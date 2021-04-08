@@ -1,9 +1,36 @@
 [package]
 name = "tui-realm"
 version = "0.1.0"
-authors = ["veeso <christian.visintin1997@gmail.com>"]
+authors = ["Christian Visintin"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+categories = ["command-line-utilities"]
+description = "TermSCP is a SCP/SFTP/FTPS client for command line with an integrated UI to explore the remote file system. Basically WinSCP on a terminal."
+documentation = "https://docs.rs/tui-realm"
+homepage = "https://github.com/veeso/tui-realm"
+include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+keywords = ["tui", "terminal"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/veeso/tui-realm"
 
 [dependencies]
+tui = { version = "0.14.0", default-features = false }
+termion = { version = "1.5", optional = true }
+rustbox = { version = "0.11", optional = true }
+crossterm = { version = "0.19", optional = true }
+easycurses = { version = "0.12.2", optional = true }
+pancurses = { version = "0.16.1", optional = true, features = ["win32a"] }
+
+[features]
+# tui-rs features
+tui-termion = ["tui/termion", "termion"]
+tui-crossterm = ["tui/crossterm", "crossterm"]
+tui-curses = ["tui/curses", "easycurses", "pancurses"]
+tui-rustbox = ["tui/rustbox", "rustbox"]
+with-components = []
+
+[target.'cfg(not(target_os = "windows"))'.features]
+default = ["tui-termion"]
+
+[target.'cfg(target_os = "windows")'.features]
+default = ["tui-crossterm"]
