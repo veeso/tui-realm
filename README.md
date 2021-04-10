@@ -14,6 +14,7 @@ Current version: 0.1.0 FIXME: (??/04/2021)
     - [Why tui-realm 🤔](#why-tui-realm-)
   - [Get started 🏁](#get-started-)
   - [Documentation 📚](#documentation-)
+  - [About other backends](#about-other-backends)
   - [Known issues 🧻](#known-issues-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
@@ -37,6 +38,8 @@ You might be wondering now how much is this project influenced by the developmen
 
 ## Get started 🏁
 
+⚠ Warning: tui-realm works only with crossterm as backend ⚠
+
 TODO: fill
 
 ---
@@ -44,6 +47,12 @@ TODO: fill
 ## Documentation 📚
 
 The developer documentation can be found on Rust Docs at <https://docs.rs/tui-realm>
+
+---
+
+## About other backends
+
+TODO: fill
 
 ---
 

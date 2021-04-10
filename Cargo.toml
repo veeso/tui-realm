@@ -14,23 +14,9 @@ readme = "README.md"
 repository = "https://github.com/veeso/tui-realm"
 
 [dependencies]
-tui = { version = "0.14.0", default-features = false }
-termion = { version = "1.5", optional = true }
-rustbox = { version = "0.11", optional = true }
-crossterm = { version = "0.19", optional = true }
-easycurses = { version = "0.12.2", optional = true }
-pancurses = { version = "0.16.1", optional = true, features = ["win32a"] }
+tui = { version = "0.14.0", default-features = false, features = ["crossterm"] }
+crossterm = { version = "0.19" }
+bitflags = "1.2.1"
 
 [features]
-# tui-rs features
-tui-termion = ["tui/termion", "termion"]
-tui-crossterm = ["tui/crossterm", "crossterm"]
-tui-curses = ["tui/curses", "easycurses", "pancurses"]
-tui-rustbox = ["tui/rustbox", "rustbox"]
 with-components = []
-
-[target.'cfg(not(target_os = "windows"))'.features]
-default = ["tui-termion"]
-
-[target.'cfg(target_os = "windows")'.features]
-default = ["tui-crossterm"]

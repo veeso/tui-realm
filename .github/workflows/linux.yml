@@ -19,19 +19,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --no-fail-fast --features tui-termion,with-components
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-fail-fast --features tui-crossterm,with-components
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-fail-fast --features tui-curses,with-components
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-fail-fast --features tui-rustbox,with-components
+          args: --no-fail-fast --features with-components
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
