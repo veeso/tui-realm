@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]
-description = "TermSCP is a SCP/SFTP/FTPS client for command line with an integrated UI to explore the remote file system. Basically WinSCP on a terminal."
+description = "A tui-rs framework to build interfaces, inspired by React and Elm."
 documentation = "https://docs.rs/tui-realm"
 homepage = "https://github.com/veeso/tui-realm"
 include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
@@ -16,7 +16,6 @@ repository = "https://github.com/veeso/tui-realm"
 [dependencies]
 tui = { version = "0.14.0", default-features = false, features = ["crossterm"] }
 crossterm = { version = "0.19" }
-bitflags = "1.2.1"
 
 [features]
 with-components = []
