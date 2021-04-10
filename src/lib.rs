@@ -42,19 +42,17 @@ extern crate crossterm;
 extern crate tui;
 
 // Ext
-use crossterm::event::{KeyEvent, MouseEvent};
+use crossterm::event::{Event, KeyEvent, MouseEvent};
 use std::io::Stdout;
-use tui::backend::CrosstermBackend;
-use tui::Frame;
+use tui::{backend::CrosstermBackend, layout::Rect, Frame};
 
 // Modules
-pub mod component;
+#[cfg(feature = "with-components")]
+pub mod components;
 pub mod props;
 pub mod view;
-
 // Export use
 // TODO:
-pub use self::component::Component;
 pub use self::props::{
     borders, texts, GenericPropsBuilder, InputType, PropValue, Props, PropsBuilder,
 };
@@ -66,6 +64,8 @@ pub use self::view::View;
 ///
 /// Canvas represents the Frame where the view will be displayed in
 pub type Canvas<'a> = Frame<'a, CrosstermBackend<Stdout>>;
+
+// -- Msg
 
 /// ## Msg
 ///
@@ -90,4 +90,55 @@ pub enum Payload {
     Text(String),
     Unsigned(usize),
     None,
+}
+
+// -- Component
+
+/// ## Component
+///
+/// Component is a trait which defines the behaviours for a View component.
+pub trait Component {
+    /// ### render
+    ///
+    /// Based on the current properties and states, renders the component in the provided area frame
+    #[cfg(not(tarpaulin_include))]
+    fn render(&self, frame: &mut Canvas, area: Rect);
+
+    /// ### update
+    ///
+    /// Update component properties
+    /// Properties should first be retrieved through `get_props` which returns
+    /// the current properties, which can be used to create new properties.
+    /// Returns a Msg to the view
+    fn update(&mut self, props: Props) -> Msg;
+
+    /// ### get_props
+    ///
+    /// Returns the current component properties.
+    /// The returned properties can then be used to create a new PropsBuilder,
+    /// which can lately be used to update the component's properties.
+    fn get_props(&self) -> Props;
+
+    /// ### on
+    ///
+    /// Handle input event and update internal states.
+    /// Returns a Msg to the view
+    fn on(&mut self, ev: Event) -> Msg;
+
+    /// ### get_state
+    ///
+    /// Get current state from component
+    fn get_state(&self) -> Payload;
+
+    // -- state changers
+
+    /// ### blur
+    ///
+    /// Blur component; basically remove focus
+    fn blur(&mut self);
+
+    /// ### active
+    ///
+    /// Active component; basically give focus
+    fn active(&mut self);
 }
