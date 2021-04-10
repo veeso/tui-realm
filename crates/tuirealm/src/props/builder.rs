@@ -141,7 +141,7 @@ impl GenericPropsBuilder {
     /// Set bold property for component
     pub fn bold(&mut self) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.modifiers = props.modifiers | Modifier::BOLD;
+            props.modifiers |= Modifier::BOLD;
         }
         self
     }
@@ -151,7 +151,7 @@ impl GenericPropsBuilder {
     /// Set italic property for component
     pub fn italic(&mut self) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.modifiers = props.modifiers | Modifier::ITALIC;
+            props.modifiers |= Modifier::ITALIC;
         }
         self
     }
@@ -161,7 +161,7 @@ impl GenericPropsBuilder {
     /// Set underlined property for component
     pub fn underlined(&mut self) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.modifiers = props.modifiers | Modifier::UNDERLINED;
+            props.modifiers |= Modifier::UNDERLINED;
         }
         self
     }
@@ -171,7 +171,7 @@ impl GenericPropsBuilder {
     /// Set slow_blink property for component
     pub fn slow_blink(&mut self) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.modifiers = props.modifiers | Modifier::SLOW_BLINK;
+            props.modifiers |= Modifier::SLOW_BLINK;
         }
         self
     }
@@ -181,7 +181,7 @@ impl GenericPropsBuilder {
     /// Set rapid_blink property for component
     pub fn rapid_blink(&mut self) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.modifiers = props.modifiers | Modifier::RAPID_BLINK;
+            props.modifiers |= Modifier::RAPID_BLINK;
         }
         self
     }
@@ -191,7 +191,7 @@ impl GenericPropsBuilder {
     /// Set reversed property for component
     pub fn reversed(&mut self) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.modifiers = props.modifiers | Modifier::REVERSED;
+            props.modifiers |= Modifier::REVERSED;
         }
         self
     }
@@ -201,7 +201,7 @@ impl GenericPropsBuilder {
     /// Set strikethrough property for component
     pub fn strikethrough(&mut self) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.modifiers = props.modifiers | Modifier::CROSSED_OUT;
+            props.modifiers |= Modifier::CROSSED_OUT;
         }
         self
     }
