@@ -7,7 +7,7 @@
 /**
  * MIT License
  *
- * termscp - Copyright (c) 2021 Christian Visintin
+ * tui-realm - Copyright (C) 2021 Christian Visintin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
