@@ -1,6 +1,6 @@
 //! # tui-realm
 //!
-//! [tui-realm](https://github.com/veeso/tui-realm) is a [tui-rs](https://github.com/fdehau/tui-rs) framework
+//! [tui-realm](https://github.com/veeso/tui-realm) is a [tui](https://github.com/fdehau/tui-rs) framework
 //! to build applications with a React/Elm inspired-by approach
 //!
 //! ## Get Started
@@ -42,7 +42,7 @@ extern crate crossterm;
 extern crate tui;
 
 // Ext
-use crossterm::event::{Event, KeyEvent, MouseEvent};
+use crossterm::event::{Event, KeyEvent};
 use std::io::Stdout;
 use tui::{backend::CrosstermBackend, layout::Rect, Frame};
 
@@ -52,7 +52,6 @@ pub mod components;
 pub mod props;
 pub mod view;
 // Export use
-// TODO:
 pub use self::props::{
     borders, texts, GenericPropsBuilder, InputType, PropValue, Props, PropsBuilder,
 };
@@ -76,7 +75,6 @@ pub enum Msg {
     OnSubmit(Payload),
     OnChange(Payload),
     OnKey(KeyEvent),
-    OnMouse(MouseEvent),
     None,
 }
 
@@ -89,6 +87,8 @@ pub enum Payload {
     Signed(isize),
     Text(String),
     Unsigned(usize),
+    VecOfText(Vec<String>),
+    VecOfUsize(Vec<usize>),
     None,
 }
 
