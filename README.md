@@ -10,7 +10,7 @@ Current version: 0.1.0 FIXME: (??/04/2021)
 ---
 
 - [tui-realm](#tui-realm)
-  - [About tui-realm 🖥](#about-tui-realm-)
+  - [About tui-realm 👑](#about-tui-realm-)
     - [Why tui-realm 🤔](#why-tui-realm-)
   - [Get started 🏁](#get-started-)
   - [Documentation 📚](#documentation-)
@@ -22,17 +22,17 @@ Current version: 0.1.0 FIXME: (??/04/2021)
 
 ---
 
-## About tui-realm 🖥
+## About tui-realm 👑
 
-tui-realm is a **framework** for [tui-rs](https://github.com/fdehau/tui-rs) which provides a layer to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable component with properties and state, as you'd do in React; but that's not all: the input events are handled through a system based on **Messages**, providing you with the possibility to implement `update` functions as happens in Elm.
+tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) which provides a layer to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable component with properties and state, as you'd do in React; but that's not all: the input events are handled through a system based on **Messages**, providing you with the possibility to implement `update` functions as happens in Elm.
 
 And that's also explains the reason of the name: Realm stands for React and Elm.
 
 ### Why tui-realm 🤔
 
-Personally I didn't start this project from scratch. I've just decided to make a library out of the already existing code in [termscp](https://github.com/veeso/termscp), which I had just finished at the time I started this project. I thought somebody could have found useful this library.
+Personally I didn't start this project from scratch. I've just decided to make a library out of the already existing code in [termscp](https://github.com/veeso/termscp), which I had just finished at the time I started this project. I thought this library could have come handy for somebody.
 
-You might be wondering now how much is this project influenced by the development of termscp. Well, a lot actully, I won't deny this, so don't expect this library to always try to fit the community needs, I'm just providing you with a tool I've made for myself, but that I wanted to share with the community.
+You might be wondering now how much is this project influenced by the development of termscp. Well, a lot actually, I won't deny this, so don't expect this library to always try to fit the community needs, I'm just providing you with a tool I've made for myself, but that I wanted to share with the community.
 
 ---
 
@@ -65,7 +65,7 @@ TODO: fill
 ## Contributing and issues 🤝🏻
 
 Contributions, bug reports, new features and questions are welcome! 😉
-If you have any question or concern, or you want to suggest a new feature, or you want just want to improve termscp, feel free to open an issue or a PR.
+If you have any question or concern, or you want to suggest a new feature, or you want just want to improve tui-realm, feel free to open an issue or a PR.
 
 Please follow [our contributing guidelines](CONTRIBUTING.md)
 
