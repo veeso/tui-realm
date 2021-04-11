@@ -302,7 +302,7 @@ mod test {
         assert_eq!(
             props
                 .texts
-                .rows
+                .spans
                 .as_ref()
                 .unwrap()
                 .get(0)
@@ -332,7 +332,7 @@ mod test {
         assert_eq!(
             props
                 .texts
-                .rows
+                .spans
                 .as_ref()
                 .unwrap()
                 .get(0)
