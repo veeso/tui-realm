@@ -41,7 +41,7 @@ pub type Table = Vec<Vec<TextSpan>>;
 #[derive(Clone)]
 pub struct TextParts {
     pub title: Option<String>,
-    pub rows: Option<Vec<TextSpan>>,
+    pub spans: Option<Vec<TextSpan>>,
     pub table: Option<Table>, // First vector is rows, inner vec is column
 }
 
@@ -49,10 +49,10 @@ impl TextParts {
     /// ### new
     ///
     /// Instantiates a new TextParts entity
-    pub fn new(title: Option<String>, rows: Option<Vec<TextSpan>>) -> Self {
+    pub fn new(title: Option<String>, spans: Option<Vec<TextSpan>>) -> Self {
         TextParts {
             title,
-            rows,
+            spans,
             table: None,
         }
     }
@@ -63,7 +63,7 @@ impl TextParts {
     pub fn table(title: Option<String>, table: Table) -> Self {
         TextParts {
             title,
-            rows: None,
+            spans: None,
             table: Some(table),
         }
     }
@@ -73,7 +73,7 @@ impl Default for TextParts {
     fn default() -> Self {
         TextParts {
             title: None,
-            rows: None,
+            spans: None,
             table: None,
         }
     }
@@ -134,9 +134,7 @@ pub struct TextSpan {
     pub content: String,
     pub fg: Color,
     pub bg: Color,
-    pub bold: bool,
-    pub italic: bool,
-    pub underlined: bool,
+    pub modifiers: Modifier,
 }
 
 impl From<&str> for TextSpan {
@@ -145,9 +143,7 @@ impl From<&str> for TextSpan {
             content: txt.to_string(),
             fg: Color::Reset,
             bg: Color::Reset,
-            bold: false,
-            italic: false,
-            underlined: false,
+            modifiers: Modifier::empty(),
         }
     }
 }
@@ -158,31 +154,8 @@ impl From<String> for TextSpan {
             content,
             fg: Color::Reset,
             bg: Color::Reset,
-            bold: false,
-            italic: false,
-            underlined: false,
+            modifiers: Modifier::empty(),
         }
-    }
-}
-
-impl TextSpan {
-    /// ### get_modifiers
-    ///
-    /// Get text modifiers from properties
-    pub fn get_modifiers(&self) -> Modifier {
-        Modifier::empty()
-            | (match self.bold {
-                true => Modifier::BOLD,
-                false => Modifier::empty(),
-            })
-            | (match self.italic {
-                true => Modifier::ITALIC,
-                false => Modifier::empty(),
-            })
-            | (match self.underlined {
-                true => Modifier::UNDERLINED,
-                false => Modifier::empty(),
-            })
     }
 }
 
@@ -195,7 +168,6 @@ pub struct TextSpanBuilder {
     text: Option<TextSpan>,
 }
 
-#[allow(dead_code)]
 impl TextSpanBuilder {
     /// ### new
     ///
@@ -226,31 +198,72 @@ impl TextSpanBuilder {
         self
     }
 
-    /// ### italic
+    /// ### bold
     ///
-    /// Set italic for text span
-    pub fn italic(&mut self) -> &mut Self {
-        if let Some(text) = self.text.as_mut() {
-            text.italic = true;
+    /// Set bold property for text
+    pub fn bold(&mut self) -> &mut Self {
+        if let Some(props) = self.text.as_mut() {
+            props.modifiers |= Modifier::BOLD;
         }
         self
     }
-    /// ### bold
+
+    /// ### italic
     ///
-    /// Set bold for text span
-    pub fn bold(&mut self) -> &mut Self {
-        if let Some(text) = self.text.as_mut() {
-            text.bold = true;
+    /// Set italic property for text
+    pub fn italic(&mut self) -> &mut Self {
+        if let Some(props) = self.text.as_mut() {
+            props.modifiers |= Modifier::ITALIC;
         }
         self
     }
 
     /// ### underlined
     ///
-    /// Set underlined for text span
+    /// Set underlined property for text
     pub fn underlined(&mut self) -> &mut Self {
-        if let Some(text) = self.text.as_mut() {
-            text.underlined = true;
+        if let Some(props) = self.text.as_mut() {
+            props.modifiers |= Modifier::UNDERLINED;
+        }
+        self
+    }
+
+    /// ### slow_blink
+    ///
+    /// Set slow_blink property for text
+    pub fn slow_blink(&mut self) -> &mut Self {
+        if let Some(props) = self.text.as_mut() {
+            props.modifiers |= Modifier::SLOW_BLINK;
+        }
+        self
+    }
+
+    /// ### rapid_blink
+    ///
+    /// Set rapid_blink property for text
+    pub fn rapid_blink(&mut self) -> &mut Self {
+        if let Some(props) = self.text.as_mut() {
+            props.modifiers |= Modifier::RAPID_BLINK;
+        }
+        self
+    }
+
+    /// ### reversed
+    ///
+    /// Set reversed property for text
+    pub fn reversed(&mut self) -> &mut Self {
+        if let Some(props) = self.text.as_mut() {
+            props.modifiers |= Modifier::REVERSED;
+        }
+        self
+    }
+
+    /// ### strikethrough
+    ///
+    /// Set strikethrough property for text
+    pub fn strikethrough(&mut self) -> &mut Self {
+        if let Some(props) = self.text.as_mut() {
+            props.modifiers |= Modifier::CROSSED_OUT;
         }
         self
     }
@@ -278,7 +291,7 @@ mod test {
         assert_eq!(parts.title.as_ref().unwrap().as_str(), "Hello world!");
         assert_eq!(
             parts
-                .rows
+                .spans
                 .as_ref()
                 .unwrap()
                 .get(0)
@@ -289,7 +302,7 @@ mod test {
         );
         assert_eq!(
             parts
-                .rows
+                .spans
                 .as_ref()
                 .unwrap()
                 .get(1)
@@ -304,7 +317,7 @@ mod test {
     fn test_props_text_parts_default() {
         let parts: TextParts = TextParts::default();
         assert!(parts.title.is_none());
-        assert!(parts.rows.is_none());
+        assert!(parts.spans.is_none());
     }
 
     #[test]
@@ -327,8 +340,8 @@ mod test {
         );
         // Verify table
         assert_eq!(table.title.as_ref().unwrap().as_str(), "my data");
-        assert!(table.rows.is_none());
-        assert_eq!(table.table.as_ref().unwrap().len(), 5); // 5 rows
+        assert!(table.spans.is_none());
+        assert_eq!(table.table.as_ref().unwrap().len(), 5); // 5 spans
         assert_eq!(table.table.as_ref().unwrap().get(0).unwrap().len(), 2); // 2 cols
         assert_eq!(table.table.as_ref().unwrap().get(1).unwrap().len(), 2); // 2 cols
         assert_eq!(
@@ -354,19 +367,14 @@ mod test {
         // from str
         let span: TextSpan = TextSpan::from("Hello!");
         assert_eq!(span.content.as_str(), "Hello!");
-        assert_eq!(span.bold, false);
+        assert_eq!(span.modifiers, Modifier::empty());
         assert_eq!(span.fg, Color::Reset);
         assert_eq!(span.bg, Color::Reset);
-        assert_eq!(span.italic, false);
-        assert_eq!(span.underlined, false);
         // From String
         let span: TextSpan = TextSpan::from(String::from("omar"));
         assert_eq!(span.content.as_str(), "omar");
-        assert_eq!(span.bold, false);
         assert_eq!(span.fg, Color::Reset);
         assert_eq!(span.bg, Color::Reset);
-        assert_eq!(span.italic, false);
-        assert_eq!(span.underlined, false);
         // With attributes
         let span: TextSpan = TextSpanBuilder::new("Error")
             .with_background(Color::Red)
@@ -374,17 +382,21 @@ mod test {
             .bold()
             .italic()
             .underlined()
+            .rapid_blink()
+            .rapid_blink()
+            .slow_blink()
+            .strikethrough()
+            .reversed()
             .build();
         assert_eq!(span.content.as_str(), "Error");
-        assert_eq!(span.bold, true);
         assert_eq!(span.fg, Color::Black);
         assert_eq!(span.bg, Color::Red);
-        assert_eq!(span.italic, true);
-        assert_eq!(span.underlined, true);
-        // Check modifiers
-        let modifiers: Modifier = span.get_modifiers();
-        assert!(modifiers.intersects(Modifier::BOLD));
-        assert!(modifiers.intersects(Modifier::ITALIC));
-        assert!(modifiers.intersects(Modifier::UNDERLINED));
+        assert!(span.modifiers.intersects(Modifier::BOLD));
+        assert!(span.modifiers.intersects(Modifier::ITALIC));
+        assert!(span.modifiers.intersects(Modifier::UNDERLINED));
+        assert!(span.modifiers.intersects(Modifier::SLOW_BLINK));
+        assert!(span.modifiers.intersects(Modifier::RAPID_BLINK));
+        assert!(span.modifiers.intersects(Modifier::REVERSED));
+        assert!(span.modifiers.intersects(Modifier::CROSSED_OUT));
     }
 }
