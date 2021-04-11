@@ -121,6 +121,6 @@ mod tests {
         assert_eq!(props.input_type, InputType::Text);
         assert!(props.input_len.is_none());
         assert_eq!(props.value, PropValue::None);
-        assert!(props.texts.rows.is_none());
+        assert!(props.texts.spans.is_none());
     }
 }
