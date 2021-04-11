@@ -228,7 +228,7 @@ mod tests {
     use tui::style::Color;
 
     #[test]
-    fn test_ui_layout_view_init() {
+    fn test_view_init() {
         let view: View = View::init();
         // Verify view
         assert_eq!(view.components.len(), 0);
@@ -237,7 +237,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ui_layout_view_mount_umount() {
+    fn test_view_mount_umount() {
         let mut view: View = View::init();
         // Mount component
         let input: &str = "INPUT";
@@ -260,7 +260,7 @@ mod tests {
 
     /*
     #[test]
-    fn test_ui_layout_view_mount_render() {
+    fn test_view_mount_render() {
         let mut view: View = View::init();
         // Mount component
         let input: &str = "INPUT";
@@ -271,7 +271,7 @@ mod tests {
     */
 
     #[test]
-    fn test_ui_layout_view_focus() {
+    fn test_view_focus() {
         let mut view: View = View::init();
         // Prepare ids
         let input1: &str = "INPUT_1";
@@ -337,7 +337,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ui_layout_view_focus_umount() {
+    fn test_view_focus_umount() {
         let mut view: View = View::init();
         // Mount component
         let input: &str = "INPUT";
@@ -371,7 +371,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ui_layout_view_update() {
+    fn test_view_update() {
         let mut view: View = View::init();
         // Prepare ids
         let text: &str = "TEXT";
@@ -398,7 +398,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ui_layout_view_on() {
+    fn test_view_on() {
         let mut view: View = View::init();
         // Prepare ids
         let text: &str = "TEXT";

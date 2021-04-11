@@ -46,6 +46,16 @@ pub trait PropsBuilder {
     /// You shouldn't allow this method to be called twice.
     /// Panic is ok.
     fn build(&mut self) -> Props;
+
+    /// ### hidden
+    ///
+    /// Initialize props with visible set to False
+    fn hidden(&mut self) -> &mut Self;
+
+    /// ### visible
+    ///
+    /// Initialize props with visible set to True
+    fn visible(&mut self) -> &mut Self;
 }
 
 /// ## GenericPropsBuilder
@@ -70,6 +80,20 @@ impl PropsBuilder for GenericPropsBuilder {
     fn build(&mut self) -> Props {
         self.props.take().unwrap()
     }
+
+    fn hidden(&mut self) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.visible = false;
+        }
+        self
+    }
+
+    fn visible(&mut self) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.visible = true;
+        }
+        self
+    }
 }
 
 impl From<Props> for GenericPropsBuilder {
@@ -79,26 +103,6 @@ impl From<Props> for GenericPropsBuilder {
 }
 
 impl GenericPropsBuilder {
-    /// ### hidden
-    ///
-    /// Initialize props with visible set to False
-    pub fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    /// ### visible
-    ///
-    /// Initialize props with visible set to True
-    pub fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-
     /// ### with_foreground
     ///
     /// Set foreground color for component
