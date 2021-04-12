@@ -29,11 +29,12 @@
 extern crate textwrap;
 extern crate unicode_width;
 // local
-use crate::props::TextSpan;
+use crate::props::{BordersProps, TextSpan};
 use crate::Props;
 // ext
 use tui::style::{Color, Modifier, Style};
 use tui::text::{Span, Spans};
+use tui::widgets::Block;
 use unicode_width::UnicodeWidthStr;
 
 /// ### wrap_spans
@@ -116,6 +117,24 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
     )
 }
 
+/// ### get_block
+///
+/// Get block
+pub fn get_block<'a>(props: &BordersProps, title: Option<String>, focus: bool) -> Block<'a> {
+    let div: Block = Block::default()
+        .borders(props.borders)
+        .border_style(match focus {
+            true => props.style(),
+            false => Style::default(),
+        })
+        .border_type(props.variant);
+    // Set title
+    match title.as_ref() {
+        Some(t) => div.title(t.to_string()),
+        None => div,
+    }
+}
+
 #[cfg(test)]
 mod test {
 
@@ -123,6 +142,8 @@ mod test {
     use crate::props::builder::PropsBuilder;
     use crate::props::TextSpanBuilder;
     use crate::GenericPropsBuilder;
+
+    use tui::widgets::{BorderType, Borders};
 
     #[test]
     fn test_components_utils_wrap_spans() {
@@ -180,5 +201,16 @@ mod test {
         assert_eq!(fg, Color::Red);
         assert_eq!(bg, Color::White);
         assert!(modifiers.intersects(Modifier::BOLD));
+    }
+
+    #[test]
+    fn test_components_utils_get_block() {
+        let props: BordersProps = BordersProps {
+            borders: Borders::ALL,
+            variant: BorderType::Rounded,
+            color: Color::Red,
+        };
+        get_block(&props, Some(String::from("title")), true);
+        get_block(&props, None, false);
     }
 }
