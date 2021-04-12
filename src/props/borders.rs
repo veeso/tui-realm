@@ -39,7 +39,7 @@ pub use tui::widgets::{BorderType, Borders};
 pub struct BordersProps {
     pub borders: Borders,
     pub variant: BorderType,
-    pub(super) color: Color,
+    pub color: Color,
 }
 
 impl Default for BordersProps {

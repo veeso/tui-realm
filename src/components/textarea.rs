@@ -275,19 +275,11 @@ impl Component for Textarea {
                     .map(|x| ListItem::new(x))
                     .collect(),
             };
-            // Make container div
-            let div: Block = Block::default()
-                .borders(self.props.borders.borders)
-                .border_style(match self.states.focus {
-                    true => self.props.borders.style(),
-                    false => Style::default(),
-                })
-                .border_type(self.props.borders.variant);
-            // Set title
-            let div: Block = match self.props.texts.title.as_ref() {
-                Some(t) => div.title(t.to_string()),
-                None => div,
-            };
+            let div: Block = super::utils::get_block(
+                &self.props.borders,
+                &self.props.texts.title,
+                self.states.focus,
+            );
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
             render.render_stateful_widget(

@@ -26,6 +26,7 @@
  * SOFTWARE.
  */
 // Modules
+pub mod input;
 pub mod label;
 pub mod paragraph;
 pub mod progress_bar;
@@ -34,6 +35,7 @@ pub mod textarea;
 pub mod utils;
 
 // Exports
+pub use input::{Input, InputPropsBuilder};
 pub use label::{Label, LabelPropsBuilder};
 pub use paragraph::{Paragraph, ParagraphPropsBuilder};
 pub use progress_bar::{ProgressBar, ProgressBarPropsBuilder};
