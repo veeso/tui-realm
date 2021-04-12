@@ -156,14 +156,8 @@ impl Component for ProgressBar {
                 PropValue::Float(ratio) => ratio,
                 _ => 0.0,
             };
-            let div: Block = Block::default()
-                .borders(self.props.borders.borders)
-                .border_style(self.props.borders.style())
-                .border_type(self.props.borders.variant);
-            let div: Block = match self.props.texts.title.as_ref() {
-                Some(t) => div.title(t.to_string()),
-                None => div,
-            };
+            let div: Block =
+                super::utils::get_block(&self.props.borders, &self.props.texts.title, true);
             // Make progress bar
             render.render_widget(
                 Gauge::default()

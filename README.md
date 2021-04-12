@@ -18,6 +18,7 @@ Current version: 0.1.0 FIXME: (??/04/2021)
   - [Known issues 🧻](#known-issues-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
+  - [Buy me a coffee ☕](#buy-me-a-coffee-)
   - [License 📃](#license-)
 
 ---
@@ -74,6 +75,14 @@ Please follow [our contributing guidelines](CONTRIBUTING.md)
 ## Changelog ⏳
 
 View tui-realm's changelog [HERE](CHANGELOG.md)
+
+---
+
+## Buy me a coffee ☕
+
+If you like tui-realm and you're grateful for the work I've done, please consider a little donation 🥳
+
+[![Buy-me-a-coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=veeso&button_colour=404040&font_colour=ffffff&font_family=Comic&outline_colour=ffffff&coffee_colour=FFDD00)](https://www.buymeacoffee.com/veeso)
 
 ---
 

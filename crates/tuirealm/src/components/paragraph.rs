@@ -217,15 +217,8 @@ impl Component for Paragraph {
                     .collect(),
             };
             // Make container div
-            let div: Block = Block::default()
-                .borders(self.props.borders.borders)
-                .border_style(self.props.borders.style())
-                .border_type(self.props.borders.variant);
-            // Set title
-            let div: Block = match self.props.texts.title.as_ref() {
-                Some(t) => div.title(t.to_string()),
-                None => div,
-            };
+            let div: Block =
+                super::utils::get_block(&self.props.borders, &self.props.texts.title, true);
             render.render_widget(
                 List::new(lines)
                     .block(div)
