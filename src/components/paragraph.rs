@@ -256,7 +256,6 @@ impl Component for Paragraph {
     ///
     /// Handle input event and update internal states.
     /// Returns a Msg to the view.
-    /// Returns always None, since cannot have any focus
     fn on(&mut self, ev: Event) -> Msg {
         // Return key
         if let Event::Key(key) = ev {

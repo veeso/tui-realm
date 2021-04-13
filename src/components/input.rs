@@ -423,7 +423,8 @@ impl Component for Input {
     /// ### get_state
     ///
     /// Get current state from component
-    /// For this component returns always None
+    /// For this component returns Unsigned if the input type is a number, otherwise a text
+    /// The value is always the current input.
     fn get_state(&self) -> Payload {
         match self.props.input_type {
             InputType::Number => {
