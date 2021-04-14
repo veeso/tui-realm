@@ -26,6 +26,7 @@
  * SOFTWARE.
  */
 // Modules
+pub mod checkbox;
 pub mod input;
 pub mod label;
 pub mod paragraph;
@@ -36,6 +37,7 @@ pub mod textarea;
 pub mod utils;
 
 // Exports
+pub use checkbox::{Checkbox, CheckboxPropsBuilder};
 pub use input::{Input, InputPropsBuilder};
 pub use label::{Label, LabelPropsBuilder};
 pub use paragraph::{Paragraph, ParagraphPropsBuilder};
