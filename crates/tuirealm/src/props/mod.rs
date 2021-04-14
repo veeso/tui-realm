@@ -86,6 +86,8 @@ pub enum PropValue {
     Signed(isize),
     Float(f64),
     Boolean(bool),
+    VecOfText(Vec<String>),
+    VecOfUsize(Vec<usize>),
     None,
 }
 
