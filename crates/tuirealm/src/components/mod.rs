@@ -33,6 +33,7 @@ pub mod paragraph;
 pub mod progress_bar;
 pub mod radio;
 pub mod span;
+pub mod table;
 pub mod textarea;
 pub mod utils;
 
@@ -44,4 +45,5 @@ pub use paragraph::{Paragraph, ParagraphPropsBuilder};
 pub use progress_bar::{ProgressBar, ProgressBarPropsBuilder};
 pub use radio::{Radio, RadioPropsBuilder};
 pub use span::{Span, SpanPropsBuilder};
+pub use table::{Table, TablePropsBuilder};
 pub use textarea::{Textarea, TextareaPropsBuilder};
