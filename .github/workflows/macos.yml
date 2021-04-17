@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --verbose --features="with-components" --all-targets --examples
       - name: Run tests
         run: cargo test --verbose --features with-components --no-fail-fast
       - name: Clippy

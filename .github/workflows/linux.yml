@@ -20,6 +20,8 @@ jobs:
         with:
           command: test
           args: --no-fail-fast --features with-components
+      - name: Examples
+        run: cargo build --features="with-components" --all-targets --examples
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
