@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{PropValue, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts, TextSpan};
 use crate::{Canvas, Component, Event, Msg, Payload};
 
 use crossterm::event::KeyCode;
@@ -33,7 +33,7 @@ use tui::{
     layout::Rect,
     style::{Color, Style},
     text::{Span, Spans},
-    widgets::{Block, Tabs},
+    widgets::{Block, BorderType, Borders, Tabs},
 };
 
 // -- Props
@@ -95,6 +95,25 @@ impl CheckboxPropsBuilder {
     pub fn with_inverted_color(&mut self, color: Color) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.background = color;
+        }
+        self
+    }
+
+    /// ### with_borders
+    ///
+    /// Set component borders style
+    pub fn with_borders(
+        &mut self,
+        borders: Borders,
+        variant: BorderType,
+        color: Color,
+    ) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.borders = BordersProps {
+                borders,
+                variant,
+                color,
+            }
         }
         self
     }
@@ -389,6 +408,9 @@ mod test {
                         String::from("Falafel"),
                     ],
                 )
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .with_color(Color::Red)
+                .with_inverted_color(Color::White)
                 .with_value(vec![1, 5])
                 .build(),
         );

@@ -467,6 +467,9 @@ mod tests {
                 .with_input(InputType::Text)
                 .with_input_len(5)
                 .with_value(PropValue::Str(String::from("home")))
+                .with_foreground(Color::Red)
+                .with_background(Color::White)
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
         // Verify initial state
