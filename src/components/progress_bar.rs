@@ -25,13 +25,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{PropValue, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts, TextSpan};
 use crate::{Canvas, Component, Event, Msg, Payload};
 
 use tui::{
     layout::Rect,
     style::{Color, Style},
-    widgets::{Block, Gauge},
+    widgets::{Block, BorderType, Borders, Gauge},
 };
 
 // -- Props
@@ -75,10 +75,10 @@ impl From<Props> for ProgressBarPropsBuilder {
 }
 
 impl ProgressBarPropsBuilder {
-    /// ### with_foreground
+    /// ### with_progbar_color
     ///
-    /// Set foreground color for component
-    pub fn with_foreground(&mut self, color: Color) -> &mut Self {
+    /// Set progbar color for component
+    pub fn with_progbar_color(&mut self, color: Color) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.foreground = color;
         }
@@ -91,6 +91,25 @@ impl ProgressBarPropsBuilder {
     pub fn with_background(&mut self, color: Color) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.background = color;
+        }
+        self
+    }
+
+    /// ### with_borders
+    ///
+    /// Set component borders style
+    pub fn with_borders(
+        &mut self,
+        borders: Borders,
+        variant: BorderType,
+        color: Color,
+    ) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.borders = BordersProps {
+                borders,
+                variant,
+                color,
+            }
         }
         self
     }
@@ -241,6 +260,7 @@ mod test {
             ProgressBarPropsBuilder::default()
                 .with_progress(60.0)
                 .with_texts(None, String::from("60% - ETA: 00:20"))
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
         // Get value
@@ -249,7 +269,7 @@ mod test {
         component.blur();
         // Update
         let props = ProgressBarPropsBuilder::from(component.get_props())
-            .with_foreground(Color::Red)
+            .with_progbar_color(Color::Red)
             .build();
         assert_eq!(component.update(props), Msg::None);
         assert_eq!(component.props.foreground, Color::Red);
