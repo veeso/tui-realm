@@ -269,9 +269,12 @@ impl Component for Checkbox {
                         true => "☑ ",
                         false => "☐ ",
                     };
-                    let (fg, bg) = match self.states.choice == idx {
-                        true => (fg, bg),
-                        false => (bg, fg),
+                    let (fg, bg) = match self.states.focus {
+                        true => match self.states.choice == idx {
+                            true => (fg, bg),
+                            false => (bg, fg),
+                        },
+                        false => (fg, bg),
                     };
                     // Make spans
                     Spans::from(vec![
