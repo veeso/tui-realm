@@ -25,14 +25,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{Props, PropsBuilder, Table as TextTable, TextParts};
+use crate::props::{BordersProps, Props, PropsBuilder, Table as TextTable, TextParts};
 use crate::{Canvas, Component, Event, Msg, Payload};
 
 use tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, List, ListItem},
+    widgets::{Block, BorderType, Borders, List, ListItem},
 };
 
 // -- Props
@@ -92,6 +92,25 @@ impl TablePropsBuilder {
     pub fn with_background(&mut self, color: Color) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.background = color;
+        }
+        self
+    }
+
+    /// ### with_borders
+    ///
+    /// Set component borders style
+    pub fn with_borders(
+        &mut self,
+        borders: Borders,
+        variant: BorderType,
+        color: Color,
+    ) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.borders = BordersProps {
+                borders,
+                variant,
+                color,
+            }
         }
         self
     }
@@ -313,6 +332,7 @@ mod tests {
                         .add_col(TextSpan::from("24"))
                         .build(),
                 )
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
         component.active();

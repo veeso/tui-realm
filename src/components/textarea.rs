@@ -27,14 +27,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{BordersProps, Props, PropsBuilder, TextParts, TextSpan};
 use crate::{Canvas, Component, Event, Msg, Payload};
 
 use crossterm::event::KeyCode;
 use tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
-    widgets::{Block, List, ListItem, ListState},
+    widgets::{Block, BorderType, Borders, List, ListItem, ListState},
 };
 
 // -- Props
@@ -94,6 +94,25 @@ impl TextareaPropsBuilder {
     pub fn with_background(&mut self, color: Color) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.background = color;
+        }
+        self
+    }
+
+    /// ### with_borders
+    ///
+    /// Set component borders style
+    pub fn with_borders(
+        &mut self,
+        borders: Borders,
+        variant: BorderType,
+        color: Color,
+    ) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.borders = BordersProps {
+                borders,
+                variant,
+                color,
+            }
         }
         self
     }
@@ -403,6 +422,7 @@ mod tests {
                     Some(String::from("textarea")),
                     vec![TextSpan::from("welcome to"), TextSpan::from("tui-realm")],
                 )
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
         // Verify states
