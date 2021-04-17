@@ -1,5 +1,5 @@
 [package]
-name = "tui-realm"
+name = "tuirealm"
 version = "0.1.0"
 authors = ["Christian Visintin"]
 edition = "2018"
@@ -21,3 +21,8 @@ unicode-width = { version = "0.1.8", optional = true }
 
 [features]
 with-components = [ "textwrap", "unicode-width" ]
+
+[[example]]
+name = "gallery"
+path = "examples/gallery.rs"
+required-features = [ "with-components" ]
