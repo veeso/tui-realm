@@ -122,9 +122,12 @@ impl RadioPropsBuilder {
     ///
     /// Set options and label
     /// If label is None, no block will be rendered
-    pub fn with_options(&mut self, label: Option<String>, options: Vec<TextSpan>) -> &mut Self {
+    pub fn with_options(&mut self, label: Option<String>, options: Vec<String>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(label, Some(options));
+            props.texts = TextParts::new(
+                label,
+                Some(options.into_iter().map(|x| TextSpan::from(x)).collect()), // Make textSpan from Strings);
+            )
         }
         self
     }
@@ -355,9 +358,9 @@ mod test {
                 .with_options(
                     Some(String::from("yes or no?")),
                     vec![
-                        TextSpan::from("Yes!"),
-                        TextSpan::from("No"),
-                        TextSpan::from("Maybe"),
+                        String::from("Yes!"),
+                        String::from("No"),
+                        String::from("Maybe"),
                     ],
                 )
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
