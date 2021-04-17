@@ -309,11 +309,17 @@ impl Component for Scrolltable {
             };
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
+            let (fg, bg) = (self.props.foreground, self.props.background);
             // Make list
             render.render_stateful_widget(
                 List::new(list_items)
                     .block(div)
-                    .start_corner(Corner::TopLeft),
+                    .start_corner(Corner::TopLeft)
+                    .highlight_style(
+                        Style::default()
+                            .fg(bg) // inverted
+                            .bg(fg),
+                    ),
                 area,
                 &mut state,
             );
