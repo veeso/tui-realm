@@ -103,9 +103,12 @@ impl CheckboxPropsBuilder {
     ///
     /// Set options and label
     /// If label is None, no block will be rendered
-    pub fn with_options(&mut self, label: Option<String>, options: Vec<TextSpan>) -> &mut Self {
+    pub fn with_options(&mut self, label: Option<String>, options: Vec<String>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(label, Some(options));
+            props.texts = TextParts::new(
+                label,
+                Some(options.into_iter().map(|x| TextSpan::from(x)).collect()), // Make textSpan from Strings
+            );
         }
         self
     }
@@ -247,9 +250,9 @@ impl Component for Checkbox {
                         true => "☑ ",
                         false => "☐ ",
                     };
-                    let (fg, bg) = match self.states.has(idx) {
-                        true => (bg, fg),
-                        false => (fg, bg),
+                    let (fg, bg) = match self.states.choice == idx {
+                        true => (fg, bg),
+                        false => (bg, fg),
                     };
                     // Make spans
                     Spans::from(vec![
@@ -378,12 +381,12 @@ mod test {
                 .with_options(
                     Some(String::from("Which food do you like?")),
                     vec![
-                        TextSpan::from("Pizza"),
-                        TextSpan::from("Hummus"),
-                        TextSpan::from("Ramen"),
-                        TextSpan::from("Gyoza"),
-                        TextSpan::from("Pasta"),
-                        TextSpan::from("Falafel"),
+                        String::from("Pizza"),
+                        String::from("Hummus"),
+                        String::from("Ramen"),
+                        String::from("Gyoza"),
+                        String::from("Pasta"),
+                        String::from("Falafel"),
                     ],
                 )
                 .with_value(vec![1, 5])
