@@ -33,6 +33,9 @@ mod utils;
 use utils::context::Context;
 use utils::keymap::*;
 
+use std::thread::sleep;
+use std::time::{Duration, Instant};
+
 // realm
 use tuirealm::components::{
     checkbox, input, label, paragraph, progress_bar, radio, scrolltable, span, table, textarea,
@@ -62,6 +65,7 @@ const COMPONENT_TEXTAREA: &str = "TEXTAREA";
 struct AppState {
     quit: bool,
     redraw: bool,
+    last_redraw: Instant,
 }
 
 impl AppState {
@@ -71,6 +75,7 @@ impl AppState {
             AppState {
                 quit: false,
                 redraw: true,
+                last_redraw: Instant::now(),
             },
             view,
         )
@@ -82,6 +87,11 @@ impl AppState {
 
     fn redraw(&mut self) {
         self.redraw = true;
+    }
+
+    fn reset(&mut self) {
+        self.redraw = false;
+        self.last_redraw = Instant::now();
     }
 }
 
@@ -103,9 +113,11 @@ fn main() {
             update(&mut states, &mut viewptr, msg);
         }
         // If redraw, draw interface
-        if states.redraw {
+        if states.redraw || states.last_redraw.elapsed() > Duration::from_millis(50) {
             view(&mut ctx, &viewptr);
+            states.reset();
         }
+        sleep(Duration::from_millis(10));
     }
     drop(ctx);
 }

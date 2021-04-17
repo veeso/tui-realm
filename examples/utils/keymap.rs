@@ -32,23 +32,11 @@ use tuirealm::Msg;
 
 // -- keys
 
-pub const MSG_KEY_ENTER: Msg = Msg::OnKey(KeyEvent {
-    code: KeyCode::Enter,
-    modifiers: KeyModifiers::NONE,
-});
 pub const MSG_KEY_ESC: Msg = Msg::OnKey(KeyEvent {
     code: KeyCode::Esc,
     modifiers: KeyModifiers::NONE,
 });
 pub const MSG_KEY_TAB: Msg = Msg::OnKey(KeyEvent {
     code: KeyCode::Tab,
-    modifiers: KeyModifiers::NONE,
-});
-pub const MSG_KEY_DOWN: Msg = Msg::OnKey(KeyEvent {
-    code: KeyCode::Down,
-    modifiers: KeyModifiers::NONE,
-});
-pub const MSG_KEY_UP: Msg = Msg::OnKey(KeyEvent {
-    code: KeyCode::Up,
     modifiers: KeyModifiers::NONE,
 });
