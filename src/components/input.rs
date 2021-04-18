@@ -149,9 +149,9 @@ impl InputPropsBuilder {
     /// ### with_value
     ///
     /// Set initial value for component
-    pub fn with_value(&mut self, value: PropValue) -> &mut Self {
+    pub fn with_value(&mut self, value: String) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = value;
+            props.value = PropValue::Str(value);
         }
         self
     }
@@ -467,7 +467,7 @@ mod tests {
                 .with_input(InputType::Text)
                 .visible()
                 .with_input_len(5)
-                .with_value(PropValue::Str(String::from("home")))
+                .with_value(String::from("home"))
                 .with_foreground(Color::Red)
                 .with_background(Color::White)
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
@@ -650,7 +650,7 @@ mod tests {
         // Update value
         component.update(
             InputPropsBuilder::from(component.get_props())
-                .with_value(PropValue::Str("new-value".to_string()))
+                .with_value("new-value".to_string())
                 .build(),
         );
         assert_eq!(
@@ -666,7 +666,7 @@ mod tests {
             InputPropsBuilder::default()
                 .with_input(InputType::Number)
                 .with_input_len(5)
-                .with_value(PropValue::Str(String::from("3000")))
+                .with_value(String::from("3000"))
                 .build(),
         );
         // Verify initial state
