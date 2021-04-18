@@ -43,15 +43,15 @@ const COMPONENT_LABEL: &str = "LABEL";
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-struct AppState {
+struct Model {
     quit: bool,
     redraw: bool,
     last_redraw: Instant,
 }
 
-impl AppState {
+impl Model {
     fn new() -> Self {
-        AppState {
+        Model {
             quit: false,
             redraw: true,
             last_redraw: Instant::now(),
@@ -104,23 +104,23 @@ fn main() {
     );
     // We need to give focus to input then
     myview.active(COMPONENT_INPUT);
-    // Now we use the State struct to keep track of some states
-    let mut states: AppState = AppState::new();
+    // Now we use the Model struct to keep track of some states
+    let mut model: Model = Model::new();
     // let's loop until quit is true
-    while !states.quit {
+    while !model.quit {
         // Listen for input events
         if let Ok(Some(ev)) = ctx.input_hnd.read_event() {
             // Pass event to view
             let msg = myview.on(ev);
-            states.redraw();
+            model.redraw();
             // Call the elm friend update
-            update(&mut states, &mut myview, msg);
+            update(&mut model, &mut myview, msg);
         }
         // If redraw, draw interface
-        if states.redraw || states.last_redraw.elapsed() > Duration::from_millis(50) {
+        if model.redraw || model.last_redraw.elapsed() > Duration::from_millis(50) {
             // Call the elm friend vie1 function
             view(&mut ctx, &myview);
-            states.reset();
+            model.reset();
         }
         sleep(Duration::from_millis(10));
     }
@@ -141,11 +141,7 @@ fn view(ctx: &mut Context, view: &View) {
     });
 }
 
-fn update(
-    states: &mut AppState,
-    view: &mut View,
-    msg: Option<(String, Msg)>,
-) -> Option<(String, Msg)> {
+fn update(model: &mut Model, view: &mut View, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
     let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
     match ref_msg {
         None => None, // Exit after None
@@ -162,7 +158,7 @@ fn update(
             }
             (_, &MSG_KEY_ESC) => {
                 // Quit on esc
-                states.quit();
+                model.quit();
                 None
             }
             _ => None,
