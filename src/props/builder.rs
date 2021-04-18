@@ -240,6 +240,16 @@ impl GenericPropsBuilder {
         self
     }
 
+    /// ### with_custom_color
+    ///
+    /// Set a custom color inside the color palette
+    pub fn with_custom_color(&mut self, name: &'static str, color: Color) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.palette.insert(name, color);
+        }
+        self
+    }
+
     /// ### with_value
     ///
     /// Set initial value for component
@@ -271,6 +281,7 @@ mod test {
             .reversed()
             .rapid_blink()
             .slow_blink()
+            .with_custom_color("arrows", Color::Red)
             .with_texts(TextParts::new(
                 Some(String::from("hello")),
                 Some(vec![TextSpan::from("hey")]),
@@ -291,6 +302,8 @@ mod test {
         assert!(props.modifiers.intersects(Modifier::REVERSED));
         assert!(props.modifiers.intersects(Modifier::CROSSED_OUT));
         assert_eq!(props.foreground, Color::Green);
+        assert_eq!(*props.palette.get("arrows").unwrap(), Color::Red);
+        assert!(props.palette.get("omar").is_none());
         assert_eq!(props.texts.title.as_ref().unwrap().as_str(), "hello");
         assert_eq!(props.input_type, InputType::Password);
         assert_eq!(*props.input_len.as_ref().unwrap(), 16);
