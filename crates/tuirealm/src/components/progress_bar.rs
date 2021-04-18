@@ -129,6 +129,10 @@ impl ProgressBarPropsBuilder {
     /// Set progress percentage
     pub fn with_progress(&mut self, prog: f64) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
+            assert!(
+                prog <= 1.0 && prog > 0.0,
+                "Progress must be in range [0.0,1.0]"
+            );
             props.value = PropValue::Float(prog);
         }
         self
@@ -260,7 +264,7 @@ mod test {
             ProgressBarPropsBuilder::default()
                 .hidden()
                 .visible()
-                .with_progress(60.0)
+                .with_progress(0.60)
                 .with_progbar_color(Color::Red)
                 .with_background(Color::Blue)
                 .with_texts(None, String::from("60% - ETA: 00:20"))
@@ -273,7 +277,7 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(component.props.value, PropValue::Float(60.0));
+        assert_eq!(component.props.value, PropValue::Float(0.60));
         // Get value
         assert_eq!(component.get_state(), Payload::None);
         component.active();
@@ -290,6 +294,16 @@ mod test {
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
             Msg::OnKey(KeyEvent::from(KeyCode::Delete))
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_components_progress_bar_bad_prog() {
+        ProgressBar::new(
+            ProgressBarPropsBuilder::default()
+                .with_progress(60.0)
+                .build(),
         );
     }
 }
