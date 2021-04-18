@@ -30,6 +30,9 @@ mod utils;
 use utils::context::Context;
 use utils::keymap::*;
 
+use std::thread::sleep;
+use std::time::{Duration, Instant};
+
 use tuirealm::components::{input, label};
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{InputType, Msg, Payload, PropsBuilder, View};
@@ -40,13 +43,10 @@ use tui::style::Color;
 const COMPONENT_INPUT: &str = "INPUT";
 const COMPONENT_LABEL: &str = "LABEL";
 
-use std::thread::sleep;
-use std::time::{Duration, Instant};
-
 struct Model {
-    quit: bool,
-    redraw: bool,
-    last_redraw: Instant,
+    quit: bool,           // Becomes true when the user presses <ESC>
+    redraw: bool,         // Tells whether to refresh the UI; performance optimization
+    last_redraw: Instant, // Last time the ui has been redrawed
 }
 
 impl Model {
@@ -153,8 +153,8 @@ fn update(model: &mut Model, view: &mut View, msg: Option<(String, Msg)>) -> Opt
                         .with_text(format!("You typed: '{}'", input))
                         .build();
                 // Report submit
-                view.update(COMPONENT_LABEL, props);
-                None
+                let msg = view.update(COMPONENT_LABEL, props);
+                update(model, view, msg)
             }
             (_, &MSG_KEY_ESC) => {
                 // Quit on esc
