@@ -131,7 +131,7 @@ impl ProgressBarPropsBuilder {
     pub fn with_progress(&mut self, prog: f64) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             assert!(
-                prog <= 1.0 && prog > 0.0,
+                prog <= 1.0 && prog >= 0.0,
                 "Progress must be in range [0.0,1.0]"
             );
             props.value = PropValue::Float(prog);
