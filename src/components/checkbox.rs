@@ -303,16 +303,22 @@ impl Component for Checkbox {
     /// existing properties and then edited before calling update.
     /// Returns a Msg to the view
     fn update(&mut self, props: Props) -> Msg {
+        let prev_selection = self.states.selection.clone();
         // Reset choices
         self.states
             .make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
+        self.states.selection.clear();
         if let PropValue::VecOfUsize(choices) = &props.value {
             self.states.selection = choices.clone();
         }
         self.props = props;
         // Msg none
-        Msg::None
+        if prev_selection != self.states.selection {
+            Msg::OnChange(self.get_state())
+        } else {
+            Msg::None
+        }
     }
 
     /// ### get_props
@@ -443,18 +449,26 @@ mod test {
         assert_eq!(component.update(props), Msg::None);
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Yellow);
+        let props = CheckboxPropsBuilder::from(component.get_props())
+            .with_value(vec![1])
+            .hidden()
+            .build();
+        assert_eq!(
+            component.update(props),
+            Msg::OnChange(Payload::VecOfUsize(vec![1]))
+        );
         // Get value
-        assert_eq!(component.get_state(), Payload::VecOfUsize(vec![1, 5]));
+        assert_eq!(component.get_state(), Payload::VecOfUsize(vec![1]));
         // Handle events
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
             Msg::None,
         );
-        assert_eq!(component.get_state(), Payload::VecOfUsize(vec![1, 5]));
+        assert_eq!(component.get_state(), Payload::VecOfUsize(vec![1]));
         // Toggle
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char(' ')))),
-            Msg::OnChange(Payload::VecOfUsize(vec![1, 5, 0]))
+            Msg::OnChange(Payload::VecOfUsize(vec![1, 0]))
         );
         // Left again
         assert_eq!(
@@ -470,7 +484,7 @@ mod test {
         // Toggle
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char(' ')))),
-            Msg::OnChange(Payload::VecOfUsize(vec![5, 0]))
+            Msg::OnChange(Payload::VecOfUsize(vec![0]))
         );
         // Right again
         assert_eq!(
@@ -505,7 +519,7 @@ mod test {
         // Submit
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::OnSubmit(Payload::VecOfUsize(vec![5, 0])),
+            Msg::OnSubmit(Payload::VecOfUsize(vec![0])),
         );
         // Any key
         assert_eq!(
