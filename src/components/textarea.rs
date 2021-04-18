@@ -245,6 +245,24 @@ impl OwnStates {
             self.list_index = 0;
         }
     }
+
+    /// ### list_index_at_first
+    ///
+    /// Set list index to the first item in the list
+    pub fn list_index_at_first(&mut self) {
+        self.list_index = 0;
+    }
+
+    /// ### list_index_at_last
+    ///
+    /// Set list index at the last item of the list
+    pub fn list_index_at_last(&mut self) {
+        if self.list_len > 0 {
+            self.list_index = self.list_len - 1;
+        } else {
+            self.list_index = 0;
+        }
+    }
 }
 
 // -- Component
@@ -353,26 +371,34 @@ impl Component for Textarea {
                 KeyCode::Down => {
                     // Update states
                     self.states.incr_list_index();
-                    Msg::None
+                    Msg::OnKey(key)
                 }
                 KeyCode::Up => {
                     // Update states
                     self.states.decr_list_index();
-                    Msg::None
+                    Msg::OnKey(key)
                 }
                 KeyCode::PageDown => {
                     // Update states
                     for _ in 0..8 {
                         self.states.incr_list_index();
                     }
-                    Msg::None
+                    Msg::OnKey(key)
                 }
                 KeyCode::PageUp => {
                     // Update states
                     for _ in 0..8 {
                         self.states.decr_list_index();
                     }
-                    Msg::None
+                    Msg::OnKey(key)
+                }
+                KeyCode::End => {
+                    self.states.list_index_at_last();
+                    Msg::OnKey(key)
+                }
+                KeyCode::Home => {
+                    self.states.list_index_at_first();
+                    Msg::OnKey(key)
                 }
                 _ => Msg::OnKey(key),
             }
@@ -499,28 +525,39 @@ mod tests {
         // Handle inputs
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
-            Msg::None
+            Msg::OnKey(KeyEvent::from(KeyCode::Down))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be decremented
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
-            Msg::None
+            Msg::OnKey(KeyEvent::from(KeyCode::Up))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 1);
         // Index should be 2
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
-            Msg::None
+            Msg::OnKey(KeyEvent::from(KeyCode::PageDown))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be 0
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
-            Msg::None
+            Msg::OnKey(KeyEvent::from(KeyCode::PageUp))
+        );
+        // End
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::End))),
+            Msg::OnKey(KeyEvent::from(KeyCode::End))
+        );
+        assert_eq!(component.states.list_index, 2);
+        // Home
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Home))),
+            Msg::OnKey(KeyEvent::from(KeyCode::Home))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 0);
