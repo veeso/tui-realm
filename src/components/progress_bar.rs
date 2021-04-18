@@ -258,21 +258,34 @@ mod test {
     fn test_components_progress_bar() {
         let mut component: ProgressBar = ProgressBar::new(
             ProgressBarPropsBuilder::default()
+                .hidden()
+                .visible()
                 .with_progress(60.0)
+                .with_progbar_color(Color::Red)
+                .with_background(Color::Blue)
                 .with_texts(None, String::from("60% - ETA: 00:20"))
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::Blue);
+        assert_eq!(component.props.visible, true);
+        assert_eq!(component.props.borders.borders, Borders::ALL);
+        assert_eq!(component.props.borders.variant, BorderType::Double);
+        assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(component.props.value, PropValue::Float(60.0));
         // Get value
         assert_eq!(component.get_state(), Payload::None);
         component.active();
         component.blur();
         // Update
         let props = ProgressBarPropsBuilder::from(component.get_props())
-            .with_progbar_color(Color::Red)
+            .with_progbar_color(Color::Yellow)
+            .hidden()
             .build();
         assert_eq!(component.update(props), Msg::None);
-        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.foreground, Color::Yellow);
+        assert_eq!(component.props.visible, false);
         // Event
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),

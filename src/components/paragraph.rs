@@ -29,13 +29,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{BordersProps, Props, PropsBuilder, TextParts, TextSpan};
 use crate::{Canvas, Component, Event, Msg, Payload};
 
 use tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
-    widgets::{Block, List, ListItem},
+    widgets::{Block, BorderType, Borders, List, ListItem},
 };
 
 // -- Props
@@ -169,6 +169,25 @@ impl ParagraphPropsBuilder {
         self
     }
 
+    /// ### with_borders
+    ///
+    /// Set component borders style
+    pub fn with_borders(
+        &mut self,
+        borders: Borders,
+        variant: BorderType,
+        color: Color,
+    ) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.borders = BordersProps {
+                borders,
+                variant,
+                color,
+            }
+        }
+        self
+    }
+
     /// ### with_spans
     ///
     /// Set spans
@@ -298,21 +317,53 @@ mod tests {
         // Make component
         let mut component: Paragraph = Paragraph::new(
             ParagraphPropsBuilder::default()
+                .with_foreground(Color::Red)
+                .with_background(Color::Blue)
+                .hidden()
+                .visible()
+                .bold()
+                .italic()
+                .rapid_blink()
+                .reversed()
+                .slow_blink()
+                .strikethrough()
+                .underlined()
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_texts(
                     Some(String::from("paragraph")),
                     vec![TextSpan::from("welcome to"), TextSpan::from("tui-realm")],
                 )
                 .build(),
         );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::Blue);
+        assert_eq!(component.props.visible, true);
+        assert!(component.props.modifiers.intersects(Modifier::BOLD));
+        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
+        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
+        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
+        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
+        assert_eq!(component.props.borders.borders, Borders::ALL);
+        assert_eq!(component.props.borders.variant, BorderType::Double);
+        assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(
+            component.props.texts.title.as_ref().unwrap().as_str(),
+            "paragraph"
+        );
+        assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 2);
         // Focus
         component.active();
         component.blur();
         // Update
         let props = ParagraphPropsBuilder::from(component.get_props())
-            .with_foreground(Color::Red)
+            .with_foreground(Color::Green)
+            .hidden()
             .build();
         assert_eq!(component.update(props), Msg::None);
-        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.visible, false);
+        assert_eq!(component.props.foreground, Color::Green);
         // Update
         component.update(
             ParagraphPropsBuilder::from(component.get_props())

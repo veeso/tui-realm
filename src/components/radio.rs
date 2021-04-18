@@ -355,18 +355,35 @@ mod test {
         // Make component
         let mut component: Radio = Radio::new(
             RadioPropsBuilder::default()
+                .hidden()
+                .visible()
+                .with_color(Color::Red)
+                .with_inverted_color(Color::Blue)
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_options(
-                    Some(String::from("yes or no?")),
+                    Some(String::from("C'est oui ou bien c'est non?")),
                     vec![
-                        String::from("Yes!"),
-                        String::from("No"),
-                        String::from("Maybe"),
+                        String::from("Oui!"),
+                        String::from("Non"),
+                        String::from("Peut-être"),
                     ],
                 )
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_value(1)
                 .build(),
         );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::Blue);
+        assert_eq!(component.props.visible, true);
+        assert_eq!(component.props.borders.borders, Borders::ALL);
+        assert_eq!(component.props.borders.variant, BorderType::Double);
+        assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(
+            component.props.texts.title.as_ref().unwrap().as_str(),
+            "C'est oui ou bien c'est non?"
+        );
+        assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 3);
+        assert_eq!(component.props.value, PropValue::Unsigned(1));
         // Verify states
         assert_eq!(component.states.choice, 1);
         assert_eq!(component.states.choices.len(), 3);
@@ -379,9 +396,11 @@ mod test {
         // Update
         let props = RadioPropsBuilder::from(component.get_props())
             .with_color(Color::Red)
+            .hidden()
             .build();
         assert_eq!(component.update(props), Msg::None);
         assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.visible, false);
         // Get value
         assert_eq!(component.get_state(), Payload::Unsigned(1));
         // Handle events

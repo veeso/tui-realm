@@ -418,6 +418,18 @@ mod tests {
         // Make component
         let mut component: Textarea = Textarea::new(
             TextareaPropsBuilder::default()
+                .with_foreground(Color::Red)
+                .with_background(Color::Blue)
+                .hidden()
+                .visible()
+                .bold()
+                .italic()
+                .rapid_blink()
+                .reversed()
+                .slow_blink()
+                .strikethrough()
+                .underlined()
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_texts(
                     Some(String::from("textarea")),
                     vec![TextSpan::from("welcome to"), TextSpan::from("tui-realm")],
@@ -425,6 +437,24 @@ mod tests {
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::Blue);
+        assert_eq!(component.props.visible, true);
+        assert!(component.props.modifiers.intersects(Modifier::BOLD));
+        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
+        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
+        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
+        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
+        assert_eq!(component.props.borders.borders, Borders::ALL);
+        assert_eq!(component.props.borders.variant, BorderType::Double);
+        assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(
+            component.props.texts.title.as_ref().unwrap().as_str(),
+            "textarea"
+        );
+        assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 2);
         // Verify states
         assert_eq!(component.states.list_index, 0);
         assert_eq!(component.states.list_len, 2);
@@ -446,6 +476,7 @@ mod tests {
         // Update
         component.update(
             TextareaPropsBuilder::from(component.get_props())
+                .hidden()
                 .with_texts(
                     Some(String::from("textarea")),
                     vec![
@@ -456,6 +487,8 @@ mod tests {
                 )
                 .build(),
         );
+        assert_eq!(component.props.visible, false);
+        assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 3);
         // Verify states
         assert_eq!(component.states.list_index, 1); // Kept
         assert_eq!(component.states.list_len, 3);
