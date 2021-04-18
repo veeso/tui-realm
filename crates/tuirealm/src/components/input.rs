@@ -338,14 +338,21 @@ impl Component for Input {
         self.props = props;
         // Set value from props
         if let PropValue::Str(val) = self.props.value.clone() {
+            let prev_input = self.states.input.clone();
             self.states.input = Vec::new();
             self.states.cursor = 0;
             for ch in val.chars() {
                 self.states
                     .append(ch, self.props.input_type, self.props.input_len);
             }
+            if prev_input != self.states.input {
+                Msg::OnChange(self.get_state())
+            } else {
+                Msg::None
+            }
+        } else {
+            Msg::None
         }
-        Msg::None
     }
 
     /// ### get_props
@@ -369,13 +376,23 @@ impl Component for Input {
             match key.code {
                 KeyCode::Backspace => {
                     // Backspace and None
+                    let prev_input = self.states.input.clone();
                     self.states.backspace();
-                    Msg::None
+                    if prev_input != self.states.input {
+                        Msg::OnChange(self.get_state())
+                    } else {
+                        Msg::None
+                    }
                 }
                 KeyCode::Delete => {
                     // Delete and None
+                    let prev_input = self.states.input.clone();
                     self.states.delete();
-                    Msg::None
+                    if prev_input != self.states.input {
+                        Msg::OnChange(self.get_state())
+                    } else {
+                        Msg::None
+                    }
                 }
                 KeyCode::Enter => Msg::OnSubmit(self.get_state()),
                 KeyCode::Left => {
@@ -404,10 +421,15 @@ impl Component for Input {
                         && !key.modifiers.intersects(KeyModifiers::ALT)
                     {
                         // Push char to input
+                        let prev_input = self.states.input.clone();
                         self.states
                             .append(ch, self.props.input_type, self.props.input_len);
-                        // Message none
-                        Msg::None
+                        // Message on change
+                        if prev_input != self.states.input {
+                            Msg::OnChange(self.get_state())
+                        } else {
+                            Msg::None
+                        }
                     } else {
                         // Return key
                         Msg::OnKey(key)
@@ -517,7 +539,7 @@ mod tests {
         // Character
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('/')))),
-            Msg::None
+            Msg::OnChange(Payload::Text(String::from("home/")))
         );
         assert_eq!(component.get_state(), Payload::Text(String::from("home/")));
         //assert_eq!(component.render().unwrap().cursor, 5);
@@ -538,7 +560,7 @@ mod tests {
         // Backspace
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
-            Msg::None
+            Msg::OnChange(Payload::Text(String::from("home")))
         );
         assert_eq!(component.get_state(), Payload::Text(String::from("home")));
         //assert_eq!(component.render().unwrap().cursor, 4);
@@ -548,7 +570,7 @@ mod tests {
         component.states.cursor = 1;
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
-            Msg::None
+            Msg::OnChange(Payload::Text(String::from("")))
         );
         assert_eq!(component.get_state(), Payload::Text(String::from("")));
         //assert_eq!(component.render().unwrap().cursor, 0);
@@ -574,7 +596,7 @@ mod tests {
         component.states.cursor = 1;
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
-            Msg::None
+            Msg::OnChange(Payload::Text(String::from("h")))
         );
         assert_eq!(component.get_state(), Payload::Text(String::from("h")));
         //assert_eq!(component.render().unwrap().cursor, 1); // Shouldn't move
@@ -600,7 +622,7 @@ mod tests {
         // Put a character here
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
-            Msg::None
+            Msg::OnChange(Payload::Text(String::from("heallo")))
         );
         assert_eq!(component.get_state(), Payload::Text(String::from("heallo")));
         //assert_eq!(component.render().unwrap().cursor, 3);
@@ -648,10 +670,21 @@ mod tests {
         );
         assert_eq!(component.states.cursor, 0);
         // Update value
-        component.update(
-            InputPropsBuilder::from(component.get_props())
-                .with_value("new-value".to_string())
-                .build(),
+        assert_eq!(
+            component.update(
+                InputPropsBuilder::from(component.get_props())
+                    .with_value("new-value".to_string())
+                    .build(),
+            ),
+            Msg::OnChange(Payload::Text(String::from("new-value")))
+        );
+        assert_eq!(
+            component.update(
+                InputPropsBuilder::from(component.get_props())
+                    .with_value("new-value".to_string())
+                    .build(),
+            ),
+            Msg::None // Didn't change at all
         );
         assert_eq!(
             component.get_state(),
@@ -683,7 +716,7 @@ mod tests {
         // Push a number
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('1')))),
-            Msg::None
+            Msg::OnChange(Payload::Unsigned(30001))
         );
         assert_eq!(component.get_state(), Payload::Unsigned(30001));
         //assert_eq!(component.render().unwrap().cursor, 5);
