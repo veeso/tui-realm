@@ -42,7 +42,7 @@ use tuirealm::components::{
 };
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::props::{TableBuilder, TextSpan, TextSpanBuilder};
-use tuirealm::{InputType, Msg, PropsBuilder, View};
+use tuirealm::{InputType, Msg, PropValue, PropsBuilder, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
 use tui::style::Color;
@@ -187,6 +187,7 @@ fn init_view() -> View {
             .italic()
             .with_background(Color::White)
             .with_foreground(Color::Black)
+            .with_borders(Borders::ALL, BorderType::Rounded, Color::Gray)
             .with_texts(Some(String::from("A poem for you")), vec![
                 TextSpanBuilder::new("Lorem ipsum dolor sit amet").underlined().with_foreground(Color::Green).build(),
                 TextSpan::from(", consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
@@ -447,23 +448,28 @@ fn update(
         Some(msg) => match msg {
             (COMPONENT_CHECKBOX, &MSG_KEY_TAB) => {
                 view.active(COMPONENT_INPUT);
-                None
+                // Update progress
+                update_progress(view)
             }
             (COMPONENT_INPUT, &MSG_KEY_TAB) => {
                 view.active(COMPONENT_RADIO);
-                None
+                // Update progress
+                update_progress(view)
             }
             (COMPONENT_RADIO, &MSG_KEY_TAB) => {
                 view.active(COMPONENT_SCROLLTABLE);
-                None
+                // Update progress
+                update_progress(view)
             }
             (COMPONENT_SCROLLTABLE, &MSG_KEY_TAB) => {
                 view.active(COMPONENT_TEXTAREA);
-                None
+                // Update progress
+                update_progress(view)
             }
             (COMPONENT_TEXTAREA, &MSG_KEY_TAB) => {
                 view.active(COMPONENT_CHECKBOX);
-                None
+                // Update progress
+                update_progress(view)
             }
             (comp, Msg::OnSubmit(payload)) => {
                 let props =
@@ -472,7 +478,8 @@ fn update(
                         .build();
                 // Report submit
                 view.update(COMPONENT_LABEL, props);
-                None
+                // Update progress
+                update_progress(view)
             }
             (_, &MSG_KEY_ESC) => {
                 // Quit
@@ -482,4 +489,27 @@ fn update(
             _ => None,
         },
     }
+}
+
+// -- misc
+
+fn update_progress(view: &mut View) -> Option<(String, Msg)> {
+    let props = view.get_props(COMPONENT_PROGBAR).unwrap();
+    let new_prog: f64 = match props.value {
+        PropValue::Float(val) => match val + 0.05 > 1.0 {
+            true => 0.0,
+            false => val + 0.05,
+        },
+        _ => 0.0,
+    };
+    view.update(
+        COMPONENT_PROGBAR,
+        progress_bar::ProgressBarPropsBuilder::from(props)
+            .with_progress(new_prog)
+            .with_texts(
+                Some(String::from("Downloading termscp 0.4.2")),
+                format!("{:.2}% - ETA 00:30", new_prog * 100.0),
+            )
+            .build(),
+    )
 }

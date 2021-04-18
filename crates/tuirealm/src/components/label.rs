@@ -285,17 +285,44 @@ mod tests {
     fn test_components_label() {
         let mut component: Label = Label::new(
             LabelPropsBuilder::default()
+                .with_foreground(Color::Red)
+                .with_background(Color::Blue)
+                .hidden()
+                .visible()
+                .bold()
+                .italic()
+                .rapid_blink()
+                .reversed()
+                .slow_blink()
+                .strikethrough()
+                .underlined()
                 .with_text(String::from("Hello, world!"))
                 .build(),
+        );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::Blue);
+        assert_eq!(component.props.visible, true);
+        assert!(component.props.modifiers.intersects(Modifier::BOLD));
+        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
+        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
+        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
+        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
+        assert_eq!(
+            component.props.texts.title.as_ref().unwrap().as_str(),
+            "Hello, world!"
         );
         component.active();
         component.blur();
         // Update
         let props = LabelPropsBuilder::from(component.get_props())
             .with_foreground(Color::Red)
+            .hidden()
             .build();
         assert_eq!(component.update(props), Msg::None);
         assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.visible, false);
         // Get value
         assert_eq!(component.get_state(), Payload::None);
         // Event

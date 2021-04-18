@@ -411,15 +411,23 @@ mod test {
                         String::from("Falafel"),
                     ],
                 )
+                .visible()
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_color(Color::Red)
                 .with_inverted_color(Color::White)
                 .with_value(vec![1, 5])
                 .build(),
         );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::White);
+        assert_eq!(component.props.visible, true);
+        assert_eq!(component.props.borders.borders, Borders::ALL);
+        assert_eq!(component.props.borders.variant, BorderType::Double);
+        assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(component.props.value, PropValue::VecOfUsize(vec![1, 5]));
         // Verify states
         assert_eq!(component.states.choice, 0);
-        assert_eq!(component.states.selection.len(), 2);
+        assert_eq!(component.states.selection, vec![1, 5]);
         assert_eq!(component.states.choices.len(), 6);
         // Focus
         assert_eq!(component.states.focus, false);
@@ -429,10 +437,12 @@ mod test {
         assert_eq!(component.states.focus, false);
         // Update
         let props = CheckboxPropsBuilder::from(component.get_props())
-            .with_color(Color::Red)
+            .with_color(Color::Yellow)
+            .hidden()
             .build();
         assert_eq!(component.update(props), Msg::None);
-        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.visible, false);
+        assert_eq!(component.props.foreground, Color::Yellow);
         // Get value
         assert_eq!(component.get_state(), Payload::VecOfUsize(vec![1, 5]));
         // Handle events

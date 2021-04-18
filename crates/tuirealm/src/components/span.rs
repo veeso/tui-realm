@@ -301,6 +301,17 @@ mod tests {
     fn test_components_span() {
         let mut component: Span = Span::new(
             SpanPropsBuilder::default()
+                .with_background(Color::Blue)
+                .with_foreground(Color::Red)
+                .hidden()
+                .visible()
+                .bold()
+                .italic()
+                .rapid_blink()
+                .reversed()
+                .slow_blink()
+                .strikethrough()
+                .underlined()
                 .with_spans(vec![
                     TextSpan::from("Press "),
                     TextSpanBuilder::new("<ESC>")
@@ -311,14 +322,27 @@ mod tests {
                 ])
                 .build(),
         );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::Blue);
+        assert_eq!(component.props.visible, true);
+        assert!(component.props.modifiers.intersects(Modifier::BOLD));
+        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
+        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
+        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
+        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
+        assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 3);
         component.active();
         component.blur();
         // Update
         let props = SpanPropsBuilder::from(component.get_props())
             .with_foreground(Color::Red)
+            .hidden()
             .build();
         assert_eq!(component.update(props), Msg::None);
         assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.visible, false);
         // Get value
         assert_eq!(component.get_state(), Payload::None);
         // Event

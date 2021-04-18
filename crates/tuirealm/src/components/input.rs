@@ -465,6 +465,7 @@ mod tests {
         let mut component: Input = Input::new(
             InputPropsBuilder::default()
                 .with_input(InputType::Text)
+                .visible()
                 .with_input_len(5)
                 .with_value(PropValue::Str(String::from("home")))
                 .with_foreground(Color::Red)
@@ -472,6 +473,12 @@ mod tests {
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::White);
+        assert_eq!(component.props.visible, true);
+        assert_eq!(component.props.borders.borders, Borders::ALL);
+        assert_eq!(component.props.borders.variant, BorderType::Double);
+        assert_eq!(component.props.borders.color, Color::Red);
         // Verify initial state
         assert_eq!(component.states.cursor, 4);
         assert_eq!(component.states.input.len(), 4);
@@ -484,8 +491,10 @@ mod tests {
         // Update
         let props = InputPropsBuilder::from(component.get_props())
             .with_foreground(Color::Red)
+            .hidden()
             .build();
         assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Red);
         // Get value
         assert_eq!(component.get_state(), Payload::Text(String::from("home")));
