@@ -38,6 +38,8 @@ pub use borders::{Borders, BordersProps};
 pub use builder::{GenericPropsBuilder, PropsBuilder};
 pub use texts::{Table, TableBuilder, TextParts, TextSpan, TextSpanBuilder};
 
+use std::collections::HashMap;
+
 // -- Props
 
 /// ## Props
@@ -51,10 +53,11 @@ pub struct Props {
     pub background: Color,     // Background color
     pub borders: BordersProps, // Borders
     pub modifiers: Modifier,
-    pub input_type: InputType,    // Input type
-    pub input_len: Option<usize>, // max input len
-    pub texts: TextParts,         // text parts
-    pub value: PropValue,         // Initial value
+    pub input_type: InputType,                 // Input type
+    pub input_len: Option<usize>,              // max input len
+    pub palette: HashMap<&'static str, Color>, // Use palette to store extra colors
+    pub texts: TextParts,                      // text parts
+    pub value: PropValue,                      // Initial value
 }
 
 impl Default for Props {
@@ -68,6 +71,7 @@ impl Default for Props {
             modifiers: Modifier::empty(),
             input_type: InputType::Text,
             input_len: None,
+            palette: HashMap::new(),
             texts: TextParts::default(),
             value: PropValue::None,
         }
@@ -119,6 +123,7 @@ mod tests {
         assert_eq!(props.borders.color, Color::Reset);
         assert_eq!(props.borders.variant, BorderType::Plain);
         assert_eq!(props.modifiers, Modifier::empty());
+        assert_eq!(props.palette.len(), 0);
         assert!(props.texts.title.is_none());
         assert_eq!(props.input_type, InputType::Text);
         assert!(props.input_len.is_none());
