@@ -127,6 +127,7 @@ impl ProgressBarPropsBuilder {
     /// ### with_progress
     ///
     /// Set progress percentage
+    /// Progress must be in range [0.0,1.0] or will panic
     pub fn with_progress(&mut self, prog: f64) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             assert!(

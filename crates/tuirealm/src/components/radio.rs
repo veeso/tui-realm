@@ -264,6 +264,7 @@ impl Component for Radio {
     /// existing properties and then edited before calling update.
     /// Returns a Msg to the view
     fn update(&mut self, props: Props) -> Msg {
+        let prev_index: usize = self.states.choice;
         // Reset choices
         self.states
             .make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
@@ -273,7 +274,11 @@ impl Component for Radio {
         }
         self.props = props;
         // Msg none
-        Msg::None
+        if prev_index != self.states.choice {
+            Msg::OnChange(self.get_state())
+        } else {
+            Msg::None
+        }
     }
 
     /// ### get_props
@@ -401,7 +406,13 @@ mod test {
         assert_eq!(component.update(props), Msg::None);
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.visible, false);
+        let props = RadioPropsBuilder::from(component.get_props())
+            .with_value(2)
+            .hidden()
+            .build();
+        assert_eq!(component.update(props), Msg::OnChange(Payload::Unsigned(2)));
         // Get value
+        component.states.choice = 1;
         assert_eq!(component.get_state(), Payload::Unsigned(1));
         // Handle events
         assert_eq!(
