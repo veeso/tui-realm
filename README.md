@@ -16,7 +16,7 @@ Current version: 0.1.0 (19/04/2021)
     - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
     - [Create a tui-realm application](#create-a-tui-realm-application)
     - [Run examples](#run-examples)
-  - [Standard component library 🎨](#standard-component-library-)
+  - [Standard components library 🎨](#standard-components-library-)
   - [Guides 🎓](#guides-)
   - [Documentation 📚](#documentation-)
   - [About other backends](#about-other-backends)
@@ -29,11 +29,11 @@ Current version: 0.1.0 (19/04/2021)
 
 ## About tui-realm 👑
 
-tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) which provides a layer to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable component with properties and state, as you'd do in React; but that's not all: the input events are handled through a system based on **Messages**, providing you with the possibility to implement `update` functions as happens in Elm.
+tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React But that's not all: the components communicate with the ui engine via a system based on **Messages** and events, providing you with the possibility to implement `update` functions as happens in Elm. In addition, the components are organized inside **Views**, which manages mounting/umounting and focus for you.
 
 And that's also explains the reason of the name: Realm stands for React and Elm.
 
-Tui-realm also comes with a built-in standard library of components you may find very useful. Don't worry, they are optional if you don't want them 😉, just follow the guide in [get started](#get-started-).
+Tui-realm also comes with a built-in standard library of components you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
 
 ### Why tui-realm 🤔
 
@@ -83,10 +83,10 @@ Still confused about how tui-realm works? Don't worry, try with the examples:
 
 ---
 
-## Standard component library 🎨
+## Standard components library 🎨
 
 Tui-realm comes with an optional standard library of components I thought may be useful for most of the applications.
-If you want to use it, just enabled the `with-components` feature in your `Cargo.toml`.
+If you want to use it, just enable the `with-components` feature in your `Cargo.toml`.
 
 For each component, the standard library provides a `PropsBuilder` in the same module (e.g. `input::Input => input::InputPropsBuilder`), which provides methods to set only the properties actually used by the component.
 
