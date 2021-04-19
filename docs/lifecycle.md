@@ -51,6 +51,8 @@ Yeah, exactly, the focus. The focus is something very important in GUIs and neve
 
 >> What does it mean? Okay, let's imagine we have 2 components: "A" and "B" and we give focus to "A", so now "A" is active. Up to now all clear I hope. Then the user presses DOWN, which for our application means the focus needs to be given to "B", so "B" becomes active (we can have focus only on one component). Let's say then our user presses DELETE and this causes the view to umount "B". Who has focus now? You might say none of them. I don't think so. It's true "A" hasn't the focus before, but it is also true that we never disabled "A". Thanks to the focus stack indeed, "A" will be re-enabled. This approach is in my opinion just perfect and very handy. It gives you the possibility not to care about re-give focus everytime to the previous component and at the same time you haven't to follow this approach at all. Indeed you could just disable "A" before enabling "B" and you would be perfectly fine.
 
+![FocusStack](images/FocusStack.png)
+
 ---
 
 What were we talking about? Uh yeah view, sorry for the interruption, but focus was just too important to skip it. So, I was saying the view is a container for components and the view tracks the focus for us, but that's not all.
