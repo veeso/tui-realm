@@ -23,7 +23,7 @@ A component is logically independent from the widget, which is created only when
 
 Basically then, a component is made up of 3 things:
 
-- **Properties**: which describe how the property will work and how it'll be displayed
+- **Properties**: which describe how the component will work and how it'll be displayed
 - **States**: which describe the current state of the component. The component state will change how it'll be rendered and how it'll respond to events. While properties are always required for a component, states are not.
 - **Behaviours**: behaviours are functions each component must implement. This is accomplished via the `Component` trait in Rust. But what are these behaviours?
   - **render**: renders a widget in the area passed as argument
@@ -49,7 +49,7 @@ Yeah, exactly, the focus. The focus is something very important in GUIs and neve
 - the focus might be held by a component
 - in a stack, all the active components are kept in case the current component is blurred.
 
->> What does it mean? Okay, let's imagine we have 3 components: "A", "B", "C" and we give focus to "A", so now "A" is active. Up to now all clear I hope. Then the user press DOWN, which for our application means the focus needs to be given to "B", so "B" becomes active (we can have focus only on one component). Let's say then our user presses DELETE and this causes the view to umount "B". Who has focus now? You might say none of them. I don't think so. It's true "A" hasn't the focus before, but it is also true that we never disabled "A". Thanks to the focus stack indeed, "A" will be re-enabled. This approach is in my opinion just perfect and very handy. It gives you the possibility not to care about re-give focus everytime to the previous component and at the same time you haven't to follow this approach at all. Indeed you could just disable "A" before enabling "B" and you would be perfectly fine.
+>> What does it mean? Okay, let's imagine we have 2 components: "A" and "B" and we give focus to "A", so now "A" is active. Up to now all clear I hope. Then the user presses DOWN, which for our application means the focus needs to be given to "B", so "B" becomes active (we can have focus only on one component). Let's say then our user presses DELETE and this causes the view to umount "B". Who has focus now? You might say none of them. I don't think so. It's true "A" hasn't the focus before, but it is also true that we never disabled "A". Thanks to the focus stack indeed, "A" will be re-enabled. This approach is in my opinion just perfect and very handy. It gives you the possibility not to care about re-give focus everytime to the previous component and at the same time you haven't to follow this approach at all. Indeed you could just disable "A" before enabling "B" and you would be perfectly fine.
 
 ---
 
@@ -79,7 +79,7 @@ Components have two behaviours which generate a Message:
 - `on()`
 - `update()`
 
-As you've probably imagined, this methods likely change the component state, which must then reported to the user somehow and that's what messages are for. Messages are just a way the component has to communicate with the end-user.
+As you've probably imagined, this methods likely change the component state, which must then be reported to the user somehow and that's what messages are for. Messages are just a way the component has to communicate with the end-user.
 
 Okay, but in practice you say?
 Well, let's see the definition of the `Msg` type:
@@ -132,4 +132,4 @@ Now we can finally see the lifecycle of a realm application 🦄
 
 ## What's next
 
-So finally you know how all the parts of a realm application works. For your application you might be interested then in [which components are already available](std-components.md) and how to [implement your own](new-components.md).
+So finally you know how all the parts of a realm application. For your application you might be interested then in [which components are already available](std-components.md) and how to [implement your own](new-components.md).
