@@ -30,13 +30,12 @@
  * SOFTWARE.
  */
 use crate::props::{BordersProps, Props, PropsBuilder, TextParts, TextSpan};
-use crate::{Canvas, Component, Event, Msg, Payload};
-
-use tui::{
+use crate::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
     widgets::{Block, BorderType, Borders, List, ListItem},
 };
+use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
 

@@ -331,24 +331,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-extern crate crossterm;
-extern crate tui;
+extern crate tui as tuirs;
 
 // Ext
-use crossterm::event::{Event, KeyEvent};
 use std::io::Stdout;
-use tui::{backend::CrosstermBackend, layout::Rect, Frame};
+use tuirs::{backend::CrosstermBackend, layout::Rect, Frame};
 
 // Modules
 #[cfg(feature = "with-components")]
 pub mod components;
+pub mod event;
 pub mod props;
+pub mod tui;
 pub mod view;
 // Export use
 pub use self::props::{
     borders, texts, GenericPropsBuilder, InputType, PropValue, Props, PropsBuilder,
 };
 pub use self::view::View;
+
+// locals
+use event::{Event, KeyEvent};
 
 // -- Types
 

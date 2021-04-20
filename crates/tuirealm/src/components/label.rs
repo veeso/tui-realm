@@ -26,13 +26,12 @@
  * SOFTWARE.
  */
 use crate::props::{Props, PropsBuilder, TextParts};
-use crate::{Canvas, Component, Event, Msg, Payload};
-
-use tui::{
+use crate::tui::{
     layout::Rect,
     style::{Color, Modifier, Style},
     widgets::Paragraph,
 };
+use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
 
@@ -278,8 +277,8 @@ mod tests {
 
     use super::*;
 
+    use crate::tui::style::Color;
     use crossterm::event::{KeyCode, KeyEvent};
-    use tui::style::Color;
 
     #[test]
     fn test_components_label() {

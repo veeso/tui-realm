@@ -21,17 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-extern crate tui;
-
 use tuirealm::components::utils::get_block;
+use tuirealm::event::{Event, KeyCode};
 use tuirealm::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts};
-use tuirealm::{Canvas, Component, Event, KeyCode, Msg, Payload};
-
-use tui::{
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
+use tuirealm::{Canvas, Component, Msg, Payload};
 
 // -- states
 

@@ -3,6 +3,7 @@
 //! `Input` represents a read-write input field. This component supports different input types, input length
 //! and handles input events related to cursor position, backspace, canc, ...
 
+use crate::event::{KeyCode, KeyModifiers};
 /**
  * MIT License
  *
@@ -27,14 +28,12 @@
  * SOFTWARE.
  */
 use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts};
-use crate::{Canvas, Component, Event, InputType, Msg, Payload};
-
-use crossterm::event::{KeyCode, KeyModifiers};
-use tui::{
+use crate::tui::{
     layout::Rect,
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
+use crate::{Canvas, Component, Event, InputType, Msg, Payload};
 
 // -- Props
 
@@ -478,8 +477,8 @@ mod tests {
 
     use super::*;
 
+    use crate::tui::style::Color;
     use crossterm::event::KeyEvent;
-    use tui::style::Color;
 
     #[test]
     fn test_components_input_text() {
