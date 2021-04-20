@@ -26,3 +26,12 @@ with-components = [ "textwrap", "unicode-width" ]
 name = "gallery"
 path = "examples/gallery.rs"
 required-features = [ "with-components" ]
+
+[[example]]
+name = "demo"
+path = "examples/demo.rs"
+required-features = [ "with-components" ]
+
+[[example]]
+name = "custom_comp"
+path = "examples/custom_comp.rs"
