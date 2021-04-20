@@ -38,21 +38,17 @@ So let's say we're going to work in a file `counter.rs`.
 The first thing we need to do is to import what we need:
 
 ```rust
-extern crate crossterm;
-extern crate tui;
 extern crate tuirealm;
 
-use tuirealm::{Canvas, Component, Event, Msg, Payload};
 use tuirealm::components::utils::get_block;
-use tuirealm::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts, TextSpan};
-
-use crossterm::event::KeyCode;
-use tui::{
+use tuirealm::event::{Event, KeyCode};
+use tuirealm::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
-    text::{Span, Spans},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
+use tuirealm::{Canvas, Component, Msg, Payload};
 ```
 
 ## States
@@ -115,7 +111,6 @@ impl Default for CounterPropsBuilder {
         let mut builder = CounterPropsBuilder {
             props: Some(Props::default()),
         };
-        builder.with_inverted_color(Color::Black);
         builder
     }
 }
@@ -186,6 +181,7 @@ impl CounterPropsBuilder {
         if let Some(props) = self.props.as_mut() {
             props.texts = TextParts::new(Some(label), None);
         }
+        self
     }
 
     pub fn with_value(&mut self, counter: usize) -> &mut Self {
@@ -244,16 +240,16 @@ To do so, we'll need to define colors etc. I will make it very simple here. Unfo
                 Some(t) => t.clone(),
             };
             let text: String = format!("{} ({})", prefix, self.states.counter);
-            let block: Block = super::utils::get_block(
-                &self.props.borders,
-                &None,
-                self.states.focus,
-            );
+            let block: Block = get_block(&self.props.borders, &None, self.states.focus);
+            let (fg, bg) = match self.states.focus {
+                true => (self.props.foreground, self.props.background),
+                false => (Color::Reset, Color::Reset),
+            };
             render.render_widget(
-                Paragraph::new(title).block(block).style(
+                Paragraph::new(text).block(block).style(
                     Style::default()
-                        .fg(self.props.foreground)
-                        .bg(self.props.background)
+                        .fg(fg)
+                        .bg(bg)
                         .add_modifier(self.props.modifiers),
                 ),
                 area,
@@ -275,7 +271,7 @@ Update, as you might know must update the component properties. This also return
         }
         self.props = props;
         // Msg none
-        if prev_value != *self.states.counter {
+        if prev_value != self.states.counter {
             Msg::OnChange(self.get_state())
         } else {
             Msg::None
