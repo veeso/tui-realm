@@ -5,7 +5,7 @@
 [![Build](https://github.com/veeso/tui-realm/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm/actions) [![codecov](https://codecov.io/gh/veeso/tui-realm/branch/main/graph/badge.svg?token=au67l7nQah)](https://codecov.io/gh/veeso/tui-realm)
 
 Developed by Christian Visintin  
-Current version: 0.1.0 (19/04/2021)
+Current version: 0.1.0 (20/04/2021)
 
 ---
 
@@ -65,6 +65,8 @@ Since this library requires `crossterm` too, you'll also need to add it to your 
 crossterm = "0.19.0"
 ```
 
+You don't need tui as dependency, since you can access to tui via `tuirealm::tui::*`
+
 ### Create a tui-realm application
 
 View how to implement a tui-realm application in the [related guide](docs/get-started.md).
@@ -117,7 +119,11 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tui-re
 
 ## About other backends
 
-TODO: fill
+As you've probably already noticed, tuirealm only supports `crossterm` as backend for the terminal, even if `tui` supports `termion` and other libraries. Why this?
+Well the reasons are these two:
+
+1. There's no reason to use the other backends: I use crossterm in termscp, and I don't find advantage in using termion or other backends. Crossterm is cross platform and works perfectly fine.
+2. Implementing the support for the other backends would me in creating a mapper for input events from the different backends into a common type. Is it possible? Yes it is, but I'm really not interested in implementing it.
 
 ---
 
@@ -126,7 +132,7 @@ TODO: fill
 Contributions, bug reports, new features and questions are welcome! 😉
 If you have any question or concern, or you want to suggest a new feature, or you want just want to improve tui-realm, feel free to open an issue or a PR.
 
-Please follow [our contributing guidelines](CONTRIBUTING.md) TODO: write contributing
+Please follow [our contributing guidelines](CONTRIBUTING.md)
 
 ---
 

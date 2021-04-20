@@ -7,7 +7,7 @@ categories = ["command-line-utilities"]
 description = "A tui-rs framework to build interfaces, inspired by React and Elm."
 documentation = "https://docs.rs/tuirealm"
 homepage = "https://github.com/veeso/tui-realm"
-include = ["docs/", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 keywords = ["tui", "terminal"]
 license = "MIT"
 readme = "README.md"
@@ -33,5 +33,5 @@ path = "examples/demo.rs"
 required-features = [ "with-components" ]
 
 [[example]]
-name = "custom_comp"
+name = "counter"
 path = "examples/custom_comp.rs"

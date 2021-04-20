@@ -342,10 +342,21 @@ Finally we just need to implement `blur` and `active` for the component:
 
 ### To summarize
 
-... TODO: complete
+You finally know how to implement a component in tui realm. As you've probably seen tuirealm gives you the possibility to use the `tui` crate with `tuirealm::tui`.
+So basically it's not that complicated and the process just consists in:
+
+1. Implement states
+2. Implement props builder
+3. Implement the Component trait
+
+you can now see the component we've just implemented running the example:
+
+```sh
+cargo run --features="with-components" --example custom-component
+```
 
 ---
 
 ## What's next
 
-... TODO: complete
+The only thing remained to do now, is to implement your application. There's nothing else you need to learn about tui-realm to build an excelent application 🦄.
