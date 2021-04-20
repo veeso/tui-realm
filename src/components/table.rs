@@ -26,14 +26,13 @@
  * SOFTWARE.
  */
 use crate::props::{BordersProps, Props, PropsBuilder, Table as TextTable, TextParts};
-use crate::{Canvas, Component, Event, Msg, Payload};
-
-use tui::{
+use crate::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, List, ListItem},
 };
+use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
 

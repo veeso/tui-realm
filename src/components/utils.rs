@@ -32,9 +32,9 @@ extern crate unicode_width;
 use crate::props::{BordersProps, TextSpan};
 use crate::Props;
 // ext
-use tui::style::{Color, Modifier, Style};
-use tui::text::{Span, Spans};
-use tui::widgets::Block;
+use crate::tui::style::{Color, Modifier, Style};
+use crate::tui::text::{Span, Spans};
+use crate::tui::widgets::Block;
 use unicode_width::UnicodeWidthStr;
 
 /// ### wrap_spans
@@ -143,7 +143,7 @@ mod test {
     use crate::props::TextSpanBuilder;
     use crate::GenericPropsBuilder;
 
-    use tui::widgets::{BorderType, Borders};
+    use crate::tui::widgets::{BorderType, Borders};
 
     #[test]
     fn test_components_utils_wrap_spans() {

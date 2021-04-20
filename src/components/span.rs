@@ -27,14 +27,13 @@
  * SOFTWARE.
  */
 use crate::props::{Props, PropsBuilder, TextParts, TextSpan};
-use crate::{Canvas, Component, Event, Msg, Payload};
-
-use tui::{
+use crate::tui::{
     layout::Rect,
     style::{Color, Modifier, Style},
     text::{Span as TuiSpan, Spans, Text},
     widgets::Paragraph,
 };
+use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
 
@@ -294,8 +293,8 @@ mod tests {
     use super::*;
     use crate::props::TextSpanBuilder;
 
+    use crate::tui::style::Color;
     use crossterm::event::{KeyCode, KeyEvent};
-    use tui::style::Color;
 
     #[test]
     fn test_components_span() {

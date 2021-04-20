@@ -2,6 +2,7 @@
 //!
 //! `Radio` component renders a radio group
 
+use crate::event::KeyCode;
 /**
  * MIT License
  *
@@ -26,15 +27,13 @@
  * SOFTWARE.
  */
 use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts, TextSpan};
-use crate::{Canvas, Component, Event, Msg, Payload};
-
-use crossterm::event::KeyCode;
-use tui::{
+use crate::tui::{
     layout::Rect,
     style::{Color, Style},
     text::Spans,
     widgets::{Block, BorderType, Borders, Tabs},
 };
+use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
 
