@@ -260,7 +260,7 @@ A span is an in-line component which supports text with different styles.
 - `strikethrough`: set strikethrough for text
 - `underlined`: set underlined text
 - `with_borders`: set border properties
-- `with_texts`: set block title and paragraph text
+- `with_spans`: set block title and paragraph text
 
 ---
 
