@@ -122,8 +122,8 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tui-re
 As you've probably already noticed, tuirealm only supports `crossterm` as backend for the terminal, even if `tui` supports `termion` and other libraries. Why this?
 Well the reasons are these two:
 
-1. There's no reason to use the other backends: I use crossterm in termscp, and I don't find advantage in using termion or other backends. Crossterm is cross platform and works perfectly fine.
-2. Implementing the support for the other backends would me in creating a mapper for input events from the different backends into a common type. Is it possible? Yes it is, but I'm really not interested in implementing it.
+1. There's no reason to use the other backends: I use crossterm in termscp, and I don't find any advantage in using termion or other backends. Crossterm is cross platform and works perfectly fine.
+2. Implementing the support for the other backends would force me in creating a mapper for input events from the different backends into a common type. Is it possible? Yes it is, but I'm really not interested in implementing it.
 
 ---
 
