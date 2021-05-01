@@ -4,6 +4,10 @@
 
 [![Build](https://github.com/veeso/tui-realm/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm/actions) [![codecov](https://codecov.io/gh/veeso/tui-realm/branch/main/graph/badge.svg?token=au67l7nQah)](https://codecov.io/gh/veeso/tui-realm)
 
+<p align="center">
+  <img src="docs/images/tui-realm.svg" width="256" height="256" />
+</p>
+
 Developed by Christian Visintin  
 Current version: 0.1.0 (20/04/2021)
 
