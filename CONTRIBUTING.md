@@ -69,7 +69,6 @@ At the moment, these kind of contributions are more appreciated and should be pr
 
 - Fix for issues described in [Known Issues](./README.md#known-issues-) or [issues reported by the community](https://github.com/veeso/tui-realm/issues)
 - Code optimizations: any optimization to the code is welcome
-- A **logo** for the project: I'd really love to have a logo for tui-realm 💛
 
 For any other kind of contribution, especially for new features, please submit a new issue first.
 
