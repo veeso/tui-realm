@@ -308,6 +308,14 @@
 //! properties for each component, while if you don't want to do so, you can use the `GenericPropsBuilder`.
 //!
 
+#![doc(html_playground_url = "https://play.rust-lang.org")]
+#![doc(
+    html_favicon_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/docs/images/cargo/tui-realm-128.png"
+)]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/docs/images/cargo/tui-realm-512.png"
+)]
+
 /**
  * MIT License
  *
