@@ -108,17 +108,41 @@ The Payload is an enum and it's used to pass different kind of data across the a
 
 ```rust
 pub enum Payload {
-    Boolean(bool),
-    Signed(isize),
-    Text(String),
-    Unsigned(usize),
-    VecOfText(Vec<String>),
-    VecOfUsize(Vec<usize>),
+    One(Value),
+    Tup2((Value, Value)),
+    Tup3((Value, Value, Value)),
+    Tup4((Value, Value, Value, Value)),
+    Vec(Vec<Value>),
+    Map(HashMap<String, Value>),
+    Linked(Box<Payload>, Option<Box<Payload>>),
     None,
 }
 ```
 
-So it used to carry a payload with a message; sometimes you don't need to report a payload, but just the event itself, so I made `Payload::None` available 😉.
+As you can see though, the Payload just defines the collection type for a `Value`, which contains the value itself:
+
+```rust
+pub enum Value {
+    Bool(bool),
+    U8(u8),
+    U16(u16),
+    U32(u32),
+    U64(u64),
+    U128(u128),
+    Usize(usize),
+    I8(i8),
+    I16(i16),
+    I32(i32),
+    I64(i64),
+    I128(i128),
+    Isize(isize),
+    Str(String),
+}
+```
+
+This data type, allows you then to carry multiple values, some very simple such as `One` and other extremely unlikely to be used, but cool to have such as `Linked`, which allows you to have multiple payload for a single `Msg`.
+In addition to this, sometimes you don't need to report a payload, but just the event itself, so I made `Payload::None` available 😉.
+The `Value` enum, contains all the primitives you need to pass data. You might have noticed that `Float` types are missing and yes, you're right. Why? Because float doesn't implement the `Eq` trait basically, which means that you wouldn't make you able to use them in match cases. So I'm sorry, but at the moment, float type is not supported.
 
 ### Putting it all together
 
