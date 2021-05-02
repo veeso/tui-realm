@@ -33,7 +33,7 @@ use crate::tui::{
     text::Spans,
     widgets::{Block, BorderType, Borders, Tabs},
 };
-use crate::{Canvas, Component, Event, Msg, Payload};
+use crate::{Canvas, Component, Event, Msg, Payload, Value};
 
 // -- Props
 
@@ -327,7 +327,7 @@ impl Component for Radio {
     /// Get current state from component
     /// For this component returns the index of the selected choice
     fn get_state(&self) -> Payload {
-        Payload::Unsigned(self.states.choice)
+        Payload::One(Value::Usize(self.states.choice))
     }
 
     // -- events
@@ -409,44 +409,47 @@ mod test {
             .with_value(2)
             .hidden()
             .build();
-        assert_eq!(component.update(props), Msg::OnChange(Payload::Unsigned(2)));
+        assert_eq!(
+            component.update(props),
+            Msg::OnChange(Payload::One(Value::Usize(2)))
+        );
         // Get value
         component.states.choice = 1;
-        assert_eq!(component.get_state(), Payload::Unsigned(1));
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(1)));
         // Handle events
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
-            Msg::OnChange(Payload::Unsigned(0)),
+            Msg::OnChange(Payload::One(Value::Usize(0))),
         );
-        assert_eq!(component.get_state(), Payload::Unsigned(0));
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(0)));
         // Left again
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
-            Msg::OnChange(Payload::Unsigned(0)),
+            Msg::OnChange(Payload::One(Value::Usize(0))),
         );
-        assert_eq!(component.get_state(), Payload::Unsigned(0));
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(0)));
         // Right
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::OnChange(Payload::Unsigned(1)),
+            Msg::OnChange(Payload::One(Value::Usize(1))),
         );
-        assert_eq!(component.get_state(), Payload::Unsigned(1));
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(1)));
         // Right again
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::OnChange(Payload::Unsigned(2)),
+            Msg::OnChange(Payload::One(Value::Usize(2))),
         );
-        assert_eq!(component.get_state(), Payload::Unsigned(2));
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(2)));
         // Right again
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::OnChange(Payload::Unsigned(2)),
+            Msg::OnChange(Payload::One(Value::Usize(2))),
         );
-        assert_eq!(component.get_state(), Payload::Unsigned(2));
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(2)));
         // Submit
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::OnSubmit(Payload::Unsigned(2)),
+            Msg::OnSubmit(Payload::One(Value::Usize(2))),
         );
         // Any key
         assert_eq!(
