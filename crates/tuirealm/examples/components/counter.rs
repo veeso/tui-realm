@@ -29,7 +29,7 @@ use tuirealm::tui::{
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
-use tuirealm::{Canvas, Component, Msg, Payload};
+use tuirealm::{Canvas, Component, Msg, Payload, Value};
 
 // -- states
 
@@ -226,7 +226,7 @@ impl Component for Counter {
     }
 
     fn get_state(&self) -> Payload {
-        Payload::Unsigned(self.states.counter)
+        Payload::One(Value::Usize(self.states.counter))
     }
 
     fn blur(&mut self) {

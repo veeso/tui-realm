@@ -52,7 +52,7 @@
 //!
 //! use tuirealm::components::input;
 //! use tuirealm::props::borders::{BorderType, Borders};
-//! use tuirealm::{InputType, Msg, Payload, PropsBuilder, View};
+//! use tuirealm::{InputType, Msg, Payload, PropsBuilder, Value, View};
 //!
 //! // tui
 //! use tui::backend::CrosstermBackend;
@@ -226,7 +226,7 @@
 //!     match ref_msg {
 //!         None => None, // Exit after None
 //!         Some(msg) => match msg {
-//!             (COMPONENT_INPUT, Msg::OnSubmit(Payload::Text(input))) => {
+//!             (COMPONENT_INPUT, Msg::OnSubmit(Payload::One(Value::Str(input)))) => {
 //!                 eprintln!("USER SUBMITTED {}", input);
 //!                 None
 //!             }
@@ -342,6 +342,7 @@
 extern crate tui as tuirs;
 
 // Ext
+use std::collections::HashMap;
 use std::io::Stdout;
 use tuirs::{backend::CrosstermBackend, layout::Rect, Frame};
 
@@ -374,7 +375,7 @@ pub type Canvas<'a> = Frame<'a, CrosstermBackend<Stdout>>;
 ///
 /// Msg is an enum returned after an event is raised for a certain component
 /// Yep, I took inspiration from Elm.
-#[derive(std::fmt::Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Msg {
     OnSubmit(Payload),
     OnChange(Payload),
@@ -385,15 +386,36 @@ pub enum Msg {
 /// ## Payload
 ///
 /// Payload describes a component value
-#[derive(std::fmt::Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Payload {
-    Boolean(bool),
-    Signed(isize),
-    Text(String),
-    Unsigned(usize),
-    VecOfText(Vec<String>),
-    VecOfUsize(Vec<usize>),
+    One(Value),
+    Tup2((Value, Value)),
+    Tup3((Value, Value, Value)),
+    Tup4((Value, Value, Value)),
+    Vec(Vec<Value>),
+    Map(HashMap<String, Value>),
     None,
+}
+
+/// ## Value
+///
+/// Value describes the value contained in a Payload
+#[derive(Debug, PartialEq, Eq)]
+pub enum Value {
+    Bool(bool),
+    U8(u8),
+    U16(u16),
+    U32(u32),
+    U64(u64),
+    U128(u128),
+    Usize(usize),
+    I8(i8),
+    I16(i16),
+    I32(i32),
+    I64(i64),
+    I128(i128),
+    Isize(isize),
+    Str(String),
 }
 
 // -- Component

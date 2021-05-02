@@ -33,7 +33,7 @@ use crate::tui::{
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, Tabs},
 };
-use crate::{Canvas, Component, Event, Msg, Payload};
+use crate::{Canvas, Component, Event, Msg, Payload, Value};
 
 // -- Props
 
@@ -373,7 +373,13 @@ impl Component for Checkbox {
     /// Get current state from component
     /// For this component returns the vec of selected items
     fn get_state(&self) -> Payload {
-        Payload::VecOfUsize(self.states.selection.clone())
+        Payload::Vec(
+            self.states
+                .selection
+                .iter()
+                .map(|x| Value::Usize(*x))
+                .collect(),
+        )
     }
 
     // -- events
@@ -454,20 +460,20 @@ mod test {
             .build();
         assert_eq!(
             component.update(props),
-            Msg::OnChange(Payload::VecOfUsize(vec![1]))
+            Msg::OnChange(Payload::Vec(vec![Value::Usize(1)]))
         );
         // Get value
-        assert_eq!(component.get_state(), Payload::VecOfUsize(vec![1]));
+        assert_eq!(component.get_state(), Payload::Vec(vec![Value::Usize(1)]));
         // Handle events
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
             Msg::None,
         );
-        assert_eq!(component.get_state(), Payload::VecOfUsize(vec![1]));
+        assert_eq!(component.get_state(), Payload::Vec(vec![Value::Usize(1)]));
         // Toggle
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char(' ')))),
-            Msg::OnChange(Payload::VecOfUsize(vec![1, 0]))
+            Msg::OnChange(Payload::Vec(vec![Value::Usize(1), Value::Usize(0)]))
         );
         // Left again
         assert_eq!(
@@ -483,7 +489,7 @@ mod test {
         // Toggle
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char(' ')))),
-            Msg::OnChange(Payload::VecOfUsize(vec![0]))
+            Msg::OnChange(Payload::Vec(vec![Value::Usize(0)]))
         );
         // Right again
         assert_eq!(
@@ -518,7 +524,7 @@ mod test {
         // Submit
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::OnSubmit(Payload::VecOfUsize(vec![0])),
+            Msg::OnSubmit(Payload::Vec(vec![Value::Usize(0)])),
         );
         // Any key
         assert_eq!(
