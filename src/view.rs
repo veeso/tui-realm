@@ -221,6 +221,7 @@ impl View {
 mod tests {
 
     use super::super::GenericPropsBuilder;
+    use super::super::Value;
     use super::*;
     use crate::props::builder::PropsBuilder;
 
@@ -407,9 +408,12 @@ mod tests {
         view.mount(text, make_component());
         view.mount(input, make_component());
         // Verify current value
-        assert_eq!(view.get_state(text).unwrap(), Payload::Unsigned(0));
-        assert_eq!(view.get_state(input).unwrap(), Payload::Unsigned(0)); // Defined in `make_component`
-                                                                          // Handle events WITHOUT ANY ACTIVE ELEMENT
+        assert_eq!(view.get_state(text).unwrap(), Payload::One(Value::Usize(0)));
+        assert_eq!(
+            view.get_state(input).unwrap(),
+            Payload::One(Value::Usize(0))
+        ); // Defined in `make_component`
+           // Handle events WITHOUT ANY ACTIVE ELEMENT
         assert!(view
             .on(Event::Key(KeyEvent::from(KeyCode::Enter)))
             .is_none());
@@ -423,11 +427,17 @@ mod tests {
             (input.to_string(), Msg::None)
         );
         // Verify new value
-        assert_eq!(view.get_state(input).unwrap(), Payload::Unsigned(1));
+        assert_eq!(
+            view.get_state(input).unwrap(),
+            Payload::One(Value::Usize(1))
+        );
         // Verify enter
         assert_eq!(
             view.on(Event::Key(KeyEvent::from(KeyCode::Enter))).unwrap(),
-            (input.to_string(), Msg::OnSubmit(Payload::Unsigned(2)))
+            (
+                input.to_string(),
+                Msg::OnSubmit(Payload::One(Value::Usize(2)))
+            )
         );
     }
 
@@ -479,7 +489,9 @@ mod tests {
             self.states.counter += 1;
             match ev {
                 Event::Key(kev) => match kev.code {
-                    KeyCode::Enter => Msg::OnSubmit(Payload::Unsigned(self.states.counter)),
+                    KeyCode::Enter => {
+                        Msg::OnSubmit(Payload::One(Value::Usize(self.states.counter)))
+                    }
                     _ => Msg::None,
                 },
                 _ => Msg::None,
@@ -487,7 +499,7 @@ mod tests {
         }
 
         fn get_state(&self) -> Payload {
-            Payload::Unsigned(self.states.counter)
+            Payload::One(Value::Usize(self.states.counter))
         }
 
         fn blur(&mut self) {

@@ -35,7 +35,7 @@ use std::time::{Duration, Instant};
 
 use tuirealm::components::{input, label};
 use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::{InputType, Msg, Payload, PropsBuilder, View};
+use tuirealm::{InputType, Msg, Payload, PropsBuilder, Value, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
 use tui::style::Color;
@@ -146,7 +146,7 @@ fn update(model: &mut Model, view: &mut View, msg: Option<(String, Msg)>) -> Opt
     match ref_msg {
         None => None, // Exit after None
         Some(msg) => match msg {
-            (COMPONENT_INPUT, Msg::OnChange(Payload::Text(input))) => {
+            (COMPONENT_INPUT, Msg::OnChange(Payload::One(Value::Str(input)))) => {
                 // Update span
                 let props =
                     label::LabelPropsBuilder::from(view.get_props(COMPONENT_LABEL).unwrap())
