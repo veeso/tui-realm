@@ -391,9 +391,10 @@ pub enum Payload {
     One(Value),
     Tup2((Value, Value)),
     Tup3((Value, Value, Value)),
-    Tup4((Value, Value, Value)),
+    Tup4((Value, Value, Value, Value)),
     Vec(Vec<Value>),
     Map(HashMap<String, Value>),
+    Linked(Box<Payload>, Option<Box<Payload>>),
     None,
 }
 
