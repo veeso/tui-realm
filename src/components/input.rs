@@ -33,7 +33,7 @@ use crate::tui::{
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
-use crate::{Canvas, Component, Event, InputType, Msg, Payload};
+use crate::{Canvas, Component, Event, InputType, Msg, Payload, Value};
 
 // -- Props
 
@@ -448,10 +448,10 @@ impl Component for Input {
     /// The value is always the current input.
     fn get_state(&self) -> Payload {
         match self.props.input_type {
-            InputType::Number => {
-                Payload::Unsigned(self.states.get_value().parse::<usize>().ok().unwrap_or(0))
-            }
-            _ => Payload::Text(self.states.get_value()),
+            InputType::Number => Payload::One(Value::Usize(
+                self.states.get_value().parse::<usize>().ok().unwrap_or(0),
+            )),
+            _ => Payload::One(Value::Str(self.states.get_value())),
         }
     }
 
@@ -518,7 +518,10 @@ mod tests {
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Red);
         // Get value
-        assert_eq!(component.get_state(), Payload::Text(String::from("home")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("home")))
+        );
         // RenderData
         //assert_eq!(component.render().unwrap().cursor, 4);
         assert_eq!(component.states.cursor, 4);
@@ -532,15 +535,21 @@ mod tests {
             Msg::OnKey(KeyEvent::new(KeyCode::Char('a'), KeyModifiers::CONTROL)),
         );
         // String shouldn't have changed
-        assert_eq!(component.get_state(), Payload::Text(String::from("home")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("home")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 4);
         assert_eq!(component.states.cursor, 4);
         // Character
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('/')))),
-            Msg::OnChange(Payload::Text(String::from("home/")))
+            Msg::OnChange(Payload::One(Value::Str(String::from("home/"))))
         );
-        assert_eq!(component.get_state(), Payload::Text(String::from("home/")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("home/")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 5);
         assert_eq!(component.states.cursor, 5);
         // Verify max length (shouldn't push any character)
@@ -548,20 +557,26 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
             Msg::None
         );
-        assert_eq!(component.get_state(), Payload::Text(String::from("home/")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("home/")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 5);
         assert_eq!(component.states.cursor, 5);
         // Enter
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::OnSubmit(Payload::Text(String::from("home/")))
+            Msg::OnSubmit(Payload::One(Value::Str(String::from("home/"))))
         );
         // Backspace
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
-            Msg::OnChange(Payload::Text(String::from("home")))
+            Msg::OnChange(Payload::One(Value::Str(String::from("home"))))
         );
-        assert_eq!(component.get_state(), Payload::Text(String::from("home")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("home")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 4);
         assert_eq!(component.states.cursor, 4);
         // Check backspace at 0
@@ -569,9 +584,12 @@ mod tests {
         component.states.cursor = 1;
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
-            Msg::OnChange(Payload::Text(String::from("")))
+            Msg::OnChange(Payload::One(Value::Str(String::from(""))))
         );
-        assert_eq!(component.get_state(), Payload::Text(String::from("")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 0);
         assert_eq!(component.states.cursor, 0);
         // Another one...
@@ -579,7 +597,10 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
             Msg::None
         );
-        assert_eq!(component.get_state(), Payload::Text(String::from("")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 0);
         assert_eq!(component.states.cursor, 0);
         // See del behaviour here
@@ -587,7 +608,10 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
             Msg::None
         );
-        assert_eq!(component.get_state(), Payload::Text(String::from("")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 0);
         assert_eq!(component.states.cursor, 0);
         // Check del behaviour
@@ -595,9 +619,12 @@ mod tests {
         component.states.cursor = 1;
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
-            Msg::OnChange(Payload::Text(String::from("h")))
+            Msg::OnChange(Payload::One(Value::Str(String::from("h"))))
         );
-        assert_eq!(component.get_state(), Payload::Text(String::from("h")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("h")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 1); // Shouldn't move
         assert_eq!(component.states.cursor, 1);
         // Another one (should do nothing)
@@ -605,7 +632,10 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
             Msg::None
         );
-        assert_eq!(component.get_state(), Payload::Text(String::from("h")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("h")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 1); // Shouldn't move
         assert_eq!(component.states.cursor, 1);
         // Move cursor right
@@ -621,9 +651,12 @@ mod tests {
         // Put a character here
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
-            Msg::OnChange(Payload::Text(String::from("heallo")))
+            Msg::OnChange(Payload::One(Value::Str(String::from("heallo"))))
         );
-        assert_eq!(component.get_state(), Payload::Text(String::from("heallo")));
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("heallo")))
+        );
         //assert_eq!(component.render().unwrap().cursor, 3);
         assert_eq!(component.states.cursor, 3);
         // Move left
@@ -675,7 +708,7 @@ mod tests {
                     .with_value("new-value".to_string())
                     .build(),
             ),
-            Msg::OnChange(Payload::Text(String::from("new-value")))
+            Msg::OnChange(Payload::One(Value::Str(String::from("new-value"))))
         );
         assert_eq!(
             component.update(
@@ -687,7 +720,7 @@ mod tests {
         );
         assert_eq!(
             component.get_state(),
-            Payload::Text(String::from("new-value"))
+            Payload::One(Value::Str(String::from("new-value")))
         );
     }
 
@@ -709,15 +742,15 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
             Msg::None
         );
-        assert_eq!(component.get_state(), Payload::Unsigned(3000));
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(3000)));
         //assert_eq!(component.render().unwrap().cursor, 4);
         assert_eq!(component.states.cursor, 4);
         // Push a number
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('1')))),
-            Msg::OnChange(Payload::Unsigned(30001))
+            Msg::OnChange(Payload::One(Value::Usize(30001)))
         );
-        assert_eq!(component.get_state(), Payload::Unsigned(30001));
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(30001)));
         //assert_eq!(component.render().unwrap().cursor, 5);
         assert_eq!(component.states.cursor, 5);
     }
