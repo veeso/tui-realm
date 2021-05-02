@@ -127,7 +127,7 @@ I will implement everything in a single file in this case and I will reproduce s
 
     use tuirealm::components::{input, label};
     use tuirealm::props::borders::{BorderType, Borders};
-    use tuirealm::{InputType, Msg, Payload, PropsBuilder, View};
+    use tuirealm::{InputType, Msg, Payload, PropsBuilder, Value, View};
     // tui
     use tui::layout::{Constraint, Direction, Layout};
     use tui::style::Color;
@@ -254,7 +254,7 @@ I will implement everything in a single file in this case and I will reproduce s
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_INPUT, Msg::OnSubmit(Payload::Text(input))) => {
+                (COMPONENT_INPUT, Msg::OnSubmit(Payload::One(Value::Str(input)))) => {
                     // Update span
                     let props =
                         label::LabelPropsBuilder::from(view.get_props   (COMPONENT_LABEL).unwrap())
