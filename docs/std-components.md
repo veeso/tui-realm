@@ -13,6 +13,7 @@
   - [Table](#table)
   - [Textarea](#textarea)
   - [Utilities](#utilities)
+  - [What's next](#whats-next)
 
 ---
 
@@ -331,3 +332,7 @@ The standard components library also exports the `utils` module, which provides 
 - **wrap_spans**: Creates span lines from text spans, in order to wrap lines
 - **use_or_default_styles**: use colors and modifiers of the text spans if not `Color::Reset` or `Modifiers::empty()`, otherwise use the properties defined the `Props`.
 - **get_block**: creates the block for the widget. If focus is true, the colors are applied, otherwise `Color::Reset`.
+
+## What's next
+
+You might now be interested in learning how to implement your custom components! If so, check out the guide [here](new-components.md)!
