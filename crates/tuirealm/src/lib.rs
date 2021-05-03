@@ -8,12 +8,12 @@
 //! ### Adding `tui-realm` as dependency
 //!
 //! ```toml
-//! tuirealm = "0.2.1"
+//! tuirealm = "0.2.2"
 //! ```
 //! or if you want the std components library
 //!
 //! ```toml
-//! tuirealm = { version = "0.2.1", features = [ "with-components" ] }
+//! tuirealm = { version = "0.2.2", features = [ "with-components" ] }
 //! ```
 //!
 //! Since the library requires crossterm as backend, you will be required also to put `crossterm` as dependency:
