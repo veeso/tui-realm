@@ -23,7 +23,7 @@
  */
 use tuirealm::components::utils::get_block;
 use tuirealm::event::{Event, KeyCode};
-use tuirealm::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts};
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -134,7 +134,7 @@ impl CounterPropsBuilder {
 
     pub fn with_value(&mut self, counter: usize) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropValue::Unsigned(counter);
+            props.value = PropPayload::One(PropValue::Usize(counter));
         }
         self
     }
@@ -151,7 +151,7 @@ impl Counter {
     pub fn new(props: Props) -> Self {
         let mut states: OwnStates = OwnStates::default();
         // Init counter
-        if let PropValue::Unsigned(val) = &props.value {
+        if let PropPayload::One(PropValue::Usize(val)) = &props.value {
             states.counter = *val;
         }
         Counter { props, states }
@@ -188,7 +188,7 @@ impl Component for Counter {
     fn update(&mut self, props: Props) -> Msg {
         let prev_value = self.states.counter;
         // Get value
-        if let PropValue::Unsigned(val) = &props.value {
+        if let PropPayload::One(PropValue::Usize(val)) = &props.value {
             self.states.counter = *val;
         }
         self.props = props;

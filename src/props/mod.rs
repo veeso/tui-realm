@@ -57,7 +57,7 @@ pub struct Props {
     pub input_len: Option<usize>,              // max input len
     pub palette: HashMap<&'static str, Color>, // Use palette to store extra colors
     pub texts: TextParts,                      // text parts
-    pub value: PropValue,                      // Initial value
+    pub value: PropPayload,                    // Initial value
 }
 
 impl Default for Props {
@@ -73,26 +73,48 @@ impl Default for Props {
             input_len: None,
             palette: HashMap::new(),
             texts: TextParts::default(),
-            value: PropValue::None,
+            value: PropPayload::None,
         }
     }
 }
 
 // -- Prop value
 
-/// ### PropValue
+/// ## PropPayload
 ///
-/// PropValue describes a property initial value
-#[derive(Clone, PartialEq, std::fmt::Debug)]
-pub enum PropValue {
-    Str(String),
-    Unsigned(usize),
-    Signed(isize),
-    Float(f64),
-    Boolean(bool),
-    VecOfText(Vec<String>),
-    VecOfUsize(Vec<usize>),
+/// Payload describes a property initial value payload, which contains the actual value in different kind of storage
+#[derive(Debug, PartialEq, Clone)]
+pub enum PropPayload {
+    One(PropValue),
+    Tup2((PropValue, PropValue)),
+    Tup3((PropValue, PropValue, PropValue)),
+    Tup4((PropValue, PropValue, PropValue, PropValue)),
+    Vec(Vec<PropValue>),
+    Map(HashMap<String, PropValue>),
     None,
+}
+
+/// ## PropValue
+///
+/// Value describes the value contained in a `PropPayload`
+#[derive(Debug, PartialEq, Clone)]
+pub enum PropValue {
+    Bool(bool),
+    U8(u8),
+    U16(u16),
+    U32(u32),
+    U64(u64),
+    U128(u128),
+    Usize(usize),
+    I8(i8),
+    I16(i16),
+    I32(i32),
+    I64(i64),
+    I128(i128),
+    Isize(isize),
+    F64(f64),
+    F32(f32),
+    Str(String),
 }
 
 // -- Input Type
@@ -127,7 +149,7 @@ mod tests {
         assert!(props.texts.title.is_none());
         assert_eq!(props.input_type, InputType::Text);
         assert!(props.input_len.is_none());
-        assert_eq!(props.value, PropValue::None);
+        assert_eq!(props.value, PropPayload::None);
         assert!(props.texts.spans.is_none());
     }
 }

@@ -26,7 +26,9 @@ use crate::event::KeyCode;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{
+    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
+};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -136,7 +138,7 @@ impl CheckboxPropsBuilder {
     /// Set initial value for choice
     pub fn with_value(&mut self, choices: Vec<usize>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropValue::VecOfUsize(choices);
+            props.value = PropPayload::Vec(choices.into_iter().map(PropValue::Usize).collect());
         }
         self
     }
@@ -233,8 +235,15 @@ impl Checkbox {
         // Update choices (vec of TextSpan to String)
         states.make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropValue::VecOfUsize(choices) = &props.value {
-            states.selection = choices.clone();
+        if let PropPayload::Vec(choices) = &props.value {
+            states.selection = choices
+                .clone()
+                .iter()
+                .map(|x| match x {
+                    PropValue::Usize(u) => *u,
+                    _ => 0,
+                })
+                .collect();
         }
         Checkbox { props, states }
     }
@@ -308,8 +317,15 @@ impl Component for Checkbox {
             .make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
         self.states.selection.clear();
-        if let PropValue::VecOfUsize(choices) = &props.value {
-            self.states.selection = choices.clone();
+        if let PropPayload::Vec(choices) = &props.value {
+            self.states.selection = choices
+                .clone()
+                .iter()
+                .map(|x| match x {
+                    PropValue::Usize(u) => *u,
+                    _ => 0,
+                })
+                .collect();
         }
         self.props = props;
         // Msg none
@@ -435,7 +451,10 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(component.props.value, PropValue::VecOfUsize(vec![1, 5]));
+        assert_eq!(
+            component.props.value,
+            PropPayload::Vec(vec![PropValue::Usize(1), PropValue::Usize(5)])
+        );
         // Verify states
         assert_eq!(component.states.choice, 0);
         assert_eq!(component.states.selection, vec![1, 5]);

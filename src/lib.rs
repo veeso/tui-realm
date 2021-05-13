@@ -8,12 +8,12 @@
 //! ### Adding `tui-realm` as dependency
 //!
 //! ```toml
-//! tuirealm = "0.2.2"
+//! tuirealm = "0.3.0"
 //! ```
 //! or if you want the std components library
 //!
 //! ```toml
-//! tuirealm = { version = "0.2.2", features = [ "with-components" ] }
+//! tuirealm = { version = "0.3.0", features = [ "with-components" ] }
 //! ```
 //!
 //! Since the library requires crossterm as backend, you will be required also to put `crossterm` as dependency:
@@ -355,7 +355,7 @@ pub mod tui;
 pub mod view;
 // Export use
 pub use self::props::{
-    borders, texts, GenericPropsBuilder, InputType, PropValue, Props, PropsBuilder,
+    borders, texts, GenericPropsBuilder, InputType, PropPayload, PropValue, Props, PropsBuilder,
 };
 pub use self::view::View;
 
