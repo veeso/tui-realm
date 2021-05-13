@@ -26,7 +26,9 @@ use crate::event::KeyCode;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{
+    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
+};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -136,7 +138,7 @@ impl RadioPropsBuilder {
     /// Set initial value for choice
     pub fn with_value(&mut self, index: usize) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropValue::Unsigned(index);
+            props.value = PropPayload::One(PropValue::Usize(index));
         }
         self
     }
@@ -211,7 +213,7 @@ impl Radio {
         // Update choices (vec of TextSpan to String)
         states.make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropValue::Unsigned(choice) = props.value {
+        if let PropPayload::One(PropValue::Usize(choice)) = props.value {
             states.choice = choice;
         }
         Radio { props, states }
@@ -268,7 +270,7 @@ impl Component for Radio {
         self.states
             .make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropValue::Unsigned(choice) = props.value {
+        if let PropPayload::One(PropValue::Usize(choice)) = props.value {
             self.states.choice = choice;
         }
         self.props = props;
@@ -387,7 +389,7 @@ mod test {
             "C'est oui ou bien c'est non?"
         );
         assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 3);
-        assert_eq!(component.props.value, PropValue::Unsigned(1));
+        assert_eq!(component.props.value, PropPayload::One(PropValue::Usize(1)));
         // Verify states
         assert_eq!(component.states.choice, 1);
         assert_eq!(component.states.choices.len(), 3);
