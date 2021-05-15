@@ -469,3 +469,45 @@ pub trait Component {
     /// Active component; basically give focus
     fn active(&mut self);
 }
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn test_lib_payload_and_values() {
+        Payload::One(Value::Usize(2));
+        Payload::Tup2((Value::Bool(true), Value::Usize(128)));
+        Payload::Tup3((
+            Value::Bool(true),
+            Value::Usize(128),
+            Value::Str(String::from("omar")),
+        ));
+        Payload::Tup4((
+            Value::Bool(true),
+            Value::U8(128),
+            Value::Str(String::from("pippo")),
+            Value::Isize(-2),
+        ));
+        Payload::Vec(vec![
+            Value::U16(1),
+            Value::U32(2),
+            Value::U64(3),
+            Value::U128(4),
+        ]);
+        let mut map: HashMap<String, Value> = HashMap::new();
+        map.insert(String::from("a"), Value::I8(4));
+        map.insert(String::from("b"), Value::I16(-8));
+        map.insert(String::from("c"), Value::I32(16));
+        map.insert(String::from("d"), Value::I64(-32));
+        map.insert(String::from("e"), Value::I128(64));
+        Payload::Map(map);
+        Payload::Linked(Box::new(Payload::One(Value::Usize(1))), None);
+        Payload::Linked(
+            Box::new(Payload::One(Value::Usize(1))),
+            Some(Box::new(Payload::Tup2((Value::Usize(2), Value::Usize(4))))),
+        );
+        drop(Payload::None);
+    }
+}

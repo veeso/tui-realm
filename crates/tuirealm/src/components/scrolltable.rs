@@ -442,6 +442,7 @@ mod tests {
     use crate::props::{TableBuilder, TextSpan};
 
     use crossterm::event::KeyEvent;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_scrolltable() {

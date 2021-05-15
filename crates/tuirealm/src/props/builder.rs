@@ -268,6 +268,8 @@ mod test {
     use super::super::TextSpan;
     use super::*;
 
+    use pretty_assertions::assert_eq;
+
     #[test]
     fn test_props_builder() {
         let props: Props = GenericPropsBuilder::default()

@@ -479,6 +479,7 @@ mod tests {
 
     use crate::tui::style::Color;
     use crossterm::event::KeyEvent;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_input_text() {
