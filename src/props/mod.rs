@@ -91,6 +91,7 @@ pub enum PropPayload {
     Tup4((PropValue, PropValue, PropValue, PropValue)),
     Vec(Vec<PropValue>),
     Map(HashMap<String, PropValue>),
+    Linked(Box<PropPayload>, Option<Box<PropPayload>>),
     None,
 }
 

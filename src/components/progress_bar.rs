@@ -259,6 +259,7 @@ mod test {
     use super::*;
 
     use crossterm::event::{KeyCode, KeyEvent};
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_progress_bar() {

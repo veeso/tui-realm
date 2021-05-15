@@ -282,6 +282,8 @@ mod test {
 
     use super::*;
 
+    use pretty_assertions::assert_eq;
+
     #[test]
     fn test_props_text_parts_with_values() {
         let parts: TextParts = TextParts::new(

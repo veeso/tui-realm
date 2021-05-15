@@ -226,6 +226,7 @@ mod tests {
     use crate::props::builder::PropsBuilder;
 
     use crossterm::event::{KeyCode, KeyEvent};
+    use pretty_assertions::assert_eq;
     use tui::style::Color;
 
     #[test]
