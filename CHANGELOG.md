@@ -1,11 +1,19 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.3.0](#030)
   - [0.2.2](#022)
   - [0.2.1](#021)
   - [0.1.0](#010)
 
 ---
+
+## 0.3.0
+
+Released on 15/05/2021
+
+- Changed `PropValue` API to be similiar to the `Msg` API. Now there are both `PropPayload` and `PropValue` as happens with `Payload` and `Value`
+- Fixed index behaviour for checkbox and radio on update
 
 ## 0.2.2
 

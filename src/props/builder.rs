@@ -28,7 +28,7 @@
  * SOFTWARE.
  */
 use super::borders::{BorderType, Borders};
-use super::{InputType, PropValue, Props, TextParts};
+use super::{InputType, PropPayload, Props, TextParts};
 
 use tui::style::{Color, Modifier};
 
@@ -253,7 +253,7 @@ impl GenericPropsBuilder {
     /// ### with_value
     ///
     /// Set initial value for component
-    pub fn with_value(&mut self, value: PropValue) -> &mut Self {
+    pub fn with_value(&mut self, value: PropPayload) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.value = value;
         }
@@ -264,8 +264,11 @@ impl GenericPropsBuilder {
 #[cfg(test)]
 mod test {
 
+    use super::super::PropValue;
     use super::super::TextSpan;
     use super::*;
+
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_props_builder() {
@@ -288,7 +291,7 @@ mod test {
             ))
             .with_input(InputType::Password)
             .with_input_len(16)
-            .with_value(PropValue::Str(String::from("Hello")))
+            .with_value(PropPayload::One(PropValue::Str(String::from("Hello"))))
             .build();
         assert_eq!(props.background, Color::Blue);
         assert_eq!(props.borders.borders, Borders::BOTTOM);
@@ -307,7 +310,7 @@ mod test {
         assert_eq!(props.texts.title.as_ref().unwrap().as_str(), "hello");
         assert_eq!(props.input_type, InputType::Password);
         assert_eq!(*props.input_len.as_ref().unwrap(), 16);
-        if let PropValue::Str(s) = props.value {
+        if let PropPayload::One(PropValue::Str(s)) = props.value {
             assert_eq!(s.as_str(), "Hello");
         } else {
             panic!("Expected value to be a string");

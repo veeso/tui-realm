@@ -26,7 +26,9 @@ use crate::event::KeyCode;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{
+    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
+};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -136,7 +138,7 @@ impl RadioPropsBuilder {
     /// Set initial value for choice
     pub fn with_value(&mut self, index: usize) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropValue::Unsigned(index);
+            props.value = PropPayload::One(PropValue::Usize(index));
         }
         self
     }
@@ -183,11 +185,20 @@ impl OwnStates {
         }
     }
 
-    /// ### make_choices
+    /// ### set_choices
     ///
     /// Set OwnStates choices from a vector of text spans
-    pub fn make_choices(&mut self, spans: &[TextSpan]) {
+    /// In addition resets current selection and keep index if possible or set it to the first value
+    /// available
+    pub fn set_choices(&mut self, spans: &[TextSpan]) {
         self.choices = spans.iter().map(|x| x.content.clone()).collect();
+        // Keep index if possible
+        if self.choice >= self.choices.len() {
+            self.choice = match self.choices.len() {
+                0 => 0,
+                l => l - 1,
+            };
+        }
     }
 }
 
@@ -209,9 +220,9 @@ impl Radio {
         // Make states
         let mut states: OwnStates = OwnStates::default();
         // Update choices (vec of TextSpan to String)
-        states.make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
+        states.set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropValue::Unsigned(choice) = props.value {
+        if let PropPayload::One(PropValue::Usize(choice)) = props.value {
             states.choice = choice;
         }
         Radio { props, states }
@@ -266,9 +277,9 @@ impl Component for Radio {
         let prev_index: usize = self.states.choice;
         // Reset choices
         self.states
-            .make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
+            .set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropValue::Unsigned(choice) = props.value {
+        if let PropPayload::One(PropValue::Usize(choice)) = props.value {
             self.states.choice = choice;
         }
         self.props = props;
@@ -354,6 +365,46 @@ mod test {
 
     use crossterm::event::{KeyCode, KeyEvent};
 
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_components_radio_states() {
+        let mut states: OwnStates = OwnStates::default();
+        assert_eq!(states.choice, 0);
+        assert_eq!(states.choices.len(), 0);
+        let choices: Vec<TextSpan> = vec![
+            TextSpan::from("lemon"),
+            TextSpan::from("strawberry"),
+            TextSpan::from("vanilla"),
+            TextSpan::from("chocolate"),
+        ];
+        states.set_choices(&choices);
+        assert_eq!(states.choice, 0);
+        assert_eq!(states.choices.len(), 4);
+        // Move
+        states.prev_choice();
+        assert_eq!(states.choice, 0);
+        states.next_choice();
+        assert_eq!(states.choice, 1);
+        states.next_choice();
+        assert_eq!(states.choice, 2);
+        // Forward overflow
+        states.next_choice();
+        states.next_choice();
+        assert_eq!(states.choice, 3);
+        states.prev_choice();
+        assert_eq!(states.choice, 2);
+        // Update
+        let choices: Vec<TextSpan> = vec![TextSpan::from("lemon"), TextSpan::from("strawberry")];
+        states.set_choices(&choices);
+        assert_eq!(states.choice, 1); // Move to first index available
+        assert_eq!(states.choices.len(), 2);
+        let choices: Vec<TextSpan> = vec![];
+        states.set_choices(&choices);
+        assert_eq!(states.choice, 0); // Move to first index available
+        assert_eq!(states.choices.len(), 0);
+    }
+
     #[test]
     fn test_components_radio() {
         // Make component
@@ -387,7 +438,7 @@ mod test {
             "C'est oui ou bien c'est non?"
         );
         assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 3);
-        assert_eq!(component.props.value, PropValue::Unsigned(1));
+        assert_eq!(component.props.value, PropPayload::One(PropValue::Usize(1)));
         // Verify states
         assert_eq!(component.states.choice, 1);
         assert_eq!(component.states.choices.len(), 3);

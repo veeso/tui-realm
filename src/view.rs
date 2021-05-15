@@ -226,6 +226,7 @@ mod tests {
     use crate::props::builder::PropsBuilder;
 
     use crossterm::event::{KeyCode, KeyEvent};
+    use pretty_assertions::assert_eq;
     use tui::style::Color;
 
     #[test]
@@ -451,7 +452,6 @@ mod tests {
     // -- dummy component
 
     struct FragmentStates {
-        focus: bool,
         counter: usize, // Tracks amount of events
     }
 
@@ -463,10 +463,7 @@ mod tests {
     impl Fragment {
         pub fn new(props: Props) -> Self {
             Fragment {
-                states: FragmentStates {
-                    focus: false,
-                    counter: 0,
-                },
+                states: FragmentStates { counter: 0 },
                 props,
             }
         }
@@ -502,12 +499,8 @@ mod tests {
             Payload::One(Value::Usize(self.states.counter))
         }
 
-        fn blur(&mut self) {
-            self.states.focus = false;
-        }
+        fn blur(&mut self) {}
 
-        fn active(&mut self) {
-            self.states.focus = true;
-        }
+        fn active(&mut self) {}
     }
 }

@@ -141,9 +141,10 @@ mod test {
     use super::*;
     use crate::props::builder::PropsBuilder;
     use crate::props::TextSpanBuilder;
+    use crate::tui::widgets::{BorderType, Borders};
     use crate::GenericPropsBuilder;
 
-    use crate::tui::widgets::{BorderType, Borders};
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_utils_wrap_spans() {
