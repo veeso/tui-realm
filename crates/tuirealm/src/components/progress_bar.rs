@@ -25,7 +25,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{
+    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
+};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -133,7 +135,7 @@ impl ProgressBarPropsBuilder {
                 prog <= 1.0 && prog >= 0.0,
                 "Progress must be in range [0.0,1.0]"
             );
-            props.value = PropValue::Float(prog);
+            props.value = PropPayload::One(PropValue::F64(prog));
         }
         self
     }
@@ -176,7 +178,7 @@ impl Component for ProgressBar {
             };
             // Get percentage
             let percentage: f64 = match self.props.value {
-                PropValue::Float(ratio) => ratio,
+                PropPayload::One(PropValue::F64(ratio)) => ratio,
                 _ => 0.0,
             };
             let div: Block =
@@ -257,6 +259,7 @@ mod test {
     use super::*;
 
     use crossterm::event::{KeyCode, KeyEvent};
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_progress_bar() {
@@ -277,7 +280,10 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(component.props.value, PropValue::Float(0.60));
+        assert_eq!(
+            component.props.value,
+            PropPayload::One(PropValue::F64(0.60))
+        );
         // Get value
         assert_eq!(component.get_state(), Payload::None);
         component.active();

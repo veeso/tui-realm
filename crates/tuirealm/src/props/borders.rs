@@ -66,6 +66,8 @@ mod test {
 
     use super::*;
 
+    use pretty_assertions::assert_eq;
+
     #[test]
     fn test_props_borders() {
         // Default

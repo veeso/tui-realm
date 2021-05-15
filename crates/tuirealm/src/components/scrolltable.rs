@@ -202,7 +202,6 @@ impl ScrollTablePropsBuilder {
 struct OwnStates {
     list_index: usize, // Index of selected item in textarea
     list_len: usize,   // Lines in text area
-    focus: bool,       // Has focus?
 }
 
 impl OwnStates {
@@ -287,7 +286,6 @@ impl Scrolltable {
             states: OwnStates {
                 list_index: 0,
                 list_len: len,
-                focus: false,
             },
         }
     }
@@ -429,16 +427,12 @@ impl Component for Scrolltable {
     /// ### blur
     ///
     /// Blur component
-    fn blur(&mut self) {
-        self.states.focus = false;
-    }
+    fn blur(&mut self) {}
 
     /// ### active
     ///
     /// Active component
-    fn active(&mut self) {
-        self.states.focus = true;
-    }
+    fn active(&mut self) {}
 }
 
 #[cfg(test)]
@@ -448,6 +442,7 @@ mod tests {
     use crate::props::{TableBuilder, TextSpan};
 
     use crossterm::event::KeyEvent;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_scrolltable() {

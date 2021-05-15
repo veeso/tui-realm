@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]
@@ -18,6 +18,9 @@ tui = { version = "0.15.0", default-features = false, features = ["crossterm"] }
 crossterm = { version = "0.19" }
 textwrap = { version = "0.13.4", optional = true }
 unicode-width = { version = "0.1.8", optional = true }
+
+[dev-dependencies]
+pretty_assertions = "0.7.2"
 
 [features]
 with-components = [ "textwrap", "unicode-width" ]

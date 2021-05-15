@@ -42,7 +42,7 @@ use tuirealm::components::{
 };
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::props::{TableBuilder, TextSpan, TextSpanBuilder};
-use tuirealm::{InputType, Msg, PropValue, PropsBuilder, View};
+use tuirealm::{InputType, Msg, PropPayload, PropValue, PropsBuilder, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
 use tui::style::Color;
@@ -498,7 +498,7 @@ fn update(model: &mut Model, view: &mut View, msg: Option<(String, Msg)>) -> Opt
 fn update_progress(view: &mut View) -> Option<(String, Msg)> {
     let props = view.get_props(COMPONENT_PROGBAR).unwrap();
     let new_prog: f64 = match props.value {
-        PropValue::Float(val) => match val + 0.05 > 1.0 {
+        PropPayload::One(PropValue::F64(val)) => match val + 0.05 > 1.0 {
             true => 0.0,
             false => val + 0.05,
         },

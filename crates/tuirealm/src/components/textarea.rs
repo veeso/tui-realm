@@ -437,6 +437,7 @@ mod tests {
     use super::*;
 
     use crossterm::event::KeyEvent;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_textarea() {

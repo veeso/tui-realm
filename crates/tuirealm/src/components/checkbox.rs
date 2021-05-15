@@ -26,7 +26,9 @@ use crate::event::KeyCode;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{
+    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
+};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -136,7 +138,7 @@ impl CheckboxPropsBuilder {
     /// Set initial value for choice
     pub fn with_value(&mut self, choices: Vec<usize>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropValue::VecOfUsize(choices);
+            props.value = PropPayload::Vec(choices.into_iter().map(PropValue::Usize).collect());
         }
         self
     }
@@ -205,11 +207,22 @@ impl OwnStates {
         self.selection.contains(&option)
     }
 
-    /// ### make_choices
+    /// ### set_choices
     ///
     /// Set OwnStates choices from a vector of text spans
-    pub fn make_choices(&mut self, spans: &[TextSpan]) {
+    /// In addition resets current selection and keep index if possible or set it to the first value
+    /// available
+    pub fn set_choices(&mut self, spans: &[TextSpan]) {
         self.choices = spans.iter().map(|x| x.content.clone()).collect();
+        // Clear selection
+        self.selection.clear();
+        // Keep index if possible
+        if self.choice >= self.choices.len() {
+            self.choice = match self.choices.len() {
+                0 => 0,
+                l => l - 1,
+            };
+        }
     }
 }
 
@@ -231,10 +244,17 @@ impl Checkbox {
         // Make states
         let mut states: OwnStates = OwnStates::default();
         // Update choices (vec of TextSpan to String)
-        states.make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
+        states.set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropValue::VecOfUsize(choices) = &props.value {
-            states.selection = choices.clone();
+        if let PropPayload::Vec(choices) = &props.value {
+            states.selection = choices
+                .clone()
+                .iter()
+                .map(|x| match x {
+                    PropValue::Usize(u) => *u,
+                    _ => 0,
+                })
+                .collect();
         }
         Checkbox { props, states }
     }
@@ -305,11 +325,17 @@ impl Component for Checkbox {
         let prev_selection = self.states.selection.clone();
         // Reset choices
         self.states
-            .make_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
+            .set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        self.states.selection.clear();
-        if let PropValue::VecOfUsize(choices) = &props.value {
-            self.states.selection = choices.clone();
+        if let PropPayload::Vec(choices) = &props.value {
+            self.states.selection = choices
+                .clone()
+                .iter()
+                .map(|x| match x {
+                    PropValue::Usize(u) => *u,
+                    _ => 0,
+                })
+                .collect();
         }
         self.props = props;
         // Msg none
@@ -405,6 +431,59 @@ mod test {
     use super::*;
 
     use crossterm::event::{KeyCode, KeyEvent};
+    use pretty_assertions::{assert_eq, assert_ne};
+
+    #[test]
+    fn test_components_checkbox_states() {
+        let mut states: OwnStates = OwnStates::default();
+        assert_eq!(states.choice, 0);
+        assert_eq!(states.choices.len(), 0);
+        assert_eq!(states.selection.len(), 0);
+        let choices: Vec<TextSpan> = vec![
+            TextSpan::from("lemon"),
+            TextSpan::from("strawberry"),
+            TextSpan::from("vanilla"),
+            TextSpan::from("chocolate"),
+        ];
+        states.set_choices(&choices);
+        assert_eq!(states.choice, 0);
+        assert_eq!(states.choices.len(), 4);
+        assert_eq!(states.selection.len(), 0);
+        // Select
+        states.toggle();
+        assert_eq!(states.selection, vec![0]);
+        // Move
+        states.prev_choice();
+        assert_eq!(states.choice, 0);
+        states.next_choice();
+        assert_eq!(states.choice, 1);
+        states.next_choice();
+        assert_eq!(states.choice, 2);
+        states.toggle();
+        assert_eq!(states.selection, vec![0, 2]);
+        // Forward overflow
+        states.next_choice();
+        states.next_choice();
+        assert_eq!(states.choice, 3);
+        states.prev_choice();
+        assert_eq!(states.choice, 2);
+        states.toggle();
+        assert_eq!(states.selection, vec![0]);
+        // has
+        assert_eq!(states.has(0), true);
+        assert_ne!(states.has(2), true);
+        // Update
+        let choices: Vec<TextSpan> = vec![TextSpan::from("lemon"), TextSpan::from("strawberry")];
+        states.set_choices(&choices);
+        assert_eq!(states.choice, 1); // Move to first index available
+        assert_eq!(states.choices.len(), 2);
+        assert_eq!(states.selection.len(), 0);
+        let choices: Vec<TextSpan> = vec![];
+        states.set_choices(&choices);
+        assert_eq!(states.choice, 0); // Move to first index available
+        assert_eq!(states.choices.len(), 0);
+        assert_eq!(states.selection.len(), 0);
+    }
 
     #[test]
     fn test_components_checkbox() {
@@ -435,7 +514,10 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(component.props.value, PropValue::VecOfUsize(vec![1, 5]));
+        assert_eq!(
+            component.props.value,
+            PropPayload::Vec(vec![PropValue::Usize(1), PropValue::Usize(5)])
+        );
         // Verify states
         assert_eq!(component.states.choice, 0);
         assert_eq!(component.states.selection, vec![1, 5]);

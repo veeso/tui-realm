@@ -27,7 +27,7 @@ use crate::event::{KeyCode, KeyModifiers};
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropValue, Props, PropsBuilder, TextParts};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -150,7 +150,7 @@ impl InputPropsBuilder {
     /// Set initial value for component
     pub fn with_value(&mut self, value: String) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropValue::Str(value);
+            props.value = PropPayload::One(PropValue::Str(value));
         }
         self
     }
@@ -290,7 +290,7 @@ impl Input {
         // Initialize states
         let mut states: OwnStates = OwnStates::default();
         // Set state value from props
-        if let PropValue::Str(val) = props.value.clone() {
+        if let PropPayload::One(PropValue::Str(val)) = props.value.clone() {
             for ch in val.chars() {
                 states.append(ch, props.input_type, props.input_len);
             }
@@ -336,7 +336,7 @@ impl Component for Input {
     fn update(&mut self, props: Props) -> Msg {
         self.props = props;
         // Set value from props
-        if let PropValue::Str(val) = self.props.value.clone() {
+        if let PropPayload::One(PropValue::Str(val)) = self.props.value.clone() {
             let prev_input = self.states.input.clone();
             self.states.input = Vec::new();
             self.states.cursor = 0;
@@ -362,7 +362,7 @@ impl Component for Input {
     fn get_props(&self) -> Props {
         // Make properties with value from states
         let mut props: Props = self.props.clone();
-        props.value = PropValue::Str(self.states.get_value());
+        props.value = PropPayload::One(PropValue::Str(self.states.get_value()));
         props
     }
 
@@ -479,6 +479,7 @@ mod tests {
 
     use crate::tui::style::Color;
     use crossterm::event::KeyEvent;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_input_text() {
