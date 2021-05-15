@@ -153,4 +153,42 @@ mod tests {
         assert_eq!(props.value, PropPayload::None);
         assert!(props.texts.spans.is_none());
     }
+
+    #[test]
+    fn test_props_values() {
+        PropPayload::One(PropValue::Usize(2));
+        PropPayload::Tup2((PropValue::Bool(true), PropValue::Usize(128)));
+        PropPayload::Tup3((
+            PropValue::Bool(true),
+            PropValue::Usize(128),
+            PropValue::Str(String::from("omar")),
+        ));
+        PropPayload::Tup4((
+            PropValue::Bool(true),
+            PropValue::U8(128),
+            PropValue::Str(String::from("pippo")),
+            PropValue::Isize(-2),
+        ));
+        PropPayload::Vec(vec![
+            PropValue::U16(1),
+            PropValue::U32(2),
+            PropValue::U64(3),
+            PropValue::U128(4),
+        ]);
+        let mut map: HashMap<String, PropValue> = HashMap::new();
+        map.insert(String::from("a"), PropValue::I8(4));
+        map.insert(String::from("b"), PropValue::I16(-8));
+        map.insert(String::from("c"), PropValue::I32(16));
+        map.insert(String::from("d"), PropValue::I64(-32));
+        map.insert(String::from("e"), PropValue::I128(64));
+        PropPayload::Map(map);
+        PropPayload::Linked(Box::new(PropPayload::One(PropValue::Usize(1))), None);
+        PropPayload::Linked(
+            Box::new(PropPayload::One(PropValue::Usize(1))),
+            Some(Box::new(PropPayload::Tup2((
+                PropValue::Usize(2),
+                PropValue::Usize(4),
+            )))),
+        );
+    }
 }
