@@ -15,11 +15,11 @@ Current version: 0.3.0 (15/05/2021)
 
 - [tui-realm](#tui-realm)
   - [About tui-realm 👑](#about-tui-realm-)
-    - [Why tui-realm 🤔](#why-tui-realm-)
   - [Get started 🏁](#get-started-)
     - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
     - [Create a tui-realm application](#create-a-tui-realm-application)
     - [Run examples](#run-examples)
+    - [Apps using tui-realm)(#apps-using-tui--realm)
   - [Standard components library 🎨](#standard-components-library-)
   - [Guides 🎓](#guides-)
   - [Documentation 📚](#documentation-)
@@ -38,12 +38,6 @@ tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) to simp
 And that's also explains the reason of the name: Realm stands for React and Elm.
 
 Tui-realm also comes with a built-in standard library of components you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
-
-### Why tui-realm 🤔
-
-Personally I didn't start this project from scratch. I've just decided to make a library out of the already existing code in [termscp](https://github.com/veeso/termscp), which I had just finished at the time I started this project. I thought this library could have come handy for somebody.
-
-You might be wondering now how much is this project influenced by the development of termscp. Well, a lot actually, I won't deny this, so don't expect this library to always try to fit the community needs, I'm just providing you with a tool I've made for myself, but that I wanted to share with the community.
 
 ---
 
@@ -85,7 +79,9 @@ Still confused about how tui-realm works? Don't worry, try with the examples:
     cargo run --features="with-components" --example demo
     ```
 
-- [termscp](https://github.com/veeso/termscp): real production implemenetation of tui-realm; just browse the `src/ui/` folder.
+### Apps using tui-realm
+
+- [termscp](https://github.com/veeso/termscp)
 
 ---
 
