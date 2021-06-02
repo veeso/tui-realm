@@ -4,7 +4,6 @@
 //! using the [textwrap](https://docs.rs/textwrap/0.13.4/textwrap/) crate.
 //! The textarea supports multi-style spans and it is scrollable with arrows.
 
-use crate::event::KeyCode;
 /**
  * MIT License
  *
@@ -28,6 +27,7 @@ use crate::event::KeyCode;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use crate::event::KeyCode;
 use crate::props::{BordersProps, Props, PropsBuilder, TextParts, TextSpan};
 use crate::tui::{
     layout::{Corner, Rect},

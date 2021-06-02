@@ -2,7 +2,6 @@
 //!
 //! `Scrolltable` represents a read-only textual table component which is scrollable through arrows
 
-use crate::event::KeyCode;
 /**
  * MIT License
  *
@@ -26,6 +25,7 @@ use crate::event::KeyCode;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use crate::event::KeyCode;
 use crate::props::{BordersProps, Props, PropsBuilder, Table as TextTable, TextParts};
 use crate::tui::{
     layout::{Corner, Rect},

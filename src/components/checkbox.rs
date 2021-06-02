@@ -2,7 +2,6 @@
 //!
 //! `Checkbox` component renders a checkbox group
 
-use crate::event::KeyCode;
 /**
  * MIT License
  *
@@ -26,6 +25,7 @@ use crate::event::KeyCode;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use crate::event::KeyCode;
 use crate::props::{
     BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
 };
