@@ -4,12 +4,12 @@
   <img src="docs/images/tui-realm.svg" width="256" height="256" />
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm.svg)](https://github.com/veeso/tui-realm) [![Downloads](https://img.shields.io/crates/d/tuirealm.svg)](https://crates.io/crates/tuirealm) [![Crates.io](https://img.shields.io/badge/crates.io-v0.3.0-orange.svg)](https://crates.io/crates/tuirealm) [![Docs](https://docs.rs/tuirealm/badge.svg)](https://docs.rs/tuirealm)  
+[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm.svg)](https://github.com/veeso/tui-realm) [![Downloads](https://img.shields.io/crates/d/tuirealm.svg)](https://crates.io/crates/tuirealm) [![Crates.io](https://img.shields.io/badge/crates.io-v0.3.1-orange.svg)](https://crates.io/crates/tuirealm) [![Docs](https://docs.rs/tuirealm/badge.svg)](https://docs.rs/tuirealm)  
 
 [![Build](https://github.com/veeso/tui-realm/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm?branch=main)
 
 Developed by Christian Visintin  
-Current version: 0.3.0 (15/05/2021)
+Current version: 0.3.1 (15/05/2021)
 
 ---
 
@@ -48,13 +48,13 @@ Tui-realm also comes with a built-in standard library of components you may find
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
-tuirealm = "0.3.0"
+tuirealm = "0.3.1"
 ```
 
 or if you want to include the [standard component library](#standard-component-library-)...
 
 ```toml
-tuirealm = { "version" = "0.3.0", features = [ "with-components" ] }
+tuirealm = { "version" = "0.3.1", features = [ "with-components" ] }
 ```
 
 Since this library requires `crossterm` too, you'll also need to add it to your Cargo.toml

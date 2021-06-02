@@ -1,12 +1,19 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.3.1](#031)
   - [0.3.0](#030)
   - [0.2.2](#022)
   - [0.2.1](#021)
   - [0.1.0](#010)
 
 ---
+
+## 0.3.1
+
+Released on 02/06/2021
+
+- Fixed input cursor for UTF8 (multi-bytes characters) ([issue 5](https://github.com/veeso/tui-realm/issues/5))
 
 ## 0.3.0
 
