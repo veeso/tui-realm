@@ -127,7 +127,7 @@ impl RadioPropsBuilder {
         if let Some(props) = self.props.as_mut() {
             props.texts = TextParts::new(
                 label,
-                Some(options.into_iter().map(|x| TextSpan::from(x)).collect()), // Make textSpan from Strings);
+                Some(options.into_iter().map(TextSpan::from).collect()), // Make textSpan from Strings);
             )
         }
         self

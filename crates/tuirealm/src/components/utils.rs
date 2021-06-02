@@ -41,7 +41,7 @@ use unicode_width::UnicodeWidthStr;
 ///
 /// Given a vector of `TextSpans`, it creates a list of `Spans` which mustn't exceed the provided width parameter.
 /// Each `Spans` in the returned `Vec` is a line in the text.
-pub fn wrap_spans<'a>(spans: &Vec<TextSpan>, width: usize, props: &Props) -> Vec<Spans<'a>> {
+pub fn wrap_spans<'a>(spans: &[TextSpan], width: usize, props: &Props) -> Vec<Spans<'a>> {
     // Prepare result (capacity will be at least spans.len)
     let mut res: Vec<Spans> = Vec::with_capacity(spans.len());
     // Prepare environment

@@ -308,7 +308,7 @@ impl Component for Textarea {
                 None => Vec::new(),
                 Some(spans) => super::utils::wrap_spans(spans, area.width as usize, &self.props)
                     .into_iter()
-                    .map(|x| ListItem::new(x))
+                    .map(ListItem::new)
                     .collect(),
             };
             let div: Block = super::utils::get_block(
