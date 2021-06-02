@@ -3,7 +3,6 @@
 //! `Input` represents a read-write input field. This component supports different input types, input length
 //! and handles input events related to cursor position, backspace, canc, ...
 
-use crate::event::{KeyCode, KeyModifiers};
 /**
  * MIT License
  *
@@ -27,6 +26,8 @@ use crate::event::{KeyCode, KeyModifiers};
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use crate::components::utils::calc_utf8_cursor_position;
+use crate::event::{KeyCode, KeyModifiers};
 use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts};
 use crate::tui::{
     layout::Rect,
@@ -257,9 +258,16 @@ impl OwnStates {
     ///
     /// Get value as string to render
     pub fn render_value(&self, itype: InputType) -> String {
+        self.render_value_chars(itype).iter().collect::<String>()
+    }
+
+    /// ### render_value_chars
+    ///
+    /// Render value as a vec of chars
+    pub fn render_value_chars(&self, itype: InputType) -> Vec<char> {
         match itype {
             InputType::Password => (0..self.input.len()).map(|_| '*').collect(),
-            _ => self.get_value(),
+            _ => self.input.clone(),
         }
     }
 
@@ -321,7 +329,12 @@ impl Component for Input {
             render.render_widget(p, area);
             // Set cursor, if focus
             if self.states.focus {
-                let x: u16 = area.x + (self.states.cursor as u16) + 1;
+                let x: u16 = area.x
+                    + calc_utf8_cursor_position(
+                        &self.states.render_value_chars(self.props.input_type)
+                            [0..self.states.cursor],
+                    )
+                    + 1;
                 render.set_cursor(x, area.y + 1);
             }
         }
