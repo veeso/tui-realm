@@ -42,7 +42,7 @@ use tuirealm::components::{
 };
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::props::{TableBuilder, TextSpan, TextSpanBuilder};
-use tuirealm::{InputType, Msg, PropPayload, PropValue, PropsBuilder, View};
+use tuirealm::{InputType, Msg, PropPayload, PropValue, PropsBuilder, Update, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
 use tui::style::Color;
@@ -66,19 +66,18 @@ struct Model {
     quit: bool,
     redraw: bool,
     last_redraw: Instant,
+    view: View,
 }
 
 impl Model {
-    fn new() -> (Model, View) {
+    fn new() -> Model {
         let view: View = init_view();
-        (
-            Model {
-                quit: false,
-                redraw: true,
-                last_redraw: Instant::now(),
-            },
+        Model {
+            quit: false,
+            redraw: true,
+            last_redraw: Instant::now(),
             view,
-        )
+        }
     }
 
     fn quit(&mut self) {
@@ -103,18 +102,18 @@ fn main() {
     // Clear screen
     ctx.clear_screen();
     // Initialize view
-    let (mut model, mut viewptr): (Model, View) = Model::new();
+    let mut model = Model::new();
     // Poll input events
     while !model.quit {
         // read events
         if let Ok(Some(ev)) = ctx.input_hnd.read_event() {
-            let msg = viewptr.on(ev);
+            let msg = model.view.on(ev);
             model.redraw();
-            update(&mut model, &mut viewptr, msg);
+            model.update(msg);
         }
         // If redraw, draw interface
         if model.redraw || model.last_redraw.elapsed() > Duration::from_millis(50) {
-            view(&mut ctx, &viewptr);
+            view(&mut ctx, &model.view);
             model.reset();
         }
         sleep(Duration::from_millis(10));
@@ -437,59 +436,62 @@ fn view(ctx: &mut Context, view: &View) {
     });
 }
 
-fn update(model: &mut Model, view: &mut View, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
-    let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
-    match ref_msg {
-        None => None, // Exit after None
-        Some(msg) => match msg {
-            (COMPONENT_CHECKBOX, &MSG_KEY_TAB) => {
-                view.active(COMPONENT_INPUT);
-                // Update progress
-                let msg = update_progress(view);
-                update(model, view, msg)
-            }
-            (COMPONENT_INPUT, &MSG_KEY_TAB) => {
-                view.active(COMPONENT_RADIO);
-                // Update progress
-                let msg = update_progress(view);
-                update(model, view, msg)
-            }
-            (COMPONENT_RADIO, &MSG_KEY_TAB) => {
-                view.active(COMPONENT_SCROLLTABLE);
-                // Update progress
-                let msg = update_progress(view);
-                update(model, view, msg)
-            }
-            (COMPONENT_SCROLLTABLE, &MSG_KEY_TAB) => {
-                view.active(COMPONENT_TEXTAREA);
-                // Update progress
-                let msg = update_progress(view);
-                update(model, view, msg)
-            }
-            (COMPONENT_TEXTAREA, &MSG_KEY_TAB) => {
-                view.active(COMPONENT_CHECKBOX);
-                // Update progress
-                let msg = update_progress(view);
-                update(model, view, msg)
-            }
-            (comp, Msg::OnSubmit(payload)) => {
-                let props =
-                    label::LabelPropsBuilder::from(view.get_props(COMPONENT_LABEL).unwrap())
-                        .with_text(format!("GOT SUBMIT EVENT FROM '{}': {:?}", comp, payload))
-                        .build();
-                // Report submit
-                view.update(COMPONENT_LABEL, props);
-                // Update progress
-                let msg = update_progress(view);
-                update(model, view, msg)
-            }
-            (_, &MSG_KEY_ESC) => {
-                // Quit
-                model.quit();
-                None
-            }
-            _ => None,
-        },
+impl Update for Model {
+    fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
+        let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
+        match ref_msg {
+            None => None, // Exit after None
+            Some(msg) => match msg {
+                (COMPONENT_CHECKBOX, &MSG_KEY_TAB) => {
+                    self.view.active(COMPONENT_INPUT);
+                    // Update progress
+                    let msg = update_progress(&mut self.view);
+                    self.update(msg)
+                }
+                (COMPONENT_INPUT, &MSG_KEY_TAB) => {
+                    self.view.active(COMPONENT_RADIO);
+                    // Update progress
+                    let msg = update_progress(&mut self.view);
+                    self.update(msg)
+                }
+                (COMPONENT_RADIO, &MSG_KEY_TAB) => {
+                    self.view.active(COMPONENT_SCROLLTABLE);
+                    // Update progress
+                    let msg = update_progress(&mut self.view);
+                    self.update(msg)
+                }
+                (COMPONENT_SCROLLTABLE, &MSG_KEY_TAB) => {
+                    self.view.active(COMPONENT_TEXTAREA);
+                    // Update progress
+                    let msg = update_progress(&mut self.view);
+                    self.update(msg)
+                }
+                (COMPONENT_TEXTAREA, &MSG_KEY_TAB) => {
+                    self.view.active(COMPONENT_CHECKBOX);
+                    // Update progress
+                    let msg = update_progress(&mut self.view);
+                    self.update(msg)
+                }
+                (comp, Msg::OnSubmit(payload)) => {
+                    let props = label::LabelPropsBuilder::from(
+                        self.view.get_props(COMPONENT_LABEL).unwrap(),
+                    )
+                    .with_text(format!("GOT SUBMIT EVENT FROM '{}': {:?}", comp, payload))
+                    .build();
+                    // Report submit
+                    self.view.update(COMPONENT_LABEL, props);
+                    // Update progress
+                    let msg = update_progress(&mut self.view);
+                    self.update(msg)
+                }
+                (_, &MSG_KEY_ESC) => {
+                    // Quit
+                    self.quit();
+                    None
+                }
+                _ => None,
+            },
+        }
     }
 }
 
