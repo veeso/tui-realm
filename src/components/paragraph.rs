@@ -231,7 +231,7 @@ impl Component for Paragraph {
                 None => Vec::new(),
                 Some(spans) => super::utils::wrap_spans(spans, area.width as usize, &self.props)
                     .into_iter()
-                    .map(|x| ListItem::new(x))
+                    .map(ListItem::new)
                     .collect(),
             };
             // Make container div

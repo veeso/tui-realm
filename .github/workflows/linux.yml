@@ -25,4 +25,4 @@ jobs:
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
-        run: cargo clippy -- -Dwarnings
+        run: cargo clippy --all-features -- -Dwarnings
