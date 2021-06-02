@@ -52,7 +52,7 @@
 //!
 //! use tuirealm::components::input;
 //! use tuirealm::props::borders::{BorderType, Borders};
-//! use tuirealm::{InputType, Msg, Payload, PropsBuilder, Value, View};
+//! use tuirealm::{InputType, Msg, Payload, PropsBuilder, Update, Value, View};
 //!
 //! // tui
 //! use tui::backend::CrosstermBackend;
@@ -152,6 +152,7 @@
 //! struct Model {
 //!     quit: bool,
 //!     redraw: bool,
+//!     view: View,
 //! }
 //!
 //! fn main() {
@@ -176,7 +177,7 @@
 //!     // Give focus to our component
 //!     myview.active(MY_COMPONENT);
 //!     // Prepare states
-//!     let mut states: Model = Model { quit: false, redraw: true };
+//!     let mut states: Model = Model { quit: false, redraw: true, view: myview, };
 //!     // Loop until states.quit is false
 //!     /*
 //!     while !states.quit {
@@ -217,26 +218,24 @@
 //!
 //! // -- update
 //!
-//! fn update(
-//!     model: &mut Model,
-//!     view: &mut View,
-//!     msg: Option<(String, Msg)>,
-//! ) -> Option<(String, Msg)> {
-//!     let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
-//!     match ref_msg {
-//!         None => None, // Exit after None
-//!         Some(msg) => match msg {
-//!             (COMPONENT_INPUT, Msg::OnSubmit(Payload::One(Value::Str(input)))) => {
-//!                 eprintln!("USER SUBMITTED {}", input);
-//!                 None
-//!             }
-//!             (_, &MSG_KEY_ESC) => {
-//!                 // Quit on esc
-//!                 model.quit = true;
-//!                 None
-//!             }
-//!             _ => None,
-//!         },
+//! impl Update for Model {
+//!     fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
+//!         let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
+//!         match ref_msg {
+//!             None => None, // Exit after None
+//!             Some(msg) => match msg {
+//!                 (COMPONENT_INPUT, Msg::OnChange(Payload::One(Value::Str(input)))) => {
+//!                     eprintln!("User submitted: {}", input);
+//!                     None
+//!                 }
+//!                 (_, &MSG_KEY_ESC) => {
+//!                     // Quit on esc
+//!                     self.quit = true;
+//!                     None
+//!                 }
+//!                 _ => None,
+//!             },
+//!         }
 //!     }
 //! }
 //!
@@ -468,6 +467,17 @@ pub trait Component {
     ///
     /// Active component; basically give focus
     fn active(&mut self);
+}
+
+// -- update
+
+/// ## Update
+pub trait Update {
+    /// ### update
+    ///
+    /// update the current state handling a message from the view.
+    /// This function may return a Message, so this function has to be intended to be call recursively.
+    fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)>;
 }
 
 #[cfg(test)]

@@ -127,7 +127,7 @@ I will implement everything in a single file in this case and I will reproduce s
 
     use tuirealm::components::{input, label};
     use tuirealm::props::borders::{BorderType, Borders};
-    use tuirealm::{InputType, Msg, Payload, PropsBuilder, Value, View};
+    use tuirealm::{InputType, Msg, Payload, PropsBuilder, Update, Value, View};
     // tui
     use tui::layout::{Constraint, Direction, Layout};
     use tui::style::Color;
@@ -147,14 +147,16 @@ I will implement everything in a single file in this case and I will reproduce s
         quit: bool,           // Becomes true when the user presses <ESC>
         redraw: bool,         // Tells whether to refresh the UI; performance optimization
         last_redraw: Instant, // Last time the ui has been redrawed
+        view: View,
     }
     
     impl Model {
-        fn new() -> Self {
+        fn new(view: View) -> Self {
             Model {
                 quit: false,
                 redraw: true,
                 last_redraw: Instant::now(),
+                view,
             }
         }
     
@@ -219,7 +221,7 @@ I will implement everything in a single file in this case and I will reproduce s
 6. Setup `Model`
 
     ```rust
-    let mut model: Model = Model::new();
+    let mut model: Model = Model::new(myview);
     ```
 
 7. Implement the `view()` function
@@ -241,7 +243,7 @@ I will implement everything in a single file in this case and I will reproduce s
     }
     ```
 
-8. Implement the `update()` function
+8. Implement the `update()` trait
 
     The update function will update the `Model` based on the `Msg` reported by the `View`. The update function has usually the signature we're going to use and I strongly suggest you to use it for two reasons:
 
@@ -249,31 +251,36 @@ I will implement everything in a single file in this case and I will reproduce s
     2. It allows recursive update
 
     ```rust
-    fn update(model: &mut Model, view: &mut View, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
-        let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str   (), msg));
-        match ref_msg {
-            None => None, // Exit after None
-            Some(msg) => match msg {
-                (COMPONENT_INPUT, Msg::OnSubmit(Payload::One(Value::Str(input)))) => {
-                    // Update span
-                    let props =
-                        label::LabelPropsBuilder::from(view.get_props   (COMPONENT_LABEL).unwrap())
-                            .with_text(format!("You typed: '{}'", input))
-                            .build();
-                    // Update label; then call update recursively
-                    let msg = view.update(COMPONENT_LABEL, props)
-                    update(model, view, msg)
-                }
-                (_, &MSG_KEY_ESC) => {
-                    // Quit on esc
-                    model.quit();
-                    None
-                }
-                _ => None,
-            },
+    impl Update for Model {
+        fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
+            let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
+            match ref_msg {
+                None => None, // Exit after None
+                Some(msg) => match msg {
+                    (COMPONENT_INPUT, Msg::OnChange(Payload::One(Value::Str(input)))) => {
+                        // Update span
+                        let props = label::LabelPropsBuilder::from(
+                            self.view.get_props(COMPONENT_LABEL).unwrap(),
+                        )
+                        .with_text(format!("You typed: '{}'", input))
+                        .build();
+                        // Report submit
+                        let msg = self.view.update(COMPONENT_LABEL, props);
+                        self.update(msg)
+                    }
+                    (_, &MSG_KEY_ESC) => {
+                        // Quit on esc
+                        self.quit();
+                        None
+                    }
+                    _ => None,
+                },
+            }
         }
     }
     ```
+
+    You don't have to use the `Update` trait. If you want you can implement an update function by yourself.
 
 9. Run the GUI
 
