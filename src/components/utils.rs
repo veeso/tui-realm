@@ -135,6 +135,14 @@ pub fn get_block<'a>(props: &BordersProps, title: &Option<String>, focus: bool) 
     }
 }
 
+/// ### calc_utf8_cursor_position
+///
+/// Calculate the UTF8 compliant position for the cursor given the characters preceeding the cursor position.
+/// Use this function to calculate cursor position whenever you want to handle UTF8 texts with cursors
+pub fn calc_utf8_cursor_position(chars: &[char]) -> u16 {
+    chars.iter().collect::<String>().width() as u16
+}
+
 #[cfg(test)]
 mod test {
 
@@ -213,5 +221,20 @@ mod test {
         };
         get_block(&props, &Some(String::from("title")), true);
         get_block(&props, &None, false);
+    }
+
+    #[test]
+    fn test_components_utils_calc_utf8_cursor_position() {
+        let chars: Vec<char> = vec!['v', 'e', 'e', 's', 'o'];
+        // Entire
+        assert_eq!(calc_utf8_cursor_position(chars.as_slice()), 5);
+        assert_eq!(calc_utf8_cursor_position(&chars[0..3]), 3);
+        // With special characters
+        let chars: Vec<char> = vec!['я', ' ', 'х', 'о', 'ч', 'у', ' ', 'с', 'п', 'а', 'т', 'ь'];
+        assert_eq!(calc_utf8_cursor_position(&chars[0..6]), 6);
+        let chars: Vec<char> = vec!['H', 'i', '😄'];
+        assert_eq!(calc_utf8_cursor_position(chars.as_slice()), 4);
+        let chars: Vec<char> = vec!['我', '之', '😄'];
+        assert_eq!(calc_utf8_cursor_position(chars.as_slice()), 6);
     }
 }
