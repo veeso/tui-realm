@@ -155,7 +155,7 @@ fn init_view() -> View {
             input::InputPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
-                .with_input(InputType::Password)
+                .with_input(InputType::Text)
                 .with_label(String::from("Type in your password"))
                 .build(),
         )),
