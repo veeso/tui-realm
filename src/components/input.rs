@@ -495,6 +495,42 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
+    fn test_components_input_states() {
+        let mut states: OwnStates = OwnStates::default();
+        states.append('a', InputType::Text, Some(3));
+        assert_eq!(states.input, vec!['a']);
+        states.append('b', InputType::Text, Some(3));
+        assert_eq!(states.input, vec!['a', 'b']);
+        states.append('c', InputType::Text, Some(3));
+        assert_eq!(states.input, vec!['a', 'b', 'c']);
+        // Reached length
+        states.append('d', InputType::Text, Some(3));
+        assert_eq!(states.input, vec!['a', 'b', 'c']);
+        // Push char to numbers
+        states.append('d', InputType::Number, None);
+        assert_eq!(states.input, vec!['a', 'b', 'c']);
+        // move cursor
+        // decr cursor
+        states.decr_cursor();
+        assert_eq!(states.cursor, 2);
+        states.cursor = 1;
+        states.decr_cursor();
+        assert_eq!(states.cursor, 0);
+        states.decr_cursor();
+        assert_eq!(states.cursor, 0);
+        // Incr
+        states.incr_cursor();
+        assert_eq!(states.cursor, 1);
+        states.incr_cursor();
+        assert_eq!(states.cursor, 2);
+        states.incr_cursor();
+        assert_eq!(states.cursor, 3);
+        // Render value
+        assert_eq!(states.render_value(InputType::Text).as_str(), "abc");
+        assert_eq!(states.render_value(InputType::Password).as_str(), "***");
+    }
+
+    #[test]
     fn test_components_input_text() {
         // Instantiate Input with value
         let mut component: Input = Input::new(
