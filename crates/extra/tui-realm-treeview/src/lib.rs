@@ -163,7 +163,8 @@ impl Node {
 #[derive(Debug)]
 struct OwnStates<'a> {
     focus: bool,
-    tree: TuiTree<'a>,
+    tree: Tree,
+    tui_tree: TuiTree<'a>,
 }
 
 impl<'a> OwnStates<'a> {
@@ -178,12 +179,16 @@ impl<'a> OwnStates<'a> {
     }
 }
 
-impl<'a> From<PropPayload> for TuiTree<'a> {
+impl From<PropPayload> for Tree {
     /// ### PropPayload to TuiTree
     ///
     /// The PropPayload is a series of `Linked` where item is a Tuple made up of `(id, label, parent)`
     /// and next element is the following element in root
     fn from(props: PropPayload) -> Self {}
+}
+
+impl<'a> From<&Tree> for TuiTree<'a> {
+    fn from(tree: &Tree) -> Self {}
 }
 
 // -- props
