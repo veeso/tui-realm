@@ -172,9 +172,11 @@ impl<'a> OwnStates<'a> {
     ///
     /// Instantiates a new OwnStates from tree data
     pub fn new(tree: PropPayload) -> Self {
+        let tree: Tree = Tree::from(tree);
         Self {
             focus: false,
-            tree: TuiTree::from(tree),
+            tui_tree: TuiTree::from(&tree),
+            tree,
         }
     }
 }
