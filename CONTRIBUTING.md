@@ -6,6 +6,7 @@
     - [Bug reports](#bug-reports)
     - [Feature requests](#feature-requests)
   - [Preferred contributions](#preferred-contributions)
+  - [Regarding new components](#regarding-new-components)
   - [Pull Request Process](#pull-request-process)
     - [Software guidelines](#software-guidelines)
 
@@ -72,6 +73,31 @@ At the moment, these kind of contributions are more appreciated and should be pr
 
 For any other kind of contribution, especially for new features, please submit a new issue first.
 
+## Regarding new components
+
+Regarding new components to implement in the standard library, consider that, as written in the readme, the standard library:
+
+> is a library of components I thought would have been useful for most of the applications
+
+which means that these components *should* be:
+
+- **general purpose**
+- not too much specific for a certain kind of application
+- possibly customisables
+- key bindings should be a few and intuitive for most of the users
+
+If you think the component you have in mind **satisfy these requirements**:
+
+1. Open an issue regarding the component you'd like to see implemented
+2. Wait for feedback
+3. If the feedback is positive, wait for implementation or ask to implement it by yourself (really appreciated 😉)
+
+If you think the component you have in mind **doesn't satisfy these requirements or you've received a negative feedback**:
+
+1. Don't get mad, implement a new rust crate with your component, if you think it might be useful for other users
+2. Once you've finished it and it works fine, submit an issue using the `new_app_component` template, reporting the information needed
+3. Your component will now be added to the readme of the project under [Community components](README.md#community-components-)
+
 ## Pull Request Process
 
 Let's make it simple and clear:
@@ -100,4 +126,4 @@ In addition to the process described for the PRs, I've also decided to introduce
 ---
 
 Thank you for any contribution!  
-Christian Visintin
+Christian `veeso` Visintin

@@ -21,6 +21,7 @@ Current version: 0.3.1 (02/06/2021)
     - [Run examples](#run-examples)
     - [Apps using tui-realm](#apps-using-tui-realm)
   - [Standard components library 🎨](#standard-components-library-)
+  - [Community components 🏘️](#community-components-️)
   - [Guides 🎓](#guides-)
   - [Documentation 📚](#documentation-)
   - [About other backends](#about-other-backends)
@@ -83,11 +84,13 @@ Still confused about how tui-realm works? Don't worry, try with the examples:
 
 - [termscp](https://github.com/veeso/termscp)
 
+Want to add yours? Open an issue using the `New app/component` template 😄
+
 ---
 
 ## Standard components library 🎨
 
-Tui-realm comes with an optional standard library of components I thought may be useful for most of the applications.
+Tui-realm comes with an optional standard library of components I thought would have been useful for most of the applications.
 If you want to use it, just enable the `with-components` feature in your `Cargo.toml`.
 
 For each component, the standard library provides a `PropsBuilder` in the same module (e.g. `input::Input => input::InputPropsBuilder`), which provides methods to set only the properties actually used by the component.
@@ -99,6 +102,14 @@ cargo run --features="with-components" --example gallery
 ```
 
 If you want a super-detailed guide about components check out the [components guide](docs/std-components.md).
+
+## Community components 🏘️
+
+These components are not included in tui-realm, but have been developed by other users. I like advertising other's contents, so here you can find a list of components you may find useful for your next tui-realm project 💜.
+
+- ...
+
+Want to add yours? Open an issue using the `New app/component` template 😄
 
 ---
 
