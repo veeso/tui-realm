@@ -124,7 +124,7 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 
 ## Documentation 📚
 
-The developer documentation can be found on Rust Docs at <https://docs.rs/tui-realm>
+The developer documentation can be found on Rust Docs at <https://docs.rs/tuirealm>
 
 ---
 
