@@ -186,14 +186,113 @@ impl From<PropPayload> for Tree {
     ///
     /// The PropPayload is a series of `Linked` where item is a Tuple made up of `(id, label, parent)`
     /// and next element is the following element in root
-    fn from(props: PropPayload) -> Self {}
+    fn from(props: PropPayload) -> Self {
+        let (mut root, mut next): (Node, Option<Box<PropPayload>>) = match props {
+            PropPayload::Linked(root, next) => match (*root, next) {
+                (
+                    PropPayload::Tup3((
+                        PropValue::Str(id),
+                        PropValue::Str(label),
+                        PropValue::Str(_),
+                    )),
+                    next,
+                ) => (Node::new(id.as_str(), label.as_str()), next),
+                _ => panic!("Invalid payload"),
+            },
+            _ => panic!("Invalid payload"),
+        };
+        // Now for each next do the same
+        while next.is_some() {
+            match props {
+                PropPayload::Linked(node, follows) => match (*node, follows) {
+                    (
+                        PropPayload::Tup3((
+                            PropValue::Str(id),
+                            PropValue::Str(label),
+                            PropValue::Str(_),
+                        )),
+                        follows,
+                    ) => {
+                        // Get parent
+                        let mut parent: &mut Node = root
+                            .query_mut(id.as_str())
+                            .expect("Parent node doesn't exist");
+                        // Push node to parent
+                        parent.add_child(Node::new(id.as_str(), label.as_str()));
+                        // Set next
+                        next = follows;
+                    }
+                    _ => panic!("Invalid syntax"),
+                },
+                _ => panic!("Invalid payload"),
+            }
+        }
+        Tree::new(root)
+    }
 }
 
 impl<'a> From<&Tree> for TuiTree<'a> {
     fn from(tree: &Tree) -> Self {}
 }
 
+impl From<&Node> for PropPayload {
+    fn from(root: &Node) -> Self {}
+}
+
 // -- props
+
+/// ## TreeViewPropsBuilder
+///
+/// Tree View properties builder
+pub struct TreeViewPropsBuilder {
+    props: Option<Props>,
+}
+
+impl Default for TreeViewPropsBuilder {
+    fn default() -> Self {
+        Self {
+            props: Some(Props::default()),
+        }
+    }
+}
+
+impl PropsBuilder for TreeViewPropsBuilder {
+    fn build(&mut self) -> Props {
+        self.props.take().unwrap()
+    }
+
+    fn hidden(&mut self) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.visible = false;
+        }
+        self
+    }
+
+    fn visible(&mut self) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.visible = true;
+        }
+        self
+    }
+}
+
+impl From<Props> for TreeViewPropsBuilder {
+    fn from(props: Props) -> Self {
+        TreeViewPropsBuilder { props: Some(props) }
+    }
+}
+
+impl TreeViewPropsBuilder {
+    /// ### with_tree
+    ///
+    /// Sets the tree for Props builder
+    pub fn with_tree(&mut self, root: &Node) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.value = PropPayload::from(root);
+        }
+        self
+    }
+}
 
 // -- component
 
