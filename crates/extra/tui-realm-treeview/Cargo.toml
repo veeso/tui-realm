@@ -1,0 +1,26 @@
+[package]
+name = "tui-realm-treeview"
+version = "0.1.0"
+authors = ["Christian Visintin"]
+edition = "2018"
+categories = ["command-line-utilities"]
+description = "Treeview component for tui-realm"
+documentation = "https://docs.rs/tui-realm-treeview"
+homepage = "https://github.com/veeso/tui-realm-treeview"
+include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+keywords = ["tui", "terminal"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/veeso/tui-realm-treeview"
+
+[dependencies]
+tuirealm = "0.3.1"
+tui-tree-widget = "0.6.0"
+
+[dev-dependencies]
+crossterm = "0.19.0"
+pretty_assertions = "0.7.2"
+
+[[example]]
+name = "demo"
+path = "examples/demo.rs"
