@@ -13,6 +13,12 @@
 //!
 
 #![doc(html_playground_url = "https://play.rust-lang.org")]
+#![doc(
+    html_favicon_url = "https://raw.githubusercontent.com/veeso/tui-realm-treeview/main/docs/images/cargo/tui-realm-treeview-128.png"
+)]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm-treeview/main/docs/images/cargo/tui-realm-treeview-512.png"
+)]
 
 /**
  * MIT License
