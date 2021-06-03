@@ -46,6 +46,7 @@
 extern crate tui_tree_widget;
 extern crate tuirealm;
 
+use tui_tree_widget::{Tree as TuiTree, TreeItem as TuiTreeItem, TreeState as TuiTreeState};
 use tuirealm::{Component, PropPayload, PropValue, Props, PropsBuilder};
 
 // -- structs
@@ -64,6 +65,20 @@ impl Tree {
     /// Instantiates a new `Tree`
     pub fn new(root: Node) -> Self {
         Self { root }
+    }
+
+    /// ### root
+    ///
+    /// Returns a reference to the root node
+    pub fn root(&self) -> &Node {
+        &self.root
+    }
+
+    /// ### root_mut
+    ///
+    /// Returns a mutable reference to the root node
+    pub(self) fn root_mut(&mut self) -> &mut Node {
+        &mut self.root
     }
 
     /// ### query
@@ -116,13 +131,20 @@ impl Node {
     ///
     /// Search for `id` inside Node's children (or is itself)
     pub fn query(&self, id: &str) -> Option<&Self> {
+        self.query_mut(id).as_deref()
+    }
+
+    /// ### query_mut
+    ///
+    /// Returns a mutable reference to a Node
+    pub(self) fn query_mut(&mut self, id: &str) -> Option<&mut Self> {
         if self.id.as_str() == id {
-            Some(&self)
+            Some(&mut self)
         } else {
             // Recurse search
             self.children
-                .iter()
-                .map(|x| x.query(id))
+                .iter_mut()
+                .map(|x| x.query_mut(id))
                 .filter(|x| x.is_some())
                 .flatten()
                 .next()
@@ -134,6 +156,35 @@ impl Node {
 // TODO: from prop payload
 
 // -- states
+
+/// ## OwnStates
+///
+/// TreeView states
+#[derive(Debug)]
+struct OwnStates<'a> {
+    focus: bool,
+    tree: TuiTree<'a>,
+}
+
+impl<'a> OwnStates<'a> {
+    /// ### new
+    ///
+    /// Instantiates a new OwnStates from tree data
+    pub fn new(tree: PropPayload) -> Self {
+        Self {
+            focus: false,
+            tree: TuiTree::from(tree),
+        }
+    }
+}
+
+impl<'a> From<PropPayload> for TuiTree<'a> {
+    /// ### PropPayload to TuiTree
+    ///
+    /// The PropPayload is a series of `Linked` where item is a Tuple made up of `(id, label, parent)`
+    /// and next element is the following element in root
+    fn from(props: PropPayload) -> Self {}
+}
 
 // -- props
 
@@ -163,10 +214,11 @@ mod tests {
                     ),
                 ),
         );
-        assert_eq!(tree.root.id.as_str(), "/");
-        assert_eq!(tree.root.label.as_str(), "/");
-        assert_eq!(tree.root.children.len(), 2);
-        let bin: &Node = &tree.root.children[0];
+        let root: &Node = tree.root();
+        assert_eq!(root.id.as_str(), "/");
+        assert_eq!(root.label.as_str(), "/");
+        assert_eq!(root.children.len(), 2);
+        let bin: &Node = &root.children[0];
         assert_eq!(bin.id.as_str(), "/bin");
         assert_eq!(bin.label.as_str(), "bin/");
         assert_eq!(bin.children.len(), 2);
@@ -189,11 +241,14 @@ mod tests {
         );
         assert!(tree.query("ommlar").is_none());
         // -- With children
-        let tree: Tree = Tree::new(
+        let mut tree: Tree = Tree::new(
             Node::new("a", "a").with_children(vec![Node::new("a1", "a1"), Node::new("a2", "a2")]),
         );
         assert!(tree.query("a").is_some());
         assert!(tree.query("a1").is_some());
         assert!(tree.query("a2").is_some());
+        // mut
+        assert!(tree.root_mut().query_mut("a1").is_some());
+        assert_eq!(tree.root_mut().id.as_str(), "a");
     }
 }
