@@ -188,5 +188,12 @@ mod tests {
             "/home/omar/changelog.md"
         );
         assert!(tree.query("ommlar").is_none());
+        // -- With children
+        let tree: Tree = Tree::new(
+            Node::new("a", "a").with_children(vec![Node::new("a1", "a1"), Node::new("a2", "a2")]),
+        );
+        assert!(tree.query("a").is_some());
+        assert!(tree.query("a1").is_some());
+        assert!(tree.query("a2").is_some());
     }
 }
