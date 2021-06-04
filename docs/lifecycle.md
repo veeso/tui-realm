@@ -114,7 +114,7 @@ pub enum Payload {
     Tup4((Value, Value, Value, Value)),
     Vec(Vec<Value>),
     Map(HashMap<String, Value>),
-    Linked(Box<Payload>, Option<Box<Payload>>),
+    Linked(LinkedList<Payload>),
     None,
 }
 ```
