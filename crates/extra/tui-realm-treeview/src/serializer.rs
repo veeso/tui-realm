@@ -26,8 +26,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::{Node, PropPayload, PropValue, Tree, TuiTree, TuiTreeItem};
-use std::{collections::LinkedList, slice::IterMut};
+use super::{Node, PropPayload, PropValue, StatefulTree, Tree, TuiTreeItem};
+use std::collections::LinkedList;
 
 impl Node {
     // -- conversion :: prop payload -> tree
@@ -99,6 +99,54 @@ impl Node {
     }
 }
 
+impl<'a> Node {
+    /// ### to_tui_tree_item
+    ///
+    /// Converts a Node into a TuiTreeitem
+    fn to_tui_tree_item(&self) -> TuiTreeItem<'a> {
+        match self.children.is_empty() {
+            true => TuiTreeItem::new_leaf(self.label.clone()),
+            false => {
+                let children: Vec<TuiTreeItem> =
+                    self.children.iter().map(|x| x.to_tui_tree_item()).collect();
+                TuiTreeItem::new(self.label.clone(), children)
+            }
+        }
+    }
+}
+
+impl From<PropPayload> for Tree {
+    /// ### PropPayload to TuiTree
+    ///
+    /// The PropPayload is a series of `Linked` where item is a Tuple made up of `(id, label, parent)`
+    /// and next element is the following element in root
+    fn from(props: PropPayload) -> Self {
+        let mut list: LinkedList<PropPayload> = match props {
+            PropPayload::Linked(list) => list,
+            _ => panic!("Invalid payload"),
+        };
+        let mut root: Node = match list.pop_front() {
+            Some(PropPayload::Tup3((PropValue::Str(id), PropValue::Str(label), _))) => {
+                Node::new(id, label)
+            }
+            _ => panic!("Invalid root"),
+        };
+        // Fill tree
+        root.from_prop_payload(list);
+        Tree::new(root)
+    }
+}
+
+impl<'a> From<&Tree> for StatefulTree<'a> {
+    fn from(tree: &Tree) -> Self {
+        let root: &Node = tree.root();
+        StatefulTree::new().with_items(vec![TuiTreeItem::new(
+            root.id.clone(),
+            vec![root.to_tui_tree_item()],
+        )])
+    }
+}
+
 #[cfg(test)]
 mod test {
 
@@ -167,5 +215,25 @@ mod test {
         let mut linked_list: LinkedList<PropPayload> = LinkedList::new();
         linked_list.push_back(PropPayload::One(PropValue::Str("pippo".to_string())));
         Tree::from(PropPayload::Linked(linked_list));
+    }
+
+    #[test]
+    fn test_serializer_tree_to_stateful_tree() {
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .add_child(
+                    Node::new("/bin", "bin/")
+                        .add_child(Node::new("/bin/ls", "ls"))
+                        .add_child(Node::new("/bin/pwd", "pwd")),
+                )
+                .add_child(
+                    Node::new("/home", "home/").add_child(
+                        Node::new("/home/omar", "omar/")
+                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        StatefulTree::from(&tree);
     }
 }

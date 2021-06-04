@@ -48,10 +48,12 @@ extern crate tuirealm;
 
 // modules
 mod serializer;
+mod stateful_tree;
+
+use stateful_tree::StatefulTree;
 
 // deps
-use std::collections::LinkedList;
-use tui_tree_widget::{Tree as TuiTree, TreeItem as TuiTreeItem, TreeState as TuiTreeState};
+use tui_tree_widget::{TreeItem as TuiTreeItem, TreeState as TuiTreeState};
 use tuirealm::{Component, PropPayload, PropValue, Props, PropsBuilder};
 
 // -- structs
@@ -196,7 +198,7 @@ impl Node {
 struct OwnStates<'a> {
     focus: bool,
     tree: Tree,
-    tui_tree: TuiTree<'a>,
+    tui_tree: StatefulTree<'a>,
 }
 
 impl<'a> OwnStates<'a> {
@@ -207,38 +209,9 @@ impl<'a> OwnStates<'a> {
         let tree: Tree = Tree::from(tree);
         Self {
             focus: false,
-            tui_tree: TuiTree::from(&tree),
+            tui_tree: StatefulTree::from(&tree),
             tree,
         }
-    }
-}
-
-impl From<PropPayload> for Tree {
-    /// ### PropPayload to TuiTree
-    ///
-    /// The PropPayload is a series of `Linked` where item is a Tuple made up of `(id, label, parent)`
-    /// and next element is the following element in root
-    fn from(props: PropPayload) -> Self {
-        let mut list: LinkedList<PropPayload> = match props {
-            PropPayload::Linked(list) => list,
-            _ => panic!("Invalid payload"),
-        };
-        let mut root: Node = match list.pop_front() {
-            Some(PropPayload::Tup3((PropValue::Str(id), PropValue::Str(label), _))) => {
-                Node::new(id, label)
-            }
-            _ => panic!("Invalid root"),
-        };
-        // Fill tree
-        root.from_prop_payload(list);
-        Tree::new(root)
-    }
-}
-
-impl<'a> From<&Tree> for TuiTree<'a> {
-    fn from(tree: &Tree) -> Self {
-        // TODO: implement
-        TuiTree::new(vec![])
     }
 }
 
