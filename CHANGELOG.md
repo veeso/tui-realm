@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.3.2](#032)
   - [0.3.1](#031)
   - [0.3.0](#030)
   - [0.2.2](#022)
@@ -8,6 +9,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 0.3.2
+
+Released on 04/06/2021
+
+- Updated `Linked` in `PropPayload` and `Payload` with a `LinkedList`
 
 ## 0.3.1
 

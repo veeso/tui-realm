@@ -38,7 +38,7 @@ pub use borders::{Borders, BordersProps};
 pub use builder::{GenericPropsBuilder, PropsBuilder};
 pub use texts::{Table, TableBuilder, TextParts, TextSpan, TextSpanBuilder};
 
-use std::collections::HashMap;
+use std::collections::{HashMap, LinkedList};
 
 // -- Props
 
@@ -91,7 +91,7 @@ pub enum PropPayload {
     Tup4((PropValue, PropValue, PropValue, PropValue)),
     Vec(Vec<PropValue>),
     Map(HashMap<String, PropValue>),
-    Linked(Box<PropPayload>, Option<Box<PropPayload>>),
+    Linked(LinkedList<PropPayload>),
     None,
 }
 
@@ -182,13 +182,12 @@ mod tests {
         map.insert(String::from("d"), PropValue::I64(-32));
         map.insert(String::from("e"), PropValue::I128(64));
         PropPayload::Map(map);
-        PropPayload::Linked(Box::new(PropPayload::One(PropValue::Usize(1))), None);
-        PropPayload::Linked(
-            Box::new(PropPayload::One(PropValue::Usize(1))),
-            Some(Box::new(PropPayload::Tup2((
-                PropValue::Usize(2),
-                PropValue::Usize(4),
-            )))),
-        );
+        let mut link: LinkedList<PropPayload> = LinkedList::new();
+        link.push_back(PropPayload::One(PropValue::Usize(1)));
+        link.push_back(PropPayload::Tup2((
+            PropValue::Usize(2),
+            PropValue::Usize(4),
+        )));
+        PropPayload::Linked(link);
     }
 }

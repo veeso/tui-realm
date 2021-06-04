@@ -8,12 +8,12 @@
 //! ### Adding `tui-realm` as dependency
 //!
 //! ```toml
-//! tuirealm = "0.3.1"
+//! tuirealm = "0.3.2"
 //! ```
 //! or if you want the std components library
 //!
 //! ```toml
-//! tuirealm = { version = "0.3.1", features = [ "with-components" ] }
+//! tuirealm = { version = "0.3.2", features = [ "with-components" ] }
 //! ```
 //!
 //! Since the library requires crossterm as backend, you will be required also to put `crossterm` as dependency:
@@ -341,7 +341,7 @@
 extern crate tui as tuirs;
 
 // Ext
-use std::collections::HashMap;
+use std::collections::{HashMap, LinkedList};
 use std::io::Stdout;
 use tuirs::{backend::CrosstermBackend, layout::Rect, Frame};
 
@@ -393,7 +393,7 @@ pub enum Payload {
     Tup4((Value, Value, Value, Value)),
     Vec(Vec<Value>),
     Map(HashMap<String, Value>),
-    Linked(Box<Payload>, Option<Box<Payload>>),
+    Linked(LinkedList<Payload>),
     None,
 }
 
@@ -513,11 +513,10 @@ mod test {
         map.insert(String::from("d"), Value::I64(-32));
         map.insert(String::from("e"), Value::I128(64));
         Payload::Map(map);
-        Payload::Linked(Box::new(Payload::One(Value::Usize(1))), None);
-        Payload::Linked(
-            Box::new(Payload::One(Value::Usize(1))),
-            Some(Box::new(Payload::Tup2((Value::Usize(2), Value::Usize(4))))),
-        );
+        let mut link: LinkedList<Payload> = LinkedList::new();
+        link.push_back(Payload::One(Value::Usize(1)));
+        link.push_back(Payload::Tup2((Value::Usize(2), Value::Usize(4))));
+        Payload::Linked(link);
         drop(Payload::None);
     }
 }
