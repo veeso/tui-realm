@@ -27,7 +27,7 @@
  * SOFTWARE.
  */
 use super::{Node, PropPayload, PropValue, Tree, TuiTree, TuiTreeItem};
-use std::slice::IterMut;
+use std::{collections::LinkedList, slice::IterMut};
 
 impl Node {
     // -- conversion :: prop payload -> tree
@@ -37,33 +37,25 @@ impl Node {
     /// Fill a tree using prop payload recursively
     pub(crate) fn from_prop_payload(
         &mut self,
-        payload: Option<Box<PropPayload>>,
+        mut list: LinkedList<PropPayload>,
     ) -> Option<Box<PropPayload>> {
-        match payload {
-            Some(payload) => match *payload {
-                PropPayload::Linked(node, next) => match (*node, next) {
-                    (
-                        PropPayload::Tup3((
-                            PropValue::Str(id),
-                            PropValue::Str(label),
-                            PropValue::Str(parent_id),
-                        )),
-                        next,
-                    ) => {
-                        // Get parent
-                        let parent: &mut Node = self
-                            .query_mut(parent_id.as_str())
-                            .expect("Parent node doesn't exist");
-                        // Push node to parent
-                        parent.children.push(Node::new(id, label));
-                        // Set next
-                        self.from_prop_payload(next)
-                    }
-                    _ => panic!("Invalid syntax"),
-                },
-                _ => panic!("Invalid payload"),
-            },
+        match list.pop_front() {
+            Some(PropPayload::Tup3((
+                PropValue::Str(id),
+                PropValue::Str(label),
+                PropValue::Str(parent),
+            ))) => {
+                // Get parent
+                let parent: &mut Node = self
+                    .query_mut(parent.as_str())
+                    .expect("Parent node doesn't exist");
+                // Push node to parent
+                parent.children.push(Node::new(id, label));
+                // Set next
+                self.from_prop_payload(list)
+            }
             None => None,
+            _ => panic!("Invalid payload"),
         }
     }
 
@@ -75,25 +67,22 @@ impl Node {
     /// This is achieved using the `Vec` variant.
     /// So basically is a flat tree
     pub(crate) fn to_prop_payload(&self, depth: usize, parent: &str) -> PropPayload {
-        let mut items: Vec<PropPayload> = Self::to_payload_vec(self, depth, parent);
-        // Convert items into Linked payload
-        let mut it: IterMut<PropPayload> = items.iter_mut();
-        PropPayload::Linked(
-            Box::new(it.next().unwrap().clone()),
-            Self::get_next_payload(it).map(Box::new),
-        )
+        PropPayload::Linked(Self::to_payload_list(self, depth, parent))
     }
 
-    fn to_payload_vec(&self, depth: usize, parent: &str) -> Vec<PropPayload> {
+    /// ### to_payload_list
+    ///
+    /// Iterates over tree, to fill the linked list
+    fn to_payload_list(&self, depth: usize, parent: &str) -> LinkedList<PropPayload> {
         let this: PropPayload = Self::to_prop_value(self, parent);
-        let mut items: Vec<PropPayload> = Vec::with_capacity(self.count());
+        let mut items: LinkedList<PropPayload> = LinkedList::new();
         // Push this
-        items.push(this);
+        items.push_back(this);
         // Push children
         if depth > 0 {
             self.children
                 .iter()
-                .for_each(|x| items.extend(Self::to_payload_vec(x, depth - 1, self.id.as_str())));
+                .for_each(|x| items.extend(Self::to_payload_list(x, depth - 1, self.id.as_str())));
         }
         items
     }
@@ -107,17 +96,6 @@ impl Node {
             PropValue::Str(self.label.to_string()),
             PropValue::Str(parent.to_string()),
         ))
-    }
-    /// ### get_next_payload
-    ///
-    /// Get next payload in item iterators
-    fn get_next_payload(mut it: IterMut<PropPayload>) -> Option<PropPayload> {
-        it.next().map(|item| {
-            PropPayload::Linked(
-                Box::new(item.clone()),
-                Self::get_next_payload(it).map(Box::new),
-            )
-        })
     }
 }
 
@@ -186,9 +164,8 @@ mod test {
     #[test]
     #[should_panic]
     fn test_serializer_bad_props_value() {
-        Tree::from(PropPayload::Linked(
-            Box::new(PropPayload::One(PropValue::Str("pippo".to_string()))),
-            None,
-        ));
+        let mut linked_list: LinkedList<PropPayload> = LinkedList::new();
+        linked_list.push_back(PropPayload::One(PropValue::Str("pippo".to_string())));
+        Tree::from(PropPayload::Linked(linked_list));
     }
 }

@@ -14,7 +14,7 @@ readme = "README.md"
 repository = "https://github.com/veeso/tui-realm-treeview"
 
 [dependencies]
-tuirealm = "^0.3.1"
+tuirealm = "^0.3.2"
 tui-tree-widget = "^0.6.0"
 
 [dev-dependencies]

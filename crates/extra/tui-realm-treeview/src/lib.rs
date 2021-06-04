@@ -50,6 +50,7 @@ extern crate tuirealm;
 mod serializer;
 
 // deps
+use std::collections::LinkedList;
 use tui_tree_widget::{Tree as TuiTree, TreeItem as TuiTreeItem, TreeState as TuiTreeState};
 use tuirealm::{Component, PropPayload, PropValue, Props, PropsBuilder};
 
@@ -218,22 +219,18 @@ impl From<PropPayload> for Tree {
     /// The PropPayload is a series of `Linked` where item is a Tuple made up of `(id, label, parent)`
     /// and next element is the following element in root
     fn from(props: PropPayload) -> Self {
-        let (mut root, next): (Node, Option<Box<PropPayload>>) = match props {
-            PropPayload::Linked(root, next) => match (*root, next) {
-                (
-                    PropPayload::Tup3((
-                        PropValue::Str(id),
-                        PropValue::Str(label),
-                        PropValue::Str(_),
-                    )),
-                    next,
-                ) => (Node::new(id, label), next),
-                _ => panic!("Invalid payload"),
-            },
+        let mut list: LinkedList<PropPayload> = match props {
+            PropPayload::Linked(list) => list,
             _ => panic!("Invalid payload"),
         };
+        let mut root: Node = match list.pop_front() {
+            Some(PropPayload::Tup3((PropValue::Str(id), PropValue::Str(label), _))) => {
+                Node::new(id, label)
+            }
+            _ => panic!("Invalid root"),
+        };
         // Fill tree
-        root.from_prop_payload(next);
+        root.from_prop_payload(list);
         Tree::new(root)
     }
 }
