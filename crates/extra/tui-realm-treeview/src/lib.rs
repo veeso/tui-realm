@@ -46,6 +46,10 @@
 extern crate tui_tree_widget;
 extern crate tuirealm;
 
+// modules
+mod serializer;
+
+// deps
 use tui_tree_widget::{Tree as TuiTree, TreeItem as TuiTreeItem, TreeState as TuiTreeState};
 use tuirealm::{Component, PropPayload, PropValue, Props, PropsBuilder};
 
@@ -96,13 +100,14 @@ impl Tree {
 pub struct Node {
     id: String,    // Must uniquely identify the node in the tree
     label: String, // The text to display associated to the node
-    children: Vec<Node>,
+    pub(crate) children: Vec<Node>,
 }
 
 impl Node {
     /// ### new
     ///
     /// Instantiates a new `Node`
+    /// ATTENTION: id mustn't be empty nor duplicated
     pub fn new(id: &str, label: &str) -> Self {
         Self {
             id: id.to_string(),
@@ -131,7 +136,17 @@ impl Node {
     ///
     /// Search for `id` inside Node's children (or is itself)
     pub fn query(&self, id: &str) -> Option<&Self> {
-        self.query_mut(id).as_deref()
+        if self.id.as_str() == id {
+            Some(&self)
+        } else {
+            // Recurse search
+            self.children
+                .iter()
+                .map(|x| x.query(id))
+                .filter(|x| x.is_some())
+                .flatten()
+                .next()
+        }
     }
 
     /// ### query_mut
@@ -139,7 +154,7 @@ impl Node {
     /// Returns a mutable reference to a Node
     pub(self) fn query_mut(&mut self, id: &str) -> Option<&mut Self> {
         if self.id.as_str() == id {
-            Some(&mut self)
+            Some(self)
         } else {
             // Recurse search
             self.children
@@ -150,10 +165,26 @@ impl Node {
                 .next()
         }
     }
-}
 
-// TODO: to propPayload
-// TODO: from prop payload
+    /// ### truncate
+    ///
+    /// Truncate tree at depth.
+    /// If depth is `0`, node's children will be cleared
+    pub fn truncate(&mut self, depth: usize) {
+        if depth == 0 {
+            self.children.clear();
+        } else {
+            self.children.iter_mut().for_each(|x| x.truncate(depth - 1));
+        }
+    }
+
+    /// ### count
+    ///
+    /// Count items in tree
+    pub fn count(&self) -> usize {
+        self.children.iter().map(|x| x.count()).sum::<usize>() + 1
+    }
+}
 
 // -- states
 
@@ -187,7 +218,7 @@ impl From<PropPayload> for Tree {
     /// The PropPayload is a series of `Linked` where item is a Tuple made up of `(id, label, parent)`
     /// and next element is the following element in root
     fn from(props: PropPayload) -> Self {
-        let (mut root, mut next): (Node, Option<Box<PropPayload>>) = match props {
+        let (mut root, next): (Node, Option<Box<PropPayload>>) = match props {
             PropPayload::Linked(root, next) => match (*root, next) {
                 (
                     PropPayload::Tup3((
@@ -201,42 +232,17 @@ impl From<PropPayload> for Tree {
             },
             _ => panic!("Invalid payload"),
         };
-        // Now for each next do the same
-        while next.is_some() {
-            match props {
-                PropPayload::Linked(node, follows) => match (*node, follows) {
-                    (
-                        PropPayload::Tup3((
-                            PropValue::Str(id),
-                            PropValue::Str(label),
-                            PropValue::Str(_),
-                        )),
-                        follows,
-                    ) => {
-                        // Get parent
-                        let mut parent: &mut Node = root
-                            .query_mut(id.as_str())
-                            .expect("Parent node doesn't exist");
-                        // Push node to parent
-                        parent.add_child(Node::new(id.as_str(), label.as_str()));
-                        // Set next
-                        next = follows;
-                    }
-                    _ => panic!("Invalid syntax"),
-                },
-                _ => panic!("Invalid payload"),
-            }
-        }
+        // Fill tree
+        root.from_prop_payload(next);
         Tree::new(root)
     }
 }
 
 impl<'a> From<&Tree> for TuiTree<'a> {
-    fn from(tree: &Tree) -> Self {}
-}
-
-impl From<&Node> for PropPayload {
-    fn from(root: &Node) -> Self {}
+    fn from(tree: &Tree) -> Self {
+        // TODO: implement
+        TuiTree::new(vec![])
+    }
 }
 
 // -- props
@@ -283,14 +289,21 @@ impl From<Props> for TreeViewPropsBuilder {
 }
 
 impl TreeViewPropsBuilder {
+    /// ### with_tree_and_depth
+    ///
+    /// Sets the tree and its max depth for Props builder
+    pub fn with_tree_and_depth(&mut self, root: &Node, depth: usize) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.value = root.to_prop_payload(depth, "")
+        }
+        self
+    }
+
     /// ### with_tree
     ///
     /// Sets the tree for Props builder
     pub fn with_tree(&mut self, root: &Node) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.value = PropPayload::from(root);
-        }
-        self
+        self.with_tree_and_depth(root, usize::MAX)
     }
 }
 
@@ -340,6 +353,8 @@ mod tests {
             omar_home_ids,
             vec!["/home/omar/readme.md", "/home/omar/changelog.md"]
         );
+        // count
+        assert_eq!(root.count(), 8);
         // -- Query
         assert_eq!(
             tree.query("/home/omar/changelog.md").unwrap().id.as_str(),
@@ -356,5 +371,28 @@ mod tests {
         // mut
         assert!(tree.root_mut().query_mut("a1").is_some());
         assert_eq!(tree.root_mut().id.as_str(), "a");
+        // -- truncate
+        let mut tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .add_child(
+                    Node::new("/bin", "bin/")
+                        .add_child(Node::new("/bin/ls", "ls"))
+                        .add_child(Node::new("/bin/pwd", "pwd")),
+                )
+                .add_child(
+                    Node::new("/home", "home/").add_child(
+                        Node::new("/home/omar", "omar/")
+                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let root: &mut Node = tree.root_mut();
+        root.truncate(1);
+        assert_eq!(root.children.len(), 2);
+        assert_eq!(root.children[0].children.len(), 0);
+        assert_eq!(root.children[0].id.as_str(), "/bin");
+        assert_eq!(root.children[1].children.len(), 0);
+        assert_eq!(root.children[1].id.as_str(), "/home");
     }
 }
