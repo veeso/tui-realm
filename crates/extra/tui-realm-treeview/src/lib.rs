@@ -108,10 +108,10 @@ impl Node {
     ///
     /// Instantiates a new `Node`
     /// ATTENTION: id mustn't be empty nor duplicated
-    pub fn new(id: &str, label: &str) -> Self {
+    pub fn new<S: AsRef<str>>(id: S, label: S) -> Self {
         Self {
-            id: id.to_string(),
-            label: label.to_string(),
+            id: id.as_ref().to_string(),
+            label: label.as_ref().to_string(),
             children: vec![],
         }
     }
@@ -227,7 +227,7 @@ impl From<PropPayload> for Tree {
                         PropValue::Str(_),
                     )),
                     next,
-                ) => (Node::new(id.as_str(), label.as_str()), next),
+                ) => (Node::new(id, label), next),
                 _ => panic!("Invalid payload"),
             },
             _ => panic!("Invalid payload"),

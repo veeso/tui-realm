@@ -55,7 +55,7 @@ impl Node {
                             .query_mut(parent_id.as_str())
                             .expect("Parent node doesn't exist");
                         // Push node to parent
-                        parent.children.push(Node::new(id.as_str(), label.as_str()));
+                        parent.children.push(Node::new(id, label));
                         // Set next
                         self.from_prop_payload(next)
                     }
