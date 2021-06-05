@@ -615,7 +615,9 @@ impl<'a> Component for TreeView<'a> {
 mod tests {
 
     use super::*;
+
     use pretty_assertions::assert_eq;
+    use tuirealm::event::KeyEvent;
 
     #[test]
     fn test_tree() {
@@ -808,6 +810,80 @@ mod tests {
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Yellow);
         // Events
-        // TODO: Update with on change
+        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
+            Msg::OnSubmit(Payload::None)
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("/bin"))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
+            Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
+        );
+        // Go to a directory
+        component.states.next();
+        component.states.open();
+        component.states.next();
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("/bin/ls")))
+        );
+        // Update with on change
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .add_child(Node::new("/bin", "bin/").add_child(Node::new("/bin/pwd", "pwd")))
+                .add_child(
+                    Node::new("/home", "home/").add_child(
+                        Node::new("/home/omar", "omar/")
+                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let props = TreeViewPropsBuilder::from(component.get_props())
+            .with_tree(tree.root())
+            .build();
+        assert_eq!(
+            component.update(props),
+            Msg::OnChange(Payload::One(Value::Str(String::from("/bin/pwd"))))
+        );
+        // Update with depth
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .add_child(Node::new("/bin", "bin/").add_child(Node::new("/bin/pwd", "pwd")))
+                .add_child(
+                    Node::new("/home", "home/").add_child(
+                        Node::new("/home/omar", "omar/")
+                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let props = TreeViewPropsBuilder::from(component.get_props())
+            .with_tree_and_depth(tree.root(), 1)
+            .build();
+        assert_eq!(
+            component.update(props),
+            Msg::OnChange(Payload::One(Value::Str(String::from("/home"))))
+        );
     }
 }
