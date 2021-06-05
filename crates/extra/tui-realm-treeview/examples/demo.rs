@@ -24,17 +24,17 @@
 mod utils;
 use utils::context::Context;
 use utils::keymap::*;
+use utils::tree_dir::dir_tree;
 
 use std::thread::sleep;
 use std::time::Duration;
 use tuirealm::components::label;
-use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{Msg, Payload, PropsBuilder, Update, Value, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
 use tuirealm::tui::style::Color;
 // treeview
-use tui_realm_treeview::{Node, Tree};
+use tui_realm_treeview::{Tree, TreeView, TreeViewPropsBuilder};
 
 const COMPONENT_LABEL: &str = "LABEL";
 const COMPONENT_TREEVIEW: &str = "TREEVIEW";
@@ -88,7 +88,24 @@ fn main() {
                 .build(),
         )),
     );
-    // TODO: mount tree
+    let tree: Tree = Tree::new(dir_tree(std::env::current_dir().ok().unwrap().as_path(), 5));
+    let title: String = std::env::current_dir()
+        .ok()
+        .unwrap()
+        .to_string_lossy()
+        .to_string();
+    // Moount tree
+    myview.mount(
+        COMPONENT_TREEVIEW,
+        Box::new(TreeView::new(
+            TreeViewPropsBuilder::default()
+                .with_foreground(Color::LightYellow)
+                .with_background(Color::Black)
+                .with_title(Some(title))
+                .with_tree(tree.root())
+                .build(),
+        )),
+    );
     // We need to give focus to input then
     myview.active(COMPONENT_TREEVIEW);
     // Now we use the Model struct to keep track of some states
@@ -104,7 +121,7 @@ fn main() {
             model.update(msg);
         }
         // If redraw, draw interface
-        if model.redraw || model.last_redraw.elapsed() > Duration::from_millis(50) {
+        if model.redraw {
             // Call the elm friend vie1 function
             view(&mut ctx, &model.view);
             model.reset();
@@ -113,6 +130,19 @@ fn main() {
     }
     // Let's drop the context finally
     drop(ctx);
+}
+
+fn view(ctx: &mut Context, view: &View) {
+    let _ = ctx.terminal.draw(|f| {
+        // Prepare chunks
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .margin(1)
+            .constraints([Constraint::Length(1), Constraint::Min(5)].as_ref())
+            .split(f.size());
+        view.render(COMPONENT_LABEL, f, chunks[0]);
+        view.render(COMPONENT_TREEVIEW, f, chunks[1]);
+    });
 }
 
 impl Update for Model {

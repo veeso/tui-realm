@@ -1,7 +1,3 @@
-//! ## Utils
-//!
-//! `Utils` provides structures useful to implement gui with tui-rs
-
 /**
  * MIT License
  *
@@ -25,7 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-pub mod context;
-mod input;
-pub mod keymap;
-pub mod tree_dir;
+use std::path::Path;
+use tui_realm_treeview::Node;
+
+pub fn dir_tree(p: &Path, depth: usize) -> Node {
+    let mut node: Node = Node::new(
+        p.to_string_lossy(),
+        p.file_name().unwrap().to_string_lossy(),
+    );
+    if depth > 0 {
+        if let Ok(e) = std::fs::read_dir(p) {
+            e.flatten()
+                .for_each(|x| node.add_child(dir_tree(x.path().as_path(), depth - 1)));
+        }
+    }
+    node
+}
