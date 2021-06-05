@@ -733,9 +733,11 @@ mod tests {
                 ),
         );
         let mut states: OwnStates = OwnStates::new(tree);
-        assert_eq!(states.focus, false);
+        assert_eq!(states.focus(), false);
         states.toggle_focus(true);
-        assert_eq!(states.focus, true);
+        assert_eq!(states.focus(), true);
+        let _ = states.get_tui_tree();
+        let _ = states.get_tui_tree_state();
         // Get selected
         assert!(states.selected_node().is_none());
         // Select root
@@ -802,6 +804,8 @@ mod tests {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        // Block
+        let _ = component.get_block();
         // Focus
         assert_eq!(component.states.focus, false);
         component.active();
@@ -846,6 +850,7 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
             Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
         );
+        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None,);
         // Go to a directory
         component.states.next();
         component.states.open();
