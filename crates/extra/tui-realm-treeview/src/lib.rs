@@ -11,6 +11,72 @@
 //! tui-realm-treeview = "0.1.0"
 //! ```
 //!
+//! ## Setup a tree component
+//!
+//! ```rust,no_run
+//! extern crate tui_realm_treeview;
+//! extern crate tuirealm;
+//!
+//! use tuirealm::{props::Borders, PropsBuilder, Msg, Payload, Update, Value};
+//! use tuirealm::tui::style::Color;
+//! use tuirealm::tui::widgets::BorderType;
+//! use tui_realm_treeview::{Node, Tree, TreeView, TreeViewPropsBuilder};
+//!
+//! const COMPONENT_TREEVIEW: &str = "TREEVIEW";
+//!
+//! pub struct Model;
+//!
+//! fn main() {
+//!     let tree: Tree = Tree::new(
+//!     Node::new("/", "/")
+//!     .with_child(
+//!         Node::new("/bin", "bin/")
+//!             .with_child(Node::new("/bin/ls", "ls"))
+//!             .with_child(Node::new("/bin/pwd", "pwd")),
+//!     )
+//!     .with_child(
+//!         Node::new("/home", "home/").with_child(
+//!             Node::new("/home/omar", "omar/")
+//!                 .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+//!                 .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+//!         ),
+//!     ),
+//!     );
+//!     let mut component: TreeView = TreeView::new(
+//!         TreeViewPropsBuilder::default()
+//!             .hidden()
+//!             .visible()
+//!             .with_borders(Borders::ALL, BorderType::Double, Color::LightYellow)
+//!             .with_background(Color::Black)
+//!             .with_foreground(Color::LightYellow)
+//!             .with_title(Some(String::from("/dev/sda")))
+//!             .with_tree(tree.root())
+//!             .build(),
+//!     );
+//! }
+//!
+//! impl Update for Model {
+//!     fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
+//!         let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
+//!         match ref_msg {
+//!             None => None, // Exit after None
+//!             Some(msg) => match msg {
+//!                 (COMPONENT_TREEVIEW, Msg::OnChange(Payload::One(Value::Str(node_id)))) => {
+//!                     println!("Moved to {}", node_id);
+//!                     None
+//!                 }
+//!                 (COMPONENT_TREEVIEW, Msg::OnSubmit(Payload::One(Value::Str(node_id)))) => {
+//!                     println!("Selected node {}", node_id);
+//!                     None
+//!                 }
+//!                 _ => None,
+//!             },
+//!         }
+//!     }
+//! }
+//!
+//! ```
+//!
 
 #![doc(html_playground_url = "https://play.rust-lang.org")]
 #![doc(
