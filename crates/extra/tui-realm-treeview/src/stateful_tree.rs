@@ -98,7 +98,7 @@ impl<'a> StatefulTree<'a> {
     ///
     /// Close selected tree node
     pub fn close(&mut self) {
-        let selected = self.state.selected();
+        let selected = self.selected();
         if !self.state.close(&selected) {
             let (head, _) = identifier::get_without_leaf(&selected);
             self.state.select(head);
@@ -109,6 +109,65 @@ impl<'a> StatefulTree<'a> {
     ///
     /// Open selected tree node
     pub fn open(&mut self) {
-        self.state.open(self.state.selected());
+        self.state.open(self.selected());
+    }
+
+    /// ### selected
+    ///
+    /// Returns selected items
+    pub fn selected(&self) -> Vec<usize> {
+        self.state.selected()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::{Node, Tree};
+
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_stateful_tree() {
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .add_child(
+                    Node::new("/bin", "bin/")
+                        .add_child(Node::new("/bin/ls", "ls"))
+                        .add_child(Node::new("/bin/pwd", "pwd")),
+                )
+                .add_child(
+                    Node::new("/home", "home/").add_child(
+                        Node::new("/home/omar", "omar/")
+                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let mut stateful_tree = StatefulTree::from(&tree);
+        // Open root
+        stateful_tree.next();
+        assert_eq!(stateful_tree.selected(), vec![0]);
+        stateful_tree.open();
+        assert_eq!(stateful_tree.selected(), vec![0]);
+        stateful_tree.next();
+        assert_eq!(stateful_tree.selected(), vec![0, 0]);
+        stateful_tree.next();
+        assert_eq!(stateful_tree.selected(), vec![0, 1]);
+        stateful_tree.open();
+        assert_eq!(stateful_tree.selected(), vec![0, 1]);
+        stateful_tree.next();
+        stateful_tree.open();
+        assert_eq!(stateful_tree.selected(), vec![0, 1, 0]);
+        stateful_tree.next();
+        stateful_tree.next();
+        stateful_tree.next();
+        assert_eq!(stateful_tree.selected(), vec![0, 1, 0, 1]);
+        // up
+        stateful_tree.previous();
+        assert_eq!(stateful_tree.selected(), vec![0, 1, 0, 0]);
+        // close
+        stateful_tree.close();
+        assert_eq!(stateful_tree.selected(), vec![0, 1, 0]);
     }
 }

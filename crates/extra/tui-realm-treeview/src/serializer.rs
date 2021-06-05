@@ -140,10 +140,9 @@ impl From<PropPayload> for Tree {
 impl<'a> From<&Tree> for StatefulTree<'a> {
     fn from(tree: &Tree) -> Self {
         let root: &Node = tree.root();
-        StatefulTree::new().with_items(vec![TuiTreeItem::new(
-            root.id.clone(),
-            vec![root.to_tui_tree_item()],
-        )])
+        let children: Vec<TuiTreeItem> =
+            root.children.iter().map(|x| x.to_tui_tree_item()).collect();
+        StatefulTree::new().with_items(vec![TuiTreeItem::new(root.id.clone(), children)])
     }
 }
 
@@ -207,6 +206,15 @@ mod test {
     #[should_panic]
     fn test_serializer_bad_props_payload() {
         Tree::from(PropPayload::None);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_serializer_bad_props_payload_2() {
+        let mut root: Node = Node::new("/", "/");
+        let mut list: LinkedList<PropPayload> = LinkedList::new();
+        list.push_back(PropPayload::One(PropValue::Bool(true)));
+        root.from_prop_payload(list);
     }
 
     #[test]
