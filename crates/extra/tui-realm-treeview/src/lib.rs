@@ -94,6 +94,14 @@ impl Tree {
     pub fn query(&self, id: &str) -> Option<&Node> {
         self.root.query(id)
     }
+
+    /// ### node_by_route
+    ///
+    /// Get starting from root the node associated to the indexes.
+    /// When starting from tree, the first element in route must be `0`
+    pub fn node_by_route(&self, route: &[usize]) -> Option<&Node> {
+        self.root().node_by_route(&route[1..])
+    }
 }
 
 /// ## Node
@@ -186,6 +194,19 @@ impl Node {
     /// Count items in tree
     pub fn count(&self) -> usize {
         self.children.iter().map(|x| x.count()).sum::<usize>() + 1
+    }
+
+    /// ### node_by_route
+    ///
+    /// Given a vector of indexes, returns the node associated to the route
+    pub fn node_by_route(&self, route: &[usize]) -> Option<&Self> {
+        if route.is_empty() {
+            Some(self)
+        } else {
+            let next: &Node = self.children.get(route[0])?;
+            let route = &route[1..];
+            next.node_by_route(route)
+        }
     }
 }
 
@@ -331,6 +352,16 @@ mod tests {
             "/home/omar/changelog.md"
         );
         assert!(tree.query("ommlar").is_none());
+        // -- node_by_route
+        assert_eq!(
+            tree.node_by_route(&[0, 1, 0, 1]).unwrap().id.as_str(),
+            "/home/omar/changelog.md"
+        );
+        assert_eq!(
+            tree.root().node_by_route(&[1, 0, 1]).unwrap().id.as_str(),
+            "/home/omar/changelog.md"
+        );
+        assert!(tree.root().node_by_route(&[1, 0, 2]).is_none());
         // -- With children
         let mut tree: Tree = Tree::new(
             Node::new("a", "a").with_children(vec![Node::new("a1", "a1"), Node::new("a2", "a2")]),
