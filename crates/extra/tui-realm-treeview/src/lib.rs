@@ -100,7 +100,11 @@ impl Tree {
     /// Get starting from root the node associated to the indexes.
     /// When starting from tree, the first element in route must be `0`
     pub fn node_by_route(&self, route: &[usize]) -> Option<&Node> {
-        self.root().node_by_route(&route[1..])
+        if route.is_empty() {
+            None
+        } else {
+            self.root().node_by_route(&route[1..])
+        }
     }
 }
 
@@ -127,6 +131,20 @@ impl Node {
         }
     }
 
+    /// ### id
+    ///
+    /// Get reference to id
+    pub fn id(&self) -> &str {
+        self.id.as_str()
+    }
+
+    /// ### label
+    ///
+    /// Get reference to label
+    pub fn label(&self) -> &str {
+        self.label.as_str()
+    }
+
     /// ### with_children
     ///
     /// Sets Node children
@@ -147,7 +165,7 @@ impl Node {
     ///
     /// Search for `id` inside Node's children (or is itself)
     pub fn query(&self, id: &str) -> Option<&Self> {
-        if self.id.as_str() == id {
+        if self.id() == id {
             Some(&self)
         } else {
             // Recurse search
@@ -164,7 +182,7 @@ impl Node {
     ///
     /// Returns a mutable reference to a Node
     pub(self) fn query_mut(&mut self, id: &str) -> Option<&mut Self> {
-        if self.id.as_str() == id {
+        if self.id() == id {
             Some(self)
         } else {
             // Recurse search
@@ -233,6 +251,71 @@ impl<'a> OwnStates<'a> {
             tui_tree: StatefulTree::from(&tree),
             tree,
         }
+    }
+
+    // -- getters
+
+    /// ### focus
+    ///
+    /// Get focus
+    pub fn focus(&self) -> bool {
+        self.focus
+    }
+
+    /// get_selected_node
+    ///
+    /// Get selected node in the tree
+    pub fn selected_node(&self) -> Option<&Node> {
+        let route: Vec<usize> = self.tui_tree.selected();
+        self.tree.node_by_route(route.as_slice())
+    }
+
+    // -- setters
+
+    /// ### update_tree
+    ///
+    /// Update states tree
+    pub fn update_tree(&mut self, tree: PropPayload) {
+        let route: Vec<usize> = self.tui_tree.selected();
+        let tree: Tree = Tree::from(tree);
+        self.tui_tree = StatefulTree::from(&tree);
+        self.tree = tree;
+        self.tui_tree.set_state(route.as_slice());
+    }
+
+    /// ### toggle_focus
+    ///
+    /// Set focus
+    pub fn toggle_focus(&mut self, focus: bool) {
+        self.focus = focus;
+    }
+
+    /// ### next
+    ///
+    /// Go to next the element in tree
+    pub fn next(&mut self) {
+        self.tui_tree.next();
+    }
+
+    /// ### previous
+    ///
+    /// Go to the previous element in the tree
+    pub fn previous(&mut self) {
+        self.tui_tree.previous();
+    }
+
+    /// ### open
+    ///
+    /// Open selected element in the tree
+    pub fn open(&mut self) {
+        self.tui_tree.open();
+    }
+
+    /// ### close
+    ///
+    /// Close seelected element in the tree
+    pub fn close(&mut self) {
+        self.tui_tree.close();
     }
 }
 
@@ -325,21 +408,21 @@ mod tests {
                 ),
         );
         let root: &Node = tree.root();
-        assert_eq!(root.id.as_str(), "/");
-        assert_eq!(root.label.as_str(), "/");
+        assert_eq!(root.id(), "/");
+        assert_eq!(root.label(), "/");
         assert_eq!(root.children.len(), 2);
         let bin: &Node = &root.children[0];
-        assert_eq!(bin.id.as_str(), "/bin");
-        assert_eq!(bin.label.as_str(), "bin/");
+        assert_eq!(bin.id(), "/bin");
+        assert_eq!(bin.label(), "bin/");
         assert_eq!(bin.children.len(), 2);
-        let bin_ids: Vec<&str> = bin.children.iter().map(|x| x.id.as_str()).collect();
+        let bin_ids: Vec<&str> = bin.children.iter().map(|x| x.id()).collect();
         assert_eq!(bin_ids, vec!["/bin/ls", "/bin/pwd"]);
         let home: &Node = &tree.root.children[1];
-        assert_eq!(home.id.as_str(), "/home");
-        assert_eq!(home.label.as_str(), "home/");
+        assert_eq!(home.id(), "/home");
+        assert_eq!(home.label(), "home/");
         assert_eq!(home.children.len(), 1);
         let omar_home: &Node = &home.children[0];
-        let omar_home_ids: Vec<&str> = omar_home.children.iter().map(|x| x.id.as_str()).collect();
+        let omar_home_ids: Vec<&str> = omar_home.children.iter().map(|x| x.id()).collect();
         assert_eq!(
             omar_home_ids,
             vec!["/home/omar/readme.md", "/home/omar/changelog.md"]
@@ -348,17 +431,17 @@ mod tests {
         assert_eq!(root.count(), 8);
         // -- Query
         assert_eq!(
-            tree.query("/home/omar/changelog.md").unwrap().id.as_str(),
+            tree.query("/home/omar/changelog.md").unwrap().id(),
             "/home/omar/changelog.md"
         );
         assert!(tree.query("ommlar").is_none());
         // -- node_by_route
         assert_eq!(
-            tree.node_by_route(&[0, 1, 0, 1]).unwrap().id.as_str(),
+            tree.node_by_route(&[0, 1, 0, 1]).unwrap().id(),
             "/home/omar/changelog.md"
         );
         assert_eq!(
-            tree.root().node_by_route(&[1, 0, 1]).unwrap().id.as_str(),
+            tree.root().node_by_route(&[1, 0, 1]).unwrap().id(),
             "/home/omar/changelog.md"
         );
         assert!(tree.root().node_by_route(&[1, 0, 2]).is_none());
@@ -371,7 +454,7 @@ mod tests {
         assert!(tree.query("a2").is_some());
         // mut
         assert!(tree.root_mut().query_mut("a1").is_some());
-        assert_eq!(tree.root_mut().id.as_str(), "a");
+        assert_eq!(tree.root_mut().id(), "a");
         // -- truncate
         let mut tree: Tree = Tree::new(
             Node::new("/", "/")
@@ -392,8 +475,64 @@ mod tests {
         root.truncate(1);
         assert_eq!(root.children.len(), 2);
         assert_eq!(root.children[0].children.len(), 0);
-        assert_eq!(root.children[0].id.as_str(), "/bin");
+        assert_eq!(root.children[0].id(), "/bin");
         assert_eq!(root.children[1].children.len(), 0);
-        assert_eq!(root.children[1].id.as_str(), "/home");
+        assert_eq!(root.children[1].id(), "/home");
+    }
+
+    #[test]
+    fn test_states() {
+        // -- Build
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .add_child(
+                    Node::new("/bin", "bin/")
+                        .add_child(Node::new("/bin/ls", "ls"))
+                        .add_child(Node::new("/bin/pwd", "pwd")),
+                )
+                .add_child(
+                    Node::new("/home", "home/").add_child(
+                        Node::new("/home/omar", "omar/")
+                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let prop_payload: PropPayload = tree.root().to_prop_payload(usize::MAX, "");
+        let mut states: OwnStates = OwnStates::new(prop_payload);
+        assert_eq!(states.focus, false);
+        states.toggle_focus(true);
+        assert_eq!(states.focus, true);
+        // Get selected
+        assert!(states.selected_node().is_none());
+        // Select root
+        states.next();
+        assert_eq!(states.selected_node().unwrap().id(), "/");
+        // Open
+        states.open();
+        states.next();
+        assert_eq!(states.selected_node().unwrap().id(), "/bin");
+        states.next();
+        assert_eq!(states.selected_node().unwrap().id(), "/home");
+        states.previous();
+        assert_eq!(states.selected_node().unwrap().id(), "/bin");
+        // Open
+        states.open();
+        assert_eq!(states.selected_node().unwrap().id(), "/bin");
+        states.next();
+        assert_eq!(states.selected_node().unwrap().id(), "/bin/ls");
+        states.next();
+        assert_eq!(states.selected_node().unwrap().id(), "/bin/pwd");
+        states.close();
+        assert_eq!(states.selected_node().unwrap().id(), "/bin");
+        // -- Update
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .add_child(Node::new("/bin", "bin/").add_child(Node::new("/bin/ls", "ls"))),
+        );
+        let prop_payload: PropPayload = tree.root().to_prop_payload(usize::MAX, "");
+        // Verify state kept
+        states.update_tree(prop_payload);
+        assert_eq!(states.selected_node().unwrap().id(), "/bin");
     }
 }
