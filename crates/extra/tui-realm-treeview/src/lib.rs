@@ -758,4 +758,56 @@ mod tests {
         states.update_tree(tree);
         assert_eq!(states.selected_node().unwrap().id(), "/bin");
     }
+
+    #[test]
+    fn test_treeview_component() {
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .add_child(
+                    Node::new("/bin", "bin/")
+                        .add_child(Node::new("/bin/ls", "ls"))
+                        .add_child(Node::new("/bin/pwd", "pwd")),
+                )
+                .add_child(
+                    Node::new("/home", "home/").add_child(
+                        Node::new("/home/omar", "omar/")
+                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let mut component: TreeView = TreeView::new(
+            TreeViewPropsBuilder::default()
+                .hidden()
+                .visible()
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .with_background(Color::White)
+                .with_foreground(Color::Red)
+                .with_title(Some(String::from("C:\\")))
+                .with_tree(tree.root())
+                .build(),
+        );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::White);
+        assert_eq!(component.props.visible, true);
+        assert_eq!(component.props.borders.borders, Borders::ALL);
+        assert_eq!(component.props.borders.variant, BorderType::Double);
+        assert_eq!(component.props.borders.color, Color::Red);
+        // Focus
+        assert_eq!(component.states.focus, false);
+        component.active();
+        assert_eq!(component.states.focus, true);
+        component.blur();
+        assert_eq!(component.states.focus, false);
+        // Update
+        let props = TreeViewPropsBuilder::from(component.get_props())
+            .with_foreground(Color::Yellow)
+            .hidden()
+            .build();
+        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.props.visible, false);
+        assert_eq!(component.props.foreground, Color::Yellow);
+        // Events
+        // TODO: Update with on change
+    }
 }
