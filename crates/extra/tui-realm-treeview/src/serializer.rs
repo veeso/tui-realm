@@ -37,7 +37,7 @@ impl Node {
     /// Fill a tree using prop payload recursively
     pub(crate) fn from_prop_payload(
         &mut self,
-        mut list: LinkedList<PropPayload>,
+        list: &mut LinkedList<PropPayload>,
     ) -> Option<Box<PropPayload>> {
         match list.pop_front() {
             Some(PropPayload::Tup3((
@@ -115,16 +115,17 @@ impl<'a> Node {
     }
 }
 
-impl From<PropPayload> for Tree {
+impl From<&PropPayload> for Tree {
     /// ### PropPayload to TuiTree
     ///
     /// The PropPayload is a series of `Linked` where item is a Tuple made up of `(id, label, parent)`
     /// and next element is the following element in root
-    fn from(props: PropPayload) -> Self {
-        let mut list: LinkedList<PropPayload> = match props {
+    fn from(props: &PropPayload) -> Self {
+        let list: &LinkedList<PropPayload> = match props {
             PropPayload::Linked(list) => list,
             _ => panic!("Invalid payload"),
         };
+        let mut list = list.clone();
         let mut root: Node = match list.pop_front() {
             Some(PropPayload::Tup3((PropValue::Str(id), PropValue::Str(label), _))) => {
                 Node::new(id, label)
@@ -132,7 +133,7 @@ impl From<PropPayload> for Tree {
             _ => panic!("Invalid root"),
         };
         // Fill tree
-        root.from_prop_payload(list);
+        root.from_prop_payload(&mut list);
         Tree::new(root)
     }
 }
@@ -171,7 +172,7 @@ mod test {
                 ),
         );
         let props: PropPayload = tree.root().to_prop_payload(usize::MAX, "");
-        let tree: Tree = Tree::from(props);
+        let tree: Tree = Tree::from(&props);
         let root: &Node = tree.root();
         // count
         assert_eq!(root.count(), 8);
@@ -205,7 +206,7 @@ mod test {
     #[test]
     #[should_panic]
     fn test_serializer_bad_props_payload() {
-        Tree::from(PropPayload::None);
+        Tree::from(&PropPayload::None);
     }
 
     #[test]
@@ -214,7 +215,7 @@ mod test {
         let mut root: Node = Node::new("/", "/");
         let mut list: LinkedList<PropPayload> = LinkedList::new();
         list.push_back(PropPayload::One(PropValue::Bool(true)));
-        root.from_prop_payload(list);
+        root.from_prop_payload(&mut list);
     }
 
     #[test]
@@ -222,7 +223,7 @@ mod test {
     fn test_serializer_bad_props_value() {
         let mut linked_list: LinkedList<PropPayload> = LinkedList::new();
         linked_list.push_back(PropPayload::One(PropValue::Str("pippo".to_string())));
-        Tree::from(PropPayload::Linked(linked_list));
+        Tree::from(&PropPayload::Linked(linked_list));
     }
 
     #[test]

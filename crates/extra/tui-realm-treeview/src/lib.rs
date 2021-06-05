@@ -49,12 +49,20 @@ extern crate tuirealm;
 // modules
 mod serializer;
 mod stateful_tree;
-
+// internal
 use stateful_tree::StatefulTree;
-
 // deps
-use tui_tree_widget::{TreeItem as TuiTreeItem, TreeState as TuiTreeState};
-use tuirealm::{Component, PropPayload, PropValue, Props, PropsBuilder};
+use tui_tree_widget::{Tree as TuiTree, TreeItem as TuiTreeItem, TreeState as TuiTreeState};
+use tuirealm::tui::{
+    layout::Rect,
+    style::{Color, Modifier, Style},
+    widgets::{Block, BorderType, Borders},
+};
+use tuirealm::{
+    event::{Event, KeyCode},
+    props::{BordersProps, TextParts},
+    Canvas, Component, Msg, Payload, PropPayload, PropValue, Props, PropsBuilder, Value,
+};
 
 // -- structs
 
@@ -79,13 +87,6 @@ impl Tree {
     /// Returns a reference to the root node
     pub fn root(&self) -> &Node {
         &self.root
-    }
-
-    /// ### root_mut
-    ///
-    /// Returns a mutable reference to the root node
-    pub(self) fn root_mut(&mut self) -> &mut Node {
-        &mut self.root
     }
 
     /// ### query
@@ -244,8 +245,7 @@ impl<'a> OwnStates<'a> {
     /// ### new
     ///
     /// Instantiates a new OwnStates from tree data
-    pub fn new(tree: PropPayload) -> Self {
-        let tree: Tree = Tree::from(tree);
+    pub fn new(tree: Tree) -> Self {
         Self {
             focus: false,
             tui_tree: StatefulTree::from(&tree),
@@ -270,14 +270,27 @@ impl<'a> OwnStates<'a> {
         self.tree.node_by_route(route.as_slice())
     }
 
+    /// ### get_tui_tree
+    ///
+    /// Generate tui tree from self tree
+    pub fn get_tui_tree(&self) -> TuiTree {
+        TuiTree::new(self.tui_tree.items.clone())
+    }
+
+    /// ### get_tui_tree_state
+    ///
+    /// Get tui tree state
+    pub fn get_tui_tree_state(&self) -> TuiTreeState {
+        self.tui_tree.state.clone()
+    }
+
     // -- setters
 
     /// ### update_tree
     ///
     /// Update states tree
-    pub fn update_tree(&mut self, tree: PropPayload) {
+    pub fn update_tree(&mut self, tree: Tree) {
         let route: Vec<usize> = self.tui_tree.selected();
-        let tree: Tree = Tree::from(tree);
         self.tui_tree = StatefulTree::from(&tree);
         self.tree = tree;
         self.tui_tree.set_state(route.as_slice());
@@ -363,6 +376,55 @@ impl From<Props> for TreeViewPropsBuilder {
 }
 
 impl TreeViewPropsBuilder {
+    /// ### with_foreground
+    ///
+    /// Set foreground
+    pub fn with_foreground(&mut self, color: Color) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.foreground = color;
+        }
+        self
+    }
+
+    /// ### with_background
+    ///
+    /// Set background
+    pub fn with_background(&mut self, color: Color) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.background = color;
+        }
+        self
+    }
+
+    /// ### with_borders
+    ///
+    /// Set component borders style
+    pub fn with_borders(
+        &mut self,
+        borders: Borders,
+        variant: BorderType,
+        color: Color,
+    ) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.borders = BordersProps {
+                borders,
+                variant,
+                color,
+            }
+        }
+        self
+    }
+
+    /// ### with_title
+    ///
+    /// Set box title
+    pub fn with_title(&mut self, title: Option<String>) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.texts = TextParts::new(title, None);
+        }
+        self
+    }
+
     /// ### with_tree_and_depth
     ///
     /// Sets the tree and its max depth for Props builder
@@ -382,6 +444,172 @@ impl TreeViewPropsBuilder {
 }
 
 // -- component
+
+/// ## TreeView
+///
+/// Tree view tui-realm component
+pub struct TreeView<'a> {
+    props: Props,
+    states: OwnStates<'a>,
+}
+
+impl<'a> TreeView<'a> {
+    /// ### new
+    ///
+    /// Instantiate a new Checkbox Group component
+    pub fn new(props: Props) -> Self {
+        // Make states
+        let tree: Tree = Tree::from(&props.value);
+        let states: OwnStates = OwnStates::new(tree);
+        TreeView { props, states }
+    }
+    /// ### get_block
+    ///
+    /// Get block
+    pub fn get_block(&self) -> Block<'a> {
+        let div: Block = Block::default()
+            .borders(self.props.borders.borders)
+            .border_style(match self.states.focus() {
+                true => self.props.borders.style(),
+                false => Style::default(),
+            })
+            .border_type(self.props.borders.variant);
+        // Set title
+        match self.props.texts.title.as_ref() {
+            Some(t) => div.title(t.to_string()),
+            None => div,
+        }
+    }
+}
+
+impl<'a> Component for TreeView<'a> {
+    /// ### render
+    ///
+    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
+    /// If focused, cursor is also set (if supported by widget)
+    fn render(&self, render: &mut Canvas, area: Rect) {
+        if self.props.visible {
+            // Make colors
+            let (bg, fg): (Color, Color) = match &self.states.focus {
+                true => (self.props.foreground, self.props.background),
+                false => (Color::Reset, self.props.foreground),
+            };
+            let block: Block = self.get_block();
+            let tree: TuiTree = self
+                .states
+                .get_tui_tree()
+                .block(block)
+                .highlight_style(Style::default().fg(fg).bg(bg).add_modifier(Modifier::BOLD));
+            render.render_stateful_widget(tree, area, &mut self.states.get_tui_tree_state());
+        }
+    }
+
+    /// ### update
+    ///
+    /// Update component properties
+    /// Properties should first be retrieved through `get_props` which creates a builder from
+    /// existing properties and then edited before calling update.
+    /// Returns a Msg to the view
+    fn update(&mut self, props: Props) -> Msg {
+        let prev_selection: Option<String> =
+            self.states.selected_node().map(|x| x.id().to_string());
+        // make tree
+        let tree: Tree = Tree::from(&props.value);
+        // Update
+        self.states.update_tree(tree);
+        let new_selection: Option<String> = self.states.selected_node().map(|x| x.id().to_string());
+        // Set props
+        self.props = props;
+        // Msg none
+        if prev_selection != new_selection {
+            Msg::OnChange(self.get_state())
+        } else {
+            Msg::None
+        }
+    }
+
+    /// ### get_props
+    ///
+    /// Returns a copy of the component properties.
+    fn get_props(&self) -> Props {
+        self.props.clone()
+    }
+
+    /// ### on
+    ///
+    /// Handle input event and update internal states.
+    /// Returns a Msg to the view.
+    fn on(&mut self, ev: Event) -> Msg {
+        // Match event
+        if let Event::Key(key) = ev {
+            match key.code {
+                KeyCode::Right => {
+                    // Open
+                    self.states.open();
+                    // Return Msg On Change
+                    Msg::OnChange(self.get_state())
+                }
+                KeyCode::Left => {
+                    // Close
+                    self.states.close();
+                    // Return Msg On Change
+                    Msg::OnChange(self.get_state())
+                }
+                KeyCode::Up => {
+                    // Previous
+                    self.states.previous();
+                    // Return Msg On Change
+                    Msg::OnChange(self.get_state())
+                }
+                KeyCode::Down => {
+                    // Next
+                    self.states.next();
+                    // Return Msg On Change
+                    Msg::OnChange(self.get_state())
+                }
+                KeyCode::Enter => {
+                    // Return Submit
+                    Msg::OnSubmit(self.get_state())
+                }
+                _ => {
+                    // Return key event to activity
+                    Msg::OnKey(key)
+                }
+            }
+        } else {
+            // Ignore event
+            Msg::None
+        }
+    }
+
+    /// ### get_state
+    ///
+    /// Get current state from component
+    /// For this component `Payload::One(Value::Str(node_id))` if a node is selected,
+    /// None otherwise
+    fn get_state(&self) -> Payload {
+        match self.states.selected_node() {
+            Some(node) => Payload::One(Value::Str(node.id().to_string())),
+            None => Payload::None,
+        }
+    }
+
+    // -- events
+
+    /// ### blur
+    ///
+    /// Blur component
+    fn blur(&mut self) {
+        self.states.toggle_focus(false);
+    }
+
+    /// ### active
+    ///
+    /// Active component
+    fn active(&mut self) {
+        self.states.toggle_focus(true);
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -446,15 +674,12 @@ mod tests {
         );
         assert!(tree.root().node_by_route(&[1, 0, 2]).is_none());
         // -- With children
-        let mut tree: Tree = Tree::new(
+        let tree: Tree = Tree::new(
             Node::new("a", "a").with_children(vec![Node::new("a1", "a1"), Node::new("a2", "a2")]),
         );
         assert!(tree.query("a").is_some());
         assert!(tree.query("a1").is_some());
         assert!(tree.query("a2").is_some());
-        // mut
-        assert!(tree.root_mut().query_mut("a1").is_some());
-        assert_eq!(tree.root_mut().id(), "a");
         // -- truncate
         let mut tree: Tree = Tree::new(
             Node::new("/", "/")
@@ -471,7 +696,7 @@ mod tests {
                     ),
                 ),
         );
-        let root: &mut Node = tree.root_mut();
+        let root: &mut Node = &mut tree.root;
         root.truncate(1);
         assert_eq!(root.children.len(), 2);
         assert_eq!(root.children[0].children.len(), 0);
@@ -498,8 +723,7 @@ mod tests {
                     ),
                 ),
         );
-        let prop_payload: PropPayload = tree.root().to_prop_payload(usize::MAX, "");
-        let mut states: OwnStates = OwnStates::new(prop_payload);
+        let mut states: OwnStates = OwnStates::new(tree);
         assert_eq!(states.focus, false);
         states.toggle_focus(true);
         assert_eq!(states.focus, true);
@@ -530,9 +754,8 @@ mod tests {
             Node::new("/", "/")
                 .add_child(Node::new("/bin", "bin/").add_child(Node::new("/bin/ls", "ls"))),
         );
-        let prop_payload: PropPayload = tree.root().to_prop_payload(usize::MAX, "");
         // Verify state kept
-        states.update_tree(prop_payload);
+        states.update_tree(tree);
         assert_eq!(states.selected_node().unwrap().id(), "/bin");
     }
 }
