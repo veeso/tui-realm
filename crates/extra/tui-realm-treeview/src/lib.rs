@@ -154,12 +154,19 @@ impl Node {
         self
     }
 
-    /// ### add_child
+    /// ### with_child
     ///
     /// Create a new child in this Node
-    pub fn add_child(mut self, child: Node) -> Self {
-        self.children.push(child);
+    pub fn with_child(mut self, child: Node) -> Self {
+        self.add_child(child);
         self
+    }
+
+    /// ### add_child
+    ///
+    /// Add a child to the node
+    pub fn add_child(&mut self, child: Node) {
+        self.children.push(child);
     }
 
     /// ### query
@@ -624,16 +631,16 @@ mod tests {
         // -- Build
         let tree: Tree = Tree::new(
             Node::new("/", "/")
-                .add_child(
+                .with_child(
                     Node::new("/bin", "bin/")
-                        .add_child(Node::new("/bin/ls", "ls"))
-                        .add_child(Node::new("/bin/pwd", "pwd")),
+                        .with_child(Node::new("/bin/ls", "ls"))
+                        .with_child(Node::new("/bin/pwd", "pwd")),
                 )
-                .add_child(
-                    Node::new("/home", "home/").add_child(
+                .with_child(
+                    Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
-                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
                     ),
                 ),
         );
@@ -685,16 +692,16 @@ mod tests {
         // -- truncate
         let mut tree: Tree = Tree::new(
             Node::new("/", "/")
-                .add_child(
+                .with_child(
                     Node::new("/bin", "bin/")
-                        .add_child(Node::new("/bin/ls", "ls"))
-                        .add_child(Node::new("/bin/pwd", "pwd")),
+                        .with_child(Node::new("/bin/ls", "ls"))
+                        .with_child(Node::new("/bin/pwd", "pwd")),
                 )
-                .add_child(
-                    Node::new("/home", "home/").add_child(
+                .with_child(
+                    Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
-                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
                     ),
                 ),
         );
@@ -712,16 +719,16 @@ mod tests {
         // -- Build
         let tree: Tree = Tree::new(
             Node::new("/", "/")
-                .add_child(
+                .with_child(
                     Node::new("/bin", "bin/")
-                        .add_child(Node::new("/bin/ls", "ls"))
-                        .add_child(Node::new("/bin/pwd", "pwd")),
+                        .with_child(Node::new("/bin/ls", "ls"))
+                        .with_child(Node::new("/bin/pwd", "pwd")),
                 )
-                .add_child(
-                    Node::new("/home", "home/").add_child(
+                .with_child(
+                    Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
-                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
                     ),
                 ),
         );
@@ -754,7 +761,7 @@ mod tests {
         // -- Update
         let tree: Tree = Tree::new(
             Node::new("/", "/")
-                .add_child(Node::new("/bin", "bin/").add_child(Node::new("/bin/ls", "ls"))),
+                .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/ls", "ls"))),
         );
         // Verify state kept
         states.update_tree(tree);
@@ -765,16 +772,16 @@ mod tests {
     fn test_treeview_component() {
         let tree: Tree = Tree::new(
             Node::new("/", "/")
-                .add_child(
+                .with_child(
                     Node::new("/bin", "bin/")
-                        .add_child(Node::new("/bin/ls", "ls"))
-                        .add_child(Node::new("/bin/pwd", "pwd")),
+                        .with_child(Node::new("/bin/ls", "ls"))
+                        .with_child(Node::new("/bin/pwd", "pwd")),
                 )
-                .add_child(
-                    Node::new("/home", "home/").add_child(
+                .with_child(
+                    Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
-                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
                     ),
                 ),
         );
@@ -850,12 +857,12 @@ mod tests {
         // Update with on change
         let tree: Tree = Tree::new(
             Node::new("/", "/")
-                .add_child(Node::new("/bin", "bin/").add_child(Node::new("/bin/pwd", "pwd")))
-                .add_child(
-                    Node::new("/home", "home/").add_child(
+                .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/pwd", "pwd")))
+                .with_child(
+                    Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
-                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
                     ),
                 ),
         );
@@ -869,12 +876,12 @@ mod tests {
         // Update with depth
         let tree: Tree = Tree::new(
             Node::new("/", "/")
-                .add_child(Node::new("/bin", "bin/").add_child(Node::new("/bin/pwd", "pwd")))
-                .add_child(
-                    Node::new("/home", "home/").add_child(
+                .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/pwd", "pwd")))
+                .with_child(
+                    Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
-                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
                     ),
                 ),
         );

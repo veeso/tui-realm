@@ -158,16 +158,16 @@ mod test {
     fn test_stateful_tree() {
         let tree: Tree = Tree::new(
             Node::new("/", "/")
-                .add_child(
+                .with_child(
                     Node::new("/bin", "bin/")
-                        .add_child(Node::new("/bin/ls", "ls"))
-                        .add_child(Node::new("/bin/pwd", "pwd")),
+                        .with_child(Node::new("/bin/ls", "ls"))
+                        .with_child(Node::new("/bin/pwd", "pwd")),
                 )
-                .add_child(
-                    Node::new("/home", "home/").add_child(
+                .with_child(
+                    Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
-                            .add_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .add_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
                     ),
                 ),
         );
