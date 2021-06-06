@@ -107,7 +107,7 @@ If you want a super-detailed guide about components check out the [components gu
 
 These components are not included in tui-realm, but have been developed by other users. I like advertising other's contents, so here you can find a list of components you may find useful for your next tui-realm project 💜.
 
-- ...
+- [tui-realm-treeview](https://github.com/veeso/tui-realm-treeview) A treeview component developed by [@veeso](https://github.com/veeso)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
 
