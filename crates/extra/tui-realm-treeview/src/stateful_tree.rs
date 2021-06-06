@@ -119,6 +119,7 @@ impl<'a> StatefulTree<'a> {
         self.state.selected()
     }
 
+    /*
     /// ### set_state
     ///
     /// Reset the state and initializes it with the provided route
@@ -145,6 +146,7 @@ impl<'a> StatefulTree<'a> {
         self.open();
         self.set_state_m(&route[1..])
     }
+    */
 }
 
 #[cfg(test)]
@@ -197,9 +199,11 @@ mod test {
         stateful_tree.close();
         assert_eq!(stateful_tree.selected(), vec![0, 1, 0]);
         // Set state
+        /*
         stateful_tree.set_state(&vec![0, 0, 1]);
         assert_eq!(stateful_tree.selected(), vec![0, 0, 1]);
         stateful_tree.set_state(&vec![0, 1, 0, 1]);
         assert_eq!(stateful_tree.selected(), vec![0, 1, 0, 1]);
+        */
     }
 }

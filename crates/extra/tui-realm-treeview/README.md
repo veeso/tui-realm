@@ -54,6 +54,7 @@ cargo run --example demo
 - Move up and down with `UP/DOWN` arrow keys
 - Open directories with `RIGHT`
 - Close directories with `LEFT`
+- Change window between input field and treeview with `TAB`
 - Press `ESC` to quit
 
 ### About performance

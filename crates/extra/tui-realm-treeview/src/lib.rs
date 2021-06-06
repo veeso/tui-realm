@@ -320,11 +320,13 @@ impl<'a> OwnStates<'a> {
     ///
     /// Instantiates a new OwnStates from tree data
     pub fn new(tree: Tree) -> Self {
-        Self {
+        let mut component: Self = Self {
             focus: false,
             tui_tree: StatefulTree::from(&tree),
             tree,
-        }
+        };
+        component.open_first();
+        component
     }
 
     // -- getters
@@ -364,10 +366,12 @@ impl<'a> OwnStates<'a> {
     ///
     /// Update states tree
     pub fn update_tree(&mut self, tree: Tree) {
-        let route: Vec<usize> = self.tui_tree.selected();
+        // let route: Vec<usize> = self.tui_tree.selected(); NOTE: restore to track state
         self.tui_tree = StatefulTree::from(&tree);
         self.tree = tree;
-        self.tui_tree.set_state(route.as_slice());
+        // Open first
+        self.open_first();
+        // self.tui_tree.set_state(route.as_slice());
     }
 
     /// ### toggle_focus
@@ -403,6 +407,11 @@ impl<'a> OwnStates<'a> {
     /// Close seelected element in the tree
     pub fn close(&mut self) {
         self.tui_tree.close();
+    }
+
+    fn open_first(&mut self) {
+        self.next();
+        self.open();
     }
 }
 
@@ -826,9 +835,6 @@ mod tests {
         let _ = states.get_tui_tree();
         let _ = states.get_tui_tree_state();
         // Get selected
-        assert!(states.selected_node().is_none());
-        // Select root
-        states.next();
         assert_eq!(states.selected_node().unwrap().id(), "/");
         // Open
         states.open();
@@ -848,6 +854,7 @@ mod tests {
         states.close();
         assert_eq!(states.selected_node().unwrap().id(), "/bin");
         // -- Update
+        /*
         let tree: Tree = Tree::new(
             Node::new("/", "/")
                 .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/ls", "ls"))),
@@ -855,6 +862,7 @@ mod tests {
         // Verify state kept
         states.update_tree(tree);
         assert_eq!(states.selected_node().unwrap().id(), "/bin");
+        */
     }
 
     #[test]
@@ -917,26 +925,37 @@ mod tests {
             ">>"
         );
         // Events
-        assert_eq!(component.get_state(), Payload::None);
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::OnSubmit(Payload::None)
-        );
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
-            Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
+            component.get_state(),
+            Payload::One(Value::Str(String::from("/")))
         );
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
             Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
         );
         assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("/")))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
+            Msg::OnSubmit(Payload::One(Value::Str(String::from("/"))))
+        );
+        assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
             Msg::OnChange(Payload::One(Value::Str(String::from("/bin"))))
         );
         assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("/bin"))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("/bin/ls"))))
+        );
+        assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
-            Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
+            Msg::OnChange(Payload::One(Value::Str(String::from("/bin"))))
         );
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
@@ -972,7 +991,7 @@ mod tests {
             .build();
         assert_eq!(
             component.update(props),
-            Msg::OnChange(Payload::One(Value::Str(String::from("/bin/pwd"))))
+            Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
         );
         // Update with depth
         let tree: Tree = Tree::new(
@@ -989,9 +1008,6 @@ mod tests {
         let props = TreeViewPropsBuilder::from(component.get_props())
             .with_tree_and_depth(tree.root(), 1)
             .build();
-        assert_eq!(
-            component.update(props),
-            Msg::OnChange(Payload::One(Value::Str(String::from("/home"))))
-        );
+        assert_eq!(component.update(props), Msg::None);
     }
 }
