@@ -50,6 +50,7 @@
 //!             .with_background(Color::Black)
 //!             .with_foreground(Color::LightYellow)
 //!             .with_title(Some(String::from("/dev/sda")))
+//!             .with_highlighted_str("🚀")
 //!             .with_tree(tree.root())
 //!             .build(),
 //!     );
@@ -126,7 +127,7 @@ use tuirealm::tui::{
 };
 use tuirealm::{
     event::{Event, KeyCode},
-    props::{BordersProps, TextParts},
+    props::{BordersProps, TextParts, TextSpan},
     Canvas, Component, Msg, Payload, PropPayload, PropValue, Props, PropsBuilder, Value,
 };
 
@@ -493,7 +494,20 @@ impl TreeViewPropsBuilder {
     /// Set box title
     pub fn with_title(&mut self, title: Option<String>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(title, None);
+            let spans = props.texts.spans.clone();
+            props.texts = TextParts::new(title, spans);
+        }
+        self
+    }
+
+    /// ### with_highlighted_str
+    ///
+    /// Set highlighted string
+    pub fn with_highlighted_str(&mut self, s: &str) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            let title = props.texts.title.clone();
+            let spans = vec![TextSpan::from(s)];
+            props.texts = TextParts::new(title, Some(spans));
         }
         self
     }
@@ -568,11 +582,17 @@ impl<'a> Component for TreeView<'a> {
                 false => (Color::Reset, self.props.foreground),
             };
             let block: Block = self.get_block();
-            let tree: TuiTree = self
+            let mut tree: TuiTree = self
                 .states
                 .get_tui_tree()
                 .block(block)
                 .highlight_style(Style::default().fg(fg).bg(bg).add_modifier(Modifier::BOLD));
+            // Highlighted symbol
+            if let Some(spans) = self.props.texts.spans.as_ref() {
+                if let Some(span) = spans.get(0) {
+                    tree = tree.highlight_symbol(&span.content);
+                }
+            }
             render.render_stateful_widget(tree, area, &mut self.states.get_tui_tree_state());
         }
     }
@@ -861,6 +881,7 @@ mod tests {
                 .with_background(Color::White)
                 .with_foreground(Color::Red)
                 .with_title(Some(String::from("C:\\")))
+                .with_highlighted_str(">>")
                 .with_tree(tree.root())
                 .build(),
         );
@@ -881,11 +902,19 @@ mod tests {
         // Update
         let props = TreeViewPropsBuilder::from(component.get_props())
             .with_foreground(Color::Yellow)
+            .with_title(Some(String::from("aaa")))
             .hidden()
             .build();
         assert_eq!(component.update(props), Msg::None);
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Yellow);
+        assert_eq!(component.props.texts.title.as_ref().unwrap(), "aaa");
+        assert_eq!(
+            component.props.texts.spans.as_ref().unwrap()[0]
+                .content
+                .as_str(),
+            ">>"
+        );
         // Events
         assert_eq!(component.get_state(), Payload::None);
         assert_eq!(
