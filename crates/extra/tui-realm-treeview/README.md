@@ -31,6 +31,8 @@ Current version: 0.1.0 (06/06/2021)
 
 tui-realm-treeview is an implementation of a **treeview component** for [tui-realm](https://github.com/veeso/tui-realm), it is implemented wrapping the [tui-tree-widget](https://crates.io/crates/tui-tree-widget)
 
+![Demo](docs/images/demo.gif)
+
 ---
 
 ## Get started 🏁
