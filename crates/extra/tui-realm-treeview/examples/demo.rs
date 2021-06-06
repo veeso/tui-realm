@@ -24,8 +24,8 @@
 mod utils;
 use utils::context::Context;
 use utils::keymap::*;
-use utils::tree_dir::dir_tree;
 
+use std::path::{Path, PathBuf};
 use std::thread::sleep;
 use std::time::Duration;
 use tuirealm::components::label;
@@ -34,28 +34,42 @@ use tuirealm::{Msg, Payload, PropsBuilder, Update, Value, View};
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
 use tuirealm::tui::style::Color;
 // treeview
-use tui_realm_treeview::{Tree, TreeView, TreeViewPropsBuilder};
+use tui_realm_treeview::{Node, Tree, TreeView, TreeViewPropsBuilder};
 
 const COMPONENT_LABEL: &str = "LABEL";
 const COMPONENT_TREEVIEW: &str = "TREEVIEW";
 
 struct Model {
+    focus: bool,
+    path: PathBuf,
+    tree: Tree,
     quit: bool,   // Becomes true when the user presses <ESC>
     redraw: bool, // Tells whether to refresh the UI; performance optimization
     view: View,
 }
 
 impl Model {
-    fn new(view: View) -> Self {
+    fn new(view: View, p: &Path) -> Self {
         Model {
+            focus: true,
             quit: false,
             redraw: true,
             view,
+            tree: Tree::new(Self::dir_tree(p, 3)),
+            path: p.to_path_buf(),
         }
     }
 
     fn quit(&mut self) {
         self.quit = true;
+    }
+
+    fn set_focus(&mut self, s: bool) {
+        self.focus = s;
+    }
+
+    fn focus(&self) -> bool {
+        self.focus
     }
 
     fn redraw(&mut self) {
@@ -64,6 +78,29 @@ impl Model {
 
     fn reset(&mut self) {
         self.redraw = false;
+    }
+
+    pub fn scan_dir(&mut self, p: &Path) {
+        self.path = p.to_path_buf();
+        self.tree = Tree::new(Self::dir_tree(p, 3));
+    }
+
+    pub fn upper_dir(&self) -> Option<&Path> {
+        self.path.parent()
+    }
+
+    fn dir_tree(p: &Path, depth: usize) -> Node {
+        let mut node: Node = Node::new(
+            p.to_string_lossy(),
+            p.file_name().unwrap().to_string_lossy(),
+        );
+        if depth > 0 && p.is_dir() {
+            if let Ok(e) = std::fs::read_dir(p) {
+                e.flatten()
+                    .for_each(|x| node.add_child(Self::dir_tree(x.path().as_path(), depth - 1)));
+            }
+        }
+        node
     }
 }
 
@@ -74,10 +111,13 @@ fn main() {
     ctx.enter_alternate_screen();
     // Clear screen
     ctx.clear_screen();
-    // let's create a `View`, which will contain the components
-    let mut myview: View = View::init();
+    // Make model
+    let mut model: Model = Model::new(
+        View::init(),
+        std::env::current_dir().ok().unwrap().as_path(),
+    );
     // Mount the component you need; we'll use a Label and an Input
-    myview.mount(
+    model.view.mount(
         COMPONENT_LABEL,
         Box::new(label::Label::new(
             label::LabelPropsBuilder::default()
@@ -88,28 +128,22 @@ fn main() {
                 .build(),
         )),
     );
-    let tree: Tree = Tree::new(dir_tree(std::env::current_dir().ok().unwrap().as_path(), 5));
-    let title: String = std::env::current_dir()
-        .ok()
-        .unwrap()
-        .to_string_lossy()
-        .to_string();
+    let title: String = model.path.to_string_lossy().to_string();
     // Moount tree
-    myview.mount(
+    model.view.mount(
         COMPONENT_TREEVIEW,
         Box::new(TreeView::new(
             TreeViewPropsBuilder::default()
                 .with_foreground(Color::LightYellow)
                 .with_background(Color::Black)
                 .with_title(Some(title))
-                .with_tree(tree.root())
+                .with_tree(model.tree.root())
+                .with_highlighted_str("🚀")
                 .build(),
         )),
     );
     // We need to give focus to input then
-    myview.active(COMPONENT_TREEVIEW);
-    // Now we use the Model struct to keep track of some states
-    let mut model: Model = Model::new(myview);
+    model.view.active(COMPONENT_TREEVIEW);
     // let's loop until quit is true
     while !model.quit {
         // Listen for input events
@@ -161,6 +195,47 @@ impl Update for Model {
                     // Report submit
                     let msg = self.view.update(COMPONENT_LABEL, props);
                     self.update(msg)
+                }
+                (COMPONENT_TREEVIEW, Msg::OnSubmit(Payload::One(Value::Str(node_id)))) => {
+                    // Update tree
+                    self.scan_dir(PathBuf::from(node_id.as_str()).as_path());
+                    // Update
+                    let props = TreeViewPropsBuilder::from(
+                        self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
+                    )
+                    .with_tree(self.tree.root())
+                    .with_title(Some(String::from(self.path.to_string_lossy())))
+                    .build();
+                    let msg = self.view.update(COMPONENT_TREEVIEW, props);
+                    self.update(msg)
+                }
+                (COMPONENT_TREEVIEW, &MSG_KEY_BACKSPACE) => {
+                    // Update tree
+                    match self.upper_dir() {
+                        None => None,
+                        Some(p) => {
+                            let p: PathBuf = p.to_path_buf();
+                            self.scan_dir(p.as_path());
+                            // Update
+                            let props = TreeViewPropsBuilder::from(
+                                self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
+                            )
+                            .with_tree(self.tree.root())
+                            .with_title(Some(String::from(self.path.to_string_lossy())))
+                            .build();
+                            let msg = self.view.update(COMPONENT_TREEVIEW, props);
+                            self.update(msg)
+                        }
+                    }
+                }
+                (_, &MSG_KEY_TAB) => {
+                    let focus: bool = !self.focus();
+                    match focus {
+                        true => self.view.active(COMPONENT_LABEL),
+                        false => self.view.active(COMPONENT_TREEVIEW),
+                    }
+                    self.set_focus(focus);
+                    None
                 }
                 (_, &MSG_KEY_ESC) => {
                     // Quit on esc

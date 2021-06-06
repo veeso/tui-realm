@@ -28,4 +28,3 @@
 pub mod context;
 mod input;
 pub mod keymap;
-pub mod tree_dir;

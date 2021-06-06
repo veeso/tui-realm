@@ -9,7 +9,7 @@
 [![Build](https://github.com/veeso/tui-realm-treeview/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm-treeview/actions) [![Build](https://github.com/veeso/tui-realm-treeview/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm-treeview/actions) [![Build](https://github.com/veeso/tui-realm-treeview/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm-treeview/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm-treeview/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm-treeview?branch=main)
 
 Developed by Christian Visintin  
-Current version: 0.1.0 FIXME: (02/06/2021)
+Current version: 0.1.0 (06/06/2021)
 
 ---
 
@@ -18,7 +18,7 @@ Current version: 0.1.0 FIXME: (02/06/2021)
   - [Get started 🏁](#get-started-)
     - [Add tui-realm-treeview to your Cargo.toml 🦀](#add-tui-realm-treeview-to-your-cargotoml-)
     - [Use the treeview component](#use-the-treeview-component)
-    - [Run examples](#run-examples)
+    - [About performance](#about-performance)
   - [Documentation 📚](#documentation-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
@@ -29,7 +29,7 @@ Current version: 0.1.0 FIXME: (02/06/2021)
 
 ## About tui-realm-treeview 🌲
 
-tui-realm-treeview is an implementation of a **treeview component** for [tui-realm](https://github.com/veeso/tui-realm), it is implemented wrapping the [tui-tree-widget](https://crates.io/crates/tui-tree-widget) 
+tui-realm-treeview is an implementation of a **treeview component** for [tui-realm](https://github.com/veeso/tui-realm), it is implemented wrapping the [tui-tree-widget](https://crates.io/crates/tui-tree-widget)
 
 ---
 
@@ -43,17 +43,27 @@ tui-realm-treeview = "0.1.0"
 
 ### Use the treeview component
 
-View how to use the treeview-component in the [related guide](docs/get-started.md).
+View how to use the treeview-component following the [example](examples/demo.rs). The example contains a simple file explorer using a tree view, the depth is set to 3.
 
-### Run examples
+```sh
+cargo run --example demo
+```
 
-Still confused about how tui-realm-treeview works? Don't worry, try with the examples:
+- Press `ENTER` to change directory
+- Press `BACKSPACE` to go to upper directory
+- Move up and down with `UP/DOWN` arrow keys
+- Open directories with `RIGHT`
+- Close directories with `LEFT`
+- Press `ESC` to quit
 
-- [demo](examples/demo.rs): a simple application which shows how tui-realm works
+### About performance
 
-    ```sh
-    cargo run --example demo
-    ```
+In this library there is a consistent use of recursion, and since rust is not functional, this might lead to stack overflows when dealing with huge trees. In addition consider that each level of depth added, will slow down the application exponentially.
+
+Best practices:
+
+- Except when dealing with small trees, always set a depth for the tree
+- For file systems, depth 3 should be fine
 
 ---
 

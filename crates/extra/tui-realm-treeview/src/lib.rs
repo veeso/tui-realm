@@ -452,7 +452,7 @@ impl From<Props> for TreeViewPropsBuilder {
 impl TreeViewPropsBuilder {
     /// ### with_foreground
     ///
-    /// Set foreground
+    /// Set foreground. The foreground will be used as foreground for the selected item, when focus is false, otherwise as background
     pub fn with_foreground(&mut self, color: Color) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.foreground = color;
@@ -462,7 +462,8 @@ impl TreeViewPropsBuilder {
 
     /// ### with_background
     ///
-    /// Set background
+    /// Set background. The background color will be used as background for unselected entry, but will be used as foreground for the selected entry
+    /// when focus is true
     pub fn with_background(&mut self, color: Color) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.background = color;
@@ -502,7 +503,7 @@ impl TreeViewPropsBuilder {
 
     /// ### with_highlighted_str
     ///
-    /// Set highlighted string
+    /// The provided string will be displayed on the left side of the selected entry in the tree
     pub fn with_highlighted_str(&mut self, s: &str) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             let title = props.texts.title.clone();
