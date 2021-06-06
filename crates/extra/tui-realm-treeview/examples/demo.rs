@@ -28,7 +28,8 @@ use utils::keymap::*;
 use std::path::{Path, PathBuf};
 use std::thread::sleep;
 use std::time::Duration;
-use tuirealm::components::label;
+use tuirealm::components::{input, label};
+use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{Msg, Payload, PropsBuilder, Update, Value, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -36,11 +37,11 @@ use tuirealm::tui::style::Color;
 // treeview
 use tui_realm_treeview::{Node, Tree, TreeView, TreeViewPropsBuilder};
 
+const COMPONENT_INPUT: &str = "INPUT";
 const COMPONENT_LABEL: &str = "LABEL";
 const COMPONENT_TREEVIEW: &str = "TREEVIEW";
 
 struct Model {
-    focus: bool,
     path: PathBuf,
     tree: Tree,
     quit: bool,   // Becomes true when the user presses <ESC>
@@ -51,7 +52,6 @@ struct Model {
 impl Model {
     fn new(view: View, p: &Path) -> Self {
         Model {
-            focus: true,
             quit: false,
             redraw: true,
             view,
@@ -62,14 +62,6 @@ impl Model {
 
     fn quit(&mut self) {
         self.quit = true;
-    }
-
-    fn set_focus(&mut self, s: bool) {
-        self.focus = s;
-    }
-
-    fn focus(&self) -> bool {
-        self.focus
     }
 
     fn redraw(&mut self) {
@@ -90,10 +82,11 @@ impl Model {
     }
 
     fn dir_tree(p: &Path, depth: usize) -> Node {
-        let mut node: Node = Node::new(
-            p.to_string_lossy(),
-            p.file_name().unwrap().to_string_lossy(),
-        );
+        let name: String = match p.file_name() {
+            None => "/".to_string(),
+            Some(n) => n.to_string_lossy().into_owned().to_string(),
+        };
+        let mut node: Node = Node::new(p.to_string_lossy().into_owned(), name);
         if depth > 0 && p.is_dir() {
             if let Ok(e) = std::fs::read_dir(p) {
                 e.flatten()
@@ -128,12 +121,24 @@ fn main() {
                 .build(),
         )),
     );
+    // Mount input
+    model.view.mount(
+        COMPONENT_INPUT,
+        Box::new(input::Input::new(
+            input::InputPropsBuilder::default()
+                .with_borders(Borders::ALL, BorderType::Rounded, Color::LightBlue)
+                .with_label(String::from("Go to..."))
+                .with_foreground(Color::LightBlue)
+                .build(),
+        )),
+    );
     let title: String = model.path.to_string_lossy().to_string();
     // Moount tree
     model.view.mount(
         COMPONENT_TREEVIEW,
         Box::new(TreeView::new(
             TreeViewPropsBuilder::default()
+                .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
                 .with_background(Color::Black)
                 .with_title(Some(title))
@@ -172,10 +177,18 @@ fn view(ctx: &mut Context, view: &View) {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .margin(1)
-            .constraints([Constraint::Length(1), Constraint::Min(5)].as_ref())
+            .constraints(
+                [
+                    Constraint::Length(1),
+                    Constraint::Min(5),
+                    Constraint::Length(3),
+                ]
+                .as_ref(),
+            )
             .split(f.size());
         view.render(COMPONENT_LABEL, f, chunks[0]);
         view.render(COMPONENT_TREEVIEW, f, chunks[1]);
+        view.render(COMPONENT_INPUT, f, chunks[2]);
     });
 }
 
@@ -228,13 +241,25 @@ impl Update for Model {
                         }
                     }
                 }
-                (_, &MSG_KEY_TAB) => {
-                    let focus: bool = !self.focus();
-                    match focus {
-                        true => self.view.active(COMPONENT_LABEL),
-                        false => self.view.active(COMPONENT_TREEVIEW),
-                    }
-                    self.set_focus(focus);
+                (COMPONENT_INPUT, Msg::OnSubmit(Payload::One(Value::Str(input)))) => {
+                    let p: PathBuf = PathBuf::from(input.as_str());
+                    self.scan_dir(p.as_path());
+                    // Update
+                    let props = TreeViewPropsBuilder::from(
+                        self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
+                    )
+                    .with_tree(self.tree.root())
+                    .with_title(Some(String::from(self.path.to_string_lossy())))
+                    .build();
+                    let msg = self.view.update(COMPONENT_TREEVIEW, props);
+                    self.update(msg)
+                }
+                (COMPONENT_INPUT, &MSG_KEY_TAB) => {
+                    self.view.active(COMPONENT_TREEVIEW);
+                    None
+                }
+                (COMPONENT_TREEVIEW, &MSG_KEY_TAB) => {
+                    self.view.active(COMPONENT_INPUT);
                     None
                 }
                 (_, &MSG_KEY_ESC) => {
