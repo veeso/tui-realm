@@ -19,6 +19,7 @@ Current version: 0.2.0 (07/06/2021)
     - [Add tui-realm-treeview to your Cargo.toml 🦀](#add-tui-realm-treeview-to-your-cargotoml-)
     - [Use the treeview component](#use-the-treeview-component)
     - [About performance](#about-performance)
+  - [Behaviour](#behaviour)
   - [Documentation 📚](#documentation-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
@@ -68,6 +69,39 @@ Best practices:
 
 - Except when dealing with small trees, always set a depth for the tree
 - For file systems, depth 3 should be fine for each directory, then expand each directory on demand as implemented in the example
+
+---
+
+## Behaviour
+
+**Events**:
+
+| Event               | Message    | Behaviour                                            |
+|---------------------|------------|------------------------------------------------------|
+| `KeyCode::Down`     | `OnChange` | Go to next element                                   |
+| `KeyCode::Up`       | `OnChange` | Go to previous element                               |
+| `KeyCode::PageDown` | `OnChange` | Move cursor down by defined max steps or end of node |
+| `KeyCode::PageUp`   | `OnChange` | Move cursor up by defined max steps or begin of node |
+| `KeyCode::Right`    | `OnChange` | Open highlighted node                                |
+| `KeyCode::Left`     | `OnChange` | Close highlighted node                               |
+| `KeyCode::Char(_)`  | `OnKey`    | Return pressed key                                   |
+
+**Update**: `Msg::OnChange` if the value changed, `Msg::None` otherwise.
+
+**State**: the state returned is a `One(Str)` containing the id of the selected node. If no node is selected `None` is returned.
+
+**Properties**:
+
+- `with_foreground`: foreground color. The foreground will be used as foreground for the selected item, when focus is false, otherwise as background
+- `with_background`: background color. The background color will be used as background for unselected entry, but will be used as foreground for the selected entry when focus is true
+- `with_borders`: set borders properties for component
+- `with_title`: Set box title
+- `with_highlighted_str`: The provided string will be displayed on the left side of the selected entry in the tree
+- `with_tree_and_depth`: Sets the tree and its max depth for Props builder
+- `with_tree`: Sets the tree for Props builder
+- `with_node`: Select initial node in the tree. This option has priority over `keep_state`
+- `keep_state`: If keep is true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree).
+- `with_max_page_steps`: Defines the maximum amount of steps to perform after a PG_DOWN / PG_UP
 
 ---
 
