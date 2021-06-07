@@ -821,6 +821,7 @@ mod tests {
             component.get_state(),
             Payload::One(Value::Str(String::from("new-value")))
         );
+        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
     }
 
     #[test]

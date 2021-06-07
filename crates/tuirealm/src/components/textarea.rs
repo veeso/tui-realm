@@ -566,5 +566,6 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
             Msg::OnKey(KeyEvent::from(KeyCode::Backspace))
         );
+        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
     }
 }
