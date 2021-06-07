@@ -53,11 +53,9 @@ pub struct Props {
     pub background: Color,     // Background color
     pub borders: BordersProps, // Borders
     pub modifiers: Modifier,
-    pub input_type: InputType,                 // Input type
-    pub input_len: Option<usize>,              // max input len
     pub palette: HashMap<&'static str, Color>, // Use palette to store extra colors
     pub texts: TextParts,                      // text parts
-    pub value: PropPayload,                    // Initial value
+    pub own: HashMap<&'static str, PropPayload>, // Own properties (extra)
 }
 
 impl Default for Props {
@@ -69,11 +67,9 @@ impl Default for Props {
             background: Color::Reset,
             borders: BordersProps::default(),
             modifiers: Modifier::empty(),
-            input_type: InputType::Text,
-            input_len: None,
             palette: HashMap::new(),
             texts: TextParts::default(),
-            value: PropPayload::None,
+            own: HashMap::new(),
         }
     }
 }
@@ -116,6 +112,8 @@ pub enum PropValue {
     F64(f64),
     F32(f32),
     Str(String),
+    Color(Color),
+    InputType(InputType),
 }
 
 // -- Input Type
@@ -148,9 +146,7 @@ mod tests {
         assert_eq!(props.modifiers, Modifier::empty());
         assert_eq!(props.palette.len(), 0);
         assert!(props.texts.title.is_none());
-        assert_eq!(props.input_type, InputType::Text);
-        assert!(props.input_len.is_none());
-        assert_eq!(props.value, PropPayload::None);
+        assert_eq!(props.own.len(), 0);
         assert!(props.texts.spans.is_none());
     }
 
@@ -177,10 +173,41 @@ mod tests {
         ]);
         let mut map: HashMap<String, PropValue> = HashMap::new();
         map.insert(String::from("a"), PropValue::I8(4));
+        assert_eq!(*map.get("a").unwrap(), PropValue::I8(4));
         map.insert(String::from("b"), PropValue::I16(-8));
+        assert_eq!(*map.get("b").unwrap(), PropValue::I16(-8));
         map.insert(String::from("c"), PropValue::I32(16));
+        assert_eq!(*map.get("c").unwrap(), PropValue::I32(16));
         map.insert(String::from("d"), PropValue::I64(-32));
+        assert_eq!(*map.get("d").unwrap(), PropValue::I64(-32));
         map.insert(String::from("e"), PropValue::I128(64));
+        assert_eq!(*map.get("e").unwrap(), PropValue::I128(64));
+        map.insert(String::from("f"), PropValue::Color(Color::Red));
+        assert_eq!(*map.get("f").unwrap(), PropValue::Color(Color::Red));
+        map.insert(String::from("g"), PropValue::InputType(InputType::Number));
+        assert_eq!(
+            *map.get("g").unwrap(),
+            PropValue::InputType(InputType::Number)
+        );
+        map.insert(String::from("h"), PropValue::U8(0));
+        assert_eq!(*map.get("h").unwrap(), PropValue::U8(0));
+        map.insert(String::from("i"), PropValue::Bool(true));
+        assert_eq!(*map.get("i").unwrap(), PropValue::Bool(true));
+        map.insert(String::from("j"), PropValue::U16(256));
+        assert_eq!(*map.get("j").unwrap(), PropValue::U16(256));
+        map.insert(String::from("k"), PropValue::U32(65536));
+        assert_eq!(*map.get("k").unwrap(), PropValue::U32(65536));
+        map.insert(String::from("l"), PropValue::U64(10000000000));
+        assert_eq!(*map.get("l").unwrap(), PropValue::U64(10000000000));
+        map.insert(String::from("m"), PropValue::Isize(200));
+        assert_eq!(*map.get("m").unwrap(), PropValue::Isize(200));
+        map.insert(String::from("n"), PropValue::F32(0.23));
+        assert_eq!(*map.get("n").unwrap(), PropValue::F32(0.23));
+        map.insert(String::from("s"), PropValue::InputType(InputType::Number));
+        assert_eq!(
+            *map.get("s").unwrap(),
+            PropValue::InputType(InputType::Number)
+        );
         PropPayload::Map(map);
         let mut link: LinkedList<PropPayload> = LinkedList::new();
         link.push_back(PropPayload::One(PropValue::Usize(1)));

@@ -37,6 +37,8 @@ use crate::tui::{
 };
 use crate::{Canvas, Component, Event, Msg, Payload, Value};
 
+const PROP_CHOICES: &str = "choices";
+
 // -- Props
 
 pub struct CheckboxPropsBuilder {
@@ -135,10 +137,13 @@ impl CheckboxPropsBuilder {
 
     /// ### with_value
     ///
-    /// Set initial value for choice
+    /// Set selected choices
     pub fn with_value(&mut self, choices: Vec<usize>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropPayload::Vec(choices.into_iter().map(PropValue::Usize).collect());
+            props.own.insert(
+                PROP_CHOICES,
+                PropPayload::Vec(choices.into_iter().map(PropValue::Usize).collect()),
+            );
         }
         self
     }
@@ -246,7 +251,7 @@ impl Checkbox {
         // Update choices (vec of TextSpan to String)
         states.set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropPayload::Vec(choices) = &props.value {
+        if let Some(PropPayload::Vec(choices)) = &props.own.get(PROP_CHOICES) {
             states.selection = choices
                 .clone()
                 .iter()
@@ -327,7 +332,7 @@ impl Component for Checkbox {
         self.states
             .set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropPayload::Vec(choices) = &props.value {
+        if let Some(PropPayload::Vec(choices)) = &props.own.get(PROP_CHOICES) {
             self.states.selection = choices
                 .clone()
                 .iter()
@@ -515,7 +520,7 @@ mod test {
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
         assert_eq!(
-            component.props.value,
+            *component.props.own.get(PROP_CHOICES).unwrap(),
             PropPayload::Vec(vec![PropValue::Usize(1), PropValue::Usize(5)])
         );
         // Verify states
@@ -613,5 +618,6 @@ mod test {
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
             Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
         );
+        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
     }
 }

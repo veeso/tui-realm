@@ -5,6 +5,9 @@
   - [Setup](#setup)
   - [States](#states)
   - [Properties](#properties)
+    - [About properties](#about-properties)
+      - [Texts](#texts)
+      - [PropPayload](#proppayload)
   - [Implement Component trait](#implement-component-trait)
     - [Render](#render)
     - [Update](#update)
@@ -186,10 +189,88 @@ impl CounterPropsBuilder {
 
     pub fn with_value(&mut self, counter: usize) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropPayload::One(PropValue::Usize(counter));
+            props.own.insert("value", PropPayload::One(PropValue::Usize(counter)));
         }
         self
     }
+}
+```
+
+### About properties
+
+The property struct contains basically everything you need to create the best components. When implementing a builder you can work with these attributes:
+
+- **visible**: a boolean which should be used to indicate whether the component must be rendered or not
+- **foreground**: the foreground color. Usually each tui widget has a foreground
+- **background**: the background color. Usually each tui widget has a background
+- **borders**: defines the style and the properties for the widget block
+- **modifiers**: the modifiers for the text (default). To differentiate modifiers across text parts, define a style for the spans.
+- **palette**: defines the color palette. Useful if you  want to define more colors, than foreground and background. You could also use `own`, but own wasn't there when palette was defined for the first time.
+- **texts**: contains the texts for the components. For more details read [texts](#texts)
+- **own**: an key-value storage to store custom values. The values must use the `PropPayload` syntax. For more details read [PropPayload](#proppayload)
+
+#### Texts
+
+Component texts are defined inside a struct called `TextParts` which is defined as:
+
+```rust
+pub struct TextParts {
+    pub title: Option<String>,
+    pub spans: Option<Vec<TextSpan>>,
+    pub table: Option<Table>, // First vector is rows, inner vec is column
+}
+```
+
+where:
+
+- **title** should describe the title for the container
+- **spans** is a multi-part text with its own style
+- **table** should be used to create a row x cols text
+
+In general spans and table should never been used at the same time.
+
+To build text parts there are some helpers such as `TextSpanBuilder` and `TableBuilder`.
+
+#### PropPayload
+
+The PropPayload is very similiar to `Payload`, but this one is used only to store properties into the component.
+The payload supports the same data types as `Payload`:
+
+```rust
+pub enum PropPayload {
+    One(PropValue),
+    Tup2((PropValue, PropValue)),
+    Tup3((PropValue, PropValue, PropValue)),
+    Tup4((PropValue, PropValue, PropValue, PropValue)),
+    Vec(Vec<PropValue>),
+    Map(HashMap<String, PropValue>),
+    Linked(LinkedList<PropPayload>),
+    None,
+}
+```
+
+while values are somehow different from `Value`:
+
+```rust
+pub enum PropValue {
+    Bool(bool),
+    U8(u8),
+    U16(u16),
+    U32(u32),
+    U64(u64),
+    U128(u128),
+    Usize(usize),
+    I8(i8),
+    I16(i16),
+    I32(i32),
+    I64(i64),
+    I128(i128),
+    Isize(isize),
+    F64(f64),
+    F32(f32),
+    Str(String),
+    Color(Color),
+    InputType(InputType),
 }
 ```
 
@@ -209,7 +290,7 @@ impl Counter {
     pub fn new(props: Props) -> Self {
         let mut states: OwnStates = OwnStates::default();
         // Init counter
-        if let PropPayload::One(PropValue::Unsigned(val)) = &props.value {
+        if let Some(PropPayload::One(PropValue::Unsigned(val))) = props.own.get("input") {
             states.counter = *val;
         }
         Counter { props, states }
@@ -266,7 +347,7 @@ Update, as you might know must update the component properties. This also return
     fn update(&mut self, props: Props) -> Msg {
         let prev_value = self.states.counter;
         // Get value
-        if let PropPayload::One(PropValue::Unsigned(val)) = &props.value {
+        if let Some(PropPayload::One(PropValue::Unsigned(val))) = props.own.get("input") {
             self.states.counter = *val;
         }
         self.props = props;

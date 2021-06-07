@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.4.0](#040)
   - [0.3.2](#032)
   - [0.3.1](#031)
   - [0.3.0](#030)
@@ -9,6 +10,18 @@
   - [0.1.0](#010)
 
 ---
+
+## 0.4.0
+
+Released on 07/06/2021
+
+- Another **Prop API Update**
+  - Removed `input_len` and `input_type` from properties. Use `own` instead with new `PropValue`
+  - Added `Color` and `InputType` to `PropValue`
+  - Removed `value` from `Props`
+  - Added `own`: key-value storage (`HashMap<&'static str, PropPayload>`) to store any value into properties.
+- Dependencies:
+  - `textwrap` 0.14.0
 
 ## 0.3.2
 

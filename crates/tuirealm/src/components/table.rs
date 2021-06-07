@@ -382,5 +382,6 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
             Msg::OnKey(KeyEvent::from(KeyCode::Delete))
         );
+        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
     }
 }

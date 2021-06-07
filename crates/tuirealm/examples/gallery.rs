@@ -156,7 +156,8 @@ fn init_view() -> View {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
                 .with_input(InputType::Text)
-                .with_label(String::from("Type in your password"))
+                .with_input_len(16)
+                .with_label(String::from("Type in your username (max length 16)"))
                 .build(),
         )),
     );
@@ -499,8 +500,8 @@ impl Update for Model {
 
 fn update_progress(view: &mut View) -> Option<(String, Msg)> {
     let props = view.get_props(COMPONENT_PROGBAR).unwrap();
-    let new_prog: f64 = match props.value {
-        PropPayload::One(PropValue::F64(val)) => match val + 0.05 > 1.0 {
+    let new_prog: f64 = match props.own.get("progress") {
+        Some(PropPayload::One(PropValue::F64(val))) => match val + 0.05 > 1.0 {
             true => 0.0,
             false => val + 0.05,
         },
