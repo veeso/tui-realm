@@ -415,13 +415,17 @@ impl<'a> OwnStates<'a> {
     /// ### new
     ///
     /// Instantiates a new OwnStates from tree data
-    pub fn new(tree: Tree) -> Self {
+    pub fn new(tree: Tree, initial_id: Option<&str>) -> Self {
         let mut component: Self = Self {
             focus: false,
             tui_tree: StatefulTree::from(&tree),
             tree,
         };
         component.open_first();
+        // Init id
+        if let Some(id) = initial_id {
+            component.set_node(id);
+        }
         component
     }
 
@@ -456,27 +460,7 @@ impl<'a> OwnStates<'a> {
         self.tui_tree.state.clone()
     }
 
-    // -- setters
-
-    /// ### update_tree
-    ///
-    /// Update states tree
-    pub fn update_tree(&mut self, tree: Tree, keep_state: bool) {
-        // let route: Vec<usize> = self.tui_tree.selected(); NOTE: restore to track state
-        let selected: Option<String> = self.selected_node().map(|x| x.id().to_string());
-        self.tui_tree = StatefulTree::from(&tree);
-        self.tree = tree;
-        // Open first
-        self.open_first();
-        // Restore state if required
-        if keep_state {
-            if let Some(selected) = selected {
-                if let Some(route) = self.tree.route_by_node(selected.as_str()) {
-                    self.tui_tree.set_state(route.as_slice());
-                }
-            }
-        }
-    }
+    // -- api
 
     /// ### toggle_focus
     ///
@@ -516,6 +500,41 @@ impl<'a> OwnStates<'a> {
     fn open_first(&mut self) {
         self.next();
         self.open();
+    }
+
+    // -- setters
+
+    /// ### update_tree
+    ///
+    /// Update states tree
+    pub fn update_tree(&mut self, tree: Tree, keep_state: bool, initial_id: Option<&str>) {
+        // let route: Vec<usize> = self.tui_tree.selected(); NOTE: restore to track state
+        let selected: Option<String> = self.selected_node().map(|x| x.id().to_string());
+        self.tui_tree = StatefulTree::from(&tree);
+        self.tree = tree;
+        // Open first
+        self.open_first();
+        // Restore state if required (initial id mustn't be set)
+        if keep_state && initial_id.is_none() {
+            if let Some(selected) = selected {
+                if let Some(route) = self.tree.route_by_node(selected.as_str()) {
+                    self.tui_tree.set_state(route.as_slice());
+                }
+            }
+        }
+        // Set initial node
+        if let Some(id) = initial_id {
+            self.set_node(id);
+        }
+    }
+
+    /// ### set_node
+    ///
+    /// Try to set node to id
+    fn set_node(&mut self, id: &str) {
+        if let Some(route) = self.tree.route_by_node(id) {
+            self.tui_tree.set_state(route.as_slice());
+        }
     }
 }
 
@@ -647,9 +666,27 @@ impl TreeViewPropsBuilder {
         self.with_tree_and_depth(root, usize::MAX)
     }
 
+    /// ### with_node
+    ///
+    /// Select initial node in the tree.
+    /// NOTE: this option has priority over `keep_state`
+    pub fn with_node(&mut self, id: Option<&str>) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            match id {
+                Some(id) => props.own.insert(
+                    PROP_INITIAL_NODE,
+                    PropPayload::One(PropValue::Str(id.to_string())),
+                ),
+                None => props.own.remove(PROP_INITIAL_NODE),
+            };
+        }
+        self
+    }
+
     /// ### keep_state
     ///
-    /// If keep is true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree)
+    /// If keep is true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree).
+    /// NOTE: this property has lower property than `with_node`
     pub fn keep_state(&mut self, keep: bool) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props
@@ -680,7 +717,11 @@ impl<'a> TreeView<'a> {
             Some(tree) => Tree::from(tree),
             None => Tree::new(Node::new("", "")),
         };
-        let states: OwnStates = OwnStates::new(tree);
+        let initial_id: Option<&str> = match props.own.get(PROP_INITIAL_NODE) {
+            Some(PropPayload::One(PropValue::Str(id))) => Some(id.as_str()),
+            _ => None,
+        };
+        let states: OwnStates = OwnStates::new(tree, initial_id);
         TreeView { props, states }
     }
     /// ### get_block
@@ -749,7 +790,11 @@ impl<'a> Component for TreeView<'a> {
             props.own.get(PROP_KEEP_STATE),
             Some(PropPayload::One(PropValue::Bool(true)))
         );
-        self.states.update_tree(tree, keep_state);
+        let initial_id: Option<&str> = match props.own.get(PROP_INITIAL_NODE) {
+            Some(PropPayload::One(PropValue::Str(id))) => Some(id.as_str()),
+            _ => None,
+        };
+        self.states.update_tree(tree, keep_state, initial_id);
         let new_selection: Option<String> = self.states.selected_node().map(|x| x.id().to_string());
         // Set props
         self.props = props;
@@ -991,7 +1036,7 @@ mod tests {
                     ),
                 ),
         );
-        let mut states: OwnStates = OwnStates::new(tree);
+        let mut states: OwnStates = OwnStates::new(tree, None);
         assert_eq!(states.focus(), false);
         states.toggle_focus(true);
         assert_eq!(states.focus(), true);
@@ -1017,15 +1062,61 @@ mod tests {
         states.close();
         assert_eq!(states.selected_node().unwrap().id(), "/bin");
         // -- Update
-        /*
         let tree: Tree = Tree::new(
             Node::new("/", "/")
                 .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/ls", "ls"))),
         );
         // Verify state kept
-        states.update_tree(tree);
+        states.update_tree(tree, true, None);
         assert_eq!(states.selected_node().unwrap().id(), "/bin");
-        */
+        // State not kept
+        let tree: Tree = Tree::new(
+            Node::new("/", "/").with_child(
+                Node::new("/home", "home/").with_child(
+                    Node::new("/home/omar", "omar/")
+                        .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                        .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                ),
+            ),
+        );
+        states.update_tree(tree, true, None);
+        assert_eq!(states.selected_node().unwrap().id(), "/");
+        // Update but with node
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .with_child(
+                    Node::new("/bin", "bin/")
+                        .with_child(Node::new("/bin/ls", "ls"))
+                        .with_child(Node::new("/bin/pwd", "pwd")),
+                )
+                .with_child(
+                    Node::new("/home", "home/").with_child(
+                        Node::new("/home/omar", "omar/")
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        states.update_tree(tree, true, Some("/home/omar"));
+        assert_eq!(states.selected_node().unwrap().id(), "/home/omar");
+        // new with state
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .with_child(
+                    Node::new("/bin", "bin/")
+                        .with_child(Node::new("/bin/ls", "ls"))
+                        .with_child(Node::new("/bin/pwd", "pwd")),
+                )
+                .with_child(
+                    Node::new("/home", "home/").with_child(
+                        Node::new("/home/omar", "omar/")
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let states: OwnStates = OwnStates::new(tree, Some("/home/omar/readme.md"));
+        assert_eq!(states.selected_node().unwrap().id(), "/home/omar/readme.md");
     }
 
     #[test]
@@ -1056,6 +1147,7 @@ mod tests {
                 .with_highlighted_str(">>")
                 .with_tree(tree.root())
                 .keep_state(false)
+                .with_node(Some("/home"))
                 .build(),
         );
         assert_eq!(component.props.foreground, Color::Red);
@@ -1064,6 +1156,11 @@ mod tests {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        // Verify with_node
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("/home")))
+        );
         // Block
         let _ = component.get_block();
         // Focus
@@ -1077,11 +1174,19 @@ mod tests {
             .with_foreground(Color::Yellow)
             .with_title(Some(String::from("aaa")))
             .hidden()
+            .with_node(None)
             .build();
-        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(
+            component.update(props),
+            Msg::OnChange(Payload::One(Value::Str("/".to_string())))
+        );
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Yellow);
         assert_eq!(component.props.texts.title.as_ref().unwrap(), "aaa");
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("/")))
+        );
         assert_eq!(
             component.props.texts.spans.as_ref().unwrap()[0]
                 .content
