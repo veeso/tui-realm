@@ -40,6 +40,8 @@ And that's also explains the reason of the name: Realm stands for React and Elm.
 
 Tui-realm also comes with a built-in standard library of components you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
 
+⚠ Warning: tui-realm is in at a very early stage in development, and the API might change between versions ⚠
+
 ![Demo](docs/images/demo.gif)
 
 ---
