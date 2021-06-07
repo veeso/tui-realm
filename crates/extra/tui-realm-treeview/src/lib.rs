@@ -8,7 +8,7 @@
 //! ### Adding `tui-realm-treeview` as dependency
 //!
 //! ```toml
-//! tui-realm-treeview = "0.1.0"
+//! tui-realm-treeview = "0.1.1"
 //! ```
 //!
 //! ## Setup a tree component
@@ -156,11 +156,25 @@ impl Tree {
         &self.root
     }
 
+    /// ### root_mut
+    ///
+    /// Returns a mutablen reference to the root node
+    pub fn root_mut(&mut self) -> &mut Node {
+        &mut self.root
+    }
+
     /// ### query
     ///
     /// Query tree for a certain node
     pub fn query(&self, id: &str) -> Option<&Node> {
         self.root.query(id)
+    }
+
+    /// ### query_mut
+    ///
+    /// Query tree for a certain node and return it as a mutable reference
+    pub fn query_mut(&mut self, id: &str) -> Option<&mut Node> {
+        self.root.query_mut(id)
     }
 
     /// ### node_by_route
@@ -725,7 +739,7 @@ mod tests {
     #[test]
     fn test_tree() {
         // -- Build
-        let tree: Tree = Tree::new(
+        let mut tree: Tree = Tree::new(
             Node::new("/", "/")
                 .with_child(
                     Node::new("/bin", "bin/")
@@ -768,6 +782,16 @@ mod tests {
             "/home/omar/changelog.md"
         );
         assert!(tree.query("ommlar").is_none());
+        // Mutable
+        let _ = tree.root_mut();
+        // Push node
+        tree.query_mut("/home/omar")
+            .unwrap()
+            .add_child(Node::new("/home/omar/Cargo.toml", "Cargo.toml"));
+        assert_eq!(
+            tree.query("/home/omar/Cargo.toml").unwrap().id(),
+            "/home/omar/Cargo.toml"
+        );
         // -- node_by_route
         assert_eq!(
             tree.node_by_route(&[0, 1, 0, 1]).unwrap().id(),
@@ -777,7 +801,7 @@ mod tests {
             tree.root().node_by_route(&[1, 0, 1]).unwrap().id(),
             "/home/omar/changelog.md"
         );
-        assert!(tree.root().node_by_route(&[1, 0, 2]).is_none());
+        assert!(tree.root().node_by_route(&[1, 0, 3]).is_none());
         // -- With children
         let tree: Tree = Tree::new(
             Node::new("a", "a").with_children(vec![Node::new("a1", "a1"), Node::new("a2", "a2")]),
@@ -1009,5 +1033,8 @@ mod tests {
             .with_tree_and_depth(tree.root(), 1)
             .build();
         assert_eq!(component.update(props), Msg::None);
+        // Reset state
+        component.states.tui_tree = StatefulTree::new();
+        assert_eq!(component.get_state(), Payload::None);
     }
 }
