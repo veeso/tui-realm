@@ -41,6 +41,8 @@ const COMPONENT_INPUT: &str = "INPUT";
 const COMPONENT_LABEL: &str = "LABEL";
 const COMPONENT_TREEVIEW: &str = "TREEVIEW";
 
+const MAX_DEPTH: usize = 3;
+
 struct Model {
     path: PathBuf,
     tree: Tree,
@@ -55,7 +57,7 @@ impl Model {
             quit: false,
             redraw: true,
             view,
-            tree: Tree::new(Self::dir_tree(p, 3)),
+            tree: Tree::new(Self::dir_tree(p, MAX_DEPTH)),
             path: p.to_path_buf(),
         }
     }
@@ -74,11 +76,26 @@ impl Model {
 
     pub fn scan_dir(&mut self, p: &Path) {
         self.path = p.to_path_buf();
-        self.tree = Tree::new(Self::dir_tree(p, 3));
+        self.tree = Tree::new(Self::dir_tree(p, MAX_DEPTH));
     }
 
     pub fn upper_dir(&self) -> Option<&Path> {
         self.path.parent()
+    }
+
+    pub fn extend_dir(&mut self, id: &str, p: &Path, depth: usize) {
+        if let Some(node) = self.tree.query_mut(id) {
+            if depth > 0 && p.is_dir() {
+                // Clear node
+                node.clear();
+                // Scan dir
+                if let Ok(e) = std::fs::read_dir(p) {
+                    e.flatten().for_each(|x| {
+                        node.add_child(Self::dir_tree(x.path().as_path(), depth - 1))
+                    });
+                }
+            }
+        }
     }
 
     fn dir_tree(p: &Path, depth: usize) -> Node {
@@ -212,7 +229,11 @@ impl Update for Model {
                 }
                 (COMPONENT_TREEVIEW, Msg::OnSubmit(Payload::One(Value::Str(node_id)))) => {
                     // Update tree
-                    self.scan_dir(PathBuf::from(node_id.as_str()).as_path());
+                    self.extend_dir(
+                        node_id.as_str(),
+                        PathBuf::from(node_id.as_str()).as_path(),
+                        MAX_DEPTH,
+                    );
                     // Update
                     let props = TreeViewPropsBuilder::from(
                         self.view.get_props(COMPONENT_TREEVIEW).unwrap(),

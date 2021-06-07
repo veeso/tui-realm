@@ -241,6 +241,13 @@ impl Node {
         self.label.as_str()
     }
 
+    /// ### is_leaf
+    ///
+    /// Returns whether this node is a leaf (which means it has no children)
+    pub fn is_leaf(&self) -> bool {
+        self.children.is_empty()
+    }
+
     /// ### with_children
     ///
     /// Sets Node children
@@ -262,6 +269,13 @@ impl Node {
     /// Add a child to the node
     pub fn add_child(&mut self, child: Node) {
         self.children.push(child);
+    }
+
+    /// ### clear
+    ///
+    /// Clear node children
+    pub fn clear(&mut self) {
+        self.children.clear();
     }
 
     /// ### query
@@ -731,10 +745,10 @@ impl<'a> Component for TreeView<'a> {
             None => Tree::new(Node::new("", "")),
         };
         // Update
-        let keep_state: bool = match props.own.get(PROP_KEEP_STATE) {
-            Some(PropPayload::One(PropValue::Bool(true))) => true,
-            _ => false,
-        };
+        let keep_state: bool = matches!(
+            props.own.get(PROP_KEEP_STATE),
+            Some(PropPayload::One(PropValue::Bool(true)))
+        );
         self.states.update_tree(tree, keep_state);
         let new_selection: Option<String> = self.states.selected_node().map(|x| x.id().to_string());
         // Set props
@@ -886,6 +900,12 @@ mod tests {
             "/home/omar/changelog.md"
         );
         assert!(tree.query("ommlar").is_none());
+        // is leaf
+        assert_eq!(tree.query("/home/omar").unwrap().is_leaf(), false);
+        assert_eq!(
+            tree.query("/home/omar/changelog.md").unwrap().is_leaf(),
+            true
+        );
         // Mutable
         let _ = tree.root_mut();
         // Push node
@@ -918,6 +938,9 @@ mod tests {
             vec![1, 0, 1]
         );
         assert!(tree.root().route_by_node("ciccio-pasticcio").is_none());
+        // Clear node
+        tree.query_mut("/home/omar").unwrap().clear();
+        assert_eq!(tree.query("/home/omar").unwrap().children.len(), 0);
         // -- With children
         let tree: Tree = Tree::new(
             Node::new("a", "a").with_children(vec![Node::new("a1", "a1"), Node::new("a2", "a2")]),

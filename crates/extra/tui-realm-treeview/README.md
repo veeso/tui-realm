@@ -51,7 +51,7 @@ View how to use the treeview-component following the [example](examples/demo.rs)
 cargo run --example demo
 ```
 
-- Press `ENTER` to change directory
+- Press `ENTER` to expand the selected directory
 - Press `BACKSPACE` to go to upper directory
 - Move up and down with `UP/DOWN` arrow keys
 - Open directories with `RIGHT`
@@ -66,7 +66,7 @@ In this library there is a consistent use of recursion, and since rust is not fu
 Best practices:
 
 - Except when dealing with small trees, always set a depth for the tree
-- For file systems, depth 3 should be fine
+- For file systems, depth 3 should be fine for each directory, then expand each directory on demand as implemented in the example
 
 ---
 
