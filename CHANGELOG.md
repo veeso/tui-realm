@@ -20,6 +20,8 @@ Released on 07/06/2021
   - Added `Color` and `InputType` to `PropValue`
   - Removed `value` from `Props`
   - Added `own`: key-value storage (`HashMap<&'static str, PropPayload>`) to store any value into properties.
+- Dependencies:
+  - `textwrap` 0.14.0
 
 ## 0.3.2
 
