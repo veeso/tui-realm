@@ -177,6 +177,20 @@ impl Tree {
         self.root.query_mut(id)
     }
 
+    /// ### parent
+    ///
+    /// Get parent node of `id`
+    pub fn parent(&self, id: &str) -> Option<&Node> {
+        self.root().parent(id)
+    }
+
+    /// ### siblings
+    ///
+    /// Get siblings for provided node
+    pub fn siblings(&self, id: &str) -> Option<Vec<&str>> {
+        self.root().siblings(id)
+    }
+
     /// ### node_by_route
     ///
     /// Get starting from root the node associated to the indexes.
@@ -241,13 +255,6 @@ impl Node {
         self.label.as_str()
     }
 
-    /// ### is_leaf
-    ///
-    /// Returns whether this node is a leaf (which means it has no children)
-    pub fn is_leaf(&self) -> bool {
-        self.children.is_empty()
-    }
-
     /// ### with_children
     ///
     /// Sets Node children
@@ -264,6 +271,8 @@ impl Node {
         self
     }
 
+    // -- manipulation
+
     /// ### add_child
     ///
     /// Add a child to the node
@@ -276,6 +285,27 @@ impl Node {
     /// Clear node children
     pub fn clear(&mut self) {
         self.children.clear();
+    }
+
+    /// ### truncate
+    ///
+    /// Truncate tree at depth.
+    /// If depth is `0`, node's children will be cleared
+    pub fn truncate(&mut self, depth: usize) {
+        if depth == 0 {
+            self.children.clear();
+        } else {
+            self.children.iter_mut().for_each(|x| x.truncate(depth - 1));
+        }
+    }
+
+    // -- query
+
+    /// ### is_leaf
+    ///
+    /// Returns whether this node is a leaf (which means it has no children)
+    pub fn is_leaf(&self) -> bool {
+        self.children.is_empty()
     }
 
     /// ### query
@@ -312,18 +342,6 @@ impl Node {
         }
     }
 
-    /// ### truncate
-    ///
-    /// Truncate tree at depth.
-    /// If depth is `0`, node's children will be cleared
-    pub fn truncate(&mut self, depth: usize) {
-        if depth == 0 {
-            self.children.clear();
-        } else {
-            self.children.iter_mut().for_each(|x| x.truncate(depth - 1));
-        }
-    }
-
     /// ### count
     ///
     /// Count items in tree
@@ -346,6 +364,32 @@ impl Node {
                 .unwrap_or(depth)
         }
         depth_r(self, 1)
+    }
+
+    /// ### parent
+    ///
+    /// Get parent node of `id`
+    pub fn parent(&self, id: &str) -> Option<&Self> {
+        match self.route_by_node(id) {
+            None => None,
+            Some(route) => {
+                // Get parent
+                self.node_by_route(&route[0..route.len() - 1])
+            }
+        }
+    }
+
+    /// ### siblings
+    ///
+    /// Get siblings for provided node
+    pub fn siblings(&self, id: &str) -> Option<Vec<&str>> {
+        self.parent(id).map(|x| {
+            x.children
+                .iter()
+                .filter(|&x| x.id() != id)
+                .map(|x| x.id())
+                .collect()
+        })
     }
 
     /// ### node_by_route
@@ -951,6 +995,19 @@ mod tests {
             tree.query("/home/omar/changelog.md").unwrap().is_leaf(),
             true
         );
+        // parent
+        assert_eq!(
+            tree.parent("/home/omar/changelog.md").unwrap().id(),
+            "/home/omar"
+        );
+        assert!(tree.parent("/homer").is_none());
+        // siblings
+        assert_eq!(
+            tree.siblings("/home/omar/changelog.md").unwrap(),
+            vec!["/home/omar/readme.md"]
+        );
+        assert_eq!(tree.siblings("/home/omar").unwrap().len(), 0);
+        assert!(tree.siblings("/homer").is_none());
         // Mutable
         let _ = tree.root_mut();
         // Push node
