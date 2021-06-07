@@ -39,6 +39,8 @@ use crate::{Canvas, Component, Event, Msg, Payload, Value};
 
 // -- Props
 
+const PROP_OPTION: &str = "option";
+
 pub struct RadioPropsBuilder {
     props: Option<Props>,
 }
@@ -138,7 +140,9 @@ impl RadioPropsBuilder {
     /// Set initial value for choice
     pub fn with_value(&mut self, index: usize) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropPayload::One(PropValue::Usize(index));
+            props
+                .own
+                .insert(PROP_OPTION, PropPayload::One(PropValue::Usize(index)));
         }
         self
     }
@@ -222,8 +226,8 @@ impl Radio {
         // Update choices (vec of TextSpan to String)
         states.set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropPayload::One(PropValue::Usize(choice)) = props.value {
-            states.choice = choice;
+        if let Some(PropPayload::One(PropValue::Usize(choice))) = props.own.get(PROP_OPTION) {
+            states.choice = *choice;
         }
         Radio { props, states }
     }
@@ -279,8 +283,8 @@ impl Component for Radio {
         self.states
             .set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
         // Get value
-        if let PropPayload::One(PropValue::Usize(choice)) = props.value {
-            self.states.choice = choice;
+        if let Some(PropPayload::One(PropValue::Usize(choice))) = props.own.get(PROP_OPTION) {
+            self.states.choice = *choice;
         }
         self.props = props;
         // Msg none
@@ -438,7 +442,10 @@ mod test {
             "C'est oui ou bien c'est non?"
         );
         assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 3);
-        assert_eq!(component.props.value, PropPayload::One(PropValue::Usize(1)));
+        assert_eq!(
+            *component.props.own.get(PROP_OPTION).unwrap(),
+            PropPayload::One(PropValue::Usize(1))
+        );
         // Verify states
         assert_eq!(component.states.choice, 1);
         assert_eq!(component.states.choices.len(), 3);

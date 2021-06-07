@@ -15,7 +15,13 @@
 
 Released on FIXME:
 
-
+- Another **Prop API Update**
+  - Removed `input_len` and `input_type` from properties. Use `own` instead with new `PropValue`
+  - Added `Color` and `InputType` to `PropValue`
+  - Removed `value` from `Props`
+  - Added `own`: key-value storage (`HashMap<&'static str, PropPayload>`) to store any value into properties.
+- Components:
+  - Added `with_validation` to `Input` component to validate with regex
 
 ## 0.3.2
 

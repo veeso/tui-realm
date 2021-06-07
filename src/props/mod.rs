@@ -53,11 +53,9 @@ pub struct Props {
     pub background: Color,     // Background color
     pub borders: BordersProps, // Borders
     pub modifiers: Modifier,
-    pub input_type: InputType,                 // Input type
-    pub input_len: Option<usize>,              // max input len
     pub palette: HashMap<&'static str, Color>, // Use palette to store extra colors
     pub texts: TextParts,                      // text parts
-    pub value: PropPayload,                    // Initial value
+    pub own: HashMap<&'static str, PropPayload>, // Own properties (extra)
 }
 
 impl Default for Props {
@@ -69,11 +67,9 @@ impl Default for Props {
             background: Color::Reset,
             borders: BordersProps::default(),
             modifiers: Modifier::empty(),
-            input_type: InputType::Text,
-            input_len: None,
             palette: HashMap::new(),
             texts: TextParts::default(),
-            value: PropPayload::None,
+            own: HashMap::new(),
         }
     }
 }
@@ -116,6 +112,8 @@ pub enum PropValue {
     F64(f64),
     F32(f32),
     Str(String),
+    Color(Color),
+    InputType(InputType),
 }
 
 // -- Input Type
@@ -148,9 +146,7 @@ mod tests {
         assert_eq!(props.modifiers, Modifier::empty());
         assert_eq!(props.palette.len(), 0);
         assert!(props.texts.title.is_none());
-        assert_eq!(props.input_type, InputType::Text);
-        assert!(props.input_len.is_none());
-        assert_eq!(props.value, PropPayload::None);
+        assert_eq!(props.own.len(), 0);
         assert!(props.texts.spans.is_none());
     }
 
@@ -181,6 +177,8 @@ mod tests {
         map.insert(String::from("c"), PropValue::I32(16));
         map.insert(String::from("d"), PropValue::I64(-32));
         map.insert(String::from("e"), PropValue::I128(64));
+        map.insert(String::from("f"), PropValue::Color(Color::Red));
+        map.insert(String::from("g"), PropValue::InputType(InputType::Number));
         PropPayload::Map(map);
         let mut link: LinkedList<PropPayload> = LinkedList::new();
         link.push_back(PropPayload::One(PropValue::Usize(1)));

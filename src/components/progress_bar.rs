@@ -37,6 +37,8 @@ use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
 
+const PROP_PROGRESS: &str = "progress";
+
 pub struct ProgressBarPropsBuilder {
     props: Option<Props>,
 }
@@ -135,7 +137,9 @@ impl ProgressBarPropsBuilder {
                 (0.0..=1.0).contains(&prog),
                 "Progress must be in range [0.0,1.0]"
             );
-            props.value = PropPayload::One(PropValue::F64(prog));
+            props
+                .own
+                .insert(PROP_PROGRESS, PropPayload::One(PropValue::F64(prog)));
         }
         self
     }
@@ -177,8 +181,8 @@ impl Component for ProgressBar {
                 None => String::new(),
             };
             // Get percentage
-            let percentage: f64 = match self.props.value {
-                PropPayload::One(PropValue::F64(ratio)) => ratio,
+            let percentage: f64 = match self.props.own.get(PROP_PROGRESS) {
+                Some(PropPayload::One(PropValue::F64(ratio))) => *ratio,
                 _ => 0.0,
             };
             let div: Block =
@@ -281,7 +285,7 @@ mod test {
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
         assert_eq!(
-            component.props.value,
+            *component.props.own.get(PROP_PROGRESS).unwrap(),
             PropPayload::One(PropValue::F64(0.60))
         );
         // Get value

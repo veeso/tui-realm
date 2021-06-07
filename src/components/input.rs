@@ -37,6 +37,9 @@ use crate::tui::{
 use crate::{Canvas, Component, Event, InputType, Msg, Payload, Value};
 
 // -- Props
+const PROP_VALUE: &str = "value";
+const PROP_INPUT_TYPE: &str = "input_type";
+const PROP_INPUT_LENGHT: &str = "input_length";
 
 pub struct InputPropsBuilder {
     props: Option<Props>,
@@ -131,7 +134,10 @@ impl InputPropsBuilder {
     /// Set input type for component
     pub fn with_input(&mut self, input_type: InputType) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.input_type = input_type;
+            props.own.insert(
+                PROP_INPUT_TYPE,
+                PropPayload::One(PropValue::InputType(input_type)),
+            );
         }
         self
     }
@@ -141,7 +147,9 @@ impl InputPropsBuilder {
     /// Set max input len
     pub fn with_input_len(&mut self, len: usize) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.input_len = Some(len);
+            props
+                .own
+                .insert(PROP_INPUT_LENGHT, PropPayload::One(PropValue::Usize(len)));
         }
         self
     }
@@ -151,7 +159,9 @@ impl InputPropsBuilder {
     /// Set initial value for component
     pub fn with_value(&mut self, value: String) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropPayload::One(PropValue::Str(value));
+            props
+                .own
+                .insert(PROP_VALUE, PropPayload::One(PropValue::Str(value)));
         }
         self
     }
@@ -297,13 +307,32 @@ impl Input {
     pub fn new(props: Props) -> Self {
         // Initialize states
         let mut states: OwnStates = OwnStates::default();
+        // Input type
         // Set state value from props
-        if let PropPayload::One(PropValue::Str(val)) = props.value.clone() {
+        if let Some(PropPayload::One(PropValue::Str(val))) = props.own.get(PROP_VALUE) {
             for ch in val.chars() {
-                states.append(ch, props.input_type, props.input_len);
+                states.append(
+                    ch,
+                    Self::get_input_type(&props),
+                    Self::get_input_len(&props),
+                );
             }
         }
         Input { props, states }
+    }
+
+    fn get_input_type(props: &Props) -> InputType {
+        match props.own.get(PROP_INPUT_TYPE) {
+            Some(PropPayload::One(PropValue::InputType(itype))) => *itype,
+            _ => InputType::Text, // Default
+        }
+    }
+
+    fn get_input_len(props: &Props) -> Option<usize> {
+        match props.own.get(PROP_INPUT_LENGHT) {
+            Some(PropPayload::One(PropValue::Usize(ilen))) => Some(*ilen),
+            _ => None, // Default
+        }
     }
 }
 
@@ -320,18 +349,21 @@ impl Component for Input {
                 &self.props.texts.title,
                 self.states.focus,
             );
-            let p: Paragraph = Paragraph::new(self.states.render_value(self.props.input_type))
-                .style(match self.states.focus {
-                    true => Style::default().fg(self.props.foreground),
-                    false => Style::default(),
-                })
-                .block(div);
+            let p: Paragraph =
+                Paragraph::new(self.states.render_value(Self::get_input_type(&self.props)))
+                    .style(match self.states.focus {
+                        true => Style::default().fg(self.props.foreground),
+                        false => Style::default(),
+                    })
+                    .block(div);
             render.render_widget(p, area);
             // Set cursor, if focus
             if self.states.focus {
                 let x: u16 = area.x
                     + calc_utf8_cursor_position(
-                        &self.states.render_value_chars(self.props.input_type)
+                        &self
+                            .states
+                            .render_value_chars(Self::get_input_type(&self.props))
                             [0..self.states.cursor],
                     )
                     + 1;
@@ -349,13 +381,16 @@ impl Component for Input {
     fn update(&mut self, props: Props) -> Msg {
         self.props = props;
         // Set value from props
-        if let PropPayload::One(PropValue::Str(val)) = self.props.value.clone() {
+        if let Some(PropPayload::One(PropValue::Str(val))) = self.props.own.get(PROP_VALUE) {
             let prev_input = self.states.input.clone();
             self.states.input = Vec::new();
             self.states.cursor = 0;
             for ch in val.chars() {
-                self.states
-                    .append(ch, self.props.input_type, self.props.input_len);
+                self.states.append(
+                    ch,
+                    Self::get_input_type(&self.props),
+                    Self::get_input_len(&self.props),
+                );
             }
             if prev_input != self.states.input {
                 Msg::OnChange(self.get_state())
@@ -375,7 +410,10 @@ impl Component for Input {
     fn get_props(&self) -> Props {
         // Make properties with value from states
         let mut props: Props = self.props.clone();
-        props.value = PropPayload::One(PropValue::Str(self.states.get_value()));
+        props.own.insert(
+            PROP_VALUE,
+            PropPayload::One(PropValue::Str(self.states.get_value())),
+        );
         props
     }
 
@@ -434,8 +472,11 @@ impl Component for Input {
                     {
                         // Push char to input
                         let prev_input = self.states.input.clone();
-                        self.states
-                            .append(ch, self.props.input_type, self.props.input_len);
+                        self.states.append(
+                            ch,
+                            Self::get_input_type(&self.props),
+                            Self::get_input_len(&self.props),
+                        );
                         // Message on change
                         if prev_input != self.states.input {
                             Msg::OnChange(self.get_state())
@@ -460,7 +501,7 @@ impl Component for Input {
     /// For this component returns Unsigned if the input type is a number, otherwise a text
     /// The value is always the current input.
     fn get_state(&self) -> Payload {
-        match self.props.input_type {
+        match Self::get_input_type(&self.props) {
             InputType::Number => Payload::One(Value::Usize(
                 self.states.get_value().parse::<usize>().ok().unwrap_or(0),
             )),
@@ -550,6 +591,10 @@ mod tests {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(
+            *component.props.own.get(PROP_VALUE).unwrap(),
+            PropPayload::One(PropValue::Str(String::from("home")))
+        );
         // Verify initial state
         assert_eq!(component.states.cursor, 4);
         assert_eq!(component.states.input.len(), 4);
@@ -690,8 +735,12 @@ mod tests {
         assert_eq!(component.states.cursor, 1);
         // Move cursor right
         component.states.input = vec!['h', 'e', 'l', 'l', 'o'];
+        let props = InputPropsBuilder::from(component.get_props())
+            .with_input_len(16)
+            .hidden()
+            .build();
+        assert_eq!(component.update(props), Msg::None);
         component.states.cursor = 1;
-        component.props.input_len = Some(16); // Let's change length
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Right))), // between 'e' and 'l'
             Msg::None
