@@ -8,7 +8,7 @@
 //! ### Adding `tui-realm-treeview` as dependency
 //!
 //! ```toml
-//! tui-realm-treeview = "0.1.1"
+//! tui-realm-treeview = "0.2.0"
 //! ```
 //!
 //! ## Setup a tree component
@@ -431,6 +431,10 @@ impl<'a> OwnStates<'a> {
 
 // -- props
 
+const PROP_TREE: &str = "tree";
+const PROP_INITIAL_NODE: &str = "initial_node";
+const PROP_KEEP_STATE: &str = "keep_state";
+
 /// ## TreeViewPropsBuilder
 ///
 /// Tree View properties builder
@@ -541,7 +545,7 @@ impl TreeViewPropsBuilder {
     /// Sets the tree and its max depth for Props builder
     pub fn with_tree_and_depth(&mut self, root: &Node, depth: usize) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = root.to_prop_payload(depth, "")
+            props.own.insert(PROP_TREE, root.to_prop_payload(depth, ""));
         }
         self
     }
@@ -570,7 +574,10 @@ impl<'a> TreeView<'a> {
     /// Instantiate a new Checkbox Group component
     pub fn new(props: Props) -> Self {
         // Make states
-        let tree: Tree = Tree::from(&props.value);
+        let tree: Tree = match props.own.get(PROP_TREE) {
+            Some(tree) => Tree::from(tree),
+            None => Tree::new(Node::new("", "")),
+        };
         let states: OwnStates = OwnStates::new(tree);
         TreeView { props, states }
     }
@@ -631,7 +638,10 @@ impl<'a> Component for TreeView<'a> {
         let prev_selection: Option<String> =
             self.states.selected_node().map(|x| x.id().to_string());
         // make tree
-        let tree: Tree = Tree::from(&props.value);
+        let tree: Tree = match props.own.get(PROP_TREE) {
+            Some(tree) => Tree::from(tree),
+            None => Tree::new(Node::new("", "")),
+        };
         // Update
         self.states.update_tree(tree);
         let new_selection: Option<String> = self.states.selected_node().map(|x| x.id().to_string());
