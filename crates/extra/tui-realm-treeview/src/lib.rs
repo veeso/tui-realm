@@ -8,7 +8,7 @@
 //! ### Adding `tui-realm-treeview` as dependency
 //!
 //! ```toml
-//! tui-realm-treeview = "0.1.1"
+//! tui-realm-treeview = "0.2.0"
 //! ```
 //!
 //! ## Setup a tree component
@@ -177,6 +177,20 @@ impl Tree {
         self.root.query_mut(id)
     }
 
+    /// ### parent
+    ///
+    /// Get parent node of `id`
+    pub fn parent(&self, id: &str) -> Option<&Node> {
+        self.root().parent(id)
+    }
+
+    /// ### siblings
+    ///
+    /// Get siblings for provided node
+    pub fn siblings(&self, id: &str) -> Option<Vec<&str>> {
+        self.root().siblings(id)
+    }
+
     /// ### node_by_route
     ///
     /// Get starting from root the node associated to the indexes.
@@ -186,6 +200,20 @@ impl Tree {
             None
         } else {
             self.root().node_by_route(&route[1..])
+        }
+    }
+
+    /// ### route_by_node
+    ///
+    /// Calculate the route of a node by its id
+    pub fn route_by_node(&self, id: &str) -> Option<Vec<usize>> {
+        match self.root().route_by_node(id) {
+            None => None,
+            Some(route) => {
+                let mut r: Vec<usize> = vec![0];
+                r.extend(route);
+                Some(r)
+            }
         }
     }
 }
@@ -243,11 +271,41 @@ impl Node {
         self
     }
 
+    // -- manipulation
+
     /// ### add_child
     ///
     /// Add a child to the node
     pub fn add_child(&mut self, child: Node) {
         self.children.push(child);
+    }
+
+    /// ### clear
+    ///
+    /// Clear node children
+    pub fn clear(&mut self) {
+        self.children.clear();
+    }
+
+    /// ### truncate
+    ///
+    /// Truncate tree at depth.
+    /// If depth is `0`, node's children will be cleared
+    pub fn truncate(&mut self, depth: usize) {
+        if depth == 0 {
+            self.children.clear();
+        } else {
+            self.children.iter_mut().for_each(|x| x.truncate(depth - 1));
+        }
+    }
+
+    // -- query
+
+    /// ### is_leaf
+    ///
+    /// Returns whether this node is a leaf (which means it has no children)
+    pub fn is_leaf(&self) -> bool {
+        self.children.is_empty()
     }
 
     /// ### query
@@ -284,23 +342,58 @@ impl Node {
         }
     }
 
-    /// ### truncate
-    ///
-    /// Truncate tree at depth.
-    /// If depth is `0`, node's children will be cleared
-    pub fn truncate(&mut self, depth: usize) {
-        if depth == 0 {
-            self.children.clear();
-        } else {
-            self.children.iter_mut().for_each(|x| x.truncate(depth - 1));
-        }
-    }
-
     /// ### count
     ///
     /// Count items in tree
     pub fn count(&self) -> usize {
         self.children.iter().map(|x| x.count()).sum::<usize>() + 1
+    }
+
+    /// ### depth
+    ///
+    /// Calculate the maximum depth of the tree
+    pub fn depth(&self) -> usize {
+        /// ### depth_r
+        ///
+        /// Private recursive call for depth
+        fn depth_r(ptr: &Node, depth: usize) -> usize {
+            ptr.children
+                .iter()
+                .map(|x| depth_r(x, depth + 1))
+                .max()
+                .unwrap_or(depth)
+        }
+        depth_r(self, 1)
+    }
+
+    /// ### parent
+    ///
+    /// Get parent node of `id`
+    pub fn parent(&self, id: &str) -> Option<&Self> {
+        match self.route_by_node(id) {
+            None => None,
+            Some(route) => {
+                // Get parent
+                if route.is_empty() {
+                    None
+                } else {
+                    self.node_by_route(&route[0..route.len() - 1])
+                }
+            }
+        }
+    }
+
+    /// ### siblings
+    ///
+    /// Get siblings for provided node
+    pub fn siblings(&self, id: &str) -> Option<Vec<&str>> {
+        self.parent(id).map(|x| {
+            x.children
+                .iter()
+                .filter(|&x| x.id() != id)
+                .map(|x| x.id())
+                .collect()
+        })
     }
 
     /// ### node_by_route
@@ -314,6 +407,43 @@ impl Node {
             let route = &route[1..];
             next.node_by_route(route)
         }
+    }
+
+    /// ### route_by_node
+    ///
+    /// Calculate the route of a node by its id
+    pub fn route_by_node(&self, id: &str) -> Option<Vec<usize>> {
+        // Recursive function
+        fn route_by_node_r(
+            node: &Node,
+            id: &str,
+            enumerator: Option<usize>,
+            mut route: Vec<usize>,
+        ) -> Option<Vec<usize>> {
+            if let Some(enumerator) = enumerator {
+                route.push(enumerator);
+            }
+            if node.id() == id {
+                // Found!!!
+                Some(route)
+            } else if node.children.is_empty() {
+                // No more children
+                route.pop(); // Pop previous entry
+                None
+            } else {
+                // Keep searching
+                let mut result: Option<Vec<usize>> = None;
+                node.children.iter().enumerate().for_each(|(i, x)| {
+                    let this_route: Vec<usize> = route.clone();
+                    if let Some(this_route) = route_by_node_r(x, id, Some(i), this_route) {
+                        result = Some(this_route);
+                    }
+                });
+                result
+            }
+        }
+        // Call recursive function
+        route_by_node_r(self, id, None, Vec::with_capacity(self.depth()))
     }
 }
 
@@ -333,13 +463,17 @@ impl<'a> OwnStates<'a> {
     /// ### new
     ///
     /// Instantiates a new OwnStates from tree data
-    pub fn new(tree: Tree) -> Self {
+    pub fn new(tree: Tree, initial_id: Option<&str>) -> Self {
         let mut component: Self = Self {
             focus: false,
             tui_tree: StatefulTree::from(&tree),
             tree,
         };
         component.open_first();
+        // Init id
+        if let Some(id) = initial_id {
+            component.set_node(id);
+        }
         component
     }
 
@@ -374,19 +508,49 @@ impl<'a> OwnStates<'a> {
         self.tui_tree.state.clone()
     }
 
-    // -- setters
-
-    /// ### update_tree
+    /// ### get_available_steps_ahead
     ///
-    /// Update states tree
-    pub fn update_tree(&mut self, tree: Tree) {
-        // let route: Vec<usize> = self.tui_tree.selected(); NOTE: restore to track state
-        self.tui_tree = StatefulTree::from(&tree);
-        self.tree = tree;
-        // Open first
-        self.open_first();
-        // self.tui_tree.set_state(route.as_slice());
+    /// Get the available steps after current node or return the max step
+    pub fn get_available_steps_ahead(&self, max_step: usize) -> usize {
+        match self.selected_node() {
+            None => 0,
+            Some(node) => match self.tree.parent(node.id()) {
+                None => 0,
+                Some(parent) => match parent.children.iter().position(|x| x.id() == node.id()) {
+                    None => 0,
+                    Some(nth) => {
+                        let children: usize = parent.children.len();
+                        let diff: usize = children - nth;
+                        match diff > max_step {
+                            true => max_step,
+                            false => diff,
+                        }
+                    }
+                },
+            },
+        }
     }
+
+    /// ### get_available_steps_behind
+    ///
+    /// Get the available steps before current node or return the max step
+    pub fn get_available_steps_behind(&self, max_step: usize) -> usize {
+        match self.selected_node() {
+            None => 0,
+            Some(node) => match self.tree.parent(node.id()) {
+                None => 0,
+                Some(parent) => match parent.children.iter().position(|x| x.id() == node.id()) {
+                    None => 0,
+                    Some(nth) => match nth > max_step {
+                        true => max_step,
+                        false => nth,
+                    },
+                },
+            },
+        }
+    }
+
+    // -- api
 
     /// ### toggle_focus
     ///
@@ -427,9 +591,49 @@ impl<'a> OwnStates<'a> {
         self.next();
         self.open();
     }
+
+    // -- setters
+
+    /// ### update_tree
+    ///
+    /// Update states tree
+    pub fn update_tree(&mut self, tree: Tree, keep_state: bool, initial_id: Option<&str>) {
+        // let route: Vec<usize> = self.tui_tree.selected(); NOTE: restore to track state
+        let selected: Option<String> = self.selected_node().map(|x| x.id().to_string());
+        self.tui_tree = StatefulTree::from(&tree);
+        self.tree = tree;
+        // Open first
+        self.open_first();
+        // Restore state if required (initial id mustn't be set)
+        if keep_state && initial_id.is_none() {
+            if let Some(selected) = selected {
+                if let Some(route) = self.tree.route_by_node(selected.as_str()) {
+                    self.tui_tree.set_state(route.as_slice());
+                }
+            }
+        }
+        // Set initial node
+        if let Some(id) = initial_id {
+            self.set_node(id);
+        }
+    }
+
+    /// ### set_node
+    ///
+    /// Try to set node to id
+    fn set_node(&mut self, id: &str) {
+        if let Some(route) = self.tree.route_by_node(id) {
+            self.tui_tree.set_state(route.as_slice());
+        }
+    }
 }
 
 // -- props
+
+const PROP_TREE: &str = "tree";
+const PROP_INITIAL_NODE: &str = "initial_node";
+const PROP_KEEP_STATE: &str = "keep_state";
+const PROP_MAX_STEPS: &str = "max_steps";
 
 /// ## TreeViewPropsBuilder
 ///
@@ -541,7 +745,7 @@ impl TreeViewPropsBuilder {
     /// Sets the tree and its max depth for Props builder
     pub fn with_tree_and_depth(&mut self, root: &Node, depth: usize) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = root.to_prop_payload(depth, "")
+            props.own.insert(PROP_TREE, root.to_prop_payload(depth, ""));
         }
         self
     }
@@ -551,6 +755,48 @@ impl TreeViewPropsBuilder {
     /// Sets the tree for Props builder
     pub fn with_tree(&mut self, root: &Node) -> &mut Self {
         self.with_tree_and_depth(root, usize::MAX)
+    }
+
+    /// ### with_node
+    ///
+    /// Select initial node in the tree.
+    /// NOTE: this option has priority over `keep_state`
+    pub fn with_node(&mut self, id: Option<&str>) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            match id {
+                Some(id) => props.own.insert(
+                    PROP_INITIAL_NODE,
+                    PropPayload::One(PropValue::Str(id.to_string())),
+                ),
+                None => props.own.remove(PROP_INITIAL_NODE),
+            };
+        }
+        self
+    }
+
+    /// ### keep_state
+    ///
+    /// If keep is true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree).
+    /// NOTE: this property has lower property than `with_node`
+    pub fn keep_state(&mut self, keep: bool) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_KEEP_STATE, PropPayload::One(PropValue::Bool(keep)));
+        }
+        self
+    }
+
+    /// ### with_max_page_steps
+    ///
+    /// Defines the maximum amount of steps to perform after a PG_DOWN / PG_UP
+    pub fn with_max_page_steps(&mut self, steps: usize) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_MAX_STEPS, PropPayload::One(PropValue::Usize(steps)));
+        }
+        self
     }
 }
 
@@ -570,8 +816,15 @@ impl<'a> TreeView<'a> {
     /// Instantiate a new Checkbox Group component
     pub fn new(props: Props) -> Self {
         // Make states
-        let tree: Tree = Tree::from(&props.value);
-        let states: OwnStates = OwnStates::new(tree);
+        let tree: Tree = match props.own.get(PROP_TREE) {
+            Some(tree) => Tree::from(tree),
+            None => Tree::new(Node::new("", "")),
+        };
+        let initial_id: Option<&str> = match props.own.get(PROP_INITIAL_NODE) {
+            Some(PropPayload::One(PropValue::Str(id))) => Some(id.as_str()),
+            _ => None,
+        };
+        let states: OwnStates = OwnStates::new(tree, initial_id);
         TreeView { props, states }
     }
     /// ### get_block
@@ -631,9 +884,20 @@ impl<'a> Component for TreeView<'a> {
         let prev_selection: Option<String> =
             self.states.selected_node().map(|x| x.id().to_string());
         // make tree
-        let tree: Tree = Tree::from(&props.value);
+        let tree: Tree = match props.own.get(PROP_TREE) {
+            Some(tree) => Tree::from(tree),
+            None => Tree::new(Node::new("", "")),
+        };
         // Update
-        self.states.update_tree(tree);
+        let keep_state: bool = matches!(
+            props.own.get(PROP_KEEP_STATE),
+            Some(PropPayload::One(PropValue::Bool(true)))
+        );
+        let initial_id: Option<&str> = match props.own.get(PROP_INITIAL_NODE) {
+            Some(PropPayload::One(PropValue::Str(id))) => Some(id.as_str()),
+            _ => None,
+        };
+        self.states.update_tree(tree, keep_state, initial_id);
         let new_selection: Option<String> = self.states.selected_node().map(|x| x.id().to_string());
         // Set props
         self.props = props;
@@ -681,6 +945,28 @@ impl<'a> Component for TreeView<'a> {
                 KeyCode::Down => {
                     // Next
                     self.states.next();
+                    // Return Msg On Change
+                    Msg::OnChange(self.get_state())
+                }
+                KeyCode::PageDown => {
+                    // Get parent to calculate step
+                    let max_step: usize = match self.props.own.get(PROP_MAX_STEPS) {
+                        Some(PropPayload::One(PropValue::Usize(steps))) => *steps,
+                        _ => usize::MAX,
+                    };
+                    (0..self.states.get_available_steps_ahead(max_step))
+                        .for_each(|_| self.states.next());
+                    // Return Msg On Change
+                    Msg::OnChange(self.get_state())
+                }
+                KeyCode::PageUp => {
+                    // Get parent to calculate step
+                    let max_step: usize = match self.props.own.get(PROP_MAX_STEPS) {
+                        Some(PropPayload::One(PropValue::Usize(steps))) => *steps,
+                        _ => usize::MAX,
+                    };
+                    (0..self.states.get_available_steps_behind(max_step))
+                        .for_each(|_| self.states.previous());
                     // Return Msg On Change
                     Msg::OnChange(self.get_state())
                 }
@@ -776,12 +1062,34 @@ mod tests {
         );
         // count
         assert_eq!(root.count(), 8);
+        // depth
+        assert_eq!(root.depth(), 4);
         // -- Query
         assert_eq!(
             tree.query("/home/omar/changelog.md").unwrap().id(),
             "/home/omar/changelog.md"
         );
         assert!(tree.query("ommlar").is_none());
+        // is leaf
+        assert_eq!(tree.query("/home/omar").unwrap().is_leaf(), false);
+        assert_eq!(
+            tree.query("/home/omar/changelog.md").unwrap().is_leaf(),
+            true
+        );
+        // parent
+        assert!(tree.parent("/").is_none());
+        assert_eq!(
+            tree.parent("/home/omar/changelog.md").unwrap().id(),
+            "/home/omar"
+        );
+        assert!(tree.parent("/homer").is_none());
+        // siblings
+        assert_eq!(
+            tree.siblings("/home/omar/changelog.md").unwrap(),
+            vec!["/home/omar/readme.md"]
+        );
+        assert_eq!(tree.siblings("/home/omar").unwrap().len(), 0);
+        assert!(tree.siblings("/homer").is_none());
         // Mutable
         let _ = tree.root_mut();
         // Push node
@@ -802,6 +1110,21 @@ mod tests {
             "/home/omar/changelog.md"
         );
         assert!(tree.root().node_by_route(&[1, 0, 3]).is_none());
+        // -- Route by node
+        assert_eq!(
+            tree.route_by_node("/home/omar/changelog.md").unwrap(),
+            vec![0, 1, 0, 1]
+        );
+        assert_eq!(
+            tree.root()
+                .route_by_node("/home/omar/changelog.md")
+                .unwrap(),
+            vec![1, 0, 1]
+        );
+        assert!(tree.root().route_by_node("ciccio-pasticcio").is_none());
+        // Clear node
+        tree.query_mut("/home/omar").unwrap().clear();
+        assert_eq!(tree.query("/home/omar").unwrap().children.len(), 0);
         // -- With children
         let tree: Tree = Tree::new(
             Node::new("a", "a").with_children(vec![Node::new("a1", "a1"), Node::new("a2", "a2")]),
@@ -848,11 +1171,17 @@ mod tests {
                     Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
                             .with_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md"))
+                            .with_child(Node::new("/home/omar/alpha.md", "alpha.md"))
+                            .with_child(Node::new("/home/omar/bravo.md", "bravo.md"))
+                            .with_child(Node::new("/home/omar/charlie.md", "charlie.md"))
+                            .with_child(Node::new("/home/omar/delta.md", "delta.md"))
+                            .with_child(Node::new("/home/omar/echo.md", "echo.md"))
+                            .with_child(Node::new("/home/omar/foxtrot.md", "foxtrot.md")),
                     ),
                 ),
         );
-        let mut states: OwnStates = OwnStates::new(tree);
+        let mut states: OwnStates = OwnStates::new(tree, None);
         assert_eq!(states.focus(), false);
         states.toggle_focus(true);
         assert_eq!(states.focus(), true);
@@ -877,20 +1206,42 @@ mod tests {
         assert_eq!(states.selected_node().unwrap().id(), "/bin/pwd");
         states.close();
         assert_eq!(states.selected_node().unwrap().id(), "/bin");
+        // Set state
+        states.set_node("/home/omar/readme.md");
+        assert_eq!(states.selected_node().unwrap().id(), "/home/omar/readme.md");
+        // Available in front
+        assert_eq!(states.get_available_steps_ahead(usize::MAX), 8);
+        assert_eq!(states.get_available_steps_ahead(4), 4);
+        assert_eq!(states.get_available_steps_behind(usize::MAX), 0);
+        assert_eq!(states.get_available_steps_behind(4), 0);
+        states.next();
+        states.next();
+        assert_eq!(states.get_available_steps_ahead(usize::MAX), 6);
+        assert_eq!(states.get_available_steps_ahead(4), 4);
+        assert_eq!(states.get_available_steps_behind(usize::MAX), 2);
+        assert_eq!(states.get_available_steps_behind(1), 1);
         // -- Update
-        /*
+        states.set_node("/bin");
         let tree: Tree = Tree::new(
             Node::new("/", "/")
                 .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/ls", "ls"))),
         );
         // Verify state kept
-        states.update_tree(tree);
+        states.update_tree(tree, true, None);
         assert_eq!(states.selected_node().unwrap().id(), "/bin");
-        */
-    }
-
-    #[test]
-    fn test_treeview_component() {
+        // State not kept
+        let tree: Tree = Tree::new(
+            Node::new("/", "/").with_child(
+                Node::new("/home", "home/").with_child(
+                    Node::new("/home/omar", "omar/")
+                        .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                        .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                ),
+            ),
+        );
+        states.update_tree(tree, true, None);
+        assert_eq!(states.selected_node().unwrap().id(), "/");
+        // Update but with node
         let tree: Tree = Tree::new(
             Node::new("/", "/")
                 .with_child(
@@ -906,6 +1257,51 @@ mod tests {
                     ),
                 ),
         );
+        states.update_tree(tree, true, Some("/home/omar"));
+        assert_eq!(states.selected_node().unwrap().id(), "/home/omar");
+        // new with state
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .with_child(
+                    Node::new("/bin", "bin/")
+                        .with_child(Node::new("/bin/ls", "ls"))
+                        .with_child(Node::new("/bin/pwd", "pwd")),
+                )
+                .with_child(
+                    Node::new("/home", "home/").with_child(
+                        Node::new("/home/omar", "omar/")
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let states: OwnStates = OwnStates::new(tree, Some("/home/omar/readme.md"));
+        assert_eq!(states.selected_node().unwrap().id(), "/home/omar/readme.md");
+    }
+
+    #[test]
+    fn test_treeview_component() {
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .with_child(
+                    Node::new("/bin", "bin/")
+                        .with_child(Node::new("/bin/ls", "ls"))
+                        .with_child(Node::new("/bin/pwd", "pwd")),
+                )
+                .with_child(
+                    Node::new("/home", "home/").with_child(
+                        Node::new("/home/omar", "omar/")
+                            .with_child(Node::new("/home/omar/readme.md", "readme.md"))
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md"))
+                            .with_child(Node::new("/home/omar/alpha.md", "alpha.md"))
+                            .with_child(Node::new("/home/omar/bravo.md", "bravo.md"))
+                            .with_child(Node::new("/home/omar/charlie.md", "charlie.md"))
+                            .with_child(Node::new("/home/omar/delta.md", "delta.md"))
+                            .with_child(Node::new("/home/omar/echo.md", "echo.md"))
+                            .with_child(Node::new("/home/omar/foxtrot.md", "foxtrot.md")),
+                    ),
+                ),
+        );
         let mut component: TreeView = TreeView::new(
             TreeViewPropsBuilder::default()
                 .hidden()
@@ -916,6 +1312,9 @@ mod tests {
                 .with_title(Some(String::from("C:\\")))
                 .with_highlighted_str(">>")
                 .with_tree(tree.root())
+                .keep_state(false)
+                .with_node(Some("/home"))
+                .with_max_page_steps(4)
                 .build(),
         );
         assert_eq!(component.props.foreground, Color::Red);
@@ -924,6 +1323,11 @@ mod tests {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        // Verify with_node
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("/home")))
+        );
         // Block
         let _ = component.get_block();
         // Focus
@@ -937,11 +1341,19 @@ mod tests {
             .with_foreground(Color::Yellow)
             .with_title(Some(String::from("aaa")))
             .hidden()
+            .with_node(None)
             .build();
-        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(
+            component.update(props),
+            Msg::OnChange(Payload::One(Value::Str("/".to_string())))
+        );
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Yellow);
         assert_eq!(component.props.texts.title.as_ref().unwrap(), "aaa");
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("/")))
+        );
         assert_eq!(
             component.props.texts.spans.as_ref().unwrap()[0]
                 .content
@@ -985,12 +1397,53 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
             Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
         );
+        // go to /home/omar
+        component.states.set_node("/home/omar/changelog.md");
+        // Page down
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/delta.md"
+            ))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/foxtrot.md"
+            ))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/foxtrot.md"
+            ))))
+        );
+        // Page up
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/bravo.md"
+            ))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/readme.md"
+            ))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/readme.md"
+            ))))
+        );
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
             Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
         );
         assert_eq!(component.on(Event::Resize(0, 0)), Msg::None,);
         // Go to a directory
+        component.states.set_node("/");
         component.states.next();
         component.states.open();
         component.states.next();
@@ -998,10 +1451,10 @@ mod tests {
             component.get_state(),
             Payload::One(Value::Str(String::from("/bin/ls")))
         );
-        // Update with on change
+        // Update with on change (KEEP STATE)
         let tree: Tree = Tree::new(
             Node::new("/", "/")
-                .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/pwd", "pwd")))
+                .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/ls", "ls")))
                 .with_child(
                     Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
@@ -1012,6 +1465,28 @@ mod tests {
         );
         let props = TreeViewPropsBuilder::from(component.get_props())
             .with_tree(tree.root())
+            .keep_state(true)
+            .build();
+        assert_eq!(component.update(props), Msg::None);
+        // Verify state kept
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("/bin/ls")))
+        );
+        // Update without keeping state
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/ls", "ls")))
+                .with_child(
+                    Node::new("/home", "home/").with_child(
+                        Node::new("/home/omar", "omar/")
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let props = TreeViewPropsBuilder::from(component.get_props())
+            .with_tree(tree.root())
+            .keep_state(false)
             .build();
         assert_eq!(
             component.update(props),

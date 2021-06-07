@@ -1,10 +1,25 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.2.0](#020)
   - [0.1.1](#011)
   - [0.1.0](#010)
 
 ---
+
+## 0.2.0
+
+Released on 07/06/2021
+
+- **Keep state property**:
+  - Possibility to keep active the selected node after an update
+- **With node property**:
+  - Set the id of the default active node in the properties
+- **PAGE_UP** and **PAGE_DOWN** keys
+  - Advance by remaining siblings forward or backward
+  - You can set a maximum amount of steps with `with_steps` in props
+- Dependencies:
+  - `tui-realm` updated to `0.4.0`
 
 ## 0.1.1
 
