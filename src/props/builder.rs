@@ -28,7 +28,7 @@
  * SOFTWARE.
  */
 use super::borders::{BorderType, Borders};
-use super::{InputType, PropPayload, Props, TextParts};
+use super::{PropPayload, Props, TextParts};
 
 use tui::style::{Color, Modifier};
 
@@ -220,26 +220,6 @@ impl GenericPropsBuilder {
         self
     }
 
-    /// ### with_input
-    ///
-    /// Set input type for component
-    pub fn with_input(&mut self, input_type: InputType) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.input_type = input_type;
-        }
-        self
-    }
-
-    /// ### with_input_len
-    ///
-    /// Set max input len
-    pub fn with_input_len(&mut self, len: usize) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.input_len = Some(len);
-        }
-        self
-    }
-
     /// ### with_custom_color
     ///
     /// Set a custom color inside the color palette
@@ -252,10 +232,10 @@ impl GenericPropsBuilder {
 
     /// ### with_value
     ///
-    /// Set initial value for component
-    pub fn with_value(&mut self, value: PropPayload) -> &mut Self {
+    /// Set a new key-value for component
+    pub fn with_value(&mut self, key: &'static str, value: PropPayload) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = value;
+            props.own.insert(key, value);
         }
         self
     }
@@ -289,9 +269,10 @@ mod test {
                 Some(String::from("hello")),
                 Some(vec![TextSpan::from("hey")]),
             ))
-            .with_input(InputType::Password)
-            .with_input_len(16)
-            .with_value(PropPayload::One(PropValue::Str(String::from("Hello"))))
+            .with_value(
+                "input",
+                PropPayload::One(PropValue::Str(String::from("Hello"))),
+            )
             .build();
         assert_eq!(props.background, Color::Blue);
         assert_eq!(props.borders.borders, Borders::BOTTOM);
@@ -305,12 +286,8 @@ mod test {
         assert!(props.modifiers.intersects(Modifier::REVERSED));
         assert!(props.modifiers.intersects(Modifier::CROSSED_OUT));
         assert_eq!(props.foreground, Color::Green);
-        assert_eq!(*props.palette.get("arrows").unwrap(), Color::Red);
-        assert!(props.palette.get("omar").is_none());
         assert_eq!(props.texts.title.as_ref().unwrap().as_str(), "hello");
-        assert_eq!(props.input_type, InputType::Password);
-        assert_eq!(*props.input_len.as_ref().unwrap(), 16);
-        if let PropPayload::One(PropValue::Str(s)) = props.value {
+        if let Some(PropPayload::One(PropValue::Str(s))) = props.own.get("input") {
             assert_eq!(s.as_str(), "Hello");
         } else {
             panic!("Expected value to be a string");

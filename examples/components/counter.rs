@@ -55,6 +55,8 @@ impl OwnStates {
 
 // -- Props
 
+const PROP_VALUE: &str = "value";
+
 pub struct CounterPropsBuilder {
     props: Option<Props>,
 }
@@ -134,7 +136,9 @@ impl CounterPropsBuilder {
 
     pub fn with_value(&mut self, counter: usize) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.value = PropPayload::One(PropValue::Usize(counter));
+            props
+                .own
+                .insert(PROP_VALUE, PropPayload::One(PropValue::Usize(counter)));
         }
         self
     }
@@ -151,7 +155,7 @@ impl Counter {
     pub fn new(props: Props) -> Self {
         let mut states: OwnStates = OwnStates::default();
         // Init counter
-        if let PropPayload::One(PropValue::Usize(val)) = &props.value {
+        if let Some(PropPayload::One(PropValue::Usize(val))) = props.own.get(PROP_VALUE) {
             states.counter = *val;
         }
         Counter { props, states }
@@ -188,7 +192,7 @@ impl Component for Counter {
     fn update(&mut self, props: Props) -> Msg {
         let prev_value = self.states.counter;
         // Get value
-        if let PropPayload::One(PropValue::Usize(val)) = &props.value {
+        if let Some(PropPayload::One(PropValue::Usize(val))) = props.own.get(PROP_VALUE) {
             self.states.counter = *val;
         }
         self.props = props;
