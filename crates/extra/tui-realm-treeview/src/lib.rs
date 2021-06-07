@@ -188,6 +188,20 @@ impl Tree {
             self.root().node_by_route(&route[1..])
         }
     }
+
+    /// ### route_by_node
+    ///
+    /// Calculate the route of a node by its id
+    pub fn route_by_node(&self, id: &str) -> Option<Vec<usize>> {
+        match self.root().route_by_node(id) {
+            None => None,
+            Some(route) => {
+                let mut r: Vec<usize> = vec![0];
+                r.extend(route);
+                Some(r)
+            }
+        }
+    }
 }
 
 /// ## Node
@@ -303,6 +317,23 @@ impl Node {
         self.children.iter().map(|x| x.count()).sum::<usize>() + 1
     }
 
+    /// ### depth
+    ///
+    /// Calculate the maximum depth of the tree
+    pub fn depth(&self) -> usize {
+        /// ### depth_r
+        ///
+        /// Private recursive call for depth
+        fn depth_r(ptr: &Node, depth: usize) -> usize {
+            ptr.children
+                .iter()
+                .map(|x| depth_r(x, depth + 1))
+                .max()
+                .unwrap_or(depth)
+        }
+        depth_r(self, 1)
+    }
+
     /// ### node_by_route
     ///
     /// Given a vector of indexes, returns the node associated to the route
@@ -314,6 +345,43 @@ impl Node {
             let route = &route[1..];
             next.node_by_route(route)
         }
+    }
+
+    /// ### route_by_node
+    ///
+    /// Calculate the route of a node by its id
+    pub fn route_by_node(&self, id: &str) -> Option<Vec<usize>> {
+        // Recursive function
+        fn route_by_node_r(
+            node: &Node,
+            id: &str,
+            enumerator: Option<usize>,
+            mut route: Vec<usize>,
+        ) -> Option<Vec<usize>> {
+            if let Some(enumerator) = enumerator {
+                route.push(enumerator);
+            }
+            if node.id() == id {
+                // Found!!!
+                Some(route)
+            } else if node.children.is_empty() {
+                // No more children
+                route.pop(); // Pop previous entry
+                None
+            } else {
+                // Keep searching
+                let mut result: Option<Vec<usize>> = None;
+                node.children.iter().enumerate().for_each(|(i, x)| {
+                    let this_route: Vec<usize> = route.clone();
+                    if let Some(this_route) = route_by_node_r(x, id, Some(i), this_route) {
+                        result = Some(this_route);
+                    }
+                });
+                result
+            }
+        }
+        // Call recursive function
+        route_by_node_r(self, id, None, Vec::with_capacity(self.depth()))
     }
 }
 
@@ -379,13 +447,21 @@ impl<'a> OwnStates<'a> {
     /// ### update_tree
     ///
     /// Update states tree
-    pub fn update_tree(&mut self, tree: Tree) {
+    pub fn update_tree(&mut self, tree: Tree, keep_state: bool) {
         // let route: Vec<usize> = self.tui_tree.selected(); NOTE: restore to track state
+        let selected: Option<String> = self.selected_node().map(|x| x.id().to_string());
         self.tui_tree = StatefulTree::from(&tree);
         self.tree = tree;
         // Open first
         self.open_first();
-        // self.tui_tree.set_state(route.as_slice());
+        // Restore state if required
+        if keep_state {
+            if let Some(selected) = selected {
+                if let Some(route) = self.tree.route_by_node(selected.as_str()) {
+                    self.tui_tree.set_state(route.as_slice());
+                }
+            }
+        }
     }
 
     /// ### toggle_focus
@@ -556,6 +632,18 @@ impl TreeViewPropsBuilder {
     pub fn with_tree(&mut self, root: &Node) -> &mut Self {
         self.with_tree_and_depth(root, usize::MAX)
     }
+
+    /// ### keep_state
+    ///
+    /// If keep is true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree)
+    pub fn keep_state(&mut self, keep: bool) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_KEEP_STATE, PropPayload::One(PropValue::Bool(keep)));
+        }
+        self
+    }
 }
 
 // -- component
@@ -643,7 +731,11 @@ impl<'a> Component for TreeView<'a> {
             None => Tree::new(Node::new("", "")),
         };
         // Update
-        self.states.update_tree(tree);
+        let keep_state: bool = match props.own.get(PROP_KEEP_STATE) {
+            Some(PropPayload::One(PropValue::Bool(true))) => true,
+            _ => false,
+        };
+        self.states.update_tree(tree, keep_state);
         let new_selection: Option<String> = self.states.selected_node().map(|x| x.id().to_string());
         // Set props
         self.props = props;
@@ -786,6 +878,8 @@ mod tests {
         );
         // count
         assert_eq!(root.count(), 8);
+        // depth
+        assert_eq!(root.depth(), 4);
         // -- Query
         assert_eq!(
             tree.query("/home/omar/changelog.md").unwrap().id(),
@@ -812,6 +906,18 @@ mod tests {
             "/home/omar/changelog.md"
         );
         assert!(tree.root().node_by_route(&[1, 0, 3]).is_none());
+        // -- Route by node
+        assert_eq!(
+            tree.route_by_node("/home/omar/changelog.md").unwrap(),
+            vec![0, 1, 0, 1]
+        );
+        assert_eq!(
+            tree.root()
+                .route_by_node("/home/omar/changelog.md")
+                .unwrap(),
+            vec![1, 0, 1]
+        );
+        assert!(tree.root().route_by_node("ciccio-pasticcio").is_none());
         // -- With children
         let tree: Tree = Tree::new(
             Node::new("a", "a").with_children(vec![Node::new("a1", "a1"), Node::new("a2", "a2")]),
@@ -926,6 +1032,7 @@ mod tests {
                 .with_title(Some(String::from("C:\\")))
                 .with_highlighted_str(">>")
                 .with_tree(tree.root())
+                .keep_state(false)
                 .build(),
         );
         assert_eq!(component.props.foreground, Color::Red);
@@ -1008,10 +1115,10 @@ mod tests {
             component.get_state(),
             Payload::One(Value::Str(String::from("/bin/ls")))
         );
-        // Update with on change
+        // Update with on change (KEEP STATE)
         let tree: Tree = Tree::new(
             Node::new("/", "/")
-                .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/pwd", "pwd")))
+                .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/ls", "ls")))
                 .with_child(
                     Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
@@ -1022,6 +1129,28 @@ mod tests {
         );
         let props = TreeViewPropsBuilder::from(component.get_props())
             .with_tree(tree.root())
+            .keep_state(true)
+            .build();
+        assert_eq!(component.update(props), Msg::None);
+        // Verify state kept
+        assert_eq!(
+            component.get_state(),
+            Payload::One(Value::Str(String::from("/bin/ls")))
+        );
+        // Update without keeping state
+        let tree: Tree = Tree::new(
+            Node::new("/", "/")
+                .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/ls", "ls")))
+                .with_child(
+                    Node::new("/home", "home/").with_child(
+                        Node::new("/home/omar", "omar/")
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                    ),
+                ),
+        );
+        let props = TreeViewPropsBuilder::from(component.get_props())
+            .with_tree(tree.root())
+            .keep_state(false)
             .build();
         assert_eq!(
             component.update(props),

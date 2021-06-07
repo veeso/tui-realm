@@ -119,34 +119,29 @@ impl<'a> StatefulTree<'a> {
         self.state.selected()
     }
 
-    /*
     /// ### set_state
     ///
     /// Reset the state and initializes it with the provided route
     pub fn set_state(&mut self, route: &[usize]) {
+        // Recursive call
+        fn set_state_m(ptr: &mut StatefulTree, route: &[usize]) {
+            if route.is_empty() {
+                // -- base case
+                return;
+            }
+            let next: usize = route[0] + 1;
+            // Go to next
+            for _ in 0..next {
+                ptr.next();
+            }
+            ptr.open();
+            set_state_m(ptr, &route[1..])
+        }
         // Reset state
         self.state = TuiTreeState::default();
         // Set state
-        self.set_state_m(route);
+        set_state_m(self, route);
     }
-
-    /// ### set_state_m
-    ///
-    /// Recursive state setter; this will try to re-open the state as it was before
-    fn set_state_m(&mut self, route: &[usize]) {
-        if route.is_empty() {
-            // -- base case
-            return;
-        }
-        let next: usize = route[0] + 1;
-        // Go to next
-        for _ in 0..next {
-            self.next();
-        }
-        self.open();
-        self.set_state_m(&route[1..])
-    }
-    */
 }
 
 #[cfg(test)]
@@ -199,11 +194,9 @@ mod test {
         stateful_tree.close();
         assert_eq!(stateful_tree.selected(), vec![0, 1, 0]);
         // Set state
-        /*
         stateful_tree.set_state(&vec![0, 0, 1]);
         assert_eq!(stateful_tree.selected(), vec![0, 0, 1]);
         stateful_tree.set_state(&vec![0, 1, 0, 1]);
         assert_eq!(stateful_tree.selected(), vec![0, 1, 0, 1]);
-        */
     }
 }

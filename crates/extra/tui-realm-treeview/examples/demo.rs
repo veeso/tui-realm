@@ -144,6 +144,7 @@ fn main() {
                 .with_title(Some(title))
                 .with_tree(model.tree.root())
                 .with_highlighted_str("🚀")
+                .keep_state(true)
                 .build(),
         )),
     );
