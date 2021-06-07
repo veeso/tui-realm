@@ -618,5 +618,6 @@ mod test {
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
             Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
         );
+        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
     }
 }
