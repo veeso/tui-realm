@@ -13,7 +13,7 @@
 
 ## 0.4.0
 
-Released on FIXME:
+Released on 07/06/2021
 
 - Another **Prop API Update**
   - Removed `input_len` and `input_type` from properties. Use `own` instead with new `PropValue`
