@@ -162,6 +162,7 @@ fn main() {
                 .with_tree(model.tree.root())
                 .with_highlighted_str("🚀")
                 .keep_state(true)
+                .with_max_page_steps(8)
                 .build(),
         )),
     );

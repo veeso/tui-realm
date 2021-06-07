@@ -374,7 +374,11 @@ impl Node {
             None => None,
             Some(route) => {
                 // Get parent
-                self.node_by_route(&route[0..route.len() - 1])
+                if route.is_empty() {
+                    None
+                } else {
+                    self.node_by_route(&route[0..route.len() - 1])
+                }
             }
         }
     }
@@ -504,6 +508,48 @@ impl<'a> OwnStates<'a> {
         self.tui_tree.state.clone()
     }
 
+    /// ### get_available_steps_ahead
+    ///
+    /// Get the available steps after current node or return the max step
+    pub fn get_available_steps_ahead(&self, max_step: usize) -> usize {
+        match self.selected_node() {
+            None => 0,
+            Some(node) => match self.tree.parent(node.id()) {
+                None => 0,
+                Some(parent) => match parent.children.iter().position(|x| x.id() == node.id()) {
+                    None => 0,
+                    Some(nth) => {
+                        let children: usize = parent.children.len();
+                        let diff: usize = children - nth;
+                        match diff > max_step {
+                            true => max_step,
+                            false => diff,
+                        }
+                    }
+                },
+            },
+        }
+    }
+
+    /// ### get_available_steps_behind
+    ///
+    /// Get the available steps before current node or return the max step
+    pub fn get_available_steps_behind(&self, max_step: usize) -> usize {
+        match self.selected_node() {
+            None => 0,
+            Some(node) => match self.tree.parent(node.id()) {
+                None => 0,
+                Some(parent) => match parent.children.iter().position(|x| x.id() == node.id()) {
+                    None => 0,
+                    Some(nth) => match nth > max_step {
+                        true => max_step,
+                        false => nth,
+                    },
+                },
+            },
+        }
+    }
+
     // -- api
 
     /// ### toggle_focus
@@ -587,6 +633,7 @@ impl<'a> OwnStates<'a> {
 const PROP_TREE: &str = "tree";
 const PROP_INITIAL_NODE: &str = "initial_node";
 const PROP_KEEP_STATE: &str = "keep_state";
+const PROP_MAX_STEPS: &str = "max_steps";
 
 /// ## TreeViewPropsBuilder
 ///
@@ -736,6 +783,18 @@ impl TreeViewPropsBuilder {
             props
                 .own
                 .insert(PROP_KEEP_STATE, PropPayload::One(PropValue::Bool(keep)));
+        }
+        self
+    }
+
+    /// ### with_max_page_steps
+    ///
+    /// Defines the maximum amount of steps to perform after a PG_DOWN / PG_UP
+    pub fn with_max_page_steps(&mut self, steps: usize) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_MAX_STEPS, PropPayload::One(PropValue::Usize(steps)));
         }
         self
     }
@@ -889,6 +948,28 @@ impl<'a> Component for TreeView<'a> {
                     // Return Msg On Change
                     Msg::OnChange(self.get_state())
                 }
+                KeyCode::PageDown => {
+                    // Get parent to calculate step
+                    let max_step: usize = match self.props.own.get(PROP_MAX_STEPS) {
+                        Some(PropPayload::One(PropValue::Usize(steps))) => *steps,
+                        _ => usize::MAX,
+                    };
+                    (0..self.states.get_available_steps_ahead(max_step))
+                        .for_each(|_| self.states.next());
+                    // Return Msg On Change
+                    Msg::OnChange(self.get_state())
+                }
+                KeyCode::PageUp => {
+                    // Get parent to calculate step
+                    let max_step: usize = match self.props.own.get(PROP_MAX_STEPS) {
+                        Some(PropPayload::One(PropValue::Usize(steps))) => *steps,
+                        _ => usize::MAX,
+                    };
+                    (0..self.states.get_available_steps_behind(max_step))
+                        .for_each(|_| self.states.previous());
+                    // Return Msg On Change
+                    Msg::OnChange(self.get_state())
+                }
                 KeyCode::Enter => {
                     // Return Submit
                     Msg::OnSubmit(self.get_state())
@@ -996,6 +1077,7 @@ mod tests {
             true
         );
         // parent
+        assert!(tree.parent("/").is_none());
         assert_eq!(
             tree.parent("/home/omar/changelog.md").unwrap().id(),
             "/home/omar"
@@ -1089,7 +1171,13 @@ mod tests {
                     Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
                             .with_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md"))
+                            .with_child(Node::new("/home/omar/alpha.md", "alpha.md"))
+                            .with_child(Node::new("/home/omar/bravo.md", "bravo.md"))
+                            .with_child(Node::new("/home/omar/charlie.md", "charlie.md"))
+                            .with_child(Node::new("/home/omar/delta.md", "delta.md"))
+                            .with_child(Node::new("/home/omar/echo.md", "echo.md"))
+                            .with_child(Node::new("/home/omar/foxtrot.md", "foxtrot.md")),
                     ),
                 ),
         );
@@ -1118,7 +1206,22 @@ mod tests {
         assert_eq!(states.selected_node().unwrap().id(), "/bin/pwd");
         states.close();
         assert_eq!(states.selected_node().unwrap().id(), "/bin");
+        // Set state
+        states.set_node("/home/omar/readme.md");
+        assert_eq!(states.selected_node().unwrap().id(), "/home/omar/readme.md");
+        // Available in front
+        assert_eq!(states.get_available_steps_ahead(usize::MAX), 8);
+        assert_eq!(states.get_available_steps_ahead(4), 4);
+        assert_eq!(states.get_available_steps_behind(usize::MAX), 0);
+        assert_eq!(states.get_available_steps_behind(4), 0);
+        states.next();
+        states.next();
+        assert_eq!(states.get_available_steps_ahead(usize::MAX), 6);
+        assert_eq!(states.get_available_steps_ahead(4), 4);
+        assert_eq!(states.get_available_steps_behind(usize::MAX), 2);
+        assert_eq!(states.get_available_steps_behind(1), 1);
         // -- Update
+        states.set_node("/bin");
         let tree: Tree = Tree::new(
             Node::new("/", "/")
                 .with_child(Node::new("/bin", "bin/").with_child(Node::new("/bin/ls", "ls"))),
@@ -1189,7 +1292,13 @@ mod tests {
                     Node::new("/home", "home/").with_child(
                         Node::new("/home/omar", "omar/")
                             .with_child(Node::new("/home/omar/readme.md", "readme.md"))
-                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md")),
+                            .with_child(Node::new("/home/omar/changelog.md", "changelog.md"))
+                            .with_child(Node::new("/home/omar/alpha.md", "alpha.md"))
+                            .with_child(Node::new("/home/omar/bravo.md", "bravo.md"))
+                            .with_child(Node::new("/home/omar/charlie.md", "charlie.md"))
+                            .with_child(Node::new("/home/omar/delta.md", "delta.md"))
+                            .with_child(Node::new("/home/omar/echo.md", "echo.md"))
+                            .with_child(Node::new("/home/omar/foxtrot.md", "foxtrot.md")),
                     ),
                 ),
         );
@@ -1205,6 +1314,7 @@ mod tests {
                 .with_tree(tree.root())
                 .keep_state(false)
                 .with_node(Some("/home"))
+                .with_max_page_steps(4)
                 .build(),
         );
         assert_eq!(component.props.foreground, Color::Red);
@@ -1287,12 +1397,53 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
             Msg::OnChange(Payload::One(Value::Str(String::from("/"))))
         );
+        // go to /home/omar
+        component.states.set_node("/home/omar/changelog.md");
+        // Page down
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/delta.md"
+            ))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/foxtrot.md"
+            ))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/foxtrot.md"
+            ))))
+        );
+        // Page up
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/bravo.md"
+            ))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/readme.md"
+            ))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
+            Msg::OnChange(Payload::One(Value::Str(String::from(
+                "/home/omar/readme.md"
+            ))))
+        );
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
             Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
         );
         assert_eq!(component.on(Event::Resize(0, 0)), Msg::None,);
         // Go to a directory
+        component.states.set_node("/");
         component.states.next();
         component.states.open();
         component.states.next();

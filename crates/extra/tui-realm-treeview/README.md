@@ -54,6 +54,7 @@ cargo run --example demo
 - Press `ENTER` to expand the selected directory
 - Press `BACKSPACE` to go to upper directory
 - Move up and down with `UP/DOWN` arrow keys
+- Advance by up to 8 entries with `PGUP/PGDOWN`
 - Open directories with `RIGHT`
 - Close directories with `LEFT`
 - Change window between input field and treeview with `TAB`
