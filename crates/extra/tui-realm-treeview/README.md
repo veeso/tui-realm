@@ -78,6 +78,7 @@ Best practices:
 
 | Event               | Message    | Behaviour                                            |
 |---------------------|------------|------------------------------------------------------|
+| `KeyCode::Enter`    | `OnSubmit` | Just returns submit event                            |
 | `KeyCode::Down`     | `OnChange` | Go to next element                                   |
 | `KeyCode::Up`       | `OnChange` | Go to previous element                               |
 | `KeyCode::PageDown` | `OnChange` | Move cursor down by defined max steps or end of node |
