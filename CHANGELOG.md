@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.4.1](#041)
   - [0.4.0](#040)
   - [0.3.2](#032)
   - [0.3.1](#031)
@@ -10,6 +11,13 @@
   - [0.1.0](#010)
 
 ---
+
+## 0.4.1
+
+Released on 11/06/2021
+
+- Fixed scrolltable not handling focus
+- Added `with_highlight_str` and `with_max_scroll_step` to scrolltable
 
 ## 0.4.0
 

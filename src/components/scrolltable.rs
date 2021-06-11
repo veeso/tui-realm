@@ -26,7 +26,9 @@
  * SOFTWARE.
  */
 use crate::event::KeyCode;
-use crate::props::{BordersProps, Props, PropsBuilder, Table as TextTable, TextParts};
+use crate::props::{
+    BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable, TextParts,
+};
 use crate::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
@@ -36,6 +38,9 @@ use crate::tui::{
 use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
+
+const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
+const PROP_MAX_STEP: &str = "max-step";
 
 pub struct ScrollTablePropsBuilder {
     props: Option<Props>,
@@ -195,11 +200,44 @@ impl ScrollTablePropsBuilder {
         }
         self
     }
+
+    /// ### with_highlighted_str
+    ///
+    /// Display a symbol to highlighted line in scroll table
+    pub fn with_highlighted_str(&mut self, s: Option<&str>) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            match s {
+                None => {
+                    props.own.remove(PROP_HIGHLIGHTED_TXT);
+                }
+                Some(s) => {
+                    props.own.insert(
+                        PROP_HIGHLIGHTED_TXT,
+                        PropPayload::One(PropValue::Str(s.to_string())),
+                    );
+                }
+            }
+        }
+        self
+    }
+
+    /// ### with_max_scroll_step
+    ///
+    /// Defines the max step for PAGEUP/PAGEDOWN keys
+    pub fn with_max_scroll_step(&mut self, step: usize) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_MAX_STEP, PropPayload::One(PropValue::Usize(step)));
+        }
+        self
+    }
 }
 
 // -- States
 
 struct OwnStates {
+    focus: bool,
     list_index: usize, // Index of selected item in textarea
     list_len: usize,   // Lines in text area
 }
@@ -260,6 +298,32 @@ impl OwnStates {
             self.list_index = 0;
         }
     }
+
+    /// ### calc_max_step_ahead
+    ///
+    /// Calculate the max step ahead to scroll list
+    pub fn calc_max_step_ahead(&self, max: usize) -> usize {
+        let remaining: usize = match self.list_len {
+            0 => 0,
+            len => len - 1 - self.list_index,
+        };
+        if remaining > max {
+            max
+        } else {
+            remaining
+        }
+    }
+
+    /// ### calc_max_step_ahead
+    ///
+    /// Calculate the max step ahead to scroll list
+    pub fn calc_max_step_behind(&self, max: usize) -> usize {
+        if self.list_index > max {
+            max
+        } else {
+            self.list_index
+        }
+    }
 }
 
 // -- Component
@@ -284,6 +348,7 @@ impl Scrolltable {
         Scrolltable {
             props,
             states: OwnStates {
+                focus: false,
                 list_index: 0,
                 list_len: len,
             },
@@ -299,8 +364,11 @@ impl Component for Scrolltable {
     #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Canvas, area: Rect) {
         if self.props.visible {
-            let div: Block =
-                super::utils::get_block(&self.props.borders, &self.props.texts.title, true);
+            let div: Block = super::utils::get_block(
+                &self.props.borders,
+                &self.props.texts.title,
+                self.states.focus,
+            );
             // Make list entries
             let list_items: Vec<ListItem> = match self.props.texts.table.as_ref() {
                 None => Vec::new(),
@@ -309,14 +377,7 @@ impl Component for Scrolltable {
                     .map(|row| {
                         let columns: Vec<Span> = row
                             .iter()
-                            .map(|col| {
-                                let (fg, bg, modifiers) =
-                                    super::utils::use_or_default_styles(&self.props, col);
-                                Span::styled(
-                                    col.content.clone(),
-                                    Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                                )
-                            })
+                            .map(|col| Span::from(col.content.clone()))
                             .collect();
                         ListItem::new(Spans::from(columns))
                     })
@@ -324,20 +385,27 @@ impl Component for Scrolltable {
             };
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
-            let (fg, bg) = (self.props.foreground, self.props.background);
+            let (fg, bg): (Color, Color) = match self.states.focus {
+                true => (self.props.background, self.props.foreground),
+                false => (self.props.foreground, self.props.background),
+            };
             // Make list
-            render.render_stateful_widget(
-                List::new(list_items)
-                    .block(div)
-                    .start_corner(Corner::TopLeft)
-                    .highlight_style(
-                        Style::default()
-                            .fg(bg) // inverted
-                            .bg(fg),
-                    ),
-                area,
-                &mut state,
-            );
+            let mut list = List::new(list_items)
+                .block(div)
+                .start_corner(Corner::TopLeft)
+                .highlight_style(
+                    Style::default()
+                        .fg(fg)
+                        .bg(bg)
+                        .add_modifier(self.props.modifiers),
+                );
+            // Highlighted symbol
+            if let Some(PropPayload::One(PropValue::Str(highlight))) =
+                self.props.own.get(PROP_HIGHLIGHTED_TXT)
+            {
+                list = list.highlight_symbol(highlight);
+            }
+            render.render_stateful_widget(list, area, &mut state);
         }
     }
 
@@ -376,27 +444,35 @@ impl Component for Scrolltable {
         if let Event::Key(key) = ev {
             match key.code {
                 KeyCode::Down => {
-                    // Update states
+                    // Go down
                     self.states.incr_list_index();
                     Msg::OnKey(key)
                 }
                 KeyCode::Up => {
-                    // Update states
+                    // Go up
                     self.states.decr_list_index();
                     Msg::OnKey(key)
                 }
                 KeyCode::PageDown => {
-                    // Update states
-                    for _ in 0..8 {
-                        self.states.incr_list_index();
-                    }
+                    // Scroll by step
+                    let step: usize =
+                        self.states
+                            .calc_max_step_ahead(match self.props.own.get(PROP_MAX_STEP) {
+                                Some(PropPayload::One(PropValue::Usize(step))) => *step,
+                                _ => 8,
+                            });
+                    (0..step).for_each(|_| self.states.incr_list_index());
                     Msg::OnKey(key)
                 }
                 KeyCode::PageUp => {
-                    // Update states
-                    for _ in 0..8 {
-                        self.states.decr_list_index();
-                    }
+                    // Scroll by step
+                    let step: usize =
+                        self.states
+                            .calc_max_step_behind(match self.props.own.get(PROP_MAX_STEP) {
+                                Some(PropPayload::One(PropValue::Usize(step))) => *step,
+                                _ => 8,
+                            });
+                    (0..step).for_each(|_| self.states.decr_list_index());
                     Msg::OnKey(key)
                 }
                 KeyCode::End => {
@@ -427,12 +503,16 @@ impl Component for Scrolltable {
     /// ### blur
     ///
     /// Blur component
-    fn blur(&mut self) {}
+    fn blur(&mut self) {
+        self.states.focus = false;
+    }
 
     /// ### active
     ///
     /// Active component
-    fn active(&mut self) {}
+    fn active(&mut self) {
+        self.states.focus = true;
+    }
 }
 
 #[cfg(test)]
@@ -461,6 +541,8 @@ mod tests {
                 .strikethrough()
                 .underlined()
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .with_highlighted_str(Some("🚀"))
+                .with_max_scroll_step(4)
                 .with_table(
                     Some(String::from("My data")),
                     TableBuilder::default()
@@ -509,6 +591,14 @@ mod tests {
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
         assert_eq!(
+            component.props.own.get(PROP_HIGHLIGHTED_TXT).unwrap(),
+            &PropPayload::One(PropValue::Str(String::from("🚀")))
+        );
+        assert_eq!(
+            component.props.own.get(PROP_MAX_STEP).unwrap(),
+            &PropPayload::One(PropValue::Usize(4))
+        );
+        assert_eq!(
             component.props.texts.title.as_ref().unwrap().as_str(),
             "My data"
         );
@@ -516,7 +606,9 @@ mod tests {
         assert_eq!(component.states.list_len, 9);
         assert_eq!(component.states.list_index, 0);
         component.active();
+        assert_eq!(component.states.focus, true);
         component.blur();
+        assert_eq!(component.states.focus, false);
         // Increment list index
         component.states.list_index += 1;
         assert_eq!(component.states.list_index, 1);
@@ -541,8 +633,19 @@ mod tests {
             Msg::OnKey(KeyEvent::from(KeyCode::PageDown))
         );
         // Index should be incremented
+        assert_eq!(component.states.list_index, 5);
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
+            Msg::OnKey(KeyEvent::from(KeyCode::PageDown))
+        );
+        // Index should be incremented
         assert_eq!(component.states.list_index, 8);
         // Index should be 0
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
+            Msg::OnKey(KeyEvent::from(KeyCode::PageUp))
+        );
+        assert_eq!(component.states.list_index, 4);
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
             Msg::OnKey(KeyEvent::from(KeyCode::PageUp))
