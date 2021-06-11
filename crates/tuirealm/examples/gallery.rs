@@ -269,6 +269,8 @@ fn init_view() -> View {
             scrolltable::ScrollTablePropsBuilder::default()
                 .with_foreground(Color::LightBlue)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
+                .with_highlighted_str(Some("🚀"))
+                .with_max_scroll_step(4)
                 .with_table(
                     Some(String::from("My scrollable data")),
                     TableBuilder::default()
