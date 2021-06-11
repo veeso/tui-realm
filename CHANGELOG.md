@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.4.2](#042)
   - [0.4.1](#041)
   - [0.4.0](#040)
   - [0.3.2](#032)
@@ -11,6 +12,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 0.4.2
+
+Releasaed on 11/06/2021
+
+- Hotfix for 0.4.1: preserve styles on scroll table; `with_highlight_color` method.
 
 ## 0.4.1
 

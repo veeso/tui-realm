@@ -267,60 +267,108 @@ fn init_view() -> View {
         COMPONENT_SCROLLTABLE,
         Box::new(scrolltable::Scrolltable::new(
             scrolltable::ScrollTablePropsBuilder::default()
-                .with_foreground(Color::LightBlue)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
+                .with_highlighted_color(Color::LightBlue)
                 .with_table(
                     Some(String::from("My scrollable data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("andreas"))
+                        .add_col(
+                            TextSpanBuilder::new("andreas")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("1"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("bohdan"))
+                        .add_col(
+                            TextSpanBuilder::new("bohdan")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("2"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("charlie"))
+                        .add_col(
+                            TextSpanBuilder::new("charlie")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("3"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("denis"))
+                        .add_col(
+                            TextSpanBuilder::new("denis")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("4"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("ector"))
+                        .add_col(
+                            TextSpanBuilder::new("ector")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("5"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("frank"))
+                        .add_col(
+                            TextSpanBuilder::new("frank")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("6"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("giulio"))
+                        .add_col(
+                            TextSpanBuilder::new("giulio")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("7"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("hermes"))
+                        .add_col(
+                            TextSpanBuilder::new("hermes")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("8"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("italo"))
+                        .add_col(
+                            TextSpanBuilder::new("italo")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("9"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("lamar"))
+                        .add_col(
+                            TextSpanBuilder::new("lamar")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("10"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("mark"))
+                        .add_col(
+                            TextSpanBuilder::new("mark")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .add_row()
                         .add_col(TextSpan::from("11"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::from("napalm"))
+                        .add_col(
+                            TextSpanBuilder::new("napalm")
+                                .with_foreground(Color::Cyan)
+                                .build(),
+                        )
                         .build(),
                 )
                 .build(),

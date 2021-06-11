@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]
