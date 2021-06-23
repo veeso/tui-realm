@@ -206,7 +206,7 @@ fn init_view() -> View {
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Yellow)
                 .with_progress(0.64)
                 .with_texts(
-                    Some(String::from("Downloading termscp 0.4.2")),
+                    Some(String::from("Downloading termscp 0.4.3")),
                     String::from("64.2% - ETA 00:48"),
                 )
                 .build(),
@@ -567,7 +567,7 @@ fn update_progress(view: &mut View) -> Option<(String, Msg)> {
         progress_bar::ProgressBarPropsBuilder::from(props)
             .with_progress(new_prog)
             .with_texts(
-                Some(String::from("Downloading termscp 0.4.2")),
+                Some(String::from("Downloading termscp 0.4.3")),
                 format!("{:.2}% - ETA 00:30", new_prog * 100.0),
             )
             .build(),
