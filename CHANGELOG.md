@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.4.3](#043)
   - [0.4.2](#042)
   - [0.4.1](#041)
   - [0.4.0](#040)
@@ -12,6 +13,13 @@
   - [0.1.0](#010)
 
 ---
+
+## 0.4.3
+
+Released on 23/06/2021
+
+- Fixed TextArea not scrolling properly
+- Added `with_highlight_str` and `with_max_scroll_step` to TextArea
 
 ## 0.4.2
 
