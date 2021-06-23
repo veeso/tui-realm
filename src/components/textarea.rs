@@ -28,7 +28,9 @@
  * SOFTWARE.
  */
 use crate::event::KeyCode;
-use crate::props::{BordersProps, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{
+    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
+};
 use crate::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
@@ -37,6 +39,9 @@ use crate::tui::{
 use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
+
+const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
+const PROP_MAX_STEP: &str = "max-step";
 
 pub struct TextareaPropsBuilder {
     props: Option<Props>,
@@ -196,6 +201,38 @@ impl TextareaPropsBuilder {
         }
         self
     }
+
+    /// ### with_highlighted_str
+    ///
+    /// Display a symbol to highlighted line in scroll table
+    pub fn with_highlighted_str(&mut self, s: Option<&str>) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            match s {
+                None => {
+                    props.own.remove(PROP_HIGHLIGHTED_TXT);
+                }
+                Some(s) => {
+                    props.own.insert(
+                        PROP_HIGHLIGHTED_TXT,
+                        PropPayload::One(PropValue::Str(s.to_string())),
+                    );
+                }
+            }
+        }
+        self
+    }
+
+    /// ### with_max_scroll_step
+    ///
+    /// Defines the max step for PAGEUP/PAGEDOWN keys
+    pub fn with_max_scroll_step(&mut self, step: usize) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_MAX_STEP, PropPayload::One(PropValue::Usize(step)));
+        }
+        self
+    }
 }
 
 // -- States
@@ -262,6 +299,32 @@ impl OwnStates {
             self.list_index = 0;
         }
     }
+
+    /// ### calc_max_step_ahead
+    ///
+    /// Calculate the max step ahead to scroll list
+    pub fn calc_max_step_ahead(&self, max: usize) -> usize {
+        let remaining: usize = match self.list_len {
+            0 => 0,
+            len => len - 1 - self.list_index,
+        };
+        if remaining > max {
+            max
+        } else {
+            remaining
+        }
+    }
+
+    /// ### calc_max_step_ahead
+    ///
+    /// Calculate the max step ahead to scroll list
+    pub fn calc_max_step_behind(&self, max: usize) -> usize {
+        if self.list_index > max {
+            max
+        } else {
+            self.list_index
+        }
+    }
 }
 
 // -- Component
@@ -306,8 +369,15 @@ impl Component for Textarea {
             // Make text items
             let lines: Vec<ListItem> = match self.props.texts.spans.as_ref() {
                 None => Vec::new(),
-                Some(spans) => super::utils::wrap_spans(spans, area.width as usize, &self.props)
-                    .into_iter()
+                Some(spans) => spans
+                    .iter()
+                    .map(|x| {
+                        super::utils::wrap_spans(
+                            vec![x.clone()].as_slice(),
+                            area.width as usize,
+                            &self.props,
+                        )
+                    })
                     .map(ListItem::new)
                     .collect(),
             };
@@ -318,18 +388,22 @@ impl Component for Textarea {
             );
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
-            render.render_stateful_widget(
-                List::new(lines)
-                    .block(div)
-                    .start_corner(Corner::TopLeft)
-                    .style(
-                        Style::default()
-                            .fg(self.props.foreground)
-                            .bg(self.props.background),
-                    ),
-                area,
-                &mut state,
-            );
+            // Make component
+            let mut list = List::new(lines)
+                .block(div)
+                .start_corner(Corner::TopLeft)
+                .style(
+                    Style::default()
+                        .fg(self.props.foreground)
+                        .bg(self.props.background),
+                );
+            // Highlighted symbol
+            if let Some(PropPayload::One(PropValue::Str(highlight))) =
+                self.props.own.get(PROP_HIGHLIGHTED_TXT)
+            {
+                list = list.highlight_symbol(highlight);
+            }
+            render.render_stateful_widget(list, area, &mut state);
         }
     }
 
@@ -378,17 +452,25 @@ impl Component for Textarea {
                     Msg::OnKey(key)
                 }
                 KeyCode::PageDown => {
-                    // Update states
-                    for _ in 0..8 {
-                        self.states.incr_list_index();
-                    }
+                    // Scroll by step
+                    let step: usize =
+                        self.states
+                            .calc_max_step_ahead(match self.props.own.get(PROP_MAX_STEP) {
+                                Some(PropPayload::One(PropValue::Usize(step))) => *step,
+                                _ => 8,
+                            });
+                    (0..step).for_each(|_| self.states.incr_list_index());
                     Msg::OnKey(key)
                 }
                 KeyCode::PageUp => {
                     // Update states
-                    for _ in 0..8 {
-                        self.states.decr_list_index();
-                    }
+                    let step: usize =
+                        self.states
+                            .calc_max_step_behind(match self.props.own.get(PROP_MAX_STEP) {
+                                Some(PropPayload::One(PropValue::Usize(step))) => *step,
+                                _ => 8,
+                            });
+                    (0..step).for_each(|_| self.states.decr_list_index());
                     Msg::OnKey(key)
                 }
                 KeyCode::End => {
@@ -456,6 +538,8 @@ mod tests {
                 .strikethrough()
                 .underlined()
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .with_highlighted_str(Some("🚀"))
+                .with_max_scroll_step(4)
                 .with_texts(
                     Some(String::from("textarea")),
                     vec![TextSpan::from("welcome to"), TextSpan::from("tui-realm")],
@@ -479,6 +563,14 @@ mod tests {
         assert_eq!(
             component.props.texts.title.as_ref().unwrap().as_str(),
             "textarea"
+        );
+        assert_eq!(
+            component.props.own.get(PROP_HIGHLIGHTED_TXT).unwrap(),
+            &PropPayload::One(PropValue::Str(String::from("🚀")))
+        );
+        assert_eq!(
+            component.props.own.get(PROP_MAX_STEP).unwrap(),
+            &PropPayload::One(PropValue::Usize(4))
         );
         assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 2);
         // Verify states
