@@ -88,7 +88,7 @@ fn main() {
     // Mount the component you need; we'll use a Label and an Input
     myview.mount(
         COMPONENT_SCROLLTABLE,
-        Box::new(scrolltable::Scrolltable::new(
+        Box::new(scrolltable::ScrollTable::new(
             scrolltable::ScrollTablePropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_highlighted_str(Some("🚀"))
@@ -198,7 +198,7 @@ fn main() {
     );
     myview.mount(
         COMPONENT_SCROLLTABLE_2,
-        Box::new(scrolltable::Scrolltable::new(
+        Box::new(scrolltable::ScrollTable::new(
             scrolltable::ScrollTablePropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_highlighted_str(Some("🚀"))

@@ -45,7 +45,7 @@ pub use label::{Label, LabelPropsBuilder};
 pub use paragraph::{Paragraph, ParagraphPropsBuilder};
 pub use progress_bar::{ProgressBar, ProgressBarPropsBuilder};
 pub use radio::{Radio, RadioPropsBuilder};
-pub use scrolltable::{ScrollTablePropsBuilder, Scrolltable};
+pub use scrolltable::{ScrollTable, ScrollTablePropsBuilder};
 pub use span::{Span, SpanPropsBuilder};
 pub use table::{Table, TablePropsBuilder};
 pub use textarea::{Textarea, TextareaPropsBuilder};

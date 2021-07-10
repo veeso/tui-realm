@@ -8,7 +8,7 @@
   - [Paragraph](#paragraph)
   - [Progress bar](#progress-bar)
   - [Radio](#radio)
-  - [Scrolltable](#scrolltable)
+  - [ScrollTable](#scrolltable)
   - [Span](#span)
   - [Table](#table)
   - [Textarea](#textarea)
@@ -199,7 +199,7 @@ A radio button group. Provides the possibility to select a single option in a gr
 
 ---
 
-## Scrolltable
+## ScrollTable
 
 a table with the possibility to scroll text with arrows. In order to scroll, the component must be active.
 

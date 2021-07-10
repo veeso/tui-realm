@@ -1,6 +1,6 @@
-//! ## Scrolltable
+//! ## ScrollTable
 //!
-//! `Scrolltable` represents a read-only textual table component which is scrollable through arrows
+//! `ScrollTable` represents a read-only textual table component which is scrollable through arrows
 
 /**
  * MIT License
@@ -339,15 +339,15 @@ impl OwnStates {
 
 // -- Component
 
-/// ## Scrolltable
+/// ## ScrollTable
 ///
 /// represents a read-only text component without any container.
-pub struct Scrolltable {
+pub struct ScrollTable {
     props: Props,
     states: OwnStates,
 }
 
-impl Scrolltable {
+impl ScrollTable {
     /// ### new
     ///
     /// Instantiates a new `Table` component.
@@ -356,7 +356,7 @@ impl Scrolltable {
             Some(t) => t.len(),
             None => 0,
         };
-        Scrolltable {
+        ScrollTable {
             props,
             states: OwnStates {
                 focus: false,
@@ -367,7 +367,7 @@ impl Scrolltable {
     }
 }
 
-impl Component for Scrolltable {
+impl Component for ScrollTable {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
@@ -552,7 +552,7 @@ mod tests {
     #[test]
     fn test_components_scrolltable() {
         // Make component
-        let mut component: Scrolltable = Scrolltable::new(
+        let mut component: ScrollTable = ScrollTable::new(
             ScrollTablePropsBuilder::default()
                 .with_foreground(Color::Red)
                 .with_background(Color::Blue)
