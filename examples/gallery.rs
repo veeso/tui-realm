@@ -206,7 +206,7 @@ fn init_view() -> View {
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Yellow)
                 .with_progress(0.64)
                 .with_texts(
-                    Some(String::from("Downloading termscp 0.4.3")),
+                    Some(String::from("Downloading termscp 0.5.0")),
                     String::from("64.2% - ETA 00:48"),
                 )
                 .build(),
@@ -262,10 +262,10 @@ fn init_view() -> View {
                 .build(),
         )),
     );
-    // Scrolltable
+    // ScrollTable
     view.mount(
         COMPONENT_SCROLLTABLE,
-        Box::new(scrolltable::Scrolltable::new(
+        Box::new(scrolltable::ScrollTable::new(
             scrolltable::ScrollTablePropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_highlighted_str(Some("🚀"))
@@ -466,7 +466,7 @@ fn view(ctx: &mut Context, view: &View) {
         let rcol = Layout::default()
             .constraints(
                 [
-                    Constraint::Length(6), // Scrolltable
+                    Constraint::Length(6), // ScrollTable
                     Constraint::Length(1), // Span
                     Constraint::Length(8), // Table
                     Constraint::Length(8), // Textarea
@@ -567,7 +567,7 @@ fn update_progress(view: &mut View) -> Option<(String, Msg)> {
         progress_bar::ProgressBarPropsBuilder::from(props)
             .with_progress(new_prog)
             .with_texts(
-                Some(String::from("Downloading termscp 0.4.3")),
+                Some(String::from("Downloading termscp 0.5.0")),
                 format!("{:.2}% - ETA 00:30", new_prog * 100.0),
             )
             .build(),

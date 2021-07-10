@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.5.0](#050)
   - [0.4.3](#043)
   - [0.4.2](#042)
   - [0.4.1](#041)
@@ -13,6 +14,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 0.5.0
+
+Released on ??
+
+- ❗ Changed name for `Scrolltable` to `ScrollTable`
 
 ## 0.4.3
 

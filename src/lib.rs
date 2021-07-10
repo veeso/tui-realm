@@ -8,7 +8,7 @@
 //! ### Adding `tui-realm` as dependency
 //!
 //! ```toml
-//! tuirealm = "0.4.3"
+//! tuirealm = "0.5.0"
 //! ```
 //! or if you want the std components library
 //!
