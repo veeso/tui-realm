@@ -38,3 +38,50 @@ required-features = [ "with-components" ]
 [[example]]
 name = "counter"
 path = "examples/custom_comp.rs"
+
+# -- components
+
+[[example]]
+name = "checkbox"
+path = "examples/checkbox.rs"
+required-features = [ "with-components" ]
+
+[[example]]
+name = "input"
+path = "examples/input.rs"
+required-features = [ "with-components" ]
+
+[[example]]
+name = "label"
+path = "examples/label.rs"
+required-features = [ "with-components" ]
+
+[[example]]
+name = "paragraph"
+path = "examples/paragraph.rs"
+required-features = [ "with-components" ]
+
+[[example]]
+name = "progress_bar"
+path = "examples/progress_bar.rs"
+required-features = [ "with-components" ]
+
+[[example]]
+name = "radio"
+path = "examples/radio.rs"
+required-features = [ "with-components" ]
+
+[[example]]
+name = "scrolltable"
+path = "examples/scrolltable.rs"
+required-features = [ "with-components" ]
+
+[[example]]
+name = "table"
+path = "examples/table.rs"
+required-features = [ "with-components" ]
+
+[[example]]
+name = "textarea"
+path = "examples/textarea.rs"
+required-features = [ "with-components" ]
