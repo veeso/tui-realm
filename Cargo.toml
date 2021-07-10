@@ -72,6 +72,12 @@ path = "examples/radio.rs"
 required-features = [ "with-components" ]
 
 [[example]]
+name = "select"
+path = "examples/select.rs"
+required-features = [ "with-components" ]
+
+
+[[example]]
 name = "scrolltable"
 path = "examples/scrolltable.rs"
 required-features = [ "with-components" ]
