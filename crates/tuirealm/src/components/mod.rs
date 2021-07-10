@@ -33,6 +33,7 @@ pub mod paragraph;
 pub mod progress_bar;
 pub mod radio;
 pub mod scrolltable;
+pub mod select;
 pub mod span;
 pub mod table;
 pub mod textarea;

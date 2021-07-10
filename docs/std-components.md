@@ -8,6 +8,7 @@
   - [Paragraph](#paragraph)
   - [Progress bar](#progress-bar)
   - [Radio](#radio)
+  - [Select](#select)
   - [ScrollTable](#scrolltable)
   - [Span](#span)
   - [Table](#table)
@@ -193,6 +194,36 @@ A radio button group. Provides the possibility to select a single option in a gr
 
 - `with_color`: foreground color
 - `with_inverted_colors`: color used when item is at current index
+- `with_borders`: set borders properties for component
+- `with_options`: set radio options and title
+- `with_value`: set default selected item by its index
+
+---
+
+## Select
+
+A select like in HTML. Provides the possibility to select a single option in a group of options. When `get_state` is invoked returns the index of the selected option as Unsigned, but only if the selection tab is closed. Returns `Payload::None` otherwise. The tab can be opened with `<ENTER>`; once opened you can move with arrows to select the entry. To close the form, you need to press `<ENTER>` again. Once the tab is closed, a `Msg::OnSubmit` is raised with the selected index.
+If the component loses focus, the selection tab is automatically closed
+This component should have a variable size in the layout to be displayed properly. Please view the example: `examples/select.rs`.
+
+**Events**:
+
+| Event                | Message                  | Behaviour                        |
+|----------------------|--------------------------|----------------------------------|
+| `KeyCode::Up`        | `OnChange` | `None`      | Move select up, if tab is open   |
+| `KeyCode::Down`      | `OnChange` | `None`      | Move select down, if tab is open |
+| `KeyCode::Enter`     | `OnSubmit` | `None`      | Open or close the select tab     |
+
+**Update**: `Msg::OnChange` if the choice changed, `Msg::None` otherwise.
+
+**State**: the state returned is an `Unsigned` containing the index of the selected item in the radio group.
+
+**Properties**:
+
+- `with_foreground`: foreground color
+- `with_background`: background color
+- `with_highlighted_color`: a different color for highlighted entry; `foreground` otherwise
+- `with_highlighted_symbol`: cursor for highlighted entry in selection tab.
 - `with_borders`: set borders properties for component
 - `with_options`: set radio options and title
 - `with_value`: set default selected item by its index

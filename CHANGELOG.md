@@ -20,6 +20,7 @@
 Released on ??
 
 - ❗ Changed name for `Scrolltable` to `ScrollTable`
+- Added `Select` component
 
 ## 0.4.3
 
