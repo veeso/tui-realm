@@ -299,7 +299,7 @@ impl OwnStates {
 /// ### BarChart
 ///
 /// A component to display a chart with bars.
-/// The bar chart can work both in active and "disabled" mode.
+/// The bar chart can work both in "active" and "disabled" mode.
 ///
 /// #### Disabled mode
 ///
