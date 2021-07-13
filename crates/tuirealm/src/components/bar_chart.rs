@@ -427,17 +427,17 @@ impl Component for BarChart {
             if let Some(PropPayload::One(PropValue::Style(style))) =
                 self.props.own.get(PROP_BAR_STYLE)
             {
-                widget = widget.bar_style(style.clone());
+                widget = widget.bar_style(*style);
             }
             if let Some(PropPayload::One(PropValue::Style(style))) =
                 self.props.own.get(PROP_LABEL_STYLE)
             {
-                widget = widget.label_style(style.clone());
+                widget = widget.label_style(*style);
             }
             if let Some(PropPayload::One(PropValue::Style(style))) =
                 self.props.own.get(PROP_VALUE_STYLE)
             {
-                widget = widget.value_style(style.clone());
+                widget = widget.value_style(*style);
             }
             // Render
             render.render_widget(widget, area);
