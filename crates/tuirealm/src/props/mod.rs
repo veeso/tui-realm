@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 // ext
-use tui::style::{Color, Modifier};
+use tui::style::{Color, Modifier, Style};
 
 // modules
 pub mod borders;
@@ -114,6 +114,7 @@ pub enum PropValue {
     Str(String),
     Color(Color),
     InputType(InputType),
+    Style(Style),
 }
 
 // -- Input Type

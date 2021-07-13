@@ -19,8 +19,12 @@
 
 Released on ??
 
-- ❗ Changed name for `Scrolltable` to `ScrollTable`
-- Added `Select` component
+- New components:
+  - Added `BarChart` component
+  - Added `Select` component
+- `PropValue` can now also be `Style`
+- ❗ Breaking changes ❗
+  - ❗ Changed name for `Scrolltable` to `ScrollTable` ❗
 
 ## 0.4.3
 
