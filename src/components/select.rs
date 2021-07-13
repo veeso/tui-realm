@@ -579,6 +579,8 @@ mod test {
                 .with_foreground(Color::Red)
                 .with_background(Color::Blue)
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .with_highlighted_color(Color::Red)
+                .with_highlighted_str(Some(">>"))
                 .with_options(
                     Some(String::from("C'est oui ou bien c'est non?")),
                     vec![
@@ -597,6 +599,18 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(
+            *component.props.own.get(PROP_HIGHLIGHTED_COLOR).unwrap(),
+            PropPayload::One(PropValue::Color(Color::Red))
+        );
+        assert_eq!(
+            *component.props.own.get(PROP_HIGHLIGHTED_TXT).unwrap(),
+            PropPayload::One(PropValue::Str(String::from(">>")))
+        );
+        assert_eq!(
+            *component.props.own.get(PROP_SELECTED).unwrap(),
+            PropPayload::One(PropValue::Usize(1))
+        );
         // Focus
         component.active();
         assert_eq!(component.states.focus, true);
