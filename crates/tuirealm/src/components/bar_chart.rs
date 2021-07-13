@@ -597,6 +597,32 @@ mod test {
                 ])
                 .build(),
         );
+        assert_eq!(component.props.foreground, Color::Black);
+        assert_eq!(component.props.background, Color::White);
+        assert_eq!(component.props.visible, true);
+        assert_eq!(component.props.borders.borders, Borders::ALL);
+        assert_eq!(component.props.borders.variant, BorderType::Double);
+        assert_eq!(component.props.borders.color, Color::Yellow);
+        assert_eq!(
+            *component.props.own.get(PROP_BAR_GAP).unwrap(),
+            PropPayload::One(PropValue::U16(2))
+        );
+        assert_eq!(
+            *component.props.own.get(PROP_BAR_WIDTH).unwrap(),
+            PropPayload::One(PropValue::U16(4))
+        );
+        assert_eq!(
+            *component.props.own.get(PROP_MAX_BARS).unwrap(),
+            PropPayload::One(PropValue::U64(6))
+        );
+        assert!(component.props.own.get(PROP_DATA).is_some());
+        assert!(component.props.own.get(PROP_BAR_STYLE).is_some());
+        assert!(component.props.own.get(PROP_LABEL_STYLE).is_some());
+        assert!(component.props.own.get(PROP_VALUE_STYLE).is_some());
+        assert_eq!(
+            *component.props.own.get(PROP_DISABLED).unwrap(),
+            PropPayload::One(PropValue::Bool(false))
+        );
         // focus
         component.active();
         assert_eq!(component.states.focus, true);
