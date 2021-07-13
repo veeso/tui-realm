@@ -26,6 +26,7 @@
  * SOFTWARE.
  */
 // Modules
+pub mod bar_chart;
 pub mod checkbox;
 pub mod input;
 pub mod label;

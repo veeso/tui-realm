@@ -42,6 +42,11 @@ path = "examples/custom_comp.rs"
 # -- components
 
 [[example]]
+name = "bar-chart"
+path = "examples/bar_chart.rs"
+required-features = [ "with-components" ]
+
+[[example]]
 name = "checkbox"
 path = "examples/checkbox.rs"
 required-features = [ "with-components" ]
