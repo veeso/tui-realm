@@ -103,6 +103,12 @@ To have an overview of the components just run the gallery example 🦄
 cargo run --features="with-components" --example gallery
 ```
 
+If you want you can view single components running
+
+```sh
+cargo run --features="with-components" --example $COMPONENT_NAME
+```
+
 If you want a super-detailed guide about components check out the [components guide](docs/std-components.md).
 
 ## Community components 🏘️

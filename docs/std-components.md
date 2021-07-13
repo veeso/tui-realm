@@ -2,6 +2,7 @@
 
 - [Standard components library](#standard-components-library)
   - [Introduction](#introduction)
+  - [BarChart](#barchart)
   - [Checkbox](#checkbox)
   - [Input](#input)
   - [Label](#label)
@@ -31,6 +32,25 @@ Each component is described by 4 parts:
 
 ---
 
+## BarChart
+
+A chart with bars. The bar chart can work both in "active" and "disabled" mode.
+
+When in disabled mode, the chart won't be interactive, so you won't be able to move through data using keys.
+If you have more data than the maximum amount of bars that can be displayed, you'll have to update data to display the remaining entries
+
+While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
+
+**Events**:
+
+| Event                | Message         | Behaviour                                      |
+|----------------------|-----------------|------------------------------------------------|
+| `KeyCode::Right`     | `None`          | Move the cursor right                          |
+| `KeyCode::Left`      | `None`          | Move the cursor left                           |
+| `KeyCode::End`       | `None`          | Move "cursor" to the end of chart              |
+| `KeyCode::Home`      | `None`          | Move "cursor" to the first entry of the chart  |
+| `KeyCode::Char(_)`   | `OnKey`         |                                                |
+
 ## Checkbox
 
 A checkbox group. Provides the possibility to select between multiple options, when `get_state` is invoked returns a vector of index; each index represents the index of the item selected.
@@ -43,6 +63,7 @@ A checkbox group. Provides the possibility to select between multiple options, w
 | `KeyCode::Left`      | `None`          | Decrement the selected choice index by 1       |
 | `KeyCode::Char(' ')` | `OnChange`      | Check or uncheck the item at the current index |
 | `KeyCode::Enter`     | `OnSubmit`      | Just returns the selection                     |
+| `KeyCode::Char(_)`   | `OnKey`         |                                                |
 
 **Update**: `Msg::OnChange` if the selection changed, `Msg::None` otherwise.
 
@@ -185,6 +206,7 @@ A radio button group. Provides the possibility to select a single option in a gr
 | `KeyCode::Right`     | `OnChange`      | Change the selected option to current item index |
 | `KeyCode::Left`      | `OnChange`      | Change the selected option to current item index |
 | `KeyCode::Enter`     | `OnSubmit`      | Just returns the index of the selected item      |
+| `KeyCode::Char(_)`   | `OnKey`         |                                                |
 
 **Update**: `Msg::OnChange` if the choice changed, `Msg::None` otherwise.
 
@@ -213,6 +235,7 @@ This component should have a variable size in the layout to be displayed properl
 | `KeyCode::Up`        | `OnChange` | `None`      | Move select up, if tab is open   |
 | `KeyCode::Down`      | `OnChange` | `None`      | Move select down, if tab is open |
 | `KeyCode::Enter`     | `OnSubmit` | `None`      | Open or close the select tab     |
+| `KeyCode::Char(_)`   | `OnKey`         |                                                |
 
 **Update**: `Msg::OnChange` if the choice changed, `Msg::None` otherwise.
 
