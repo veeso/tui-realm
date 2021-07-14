@@ -36,6 +36,7 @@ pub mod radio;
 pub mod scrolltable;
 pub mod select;
 pub mod span;
+pub mod sparkline;
 pub mod table;
 pub mod textarea;
 pub mod utils;

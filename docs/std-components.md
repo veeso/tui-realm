@@ -10,6 +10,7 @@
   - [Progress bar](#progress-bar)
   - [Radio](#radio)
   - [Select](#select)
+  - [Sparkline](#sparkline)
   - [ScrollTable](#scrolltable)
   - [Span](#span)
   - [Table](#table)
@@ -50,6 +51,25 @@ While in active mode (default) you can put as many entries as you wish. You can 
 | `KeyCode::End`       | `None`          | Move "cursor" to the end of chart              |
 | `KeyCode::Home`      | `None`          | Move "cursor" to the first entry of the chart  |
 | `KeyCode::Char(_)`   | `OnKey`         |                                                |
+
+**State**: `None`.
+
+**Properties**:
+
+- `disabled`: Sets the chart in disabled mode
+- `with_foreground`: foreground color
+- `with_background`: background color
+- `with_title`: title for chart
+- `with_label_style`: Sets the style for data labels
+- `with_max_bars`: maximum amount of bars to display. If not provided, will be the maximum allowed by the area width.
+- `with_bar_style`: sets style for bars
+- `with_bar_gap`: sets gap for bars
+- `with_value_style`: Sets style for values
+- `with_data`: set data for chart. Is a vec of tuple of labels and u64
+- `push_record_back`: Just push the provided record to the back of data (end)
+- `push_record_front`: Just push the provided record to the front of data (begin)
+- `pop_record_front`: Pops the first element of data
+- `pop_record_back`: Pops the last element of data
 
 ## Checkbox
 
@@ -252,6 +272,30 @@ This component should have a variable size in the layout to be displayed properl
 - `with_value`: set default selected item by its index
 
 ---
+
+## Sparkline
+
+A sparkline chart.
+
+**Events**:
+
+| Event                | Message         | Behaviour                                      |
+|----------------------|-----------------|------------------------------------------------|
+| `KeyCode::Char(_)`   | `OnKey`         |                                                |
+
+**State**: `None`.
+
+**Properties**:
+
+- `with_foreground`: foreground color
+- `with_background`: background color
+- `with_label`: label for sparkline
+- `with_max_entries`: maximum amount of entries to display. If not provided, will be the maximum allowed by the area width.
+- `with_data`: set data for sparkline. Is a vec of u64
+- `push_record_back`: Just push the provided record to the back of data (end)
+- `push_record_front`: Just push the provided record to the front of data (begin)
+- `pop_record_front`: Pops the first element of data
+- `pop_record_back`: Pops the last element of data
 
 ## ScrollTable
 
