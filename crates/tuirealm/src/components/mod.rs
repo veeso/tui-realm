@@ -27,6 +27,7 @@
  */
 // Modules
 pub mod bar_chart;
+pub mod chart;
 pub mod checkbox;
 pub mod input;
 pub mod label;
@@ -42,6 +43,8 @@ pub mod textarea;
 pub mod utils;
 
 // Exports
+pub use bar_chart::{BarChart, BarChartPropsBuilder};
+pub use chart::{Chart, ChartPropsBuilder};
 pub use checkbox::{Checkbox, CheckboxPropsBuilder};
 pub use input::{Input, InputPropsBuilder};
 pub use label::{Label, LabelPropsBuilder};
@@ -49,6 +52,8 @@ pub use paragraph::{Paragraph, ParagraphPropsBuilder};
 pub use progress_bar::{ProgressBar, ProgressBarPropsBuilder};
 pub use radio::{Radio, RadioPropsBuilder};
 pub use scrolltable::{ScrollTable, ScrollTablePropsBuilder};
+pub use select::{Select, SelectPropsBuilder};
 pub use span::{Span, SpanPropsBuilder};
+pub use sparkline::{Sparkline, SparklinePropsBuilder};
 pub use table::{Table, TablePropsBuilder};
 pub use textarea::{Textarea, TextareaPropsBuilder};

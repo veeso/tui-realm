@@ -31,11 +31,13 @@ use tui::style::{Color, Modifier, Style};
 // modules
 pub mod borders;
 pub mod builder;
+pub mod dataset;
 pub mod texts;
 
 // Exports
 pub use borders::{Borders, BordersProps};
 pub use builder::{GenericPropsBuilder, PropsBuilder};
+pub use dataset::Dataset;
 pub use texts::{Table, TableBuilder, TextParts, TextSpan, TextSpanBuilder};
 
 use std::collections::{HashMap, LinkedList};
@@ -112,6 +114,7 @@ pub enum PropValue {
     F64(f64),
     F32(f32),
     Str(String),
+    Dataset(Dataset),
     Color(Color),
     InputType(InputType),
     Style(Style),
@@ -122,7 +125,7 @@ pub enum PropValue {
 /// ## InputType
 ///
 /// Input type for text inputs
-#[derive(Clone, Copy, PartialEq, std::fmt::Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum InputType {
     Text,
     Number,
@@ -204,6 +207,24 @@ mod tests {
         assert_eq!(*map.get("m").unwrap(), PropValue::Isize(200));
         map.insert(String::from("n"), PropValue::F32(0.23));
         assert_eq!(*map.get("n").unwrap(), PropValue::F32(0.23));
+        map.insert(String::from("o"), PropValue::Color(Color::Red));
+        assert_eq!(*map.get("o").unwrap(), PropValue::Color(Color::Red));
+        map.insert(
+            String::from("p"),
+            PropValue::Style(Style::default().fg(Color::Red)),
+        );
+        assert_eq!(
+            *map.get("p").unwrap(),
+            PropValue::Style(Style::default().fg(Color::Red))
+        );
+        map.insert(
+            String::from("q"),
+            PropValue::Dataset(Dataset::default().name("omar")),
+        );
+        assert_eq!(
+            *map.get("q").unwrap(),
+            PropValue::Dataset(Dataset::default().name("omar"))
+        );
         map.insert(String::from("s"), PropValue::InputType(InputType::Number));
         assert_eq!(
             *map.get("s").unwrap(),

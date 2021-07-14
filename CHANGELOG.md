@@ -21,9 +21,12 @@ Released on ??
 
 - New components:
   - Added `BarChart` component
+  - Added `Chart` component
   - Added `Select` component
   - Added `Sparkline` component
-- `PropValue` can now also be `Style`
+- `PropValue` can now also be:
+  - `Dataset`
+  - `Style`
 - ❗ Breaking changes ❗
   - ❗ Changed name for `Scrolltable` to `ScrollTable` ❗
 

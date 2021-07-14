@@ -3,6 +3,7 @@
 - [Standard components library](#standard-components-library)
   - [Introduction](#introduction)
   - [BarChart](#barchart)
+  - [Chart](#chart)
   - [Checkbox](#checkbox)
   - [Input](#input)
   - [Label](#label)
@@ -68,6 +69,43 @@ While in active mode (default) you can put as many entries as you wish. You can 
 - `with_data`: set data for chart. Is a vec of tuple of labels and u64
 - `push_record_back`: Just push the provided record to the back of data (end)
 - `push_record_front`: Just push the provided record to the front of data (begin)
+- `pop_record_front`: Pops the first element of data
+- `pop_record_back`: Pops the last element of data
+
+## Chart
+
+A chart displayed on a cartesian axis system. Can work both in "active" and "disabled" mode.
+
+When in disabled mode, the chart won't be interactive, so you won't be able to move through data using keys.
+If you have more data than the maximum amount of bars that can be displayed, you'll have to update data to display the remaining entries
+
+While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
+
+**Events**:
+
+| Event                | Message         | Behaviour                                      |
+|----------------------|-----------------|------------------------------------------------|
+| `KeyCode::Right`     | `None`          | Move the cursor right                          |
+| `KeyCode::Left`      | `None`          | Move the cursor left                           |
+| `KeyCode::End`       | `None`          | Move "cursor" to the end of chart              |
+| `KeyCode::Home`      | `None`          | Move "cursor" to the first entry of the chart  |
+| `KeyCode::Char(_)`   | `OnKey`         |                                                |
+
+**State**: `None`.
+
+**Properties**:
+
+- `disabled`: Sets the chart in disabled mode
+- `with_foreground`: foreground color
+- `with_background`: background color
+- `with_title`: title for chart
+- `with_label_style`: Sets the style for data labels
+- `with_*_bounds`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
+- `with_*_labels`: Set labels for provided axis
+- `with_*_style`: Set style for provided axis
+- `with_*_title`: Set title for axis
+- `with_data`: set data for chart. Is a vec of `Dataset`
+- `push_record`: Just push the provided record to the back of data (end)
 - `pop_record_front`: Pops the first element of data
 - `pop_record_back`: Pops the last element of data
 
