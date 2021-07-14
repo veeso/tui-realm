@@ -25,32 +25,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+extern crate rand;
+
 mod utils;
 
 use utils::context::Context;
 use utils::keymap::*;
 
+use rand::{rngs::ThreadRng, thread_rng, Rng};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tuirealm::components::{
-    bar_chart::{BarChart, BarChartPropsBuilder},
     label,
+    sparkline::{Sparkline, SparklinePropsBuilder},
 };
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
-use tui::style::{Color, Style};
+use tui::style::Color;
 
 const COMPONENT_CHART1: &str = "chart1";
-const COMPONENT_CHART2: &str = "chart2";
 const COMPONENT_EVENT: &str = "LABEL";
 
 struct Model {
-    quit: bool,           // Becomes true when the user presses <ESC>
-    redraw: bool,         // Tells whether to refresh the UI; performance optimization
-    last_redraw: Instant, // Last time the ui has been redrawed
+    quit: bool,               // Becomes true when the user presses <ESC>
+    redraw: bool,             // Tells whether to refresh the UI; performance optimization
+    last_redraw: Instant,     // Last time the ui has been redrawed
+    last_data_fetch: Instant, // Last time data was added
     view: View,
 }
 
@@ -60,6 +63,7 @@ impl Model {
             quit: false,
             redraw: true,
             last_redraw: Instant::now(),
+            last_data_fetch: Instant::now(),
             view,
         }
     }
@@ -76,6 +80,14 @@ impl Model {
         self.redraw = false;
         self.last_redraw = Instant::now();
     }
+
+    fn should_fetch_data(&self) -> bool {
+        self.last_data_fetch.elapsed() >= Duration::from_millis(500)
+    }
+
+    fn data_fetched(&mut self) {
+        self.last_data_fetch = Instant::now();
+    }
 }
 
 fn main() {
@@ -87,70 +99,20 @@ fn main() {
     ctx.clear_screen();
     // let's create a `View`, which will contain the components
     let mut myview: View = View::init();
-    // Mount the component you need; we'll use a Label and an Input
+    // Init data
+    let mut rand: ThreadRng = thread_rng();
+    let max_val: u64 = 1024;
+    let data: Vec<u64> = (0..1024).map(|_| get_rand(&mut rand, max_val)).collect();
+    // Mount the component you need; we'll use a Label and an Sparkline
     myview.mount(
         COMPONENT_CHART1,
-        Box::new(BarChart::new(
-            BarChartPropsBuilder::default()
-                .hidden()
+        Box::new(Sparkline::new(
+            SparklinePropsBuilder::default()
                 .visible()
-                .disabled(false)
-                .with_title(String::from("my incomes"))
-                .with_label_style(Style::default().fg(Color::Yellow))
-                .with_bar_style(Style::default().fg(Color::LightYellow))
-                .with_bar_gap(6)
-                .with_bar_width(12)
-                .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
-                .with_max_bars(4)
-                .with_value_style(Style::default().fg(Color::LightBlue))
-                .with_data(&[
-                    ("january", 250),
-                    ("february", 300),
-                    ("march", 275),
-                    ("april", 312),
-                    ("may", 420),
-                    ("june", 170),
-                    ("july", 220),
-                    ("august", 160),
-                    ("september", 180),
-                    ("october", 470),
-                    ("november", 380),
-                    ("december", 820),
-                ])
-                .build(),
-        )),
-    );
-    myview.mount(
-        COMPONENT_CHART2,
-        Box::new(BarChart::new(
-            BarChartPropsBuilder::default()
-                .hidden()
-                .visible()
-                .disabled(true)
-                .with_background(Color::White)
-                .with_foreground(Color::Black)
-                .with_title(String::from("my incomes"))
-                .with_label_style(Style::default().fg(Color::Yellow))
-                .with_bar_style(Style::default().fg(Color::LightYellow))
-                .with_bar_gap(4)
-                .with_bar_width(12)
-                .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
-                .with_max_bars(12)
-                .with_value_style(Style::default().fg(Color::LightBlue))
-                .with_data(&[
-                    ("january", 250),
-                    ("february", 300),
-                    ("march", 275),
-                    ("april", 312),
-                    ("may", 420),
-                    ("june", 170),
-                    ("july", 220),
-                    ("august", 160),
-                    ("september", 180),
-                    ("october", 470),
-                    ("november", 380),
-                    ("december", 820),
-                ])
+                .with_foreground(Color::LightYellow)
+                .with_title(String::from("bandwidth (Mbps) *data is fake*"))
+                .with_borders(Borders::ALL, BorderType::Thick, Color::LightYellow)
+                .with_data(&data)
                 .build(),
         )),
     );
@@ -177,6 +139,18 @@ fn main() {
             // Call the elm friend update
             model.update(msg);
         }
+        // Fetch data
+        if model.should_fetch_data() {
+            model.view.update(
+                COMPONENT_CHART1,
+                SparklinePropsBuilder::from(model.view.get_props(COMPONENT_CHART1).unwrap())
+                    .pop_record_front()
+                    .push_record_back(get_rand(&mut rand, max_val))
+                    .build(),
+            );
+            model.data_fetched();
+            model.redraw();
+        }
         // If redraw, draw interface
         if model.redraw || model.last_redraw.elapsed() > Duration::from_millis(50) {
             // Call the elm friend vie1 function
@@ -195,18 +169,10 @@ fn view(ctx: &mut Context, view: &View) {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .margin(1)
-            .constraints(
-                [
-                    Constraint::Length(10),
-                    Constraint::Length(10),
-                    Constraint::Length(3),
-                ]
-                .as_ref(),
-            )
+            .constraints([Constraint::Length(20), Constraint::Length(3)].as_ref())
             .split(f.size());
         view.render(COMPONENT_CHART1, f, chunks[0]);
-        view.render(COMPONENT_CHART2, f, chunks[1]);
-        view.render(COMPONENT_EVENT, f, chunks[2]);
+        view.render(COMPONENT_EVENT, f, chunks[1]);
     });
 }
 
@@ -216,14 +182,6 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_CHART1, &MSG_KEY_TAB) => {
-                    self.view.active(COMPONENT_CHART2);
-                    None
-                }
-                (COMPONENT_CHART2, &MSG_KEY_TAB) => {
-                    self.view.active(COMPONENT_CHART1);
-                    None
-                }
                 (_, &MSG_KEY_ESC) => {
                     // Quit on esc
                     self.quit();
@@ -243,4 +201,8 @@ impl Update for Model {
             },
         }
     }
+}
+
+fn get_rand(rng: &mut ThreadRng, max: u64) -> u64 {
+    rng.gen_range(0..max)
 }

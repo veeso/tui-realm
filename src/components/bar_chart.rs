@@ -123,10 +123,10 @@ impl BarChartPropsBuilder {
         self
     }
 
-    /// ### with_label
+    /// ### with_title
     ///
-    /// Set input label
-    pub fn with_label(&mut self, label: String) -> &mut Self {
+    /// Set title
+    pub fn with_title(&mut self, label: String) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.texts = TextParts::new(Some(label), None);
         }
@@ -649,7 +649,7 @@ mod test {
                 .disabled(false)
                 .with_background(Color::White)
                 .with_foreground(Color::Black)
-                .with_label(String::from("my incomes"))
+                .with_title(String::from("my incomes"))
                 .with_label_style(Style::default().fg(Color::Yellow))
                 .with_bar_style(Style::default().fg(Color::LightYellow))
                 .with_bar_gap(2)
@@ -766,7 +766,7 @@ mod test {
                 .disabled(true)
                 .with_background(Color::White)
                 .with_foreground(Color::Black)
-                .with_label(String::from("my incomes"))
+                .with_title(String::from("my incomes"))
                 .with_label_style(Style::default().fg(Color::Yellow))
                 .with_bar_style(Style::default().fg(Color::LightYellow))
                 .with_bar_gap(2)
