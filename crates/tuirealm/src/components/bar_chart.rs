@@ -223,6 +223,58 @@ impl BarChartPropsBuilder {
         self
     }
 
+    /// ### push_record_back
+    ///
+    /// Just pushes a record to the back of the data
+    pub fn push_record_back(&mut self, (label, value): (&str, u64)) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            match props.own.get_mut(PROP_DATA) {
+                Some(PropPayload::Linked(list)) => {
+                    list.push_back(PropPayload::Tup2((
+                        PropValue::Str(label.to_string()),
+                        PropValue::U64(value),
+                    )));
+                }
+                _ => {
+                    // Create list
+                    let mut l: LinkedList<PropPayload> = LinkedList::new();
+                    l.push_back(PropPayload::Tup2((
+                        PropValue::Str(label.to_string()),
+                        PropValue::U64(value),
+                    )));
+                    props.own.insert(PROP_DATA, PropPayload::Linked(l));
+                }
+            }
+        }
+        self
+    }
+
+    /// ### push_record_front
+    ///
+    /// Just pushes a record to the front of the data
+    pub fn push_record_front(&mut self, (label, value): (&str, u64)) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            match props.own.get_mut(PROP_DATA) {
+                Some(PropPayload::Linked(list)) => {
+                    list.push_front(PropPayload::Tup2((
+                        PropValue::Str(label.to_string()),
+                        PropValue::U64(value),
+                    )));
+                }
+                _ => {
+                    // Create list
+                    let mut l: LinkedList<PropPayload> = LinkedList::new();
+                    l.push_front(PropPayload::Tup2((
+                        PropValue::Str(label.to_string()),
+                        PropValue::U64(value),
+                    )));
+                    props.own.insert(PROP_DATA, PropPayload::Linked(l));
+                }
+            }
+        }
+        self
+    }
+
     /// ### disabled
     ///
     /// If component is set to `disabled`, then input commands won't work, and colors will be rendered
@@ -757,8 +809,19 @@ mod test {
             component.data(2, 4),
             vec![("march", 275), ("april", 312), ("may", 420), ("june", 170),]
         );
+        // Add a new record
+        assert_eq!(
+            component.update(
+                BarChartPropsBuilder::from(component.get_props())
+                    .push_record_back(("january", 983))
+                    .push_record_front(("december", 187))
+                    .build()
+            ),
+            Msg::None
+        );
+        assert_eq!(component.data_len(), 14);
         // Update and test empty data
-        component.states.cursor_at_end(12);
+        component.states.cursor_at_end(14);
         assert_eq!(
             component.update(
                 BarChartPropsBuilder::from(component.get_props())
