@@ -275,6 +275,30 @@ impl BarChartPropsBuilder {
         self
     }
 
+    /// ### pop_record_back
+    ///
+    /// Pop first record on the back of the data list
+    pub fn pop_record_back(&mut self) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            if let Some(PropPayload::Linked(list)) = props.own.get_mut(PROP_DATA) {
+                list.pop_back();
+            }
+        }
+        self
+    }
+
+    /// ### pop_record_front
+    ///
+    /// Pop first record on the front of the data list
+    pub fn pop_record_front(&mut self) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            if let Some(PropPayload::Linked(list)) = props.own.get_mut(PROP_DATA) {
+                list.pop_front();
+            }
+        }
+        self
+    }
+
     /// ### disabled
     ///
     /// If component is set to `disabled`, then input commands won't work, and colors will be rendered
@@ -820,8 +844,19 @@ mod test {
             Msg::None
         );
         assert_eq!(component.data_len(), 14);
+        // Pop
+        assert_eq!(
+            component.update(
+                BarChartPropsBuilder::from(component.get_props())
+                    .pop_record_back()
+                    .pop_record_front()
+                    .build()
+            ),
+            Msg::None
+        );
+        assert_eq!(component.data_len(), 12);
         // Update and test empty data
-        component.states.cursor_at_end(14);
+        component.states.cursor_at_end(12);
         assert_eq!(
             component.update(
                 BarChartPropsBuilder::from(component.get_props())
