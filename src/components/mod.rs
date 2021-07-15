@@ -38,6 +38,7 @@ pub mod radio;
 pub mod select;
 pub mod span;
 pub mod sparkline;
+pub mod table;
 pub mod textarea;
 pub mod utils;
 
@@ -54,4 +55,5 @@ pub use radio::{Radio, RadioPropsBuilder};
 pub use select::{Select, SelectPropsBuilder};
 pub use span::{Span, SpanPropsBuilder};
 pub use sparkline::{Sparkline, SparklinePropsBuilder};
+pub use table::{Table, TablePropsBuilder};
 pub use textarea::{Textarea, TextareaPropsBuilder};

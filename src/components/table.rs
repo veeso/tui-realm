@@ -1,6 +1,6 @@
-//! ## List
+//! ## Table
 //!
-//! `List` represents a read-only textual list component which can be scrollable through arrows or inactive
+//! `Table` represents a read-only textual table component which can be scrollable through arrows or inactive
 
 /**
  * MIT License
@@ -30,33 +30,37 @@ use crate::props::{
     BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable, TextParts,
 };
 use crate::tui::{
-    layout::{Corner, Rect},
+    layout::{Constraint, Rect},
     style::{Color, Modifier, Style},
-    text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, List as TuiList, ListItem, ListState},
+    text::Span,
+    widgets::{Block, BorderType, Borders, Cell, Row, Table as TuiTable, TableState},
 };
 use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
 
 const COLOR_HIGHLIGHTED: &str = "highlighted-color";
-const PROP_SCROLLABLE: &str = "scrollable";
+const PROP_COLUMN_SPACING: &str = "col-spacing";
+const PROP_HEADER: &str = "header";
 const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_MAX_STEP: &str = "max-step";
+const PROP_ROW_HEIGHT: &str = "row-height";
+const PROP_SCROLLABLE: &str = "scrollable";
+const PROP_WIDTHS: &str = "widhts";
 
-pub struct ListPropsBuilder {
+pub struct TablePropsBuilder {
     props: Option<Props>,
 }
 
-impl Default for ListPropsBuilder {
+impl Default for TablePropsBuilder {
     fn default() -> Self {
-        ListPropsBuilder {
+        TablePropsBuilder {
             props: Some(Props::default()),
         }
     }
 }
 
-impl PropsBuilder for ListPropsBuilder {
+impl PropsBuilder for TablePropsBuilder {
     fn build(&mut self) -> Props {
         self.props.take().unwrap()
     }
@@ -76,13 +80,13 @@ impl PropsBuilder for ListPropsBuilder {
     }
 }
 
-impl From<Props> for ListPropsBuilder {
+impl From<Props> for TablePropsBuilder {
     fn from(props: Props) -> Self {
-        ListPropsBuilder { props: Some(props) }
+        TablePropsBuilder { props: Some(props) }
     }
 }
 
-impl ListPropsBuilder {
+impl TablePropsBuilder {
     /// ### with_foreground
     ///
     /// Set foreground color for area
@@ -202,13 +206,70 @@ impl ListPropsBuilder {
         self
     }
 
-    /// ### with_rows
+    /// ### with_table
     ///
-    /// Set rows
+    /// Set table content
     /// You can define a title if you want. The title will be displayed on the upper border of the box
-    pub fn with_rows(&mut self, title: Option<String>, table: TextTable) -> &mut Self {
+    pub fn with_table(&mut self, title: Option<String>, table: TextTable) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.texts = TextParts::table(title, table);
+        }
+        self
+    }
+
+    /// ### with_header
+    ///
+    /// Set header for table
+    pub fn with_header(&mut self, header: &[&str]) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_HEADER,
+                PropPayload::Vec(
+                    header
+                        .iter()
+                        .map(|x| PropValue::Str(x.to_string()))
+                        .collect(),
+                ),
+            );
+        }
+        self
+    }
+
+    /// ### with_widths
+    ///
+    /// Set widths in percentage for table columns.
+    /// Panics if amount of columns doesn't match the amount of columns in table
+    pub fn with_widths(&mut self, widths: &[u16]) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_WIDTHS,
+                PropPayload::Vec(widths.iter().map(|x| PropValue::U16(*x)).collect()),
+            );
+        }
+        self
+    }
+
+    /// ### with_row_height
+    ///
+    /// Set row height
+    pub fn with_row_height(&mut self, height: u16) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_ROW_HEIGHT, PropPayload::One(PropValue::U16(height)));
+        }
+        self
+    }
+
+    /// ### with_col_spacing
+    ///
+    /// Set column spacing
+    pub fn with_col_spacing(&mut self, spacing: u16) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_COLUMN_SPACING,
+                PropPayload::One(PropValue::U16(spacing)),
+            );
         }
         self
     }
@@ -353,15 +414,15 @@ impl OwnStates {
 
 // -- Component
 
-/// ## List
+/// ## Table
 ///
 /// represents a read-only text component without any container.
-pub struct List {
+pub struct Table {
     props: Props,
     states: OwnStates,
 }
 
-impl List {
+impl Table {
     /// ### new
     ///
     /// Instantiates a new `Table` component.
@@ -370,7 +431,7 @@ impl List {
             Some(t) => t.len(),
             None => 0,
         };
-        List {
+        Table {
             props,
             states: OwnStates {
                 focus: false,
@@ -389,9 +450,37 @@ impl List {
             _ => false,
         }
     }
+
+    /// ### layout
+    ///
+    /// Returns layout based on properties.
+    /// If layout is not set in properties, they'll be divided by rows number
+    fn layout(&self) -> Vec<Constraint> {
+        match self.props.own.get(PROP_WIDTHS) {
+            Some(PropPayload::Vec(widths)) => widths
+                .iter()
+                .map(|x| match x {
+                    PropValue::U16(sz) => Constraint::Percentage(*sz),
+                    _ => panic!("Size is not a u16"),
+                })
+                .collect(),
+            _ => {
+                // Get amount of columns (maximum len of row elements)
+                let columns: usize = match self.props.texts.table.as_ref() {
+                    None => 0,
+                    Some(rows) => rows.iter().map(|col| col.len()).max().unwrap_or(0),
+                };
+                // Calc width in equal way
+                let width: u16 = (100 / columns) as u16;
+                (0..columns)
+                    .map(|_| Constraint::Percentage(width))
+                    .collect()
+            }
+        }
+    }
 }
 
-impl Component for List {
+impl Component for Table {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
@@ -404,24 +493,29 @@ impl Component for List {
             };
             let div: Block =
                 super::utils::get_block(&self.props.borders, &self.props.texts.title, active);
-            // Make list entries
-            let list_items: Vec<ListItem> = match self.props.texts.table.as_ref() {
+            // Get row height
+            let row_height: u16 = match self.props.own.get(PROP_ROW_HEIGHT) {
+                Some(PropPayload::One(PropValue::U16(h))) => *h,
+                _ => 1,
+            };
+            // Make rows
+            let rows: Vec<Row> = match self.props.texts.table.as_ref() {
                 None => Vec::new(),
                 Some(table) => table
                     .iter()
                     .map(|row| {
-                        let columns: Vec<Span> = row
+                        let columns: Vec<Cell> = row
                             .iter()
                             .map(|col| {
                                 let (fg, bg, modifiers) =
                                     super::utils::use_or_default_styles(&self.props, col);
-                                Span::styled(
+                                Cell::from(Span::styled(
                                     col.content.clone(),
                                     Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                                )
+                                ))
                             })
                             .collect();
-                        ListItem::new(Spans::from(columns))
+                        Row::new(columns).height(row_height)
                     })
                     .collect(), // Make List item from TextSpan
             };
@@ -437,27 +531,54 @@ impl Component for List {
                 false => (highlighted_color, self.props.background),
             };
             // Make list
-            let mut list = TuiList::new(list_items)
+            let widths: Vec<Constraint> = self.layout();
+            let mut table = TuiTable::new(rows)
                 .block(div)
-                .start_corner(Corner::TopLeft)
                 .highlight_style(
                     Style::default()
                         .fg(fg)
                         .bg(bg)
                         .add_modifier(self.props.modifiers),
-                );
+                )
+                .widths(&widths);
             // Highlighted symbol
             if let Some(PropPayload::One(PropValue::Str(highlight))) =
                 self.props.own.get(PROP_HIGHLIGHTED_TXT)
             {
-                list = list.highlight_symbol(highlight);
+                table = table.highlight_symbol(highlight);
+            }
+            // Col spacing
+            if let Some(PropPayload::One(PropValue::U16(spacing))) =
+                self.props.own.get(PROP_COLUMN_SPACING)
+            {
+                table = table.column_spacing(*spacing);
+            }
+            // Header
+            if let Some(PropPayload::Vec(headers)) = self.props.own.get(PROP_HEADER) {
+                let headers: Vec<&str> = headers
+                    .iter()
+                    .map(|x| match x {
+                        PropValue::Str(s) => s,
+                        _ => "",
+                    })
+                    .collect();
+                table = table.header(
+                    Row::new(headers)
+                        .style(
+                            Style::default()
+                                .fg(self.props.foreground)
+                                .bg(self.props.background)
+                                .add_modifier(self.props.modifiers),
+                        )
+                        .height(row_height),
+                );
             }
             if self.scrollable() {
-                let mut state: ListState = ListState::default();
+                let mut state: TableState = TableState::default();
                 state.select(Some(self.states.list_index));
-                render.render_stateful_widget(list, area, &mut state);
+                render.render_stateful_widget(table, area, &mut state);
             } else {
-                render.render_widget(list, area);
+                render.render_widget(table, area);
             }
         }
     }
@@ -588,10 +709,10 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn test_components_list_scrollable() {
+    fn test_component_table_scrolling() {
         // Make component
-        let mut component: List = List::new(
-            ListPropsBuilder::default()
+        let mut component: Table = Table::new(
+            TablePropsBuilder::default()
                 .with_foreground(Color::Red)
                 .with_background(Color::Blue)
                 .with_highlighted_color(Color::Yellow)
@@ -608,37 +729,43 @@ mod tests {
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
                 .scrollable(true)
-                .with_rows(
-                    Some(String::from("My data")),
+                .with_table(
+                    Some(String::from("Events")),
                     TableBuilder::default()
-                        .add_col(TextSpan::from("name"))
-                        .add_col(TextSpan::from("age"))
+                        .add_col(TextSpan::from("KeyCode::Down"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down"))
                         .add_row()
-                        .add_col(TextSpan::from("omar"))
-                        .add_col(TextSpan::from("1"))
+                        .add_col(TextSpan::from("KeyCode::Up"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor up"))
                         .add_row()
-                        .add_col(TextSpan::from("mark"))
-                        .add_col(TextSpan::from("2"))
+                        .add_col(TextSpan::from("KeyCode::PageDown"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down by 8"))
                         .add_row()
-                        .add_col(TextSpan::from("tom"))
-                        .add_col(TextSpan::from("3"))
+                        .add_col(TextSpan::from("KeyCode::PageUp"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("ove cursor up by 8"))
                         .add_row()
-                        .add_col(TextSpan::from("pippo"))
-                        .add_col(TextSpan::from("5"))
+                        .add_col(TextSpan::from("KeyCode::End"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to last item"))
                         .add_row()
-                        .add_col(TextSpan::from("carl"))
-                        .add_col(TextSpan::from("8"))
+                        .add_col(TextSpan::from("KeyCode::Home"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to first item"))
                         .add_row()
-                        .add_col(TextSpan::from("charlie"))
-                        .add_col(TextSpan::from("13"))
-                        .add_row()
-                        .add_col(TextSpan::from("thomas"))
-                        .add_col(TextSpan::from("21"))
-                        .add_row()
-                        .add_col(TextSpan::from("cammello"))
-                        .add_col(TextSpan::from("34"))
+                        .add_col(TextSpan::from("KeyCode::Char(_)"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Return pressed key"))
+                        .add_col(TextSpan::from("4th mysterious columns"))
                         .build(),
                 )
+                .with_header(&["Event", "Message", "Behaviour", "???"])
+                .with_col_spacing(2)
+                .with_row_height(3)
+                .with_widths(&[25, 25, 25, 25])
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
@@ -669,15 +796,17 @@ mod tests {
         );
         assert_eq!(
             component.props.texts.title.as_ref().unwrap().as_str(),
-            "My data"
+            "Events"
         );
-        assert_eq!(component.props.texts.table.as_ref().unwrap().len(), 9);
-        assert_eq!(component.states.list_len, 9);
+        assert_eq!(component.props.texts.table.as_ref().unwrap().len(), 7);
+        assert_eq!(component.states.list_len, 7);
         assert_eq!(component.states.list_index, 0);
         component.active();
         assert_eq!(component.states.focus, true);
         component.blur();
         assert_eq!(component.states.focus, false);
+        // Own funcs
+        assert_eq!(component.layout().len(), 4);
         // Increment list index
         component.states.list_index += 1;
         assert_eq!(component.states.list_index, 1);
@@ -708,13 +837,13 @@ mod tests {
             Msg::OnKey(KeyEvent::from(KeyCode::PageDown))
         );
         // Index should be incremented
-        assert_eq!(component.states.list_index, 8);
+        assert_eq!(component.states.list_index, 6);
         // Index should be 0
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
             Msg::OnKey(KeyEvent::from(KeyCode::PageUp))
         );
-        assert_eq!(component.states.list_index, 4);
+        assert_eq!(component.states.list_index, 2);
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
             Msg::OnKey(KeyEvent::from(KeyCode::PageUp))
@@ -725,7 +854,7 @@ mod tests {
             component.on(Event::Key(KeyEvent::from(KeyCode::End))),
             Msg::OnKey(KeyEvent::from(KeyCode::End))
         );
-        assert_eq!(component.states.list_index, 8);
+        assert_eq!(component.states.list_index, 6);
         // Home
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Home))),
@@ -733,14 +862,15 @@ mod tests {
         );
         assert_eq!(component.states.list_index, 0);
         // Update
-        let props = ListPropsBuilder::from(component.get_props())
+        let props = TablePropsBuilder::from(component.get_props())
             .with_foreground(Color::Red)
             .hidden()
-            .with_rows(
-                Some(String::from("My data")),
+            .with_table(
+                Some(String::from("Events")),
                 TableBuilder::default()
                     .add_col(TextSpan::from("name"))
                     .add_col(TextSpan::from("age"))
+                    .add_col(TextSpan::from("birthdate"))
                     .build(),
             )
             .build();
@@ -760,12 +890,13 @@ mod tests {
     }
 
     #[test]
-    fn test_components_list() {
+    fn test_components_table() {
         // Make component
-        let mut component: List = List::new(
-            ListPropsBuilder::default()
+        let mut component: Table = Table::new(
+            TablePropsBuilder::default()
                 .with_foreground(Color::Red)
                 .with_background(Color::Blue)
+                .with_highlighted_color(Color::Yellow)
                 .hidden()
                 .visible()
                 .bold()
@@ -776,16 +907,44 @@ mod tests {
                 .strikethrough()
                 .underlined()
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_rows(
-                    Some(String::from("My data")),
+                .with_highlighted_str(Some("🚀"))
+                .with_max_scroll_step(4)
+                .with_table(
+                    Some(String::from("Events")),
                     TableBuilder::default()
-                        .add_col(TextSpan::from("name"))
-                        .add_col(TextSpan::from("age"))
+                        .add_col(TextSpan::from("KeyCode::Down"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down"))
                         .add_row()
-                        .add_col(TextSpan::from("omar"))
-                        .add_col(TextSpan::from("24"))
+                        .add_col(TextSpan::from("KeyCode::Up"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor up"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::PageDown"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down by 8"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::PageUp"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("ove cursor up by 8"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::End"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to last item"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Home"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to first item"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Char(_)"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Return pressed key"))
                         .build(),
                 )
+                .with_header(&["Event", "Message", "Behaviour"])
+                .with_col_spacing(2)
+                .with_row_height(3)
+                .with_widths(&[33, 33, 33])
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
@@ -804,13 +963,13 @@ mod tests {
         assert_eq!(component.props.borders.color, Color::Red);
         assert_eq!(
             component.props.texts.title.as_ref().unwrap().as_str(),
-            "My data"
+            "Events"
         );
-        assert_eq!(component.props.texts.table.as_ref().unwrap().len(), 2);
+        assert_eq!(component.props.texts.table.as_ref().unwrap().len(), 7);
         component.active();
         component.blur();
         // Update
-        let props = ListPropsBuilder::from(component.get_props())
+        let props = TablePropsBuilder::from(component.get_props())
             .with_foreground(Color::Red)
             .hidden()
             .build();
