@@ -68,6 +68,11 @@ path = "examples/label.rs"
 required-features = [ "with-components" ]
 
 [[example]]
+name = "list"
+path = "examples/list.rs"
+required-features = [ "with-components" ]
+
+[[example]]
 name = "paragraph"
 path = "examples/paragraph.rs"
 required-features = [ "with-components" ]
@@ -87,20 +92,9 @@ name = "select"
 path = "examples/select.rs"
 required-features = [ "with-components" ]
 
-
-[[example]]
-name = "scrolltable"
-path = "examples/scrolltable.rs"
-required-features = [ "with-components" ]
-
 [[example]]
 name = "sparkline"
 path = "examples/sparkline.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "table"
-path = "examples/table.rs"
 required-features = [ "with-components" ]
 
 [[example]]
