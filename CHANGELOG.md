@@ -28,7 +28,8 @@ Released on ??
   - `Dataset`
   - `Style`
 - ❗ Breaking changes ❗
-  - ❗ Changed name for `Scrolltable` to `ScrollTable` ❗
+  - ❗ Renamed `Table` to `List` ❗
+  - ❗ Removed `ScrollTable`; Use `List` with `scrollable(true)` instead ❗
 
 ## 0.4.3
 
