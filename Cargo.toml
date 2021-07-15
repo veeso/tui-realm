@@ -98,6 +98,11 @@ path = "examples/sparkline.rs"
 required-features = [ "with-components" ]
 
 [[example]]
+name = "table"
+path = "examples/table.rs"
+required-features = [ "with-components" ]
+
+[[example]]
 name = "textarea"
 path = "examples/textarea.rs"
 required-features = [ "with-components" ]

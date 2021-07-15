@@ -14,6 +14,7 @@
   - [Select](#select)
   - [Sparkline](#sparkline)
   - [Span](#span)
+  - [Table](#table)
   - [Textarea](#textarea)
   - [Utilities](#utilities)
   - [What's next](#whats-next)
@@ -233,7 +234,7 @@ Events will be reported only when set as `Scrollable`
 - `strikethrough`: set strikethrough for text
 - `underlined`: set underlined text
 - `with_borders`: set border properties
-- `with_table`: set block title and table entries
+- `with_rows`: set block title and table entries
 
 ---
 
@@ -373,7 +374,6 @@ A sparkline chart.
 - `pop_record_front`: Pops the first element of data
 - `pop_record_back`: Pops the last element of data
 
-
 ---
 
 ## Span
@@ -403,6 +403,48 @@ A span is an in-line component which supports text with different styles.
 - `underlined`: set underlined text
 - `with_borders`: set border properties
 - `with_spans`: set block title and paragraph text
+
+---
+
+## Table
+
+a table of rows with the possibility to scroll text with arrows. In order to scroll, the component must be active.
+
+**Events**:
+
+Events will be reported only when set as `Scrollable`
+
+| Event               | Message | Behaviour                 |
+|---------------------|---------|---------------------------|
+| `KeyCode::Down`     | `OnKey` | Move cursor down          |
+| `KeyCode::Up`       | `OnKey` | Move cursor up            |
+| `KeyCode::PageDown` | `OnKey` | Move cursor down by 8     |
+| `KeyCode::PageUp`   | `OnKey` | Move cursor up by 8       |
+| `KeyCode::End`      | `OnKey` | Move cursor to last item  |
+| `KeyCode::Home`     | `OnKey` | Move cursor to first item |
+| `KeyCode::Char(_)`  | `OnKey` | Return pressed key        |
+
+**Update**: None
+
+**State**: None
+
+**Properties**:
+
+- `with_foreground`: set foreground color
+- `with_background`: set background color
+- `scrollable`: mark the list as scrollable
+- `bold`: set text bold
+- `italic`: set text italic
+- `rapid_blink`: set rapid blink for text
+- `reversed`: reverses colors
+- `slow_blink` set slow blink for test
+- `strikethrough`: set strikethrough for text
+- `underlined`: set underlined text
+- `with_borders`: set border properties
+- `with_headers`: define headers for table
+- `with_col_spacing`: spacing between columns
+- `with_row_height`: Height of each row
+- `with_table`: set block title and table entries
 
 ---
 
