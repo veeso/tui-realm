@@ -1,6 +1,6 @@
-//! ## ScrollTable
+//! ## List
 //!
-//! `ScrollTable` represents a read-only textual table component which is scrollable through arrows
+//! `List` represents a read-only textual list component which can be scrollable through arrows or inactive
 
 /**
  * MIT License
@@ -33,29 +33,30 @@ use crate::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, List, ListItem, ListState},
+    widgets::{Block, BorderType, Borders, List as TuiList, ListItem, ListState},
 };
 use crate::{Canvas, Component, Event, Msg, Payload};
 
 // -- Props
 
 const COLOR_HIGHLIGHTED: &str = "highlighted-color";
+const PROP_SCROLLABLE: &str = "scrollable";
 const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_MAX_STEP: &str = "max-step";
 
-pub struct ScrollTablePropsBuilder {
+pub struct ListPropsBuilder {
     props: Option<Props>,
 }
 
-impl Default for ScrollTablePropsBuilder {
+impl Default for ListPropsBuilder {
     fn default() -> Self {
-        ScrollTablePropsBuilder {
+        ListPropsBuilder {
             props: Some(Props::default()),
         }
     }
 }
 
-impl PropsBuilder for ScrollTablePropsBuilder {
+impl PropsBuilder for ListPropsBuilder {
     fn build(&mut self) -> Props {
         self.props.take().unwrap()
     }
@@ -75,13 +76,13 @@ impl PropsBuilder for ScrollTablePropsBuilder {
     }
 }
 
-impl From<Props> for ScrollTablePropsBuilder {
+impl From<Props> for ListPropsBuilder {
     fn from(props: Props) -> Self {
-        ScrollTablePropsBuilder { props: Some(props) }
+        ListPropsBuilder { props: Some(props) }
     }
 }
 
-impl ScrollTablePropsBuilder {
+impl ListPropsBuilder {
     /// ### with_foreground
     ///
     /// Set foreground color for area
@@ -201,11 +202,11 @@ impl ScrollTablePropsBuilder {
         self
     }
 
-    /// ### with_table
+    /// ### with_rows
     ///
-    /// Set table
+    /// Set rows
     /// You can define a title if you want. The title will be displayed on the upper border of the box
-    pub fn with_table(&mut self, title: Option<String>, table: TextTable) -> &mut Self {
+    pub fn with_rows(&mut self, title: Option<String>, table: TextTable) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.texts = TextParts::table(title, table);
         }
@@ -240,6 +241,19 @@ impl ScrollTablePropsBuilder {
             props
                 .own
                 .insert(PROP_MAX_STEP, PropPayload::One(PropValue::Usize(step)));
+        }
+        self
+    }
+
+    /// ### scrollable
+    ///
+    /// Sets whether the list is scrollable
+    pub fn scrollable(&mut self, scrollable: bool) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_SCROLLABLE,
+                PropPayload::One(PropValue::Bool(scrollable)),
+            );
         }
         self
     }
@@ -339,15 +353,15 @@ impl OwnStates {
 
 // -- Component
 
-/// ## ScrollTable
+/// ## List
 ///
 /// represents a read-only text component without any container.
-pub struct ScrollTable {
+pub struct List {
     props: Props,
     states: OwnStates,
 }
 
-impl ScrollTable {
+impl List {
     /// ### new
     ///
     /// Instantiates a new `Table` component.
@@ -356,7 +370,7 @@ impl ScrollTable {
             Some(t) => t.len(),
             None => 0,
         };
-        ScrollTable {
+        List {
             props,
             states: OwnStates {
                 focus: false,
@@ -365,21 +379,31 @@ impl ScrollTable {
             },
         }
     }
+
+    /// ### scrollable
+    ///
+    /// returns the value of the scrollable flag; by default is false
+    fn scrollable(&self) -> bool {
+        match self.props.own.get(PROP_SCROLLABLE) {
+            Some(PropPayload::One(PropValue::Bool(scrollable))) => *scrollable,
+            _ => false,
+        }
+    }
 }
 
-impl Component for ScrollTable {
+impl Component for List {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Canvas, area: Rect) {
         if self.props.visible {
-            let div: Block = super::utils::get_block(
-                &self.props.borders,
-                &self.props.texts.title,
-                self.states.focus,
-            );
+            let active: bool = match self.scrollable() {
+                true => self.states.focus,
+                false => true,
+            };
+            let div: Block =
+                super::utils::get_block(&self.props.borders, &self.props.texts.title, active);
             // Make list entries
             let list_items: Vec<ListItem> = match self.props.texts.table.as_ref() {
                 None => Vec::new(),
@@ -401,8 +425,6 @@ impl Component for ScrollTable {
                     })
                     .collect(), // Make List item from TextSpan
             };
-            let mut state: ListState = ListState::default();
-            state.select(Some(self.states.list_index));
             let highlighted_color: Color = match self.props.palette.get(COLOR_HIGHLIGHTED) {
                 None => match self.states.focus {
                     true => self.props.background,
@@ -410,12 +432,12 @@ impl Component for ScrollTable {
                 },
                 Some(color) => *color,
             };
-            let (fg, bg): (Color, Color) = match self.states.focus {
+            let (fg, bg): (Color, Color) = match active {
                 true => (self.props.background, highlighted_color),
                 false => (highlighted_color, self.props.background),
             };
             // Make list
-            let mut list = List::new(list_items)
+            let mut list = TuiList::new(list_items)
                 .block(div)
                 .start_corner(Corner::TopLeft)
                 .highlight_style(
@@ -430,7 +452,13 @@ impl Component for ScrollTable {
             {
                 list = list.highlight_symbol(highlight);
             }
-            render.render_stateful_widget(list, area, &mut state);
+            if self.scrollable() {
+                let mut state: ListState = ListState::default();
+                state.select(Some(self.states.list_index));
+                render.render_stateful_widget(list, area, &mut state);
+            } else {
+                render.render_widget(list, area);
+            }
         }
     }
 
@@ -449,6 +477,10 @@ impl Component for ScrollTable {
         });
         // Fix list index
         self.states.fix_list_index();
+        // disable if scrollable
+        if self.scrollable() {
+            self.blur();
+        }
         // Return None
         Msg::None
     }
@@ -467,48 +499,52 @@ impl Component for ScrollTable {
     fn on(&mut self, ev: Event) -> Msg {
         // Return key
         if let Event::Key(key) = ev {
-            match key.code {
-                KeyCode::Down => {
-                    // Go down
-                    self.states.incr_list_index();
-                    Msg::OnKey(key)
-                }
-                KeyCode::Up => {
-                    // Go up
-                    self.states.decr_list_index();
-                    Msg::OnKey(key)
-                }
-                KeyCode::PageDown => {
-                    // Scroll by step
-                    let step: usize =
-                        self.states
-                            .calc_max_step_ahead(match self.props.own.get(PROP_MAX_STEP) {
+            if self.scrollable() {
+                match key.code {
+                    KeyCode::Down => {
+                        // Go down
+                        self.states.incr_list_index();
+                        Msg::OnKey(key)
+                    }
+                    KeyCode::Up => {
+                        // Go up
+                        self.states.decr_list_index();
+                        Msg::OnKey(key)
+                    }
+                    KeyCode::PageDown => {
+                        // Scroll by step
+                        let step: usize = self.states.calc_max_step_ahead(
+                            match self.props.own.get(PROP_MAX_STEP) {
                                 Some(PropPayload::One(PropValue::Usize(step))) => *step,
                                 _ => 8,
-                            });
-                    (0..step).for_each(|_| self.states.incr_list_index());
-                    Msg::OnKey(key)
-                }
-                KeyCode::PageUp => {
-                    // Scroll by step
-                    let step: usize =
-                        self.states
-                            .calc_max_step_behind(match self.props.own.get(PROP_MAX_STEP) {
+                            },
+                        );
+                        (0..step).for_each(|_| self.states.incr_list_index());
+                        Msg::OnKey(key)
+                    }
+                    KeyCode::PageUp => {
+                        // Scroll by step
+                        let step: usize = self.states.calc_max_step_behind(
+                            match self.props.own.get(PROP_MAX_STEP) {
                                 Some(PropPayload::One(PropValue::Usize(step))) => *step,
                                 _ => 8,
-                            });
-                    (0..step).for_each(|_| self.states.decr_list_index());
-                    Msg::OnKey(key)
+                            },
+                        );
+                        (0..step).for_each(|_| self.states.decr_list_index());
+                        Msg::OnKey(key)
+                    }
+                    KeyCode::End => {
+                        self.states.list_index_at_last();
+                        Msg::OnKey(key)
+                    }
+                    KeyCode::Home => {
+                        self.states.list_index_at_first();
+                        Msg::OnKey(key)
+                    }
+                    _ => Msg::OnKey(key),
                 }
-                KeyCode::End => {
-                    self.states.list_index_at_last();
-                    Msg::OnKey(key)
-                }
-                KeyCode::Home => {
-                    self.states.list_index_at_first();
-                    Msg::OnKey(key)
-                }
-                _ => Msg::OnKey(key),
+            } else {
+                Msg::OnKey(key)
             }
         } else {
             Msg::None
@@ -536,7 +572,9 @@ impl Component for ScrollTable {
     ///
     /// Active component
     fn active(&mut self) {
-        self.states.focus = true;
+        if self.scrollable() {
+            self.states.focus = true;
+        }
     }
 }
 
@@ -550,10 +588,10 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn test_components_scrolltable() {
+    fn test_components_list_scrollable() {
         // Make component
-        let mut component: ScrollTable = ScrollTable::new(
-            ScrollTablePropsBuilder::default()
+        let mut component: List = List::new(
+            ListPropsBuilder::default()
                 .with_foreground(Color::Red)
                 .with_background(Color::Blue)
                 .with_highlighted_color(Color::Yellow)
@@ -569,7 +607,8 @@ mod tests {
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
-                .with_table(
+                .scrollable(true)
+                .with_rows(
                     Some(String::from("My data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("name"))
@@ -694,10 +733,10 @@ mod tests {
         );
         assert_eq!(component.states.list_index, 0);
         // Update
-        let props = ScrollTablePropsBuilder::from(component.get_props())
+        let props = ListPropsBuilder::from(component.get_props())
             .with_foreground(Color::Red)
             .hidden()
-            .with_table(
+            .with_rows(
                 Some(String::from("My data")),
                 TableBuilder::default()
                     .add_col(TextSpan::from("name"))
@@ -710,6 +749,74 @@ mod tests {
         assert_eq!(component.props.visible, false);
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
+        // Get value
+        assert_eq!(component.get_state(), Payload::None);
+        // Event
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
+            Msg::OnKey(KeyEvent::from(KeyCode::Delete))
+        );
+        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+    }
+
+    #[test]
+    fn test_components_list() {
+        // Make component
+        let mut component: List = List::new(
+            ListPropsBuilder::default()
+                .with_foreground(Color::Red)
+                .with_background(Color::Blue)
+                .hidden()
+                .visible()
+                .bold()
+                .italic()
+                .rapid_blink()
+                .reversed()
+                .slow_blink()
+                .strikethrough()
+                .underlined()
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .with_rows(
+                    Some(String::from("My data")),
+                    TableBuilder::default()
+                        .add_col(TextSpan::from("name"))
+                        .add_col(TextSpan::from("age"))
+                        .add_row()
+                        .add_col(TextSpan::from("omar"))
+                        .add_col(TextSpan::from("24"))
+                        .build(),
+                )
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .build(),
+        );
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.background, Color::Blue);
+        assert_eq!(component.props.visible, true);
+        assert!(component.props.modifiers.intersects(Modifier::BOLD));
+        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
+        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
+        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
+        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
+        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
+        assert_eq!(component.props.borders.borders, Borders::ALL);
+        assert_eq!(component.props.borders.variant, BorderType::Double);
+        assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(
+            component.props.texts.title.as_ref().unwrap().as_str(),
+            "My data"
+        );
+        assert_eq!(component.props.texts.table.as_ref().unwrap().len(), 2);
+        component.active();
+        component.blur();
+        // Update
+        let props = ListPropsBuilder::from(component.get_props())
+            .with_foreground(Color::Red)
+            .hidden()
+            .build();
+        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.props.foreground, Color::Red);
+        assert_eq!(component.props.visible, false);
         // Get value
         assert_eq!(component.get_state(), Payload::None);
         // Event

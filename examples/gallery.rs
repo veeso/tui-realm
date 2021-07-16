@@ -38,7 +38,7 @@ use std::time::{Duration, Instant};
 
 // realm
 use tuirealm::components::{
-    checkbox, input, label, paragraph, progress_bar, radio, scrolltable, span, table, textarea,
+    checkbox, input, label, list, paragraph, progress_bar, radio, span, textarea,
 };
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::props::{TableBuilder, TextSpan, TextSpanBuilder};
@@ -56,7 +56,7 @@ const COMPONENT_PARAGRAPH: &str = "PARAGRAPH";
 const COMPONENT_PROGBAR: &str = "PROGBAR";
 const COMPONENT_RADIO: &str = "RADIO";
 const COMPONENT_SPAN: &str = "SPAN";
-const COMPONENT_SCROLLTABLE: &str = "SCROLLTABLE";
+const COMPONENT_SCROLLIST: &str = "SCROLLTABLE";
 const COMPONENT_TABLE: &str = "TABLE";
 const COMPONENT_TEXTAREA: &str = "TEXTAREA";
 
@@ -262,16 +262,17 @@ fn init_view() -> View {
                 .build(),
         )),
     );
-    // ScrollTable
+    // ScrollList
     view.mount(
-        COMPONENT_SCROLLTABLE,
-        Box::new(scrolltable::ScrollTable::new(
-            scrolltable::ScrollTablePropsBuilder::default()
+        COMPONENT_SCROLLIST,
+        Box::new(list::List::new(
+            list::ListPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
                 .with_highlighted_color(Color::LightBlue)
-                .with_table(
+                .scrollable(true)
+                .with_rows(
                     Some(String::from("My scrollable data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
@@ -377,11 +378,11 @@ fn init_view() -> View {
     // Table
     view.mount(
         COMPONENT_TABLE,
-        Box::new(table::Table::new(
-            table::TablePropsBuilder::default()
+        Box::new(list::List::new(
+            list::ListPropsBuilder::default()
                 .with_foreground(Color::Green)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::LightGreen)
-                .with_table(
+                .with_rows(
                     Some(String::from("My data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("2021-04-17T18:32:00"))
@@ -466,7 +467,7 @@ fn view(ctx: &mut Context, view: &View) {
         let rcol = Layout::default()
             .constraints(
                 [
-                    Constraint::Length(6), // ScrollTable
+                    Constraint::Length(6), // ScrollList
                     Constraint::Length(1), // Span
                     Constraint::Length(8), // Table
                     Constraint::Length(8), // Textarea
@@ -485,7 +486,7 @@ fn view(ctx: &mut Context, view: &View) {
         view.render(COMPONENT_RADIO, f, lcol[4]);
         view.render(COMPONENT_PARAGRAPH, f, lcol[5]);
         // right
-        view.render(COMPONENT_SCROLLTABLE, f, rcol[0]);
+        view.render(COMPONENT_SCROLLIST, f, rcol[0]);
         view.render(COMPONENT_SPAN, f, rcol[1]);
         view.render(COMPONENT_TABLE, f, rcol[2]);
         view.render(COMPONENT_TEXTAREA, f, rcol[3]);
@@ -511,12 +512,12 @@ impl Update for Model {
                     self.update(msg)
                 }
                 (COMPONENT_RADIO, &MSG_KEY_TAB) => {
-                    self.view.active(COMPONENT_SCROLLTABLE);
+                    self.view.active(COMPONENT_SCROLLIST);
                     // Update progress
                     let msg = update_progress(&mut self.view);
                     self.update(msg)
                 }
-                (COMPONENT_SCROLLTABLE, &MSG_KEY_TAB) => {
+                (COMPONENT_SCROLLIST, &MSG_KEY_TAB) => {
                     self.view.active(COMPONENT_TEXTAREA);
                     // Update progress
                     let msg = update_progress(&mut self.view);
