@@ -42,7 +42,6 @@ use tui::layout::{Constraint, Direction, Layout};
 use tui::style::Color;
 
 const COMPONENT_TABLE: &str = "table";
-const COMPONENT_TABLE_2: &str = "table2";
 const COMPONENT_SCROLLTABLE: &str = "scroll_list1";
 const COMPONENT_SCROLLTABLE_2: &str = "scroll_list2";
 const COMPONENT_EVENT: &str = "LABEL";
@@ -95,51 +94,7 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_col_spacing(3)
                 .with_header(&["Key", "Msg", "Description"])
-                .with_row_height(3)
-                .with_widths(&[30, 20, 50])
-                .with_table(
-                    Some(String::from("Events")),
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("KeyCode::Down"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor down"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Up"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor up"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::PageDown"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor down by 8"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::PageUp"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("ove cursor up by 8"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::End"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor to last item"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Home"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor to first item"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Char(_)"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Return pressed key"))
-                        .build(),
-                )
-                .build(),
-        )),
-    );
-    myview.mount(
-        COMPONENT_TABLE_2,
-        Box::new(table::Table::new(
-            table::TablePropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_col_spacing(3)
-                .with_header(&["Key", "Msg", "Description"])
-                .with_row_height(3)
+                .with_row_height(1)
                 .with_widths(&[30, 20, 50])
                 .with_table(
                     Some(String::from("Events")),
@@ -234,7 +189,7 @@ fn main() {
                 .with_highlighted_color(Color::LightBlue)
                 .with_col_spacing(3)
                 .with_header(&["Key", "Msg", "Description"])
-                .with_row_height(3)
+                .with_row_height(1)
                 .with_widths(&[30, 20, 50])
                 .with_table(
                     Some(String::from("Events")),
@@ -313,9 +268,8 @@ fn view(ctx: &mut Context, view: &View) {
             .margin(1)
             .constraints(
                 [
-                    Constraint::Length(10),
-                    Constraint::Length(6),
-                    Constraint::Length(10),
+                    Constraint::Length(8),
+                    Constraint::Length(15),
                     Constraint::Length(6),
                     Constraint::Length(1),
                 ]
@@ -323,10 +277,9 @@ fn view(ctx: &mut Context, view: &View) {
             )
             .split(f.size());
         view.render(COMPONENT_TABLE, f, chunks[0]);
-        view.render(COMPONENT_TABLE_2, f, chunks[1]);
-        view.render(COMPONENT_SCROLLTABLE, f, chunks[2]);
-        view.render(COMPONENT_SCROLLTABLE_2, f, chunks[3]);
-        view.render(COMPONENT_EVENT, f, chunks[4]);
+        view.render(COMPONENT_SCROLLTABLE, f, chunks[1]);
+        view.render(COMPONENT_SCROLLTABLE_2, f, chunks[2]);
+        view.render(COMPONENT_EVENT, f, chunks[3]);
     });
 }
 
