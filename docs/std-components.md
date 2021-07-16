@@ -7,12 +7,12 @@
   - [Checkbox](#checkbox)
   - [Input](#input)
   - [Label](#label)
+  - [List](#list)
   - [Paragraph](#paragraph)
   - [Progress bar](#progress-bar)
   - [Radio](#radio)
   - [Select](#select)
   - [Sparkline](#sparkline)
-  - [ScrollTable](#scrolltable)
   - [Span](#span)
   - [Table](#table)
   - [Textarea](#textarea)
@@ -199,6 +199,45 @@ A text label. Provides the possibility to display a simple text, with the possib
 
 ---
 
+## List
+
+a list of rows with the possibility to scroll text with arrows. In order to scroll, the component must be active.
+
+**Events**:
+
+Events will be reported only when set as `Scrollable`
+
+| Event               | Message | Behaviour                 |
+|---------------------|---------|---------------------------|
+| `KeyCode::Down`     | `OnKey` | Move cursor down          |
+| `KeyCode::Up`       | `OnKey` | Move cursor up            |
+| `KeyCode::PageDown` | `OnKey` | Move cursor down by 8     |
+| `KeyCode::PageUp`   | `OnKey` | Move cursor up by 8       |
+| `KeyCode::End`      | `OnKey` | Move cursor to last item  |
+| `KeyCode::Home`     | `OnKey` | Move cursor to first item |
+| `KeyCode::Char(_)`  | `OnKey` | Return pressed key        |
+
+**Update**: None
+
+**State**: None
+
+**Properties**:
+
+- `with_foreground`: set foreground color
+- `with_background`: set background color
+- `scrollable`: mark the list as scrollable
+- `bold`: set text bold
+- `italic`: set text italic
+- `rapid_blink`: set rapid blink for text
+- `reversed`: reverses colors
+- `slow_blink` set slow blink for test
+- `strikethrough`: set strikethrough for text
+- `underlined`: set underlined text
+- `with_borders`: set border properties
+- `with_rows`: set block title and table entries
+
+---
+
 ## Paragraph
 
 A text paragraph. Like in HTML this has to be considered a block element, and supports multi-line texts with different styles. The text is automatically wrapped.
@@ -335,40 +374,6 @@ A sparkline chart.
 - `pop_record_front`: Pops the first element of data
 - `pop_record_back`: Pops the last element of data
 
-## ScrollTable
-
-a table with the possibility to scroll text with arrows. In order to scroll, the component must be active.
-
-**Events**:
-
-| Event               | Message | Behaviour                 |
-|---------------------|---------|---------------------------|
-| `KeyCode::Down`     | `OnKey` | Move cursor down          |
-| `KeyCode::Up`       | `OnKey` | Move cursor up            |
-| `KeyCode::PageDown` | `OnKey` | Move cursor down by 8     |
-| `KeyCode::PageUp`   | `OnKey` | Move cursor up by 8       |
-| `KeyCode::End`      | `OnKey` | Move cursor to last item  |
-| `KeyCode::Home`     | `OnKey` | Move cursor to first item |
-| `KeyCode::Char(_)`  | `OnKey` | Return pressed key        |
-
-**Update**: None
-
-**State**: None
-
-**Properties**:
-
-- `with_foreground`: set foreground color
-- `with_background`: set background color
-- `bold`: set text bold
-- `italic`: set text italic
-- `rapid_blink`: set rapid blink for text
-- `reversed`: reverses colors
-- `slow_blink` set slow blink for test
-- `strikethrough`: set strikethrough for text
-- `underlined`: set underlined text
-- `with_borders`: set border properties
-- `with_table`: set block title and table entries
-
 ---
 
 ## Span
@@ -403,13 +408,21 @@ A span is an in-line component which supports text with different styles.
 
 ## Table
 
-A table, but without the possibility to interact with it and without scrolling.
+a table of rows with the possibility to scroll text with arrows. In order to scroll, the component must be active.
 
 **Events**:
 
-| Event                | Message            | Behaviour          |
-|----------------------|--------------------|--------------------|
-| `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
+Events will be reported only when set as `Scrollable`
+
+| Event               | Message | Behaviour                 |
+|---------------------|---------|---------------------------|
+| `KeyCode::Down`     | `OnKey` | Move cursor down          |
+| `KeyCode::Up`       | `OnKey` | Move cursor up            |
+| `KeyCode::PageDown` | `OnKey` | Move cursor down by 8     |
+| `KeyCode::PageUp`   | `OnKey` | Move cursor up by 8       |
+| `KeyCode::End`      | `OnKey` | Move cursor to last item  |
+| `KeyCode::Home`     | `OnKey` | Move cursor to first item |
+| `KeyCode::Char(_)`  | `OnKey` | Return pressed key        |
 
 **Update**: None
 
@@ -419,6 +432,7 @@ A table, but without the possibility to interact with it and without scrolling.
 
 - `with_foreground`: set foreground color
 - `with_background`: set background color
+- `scrollable`: mark the list as scrollable
 - `bold`: set text bold
 - `italic`: set text italic
 - `rapid_blink`: set rapid blink for text
@@ -427,7 +441,12 @@ A table, but without the possibility to interact with it and without scrolling.
 - `strikethrough`: set strikethrough for text
 - `underlined`: set underlined text
 - `with_borders`: set border properties
+- `with_headers`: define headers for table
+- `with_col_spacing`: spacing between columns
+- `with_row_height`: Height of each row
 - `with_table`: set block title and table entries
+
+---
 
 ## Textarea
 
