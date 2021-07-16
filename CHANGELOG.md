@@ -24,6 +24,7 @@ Released on ??
   - Added `Chart` component
   - Added `Select` component
   - Added `Sparkline` component
+  - Added `Table` component
 - `PropValue` can now also be:
   - `Dataset`
   - `Style`
