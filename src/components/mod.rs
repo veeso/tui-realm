@@ -27,6 +27,7 @@
  */
 // Modules
 pub mod bar_chart;
+pub mod canvas;
 pub mod chart;
 pub mod checkbox;
 pub mod input;
@@ -44,6 +45,7 @@ pub mod utils;
 
 // Exports
 pub use bar_chart::{BarChart, BarChartPropsBuilder};
+pub use canvas::{Canvas, CanvasPropsBuilder};
 pub use chart::{Chart, ChartPropsBuilder};
 pub use checkbox::{Checkbox, CheckboxPropsBuilder};
 pub use input::{Input, InputPropsBuilder};
