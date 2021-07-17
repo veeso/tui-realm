@@ -34,7 +34,7 @@ use crate::tui::{
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
-use crate::{Canvas, Component, Event, InputType, Msg, Payload, Value};
+use crate::{Component, Event, Frame, InputType, Msg, Payload, Value};
 
 // -- Props
 const PROP_VALUE: &str = "value";
@@ -342,7 +342,7 @@ impl Component for Input {
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     #[cfg(not(tarpaulin_include))]
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             let div: Block = super::utils::get_block(
                 &self.props.borders,

@@ -37,7 +37,7 @@ use crate::tui::{
     text::Spans,
     widgets::{Block, BorderType, List, ListItem, ListState, Paragraph},
 };
-use crate::{Canvas, Component, Event, Msg, Payload, Value};
+use crate::{Frame, Component, Event, Msg, Payload, Value};
 
 // -- props
 
@@ -286,7 +286,7 @@ impl Select {
     /// ### render_open_tab
     ///
     /// Render component when tab is open
-    fn render_open_tab(&self, render: &mut Canvas, area: Rect) {
+    fn render_open_tab(&self, render: &mut Frame, area: Rect) {
         // Make choices
         let choices: Vec<ListItem> = self
             .states
@@ -365,7 +365,7 @@ impl Select {
     /// ### render_closed_tab
     ///
     /// Render component when tab is closed
-    fn render_closed_tab(&self, render: &mut Canvas, area: Rect) {
+    fn render_closed_tab(&self, render: &mut Frame, area: Rect) {
         let div: Block = super::utils::get_block(
             &self.props.borders,
             &self.props.texts.title,
@@ -392,7 +392,7 @@ impl Component for Select {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             match self.states.is_tab_open() {
                 true => self.render_open_tab(render, area),

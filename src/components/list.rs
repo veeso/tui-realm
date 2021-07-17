@@ -35,7 +35,7 @@ use crate::tui::{
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, List as TuiList, ListItem, ListState},
 };
-use crate::{Canvas, Component, Event, Msg, Payload};
+use crate::{Frame, Component, Event, Msg, Payload};
 
 // -- Props
 
@@ -396,7 +396,7 @@ impl Component for List {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             let active: bool = match self.scrollable() {
                 true => self.states.focus,

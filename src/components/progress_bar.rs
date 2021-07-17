@@ -33,7 +33,7 @@ use crate::tui::{
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Gauge},
 };
-use crate::{Canvas, Component, Event, Msg, Payload};
+use crate::{Component, Event, Frame, Msg, Payload};
 
 // -- Props
 
@@ -169,7 +169,7 @@ impl Component for ProgressBar {
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     #[cfg(not(tarpaulin_include))]
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.visible {
             // Text
