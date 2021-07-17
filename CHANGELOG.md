@@ -21,12 +21,14 @@ Released on ??
 
 - New components:
   - Added `BarChart` component
+  - Added `Canvas` component
   - Added `Chart` component
   - Added `Select` component
   - Added `Sparkline` component
   - Added `Table` component
 - `PropValue` can now also be:
   - `Dataset`
+  - `Shape`
   - `Style`
 - ❗ Breaking changes ❗
   - ❗ Renamed `Canvas` to `Frame` ❗

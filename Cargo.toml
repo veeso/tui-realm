@@ -48,6 +48,11 @@ path = "examples/bar_chart.rs"
 required-features = [ "with-components" ]
 
 [[example]]
+name = "canvas"
+path = "examples/canvas.rs"
+required-features = [ "with-components" ]
+
+[[example]]
 name = "chart"
 path = "examples/chart.rs"
 required-features = [ "with-components" ]
