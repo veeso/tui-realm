@@ -29,6 +29,7 @@ Released on ??
   - `Dataset`
   - `Style`
 - ❗ Breaking changes ❗
+  - ❗ Renamed `Canvas` to `Frame` ❗
   - ❗ Renamed `Table` to `List` ❗
   - ❗ Removed `ScrollTable`; Use `List` with `scrollable(true)` instead ❗
 

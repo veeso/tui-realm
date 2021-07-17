@@ -35,7 +35,7 @@ use crate::tui::{
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, Tabs},
 };
-use crate::{Canvas, Component, Event, Msg, Payload, Value};
+use crate::{Frame, Component, Event, Msg, Payload, Value};
 
 const PROP_CHOICES: &str = "choices";
 
@@ -271,7 +271,7 @@ impl Component for Checkbox {
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     #[cfg(not(tarpaulin_include))]
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             // Make colors
             let (bg, fg, block_color): (Color, Color, Color) = match &self.states.focus {

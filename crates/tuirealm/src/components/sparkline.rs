@@ -31,7 +31,7 @@ use crate::tui::{
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Sparkline as TuiSparkline},
 };
-use crate::{Canvas, Component, Event, Msg, Payload};
+use crate::{Component, Event, Frame, Msg, Payload};
 use std::collections::LinkedList;
 
 // -- Props
@@ -274,7 +274,7 @@ impl Component for Sparkline {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             let block: Block =
                 super::utils::get_block(&self.props.borders, &self.props.texts.title, true);

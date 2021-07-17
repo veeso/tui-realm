@@ -343,7 +343,7 @@ extern crate tui as tuirs;
 // Ext
 use std::collections::{HashMap, LinkedList};
 use std::io::Stdout;
-use tuirs::{backend::CrosstermBackend, layout::Rect, Frame};
+use tuirs::{backend::CrosstermBackend, layout::Rect, Frame as TuiFrame};
 
 // Modules
 #[cfg(feature = "with-components")]
@@ -363,10 +363,10 @@ use event::{Event, KeyEvent};
 
 // -- Types
 
-/// ## Canvas
+/// ## Frame
 ///
-/// Canvas represents the Frame where the view will be displayed in
-pub type Canvas<'a> = Frame<'a, CrosstermBackend<Stdout>>;
+/// Frame represents the Frame where the view will be displayed in
+pub type Frame<'a> = TuiFrame<'a, CrosstermBackend<Stdout>>;
 
 // -- Msg
 
@@ -428,7 +428,7 @@ pub trait Component {
     ///
     /// Based on the current properties and states, renders the component in the provided area frame
     #[cfg(not(tarpaulin_include))]
-    fn render(&self, frame: &mut Canvas, area: Rect);
+    fn render(&self, frame: &mut Frame, area: Rect);
 
     /// ### update
     ///

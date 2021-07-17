@@ -28,7 +28,7 @@
 extern crate tui;
 
 // imports
-use super::{Canvas, Component, Msg, Payload, Props};
+use super::{Component, Frame, Msg, Payload, Props};
 // ext
 use crossterm::event::Event;
 use std::collections::HashMap;
@@ -91,7 +91,7 @@ impl View {
     ///
     /// RenderData component with the provided id
     #[cfg(not(tarpaulin_include))]
-    pub fn render(&self, id: &str, frame: &mut Canvas, area: Rect) {
+    pub fn render(&self, id: &str, frame: &mut Frame, area: Rect) {
         if let Some(component) = self.components.get(id) {
             component.render(frame, area);
         }
@@ -471,7 +471,7 @@ mod tests {
 
     impl Component for Fragment {
         #[cfg(not(tarpaulin_include))]
-        fn render(&self, _frame: &mut Canvas, _area: Rect) {}
+        fn render(&self, _frame: &mut Frame, _area: Rect) {}
 
         fn update(&mut self, props: Props) -> Msg {
             self.props = props;

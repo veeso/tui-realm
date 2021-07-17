@@ -33,7 +33,7 @@ use crate::tui::{
     text::Span,
     widgets::{Axis, Block, BorderType, Borders, Chart as TuiChart, Dataset as TuiDataset},
 };
-use crate::{Canvas, Component, Event, Msg, Payload};
+use crate::{Frame, Component, Event, Msg, Payload};
 use std::collections::LinkedList;
 
 // -- Props
@@ -520,7 +520,7 @@ impl Component for Chart {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             // If component is disabled, will be displayed as `active`; as focus state otherwise
             let active: bool = match self.disabled() {

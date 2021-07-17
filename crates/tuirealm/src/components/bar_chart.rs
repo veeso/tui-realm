@@ -32,7 +32,7 @@ use crate::tui::{
     style::{Color, Style},
     widgets::{BarChart as TuiBarChart, Block, BorderType, Borders},
 };
-use crate::{Canvas, Component, Event, Msg, Payload};
+use crate::{Component, Event, Frame, Msg, Payload};
 use std::collections::LinkedList;
 
 // -- Props
@@ -466,7 +466,7 @@ impl Component for BarChart {
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     #[cfg(not(tarpaulin_include))]
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             // If component is disabled, will be displayed as `active`; as focus state otherwise
             let active: bool = match self.disabled() {

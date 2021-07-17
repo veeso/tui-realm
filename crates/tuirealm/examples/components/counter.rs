@@ -29,7 +29,7 @@ use tuirealm::tui::{
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
-use tuirealm::{Canvas, Component, Msg, Payload, Value};
+use tuirealm::{Component, Frame, Msg, Payload, Value};
 
 // -- states
 
@@ -163,7 +163,7 @@ impl Counter {
 }
 
 impl Component for Counter {
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span - THIS IS VERY IMPORTANT!!!
         if self.props.visible {
             // Make text
