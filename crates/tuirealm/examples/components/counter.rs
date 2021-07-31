@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::components::utils::get_block;
 use tuirealm::event::{Event, KeyCode};
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts};
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
-use tuirealm::{Canvas, Component, Msg, Payload, Value};
+use tuirealm::{Component, Frame, Msg, Payload, Value};
 
 // -- states
 
@@ -56,6 +55,7 @@ impl OwnStates {
 // -- Props
 
 const PROP_VALUE: &str = "value";
+const PROP_LABEL: &str = "title";
 
 pub struct CounterPropsBuilder {
     props: Option<Props>,
@@ -127,9 +127,12 @@ impl CounterPropsBuilder {
         self
     }
 
-    pub fn with_label(&mut self, label: String) -> &mut Self {
+    pub fn with_label<S: AsRef<str>>(&mut self, label: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(Some(label), None);
+            props.own.insert(
+                PROP_LABEL,
+                PropPayload::One(PropValue::Str(label.as_ref().to_string())),
+            );
         }
         self
     }
@@ -163,16 +166,16 @@ impl Counter {
 }
 
 impl Component for Counter {
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span - THIS IS VERY IMPORTANT!!!
         if self.props.visible {
             // Make text
-            let prefix: String = match self.props.texts.title.as_ref() {
-                None => String::new(),
-                Some(t) => t.clone(),
+            let prefix: String = match self.props.own.get(PROP_LABEL).as_ref() {
+                Some(PropPayload::One(PropValue::Str(s))) => s.clone(),
+                _ => String::new(),
             };
             let text: String = format!("{} ({})", prefix, self.states.counter);
-            let block: Block = get_block(&self.props.borders, &None, self.states.focus);
+            let block: Block = super::get_block(&self.props.borders, None, self.states.focus);
             let (fg, bg) = match self.states.focus {
                 true => (self.props.foreground, self.props.background),
                 false => (Color::Reset, Color::Reset),

@@ -28,7 +28,7 @@
  * SOFTWARE.
  */
 use super::borders::{BorderType, Borders};
-use super::{PropPayload, Props, TextParts};
+use super::{PropPayload, Props};
 
 use tui::style::{Color, Modifier};
 
@@ -210,16 +210,6 @@ impl GenericPropsBuilder {
         self
     }
 
-    /// ### with_texts
-    ///
-    /// Set texts for component
-    pub fn with_texts(&mut self, texts: TextParts) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.texts = texts;
-        }
-        self
-    }
-
     /// ### with_custom_color
     ///
     /// Set a custom color inside the color palette
@@ -245,7 +235,6 @@ impl GenericPropsBuilder {
 mod test {
 
     use super::super::PropValue;
-    use super::super::TextSpan;
     use super::*;
 
     use pretty_assertions::assert_eq;
@@ -265,10 +254,6 @@ mod test {
             .rapid_blink()
             .slow_blink()
             .with_custom_color("arrows", Color::Red)
-            .with_texts(TextParts::new(
-                Some(String::from("hello")),
-                Some(vec![TextSpan::from("hey")]),
-            ))
             .with_value(
                 "input",
                 PropPayload::One(PropValue::Str(String::from("Hello"))),
@@ -286,23 +271,15 @@ mod test {
         assert!(props.modifiers.intersects(Modifier::REVERSED));
         assert!(props.modifiers.intersects(Modifier::CROSSED_OUT));
         assert_eq!(props.foreground, Color::Green);
-        assert_eq!(props.texts.title.as_ref().unwrap().as_str(), "hello");
-        if let Some(PropPayload::One(PropValue::Str(s))) = props.own.get("input") {
-            assert_eq!(s.as_str(), "Hello");
-        } else {
-            panic!("Expected value to be a string");
-        }
         assert_eq!(
             props
-                .texts
-                .spans
-                .as_ref()
+                .own
+                .get("input")
                 .unwrap()
-                .get(0)
-                .unwrap()
-                .content
+                .unwrap_one()
+                .unwrap_str()
                 .as_str(),
-            "hey"
+            "Hello"
         );
         assert_eq!(props.visible, false);
         let props: Props = GenericPropsBuilder::default()
@@ -312,28 +289,11 @@ mod test {
             .bold()
             .italic()
             .underlined()
-            .with_texts(TextParts::new(
-                Some(String::from("hello")),
-                Some(vec![TextSpan::from("hey")]),
-            ))
             .build();
         assert_eq!(props.background, Color::Blue);
         assert!(props.modifiers.intersects(Modifier::BOLD));
         assert_eq!(props.foreground, Color::Green);
         assert!(props.modifiers.intersects(Modifier::ITALIC));
-        assert_eq!(props.texts.title.as_ref().unwrap().as_str(), "hello");
-        assert_eq!(
-            props
-                .texts
-                .spans
-                .as_ref()
-                .unwrap()
-                .get(0)
-                .unwrap()
-                .content
-                .as_str(),
-            "hey"
-        );
         assert!(props.modifiers.intersects(Modifier::UNDERLINED));
         assert_eq!(props.visible, true);
     }
@@ -349,11 +309,7 @@ mod test {
             .with_foreground(Color::Green)
             .bold()
             .italic()
-            .underlined()
-            .with_texts(TextParts::new(
-                Some(String::from("hello")),
-                Some(vec![TextSpan::from("hey")]),
-            ));
+            .underlined();
         // Rebuild
         let _ = builder.build();
     }
@@ -367,10 +323,6 @@ mod test {
             .bold()
             .italic()
             .underlined()
-            .with_texts(TextParts::new(
-                Some(String::from("hello")),
-                Some(vec![TextSpan::from("hey")]),
-            ))
             .build();
         // Ok, now make a builder from properties
         let builder: GenericPropsBuilder = GenericPropsBuilder::from(props);

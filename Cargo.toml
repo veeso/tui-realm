@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm"
-version = "0.4.3"
+version = "0.5.0"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]
@@ -16,25 +16,11 @@ repository = "https://github.com/veeso/tui-realm"
 [dependencies]
 tui = { version = "0.15.0", default-features = false, features = ["crossterm"] }
 crossterm = { version = "0.19" }
-textwrap = { version = "0.14.0", optional = true }
-unicode-width = { version = "0.1.8", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "0.7.2"
-
-[features]
-with-components = [ "textwrap", "unicode-width" ]
-
-[[example]]
-name = "gallery"
-path = "examples/gallery.rs"
-required-features = [ "with-components" ]
+rand = "0.8.4"
 
 [[example]]
 name = "demo"
 path = "examples/demo.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "counter"
-path = "examples/custom_comp.rs"

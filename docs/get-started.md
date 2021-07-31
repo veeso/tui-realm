@@ -226,7 +226,7 @@ I will implement everything in a single file in this case and I will reproduce s
 
 7. Implement the `view()` function
 
-    The view function will render our `View` into the Canvas
+    The view function will render our `View` into the Frame
 
     ```rust
     fn view(t: &mut Terminal, view: &View) {

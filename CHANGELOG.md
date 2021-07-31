@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.5.0](#050)
   - [0.4.3](#043)
   - [0.4.2](#042)
   - [0.4.1](#041)
@@ -13,6 +14,26 @@
   - [0.1.0](#010)
 
 ---
+
+## 0.5.0
+
+Released on 31/07/2021
+
+- New **PropValue** values:
+  - `Alignment`
+  - `Dataset`
+  - `Shape`
+  - `Style`
+  - `Table`
+  - `TextSpan`
+- Added `unwrap_{type}()` helpers for `PropPayload` and `PropValue`
+- ❗ Breaking changes ❗
+  - Removed `Color` from `PropValue`, use `palette` instead ❗
+  - ❗ Removed `TextParts` from `Props`, use `own` properties instead ❗
+  - ❗ Removed `TextSpanBuilder`, you can just use the same methods on `TextSpan` when creating it ❗
+  - ❗ Renamed `Canvas` to `Frame` ❗
+  - ❗ Moved standard library to [tui-realm-stdlib](https://crates.io/crates/tui-realm-stdlib) ❗
+  - ❗ Removed `with-components` feature ❗
 
 ## 0.4.3
 
