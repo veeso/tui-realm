@@ -39,7 +39,7 @@ use crate::{Component, Event, Frame, Msg, Payload, Value};
 
 // -- props
 
-const PROP_HIGHLIGHTED_COLOR: &str = "highlighted-color";
+const COLOR_HIGHLIGHTED: &str = "highlighted";
 const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_SELECTED: &str = "selected";
 const PROP_CHOICES: &str = "choices";
@@ -106,10 +106,7 @@ impl SelectPropsBuilder {
 
     pub fn with_highlighted_color(&mut self, color: Color) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_HIGHLIGHTED_COLOR,
-                PropPayload::One(PropValue::Color(color)),
-            );
+            props.palette.insert(COLOR_HIGHLIGHTED, color);
         }
         self
     }
@@ -321,10 +318,12 @@ impl Select {
             .iter()
             .map(|x| ListItem::new(Spans::from(x.clone())))
             .collect();
-        let hg: Color = match self.props.own.get(PROP_HIGHLIGHTED_COLOR) {
-            Some(PropPayload::One(PropValue::Color(c))) => *c,
-            _ => self.props.foreground,
-        };
+        let hg: Color = self
+            .props
+            .palette
+            .get(COLOR_HIGHLIGHTED)
+            .cloned()
+            .unwrap_or(self.props.foreground);
         // Make colors
         let (bg, hg): (Color, Color) = (self.props.background, hg);
         // Prepare layout
@@ -629,8 +628,8 @@ mod test {
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
         assert_eq!(
-            *component.props.own.get(PROP_HIGHLIGHTED_COLOR).unwrap(),
-            PropPayload::One(PropValue::Color(Color::Red))
+            *component.props.palette.get(COLOR_HIGHLIGHTED).unwrap(),
+            Color::Red
         );
         assert_eq!(
             *component.props.own.get(PROP_HIGHLIGHTED_TXT).unwrap(),

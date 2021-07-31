@@ -115,7 +115,6 @@ pub enum PropValue {
     Str(String),
     // -- tui props
     Alignment(Alignment),
-    Color(Color),
     Dataset(Dataset),
     InputType(InputType),
     Shape(Shape),
@@ -225,8 +224,6 @@ mod tests {
         assert_eq!(*map.get("d").unwrap(), PropValue::I64(-32));
         map.insert(String::from("e"), PropValue::I128(64));
         assert_eq!(*map.get("e").unwrap(), PropValue::I128(64));
-        map.insert(String::from("f"), PropValue::Color(Color::Red));
-        assert_eq!(*map.get("f").unwrap(), PropValue::Color(Color::Red));
         map.insert(String::from("g"), PropValue::InputType(InputType::Number));
         assert_eq!(
             *map.get("g").unwrap(),
@@ -246,8 +243,6 @@ mod tests {
         assert_eq!(*map.get("m").unwrap(), PropValue::Isize(200));
         map.insert(String::from("n"), PropValue::F32(0.23));
         assert_eq!(*map.get("n").unwrap(), PropValue::F32(0.23));
-        map.insert(String::from("o"), PropValue::Color(Color::Red));
-        assert_eq!(*map.get("o").unwrap(), PropValue::Color(Color::Red));
         map.insert(
             String::from("p"),
             PropValue::Style(Style::default().fg(Color::Red)),
