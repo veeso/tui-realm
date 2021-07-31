@@ -111,6 +111,7 @@ fn main() {
                 .with_foreground(Color::Cyan)
                 .with_highlighted_color(Color::LightBlue)
                 .with_title("Select a fruit")
+                .rewind(true)
                 .with_options(&[
                     "lemon".to_string(),
                     "orange".to_string(),

@@ -197,6 +197,7 @@ A checkbox group. Provides the possibility to select between multiple options, w
 - `with_options`: set checkbox options
 - `with_title`: set checkbox title
 - `with_value`: set selected by-default items by their index
+- `rewind`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
 
 ---
 
@@ -386,6 +387,7 @@ A radio button group. Provides the possibility to select a single option in a gr
 - `with_options`: set radio options
 - `with_title`: set radio title
 - `with_value`: set default selected item by its index
+- `rewind`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
 
 ---
 
@@ -418,6 +420,7 @@ This component should have a variable size in the layout to be displayed properl
 - `with_options`: set select options
 - `with_title`: set select title
 - `with_value`: set default selected item by its index
+- `rewind`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
 
 ---
 

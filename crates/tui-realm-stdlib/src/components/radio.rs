@@ -39,6 +39,7 @@ use tuirealm::{event::Event, Component, Frame, Msg, Payload, Value};
 
 const PROP_CHOICES: &str = "choices";
 const PROP_OPTION: &str = "option";
+const PROP_REWIND: &str = "rewind";
 const PROP_TITLE: &str = "title";
 
 pub struct RadioPropsBuilder {
@@ -163,6 +164,18 @@ impl RadioPropsBuilder {
         }
         self
     }
+
+    /// ### rewind
+    ///
+    /// If true, moving below or beyond limit will rewind the selected record
+    pub fn rewind(&mut self, rewind: bool) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_REWIND, PropPayload::One(PropValue::Bool(rewind)));
+        }
+        self
+    }
 }
 
 // -- states
@@ -191,8 +204,10 @@ impl OwnStates {
     /// ### next_choice
     ///
     /// Move choice index to next choice
-    pub fn next_choice(&mut self) {
-        if self.choice + 1 < self.choices.len() {
+    pub fn next_choice(&mut self, rewind: bool) {
+        if rewind && self.choice + 1 >= self.choices.len() {
+            self.choice = 0;
+        } else if self.choice + 1 < self.choices.len() {
             self.choice += 1;
         }
     }
@@ -200,8 +215,10 @@ impl OwnStates {
     /// ### prev_choice
     ///
     /// Move choice index to previous choice
-    pub fn prev_choice(&mut self) {
-        if self.choice > 0 {
+    pub fn prev_choice(&mut self, rewind: bool) {
+        if rewind && self.choice == 0 && !self.choices.is_empty() {
+            self.choice = self.choices.len() - 1;
+        } else if self.choice > 0 {
             self.choice -= 1;
         }
     }
@@ -253,6 +270,13 @@ impl Radio {
             states.choice = *choice;
         }
         Radio { props, states }
+    }
+
+    fn rewind(&self) -> bool {
+        match self.props.own.get(PROP_REWIND) {
+            Some(PropPayload::One(PropValue::Bool(b))) => *b,
+            _ => false,
+        }
     }
 }
 
@@ -341,13 +365,13 @@ impl Component for Radio {
             match key.code {
                 KeyCode::Right => {
                     // Increment choice
-                    self.states.next_choice();
+                    self.states.next_choice(self.rewind());
                     // Return Msg On Change
                     Msg::OnChange(self.get_state())
                 }
                 KeyCode::Left => {
                     // Decrement choice
-                    self.states.prev_choice();
+                    self.states.prev_choice(self.rewind());
                     // Return Msg On Change
                     Msg::OnChange(self.get_state())
                 }
@@ -410,17 +434,17 @@ mod test {
         assert_eq!(states.choice, 0);
         assert_eq!(states.choices.len(), 4);
         // Move
-        states.prev_choice();
+        states.prev_choice(false);
         assert_eq!(states.choice, 0);
-        states.next_choice();
+        states.next_choice(false);
         assert_eq!(states.choice, 1);
-        states.next_choice();
+        states.next_choice(false);
         assert_eq!(states.choice, 2);
         // Forward overflow
-        states.next_choice();
-        states.next_choice();
+        states.next_choice(false);
+        states.next_choice(false);
         assert_eq!(states.choice, 3);
-        states.prev_choice();
+        states.prev_choice(false);
         assert_eq!(states.choice, 2);
         // Update
         let choices: &[&str] = &["lemon", "strawberry"];
@@ -431,6 +455,18 @@ mod test {
         states.set_choices(choices);
         assert_eq!(states.choice, 0); // Move to first index available
         assert_eq!(states.choices.len(), 0);
+        // Rewind
+        let choices: &[&str] = &["lemon", "strawberry", "vanilla", "chocolate"];
+        states.set_choices(choices);
+        assert_eq!(states.choice, 0);
+        states.prev_choice(true);
+        assert_eq!(states.choice, 3);
+        states.next_choice(true);
+        assert_eq!(states.choice, 0);
+        states.next_choice(true);
+        assert_eq!(states.choice, 1);
+        states.prev_choice(true);
+        assert_eq!(states.choice, 0);
     }
 
     #[test]
@@ -447,6 +483,7 @@ mod test {
                 .with_options(&["Oui!", "Non", "Peut-être"])
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_value(1)
+                .rewind(false)
                 .build(),
         );
         assert_eq!(component.props.foreground, Color::Red);
@@ -455,6 +492,16 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(
+            *component
+                .props
+                .own
+                .get(PROP_REWIND)
+                .unwrap()
+                .unwrap_one()
+                .unwrap_bool(),
+            false
+        );
         assert_eq!(
             component.props.own.get(PROP_TITLE).unwrap(),
             &PropPayload::One(PropValue::Str("C'est oui ou bien c'est non?".to_string()))

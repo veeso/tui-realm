@@ -43,6 +43,7 @@ const COLOR_HIGHLIGHTED: &str = "highlighted";
 const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_SELECTED: &str = "selected";
 const PROP_CHOICES: &str = "choices";
+const PROP_REWIND: &str = "rewind";
 const PROP_TITLE: &str = "title";
 
 pub struct SelectPropsBuilder {
@@ -192,6 +193,18 @@ impl SelectPropsBuilder {
         }
         self
     }
+
+    /// ### rewind
+    ///
+    /// If true, moving below or beyond limit will rewind the selected record
+    pub fn rewind(&mut self, rewind: bool) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_REWIND, PropPayload::One(PropValue::Bool(rewind)));
+        }
+        self
+    }
 }
 
 // -- states
@@ -221,18 +234,26 @@ impl OwnStates {
     /// ### next_choice
     ///
     /// Move choice index to next choice
-    pub fn next_choice(&mut self) {
-        if self.is_tab_open() && self.selected + 1 < self.choices.len() {
-            self.selected += 1;
+    pub fn next_choice(&mut self, rewind: bool) {
+        if self.tab_open {
+            if rewind && self.selected + 1 >= self.choices.len() {
+                self.selected = 0;
+            } else if self.selected + 1 < self.choices.len() {
+                self.selected += 1;
+            }
         }
     }
 
     /// ### prev_choice
     ///
     /// Move choice index to previous choice
-    pub fn prev_choice(&mut self) {
-        if self.is_tab_open() && self.selected > 0 {
-            self.selected -= 1;
+    pub fn prev_choice(&mut self, rewind: bool) {
+        if self.tab_open {
+            if rewind && self.selected == 0 && !self.choices.is_empty() {
+                self.selected = self.choices.len() - 1;
+            } else if self.selected > 0 {
+                self.selected -= 1;
+            }
         }
     }
 
@@ -411,6 +432,13 @@ impl Select {
             .block(div);
         render.render_widget(p, area);
     }
+
+    fn rewind(&self) -> bool {
+        match self.props.own.get(PROP_REWIND) {
+            Some(PropPayload::One(PropValue::Bool(b))) => *b,
+            _ => false,
+        }
+    }
 }
 
 impl Component for Select {
@@ -473,7 +501,7 @@ impl Component for Select {
             match key.code {
                 KeyCode::Down => {
                     // Increment choice
-                    self.states.next_choice();
+                    self.states.next_choice(self.rewind());
                     // Return Msg On Change or None if tab is closed
                     match self.states.is_tab_open() {
                         false => Msg::None,
@@ -482,7 +510,7 @@ impl Component for Select {
                 }
                 KeyCode::Up => {
                     // Decrement choice
-                    self.states.prev_choice();
+                    self.states.prev_choice(self.rewind());
                     // Return Msg On Change or None if tab is closed
                     match self.states.is_tab_open() {
                         false => Msg::None,
@@ -561,28 +589,28 @@ mod test {
         assert_eq!(states.selected, 0);
         assert_eq!(states.choices.len(), 4);
         // Move
-        states.prev_choice();
+        states.prev_choice(false);
         assert_eq!(states.selected, 0);
-        states.next_choice();
+        states.next_choice(false);
         // Tab is closed!!!
         assert_eq!(states.selected, 0);
         states.open_tab();
         assert_eq!(states.is_tab_open(), true);
         // Now we can move
-        states.next_choice();
+        states.next_choice(false);
         assert_eq!(states.selected, 1);
-        states.next_choice();
+        states.next_choice(false);
         assert_eq!(states.selected, 2);
         // Forward overflow
-        states.next_choice();
-        states.next_choice();
+        states.next_choice(false);
+        states.next_choice(false);
         assert_eq!(states.selected, 3);
-        states.prev_choice();
+        states.prev_choice(false);
         assert_eq!(states.selected, 2);
         // Close tab
         states.close_tab();
         assert_eq!(states.is_tab_open(), false);
-        states.prev_choice();
+        states.prev_choice(false);
         assert_eq!(states.selected, 2);
         // Update
         let choices = vec!["lemon", "strawberry"];
@@ -593,6 +621,19 @@ mod test {
         states.set_choices(&choices);
         assert_eq!(states.selected, 0); // Move to first index available
         assert_eq!(states.choices.len(), 0);
+        // Rewind
+        let choices: &[&str] = &["lemon", "strawberry", "vanilla", "chocolate"];
+        states.set_choices(choices);
+        states.open_tab();
+        assert_eq!(states.selected, 0);
+        states.prev_choice(true);
+        assert_eq!(states.selected, 3);
+        states.next_choice(true);
+        assert_eq!(states.selected, 0);
+        states.next_choice(true);
+        assert_eq!(states.selected, 1);
+        states.prev_choice(true);
+        assert_eq!(states.selected, 0);
     }
 
     #[test]
@@ -611,6 +652,7 @@ mod test {
                 .with_options(&["Oui!", "Non", "Peut-être"])
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_value(1)
+                .rewind(false)
                 .build(),
         );
         assert_eq!(component.props.foreground, Color::Red);
@@ -619,6 +661,16 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(
+            *component
+                .props
+                .own
+                .get(PROP_REWIND)
+                .unwrap()
+                .unwrap_one()
+                .unwrap_bool(),
+            false
+        );
         assert_eq!(
             *component.props.palette.get(COLOR_HIGHLIGHTED).unwrap(),
             Color::Red

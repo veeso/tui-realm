@@ -104,6 +104,7 @@ fn main() {
                 .with_color(Color::Black)
                 .with_title("Select flavour")
                 .with_options(&["vanilla", "chocolate", "coconut", "hazelnut"])
+                .rewind(true)
                 .build(),
         )),
     );

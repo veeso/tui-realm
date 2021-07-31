@@ -36,6 +36,7 @@ use tuirealm::tui::{
 use tuirealm::{Component, Frame, Msg, Payload, Value};
 
 const PROP_CHOICES: &str = "choices";
+const PROP_REWIND: &str = "rewind";
 const PROP_SELECTED: &str = "selected";
 const PROP_TITLE: &str = "title";
 
@@ -164,6 +165,18 @@ impl CheckboxPropsBuilder {
         }
         self
     }
+
+    /// ### rewind
+    ///
+    /// If true, moving below or beyond limit will rewind the selected record
+    pub fn rewind(&mut self, rewind: bool) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_REWIND, PropPayload::One(PropValue::Bool(rewind)));
+        }
+        self
+    }
 }
 
 // -- states
@@ -194,8 +207,10 @@ impl OwnStates {
     /// ### next_choice
     ///
     /// Move choice index to next choice
-    pub fn next_choice(&mut self) {
-        if self.choice + 1 < self.choices.len() {
+    pub fn next_choice(&mut self, rewind: bool) {
+        if rewind && self.choice + 1 >= self.choices.len() {
+            self.choice = 0;
+        } else if self.choice + 1 < self.choices.len() {
             self.choice += 1;
         }
     }
@@ -203,8 +218,10 @@ impl OwnStates {
     /// ### prev_choice
     ///
     /// Move choice index to previous choice
-    pub fn prev_choice(&mut self) {
-        if self.choice > 0 {
+    pub fn prev_choice(&mut self, rewind: bool) {
+        if rewind && self.choice == 0 && !self.choices.is_empty() {
+            self.choice = self.choices.len() - 1;
+        } else if self.choice > 0 {
             self.choice -= 1;
         }
     }
@@ -285,6 +302,13 @@ impl Checkbox {
                 .collect();
         }
         Checkbox { props, states }
+    }
+
+    fn rewind(&self) -> bool {
+        match self.props.own.get(PROP_REWIND) {
+            Some(PropPayload::One(PropValue::Bool(b))) => *b,
+            _ => false,
+        }
     }
 }
 
@@ -396,13 +420,13 @@ impl Component for Checkbox {
             match key.code {
                 KeyCode::Right => {
                     // Increment choice
-                    self.states.next_choice();
+                    self.states.next_choice(self.rewind());
                     // Return Msg On Change
                     Msg::None
                 }
                 KeyCode::Left => {
                     // Decrement choice
-                    self.states.prev_choice();
+                    self.states.prev_choice(self.rewind());
                     // Return Msg On Change
                     Msg::None
                 }
@@ -481,19 +505,19 @@ mod test {
         states.toggle();
         assert_eq!(states.selection, vec![0]);
         // Move
-        states.prev_choice();
+        states.prev_choice(false);
         assert_eq!(states.choice, 0);
-        states.next_choice();
+        states.next_choice(false);
         assert_eq!(states.choice, 1);
-        states.next_choice();
+        states.next_choice(false);
         assert_eq!(states.choice, 2);
         states.toggle();
         assert_eq!(states.selection, vec![0, 2]);
         // Forward overflow
-        states.next_choice();
-        states.next_choice();
+        states.next_choice(false);
+        states.next_choice(false);
         assert_eq!(states.choice, 3);
-        states.prev_choice();
+        states.prev_choice(false);
         assert_eq!(states.choice, 2);
         states.toggle();
         assert_eq!(states.selection, vec![0]);
@@ -511,6 +535,18 @@ mod test {
         assert_eq!(states.choice, 0); // Move to first index available
         assert_eq!(states.choices.len(), 0);
         assert_eq!(states.selection.len(), 0);
+        // Rewind
+        let choices: &[&str] = &["lemon", "strawberry", "vanilla", "chocolate"];
+        states.set_choices(choices);
+        assert_eq!(states.choice, 0);
+        states.prev_choice(true);
+        assert_eq!(states.choice, 3);
+        states.next_choice(true);
+        assert_eq!(states.choice, 0);
+        states.next_choice(true);
+        assert_eq!(states.choice, 1);
+        states.prev_choice(true);
+        assert_eq!(states.choice, 0);
     }
 
     #[test]
@@ -525,6 +561,7 @@ mod test {
                 .with_color(Color::Red)
                 .with_inverted_color(Color::White)
                 .with_value(vec![1, 5])
+                .rewind(false)
                 .build(),
         );
         assert_eq!(component.props.foreground, Color::Red);
@@ -533,6 +570,16 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(
+            *component
+                .props
+                .own
+                .get(PROP_REWIND)
+                .unwrap()
+                .unwrap_one()
+                .unwrap_bool(),
+            false
+        );
         assert_eq!(
             *component.props.own.get(PROP_SELECTED).unwrap(),
             PropPayload::Vec(vec![PropValue::Usize(1), PropValue::Usize(5)])

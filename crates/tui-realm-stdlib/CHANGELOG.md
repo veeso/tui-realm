@@ -20,6 +20,7 @@ Released on 31/07/2021
   - **Checkbox**
     - `with_options` now takes only options
     - added `with_title` to set the title
+    - `rewind` property
   - **Label**
     - Label now supports text alignment `with_text_alignment()`
   - **List**
@@ -38,8 +39,10 @@ Released on 31/07/2021
   - **Radio**
     - `with_options` now takes only options
     - added `with_title` to set the title
+    - `rewind` property
   - **Select**
     - `with_options` now takes only options
+    - `rewind` property
     - added `with_title` to set the title
   - **Span**
     - Span now supports text alignment `with_text_alignment()`

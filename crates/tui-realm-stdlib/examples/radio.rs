@@ -108,6 +108,7 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Black)
                 .with_color(Color::Black)
                 .with_title("Select flavour")
+                .rewind(true)
                 .with_options(&[
                     "vanilla".to_string(),
                     "chocolate".to_string(),
