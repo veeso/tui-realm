@@ -122,7 +122,7 @@ impl Dataset {
     /// ### get_data
     ///
     /// Get a reference to data
-    pub(crate) fn get_data(&self) -> &[(f64, f64)] {
+    pub fn get_data(&self) -> &[(f64, f64)] {
         &self.data
     }
 }

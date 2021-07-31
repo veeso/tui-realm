@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.5.1](#051)
   - [0.5.0](#050)
   - [0.4.3](#043)
   - [0.4.2](#042)
@@ -14,6 +15,13 @@
   - [0.1.0](#010)
 
 ---
+
+## 0.5.1
+
+Released on 31/07/2021
+
+- Bugfix:
+  - Expose `get_data` from `Dataset`
 
 ## 0.5.0
 
