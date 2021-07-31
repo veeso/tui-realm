@@ -311,7 +311,6 @@ impl Component for Span {
 mod tests {
 
     use super::*;
-    use crate::props::TextSpanBuilder;
 
     use crate::tui::style::Color;
     use crossterm::event::{KeyCode, KeyEvent};
@@ -335,10 +334,7 @@ mod tests {
                 .with_text_alignment(Alignment::Center)
                 .with_spans(vec![
                     TextSpan::from("Press "),
-                    TextSpanBuilder::new("<ESC>")
-                        .with_foreground(Color::Cyan)
-                        .bold()
-                        .build(),
+                    TextSpan::from("<ESC>").fg(Color::Cyan).bold(),
                     TextSpan::from(" to quit"),
                 ])
                 .build(),

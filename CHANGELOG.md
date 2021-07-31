@@ -35,12 +35,13 @@ Released on ??
     - paragraph now supports wrap with trim `with_trim()`
   - **Span**
     - Span now supports text alignment `with_text_alignment()`
-- `PropValue` can now also be:
-  - `Alignment` (`props::Alignment`)
+- New **PropValue** values:
+  - `Alignment`
   - `Dataset`
   - `Shape`
   - `Style`
 - ❗ Breaking changes ❗
+  - ❗ Removed `TextSpanBuilder`, you can just use the same methods on `TextSpan` when creating it ❗
   - ❗ Renamed `Canvas` to `Frame` ❗
   - ❗ Renamed `Table` to `List` ❗
   - ❗ Removed `ScrollTable`; Use `List` with `scrollable(true)` instead ❗

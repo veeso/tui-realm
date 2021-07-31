@@ -34,7 +34,7 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tuirealm::components::{label, Span, SpanPropsBuilder};
-use tuirealm::props::{Alignment, TextSpanBuilder};
+use tuirealm::props::{Alignment, TextSpan};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
@@ -91,14 +91,8 @@ fn main() {
             SpanPropsBuilder::default()
                 .bold()
                 .with_spans(vec![
-                    TextSpanBuilder::new("Hello ")
-                        .bold()
-                        .with_foreground(Color::Yellow)
-                        .build(),
-                    TextSpanBuilder::new("world!")
-                        .bold()
-                        .with_foreground(Color::Cyan)
-                        .build(),
+                    TextSpan::new("Hello ").bold().fg(Color::Yellow),
+                    TextSpan::new("world!").bold().fg(Color::Cyan),
                 ])
                 .with_text_alignment(Alignment::Center)
                 .build(),
@@ -111,14 +105,8 @@ fn main() {
                 .bold()
                 .with_background(Color::LightGreen)
                 .with_spans(vec![
-                    TextSpanBuilder::new("Hello ")
-                        .bold()
-                        .with_foreground(Color::Yellow)
-                        .build(),
-                    TextSpanBuilder::new("world!")
-                        .bold()
-                        .with_foreground(Color::Cyan)
-                        .build(),
+                    TextSpan::new("Hello ").bold().fg(Color::Yellow),
+                    TextSpan::new("world!").bold().fg(Color::Cyan),
                 ])
                 .with_text_alignment(Alignment::Right)
                 .build(),
