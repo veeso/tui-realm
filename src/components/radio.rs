@@ -130,7 +130,7 @@ impl RadioPropsBuilder {
                 PROP_CHOICES,
                 PropPayload::Vec(
                     options
-                        .into_iter()
+                        .iter()
                         .map(|x| PropValue::Str(x.as_ref().to_string()))
                         .collect(),
                 ),
