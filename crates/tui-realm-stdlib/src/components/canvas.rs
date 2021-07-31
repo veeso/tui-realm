@@ -25,14 +25,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, Shape};
-use crate::tui::{
+use tuirealm::event::Event;
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, Shape};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
     widgets::canvas::{Canvas as TuiCanvas, Context, Line, Map, MapResolution, Points, Rectangle},
     widgets::{Block, BorderType, Borders},
 };
-use crate::{Component, Event, Frame, Msg, Payload};
+use tuirealm::{Component, Frame, Msg, Payload};
 
 // -- Props
 
@@ -341,7 +342,7 @@ impl Component for Canvas {
                 _ => None,
             };
             let mut block: Block =
-                super::utils::get_block(&self.props.borders, title, self.states.focus);
+                crate::utils::get_block(&self.props.borders, title, self.states.focus);
             block = block.style(Style::default().bg(self.props.background));
             // Get properties
             let x_bounds: [f64; 2] = self
@@ -440,7 +441,7 @@ impl Component for Canvas {
 mod test {
 
     use super::*;
-    use crate::event::{KeyCode, KeyEvent};
+    use tuirealm::event::{KeyCode, KeyEvent};
 
     use pretty_assertions::assert_eq;
 

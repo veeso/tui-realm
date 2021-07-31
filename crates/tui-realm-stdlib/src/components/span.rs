@@ -26,14 +26,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder, TextSpan};
-use crate::tui::{
+use tuirealm::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder, TextSpan};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Modifier, Style},
     text::{Span as TuiSpan, Spans, Text},
     widgets::Paragraph,
 };
-use crate::{Component, Event, Frame, Msg, Payload};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 const PROP_ALIGNMENT: &str = "text-alignment";
 const PROP_SPANS: &str = "spans";
@@ -239,7 +239,7 @@ impl Component for Span {
                     .map(|x| {
                         // Keep colors and modifiers, or use default
                         let (fg, bg, modifiers) =
-                            super::utils::use_or_default_styles(&self.props, x);
+                            crate::utils::use_or_default_styles(&self.props, x);
                         TuiSpan::styled(
                             x.content.clone(),
                             Style::default().add_modifier(modifiers).fg(fg).bg(bg),
@@ -316,9 +316,9 @@ mod tests {
 
     use super::*;
 
-    use crate::tui::style::Color;
     use crossterm::event::{KeyCode, KeyEvent};
     use pretty_assertions::assert_eq;
+    use tuirealm::tui::style::Color;
 
     #[test]
     fn test_components_span() {

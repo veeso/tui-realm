@@ -41,7 +41,6 @@ pub mod span;
 pub mod sparkline;
 pub mod table;
 pub mod textarea;
-pub mod utils;
 
 // Exports
 pub use bar_chart::{BarChart, BarChartPropsBuilder};

@@ -2,6 +2,7 @@
 //!
 //! A chart with bars
 
+use std::collections::LinkedList;
 /**
  * MIT License
  *
@@ -25,15 +26,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::event::KeyCode;
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
-use crate::tui::{
+use tuirealm::event::Event;
+use tuirealm::event::KeyCode;
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
     widgets::{BarChart as TuiBarChart, Block, BorderType, Borders},
 };
-use crate::{Component, Event, Frame, Msg, Payload};
-use std::collections::LinkedList;
+use tuirealm::{Component, Frame, Msg, Payload};
 
 // -- Props
 const PROP_BAR_WIDTH: &str = "bar-width";
@@ -480,7 +481,7 @@ impl Component for BarChart {
                 Some(PropPayload::One(PropValue::Str(t))) => Some(t),
                 _ => None,
             };
-            let block: Block = super::utils::get_block(&self.props.borders, title, active);
+            let block: Block = crate::utils::get_block(&self.props.borders, title, active);
             // Get max elements
             let data_max_len: u64 = self
                 .props

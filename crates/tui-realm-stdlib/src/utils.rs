@@ -29,12 +29,12 @@
 extern crate textwrap;
 extern crate unicode_width;
 // local
-use crate::props::{BordersProps, TextSpan};
-use crate::Props;
+use tuirealm::props::{BordersProps, TextSpan};
+use tuirealm::Props;
 // ext
-use crate::tui::style::{Color, Modifier, Style};
-use crate::tui::text::{Span, Spans};
-use crate::tui::widgets::Block;
+use tuirealm::tui::style::{Color, Modifier, Style};
+use tuirealm::tui::text::{Span, Spans};
+use tuirealm::tui::widgets::Block;
 use unicode_width::UnicodeWidthStr;
 
 /// ### wrap_spans
@@ -147,9 +147,9 @@ pub fn calc_utf8_cursor_position(chars: &[char]) -> u16 {
 mod test {
 
     use super::*;
-    use crate::props::builder::PropsBuilder;
-    use crate::tui::widgets::{BorderType, Borders};
-    use crate::GenericPropsBuilder;
+    use tuirealm::props::builder::PropsBuilder;
+    use tuirealm::tui::widgets::{BorderType, Borders};
+    use tuirealm::GenericPropsBuilder;
 
     use pretty_assertions::assert_eq;
 

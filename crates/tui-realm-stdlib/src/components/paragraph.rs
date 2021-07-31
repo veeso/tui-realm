@@ -29,16 +29,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{
+use tuirealm::props::{
     Alignment, BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan,
 };
-use crate::tui::{
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Modifier, Style},
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, Paragraph as TuiParagraph, Wrap},
 };
-use crate::{Component, Event, Frame, Msg, Payload};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 // -- Props
 
@@ -280,7 +280,7 @@ impl Component for Paragraph {
                     .map(|x| x.unwrap_text_span())
                     .map(|x| {
                         let (fg, bg, modifiers) =
-                            super::utils::use_or_default_styles(&self.props, x);
+                            crate::utils::use_or_default_styles(&self.props, x);
                         Spans::from(vec![Span::styled(
                             x.content.clone(),
                             Style::default().add_modifier(modifiers).fg(fg).bg(bg),
@@ -294,7 +294,7 @@ impl Component for Paragraph {
                 Some(PropPayload::One(PropValue::Str(t))) => Some(t),
                 _ => None,
             };
-            let div: Block = super::utils::get_block(&self.props.borders, title, true);
+            let div: Block = crate::utils::get_block(&self.props.borders, title, true);
             // Text properties
             let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
                 Some(PropPayload::One(PropValue::Alignment(alignment))) => *alignment,

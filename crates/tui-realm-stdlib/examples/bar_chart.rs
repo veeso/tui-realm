@@ -33,15 +33,15 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tuirealm::components::{
+use tui_realm_stdlib::components::{
     bar_chart::{BarChart, BarChartPropsBuilder},
     label,
 };
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
-use tui::layout::{Constraint, Direction, Layout};
-use tui::style::{Color, Style};
+use tuirealm::tui::layout::{Constraint, Direction, Layout};
+use tuirealm::tui::style::{Color, Style};
 
 const COMPONENT_CHART1: &str = "chart1";
 const COMPONENT_CHART2: &str = "chart2";

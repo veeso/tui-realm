@@ -33,12 +33,12 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tuirealm::components::{label, paragraph};
+use tui_realm_stdlib::components::{label, paragraph};
 use tuirealm::props::TextSpan;
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
-use tui::layout::{Alignment, Constraint, Direction, Layout};
-use tui::style::Color;
+use tuirealm::tui::layout::{Alignment, Constraint, Direction, Layout};
+use tuirealm::tui::style::Color;
 
 const COMPONENT_PARAGRAPH: &str = "paragraph1";
 const COMPONENT_PARAGRAPH_2: &str = "paragraph2";

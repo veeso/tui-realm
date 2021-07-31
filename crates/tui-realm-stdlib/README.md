@@ -64,10 +64,10 @@ Since this library requires `crossterm` too, you'll also need to add it to your 
 crossterm = "0.19.0"
 ```
 
-Latest version of tui-realm-stdlib requires **tui-realm 0.5.0**
+Latest version of tui-realm-stdlib requires **tui-realm 0.5.1**
 
 ```toml
-tuirealm = "0.5.0"
+tuirealm = "0.5.1"
 ```
 
 ## Examples

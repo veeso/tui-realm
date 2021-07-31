@@ -27,14 +27,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::event::KeyCode;
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan};
-use crate::tui::{
+use tuirealm::event::KeyCode;
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan};
+use tuirealm::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
     widgets::{Block, BorderType, Borders, List, ListItem, ListState},
 };
-use crate::{Component, Event, Frame, Msg, Payload};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 // -- Props
 
@@ -387,7 +387,7 @@ impl Component for Textarea {
                     .iter()
                     .map(|x| x.unwrap_text_span())
                     .map(|x| {
-                        super::utils::wrap_spans(
+                        crate::utils::wrap_spans(
                             vec![x.clone()].as_slice(),
                             area.width as usize,
                             &self.props,
@@ -401,7 +401,7 @@ impl Component for Textarea {
                 Some(PropPayload::One(PropValue::Str(t))) => Some(t),
                 _ => None,
             };
-            let div: Block = super::utils::get_block(&self.props.borders, title, self.states.focus);
+            let div: Block = crate::utils::get_block(&self.props.borders, title, self.states.focus);
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
             // Make component

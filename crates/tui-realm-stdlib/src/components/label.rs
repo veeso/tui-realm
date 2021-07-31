@@ -25,13 +25,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder};
-use crate::tui::{
+use tuirealm::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Modifier, Style},
     widgets::Paragraph,
 };
-use crate::{Component, Event, Frame, Msg, Payload};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 const PROP_ALIGNMENT: &str = "text-alignment";
 const PROP_TEXT: &str = "text";
@@ -302,9 +302,9 @@ mod tests {
 
     use super::*;
 
-    use crate::tui::style::Color;
     use crossterm::event::{KeyCode, KeyEvent};
     use pretty_assertions::assert_eq;
+    use tuirealm::tui::style::Color;
 
     #[test]
     fn test_components_label() {

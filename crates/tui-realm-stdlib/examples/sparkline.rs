@@ -36,15 +36,15 @@ use rand::{rngs::ThreadRng, thread_rng, Rng};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tuirealm::components::{
+use tui_realm_stdlib::components::{
     label,
     sparkline::{Sparkline, SparklinePropsBuilder},
 };
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
-use tui::layout::{Constraint, Direction, Layout};
-use tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction, Layout};
+use tuirealm::tui::style::Color;
 
 const COMPONENT_CHART1: &str = "chart1";
 const COMPONENT_EVENT: &str = "LABEL";

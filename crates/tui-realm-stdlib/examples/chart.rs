@@ -36,7 +36,7 @@ use rand::{rngs::ThreadRng, thread_rng, Rng};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tuirealm::components::{
+use tui_realm_stdlib::components::{
     chart::{Chart, ChartPropsBuilder},
     label,
 };
@@ -46,10 +46,10 @@ use tuirealm::props::{
 };
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
-use tui::layout::{Constraint, Direction, Layout};
-use tui::style::{Color, Style};
-use tui::symbols::Marker;
-use tui::widgets::GraphType;
+use tuirealm::tui::layout::{Constraint, Direction, Layout};
+use tuirealm::tui::style::{Color, Style};
+use tuirealm::tui::symbols::Marker;
+use tuirealm::tui::widgets::GraphType;
 
 const COMPONENT_CHART1: &str = "chart1";
 const COMPONENT_EVENT: &str = "LABEL";

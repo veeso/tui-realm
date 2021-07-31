@@ -33,12 +33,12 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tuirealm::components::{input, label};
+use tui_realm_stdlib::components::{input, label};
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{InputType, Msg, Payload, PropsBuilder, Update, Value, View};
 // tui
-use tui::layout::{Constraint, Direction, Layout};
-use tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction, Layout};
+use tuirealm::tui::style::Color;
 
 const COMPONENT_INPUT: &str = "INPUT";
 const COMPONENT_LABEL: &str = "LABEL";

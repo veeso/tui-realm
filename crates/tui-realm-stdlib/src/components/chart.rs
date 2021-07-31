@@ -25,16 +25,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::event::KeyCode;
-use crate::props::{BordersProps, Dataset, PropPayload, PropValue, Props, PropsBuilder};
-use crate::tui::{
+use std::collections::LinkedList;
+use tuirealm::event::Event;
+use tuirealm::event::KeyCode;
+use tuirealm::props::{BordersProps, Dataset, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
     text::Span,
     widgets::{Axis, Block, BorderType, Borders, Chart as TuiChart, Dataset as TuiDataset},
 };
-use crate::{Component, Event, Frame, Msg, Payload};
-use std::collections::LinkedList;
+use tuirealm::{Component, Frame, Msg, Payload};
 
 // -- Props
 const PROP_X_BOUNDS: &str = "x-bounds";
@@ -535,7 +536,7 @@ impl Component for Chart {
                 Some(PropPayload::One(PropValue::Str(t))) => Some(t),
                 _ => None,
             };
-            let block: Block = super::utils::get_block(&self.props.borders, title, active);
+            let block: Block = crate::utils::get_block(&self.props.borders, title, active);
             // Get data
             let data: Vec<TuiDataset> = self.data(self.states.cursor, area.width as usize);
             // Create widget
@@ -698,9 +699,9 @@ mod test {
 
     use super::*;
 
-    use crate::tui::{symbols::Marker, widgets::GraphType};
     use crossterm::event::KeyEvent;
     use pretty_assertions::assert_eq;
+    use tuirealm::tui::{symbols::Marker, widgets::GraphType};
 
     #[test]
     fn test_components_chart_states() {

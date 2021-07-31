@@ -25,7 +25,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-extern crate tui;
 extern crate tuirealm;
 
 mod utils;
@@ -37,15 +36,15 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 // realm
-use tuirealm::components::{
+use tui_realm_stdlib::components::{
     checkbox, input, label, list, paragraph, progress_bar, radio, span, textarea,
 };
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::props::{TableBuilder, TextSpan};
 use tuirealm::{InputType, Msg, PropPayload, PropValue, PropsBuilder, Update, View};
 // tui
-use tui::layout::{Constraint, Direction, Layout};
-use tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction, Layout};
+use tuirealm::tui::style::Color;
 
 // -- components
 

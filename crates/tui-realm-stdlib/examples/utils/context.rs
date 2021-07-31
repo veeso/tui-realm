@@ -27,7 +27,6 @@
  */
 // Dependencies
 extern crate crossterm;
-extern crate tui;
 use super::input::InputHandler;
 
 // Includes
@@ -37,8 +36,8 @@ use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
 };
 use std::io::{stdout, Stdout};
-use tui::backend::CrosstermBackend;
-use tui::Terminal;
+use tuirealm::tui::backend::CrosstermBackend;
+use tuirealm::tui::Terminal;
 
 /// ## Context
 ///

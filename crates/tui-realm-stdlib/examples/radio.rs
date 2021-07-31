@@ -33,12 +33,12 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tuirealm::components::{label, radio};
+use tui_realm_stdlib::components::{label, radio};
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
-use tui::layout::{Constraint, Direction, Layout};
-use tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction, Layout};
+use tuirealm::tui::style::Color;
 
 const COMPONENT_RADIO: &str = "chk1";
 const COMPONENT_RADIO_INVERTED: &str = "chk2";

@@ -26,15 +26,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::components::utils::calc_utf8_cursor_position;
-use crate::event::{KeyCode, KeyModifiers};
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
-use crate::tui::{
+use crate::utils::calc_utf8_cursor_position;
+use tuirealm::event::{Event, KeyCode, KeyModifiers};
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
-use crate::{Component, Event, Frame, InputType, Msg, Payload, Value};
+use tuirealm::{Component, Frame, InputType, Msg, Payload, Value};
 
 // -- Props
 const PROP_VALUE: &str = "value";
@@ -352,7 +352,7 @@ impl Component for Input {
                 Some(PropPayload::One(PropValue::Str(t))) => Some(t),
                 _ => None,
             };
-            let div: Block = super::utils::get_block(&self.props.borders, title, self.states.focus);
+            let div: Block = crate::utils::get_block(&self.props.borders, title, self.states.focus);
             let p: Paragraph =
                 Paragraph::new(self.states.render_value(Self::get_input_type(&self.props)))
                     .style(match self.states.focus {
@@ -535,9 +535,9 @@ mod tests {
 
     use super::*;
 
-    use crate::tui::style::Color;
     use crossterm::event::KeyEvent;
     use pretty_assertions::assert_eq;
+    use tuirealm::tui::style::Color;
 
     #[test]
     fn test_components_input_states() {

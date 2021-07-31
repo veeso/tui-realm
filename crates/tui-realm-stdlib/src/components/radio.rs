@@ -25,15 +25,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::event::KeyCode;
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
-use crate::tui::{
+use tuirealm::event::KeyCode;
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
     text::Spans,
     widgets::{Block, BorderType, Borders, Tabs},
 };
-use crate::{Component, Event, Frame, Msg, Payload, Value};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload, Value};
 
 // -- Props
 
@@ -285,7 +285,7 @@ impl Component for Radio {
                 _ => None,
             };
             let block: Block =
-                super::utils::get_block(&self.props.borders, title, self.states.focus);
+                crate::utils::get_block(&self.props.borders, title, self.states.focus);
             let radio: Tabs = Tabs::new(choices)
                 .block(block)
                 .select(self.states.choice)

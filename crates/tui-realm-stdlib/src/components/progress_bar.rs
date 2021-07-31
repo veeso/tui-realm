@@ -25,13 +25,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
-use crate::tui::{
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Gauge},
 };
-use crate::{Component, Event, Frame, Msg, Payload};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 // -- Props
 
@@ -201,7 +201,7 @@ impl Component for ProgressBar {
                 Some(PropPayload::One(PropValue::F64(ratio))) => *ratio,
                 _ => 0.0,
             };
-            let div: Block = super::utils::get_block(&self.props.borders, title, true);
+            let div: Block = crate::utils::get_block(&self.props.borders, title, true);
             // Make progress bar
             render.render_widget(
                 Gauge::default()

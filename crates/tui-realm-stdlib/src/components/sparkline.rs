@@ -2,6 +2,7 @@
 //!
 //! A sparkline over more lines
 
+use std::collections::LinkedList;
 /**
  * MIT License
  *
@@ -25,14 +26,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
-use crate::tui::{
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Sparkline as TuiSparkline},
 };
-use crate::{Component, Event, Frame, Msg, Payload};
-use std::collections::LinkedList;
+use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 // -- Props
 const PROP_DATA: &str = "data";
@@ -284,7 +284,7 @@ impl Component for Sparkline {
                 Some(PropPayload::One(PropValue::Str(t))) => Some(t),
                 _ => None,
             };
-            let block: Block = super::utils::get_block(&self.props.borders, title, true);
+            let block: Block = crate::utils::get_block(&self.props.borders, title, true);
             // Get max elements
             let data_max_len: u64 = self
                 .props

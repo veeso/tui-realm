@@ -25,15 +25,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::event::KeyCode;
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable};
-use crate::tui::{
+use tuirealm::event::KeyCode;
+use tuirealm::props::{
+    BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable,
+};
+use tuirealm::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, List as TuiList, ListItem, ListState},
 };
-use crate::{Component, Event, Frame, Msg, Payload};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 // -- Props
 
@@ -421,7 +423,7 @@ impl Component for List {
                 Some(PropPayload::One(PropValue::Str(t))) => Some(t),
                 _ => None,
             };
-            let div: Block = super::utils::get_block(&self.props.borders, title, active);
+            let div: Block = crate::utils::get_block(&self.props.borders, title, active);
             // Make list entries
             let list_items: Vec<ListItem> = match self.props.own.get(PROP_TABLE).as_ref() {
                 Some(PropPayload::One(PropValue::Table(table))) => table
@@ -431,7 +433,7 @@ impl Component for List {
                             .iter()
                             .map(|col| {
                                 let (fg, bg, modifiers) =
-                                    super::utils::use_or_default_styles(&self.props, col);
+                                    crate::utils::use_or_default_styles(&self.props, col);
                                 Span::styled(
                                     col.content.clone(),
                                     Style::default().add_modifier(modifiers).fg(fg).bg(bg),
@@ -601,7 +603,7 @@ impl Component for List {
 mod tests {
 
     use super::*;
-    use crate::props::{TableBuilder, TextSpan};
+    use tuirealm::props::{TableBuilder, TextSpan};
 
     use crossterm::event::KeyEvent;
     use pretty_assertions::assert_eq;

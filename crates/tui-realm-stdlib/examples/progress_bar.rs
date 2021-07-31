@@ -33,12 +33,12 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tuirealm::components::{label, progress_bar};
+use tui_realm_stdlib::components::{label, progress_bar};
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
-use tui::layout::{Constraint, Direction, Layout};
-use tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction, Layout};
+use tuirealm::tui::style::Color;
 
 const COMPONENT_PROGRESSBAR: &str = "prog1";
 const COMPONENT_PROGRESSBAR_2: &str = "prog2";

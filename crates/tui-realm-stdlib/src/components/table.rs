@@ -25,15 +25,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::event::KeyCode;
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable};
-use crate::tui::{
+use tuirealm::event::KeyCode;
+use tuirealm::props::{
+    BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable,
+};
+use tuirealm::tui::{
     layout::{Constraint, Rect},
     style::{Color, Modifier, Style},
     text::Span,
     widgets::{Block, BorderType, Borders, Cell, Row, Table as TuiTable, TableState},
 };
-use crate::{Component, Event, Frame, Msg, Payload};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 // -- Props
 
@@ -510,7 +512,7 @@ impl Component for Table {
                 Some(PropPayload::One(PropValue::Str(t))) => Some(t),
                 _ => None,
             };
-            let div: Block = super::utils::get_block(&self.props.borders, title, active);
+            let div: Block = crate::utils::get_block(&self.props.borders, title, active);
             // Get row height
             let row_height: u16 = match self.props.own.get(PROP_ROW_HEIGHT) {
                 Some(PropPayload::One(PropValue::U16(h))) => *h,
@@ -525,7 +527,7 @@ impl Component for Table {
                             .iter()
                             .map(|col| {
                                 let (fg, bg, modifiers) =
-                                    super::utils::use_or_default_styles(&self.props, col);
+                                    crate::utils::use_or_default_styles(&self.props, col);
                                 Cell::from(Span::styled(
                                     col.content.clone(),
                                     Style::default().add_modifier(modifiers).fg(fg).bg(bg),
@@ -722,7 +724,7 @@ impl Component for Table {
 mod tests {
 
     use super::*;
-    use crate::props::{TableBuilder, TextSpan};
+    use tuirealm::props::{TableBuilder, TextSpan};
 
     use crossterm::event::KeyEvent;
     use pretty_assertions::assert_eq;

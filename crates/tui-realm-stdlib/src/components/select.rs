@@ -26,16 +26,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::event::KeyCode;
-use crate::props::borders::Borders;
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
-use crate::tui::{
+use tuirealm::event::KeyCode;
+use tuirealm::props::borders::Borders;
+use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::tui::{
     layout::{Constraint, Corner, Direction, Layout, Rect},
     style::{Color, Style},
     text::Spans,
     widgets::{Block, BorderType, List, ListItem, ListState, Paragraph},
 };
-use crate::{Component, Event, Frame, Msg, Payload, Value};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload, Value};
 
 // -- props
 
@@ -396,7 +396,7 @@ impl Select {
             Some(PropPayload::One(PropValue::Str(t))) => Some(t),
             _ => None,
         };
-        let div: Block = super::utils::get_block(&self.props.borders, title, self.states.focus);
+        let div: Block = crate::utils::get_block(&self.props.borders, title, self.states.focus);
         let selected_text: String = match self.states.choices.get(self.states.selected) {
             None => String::default(),
             Some(s) => s.clone(),

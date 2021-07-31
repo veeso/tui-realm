@@ -33,12 +33,12 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tuirealm::components::{label, select};
+use tui_realm_stdlib::components::{label, select};
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{Msg, Payload, PropsBuilder, Update, View};
 // tui
-use tui::layout::{Constraint, Direction, Layout};
-use tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction, Layout};
+use tuirealm::tui::style::Color;
 
 const COMPONENT_SELECT: &str = "select";
 const COMPONENT_SELECT_HG: &str = "select-hg";
