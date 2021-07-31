@@ -140,7 +140,7 @@ impl<'a> From<&'a Dataset> for TuiDataset<'a> {
             .marker(data.marker)
             .graph_type(data.graph_type)
             .style(data.style)
-            .data(&data.get_data())
+            .data(data.get_data())
     }
 }
 

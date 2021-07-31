@@ -185,7 +185,7 @@ impl SpanPropsBuilder {
         if let Some(props) = self.props.as_mut() {
             props.own.insert(
                 PROP_SPANS,
-                PropPayload::Vec(spans.into_iter().map(|x| PropValue::TextSpan(x)).collect()),
+                PropPayload::Vec(spans.into_iter().map(PropValue::TextSpan).collect()),
             );
         }
         self
