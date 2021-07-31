@@ -26,7 +26,17 @@ Released on ??
   - Added `Select` component
   - Added `Sparkline` component
   - Added `Table` component
+- Component changes:
+  - **Label**
+    - Label now supports text alignment `with_text_alignment()`
+  - **Paragraph**:
+    - paragraph will now use `TuiParagraph` to render instead of `List`.
+    - paragraph now supports text alignment `with_text_alignment()`
+    - paragraph now supports wrap with trim `with_trim()`
+  - **Span**
+    - Span now supports text alignment `with_text_alignment()`
 - `PropValue` can now also be:
+  - `Alignment` (`props::Alignment`)
   - `Dataset`
   - `Shape`
   - `Style`

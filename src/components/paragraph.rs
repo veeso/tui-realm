@@ -29,15 +29,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{
+    Alignment, BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
+};
 use crate::tui::{
-    layout::{Corner, Rect},
+    layout::Rect,
     style::{Color, Modifier, Style},
-    widgets::{Block, BorderType, Borders, List, ListItem},
+    text::{Span, Spans},
+    widgets::{Block, BorderType, Borders, Paragraph as TuiParagraph, Wrap},
 };
 use crate::{Component, Event, Frame, Msg, Payload};
 
 // -- Props
+
+const PROP_ALIGNMENT: &str = "text-align";
+const PROP_TRIM: &str = "wrap";
 
 pub struct ParagraphPropsBuilder {
     props: Option<Props>,
@@ -197,6 +203,31 @@ impl ParagraphPropsBuilder {
         }
         self
     }
+
+    /// ### with_text_alignment
+    ///
+    /// Set text alignment for paragraph
+    pub fn with_text_alignment(&mut self, alignment: Alignment) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_ALIGNMENT,
+                PropPayload::One(PropValue::Alignment(alignment)),
+            );
+        }
+        self
+    }
+
+    /// ### with_trim
+    ///
+    /// Set whether wrapped text should be trimmed or not on newlines
+    pub fn with_trim(&mut self, trim: bool) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props
+                .own
+                .insert(PROP_TRIM, PropPayload::One(PropValue::Bool(trim)));
+        }
+        self
+    }
 }
 
 // -- Component
@@ -222,30 +253,47 @@ impl Component for Paragraph {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.visible {
             // Make text items
-            let lines: Vec<ListItem> = match self.props.texts.spans.as_ref() {
+            let text: Vec<Spans> = match self.props.texts.spans.as_ref() {
                 None => Vec::new(),
-                Some(spans) => super::utils::wrap_spans(spans, area.width as usize, &self.props)
-                    .into_iter()
-                    .map(ListItem::new)
+                Some(spans) => spans
+                    .iter()
+                    .map(|x| {
+                        let (fg, bg, modifiers) =
+                            super::utils::use_or_default_styles(&self.props, x);
+                        Spans::from(vec![Span::styled(
+                            x.content.clone(),
+                            Style::default().add_modifier(modifiers).fg(fg).bg(bg),
+                        )])
+                    })
                     .collect(),
             };
             // Make container div
             let div: Block =
                 super::utils::get_block(&self.props.borders, &self.props.texts.title, true);
+            // Text properties
+            let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
+                Some(PropPayload::One(PropValue::Alignment(alignment))) => *alignment,
+                _ => Alignment::Left,
+            };
+            // Wrap
+            let trim: bool = match self.props.own.get(PROP_TRIM) {
+                Some(PropPayload::One(PropValue::Bool(trim))) => *trim,
+                _ => false,
+            };
             render.render_widget(
-                List::new(lines)
+                TuiParagraph::new(text)
                     .block(div)
-                    .start_corner(Corner::TopLeft)
                     .style(
                         Style::default()
                             .fg(self.props.foreground)
                             .bg(self.props.background),
-                    ),
+                    )
+                    .alignment(alignment)
+                    .wrap(Wrap { trim }),
                 area,
             );
         }
@@ -333,6 +381,8 @@ mod tests {
                     Some(String::from("paragraph")),
                     vec![TextSpan::from("welcome to"), TextSpan::from("tui-realm")],
                 )
+                .with_trim(true)
+                .with_text_alignment(Alignment::Center)
                 .build(),
         );
         assert_eq!(component.props.foreground, Color::Red);
@@ -351,6 +401,14 @@ mod tests {
         assert_eq!(
             component.props.texts.title.as_ref().unwrap().as_str(),
             "paragraph"
+        );
+        assert_eq!(
+            *component.props.own.get(PROP_ALIGNMENT).unwrap(),
+            PropPayload::One(PropValue::Alignment(Alignment::Center))
+        );
+        assert_eq!(
+            *component.props.own.get(PROP_TRIM).unwrap(),
+            PropPayload::One(PropValue::Bool(true))
         );
         assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 2);
         // Focus

@@ -37,7 +37,7 @@ use tuirealm::components::{label, paragraph};
 use tuirealm::props::{TextSpan, TextSpanBuilder};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
-use tui::layout::{Constraint, Direction, Layout};
+use tui::layout::{Alignment, Constraint, Direction, Layout};
 use tui::style::Color;
 
 const COMPONENT_PARAGRAPH: &str = "paragraph1";
@@ -90,11 +90,11 @@ fn main() {
         Box::new(paragraph::Paragraph::new(
             paragraph::ParagraphPropsBuilder::default()
                 .bold()
-                .with_background(Color::Red)
+                .with_background(Color::White)
                 .with_foreground(Color::Black)
                 .with_texts(Some(String::from("A poem for you")), vec![
-                TextSpanBuilder::new("Lorem ipsum dolor sit amet").underlined().with_foreground(Color::Green).build(),
-                TextSpan::from(", consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
+                TextSpanBuilder::new("Lorem ipsum dolor sit amet,").underlined().with_foreground(Color::Green).build(),
+                TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
                 TextSpan::from("Duis augue diam, tempor vitae posuere et, tempus mattis ligula.")
             ])
                 .build(),
@@ -106,10 +106,11 @@ fn main() {
             paragraph::ParagraphPropsBuilder::default()
                 .bold()
                 .with_foreground(Color::LightBlue)
+                .with_text_alignment(Alignment::Center)
+                .with_trim(true)
                 .with_texts(Some(String::from("A poem for you")), vec![
-                TextSpanBuilder::new("Lorem ipsum dolor sit amet").underlined().with_foreground(Color::Green).build(),
-                TextSpan::from(", consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
-                TextSpan::from("Duis augue diam, tempor vitae posuere et, tempus mattis ligula.")
+                TextSpanBuilder::new("Lorem ipsum dolor sit amet, ").underlined().with_foreground(Color::Green).build(),
+                TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus Duis augue diam, tempor vitae posuere et, tempus mattis ligula."),
             ])
                 .build(),
         )),
