@@ -64,7 +64,8 @@ Released on ??
   - `Table`
   - `TextSpan`
 - ❗ Breaking changes ❗
-  - ❗ Removed `TextParts` from `Props` use `own` properties instead ❗
+  - Removed `Color` from `PropValue`, use `palette` instead ❗
+  - ❗ Removed `TextParts` from `Props`, use `own` properties instead ❗
   - ❗ Removed `TextSpanBuilder`, you can just use the same methods on `TextSpan` when creating it ❗
   - ❗ Renamed `Canvas` to `Frame` ❗
   - ❗ Renamed `Table` to `List` ❗
