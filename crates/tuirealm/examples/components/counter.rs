@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::components::utils::get_block;
 use tuirealm::event::{Event, KeyCode};
 use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
 use tuirealm::tui::{
@@ -176,7 +175,7 @@ impl Component for Counter {
                 _ => String::new(),
             };
             let text: String = format!("{} ({})", prefix, self.states.counter);
-            let block: Block = get_block(&self.props.borders, None, self.states.focus);
+            let block: Block = super::get_block(&self.props.borders, None, self.states.focus);
             let (fg, bg) = match self.states.focus {
                 true => (self.props.foreground, self.props.background),
                 false => (Color::Reset, Color::Reset),

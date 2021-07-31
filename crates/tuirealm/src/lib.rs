@@ -10,11 +10,6 @@
 //! ```toml
 //! tuirealm = "0.5.0"
 //! ```
-//! or if you want the std components library
-//!
-//! ```toml
-//! tuirealm = { version = "0.3.2", features = [ "with-components" ] }
-//! ```
 //!
 //! Since the library requires crossterm as backend, you will be required also to put `crossterm` as dependency:
 //!
@@ -346,8 +341,6 @@ use std::io::Stdout;
 use tuirs::{backend::CrosstermBackend, layout::Rect, Frame as TuiFrame};
 
 // Modules
-#[cfg(feature = "with-components")]
-pub mod components;
 pub mod event;
 pub mod props;
 pub mod tui;

@@ -22,3 +22,24 @@
  * SOFTWARE.
  */
 pub mod counter;
+
+use tuirealm::props::borders::BordersProps;
+use tuirealm::tui::{style::Style, widgets::Block};
+
+/// ### get_block
+///
+/// Get block
+pub fn get_block<'a>(props: &BordersProps, title: Option<&str>, focus: bool) -> Block<'a> {
+    let div: Block = Block::default()
+        .borders(props.borders)
+        .border_style(match focus {
+            true => props.style(),
+            false => Style::default(),
+        })
+        .border_type(props.variant);
+    // Set title
+    match title.as_ref() {
+        Some(t) => div.title(t.to_string()),
+        None => div,
+    }
+}

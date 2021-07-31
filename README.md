@@ -9,7 +9,7 @@
 [![Build](https://github.com/veeso/tui-realm/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm?branch=main)
 
 Developed by Christian Visintin  
-Current version: 0.5.0 (23/06/2021)
+Current version: 0.5.0 (31/07/2021)
 
 ---
 
@@ -38,7 +38,7 @@ tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) to simp
 
 And that's also explains the reason of the name: Realm stands for React and Elm.
 
-Tui-realm also comes with a built-in standard library of components you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
+Tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
 
 ![Demo](docs/images/demo.gif)
 
@@ -93,23 +93,9 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 ## Standard components library 🎨
 
 Tui-realm comes with an optional standard library of components I thought would have been useful for most of the applications.
-If you want to use it, just enable the `with-components` feature in your `Cargo.toml`.
+If you want to use it, just add the [tui-realm-stdlib](https://crates.io/crates/tui-realm-stdlib) to your `Cargo.toml` dependencies.
 
 For each component, the standard library provides a `PropsBuilder` in the same module (e.g. `input::Input => input::InputPropsBuilder`), which provides methods to set only the properties actually used by the component.
-
-To have an overview of the components just run the gallery example 🦄
-
-```sh
-cargo run --features="with-components" --example gallery
-```
-
-If you want you can view single components running
-
-```sh
-cargo run --features="with-components" --example $COMPONENT_NAME
-```
-
-If you want a super-detailed guide about components check out the [components guide](docs/std-components.md).
 
 ## Community components 🏘️
 
@@ -125,7 +111,6 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 
 - [Get Started Guide](docs/get-started.md)
 - [The UI lifecycle](docs/lifecycle.md)
-- [Standard Library Components](docs/std-components.md)
 - [Implement components](docs/new-components.md)
 
 ---
