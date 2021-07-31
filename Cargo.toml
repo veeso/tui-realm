@@ -98,6 +98,11 @@ path = "examples/select.rs"
 required-features = [ "with-components" ]
 
 [[example]]
+name = "span"
+path = "examples/span.rs"
+required-features = [ "with-components" ]
+
+[[example]]
 name = "sparkline"
 path = "examples/sparkline.rs"
 required-features = [ "with-components" ]

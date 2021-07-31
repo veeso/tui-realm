@@ -33,8 +33,8 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tuirealm::components::label;
-use tuirealm::props::Alignment;
+use tuirealm::components::{label, Span, SpanPropsBuilder};
+use tuirealm::props::{Alignment, TextSpanBuilder};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
@@ -87,23 +87,40 @@ fn main() {
     // Mount the component you need; we'll use a Label and an Input
     myview.mount(
         COMPONENT_LABEL,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Span::new(
+            SpanPropsBuilder::default()
                 .bold()
-                .with_background(Color::Red)
-                .with_foreground(Color::Black)
-                .with_text(String::from("Label with background"))
+                .with_spans(vec![
+                    TextSpanBuilder::new("Hello ")
+                        .bold()
+                        .with_foreground(Color::Yellow)
+                        .build(),
+                    TextSpanBuilder::new("world!")
+                        .bold()
+                        .with_foreground(Color::Cyan)
+                        .build(),
+                ])
+                .with_text_alignment(Alignment::Center)
                 .build(),
         )),
     );
     myview.mount(
         COMPONENT_LABEL_2,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Span::new(
+            SpanPropsBuilder::default()
                 .bold()
-                .with_foreground(Color::LightBlue)
-                .with_text(String::from("Label without background"))
-                .with_text_alignment(Alignment::Center)
+                .with_background(Color::LightGreen)
+                .with_spans(vec![
+                    TextSpanBuilder::new("Hello ")
+                        .bold()
+                        .with_foreground(Color::Yellow)
+                        .build(),
+                    TextSpanBuilder::new("world!")
+                        .bold()
+                        .with_foreground(Color::Cyan)
+                        .build(),
+                ])
+                .with_text_alignment(Alignment::Right)
                 .build(),
         )),
     );

@@ -25,13 +25,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{Props, PropsBuilder, TextParts};
+use crate::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder, TextParts};
 use crate::tui::{
     layout::Rect,
     style::{Color, Modifier, Style},
     widgets::Paragraph,
 };
 use crate::{Component, Event, Frame, Msg, Payload};
+
+const PROP_ALIGNMENT: &str = "text-alignment";
 
 // -- Props
 
@@ -173,6 +175,19 @@ impl LabelPropsBuilder {
         }
         self
     }
+
+    /// ### with_text_alignment
+    ///
+    /// Set text alignment for paragraph
+    pub fn with_text_alignment(&mut self, alignment: Alignment) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_ALIGNMENT,
+                PropPayload::One(PropValue::Alignment(alignment)),
+            );
+        }
+        self
+    }
 }
 
 // -- Component
@@ -198,7 +213,6 @@ impl Component for Label {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.visible {
@@ -207,13 +221,20 @@ impl Component for Label {
                 None => String::new(),
                 Some(t) => t.clone(),
             };
+            // Text properties
+            let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
+                Some(PropPayload::One(PropValue::Alignment(alignment))) => *alignment,
+                _ => Alignment::Left,
+            };
             render.render_widget(
-                Paragraph::new(title).style(
-                    Style::default()
-                        .fg(self.props.foreground)
-                        .bg(self.props.background)
-                        .add_modifier(self.props.modifiers),
-                ),
+                Paragraph::new(title)
+                    .style(
+                        Style::default()
+                            .fg(self.props.foreground)
+                            .bg(self.props.background)
+                            .add_modifier(self.props.modifiers),
+                    )
+                    .alignment(alignment),
                 area,
             );
         }
@@ -297,6 +318,7 @@ mod tests {
                 .strikethrough()
                 .underlined()
                 .with_text(String::from("Hello, world!"))
+                .with_text_alignment(Alignment::Center)
                 .build(),
         );
         assert_eq!(component.props.foreground, Color::Red);
@@ -312,6 +334,10 @@ mod tests {
         assert_eq!(
             component.props.texts.title.as_ref().unwrap().as_str(),
             "Hello, world!"
+        );
+        assert_eq!(
+            *component.props.own.get(PROP_ALIGNMENT).unwrap(),
+            PropPayload::One(PropValue::Alignment(Alignment::Center))
         );
         component.active();
         component.blur();

@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan};
 use crate::tui::{
     layout::Rect,
     style::{Color, Modifier, Style},
@@ -34,6 +34,8 @@ use crate::tui::{
     widgets::Paragraph,
 };
 use crate::{Component, Event, Frame, Msg, Payload};
+
+const PROP_ALIGNMENT: &str = "text-alignment";
 
 // -- Props
 
@@ -184,6 +186,19 @@ impl SpanPropsBuilder {
         }
         self
     }
+
+    /// ### with_text_alignment
+    ///
+    /// Set text alignment for paragraph
+    pub fn with_text_alignment(&mut self, alignment: Alignment) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_ALIGNMENT,
+                PropPayload::One(PropValue::Alignment(alignment)),
+            );
+        }
+        self
+    }
 }
 
 // -- Component
@@ -230,7 +245,12 @@ impl Component for Span {
                     .collect(),
             };
             let text: Text = Text::from(Spans::from(spans));
-            render.render_widget(Paragraph::new(text), area);
+            // Text properties
+            let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
+                Some(PropPayload::One(PropValue::Alignment(alignment))) => *alignment,
+                _ => Alignment::Left,
+            };
+            render.render_widget(Paragraph::new(text).alignment(alignment), area);
         }
     }
 
@@ -312,6 +332,7 @@ mod tests {
                 .slow_blink()
                 .strikethrough()
                 .underlined()
+                .with_text_alignment(Alignment::Center)
                 .with_spans(vec![
                     TextSpan::from("Press "),
                     TextSpanBuilder::new("<ESC>")
@@ -333,6 +354,10 @@ mod tests {
         assert!(component.props.modifiers.intersects(Modifier::REVERSED));
         assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
         assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 3);
+        assert_eq!(
+            *component.props.own.get(PROP_ALIGNMENT).unwrap(),
+            PropPayload::One(PropValue::Alignment(Alignment::Center))
+        );
         component.active();
         component.blur();
         // Update

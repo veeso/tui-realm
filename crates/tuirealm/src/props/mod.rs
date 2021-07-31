@@ -41,6 +41,7 @@ pub use borders::{Borders, BordersProps};
 pub use builder::{GenericPropsBuilder, PropsBuilder};
 pub use dataset::Dataset;
 pub use texts::{Table, TableBuilder, TextParts, TextSpan, TextSpanBuilder};
+pub use tui::layout::Alignment;
 
 // -- Props
 
@@ -114,8 +115,10 @@ pub enum PropValue {
     F64(f64),
     F32(f32),
     Str(String),
-    Dataset(Dataset),
+    // -- tui props
+    Alignment(Alignment),
     Color(Color),
+    Dataset(Dataset),
     InputType(InputType),
     Shape(Shape),
     Style(Style),
@@ -275,6 +278,11 @@ mod tests {
         assert_eq!(
             *map.get("t").unwrap(),
             PropValue::Shape(Shape::Map(Map::default()))
+        );
+        map.insert(String::from("u"), PropValue::Alignment(Alignment::Center));
+        assert_eq!(
+            *map.get("u").unwrap(),
+            PropValue::Alignment(Alignment::Center)
         );
         PropPayload::Map(map);
         let mut link: LinkedList<PropPayload> = LinkedList::new();
