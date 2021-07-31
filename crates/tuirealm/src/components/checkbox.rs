@@ -26,18 +26,18 @@
  * SOFTWARE.
  */
 use crate::event::KeyCode;
-use crate::props::{
-    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
-};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, Tabs},
 };
-use crate::{Frame, Component, Event, Msg, Payload, Value};
+use crate::{Component, Event, Frame, Msg, Payload, Value};
 
 const PROP_CHOICES: &str = "choices";
+const PROP_SELECTED: &str = "selected";
+const PROP_TITLE: &str = "title";
 
 // -- Props
 
@@ -123,13 +123,30 @@ impl CheckboxPropsBuilder {
 
     /// ### with_options
     ///
-    /// Set options and label
-    /// If label is None, no block will be rendered
-    pub fn with_options(&mut self, label: Option<String>, options: Vec<String>) -> &mut Self {
+    /// Set options for radio group
+    pub fn with_options<S: AsRef<str>>(&mut self, options: &[S]) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(
-                label,
-                Some(options.into_iter().map(TextSpan::from).collect()), // Make textSpan from Strings
+            props.own.insert(
+                PROP_CHOICES,
+                PropPayload::Vec(
+                    options
+                        .into_iter()
+                        .map(|x| PropValue::Str(x.as_ref().to_string()))
+                        .collect(),
+                ),
+            );
+        }
+        self
+    }
+
+    /// ### with_title
+    ///
+    /// Set title
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
             );
         }
         self
@@ -141,7 +158,7 @@ impl CheckboxPropsBuilder {
     pub fn with_value(&mut self, choices: Vec<usize>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
             props.own.insert(
-                PROP_CHOICES,
+                PROP_SELECTED,
                 PropPayload::Vec(choices.into_iter().map(PropValue::Usize).collect()),
             );
         }
@@ -214,11 +231,11 @@ impl OwnStates {
 
     /// ### set_choices
     ///
-    /// Set OwnStates choices from a vector of text spans
+    /// Set OwnStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
-    pub fn set_choices(&mut self, spans: &[TextSpan]) {
-        self.choices = spans.iter().map(|x| x.content.clone()).collect();
+    pub fn set_choices(&mut self, choices: &[&str]) {
+        self.choices = choices.iter().map(|x| x.to_string()).collect();
         // Clear selection
         self.selection.clear();
         // Keep index if possible
@@ -249,9 +266,19 @@ impl Checkbox {
         // Make states
         let mut states: OwnStates = OwnStates::default();
         // Update choices (vec of TextSpan to String)
-        states.set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
+        let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
+            Some(PropPayload::Vec(choices)) => choices
+                .iter()
+                .map(|x| match x {
+                    PropValue::Str(s) => s.as_str(),
+                    _ => panic!("Choices is not a vec of Str"),
+                })
+                .collect(),
+            _ => Vec::new(),
+        };
+        states.set_choices(&choices);
         // Get value
-        if let Some(PropPayload::Vec(choices)) = &props.own.get(PROP_CHOICES) {
+        if let Some(PropPayload::Vec(choices)) = &props.own.get(PROP_SELECTED) {
             states.selection = choices
                 .clone()
                 .iter()
@@ -270,7 +297,6 @@ impl Component for Checkbox {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             // Make colors
@@ -307,11 +333,12 @@ impl Component for Checkbox {
                     ])
                 })
                 .collect();
-            let block: Block = super::utils::get_block(
-                &self.props.borders,
-                &self.props.texts.title,
-                self.states.focus,
-            );
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let block: Block =
+                super::utils::get_block(&self.props.borders, title, self.states.focus);
             let checkbox: Tabs = Tabs::new(choices)
                 .block(block)
                 .select(self.states.choice)
@@ -329,10 +356,19 @@ impl Component for Checkbox {
     fn update(&mut self, props: Props) -> Msg {
         let prev_selection = self.states.selection.clone();
         // Reset choices
-        self.states
-            .set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
+        let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
+            Some(PropPayload::Vec(choices)) => choices
+                .iter()
+                .map(|x| match x {
+                    PropValue::Str(s) => s.as_str(),
+                    _ => panic!("Choices is not a vec of Str"),
+                })
+                .collect(),
+            _ => Vec::new(),
+        };
+        self.states.set_choices(&choices);
         // Get value
-        if let Some(PropPayload::Vec(choices)) = &props.own.get(PROP_CHOICES) {
+        if let Some(PropPayload::Vec(choices)) = &props.own.get(PROP_SELECTED) {
             self.states.selection = choices
                 .clone()
                 .iter()
@@ -444,13 +480,8 @@ mod test {
         assert_eq!(states.choice, 0);
         assert_eq!(states.choices.len(), 0);
         assert_eq!(states.selection.len(), 0);
-        let choices: Vec<TextSpan> = vec![
-            TextSpan::from("lemon"),
-            TextSpan::from("strawberry"),
-            TextSpan::from("vanilla"),
-            TextSpan::from("chocolate"),
-        ];
-        states.set_choices(&choices);
+        let choices: &[&str] = &["lemon", "strawberry", "vanilla", "chocolate"];
+        states.set_choices(choices);
         assert_eq!(states.choice, 0);
         assert_eq!(states.choices.len(), 4);
         assert_eq!(states.selection.len(), 0);
@@ -478,13 +509,13 @@ mod test {
         assert_eq!(states.has(0), true);
         assert_ne!(states.has(2), true);
         // Update
-        let choices: Vec<TextSpan> = vec![TextSpan::from("lemon"), TextSpan::from("strawberry")];
-        states.set_choices(&choices);
+        let choices: &[&str] = &["lemon", "strawberry"];
+        states.set_choices(choices);
         assert_eq!(states.choice, 1); // Move to first index available
         assert_eq!(states.choices.len(), 2);
         assert_eq!(states.selection.len(), 0);
-        let choices: Vec<TextSpan> = vec![];
-        states.set_choices(&choices);
+        let choices: &[&str] = &[];
+        states.set_choices(choices);
         assert_eq!(states.choice, 0); // Move to first index available
         assert_eq!(states.choices.len(), 0);
         assert_eq!(states.selection.len(), 0);
@@ -495,17 +526,8 @@ mod test {
         // Make component
         let mut component: Checkbox = Checkbox::new(
             CheckboxPropsBuilder::default()
-                .with_options(
-                    Some(String::from("Which food do you like?")),
-                    vec![
-                        String::from("Pizza"),
-                        String::from("Hummus"),
-                        String::from("Ramen"),
-                        String::from("Gyoza"),
-                        String::from("Pasta"),
-                        String::from("Falafel"),
-                    ],
-                )
+                .with_title("Which food do you prefer?")
+                .with_options(&["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta", "Falafel"])
                 .visible()
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_color(Color::Red)
@@ -520,8 +542,23 @@ mod test {
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
         assert_eq!(
-            *component.props.own.get(PROP_CHOICES).unwrap(),
+            *component.props.own.get(PROP_SELECTED).unwrap(),
             PropPayload::Vec(vec![PropValue::Usize(1), PropValue::Usize(5)])
+        );
+        assert_eq!(
+            component.props.own.get(PROP_TITLE).unwrap(),
+            &PropPayload::One(PropValue::Str("Which food do you prefer?".to_string()))
+        );
+        assert_eq!(
+            component.props.own.get(PROP_CHOICES).unwrap(),
+            &PropPayload::Vec(vec![
+                PropValue::Str(String::from("Pizza")),
+                PropValue::Str(String::from("Hummus")),
+                PropValue::Str(String::from("Ramen")),
+                PropValue::Str(String::from("Gyoza")),
+                PropValue::Str(String::from("Pasta")),
+                PropValue::Str(String::from("Falafel"))
+            ])
         );
         // Verify states
         assert_eq!(component.states.choice, 0);

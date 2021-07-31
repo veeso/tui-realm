@@ -96,8 +96,8 @@ fn main() {
                 .with_header(&["Key", "Msg", "Description"])
                 .with_row_height(1)
                 .with_widths(&[30, 20, 50])
+                .with_title("My data")
                 .with_table(
-                    Some(String::from("Events")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("KeyCode::Down"))
                         .add_col(TextSpan::from("OnKey"))
@@ -143,8 +143,8 @@ fn main() {
                 .with_header(&["Key", "Msg", "Description"])
                 .with_row_height(3)
                 .with_widths(&[30, 20, 50])
+                .with_title("Events")
                 .with_table(
-                    Some(String::from("Events")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("KeyCode::Down"))
                         .add_col(TextSpan::from("OnKey"))
@@ -191,8 +191,8 @@ fn main() {
                 .with_header(&["Key", "Msg", "Description"])
                 .with_row_height(1)
                 .with_widths(&[30, 20, 50])
+                .with_title("Events")
                 .with_table(
-                    Some(String::from("Events")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("KeyCode::Down"))
                         .add_col(TextSpan::from("OnKey"))

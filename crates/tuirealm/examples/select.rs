@@ -93,15 +93,13 @@ fn main() {
                 .with_background(Color::White)
                 .with_foreground(Color::LightRed)
                 .with_highlighted_str(Some(">> "))
-                .with_options(
-                    Some(String::from("Select flavour")),
-                    vec![
-                        "vanilla".to_string(),
-                        "chocolate".to_string(),
-                        "coconut".to_string(),
-                        "hazelnut".to_string(),
-                    ],
-                )
+                .with_title("Select a flavour")
+                .with_options(&[
+                    "vanilla".to_string(),
+                    "chocolate".to_string(),
+                    "coconut".to_string(),
+                    "hazelnut".to_string(),
+                ])
                 .build(),
         )),
     );
@@ -112,16 +110,14 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Cyan)
                 .with_foreground(Color::Cyan)
                 .with_highlighted_color(Color::LightBlue)
-                .with_options(
-                    Some(String::from("Select a fruit")),
-                    vec![
-                        "lemon".to_string(),
-                        "orange".to_string(),
-                        "apple".to_string(),
-                        "banana".to_string(),
-                        "watermelon".to_string(),
-                    ],
-                )
+                .with_title("Select a fruit")
+                .with_options(&[
+                    "lemon".to_string(),
+                    "orange".to_string(),
+                    "apple".to_string(),
+                    "banana".to_string(),
+                    "watermelon".to_string(),
+                ])
                 .with_value(3)
                 .build(),
         )),

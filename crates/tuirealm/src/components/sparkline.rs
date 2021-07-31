@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -37,6 +37,7 @@ use std::collections::LinkedList;
 // -- Props
 const PROP_DATA: &str = "data";
 const PROP_MAX_ENTRIES: &str = "max-bars";
+const PROP_TITLE: &str = "title";
 
 pub struct SparklinePropsBuilder {
     props: Option<Props>,
@@ -118,10 +119,13 @@ impl SparklinePropsBuilder {
 
     /// ### with_title
     ///
-    /// Set chart title
-    pub fn with_title(&mut self, label: String) -> &mut Self {
+    /// Set title
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(Some(label), None);
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
         }
         self
     }
@@ -276,8 +280,11 @@ impl Component for Sparkline {
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
-            let block: Block =
-                super::utils::get_block(&self.props.borders, &self.props.texts.title, true);
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let block: Block = super::utils::get_block(&self.props.borders, title, true);
             // Get max elements
             let data_max_len: u64 = self
                 .props

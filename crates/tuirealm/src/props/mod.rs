@@ -40,7 +40,7 @@ pub mod texts;
 pub use borders::{Borders, BordersProps};
 pub use builder::{GenericPropsBuilder, PropsBuilder};
 pub use dataset::Dataset;
-pub use texts::{Table, TableBuilder, TextParts, TextSpan};
+pub use texts::{Table, TableBuilder, TextSpan};
 pub use tui::layout::Alignment;
 
 // -- Props
@@ -57,7 +57,6 @@ pub struct Props {
     pub borders: BordersProps, // Borders
     pub modifiers: Modifier,
     pub palette: HashMap<&'static str, Color>, // Use palette to store extra colors
-    pub texts: TextParts,                      // text parts
     pub own: HashMap<&'static str, PropPayload>, // Own properties (extra)
 }
 
@@ -71,7 +70,6 @@ impl Default for Props {
             borders: BordersProps::default(),
             modifiers: Modifier::empty(),
             palette: HashMap::new(),
-            texts: TextParts::default(),
             own: HashMap::new(),
         }
     }
@@ -122,6 +120,8 @@ pub enum PropValue {
     InputType(InputType),
     Shape(Shape),
     Style(Style),
+    Table(Table),
+    TextSpan(TextSpan),
 }
 
 // -- Input Type
@@ -190,9 +190,7 @@ mod tests {
         assert_eq!(props.borders.variant, BorderType::Plain);
         assert_eq!(props.modifiers, Modifier::empty());
         assert_eq!(props.palette.len(), 0);
-        assert!(props.texts.title.is_none());
         assert_eq!(props.own.len(), 0);
-        assert!(props.texts.spans.is_none());
     }
 
     #[test]

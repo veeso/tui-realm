@@ -25,9 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{
-    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
-};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -38,6 +36,8 @@ use crate::{Component, Event, Frame, Msg, Payload};
 // -- Props
 
 const PROP_PROGRESS: &str = "progress";
+const PROP_LABEL: &str = "label";
+const PROP_TITLE: &str = "title";
 
 pub struct ProgressBarPropsBuilder {
     props: Option<Props>,
@@ -117,12 +117,28 @@ impl ProgressBarPropsBuilder {
         self
     }
 
-    /// ### with_texts
+    /// ### with_title
     ///
-    /// Set block title text and progress bar label
-    pub fn with_texts(&mut self, title: Option<String>, label: String) -> &mut Self {
+    /// Set title
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(title, Some(vec![TextSpan::from(label)]));
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
+        }
+        self
+    }
+
+    /// ### with_label
+    ///
+    /// Set label to display on progress bar
+    pub fn with_label<S: AsRef<str>>(&mut self, label: S) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_LABEL,
+                PropPayload::One(PropValue::Str(label.as_ref().to_string())),
+            );
         }
         self
     }
@@ -168,25 +184,24 @@ impl Component for ProgressBar {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.visible {
             // Text
-            let label: String = match self.props.texts.spans.as_ref() {
-                Some(rows) => match rows.get(0) {
-                    Some(label) => label.content.clone(),
-                    None => String::new(),
-                },
-                None => String::new(),
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let label: String = match self.props.own.get(PROP_LABEL).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => t.to_string(),
+                _ => String::default(),
             };
             // Get percentage
             let percentage: f64 = match self.props.own.get(PROP_PROGRESS) {
                 Some(PropPayload::One(PropValue::F64(ratio))) => *ratio,
                 _ => 0.0,
             };
-            let div: Block =
-                super::utils::get_block(&self.props.borders, &self.props.texts.title, true);
+            let div: Block = super::utils::get_block(&self.props.borders, title, true);
             // Make progress bar
             render.render_widget(
                 Gauge::default()
@@ -274,9 +289,18 @@ mod test {
                 .with_progress(0.60)
                 .with_progbar_color(Color::Red)
                 .with_background(Color::Blue)
-                .with_texts(None, String::from("60% - ETA: 00:20"))
+                .with_title("Downloading file...")
+                .with_label("60% - ETA: 00:20")
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
+        );
+        assert_eq!(
+            *component.props.own.get(PROP_LABEL).unwrap(),
+            PropPayload::One(PropValue::Str(String::from("60% - ETA: 00:20")))
+        );
+        assert_eq!(
+            *component.props.own.get(PROP_TITLE).unwrap(),
+            PropPayload::One(PropValue::Str(String::from("Downloading file...")))
         );
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.background, Color::Blue);

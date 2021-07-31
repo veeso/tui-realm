@@ -26,16 +26,14 @@
  * SOFTWARE.
  */
 use crate::event::KeyCode;
-use crate::props::{
-    BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable, TextParts,
-};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable};
 use crate::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, List as TuiList, ListItem, ListState},
 };
-use crate::{Frame, Component, Event, Msg, Payload};
+use crate::{Component, Event, Frame, Msg, Payload};
 
 // -- Props
 
@@ -43,6 +41,8 @@ const COLOR_HIGHLIGHTED: &str = "highlighted-color";
 const PROP_SCROLLABLE: &str = "scrollable";
 const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_MAX_STEP: &str = "max-step";
+const PROP_TABLE: &str = "table";
+const PROP_TITLE: &str = "title";
 
 pub struct ListPropsBuilder {
     props: Option<Props>,
@@ -206,9 +206,24 @@ impl ListPropsBuilder {
     ///
     /// Set rows
     /// You can define a title if you want. The title will be displayed on the upper border of the box
-    pub fn with_rows(&mut self, title: Option<String>, table: TextTable) -> &mut Self {
+    pub fn with_rows(&mut self, table: TextTable) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::table(title, table);
+            props
+                .own
+                .insert(PROP_TABLE, PropPayload::One(PropValue::Table(table)));
+        }
+        self
+    }
+
+    /// ### with_title
+    ///
+    /// Set title
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
         }
         self
     }
@@ -366,9 +381,9 @@ impl List {
     ///
     /// Instantiates a new `Table` component.
     pub fn new(props: Props) -> Self {
-        let len: usize = match props.texts.table.as_ref() {
-            Some(t) => t.len(),
-            None => 0,
+        let len: usize = match props.own.get(PROP_TABLE).as_ref() {
+            Some(PropPayload::One(PropValue::Table(t))) => t.len(),
+            _ => 0,
         };
         List {
             props,
@@ -402,12 +417,14 @@ impl Component for List {
                 true => self.states.focus,
                 false => true,
             };
-            let div: Block =
-                super::utils::get_block(&self.props.borders, &self.props.texts.title, active);
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let div: Block = super::utils::get_block(&self.props.borders, title, active);
             // Make list entries
-            let list_items: Vec<ListItem> = match self.props.texts.table.as_ref() {
-                None => Vec::new(),
-                Some(table) => table
+            let list_items: Vec<ListItem> = match self.props.own.get(PROP_TABLE).as_ref() {
+                Some(PropPayload::One(PropValue::Table(table))) => table
                     .iter()
                     .map(|row| {
                         let columns: Vec<Span> = row
@@ -424,6 +441,7 @@ impl Component for List {
                         ListItem::new(Spans::from(columns))
                     })
                     .collect(), // Make List item from TextSpan
+                _ => Vec::new(),
             };
             let highlighted_color: Color = match self.props.palette.get(COLOR_HIGHLIGHTED) {
                 None => match self.states.focus {
@@ -471,10 +489,11 @@ impl Component for List {
     fn update(&mut self, props: Props) -> Msg {
         self.props = props;
         // re-Set list length
-        self.states.set_list_len(match &self.props.texts.table {
-            Some(table) => table.len(),
-            None => 0,
-        });
+        self.states
+            .set_list_len(match self.props.own.get(PROP_TABLE).as_ref() {
+                Some(PropPayload::One(PropValue::Table(t))) => t.len(),
+                _ => 0,
+            });
         // Fix list index
         self.states.fix_list_index();
         // disable if scrollable
@@ -608,8 +627,8 @@ mod tests {
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
                 .scrollable(true)
+                .with_title("my data")
                 .with_rows(
-                    Some(String::from("My data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("name"))
                         .add_col(TextSpan::from("age"))
@@ -667,11 +686,6 @@ mod tests {
             component.props.own.get(PROP_MAX_STEP).unwrap(),
             &PropPayload::One(PropValue::Usize(4))
         );
-        assert_eq!(
-            component.props.texts.title.as_ref().unwrap().as_str(),
-            "My data"
-        );
-        assert_eq!(component.props.texts.table.as_ref().unwrap().len(), 9);
         assert_eq!(component.states.list_len, 9);
         assert_eq!(component.states.list_index, 0);
         component.active();
@@ -737,7 +751,6 @@ mod tests {
             .with_foreground(Color::Red)
             .hidden()
             .with_rows(
-                Some(String::from("My data")),
                 TableBuilder::default()
                     .add_col(TextSpan::from("name"))
                     .add_col(TextSpan::from("age"))
@@ -777,7 +790,6 @@ mod tests {
                 .underlined()
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_rows(
-                    Some(String::from("My data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("name"))
                         .add_col(TextSpan::from("age"))
@@ -802,11 +814,6 @@ mod tests {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(
-            component.props.texts.title.as_ref().unwrap().as_str(),
-            "My data"
-        );
-        assert_eq!(component.props.texts.table.as_ref().unwrap().len(), 2);
         component.active();
         component.blur();
         // Update

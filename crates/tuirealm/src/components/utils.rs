@@ -120,7 +120,7 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
 /// ### get_block
 ///
 /// Get block
-pub fn get_block<'a>(props: &BordersProps, title: &Option<String>, focus: bool) -> Block<'a> {
+pub fn get_block<'a>(props: &BordersProps, title: Option<&str>, focus: bool) -> Block<'a> {
     let div: Block = Block::default()
         .borders(props.borders)
         .border_style(match focus {
@@ -217,8 +217,8 @@ mod test {
             variant: BorderType::Rounded,
             color: Color::Red,
         };
-        get_block(&props, &Some(String::from("title")), true);
-        get_block(&props, &None, false);
+        get_block(&props, Some("title"), true);
+        get_block(&props, None, false);
     }
 
     #[test]

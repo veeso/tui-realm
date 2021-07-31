@@ -91,15 +91,8 @@ fn main() {
             checkbox::CheckboxPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_color(Color::LightYellow)
-                .with_options(
-                    Some(String::from("Select flavour")),
-                    vec![
-                        "vanilla".to_string(),
-                        "chocolate".to_string(),
-                        "coconut".to_string(),
-                        "hazelnut".to_string(),
-                    ],
-                )
+                .with_title("Select flavour")
+                .with_options(&["vanilla", "chocolate", "coconut", "hazelnut"])
                 .build(),
         )),
     );
@@ -109,15 +102,8 @@ fn main() {
             checkbox::CheckboxPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Black)
                 .with_color(Color::Black)
-                .with_options(
-                    Some(String::from("Select flavour")),
-                    vec![
-                        "vanilla".to_string(),
-                        "chocolate".to_string(),
-                        "coconut".to_string(),
-                        "hazelnut".to_string(),
-                    ],
-                )
+                .with_title("Select flavour")
+                .with_options(&["vanilla", "chocolate", "coconut", "hazelnut"])
                 .build(),
         )),
     );

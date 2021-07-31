@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 use crate::event::KeyCode;
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -44,6 +44,7 @@ const PROP_DISABLED: &str = "disabled";
 const PROP_LABEL_STYLE: &str = "label-style";
 const PROP_MAX_BARS: &str = "max-bars";
 const PROP_VALUE_STYLE: &str = "value-style";
+const PROP_TITLE: &str = "title";
 
 pub struct BarChartPropsBuilder {
     props: Option<Props>,
@@ -126,9 +127,12 @@ impl BarChartPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title(&mut self, label: String) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(Some(label), None);
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
         }
         self
     }
@@ -465,7 +469,6 @@ impl Component for BarChart {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             // If component is disabled, will be displayed as `active`; as focus state otherwise
@@ -473,8 +476,11 @@ impl Component for BarChart {
                 true => true,
                 false => self.states.focus,
             };
-            let block: Block =
-                super::utils::get_block(&self.props.borders, &self.props.texts.title, active);
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let block: Block = super::utils::get_block(&self.props.borders, title, active);
             // Get max elements
             let data_max_len: u64 = self
                 .props

@@ -134,17 +134,15 @@ fn init_view() -> View {
                 .with_color(Color::Cyan)
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Magenta)
                 .with_value(vec![1])
-                .with_options(
-                    Some(String::from("Select ice-cream flavours")),
-                    vec![
-                        String::from("Vanilla"),
-                        String::from("Chocolate"),
-                        String::from("Coconut"),
-                        String::from("Strawberry"),
-                        String::from("Lemon"),
-                        String::from("Unicorn 🦄"),
-                    ],
-                )
+                .with_title("Select ice-cream flavours")
+                .with_options(&[
+                    "Vanilla",
+                    "Chocolate",
+                    "Coconut",
+                    "Strawberry",
+                    "Lemon",
+                    "Unicorn 🦄",
+                ])
                 .build(),
         )),
     );
@@ -188,7 +186,8 @@ fn init_view() -> View {
             .with_background(Color::White)
             .with_foreground(Color::Black)
             .with_borders(Borders::ALL, BorderType::Rounded, Color::Gray)
-            .with_texts(Some(String::from("A poem for you")), vec![
+            .with_title("A poem for you")
+            .with_texts(vec![
                 TextSpan::new("Lorem ipsum dolor sit amet").underlined().fg(Color::Green),
                 TextSpan::from(", consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
                 TextSpan::from("Duis augue diam, tempor vitae posuere et, tempus mattis ligula.")
@@ -205,10 +204,8 @@ fn init_view() -> View {
                 .with_progbar_color(Color::Yellow)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Yellow)
                 .with_progress(0.64)
-                .with_texts(
-                    Some(String::from("Downloading termscp 0.5.0")),
-                    String::from("64.2% - ETA 00:48"),
-                )
+                .with_title("Downloading termscp 0.5.0")
+                .with_label("64.2% - ETA 00:48")
                 .build(),
         )),
     );
@@ -225,14 +222,8 @@ fn init_view() -> View {
                 )
                 .with_inverted_color(Color::Black)
                 .with_value(1)
-                .with_options(
-                    Some(String::from("Will you use tui-realm in your next project?")),
-                    vec![
-                        String::from("Yes!"),
-                        String::from("No"),
-                        String::from("Maybe"),
-                    ],
-                )
+                .with_title("Will you use tui-realm in your next project?")
+                .with_options(&["Yes!", "No", "Maybe"])
                 .build(),
         )),
     );
@@ -270,8 +261,8 @@ fn init_view() -> View {
                 .with_max_scroll_step(4)
                 .with_highlighted_color(Color::LightBlue)
                 .scrollable(true)
+                .with_title("My scrollable data")
                 .with_rows(
-                    Some(String::from("My scrollable data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
@@ -332,8 +323,8 @@ fn init_view() -> View {
             list::ListPropsBuilder::default()
                 .with_foreground(Color::Green)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::LightGreen)
+                .with_title("My data")
                 .with_rows(
-                    Some(String::from("My data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("2021-04-17T18:32:00"))
                         .add_col(TextSpan::from(" "))
@@ -373,7 +364,8 @@ fn init_view() -> View {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightRed)
                 .with_highlighted_str(Some("🎵"))
                 .with_max_scroll_step(3)
-                .with_texts(Some(String::from("Scrollable textarea")),
+                .with_title("Scrollable textarea")
+                .with_texts(
                     vec![
                         TextSpan::new("About TermSCP").bold().underlined().fg(Color::Yellow),
                         TextSpan::from("TermSCP is basically a porting of WinSCP to terminal. So basically is a terminal utility with an TUI to connect to a remote server to retrieve and upload files and to interact with the local file system. It works both on Linux, MacOS, BSD and Windows and supports SFTP, SCP, FTP and FTPS."),
@@ -517,10 +509,7 @@ fn update_progress(view: &mut View) -> Option<(String, Msg)> {
         COMPONENT_PROGBAR,
         progress_bar::ProgressBarPropsBuilder::from(props)
             .with_progress(new_prog)
-            .with_texts(
-                Some(String::from("Downloading termscp 0.5.0")),
-                format!("{:.2}% - ETA 00:30", new_prog * 100.0),
-            )
+            .with_label(format!("{:.2}% - ETA 00:30", new_prog * 100.0))
             .build(),
     )
 }
