@@ -158,4 +158,4 @@ Now we can finally see the lifecycle of a realm application 🦄
 
 ## What's next
 
-So finally you know how all the parts of a realm application. For your application you might be interested then in [which components are already available](std-components.md) and how to [implement your own](new-components.md).
+So finally you know how all the parts of a realm application. For your application you might be interested then in [which components are already available](https://github.com/veeso/tui-realm-stdlib) and how to [implement your own](new-components.md).

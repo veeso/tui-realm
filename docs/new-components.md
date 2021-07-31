@@ -51,7 +51,7 @@ use tuirealm::tui::{
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Paragraph},
 };
-use tuirealm::{Canvas, Component, Msg, Payload, Value};
+use tuirealm::{Frame, Component, Msg, Payload, Value};
 ```
 
 ## States
@@ -312,7 +312,7 @@ The render method must, indeed, render the component into the canvas.
 To do so, we'll need to define colors etc. I will make it very simple here. Unfortunately I cannot help you to implement yours, but try to give a look at the tui documentation 😄.
 
 ```rust
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span - THIS IS VERY IMPORTANT!!!
         if self.props.visible {
             // Make text
@@ -433,7 +433,7 @@ So basically it's not that complicated and the process just consists in:
 you can now see the component we've just implemented running the example:
 
 ```sh
-cargo run --features="with-components" --example counter
+cargo run --example counter
 ```
 
 ---
@@ -441,4 +441,4 @@ cargo run --features="with-components" --example counter
 ## What's next
 
 The only thing remained to do now, is to implement your application. There's nothing else you need to learn about tui-realm to build an excelent application 🦄.
-Remember that tui-realm already provides some standard components; check out [here](std-components.md)!
+Remember that tui-realm already provides some standard components; check out [here](https://github.com/veeso/tui-realm-stdlib)!

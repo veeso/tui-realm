@@ -4,12 +4,12 @@
   <img src="docs/images/tui-realm.svg" width="256" height="256" />
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm.svg)](https://github.com/veeso/tui-realm) [![Downloads](https://img.shields.io/crates/d/tuirealm.svg)](https://crates.io/crates/tuirealm) [![Crates.io](https://img.shields.io/badge/crates.io-v0.4.3-orange.svg)](https://crates.io/crates/tuirealm) [![Docs](https://docs.rs/tuirealm/badge.svg)](https://docs.rs/tuirealm)  
+[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm.svg)](https://github.com/veeso/tui-realm) [![Downloads](https://img.shields.io/crates/d/tuirealm.svg)](https://crates.io/crates/tuirealm) [![Crates.io](https://img.shields.io/badge/crates.io-v0.5.0-orange.svg)](https://crates.io/crates/tuirealm) [![Docs](https://docs.rs/tuirealm/badge.svg)](https://docs.rs/tuirealm)  
 
 [![Build](https://github.com/veeso/tui-realm/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm?branch=main)
 
 Developed by Christian Visintin  
-Current version: 0.4.3 (23/06/2021)
+Current version: 0.5.0 (31/07/2021)
 
 ---
 
@@ -38,7 +38,7 @@ tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) to simp
 
 And that's also explains the reason of the name: Realm stands for React and Elm.
 
-Tui-realm also comes with a built-in standard library of components you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
+Tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
 
 ![Demo](docs/images/demo.gif)
 
@@ -51,13 +51,7 @@ Tui-realm also comes with a built-in standard library of components you may find
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
-tuirealm = "0.4.3"
-```
-
-or if you want to include the [standard component library](#standard-component-library-)...
-
-```toml
-tuirealm = { "version" = "0.4.3", features = [ "with-components" ] }
+tuirealm = "0.5.0"
 ```
 
 Since this library requires `crossterm` too, you'll also need to add it to your Cargo.toml
@@ -79,7 +73,7 @@ Still confused about how tui-realm works? Don't worry, try with the examples:
 - [demo](examples/demo.rs): a simple application which shows how tui-realm works
 
     ```sh
-    cargo run --features="with-components" --example demo
+    cargo run --example demo
     ```
 
 ### Apps using tui-realm
@@ -93,17 +87,9 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 ## Standard components library 🎨
 
 Tui-realm comes with an optional standard library of components I thought would have been useful for most of the applications.
-If you want to use it, just enable the `with-components` feature in your `Cargo.toml`.
+If you want to use it, just add the [tui-realm-stdlib](https://crates.io/crates/tui-realm-stdlib) to your `Cargo.toml` dependencies.
 
 For each component, the standard library provides a `PropsBuilder` in the same module (e.g. `input::Input => input::InputPropsBuilder`), which provides methods to set only the properties actually used by the component.
-
-To have an overview of the components just run the gallery example 🦄
-
-```sh
-cargo run --features="with-components" --example gallery
-```
-
-If you want a super-detailed guide about components check out the [components guide](docs/std-components.md).
 
 ## Community components 🏘️
 
@@ -119,7 +105,6 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 
 - [Get Started Guide](docs/get-started.md)
 - [The UI lifecycle](docs/lifecycle.md)
-- [Standard Library Components](docs/std-components.md)
 - [Implement components](docs/new-components.md)
 
 ---
