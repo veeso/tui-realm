@@ -54,12 +54,6 @@ Tui-realm also comes with a standard library of components, which can be added t
 tuirealm = "0.5.0"
 ```
 
-or if you want to include the [standard component library](#standard-component-library-)...
-
-```toml
-tuirealm = { "version" = "0.5.0", features = [ "with-components" ] }
-```
-
 Since this library requires `crossterm` too, you'll also need to add it to your Cargo.toml
 
 ```toml
@@ -79,7 +73,7 @@ Still confused about how tui-realm works? Don't worry, try with the examples:
 - [demo](examples/demo.rs): a simple application which shows how tui-realm works
 
     ```sh
-    cargo run --features="with-components" --example demo
+    cargo run --example demo
     ```
 
 ### Apps using tui-realm
