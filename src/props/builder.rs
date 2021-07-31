@@ -271,11 +271,16 @@ mod test {
         assert!(props.modifiers.intersects(Modifier::REVERSED));
         assert!(props.modifiers.intersects(Modifier::CROSSED_OUT));
         assert_eq!(props.foreground, Color::Green);
-        if let Some(PropPayload::One(PropValue::Str(s))) = props.own.get("input") {
-            assert_eq!(s.as_str(), "Hello");
-        } else {
-            panic!("Expected value to be a string");
-        }
+        assert_eq!(
+            props
+                .own
+                .get("input")
+                .unwrap()
+                .unwrap_one()
+                .unwrap_str()
+                .as_str(),
+            "Hello"
+        );
         assert_eq!(props.visible, false);
         let props: Props = GenericPropsBuilder::default()
             .visible()

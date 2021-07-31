@@ -16,103 +16,11 @@ repository = "https://github.com/veeso/tui-realm"
 [dependencies]
 tui = { version = "0.15.0", default-features = false, features = ["crossterm"] }
 crossterm = { version = "0.19" }
-textwrap = { version = "0.14.0", optional = true }
-unicode-width = { version = "0.1.8", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "0.7.2"
 rand = "0.8.4"
 
-[features]
-with-components = [ "textwrap", "unicode-width" ]
-
-[[example]]
-name = "gallery"
-path = "examples/gallery.rs"
-required-features = [ "with-components" ]
-
 [[example]]
 name = "demo"
 path = "examples/demo.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "counter"
-path = "examples/custom_comp.rs"
-
-# -- components
-
-[[example]]
-name = "bar-chart"
-path = "examples/bar_chart.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "canvas"
-path = "examples/canvas.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "chart"
-path = "examples/chart.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "checkbox"
-path = "examples/checkbox.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "input"
-path = "examples/input.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "label"
-path = "examples/label.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "list"
-path = "examples/list.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "paragraph"
-path = "examples/paragraph.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "progress_bar"
-path = "examples/progress_bar.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "radio"
-path = "examples/radio.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "select"
-path = "examples/select.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "span"
-path = "examples/span.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "sparkline"
-path = "examples/sparkline.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "table"
-path = "examples/table.rs"
-required-features = [ "with-components" ]
-
-[[example]]
-name = "textarea"
-path = "examples/textarea.rs"
-required-features = [ "with-components" ]

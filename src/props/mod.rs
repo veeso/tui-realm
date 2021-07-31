@@ -123,6 +123,322 @@ pub enum PropValue {
     TextSpan(TextSpan),
 }
 
+impl PropPayload {
+    /// ### unwrap_one
+    ///
+    /// Unwrap a One value from PropPayload
+    pub fn unwrap_one(&self) -> &PropValue {
+        match self {
+            PropPayload::One(one) => one,
+            _ => panic!("Called `unwrap_one` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_tup2
+    ///
+    /// Unwrap a Tup2 value from PropPayload
+    pub fn unwrap_tup2(&self) -> &(PropValue, PropValue) {
+        match self {
+            PropPayload::Tup2(t) => t,
+            _ => panic!("Called `unwrap_tup2` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_tup3
+    ///
+    /// Unwrap a Tup3 value from PropPayload
+    pub fn unwrap_tup3(&self) -> &(PropValue, PropValue, PropValue) {
+        match self {
+            PropPayload::Tup3(t) => t,
+            _ => panic!("Called `unwrap_tup3` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_tup4
+    ///
+    /// Unwrap a Tup4 value from PropPayload
+    pub fn unwrap_tup4(&self) -> &(PropValue, PropValue, PropValue, PropValue) {
+        match self {
+            PropPayload::Tup4(t) => t,
+            _ => panic!("Called `unwrap_tup4` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_vec
+    ///
+    /// Unwrap a Vec value from PropPayload
+    pub fn unwrap_vec(&self) -> &[PropValue] {
+        match self {
+            PropPayload::Vec(v) => v,
+            _ => panic!("Called `unwrap_vec` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_map
+    ///
+    /// Unwrap a Map value from PropPayload
+    pub fn unwrap_map(&self) -> &HashMap<String, PropValue> {
+        match self {
+            PropPayload::Map(m) => m,
+            _ => panic!("Called `unwrap_map` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_linked
+    ///
+    /// Unwrap a Linked list from PropPayload
+    pub fn unwrap_linked(&self) -> &LinkedList<PropPayload> {
+        match self {
+            PropPayload::Linked(l) => l,
+            _ => panic!("Called `unwrap_linked` on a bad value"),
+        }
+    }
+}
+
+impl PropValue {
+    /// ### unwrap_bool
+    ///
+    /// Unwrap PropValue as Bool.
+    /// Panics otherwise
+    pub fn unwrap_bool(&self) -> &bool {
+        match self {
+            PropValue::Bool(b) => b,
+            _ => panic!("Called `unwrap_bool` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_u8
+    ///
+    /// Unwrap PropValue as U8.
+    /// Panics otherwise
+    pub fn unwrap_u8(&self) -> &u8 {
+        match self {
+            PropValue::U8(v) => v,
+            _ => panic!("Called `unwrap_u8` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_u16
+    ///
+    /// Unwrap PropValue as u16.
+    /// Panics otherwise
+    pub fn unwrap_u16(&self) -> &u16 {
+        match self {
+            PropValue::U16(b) => b,
+            _ => panic!("Called `unwrap_bool` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_u32
+    ///
+    /// Unwrap PropValue as Bool.
+    /// Panics otherwise
+    pub fn unwrap_u32(&self) -> &u32 {
+        match self {
+            PropValue::U32(b) => b,
+            _ => panic!("Called `unwrap_u32` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_u64
+    ///
+    /// Unwrap PropValue as u64.
+    /// Panics otherwise
+    pub fn unwrap_u64(&self) -> &u64 {
+        match self {
+            PropValue::U64(b) => b,
+            _ => panic!("Called `unwrap_u64` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_u128
+    ///
+    /// Unwrap PropValue as u128.
+    /// Panics otherwise
+    pub fn unwrap_u128(&self) -> &u128 {
+        match self {
+            PropValue::U128(b) => b,
+            _ => panic!("Called `unwrap_u128` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_usize
+    ///
+    /// Unwrap PropValue as usize.
+    /// Panics otherwise
+    pub fn unwrap_usize(&self) -> &usize {
+        match self {
+            PropValue::Usize(b) => b,
+            _ => panic!("Called `unwrap_usize` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_i8
+    ///
+    /// Unwrap PropValue as I8.
+    /// Panics otherwise
+    pub fn unwrap_i8(&self) -> &i8 {
+        match self {
+            PropValue::I8(v) => v,
+            _ => panic!("Called `unwrap_i8` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_i16
+    ///
+    /// Unwrap PropValue as i16.
+    /// Panics otherwise
+    pub fn unwrap_i16(&self) -> &i16 {
+        match self {
+            PropValue::I16(b) => b,
+            _ => panic!("Called `unwrap_i16` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_i32
+    ///
+    /// Unwrap PropValue as i32.
+    /// Panics otherwise
+    pub fn unwrap_i32(&self) -> &i32 {
+        match self {
+            PropValue::I32(b) => b,
+            _ => panic!("Called `unwrap_i32` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_i64
+    ///
+    /// Unwrap PropValue as u64.
+    /// Panics otherwise
+    pub fn unwrap_i64(&self) -> &i64 {
+        match self {
+            PropValue::I64(b) => b,
+            _ => panic!("Called `unwrap_i64` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_i128
+    ///
+    /// Unwrap PropValue as i128.
+    /// Panics otherwise
+    pub fn unwrap_i128(&self) -> &i128 {
+        match self {
+            PropValue::I128(b) => b,
+            _ => panic!("Called `unwrap_i128` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_isize
+    ///
+    /// Unwrap PropValue as isize.
+    /// Panics otherwise
+    pub fn unwrap_isize(&self) -> &isize {
+        match self {
+            PropValue::Isize(b) => b,
+            _ => panic!("Called `unwrap_isize` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_f32
+    ///
+    /// Unwrap PropValue as f3.
+    /// Panics otherwise
+    pub fn unwrap_f32(&self) -> &f32 {
+        match self {
+            PropValue::F32(b) => b,
+            _ => panic!("Called `unwrap_f32` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_f64
+    ///
+    /// Unwrap PropValue as F64.
+    /// Panics otherwise
+    pub fn unwrap_f64(&self) -> &f64 {
+        match self {
+            PropValue::F64(b) => b,
+            _ => panic!("Called `unwrap_f64` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_str
+    ///
+    /// Unwrap PropValue as str.
+    /// Panics otherwise
+    pub fn unwrap_str(&self) -> &String {
+        match self {
+            PropValue::Str(s) => s,
+            _ => panic!("Called `unwrap_str` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_alignment
+    ///
+    /// Unwrap PropValue as alignment.
+    /// Panics otherwise
+    pub fn unwrap_alignment(&self) -> &Alignment {
+        match self {
+            PropValue::Alignment(b) => b,
+            _ => panic!("Called `unwrap_alignment` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_dataset
+    ///
+    /// Unwrap PropValue as Dataset.
+    /// Panics otherwise
+    pub fn unwrap_dataset(&self) -> &Dataset {
+        match self {
+            PropValue::Dataset(b) => b,
+            _ => panic!("Called `unwrap_dataset` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_input_type
+    ///
+    /// Unwrap PropValue as InputType.
+    /// Panics otherwise
+    pub fn unwrap_input_type(&self) -> &InputType {
+        match self {
+            PropValue::InputType(b) => b,
+            _ => panic!("Called `unwrap_input_type` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_shape
+    ///
+    /// Unwrap PropValue as shape.
+    /// Panics otherwise
+    pub fn unwrap_shape(&self) -> &Shape {
+        match self {
+            PropValue::Shape(b) => b,
+            _ => panic!("Called `unwrap_shape` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_style
+    ///
+    /// Unwrap PropValue as Style.
+    /// Panics otherwise
+    pub fn unwrap_style(&self) -> &Style {
+        match self {
+            PropValue::Style(b) => b,
+            _ => panic!("Called `unwrap_style` on a bad value"),
+        }
+    }
+
+    /// ### unwrap_bool
+    ///
+    /// Unwrap PropValue as Bool.
+    /// Panics otherwise
+    pub fn unwrap_text_span(&self) -> &TextSpan {
+        match self {
+            PropValue::TextSpan(b) => b,
+            _ => panic!("Called `unwrap_text_span` on a bad value"),
+        }
+    }
+}
+
 // -- Input Type
 
 /// ## InputType
@@ -285,5 +601,95 @@ mod tests {
             PropValue::Usize(4),
         )));
         PropPayload::Linked(link);
+    }
+
+    #[test]
+    fn test_props_unwrap_values() {
+        assert_eq!(
+            *PropValue::Alignment(Alignment::Center).unwrap_alignment(),
+            Alignment::Center
+        );
+        assert_eq!(*PropValue::Bool(true).unwrap_bool(), true);
+        assert_eq!(
+            *PropValue::Dataset(Dataset::default()).unwrap_dataset(),
+            Dataset::default()
+        );
+        assert_eq!(*PropValue::F32(0.32).unwrap_f32(), 0.32);
+        assert_eq!(*PropValue::F64(0.32).unwrap_f64(), 0.32);
+        assert_eq!(*PropValue::I128(5).unwrap_i128(), 5);
+        assert_eq!(*PropValue::I64(5).unwrap_i64(), 5);
+        assert_eq!(*PropValue::I32(5).unwrap_i32(), 5);
+        assert_eq!(*PropValue::I16(5).unwrap_i16(), 5);
+        assert_eq!(*PropValue::I8(5).unwrap_i8(), 5);
+        assert_eq!(*PropValue::Isize(5).unwrap_isize(), 5);
+        assert_eq!(*PropValue::U128(5).unwrap_u128(), 5);
+        assert_eq!(*PropValue::U64(5).unwrap_u64(), 5);
+        assert_eq!(*PropValue::U32(5).unwrap_u32(), 5);
+        assert_eq!(*PropValue::U16(5).unwrap_u16(), 5);
+        assert_eq!(*PropValue::U8(5).unwrap_u8(), 5);
+        assert_eq!(*PropValue::Usize(5).unwrap_usize(), 5);
+        assert_eq!(
+            *PropValue::InputType(InputType::Number).unwrap_input_type(),
+            InputType::Number
+        );
+        assert_eq!(*PropValue::Shape(Shape::Layer).unwrap_shape(), Shape::Layer);
+        assert_eq!(
+            *PropValue::Str(String::from("ciao")).unwrap_str(),
+            "ciao".to_string()
+        );
+        assert_eq!(
+            *PropValue::Style(Style::default()).unwrap_style(),
+            Style::default()
+        );
+        assert_eq!(
+            *PropValue::TextSpan(TextSpan::from("ciao")).unwrap_text_span(),
+            TextSpan::from("ciao")
+        );
+    }
+
+    #[test]
+    fn test_props_unwrap_payloads() {
+        assert_eq!(
+            *PropPayload::One(PropValue::Bool(false))
+                .unwrap_one()
+                .unwrap_bool(),
+            false
+        );
+        assert_eq!(
+            *PropPayload::Tup2((PropValue::Bool(false), PropValue::Bool(false))).unwrap_tup2(),
+            (PropValue::Bool(false), PropValue::Bool(false))
+        );
+        assert_eq!(
+            *PropPayload::Tup3((
+                PropValue::Bool(false),
+                PropValue::Bool(false),
+                PropValue::Bool(false)
+            ))
+            .unwrap_tup3(),
+            (
+                PropValue::Bool(false),
+                PropValue::Bool(false),
+                PropValue::Bool(false)
+            )
+        );
+        assert_eq!(
+            *PropPayload::Tup4((
+                PropValue::Bool(false),
+                PropValue::Bool(false),
+                PropValue::Bool(false),
+                PropValue::Bool(false)
+            ))
+            .unwrap_tup4(),
+            (
+                PropValue::Bool(false),
+                PropValue::Bool(false),
+                PropValue::Bool(false),
+                PropValue::Bool(false)
+            )
+        );
+        assert_eq!(
+            PropPayload::Vec(vec![PropValue::Bool(false), PropValue::Bool(false)]).unwrap_vec(),
+            &[PropValue::Bool(false), PropValue::Bool(false)]
+        );
     }
 }

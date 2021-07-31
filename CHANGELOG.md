@@ -17,45 +17,8 @@
 
 ## 0.5.0
 
-Released on ??
+Released on 31/07/2021
 
-- New components:
-  - Added `BarChart` component
-  - Added `Canvas` component
-  - Added `Chart` component
-  - Added `Select` component
-  - Added `Sparkline` component
-  - Added `Table` component
-- Component changes:
-  - **Checkbox**
-    - `with_options` now takes only options
-    - added `with_title` to set the title
-  - **Label**
-    - Label now supports text alignment `with_text_alignment()`
-  - **List**
-    - From now on `with_rows` takes only the table
-    - Added `with_title`
-  - **Paragraph**
-    - paragraph will now use `TuiParagraph` to render instead of `List`.
-    - paragraph now supports text alignment `with_text_alignment()`
-    - paragraph now supports wrap with trim `with_trim()`
-    - Added `with_title` to set title
-    - From now on `with_texts` only sets the texts for the paragraph
-  - **ProgressBar**
-    - added `with_title` to set the title
-    - added `with_label` to set the label
-    - removed `with_texts`
-  - **Radio**
-    - `with_options` now takes only options
-    - added `with_title` to set the title
-  - **Select**
-    - `with_options` now takes only options
-    - added `with_title` to set the title
-  - **Span**
-    - Span now supports text alignment `with_text_alignment()`
-  - **Textarea**
-    - From now on `with_texts` only sets the texts for the paragraph
-    - Added `with_title` to set title
 - New **PropValue** values:
   - `Alignment`
   - `Dataset`
@@ -63,13 +26,14 @@ Released on ??
   - `Style`
   - `Table`
   - `TextSpan`
+- Added `unwrap_{type}()` helpers for `PropPayload` and `PropValue`
 - ❗ Breaking changes ❗
   - Removed `Color` from `PropValue`, use `palette` instead ❗
   - ❗ Removed `TextParts` from `Props`, use `own` properties instead ❗
   - ❗ Removed `TextSpanBuilder`, you can just use the same methods on `TextSpan` when creating it ❗
   - ❗ Renamed `Canvas` to `Frame` ❗
-  - ❗ Renamed `Table` to `List` ❗
-  - ❗ Removed `ScrollTable`; Use `List` with `scrollable(true)` instead ❗
+  - ❗ Moved standard library to [tui-realm-stdlib](https://crates.io/crates/tui-realm-stdlib) ❗
+  - ❗ Removed `with-components` feature ❗
 
 ## 0.4.3
 
