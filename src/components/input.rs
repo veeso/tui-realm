@@ -28,7 +28,7 @@
  */
 use crate::components::utils::calc_utf8_cursor_position;
 use crate::event::{KeyCode, KeyModifiers};
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -40,6 +40,7 @@ use crate::{Component, Event, Frame, InputType, Msg, Payload, Value};
 const PROP_VALUE: &str = "value";
 const PROP_INPUT_TYPE: &str = "input_type";
 const PROP_INPUT_LENGHT: &str = "input_length";
+const PROP_LABEL: &str = "label";
 
 pub struct InputPropsBuilder {
     props: Option<Props>,
@@ -122,9 +123,12 @@ impl InputPropsBuilder {
     /// ### with_label
     ///
     /// Set input label
-    pub fn with_label(&mut self, label: String) -> &mut Self {
+    pub fn with_label<S: AsRef<str>>(&mut self, text: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(Some(label), None);
+            props.own.insert(
+                PROP_LABEL,
+                PropPayload::One(PropValue::Str(text.as_ref().to_string())),
+            );
         }
         self
     }
@@ -344,11 +348,11 @@ impl Component for Input {
     #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
-            let div: Block = super::utils::get_block(
-                &self.props.borders,
-                &self.props.texts.title,
-                self.states.focus,
-            );
+            let title: Option<&str> = match self.props.own.get(PROP_LABEL).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let div: Block = super::utils::get_block(&self.props.borders, title, self.states.focus);
             let p: Paragraph =
                 Paragraph::new(self.states.render_value(Self::get_input_type(&self.props)))
                     .style(match self.states.focus {

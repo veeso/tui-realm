@@ -26,14 +26,14 @@
  * SOFTWARE.
  */
 use crate::event::KeyCode;
-use crate::props::{BordersProps, Dataset, PropPayload, PropValue, Props, PropsBuilder, TextParts};
+use crate::props::{BordersProps, Dataset, PropPayload, PropValue, Props, PropsBuilder};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
     text::Span,
     widgets::{Axis, Block, BorderType, Borders, Chart as TuiChart, Dataset as TuiDataset},
 };
-use crate::{Frame, Component, Event, Msg, Payload};
+use crate::{Component, Event, Frame, Msg, Payload};
 use std::collections::LinkedList;
 
 // -- Props
@@ -47,6 +47,7 @@ const PROP_Y_STYLE: &str = "y-style";
 const PROP_Y_TITLE: &str = "y-title";
 const PROP_DATA: &str = "data";
 const PROP_DISABLED: &str = "disabled";
+const PROP_TITLE: &str = "title";
 
 pub struct ChartPropsBuilder {
     props: Option<Props>,
@@ -129,9 +130,12 @@ impl ChartPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title(&mut self, label: String) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(Some(label), None);
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
         }
         self
     }
@@ -527,8 +531,11 @@ impl Component for Chart {
                 true => true,
                 false => self.states.focus,
             };
-            let block: Block =
-                super::utils::get_block(&self.props.borders, &self.props.texts.title, active);
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let block: Block = super::utils::get_block(&self.props.borders, title, active);
             // Get data
             let data: Vec<TuiDataset> = self.data(self.states.cursor, area.width as usize);
             // Create widget

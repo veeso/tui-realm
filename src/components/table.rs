@@ -26,16 +26,14 @@
  * SOFTWARE.
  */
 use crate::event::KeyCode;
-use crate::props::{
-    BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable, TextParts,
-};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable};
 use crate::tui::{
     layout::{Constraint, Rect},
     style::{Color, Modifier, Style},
     text::Span,
     widgets::{Block, BorderType, Borders, Cell, Row, Table as TuiTable, TableState},
 };
-use crate::{Frame, Component, Event, Msg, Payload};
+use crate::{Component, Event, Frame, Msg, Payload};
 
 // -- Props
 
@@ -47,6 +45,8 @@ const PROP_MAX_STEP: &str = "max-step";
 const PROP_ROW_HEIGHT: &str = "row-height";
 const PROP_SCROLLABLE: &str = "scrollable";
 const PROP_WIDTHS: &str = "widhts";
+const PROP_TABLE: &str = "table";
+const PROP_TITLE: &str = "title";
 
 pub struct TablePropsBuilder {
     props: Option<Props>,
@@ -210,9 +210,24 @@ impl TablePropsBuilder {
     ///
     /// Set table content
     /// You can define a title if you want. The title will be displayed on the upper border of the box
-    pub fn with_table(&mut self, title: Option<String>, table: TextTable) -> &mut Self {
+    pub fn with_table(&mut self, table: TextTable) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::table(title, table);
+            props
+                .own
+                .insert(PROP_TABLE, PropPayload::One(PropValue::Table(table)));
+        }
+        self
+    }
+
+    /// ### with_title
+    ///
+    /// Set title
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
         }
         self
     }
@@ -427,9 +442,9 @@ impl Table {
     ///
     /// Instantiates a new `Table` component.
     pub fn new(props: Props) -> Self {
-        let len: usize = match props.texts.table.as_ref() {
-            Some(t) => t.len(),
-            None => 0,
+        let len: usize = match props.own.get(PROP_TABLE).as_ref() {
+            Some(PropPayload::One(PropValue::Table(t))) => t.len(),
+            _ => 0,
         };
         Table {
             props,
@@ -466,9 +481,11 @@ impl Table {
                 .collect(),
             _ => {
                 // Get amount of columns (maximum len of row elements)
-                let columns: usize = match self.props.texts.table.as_ref() {
-                    None => 0,
-                    Some(rows) => rows.iter().map(|col| col.len()).max().unwrap_or(0),
+                let columns: usize = match self.props.own.get(PROP_TABLE).as_ref() {
+                    Some(PropPayload::One(PropValue::Table(rows))) => {
+                        rows.iter().map(|col| col.len()).max().unwrap_or(0)
+                    }
+                    _ => 0,
                 };
                 // Calc width in equal way
                 let width: u16 = (100 / columns) as u16;
@@ -491,17 +508,19 @@ impl Component for Table {
                 true => self.states.focus,
                 false => true,
             };
-            let div: Block =
-                super::utils::get_block(&self.props.borders, &self.props.texts.title, active);
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let div: Block = super::utils::get_block(&self.props.borders, title, active);
             // Get row height
             let row_height: u16 = match self.props.own.get(PROP_ROW_HEIGHT) {
                 Some(PropPayload::One(PropValue::U16(h))) => *h,
                 _ => 1,
             };
             // Make rows
-            let rows: Vec<Row> = match self.props.texts.table.as_ref() {
-                None => Vec::new(),
-                Some(table) => table
+            let rows: Vec<Row> = match self.props.own.get(PROP_TABLE).as_ref() {
+                Some(PropPayload::One(PropValue::Table(table))) => table
                     .iter()
                     .map(|row| {
                         let columns: Vec<Cell> = row
@@ -518,6 +537,7 @@ impl Component for Table {
                         Row::new(columns).height(row_height)
                     })
                     .collect(), // Make List item from TextSpan
+                _ => Vec::new(),
             };
             let highlighted_color: Color = match self.props.palette.get(COLOR_HIGHLIGHTED) {
                 None => match self.states.focus {
@@ -592,10 +612,11 @@ impl Component for Table {
     fn update(&mut self, props: Props) -> Msg {
         self.props = props;
         // re-Set list length
-        self.states.set_list_len(match &self.props.texts.table {
-            Some(table) => table.len(),
-            None => 0,
-        });
+        self.states
+            .set_list_len(match self.props.own.get(PROP_TABLE).as_ref() {
+                Some(PropPayload::One(PropValue::Table(t))) => t.len(),
+                _ => 0,
+            });
         // Fix list index
         self.states.fix_list_index();
         // disable if scrollable
@@ -729,8 +750,8 @@ mod tests {
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
                 .scrollable(true)
+                .with_title("events")
                 .with_table(
-                    Some(String::from("Events")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("KeyCode::Down"))
                         .add_col(TextSpan::from("OnKey"))
@@ -794,11 +815,6 @@ mod tests {
             component.props.own.get(PROP_MAX_STEP).unwrap(),
             &PropPayload::One(PropValue::Usize(4))
         );
-        assert_eq!(
-            component.props.texts.title.as_ref().unwrap().as_str(),
-            "Events"
-        );
-        assert_eq!(component.props.texts.table.as_ref().unwrap().len(), 7);
         assert_eq!(component.states.list_len, 7);
         assert_eq!(component.states.list_index, 0);
         component.active();
@@ -866,7 +882,6 @@ mod tests {
             .with_foreground(Color::Red)
             .hidden()
             .with_table(
-                Some(String::from("Events")),
                 TableBuilder::default()
                     .add_col(TextSpan::from("name"))
                     .add_col(TextSpan::from("age"))
@@ -910,7 +925,6 @@ mod tests {
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
                 .with_table(
-                    Some(String::from("Events")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("KeyCode::Down"))
                         .add_col(TextSpan::from("OnKey"))
@@ -961,11 +975,6 @@ mod tests {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(
-            component.props.texts.title.as_ref().unwrap().as_str(),
-            "Events"
-        );
-        assert_eq!(component.props.texts.table.as_ref().unwrap().len(), 7);
         component.active();
         component.blur();
         // Update

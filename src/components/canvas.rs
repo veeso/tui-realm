@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, Shape, TextParts};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, Shape};
 use crate::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -39,6 +39,7 @@ use crate::{Component, Event, Frame, Msg, Payload};
 const PROP_X_BOUNDS: &str = "x-bounds";
 const PROP_Y_BOUNDS: &str = "y-bounds";
 const PROP_SHAPES: &str = "shapes";
+const PROP_TITLE: &str = "title";
 
 pub struct CanvasPropsBuilder {
     props: Option<Props>,
@@ -111,9 +112,12 @@ impl CanvasPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title(&mut self, label: String) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(Some(label), None);
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
         }
         self
     }
@@ -332,11 +336,12 @@ impl Component for Canvas {
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
-            let mut block: Block = super::utils::get_block(
-                &self.props.borders,
-                &self.props.texts.title,
-                self.states.focus,
-            );
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let mut block: Block =
+                super::utils::get_block(&self.props.borders, title, self.states.focus);
             block = block.style(Style::default().bg(self.props.background));
             // Get properties
             let x_bounds: [f64; 2] = self

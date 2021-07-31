@@ -28,9 +28,7 @@
  * SOFTWARE.
  */
 use crate::event::KeyCode;
-use crate::props::{
-    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
-};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan};
 use crate::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
@@ -42,6 +40,8 @@ use crate::{Component, Event, Frame, Msg, Payload};
 
 const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_MAX_STEP: &str = "max-step";
+const PROP_SPANS: &str = "spans";
+const PROP_TITLE: &str = "title";
 
 pub struct TextareaPropsBuilder {
     props: Option<Props>,
@@ -191,13 +191,28 @@ impl TextareaPropsBuilder {
         self
     }
 
-    /// ### with_spans
+    /// ### with_title
+    ///
+    /// Set title
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
+        }
+        self
+    }
+
+    /// ### with_texts
     ///
     /// Set spans
-    /// You can define a title if you want. The title will be displayed on the upper border of the box
-    pub fn with_texts(&mut self, title: Option<String>, spans: Vec<TextSpan>) -> &mut Self {
+    pub fn with_texts(&mut self, spans: Vec<TextSpan>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(title, Some(spans));
+            props.own.insert(
+                PROP_SPANS,
+                PropPayload::Vec(spans.into_iter().map(|x| PropValue::TextSpan(x)).collect()),
+            );
         }
         self
     }
@@ -342,9 +357,9 @@ impl Textarea {
     ///
     /// Instantiates a new `Textarea` component.
     pub fn new(props: Props) -> Self {
-        let len: usize = match props.texts.spans.as_ref() {
-            Some(s) => s.len(),
-            None => 0,
+        let len: usize = match props.own.get(PROP_SPANS).as_ref() {
+            Some(PropPayload::Vec(s)) => s.len(),
+            _ => 0,
         };
         Textarea {
             props,
@@ -367,25 +382,26 @@ impl Component for Textarea {
         // Make a Span
         if self.props.visible {
             // Make text items
-            let lines: Vec<ListItem> = match self.props.texts.spans.as_ref() {
-                None => Vec::new(),
-                Some(spans) => spans
+            let lines: Vec<ListItem> = match self.props.own.get(PROP_SPANS).as_ref() {
+                Some(PropPayload::Vec(spans)) => spans
                     .iter()
-                    .map(|x| {
-                        super::utils::wrap_spans(
+                    .map(|x| match x {
+                        PropValue::TextSpan(x) => super::utils::wrap_spans(
                             vec![x.clone()].as_slice(),
                             area.width as usize,
                             &self.props,
-                        )
+                        ),
+                        _ => panic!("Spans doesn't contain TextSpan"),
                     })
                     .map(ListItem::new)
                     .collect(),
+                _ => Vec::new(),
             };
-            let div: Block = super::utils::get_block(
-                &self.props.borders,
-                &self.props.texts.title,
-                self.states.focus,
-            );
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let div: Block = super::utils::get_block(&self.props.borders, title, self.states.focus);
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
             // Make component
@@ -416,10 +432,11 @@ impl Component for Textarea {
     fn update(&mut self, props: Props) -> Msg {
         self.props = props;
         // re-Set list length
-        self.states.set_list_len(match &self.props.texts.spans {
-            Some(tokens) => tokens.len(),
-            None => 0,
-        });
+        self.states
+            .set_list_len(match self.props.own.get(PROP_SPANS).as_ref() {
+                Some(PropPayload::Vec(s)) => s.len(),
+                _ => 0,
+            });
         // Fix list index
         self.states.fix_list_index();
         // Return None
@@ -540,10 +557,11 @@ mod tests {
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
-                .with_texts(
-                    Some(String::from("textarea")),
-                    vec![TextSpan::from("welcome to"), TextSpan::from("tui-realm")],
-                )
+                .with_title("textarea")
+                .with_texts(vec![
+                    TextSpan::from("welcome to "),
+                    TextSpan::from("tui-realm"),
+                ])
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
         );
@@ -561,8 +579,15 @@ mod tests {
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
         assert_eq!(
-            component.props.texts.title.as_ref().unwrap().as_str(),
-            "textarea"
+            component.props.own.get(PROP_SPANS).unwrap(),
+            &PropPayload::Vec(vec![
+                PropValue::TextSpan(TextSpan::from("welcome to ")),
+                PropValue::TextSpan(TextSpan::from("tui-realm")),
+            ])
+        );
+        assert_eq!(
+            component.props.own.get(PROP_TITLE).unwrap(),
+            &PropPayload::One(PropValue::Str("textarea".to_string()))
         );
         assert_eq!(
             component.props.own.get(PROP_HIGHLIGHTED_TXT).unwrap(),
@@ -572,7 +597,6 @@ mod tests {
             component.props.own.get(PROP_MAX_STEP).unwrap(),
             &PropPayload::One(PropValue::Usize(4))
         );
-        assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 2);
         // Verify states
         assert_eq!(component.states.list_index, 0);
         assert_eq!(component.states.list_len, 2);
@@ -595,18 +619,22 @@ mod tests {
         component.update(
             TextareaPropsBuilder::from(component.get_props())
                 .hidden()
-                .with_texts(
-                    Some(String::from("textarea")),
-                    vec![
-                        TextSpan::from("welcome"),
-                        TextSpan::from("to"),
-                        TextSpan::from("tui-realm"),
-                    ],
-                )
+                .with_texts(vec![
+                    TextSpan::from("welcome "),
+                    TextSpan::from("to "),
+                    TextSpan::from("tui-realm"),
+                ])
                 .build(),
         );
+        assert_eq!(
+            component.props.own.get(PROP_SPANS).unwrap(),
+            &PropPayload::Vec(vec![
+                PropValue::TextSpan(TextSpan::from("welcome ")),
+                PropValue::TextSpan(TextSpan::from("to ")),
+                PropValue::TextSpan(TextSpan::from("tui-realm")),
+            ])
+        );
         assert_eq!(component.props.visible, false);
-        assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 3);
         // Verify states
         assert_eq!(component.states.list_index, 1); // Kept
         assert_eq!(component.states.list_len, 3);

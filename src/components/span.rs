@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan};
+use crate::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder, TextSpan};
 use crate::tui::{
     layout::Rect,
     style::{Color, Modifier, Style},
@@ -36,6 +36,7 @@ use crate::tui::{
 use crate::{Component, Event, Frame, Msg, Payload};
 
 const PROP_ALIGNMENT: &str = "text-alignment";
+const PROP_SPANS: &str = "spans";
 
 // -- Props
 
@@ -182,7 +183,10 @@ impl SpanPropsBuilder {
     /// Set spans
     pub fn with_spans(&mut self, spans: Vec<TextSpan>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(None, Some(spans));
+            props.own.insert(
+                PROP_SPANS,
+                PropPayload::Vec(spans.into_iter().map(|x| PropValue::TextSpan(x)).collect()),
+            );
         }
         self
     }
@@ -224,25 +228,29 @@ impl Component for Span {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.visible {
             // Make text
-            let spans: Vec<TuiSpan> = match self.props.texts.spans.as_ref() {
-                None => Vec::new(),
-                Some(spans) => spans
+            let spans: Vec<TuiSpan> = match self.props.own.get(PROP_SPANS).as_ref() {
+                Some(PropPayload::Vec(spans)) => spans
                     .iter()
                     .map(|x| {
-                        // Keep colors and modifiers, or use default
-                        let (fg, bg, modifiers) =
-                            super::utils::use_or_default_styles(&self.props, x);
-                        TuiSpan::styled(
-                            x.content.clone(),
-                            Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                        )
+                        match x {
+                            PropValue::TextSpan(x) => {
+                                // Keep colors and modifiers, or use default
+                                let (fg, bg, modifiers) =
+                                    super::utils::use_or_default_styles(&self.props, x);
+                                TuiSpan::styled(
+                                    x.content.clone(),
+                                    Style::default().add_modifier(modifiers).fg(fg).bg(bg),
+                                )
+                            }
+                            _ => panic!("Spans doesn't contain TextSpan"),
+                        }
                     })
                     .collect(),
+                _ => Vec::new(),
             };
             let text: Text = Text::from(Spans::from(spans));
             // Text properties
@@ -349,7 +357,14 @@ mod tests {
         assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
         assert!(component.props.modifiers.intersects(Modifier::REVERSED));
         assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
-        assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 3);
+        assert_eq!(
+            component.props.own.get(PROP_SPANS).unwrap(),
+            &PropPayload::Vec(vec![
+                PropValue::TextSpan(TextSpan::from("Press ")),
+                PropValue::TextSpan(TextSpan::from("<ESC>").fg(Color::Cyan).bold()),
+                PropValue::TextSpan(TextSpan::from(" to quit")),
+            ])
+        );
         assert_eq!(
             *component.props.own.get(PROP_ALIGNMENT).unwrap(),
             PropPayload::One(PropValue::Alignment(Alignment::Center))
@@ -398,6 +413,9 @@ mod tests {
         assert!(props.modifiers.intersects(Modifier::REVERSED));
         assert!(props.modifiers.intersects(Modifier::CROSSED_OUT));
         assert_eq!(props.foreground, Color::Green);
-        assert_eq!(props.texts.spans.as_ref().unwrap().len(), 1);
+        assert_eq!(
+            props.own.get(PROP_SPANS).unwrap(),
+            &PropPayload::Vec(vec![PropValue::TextSpan(TextSpan::from("test")),])
+        );
     }
 }

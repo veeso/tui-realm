@@ -30,7 +30,7 @@
  * SOFTWARE.
  */
 use crate::props::{
-    Alignment, BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
+    Alignment, BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan,
 };
 use crate::tui::{
     layout::Rect,
@@ -42,7 +42,9 @@ use crate::{Component, Event, Frame, Msg, Payload};
 
 // -- Props
 
+const PROP_SPANS: &str = "spans";
 const PROP_ALIGNMENT: &str = "text-align";
+const PROP_TITLE: &str = "title";
 const PROP_TRIM: &str = "wrap";
 
 pub struct ParagraphPropsBuilder {
@@ -193,13 +195,28 @@ impl ParagraphPropsBuilder {
         self
     }
 
-    /// ### with_spans
+    /// ### with_title
+    ///
+    /// Set title
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
+        }
+        self
+    }
+
+    /// ### with_texts
     ///
     /// Set spans
-    /// You can define a title if you want. The title will be displayed on the upper border of the box
-    pub fn with_texts(&mut self, title: Option<String>, spans: Vec<TextSpan>) -> &mut Self {
+    pub fn with_texts(&mut self, spans: Vec<TextSpan>) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(title, Some(spans));
+            props.own.insert(
+                PROP_SPANS,
+                PropPayload::Vec(spans.into_iter().map(|x| PropValue::TextSpan(x)).collect()),
+            );
         }
         self
     }
@@ -257,23 +274,29 @@ impl Component for Paragraph {
         // Make a Span
         if self.props.visible {
             // Make text items
-            let text: Vec<Spans> = match self.props.texts.spans.as_ref() {
-                None => Vec::new(),
-                Some(spans) => spans
+            let text: Vec<Spans> = match self.props.own.get(PROP_SPANS).as_ref() {
+                Some(PropPayload::Vec(spans)) => spans
                     .iter()
-                    .map(|x| {
-                        let (fg, bg, modifiers) =
-                            super::utils::use_or_default_styles(&self.props, x);
-                        Spans::from(vec![Span::styled(
-                            x.content.clone(),
-                            Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                        )])
+                    .map(|x| match x {
+                        PropValue::TextSpan(x) => {
+                            let (fg, bg, modifiers) =
+                                super::utils::use_or_default_styles(&self.props, x);
+                            Spans::from(vec![Span::styled(
+                                x.content.clone(),
+                                Style::default().add_modifier(modifiers).fg(fg).bg(bg),
+                            )])
+                        }
+                        _ => panic!("Spans doesn't contain TextSpan"),
                     })
                     .collect(),
+                _ => Vec::new(),
             };
             // Make container div
-            let div: Block =
-                super::utils::get_block(&self.props.borders, &self.props.texts.title, true);
+            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+                _ => None,
+            };
+            let div: Block = super::utils::get_block(&self.props.borders, title, true);
             // Text properties
             let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
                 Some(PropPayload::One(PropValue::Alignment(alignment))) => *alignment,
@@ -377,10 +400,11 @@ mod tests {
                 .strikethrough()
                 .underlined()
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_texts(
-                    Some(String::from("paragraph")),
-                    vec![TextSpan::from("welcome to"), TextSpan::from("tui-realm")],
-                )
+                .with_texts(vec![
+                    TextSpan::from("welcome to "),
+                    TextSpan::from("tui-realm"),
+                ])
+                .with_title("paragraph")
                 .with_trim(true)
                 .with_text_alignment(Alignment::Center)
                 .build(),
@@ -399,8 +423,15 @@ mod tests {
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
         assert_eq!(
-            component.props.texts.title.as_ref().unwrap().as_str(),
-            "paragraph"
+            component.props.own.get(PROP_SPANS).unwrap(),
+            &PropPayload::Vec(vec![
+                PropValue::TextSpan(TextSpan::from("welcome to ")),
+                PropValue::TextSpan(TextSpan::from("tui-realm")),
+            ])
+        );
+        assert_eq!(
+            component.props.own.get(PROP_TITLE).unwrap(),
+            &PropPayload::One(PropValue::Str("paragraph".to_string()))
         );
         assert_eq!(
             *component.props.own.get(PROP_ALIGNMENT).unwrap(),
@@ -410,7 +441,6 @@ mod tests {
             *component.props.own.get(PROP_TRIM).unwrap(),
             PropPayload::One(PropValue::Bool(true))
         );
-        assert_eq!(component.props.texts.spans.as_ref().unwrap().len(), 2);
         // Focus
         component.active();
         component.blur();
@@ -425,14 +455,11 @@ mod tests {
         // Update
         component.update(
             ParagraphPropsBuilder::from(component.get_props())
-                .with_texts(
-                    Some(String::from("paragraph")),
-                    vec![
-                        TextSpan::from("welcome"),
-                        TextSpan::from("to"),
-                        TextSpan::from("tui-realm"),
-                    ],
-                )
+                .with_texts(vec![
+                    TextSpan::from("welcome"),
+                    TextSpan::from("to"),
+                    TextSpan::from("tui-realm"),
+                ])
                 .build(),
         );
         // get value

@@ -93,8 +93,8 @@ fn main() {
         Box::new(list::List::new(
             list::ListPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
+                .with_title("My table data")
                 .with_rows(
-                    Some(String::from("My table data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
@@ -153,8 +153,8 @@ fn main() {
         Box::new(list::List::new(
             list::ListPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
+                .with_title("My table data")
                 .with_rows(
-                    Some(String::from("My table data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
@@ -216,8 +216,8 @@ fn main() {
                 .with_highlighted_str(Some("🚀"))
                 .with_highlighted_color(Color::LightBlue)
                 .scrollable(true)
+                .with_title("My table data")
                 .with_rows(
-                    Some(String::from("My scrollable data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
@@ -280,8 +280,8 @@ fn main() {
                 .with_max_scroll_step(4)
                 .scrollable(true)
                 .with_highlighted_color(Color::LightBlue)
+                .with_title("My table data")
                 .with_rows(
-                    Some(String::from("My scrollable data")),
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))

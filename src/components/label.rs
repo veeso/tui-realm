@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder, TextParts};
+use crate::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder};
 use crate::tui::{
     layout::Rect,
     style::{Color, Modifier, Style},
@@ -34,6 +34,7 @@ use crate::tui::{
 use crate::{Component, Event, Frame, Msg, Payload};
 
 const PROP_ALIGNMENT: &str = "text-alignment";
+const PROP_TEXT: &str = "text";
 
 // -- Props
 
@@ -168,10 +169,13 @@ impl LabelPropsBuilder {
 
     /// ### with_text
     ///
-    /// Set text for label
-    pub fn with_text(&mut self, text: String) -> &mut Self {
+    /// Set text
+    pub fn with_text<S: AsRef<str>>(&mut self, text: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(Some(text), None);
+            props.own.insert(
+                PROP_TEXT,
+                PropPayload::One(PropValue::Str(text.as_ref().to_string())),
+            );
         }
         self
     }
@@ -217,9 +221,9 @@ impl Component for Label {
         // Make a Span
         if self.props.visible {
             // Make text
-            let title: String = match self.props.texts.title.as_ref() {
-                None => String::new(),
-                Some(t) => t.clone(),
+            let text: String = match self.props.own.get(PROP_TEXT).as_ref() {
+                Some(PropPayload::One(PropValue::Str(t))) => t.to_string(),
+                _ => String::default(),
             };
             // Text properties
             let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
@@ -227,7 +231,7 @@ impl Component for Label {
                 _ => Alignment::Left,
             };
             render.render_widget(
-                Paragraph::new(title)
+                Paragraph::new(text)
                     .style(
                         Style::default()
                             .fg(self.props.foreground)
@@ -332,8 +336,8 @@ mod tests {
         assert!(component.props.modifiers.intersects(Modifier::REVERSED));
         assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
         assert_eq!(
-            component.props.texts.title.as_ref().unwrap().as_str(),
-            "Hello, world!"
+            component.props.own.get(PROP_TEXT).unwrap(),
+            &PropPayload::One(PropValue::Str("Hello, world!".to_string()))
         );
         assert_eq!(
             *component.props.own.get(PROP_ALIGNMENT).unwrap(),
@@ -383,6 +387,9 @@ mod tests {
         assert!(props.modifiers.intersects(Modifier::REVERSED));
         assert!(props.modifiers.intersects(Modifier::CROSSED_OUT));
         assert_eq!(props.foreground, Color::Green);
-        assert_eq!(props.texts.title.as_ref().unwrap().as_str(), "test");
+        assert_eq!(
+            props.own.get(PROP_TEXT).unwrap(),
+            &PropPayload::One(PropValue::Str("test".to_string()))
+        );
     }
 }

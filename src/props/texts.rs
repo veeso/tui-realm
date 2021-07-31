@@ -30,106 +30,10 @@ use tui::style::{Color, Modifier};
 
 // -- Text parts
 
-/// ## Table
-///
-/// Table represents a list of rows with a list of columns of text spans
-pub type Table = Vec<Vec<TextSpan>>;
-
-/// ## TextParts
-///
-/// TextParts holds optional component for the text displayed by a component
-#[derive(Clone)]
-pub struct TextParts {
-    pub title: Option<String>,
-    pub spans: Option<Vec<TextSpan>>,
-    pub table: Option<Table>, // First vector is rows, inner vec is column
-}
-
-impl TextParts {
-    /// ### new
-    ///
-    /// Instantiates a new TextParts entity
-    pub fn new(title: Option<String>, spans: Option<Vec<TextSpan>>) -> Self {
-        TextParts {
-            title,
-            spans,
-            table: None,
-        }
-    }
-
-    /// ### table
-    ///
-    /// Instantiates a new TextParts as a Table
-    pub fn table(title: Option<String>, table: Table) -> Self {
-        TextParts {
-            title,
-            spans: None,
-            table: Some(table),
-        }
-    }
-}
-
-impl Default for TextParts {
-    fn default() -> Self {
-        TextParts {
-            title: None,
-            spans: None,
-            table: None,
-        }
-    }
-}
-
-/// ## TableBuilder
-///
-/// Table builder is a helper to make it easier to build text tables
-pub struct TableBuilder {
-    table: Option<Table>,
-}
-
-impl TableBuilder {
-    /// ### add_col
-    ///
-    /// Add a column to the last row
-    pub fn add_col(&mut self, span: TextSpan) -> &mut Self {
-        if let Some(table) = self.table.as_mut() {
-            if let Some(row) = table.last_mut() {
-                row.push(span);
-            }
-        }
-        self
-    }
-
-    /// ### add_row
-    ///
-    /// Add a new row to the table
-    pub fn add_row(&mut self) -> &mut Self {
-        if let Some(table) = self.table.as_mut() {
-            table.push(vec![]);
-        }
-        self
-    }
-
-    /// ### build
-    ///
-    /// Take table out of builder
-    /// Don't call this method twice for any reasons!
-    pub fn build(&mut self) -> Table {
-        self.table.take().unwrap()
-    }
-}
-
-impl Default for TableBuilder {
-    fn default() -> Self {
-        TableBuilder {
-            table: Some(vec![vec![]]),
-        }
-    }
-}
-
 /// ### TextSpan
 ///
 /// TextSpan is a "cell" of text with its attributes
-#[derive(Clone, std::fmt::Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TextSpan {
     pub content: String,
     pub fg: Color,
@@ -229,6 +133,58 @@ impl From<String> for TextSpan {
     }
 }
 
+/// ## Table
+///
+/// Table represents a list of rows with a list of columns of text spans
+pub type Table = Vec<Vec<TextSpan>>;
+
+/// ## TableBuilder
+///
+/// Table builder is a helper to make it easier to build text tables
+pub struct TableBuilder {
+    table: Option<Table>,
+}
+
+impl TableBuilder {
+    /// ### add_col
+    ///
+    /// Add a column to the last row
+    pub fn add_col(&mut self, span: TextSpan) -> &mut Self {
+        if let Some(table) = self.table.as_mut() {
+            if let Some(row) = table.last_mut() {
+                row.push(span);
+            }
+        }
+        self
+    }
+
+    /// ### add_row
+    ///
+    /// Add a new row to the table
+    pub fn add_row(&mut self) -> &mut Self {
+        if let Some(table) = self.table.as_mut() {
+            table.push(vec![]);
+        }
+        self
+    }
+
+    /// ### build
+    ///
+    /// Take table out of builder
+    /// Don't call this method twice for any reasons!
+    pub fn build(&mut self) -> Table {
+        self.table.take().unwrap()
+    }
+}
+
+impl Default for TableBuilder {
+    fn default() -> Self {
+        TableBuilder {
+            table: Some(vec![vec![]]),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
 
@@ -237,83 +193,31 @@ mod test {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn test_props_text_parts_with_values() {
-        let parts: TextParts = TextParts::new(
-            Some(String::from("Hello world!")),
-            Some(vec![TextSpan::from("row1"), TextSpan::from("row2")]),
-        );
-        assert_eq!(parts.title.as_ref().unwrap().as_str(), "Hello world!");
-        assert_eq!(
-            parts
-                .spans
-                .as_ref()
-                .unwrap()
-                .get(0)
-                .unwrap()
-                .content
-                .as_str(),
-            "row1"
-        );
-        assert_eq!(
-            parts
-                .spans
-                .as_ref()
-                .unwrap()
-                .get(1)
-                .unwrap()
-                .content
-                .as_str(),
-            "row2"
-        );
-    }
-
-    #[test]
-    fn test_props_text_parts_default() {
-        let parts: TextParts = TextParts::default();
-        assert!(parts.title.is_none());
-        assert!(parts.spans.is_none());
-    }
-
-    #[test]
-    fn test_props_text_parts_table() {
-        let table: TextParts = TextParts::table(
-            Some(String::from("my data")),
-            TableBuilder::default()
-                .add_col(TextSpan::from("name"))
-                .add_col(TextSpan::from("age"))
-                .add_row()
-                .add_col(TextSpan::from("christian"))
-                .add_col(TextSpan::from("23"))
-                .add_row()
-                .add_col(TextSpan::from("omar"))
-                .add_col(TextSpan::from("25"))
-                .add_row()
-                .add_row()
-                .add_col(TextSpan::from("pippo"))
-                .build(),
-        );
+    fn test_props_text_table() {
+        let table: Table = TableBuilder::default()
+            .add_col(TextSpan::from("name"))
+            .add_col(TextSpan::from("age"))
+            .add_row()
+            .add_col(TextSpan::from("christian"))
+            .add_col(TextSpan::from("23"))
+            .add_row()
+            .add_col(TextSpan::from("omar"))
+            .add_col(TextSpan::from("25"))
+            .add_row()
+            .add_row()
+            .add_col(TextSpan::from("pippo"))
+            .build();
         // Verify table
-        assert_eq!(table.title.as_ref().unwrap().as_str(), "my data");
-        assert!(table.spans.is_none());
-        assert_eq!(table.table.as_ref().unwrap().len(), 5); // 5 spans
-        assert_eq!(table.table.as_ref().unwrap().get(0).unwrap().len(), 2); // 2 cols
-        assert_eq!(table.table.as_ref().unwrap().get(1).unwrap().len(), 2); // 2 cols
+        assert_eq!(table.len(), 5); // 5 spans
+        assert_eq!(table.get(0).unwrap().len(), 2); // 2 cols
+        assert_eq!(table.get(1).unwrap().len(), 2); // 2 cols
         assert_eq!(
-            table
-                .table
-                .as_ref()
-                .unwrap()
-                .get(1)
-                .unwrap()
-                .get(0)
-                .unwrap()
-                .content
-                .as_str(),
+            table.get(1).unwrap().get(0).unwrap().content.as_str(),
             "christian"
         ); // check content
-        assert_eq!(table.table.as_ref().unwrap().get(2).unwrap().len(), 2); // 2 cols
-        assert_eq!(table.table.as_ref().unwrap().get(3).unwrap().len(), 0); // 0 cols
-        assert_eq!(table.table.as_ref().unwrap().get(4).unwrap().len(), 1); // 1 cols
+        assert_eq!(table.get(2).unwrap().len(), 2); // 2 cols
+        assert_eq!(table.get(3).unwrap().len(), 0); // 0 cols
+        assert_eq!(table.get(4).unwrap().len(), 1); // 1 cols
     }
 
     #[test]

@@ -92,11 +92,12 @@ fn main() {
                 .bold()
                 .with_background(Color::White)
                 .with_foreground(Color::Black)
-                .with_texts(Some(String::from("A poem for you")), vec![
-                TextSpan::new("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
-                TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
-                TextSpan::from("Duis augue diam, tempor vitae posuere et, tempus mattis ligula.")
-            ])
+                .with_title("A poem for you")
+                .with_texts(vec![
+                    TextSpan::new("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
+                    TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
+                    TextSpan::from("Duis augue diam, tempor vitae posuere et, tempus mattis ligula.")
+                ])
                 .build(),
         )),
     );
@@ -108,10 +109,11 @@ fn main() {
                 .with_foreground(Color::LightBlue)
                 .with_text_alignment(Alignment::Center)
                 .with_trim(true)
-                .with_texts(Some(String::from("A poem for you")), vec![
-                TextSpan::new("Lorem ipsum dolor sit amet, ").underlined().fg(Color::Green),
-                TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus Duis augue diam, tempor vitae posuere et, tempus mattis ligula."),
-            ])
+                .with_title("A poem for you")
+                .with_texts(vec![
+                    TextSpan::new("Lorem ipsum dolor sit amet, ").underlined().fg(Color::Green),
+                    TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus Duis augue diam, tempor vitae posuere et, tempus mattis ligula."),
+                ])
                 .build(),
         )),
     );

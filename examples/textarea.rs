@@ -95,7 +95,8 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightRed)
                 .with_highlighted_str(Some("🎵"))
                 .with_max_scroll_step(2)
-                .with_texts(Some(String::from("Scrollable textarea")),
+                .with_title("Scrollable textarea")
+                .with_texts(
                     vec![
                         TextSpan::new("About TermSCP").bold().underlined().fg(Color::Yellow),
                         TextSpan::from("TermSCP is basically a porting of WinSCP to terminal. So basically is a terminal utility with an TUI to connect to a remote server to retrieve and upload files and to interact with the local file system. It works both on Linux, MacOS, BSD and Windows and supports SFTP, SCP, FTP and FTPS."),
@@ -117,7 +118,8 @@ fn main() {
                 .italic()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightRed)
                 .with_highlighted_str(Some("🎵"))
-                .with_texts(Some(String::from("Scrollable textarea")),
+                .with_title("Scrollble textarea")
+                .with_texts(
                     vec![
                         TextSpan::new("About TermSCP").bold().underlined().fg(Color::Yellow),
                         TextSpan::from("TermSCP is basically a porting of WinSCP to terminal. So basically is a terminal utility with an TUI to connect to a remote server to retrieve and upload files and to interact with the local file system. It works both on Linux, MacOS, BSD and Windows and supports SFTP, SCP, FTP and FTPS."),

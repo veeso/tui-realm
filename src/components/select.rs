@@ -28,22 +28,22 @@
  */
 use crate::event::KeyCode;
 use crate::props::borders::Borders;
-use crate::props::{
-    BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextParts, TextSpan,
-};
+use crate::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
 use crate::tui::{
     layout::{Constraint, Corner, Direction, Layout, Rect},
     style::{Color, Style},
     text::Spans,
     widgets::{Block, BorderType, List, ListItem, ListState, Paragraph},
 };
-use crate::{Frame, Component, Event, Msg, Payload, Value};
+use crate::{Component, Event, Frame, Msg, Payload, Value};
 
 // -- props
 
 const PROP_HIGHLIGHTED_COLOR: &str = "highlighted-color";
 const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_SELECTED: &str = "selected";
+const PROP_CHOICES: &str = "choices";
+const PROP_TITLE: &str = "title";
 
 pub struct SelectPropsBuilder {
     props: Option<Props>,
@@ -155,14 +155,31 @@ impl SelectPropsBuilder {
 
     /// ### with_options
     ///
-    /// Set options and label
-    /// If label is None, no block will be rendered
-    pub fn with_options(&mut self, label: Option<String>, options: Vec<String>) -> &mut Self {
+    /// Set options for radio group
+    pub fn with_options<S: AsRef<str>>(&mut self, options: &[S]) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.texts = TextParts::new(
-                label,
-                Some(options.into_iter().map(TextSpan::from).collect()), // Make textSpan from Strings);
-            )
+            props.own.insert(
+                PROP_CHOICES,
+                PropPayload::Vec(
+                    options
+                        .into_iter()
+                        .map(|x| PropValue::Str(x.as_ref().to_string()))
+                        .collect(),
+                ),
+            );
+        }
+        self
+    }
+
+    /// ### with_title
+    ///
+    /// Set title
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
         }
         self
     }
@@ -224,11 +241,11 @@ impl OwnStates {
 
     /// ### set_choices
     ///
-    /// Set OwnStates choices from a vector of text spans
+    /// Set OwnStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
-    pub fn set_choices(&mut self, spans: &[TextSpan]) {
-        self.choices = spans.iter().map(|x| x.content.clone()).collect();
+    pub fn set_choices(&mut self, choices: &[&str]) {
+        self.choices = choices.iter().map(|x| x.to_string()).collect();
         // Keep index if possible
         if self.selected >= self.choices.len() {
             self.selected = match self.choices.len() {
@@ -275,7 +292,17 @@ impl Select {
         // Make states
         let mut states: OwnStates = OwnStates::default();
         // Update choices (vec of TextSpan to String)
-        states.set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
+        let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
+            Some(PropPayload::Vec(choices)) => choices
+                .iter()
+                .map(|x| match x {
+                    PropValue::Str(s) => s.as_str(),
+                    _ => panic!("Choices is not a vec of Str"),
+                })
+                .collect(),
+            _ => Vec::new(),
+        };
+        states.set_choices(&choices);
         // Get value
         if let Some(PropPayload::One(PropValue::Usize(choice))) = props.own.get(PROP_SELECTED) {
             states.selected = *choice;
@@ -311,11 +338,15 @@ impl Select {
             None => String::default(),
             Some(s) => s.clone(),
         };
+        let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+            Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+            _ => None,
+        };
         let block: Block = Block::default()
             .borders(Borders::LEFT | Borders::TOP | Borders::RIGHT)
             .border_style(self.props.borders.style())
             .style(Style::default().bg(self.props.background));
-        let block: Block = match self.props.texts.title.as_ref() {
+        let block: Block = match title.as_ref() {
             Some(t) => block.title(t.to_string()),
             None => block,
         };
@@ -366,11 +397,11 @@ impl Select {
     ///
     /// Render component when tab is closed
     fn render_closed_tab(&self, render: &mut Frame, area: Rect) {
-        let div: Block = super::utils::get_block(
-            &self.props.borders,
-            &self.props.texts.title,
-            self.states.focus,
-        );
+        let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
+            Some(PropPayload::One(PropValue::Str(t))) => Some(t),
+            _ => None,
+        };
+        let div: Block = super::utils::get_block(&self.props.borders, title, self.states.focus);
         let selected_text: String = match self.states.choices.get(self.states.selected) {
             None => String::default(),
             Some(s) => s.clone(),
@@ -410,8 +441,17 @@ impl Component for Select {
     fn update(&mut self, props: Props) -> Msg {
         let prev_index: usize = self.states.selected;
         // Reset choices
-        self.states
-            .set_choices(props.texts.spans.as_ref().unwrap_or(&Vec::new()));
+        let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
+            Some(PropPayload::Vec(choices)) => choices
+                .iter()
+                .map(|x| match x {
+                    PropValue::Str(s) => s.as_str(),
+                    _ => panic!("Choices is not a vec of Str"),
+                })
+                .collect(),
+            _ => Vec::new(),
+        };
+        self.states.set_choices(&choices);
         // Get value
         if let Some(PropPayload::One(PropValue::Usize(choice))) = props.own.get(PROP_SELECTED) {
             self.states.selected = *choice;
@@ -525,12 +565,7 @@ mod test {
         assert_eq!(states.selected, 0);
         assert_eq!(states.choices.len(), 0);
         assert_eq!(states.tab_open, false);
-        let choices: Vec<TextSpan> = vec![
-            TextSpan::from("lemon"),
-            TextSpan::from("strawberry"),
-            TextSpan::from("vanilla"),
-            TextSpan::from("chocolate"),
-        ];
+        let choices = vec!["lemon", "strawberry", "vanilla", "chocolate"];
         states.set_choices(&choices);
         assert_eq!(states.selected, 0);
         assert_eq!(states.choices.len(), 4);
@@ -559,11 +594,11 @@ mod test {
         states.prev_choice();
         assert_eq!(states.selected, 2);
         // Update
-        let choices: Vec<TextSpan> = vec![TextSpan::from("lemon"), TextSpan::from("strawberry")];
+        let choices = vec!["lemon", "strawberry"];
         states.set_choices(&choices);
         assert_eq!(states.selected, 1); // Move to first index available
         assert_eq!(states.choices.len(), 2);
-        let choices: Vec<TextSpan> = vec![];
+        let choices = vec![];
         states.set_choices(&choices);
         assert_eq!(states.selected, 0); // Move to first index available
         assert_eq!(states.choices.len(), 0);
@@ -581,14 +616,8 @@ mod test {
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_highlighted_color(Color::Red)
                 .with_highlighted_str(Some(">>"))
-                .with_options(
-                    Some(String::from("C'est oui ou bien c'est non?")),
-                    vec![
-                        String::from("Oui!"),
-                        String::from("Non"),
-                        String::from("Peut-être"),
-                    ],
-                )
+                .with_title("C'est oui ou bien c'est non?")
+                .with_options(&["Oui!", "Non", "Peut-être"])
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_value(1)
                 .build(),
@@ -610,6 +639,18 @@ mod test {
         assert_eq!(
             *component.props.own.get(PROP_SELECTED).unwrap(),
             PropPayload::One(PropValue::Usize(1))
+        );
+        assert_eq!(
+            component.props.own.get(PROP_TITLE).unwrap(),
+            &PropPayload::One(PropValue::Str("C'est oui ou bien c'est non?".to_string()))
+        );
+        assert_eq!(
+            component.props.own.get(PROP_CHOICES).unwrap(),
+            &PropPayload::Vec(vec![
+                PropValue::Str(String::from("Oui!")),
+                PropValue::Str(String::from("Non")),
+                PropValue::Str(String::from("Peut-être")),
+            ])
         );
         // Focus
         component.active();

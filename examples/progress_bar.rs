@@ -93,10 +93,8 @@ fn main() {
                 .with_progbar_color(Color::Yellow)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Yellow)
                 .with_progress(0.64)
-                .with_texts(
-                    Some(String::from("Downloading termscp 0.5.0")),
-                    String::from("64.2% - ETA 00:48"),
-                )
+                .with_title("Downloading termscp 0.5.0")
+                .with_label("64.2% - ETA 00:48")
                 .build(),
         )),
     );
@@ -108,10 +106,8 @@ fn main() {
                 .with_progbar_color(Color::LightBlue)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::LightBlue)
                 .with_progress(0.0)
-                .with_texts(
-                    Some(String::from("Downloading termscp 0.6.0")),
-                    String::from("0.0% - ETA --:--"),
-                )
+                .with_title("Downloading termscp 0.5.0")
+                .with_label("0.0% - ETA --:--")
                 .build(),
         )),
     );
