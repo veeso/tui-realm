@@ -35,7 +35,7 @@ use std::time::{Duration, Instant};
 
 use tuirealm::components::{label, list};
 use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::props::{TableBuilder, TextSpan, TextSpanBuilder};
+use tuirealm::props::{TableBuilder, TextSpan};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
@@ -98,99 +98,51 @@ fn main() {
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("andreas")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("andreas").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("1"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("bohdan")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("bohdan").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("2"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("charlie")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("charlie").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("3"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("denis")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("denis").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("4"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("ector")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("ector").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("5"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("frank")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("frank").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("6"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("giulio")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("giulio").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("7"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("hermes")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("hermes").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("8"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("italo")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("italo").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("9"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("lamar")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("lamar").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("10"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("mark")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("mark").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("11"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("napalm")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("napalm").fg(Color::Cyan))
                         .build(),
                 )
                 .build(),
@@ -206,99 +158,51 @@ fn main() {
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("andreas")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("andreas").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("1"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("bohdan")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("bohdan").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("2"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("charlie")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("charlie").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("3"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("denis")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("denis").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("4"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("ector")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("ector").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("5"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("frank")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("frank").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("6"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("giulio")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("giulio").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("7"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("hermes")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("hermes").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("8"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("italo")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("italo").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("9"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("lamar")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("lamar").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("10"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("mark")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("mark").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("11"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("napalm")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("napalm").fg(Color::Cyan))
                         .build(),
                 )
                 .build(),
@@ -317,99 +221,51 @@ fn main() {
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("andreas")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("andreas").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("1"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("bohdan")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("bohdan").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("2"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("charlie")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("charlie").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("3"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("denis")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("denis").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("4"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("ector")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("ector").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("5"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("frank")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("frank").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("6"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("giulio")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("giulio").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("7"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("hermes")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("hermes").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("8"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("italo")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("italo").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("9"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("lamar")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("lamar").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("10"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("mark")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("mark").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("11"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("napalm")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("napalm").fg(Color::Cyan))
                         .build(),
                 )
                 .build(),
@@ -429,99 +285,51 @@ fn main() {
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("andreas")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("andreas").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("1"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("bohdan")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("bohdan").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("2"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("charlie")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("charlie").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("3"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("denis")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("denis").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("4"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("ector")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("ector").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("5"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("frank")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("frank").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("6"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("giulio")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("giulio").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("7"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("hermes")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("hermes").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("8"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("italo")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("italo").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("9"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("lamar")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("lamar").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("10"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("mark")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("mark").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("11"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("napalm")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("napalm").fg(Color::Cyan))
                         .build(),
                 )
                 .build(),

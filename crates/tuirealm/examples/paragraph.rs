@@ -34,7 +34,7 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tuirealm::components::{label, paragraph};
-use tuirealm::props::{TextSpan, TextSpanBuilder};
+use tuirealm::props::TextSpan;
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tui::layout::{Alignment, Constraint, Direction, Layout};
@@ -93,7 +93,7 @@ fn main() {
                 .with_background(Color::White)
                 .with_foreground(Color::Black)
                 .with_texts(Some(String::from("A poem for you")), vec![
-                TextSpanBuilder::new("Lorem ipsum dolor sit amet,").underlined().with_foreground(Color::Green).build(),
+                TextSpan::new("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
                 TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
                 TextSpan::from("Duis augue diam, tempor vitae posuere et, tempus mattis ligula.")
             ])
@@ -109,7 +109,7 @@ fn main() {
                 .with_text_alignment(Alignment::Center)
                 .with_trim(true)
                 .with_texts(Some(String::from("A poem for you")), vec![
-                TextSpanBuilder::new("Lorem ipsum dolor sit amet, ").underlined().with_foreground(Color::Green).build(),
+                TextSpan::new("Lorem ipsum dolor sit amet, ").underlined().fg(Color::Green),
                 TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus Duis augue diam, tempor vitae posuere et, tempus mattis ligula."),
             ])
                 .build(),

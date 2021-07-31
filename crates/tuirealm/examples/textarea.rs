@@ -35,7 +35,7 @@ use std::time::{Duration, Instant};
 
 use tuirealm::components::{label, textarea};
 use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::props::{TextSpan, TextSpanBuilder};
+use tuirealm::props::TextSpan;
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
@@ -97,9 +97,9 @@ fn main() {
                 .with_max_scroll_step(2)
                 .with_texts(Some(String::from("Scrollable textarea")),
                     vec![
-                        TextSpanBuilder::new("About TermSCP").bold().underlined().with_foreground(Color::Yellow).build(),
+                        TextSpan::new("About TermSCP").bold().underlined().fg(Color::Yellow),
                         TextSpan::from("TermSCP is basically a porting of WinSCP to terminal. So basically is a terminal utility with an TUI to connect to a remote server to retrieve and upload files and to interact with the local file system. It works both on Linux, MacOS, BSD and Windows and supports SFTP, SCP, FTP and FTPS."),
-                        TextSpanBuilder::new("Why TermSCP 🤔").bold().underlined().with_foreground(Color::Cyan).build(),
+                        TextSpan::new("Why TermSCP 🤔").bold().underlined().fg(Color::Cyan),
                         TextSpan::from("It happens quite often to me, when using SCP at work to forget the path of a file on a remote machine, which forces me to connect through SSH, gather the file path and finally download it through SCP. I could use WinSCP, but I use Linux and I pratically use the terminal for everything, so I wanted something like WinSCP on my terminal. Yeah, I know there is midnight commander too, but actually I don't like it very much tbh (and hasn't a decent support for scp)."),
                         TextSpan::from("Lorde ~ Green Light"),
                         TextSpan::from("I do my makeup in somebody else's car We order different drinks at the same bars I know about what you did and I wanna scream the truth She thinks you love the beach, you're such a damn liar ")
@@ -119,9 +119,9 @@ fn main() {
                 .with_highlighted_str(Some("🎵"))
                 .with_texts(Some(String::from("Scrollable textarea")),
                     vec![
-                        TextSpanBuilder::new("About TermSCP").bold().underlined().with_foreground(Color::Yellow).build(),
+                        TextSpan::new("About TermSCP").bold().underlined().fg(Color::Yellow),
                         TextSpan::from("TermSCP is basically a porting of WinSCP to terminal. So basically is a terminal utility with an TUI to connect to a remote server to retrieve and upload files and to interact with the local file system. It works both on Linux, MacOS, BSD and Windows and supports SFTP, SCP, FTP and FTPS."),
-                        TextSpanBuilder::new("Why TermSCP 🤔").bold().underlined().with_foreground(Color::Cyan).build(),
+                        TextSpan::new("Why TermSCP 🤔").bold().underlined().fg(Color::Cyan),
                         TextSpan::from("It happens quite often to me, when using SCP at work to forget the path of a file on a remote machine, which forces me to connect through SSH, gather the file path and finally download it through SCP. I could use WinSCP, but I use Linux and I pratically use the terminal for everything, so I wanted something like WinSCP on my terminal. Yeah, I know there is midnight commander too, but actually I don't like it very much tbh (and hasn't a decent support for scp)."),
                         TextSpan::from("Lorde ~ Green Light"),
                         TextSpan::from("I do my makeup in somebody else's car We order different drinks at the same bars I know about what you did and I wanna scream the truth She thinks you love the beach, you're such a damn liar ")

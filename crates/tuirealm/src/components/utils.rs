@@ -148,7 +148,6 @@ mod test {
 
     use super::*;
     use crate::props::builder::PropsBuilder;
-    use crate::props::TextSpanBuilder;
     use crate::tui::widgets::{BorderType, Borders};
     use crate::GenericPropsBuilder;
 
@@ -194,11 +193,10 @@ mod test {
             .with_foreground(Color::Red)
             .with_background(Color::White)
             .build();
-        let span: TextSpan = TextSpanBuilder::new("test")
+        let span: TextSpan = TextSpan::from("test")
             .underlined()
-            .with_foreground(Color::Yellow)
-            .with_background(Color::Cyan)
-            .build();
+            .fg(Color::Yellow)
+            .bg(Color::Cyan);
         // Not-default
         let (fg, bg, modifiers) = use_or_default_styles(&props, &span);
         assert_eq!(fg, Color::Yellow);

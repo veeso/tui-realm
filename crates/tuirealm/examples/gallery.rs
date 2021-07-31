@@ -41,7 +41,7 @@ use tuirealm::components::{
     checkbox, input, label, list, paragraph, progress_bar, radio, span, textarea,
 };
 use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::props::{TableBuilder, TextSpan, TextSpanBuilder};
+use tuirealm::props::{TableBuilder, TextSpan};
 use tuirealm::{InputType, Msg, PropPayload, PropValue, PropsBuilder, Update, View};
 // tui
 use tui::layout::{Constraint, Direction, Layout};
@@ -189,7 +189,7 @@ fn init_view() -> View {
             .with_foreground(Color::Black)
             .with_borders(Borders::ALL, BorderType::Rounded, Color::Gray)
             .with_texts(Some(String::from("A poem for you")), vec![
-                TextSpanBuilder::new("Lorem ipsum dolor sit amet").underlined().with_foreground(Color::Green).build(),
+                TextSpan::new("Lorem ipsum dolor sit amet").underlined().fg(Color::Green),
                 TextSpan::from(", consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
                 TextSpan::from("Duis augue diam, tempor vitae posuere et, tempus mattis ligula.")
             ])
@@ -246,18 +246,16 @@ fn init_view() -> View {
                 .with_background(Color::Black)
                 .with_spans(vec![
                     TextSpan::from("THIS IS A SPAN: "),
-                    TextSpanBuilder::new("Hello ")
+                    TextSpan::new("Hello ")
                         .italic()
                         .slow_blink()
-                        .with_foreground(Color::Black)
-                        .with_background(Color::White)
-                        .build(),
-                    TextSpanBuilder::new("World!")
+                        .fg(Color::Black)
+                        .bg(Color::White),
+                    TextSpan::new("World!")
                         .bold()
                         .underlined()
                         .rapid_blink()
-                        .with_foreground(Color::Red)
-                        .build(),
+                        .fg(Color::Red),
                 ])
                 .build(),
         )),
@@ -277,99 +275,51 @@ fn init_view() -> View {
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("andreas")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("andreas").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("1"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("bohdan")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("bohdan").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("2"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("charlie")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("charlie").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("3"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("denis")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("denis").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("4"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("ector")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("ector").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("5"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("frank")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("frank").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("6"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("giulio")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("giulio").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("7"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("hermes")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("hermes").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("8"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("italo")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("italo").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("9"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("lamar")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("lamar").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("10"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("mark")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("mark").fg(Color::Cyan))
                         .add_row()
                         .add_col(TextSpan::from("11"))
                         .add_col(TextSpan::from(" "))
-                        .add_col(
-                            TextSpanBuilder::new("napalm")
-                                .with_foreground(Color::Cyan)
-                                .build(),
-                        )
+                        .add_col(TextSpan::new("napalm").fg(Color::Cyan))
                         .build(),
                 )
                 .build(),
@@ -425,9 +375,9 @@ fn init_view() -> View {
                 .with_max_scroll_step(3)
                 .with_texts(Some(String::from("Scrollable textarea")),
                     vec![
-                        TextSpanBuilder::new("About TermSCP").bold().underlined().with_foreground(Color::Yellow).build(),
+                        TextSpan::new("About TermSCP").bold().underlined().fg(Color::Yellow),
                         TextSpan::from("TermSCP is basically a porting of WinSCP to terminal. So basically is a terminal utility with an TUI to connect to a remote server to retrieve and upload files and to interact with the local file system. It works both on Linux, MacOS, BSD and Windows and supports SFTP, SCP, FTP and FTPS."),
-                        TextSpanBuilder::new("Why TermSCP 🤔").bold().underlined().with_foreground(Color::Cyan).build(),
+                        TextSpan::new("Why TermSCP 🤔").bold().underlined().fg(Color::Cyan),
                         TextSpan::from("It happens quite often to me, when using SCP at work to forget the path of a file on a remote machine, which forces me to connect through SSH, gather the file path and finally download it through SCP. I could use WinSCP, but I use Linux and I pratically use the terminal for everything, so I wanted something like WinSCP on my terminal. Yeah, I know there is midnight commander too, but actually I don't like it very much tbh (and hasn't a decent support for scp)."),
                         TextSpan::from("Lorde ~ Green Light"),
                         TextSpan::from("I do my makeup in somebody else's car We order different drinks at the same bars I know about what you did and I wanna scream the truth She thinks you love the beach, you're such a damn liar ")

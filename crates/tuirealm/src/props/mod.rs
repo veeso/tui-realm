@@ -40,7 +40,7 @@ pub mod texts;
 pub use borders::{Borders, BordersProps};
 pub use builder::{GenericPropsBuilder, PropsBuilder};
 pub use dataset::Dataset;
-pub use texts::{Table, TableBuilder, TextParts, TextSpan, TextSpanBuilder};
+pub use texts::{Table, TableBuilder, TextParts, TextSpan};
 pub use tui::layout::Alignment;
 
 // -- Props
