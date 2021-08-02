@@ -28,7 +28,7 @@ use utils::keymap::*;
 use std::path::{Path, PathBuf};
 use std::thread::sleep;
 use std::time::Duration;
-use tuirealm::components::{input, label};
+use tui_realm_stdlib::{input, label};
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::{Msg, Payload, PropsBuilder, Update, Value, View};
 // tui
@@ -158,7 +158,7 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
                 .with_background(Color::Black)
-                .with_title(Some(title))
+                .with_title(title)
                 .with_tree(model.tree.root())
                 .with_highlighted_str("🚀")
                 .keep_state(true)
@@ -240,7 +240,7 @@ impl Update for Model {
                         self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
                     )
                     .with_tree(self.tree.root())
-                    .with_title(Some(String::from(self.path.to_string_lossy())))
+                    .with_title(self.path.to_string_lossy())
                     .build();
                     let msg = self.view.update(COMPONENT_TREEVIEW, props);
                     self.update(msg)
@@ -257,7 +257,7 @@ impl Update for Model {
                                 self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
                             )
                             .with_tree(self.tree.root())
-                            .with_title(Some(String::from(self.path.to_string_lossy())))
+                            .with_title(self.path.to_string_lossy())
                             .build();
                             let msg = self.view.update(COMPONENT_TREEVIEW, props);
                             self.update(msg)
@@ -272,7 +272,7 @@ impl Update for Model {
                         self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
                     )
                     .with_tree(self.tree.root())
-                    .with_title(Some(String::from(self.path.to_string_lossy())))
+                    .with_title(self.path.to_string_lossy())
                     .build();
                     let msg = self.view.update(COMPONENT_TREEVIEW, props);
                     self.update(msg)

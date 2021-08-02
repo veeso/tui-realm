@@ -8,7 +8,7 @@
 //! ### Adding `tui-realm-treeview` as dependency
 //!
 //! ```toml
-//! tui-realm-treeview = "0.2.0"
+//! tui-realm-treeview = "0.2.1"
 //! ```
 //!
 //! ## Setup a tree component
@@ -49,7 +49,7 @@
 //!             .with_borders(Borders::ALL, BorderType::Double, Color::LightYellow)
 //!             .with_background(Color::Black)
 //!             .with_foreground(Color::LightYellow)
-//!             .with_title(Some(String::from("/dev/sda")))
+//!             .with_title("/dev/sda")
 //!             .with_highlighted_str("🚀")
 //!             .with_tree(tree.root())
 //!             .build(),
@@ -127,8 +127,8 @@ use tuirealm::tui::{
 };
 use tuirealm::{
     event::{Event, KeyCode},
-    props::{BordersProps, TextParts, TextSpan},
-    Canvas, Component, Msg, Payload, PropPayload, PropValue, Props, PropsBuilder, Value,
+    props::BordersProps,
+    Component, Frame, Msg, Payload, PropPayload, PropValue, Props, PropsBuilder, Value,
 };
 
 // -- structs
@@ -634,6 +634,8 @@ const PROP_TREE: &str = "tree";
 const PROP_INITIAL_NODE: &str = "initial_node";
 const PROP_KEEP_STATE: &str = "keep_state";
 const PROP_MAX_STEPS: &str = "max_steps";
+const PROP_TITLE: &str = "title";
+const PROP_HG_STR: &str = "hg-str";
 
 /// ## TreeViewPropsBuilder
 ///
@@ -720,10 +722,12 @@ impl TreeViewPropsBuilder {
     /// ### with_title
     ///
     /// Set box title
-    pub fn with_title(&mut self, title: Option<String>) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            let spans = props.texts.spans.clone();
-            props.texts = TextParts::new(title, spans);
+            props.own.insert(
+                PROP_TITLE,
+                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
+            );
         }
         self
     }
@@ -731,11 +735,12 @@ impl TreeViewPropsBuilder {
     /// ### with_highlighted_str
     ///
     /// The provided string will be displayed on the left side of the selected entry in the tree
-    pub fn with_highlighted_str(&mut self, s: &str) -> &mut Self {
+    pub fn with_highlighted_str<S: AsRef<str>>(&mut self, s: S) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            let title = props.texts.title.clone();
-            let spans = vec![TextSpan::from(s)];
-            props.texts = TextParts::new(title, Some(spans));
+            props.own.insert(
+                PROP_HG_STR,
+                PropPayload::One(PropValue::Str(s.as_ref().to_string())),
+            );
         }
         self
     }
@@ -839,9 +844,9 @@ impl<'a> TreeView<'a> {
             })
             .border_type(self.props.borders.variant);
         // Set title
-        match self.props.texts.title.as_ref() {
-            Some(t) => div.title(t.to_string()),
-            None => div,
+        match self.props.own.get(PROP_TITLE).as_ref() {
+            Some(PropPayload::One(PropValue::Str(t))) => div.title(t.to_string()),
+            _ => div,
         }
     }
 }
@@ -851,7 +856,7 @@ impl<'a> Component for TreeView<'a> {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Canvas, area: Rect) {
+    fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
             // Make colors
             let (bg, fg): (Color, Color) = match &self.states.focus {
@@ -865,10 +870,10 @@ impl<'a> Component for TreeView<'a> {
                 .block(block)
                 .highlight_style(Style::default().fg(fg).bg(bg).add_modifier(Modifier::BOLD));
             // Highlighted symbol
-            if let Some(spans) = self.props.texts.spans.as_ref() {
-                if let Some(span) = spans.get(0) {
-                    tree = tree.highlight_symbol(&span.content);
-                }
+            if let Some(PropPayload::One(PropValue::Str(s))) =
+                self.props.own.get(PROP_HG_STR).as_ref()
+            {
+                tree = tree.highlight_symbol(s);
             }
             render.render_stateful_widget(tree, area, &mut self.states.get_tui_tree_state());
         }
@@ -1309,7 +1314,7 @@ mod tests {
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_background(Color::White)
                 .with_foreground(Color::Red)
-                .with_title(Some(String::from("C:\\")))
+                .with_title("C:\\")
                 .with_highlighted_str(">>")
                 .with_tree(tree.root())
                 .keep_state(false)
@@ -1339,7 +1344,7 @@ mod tests {
         // Update
         let props = TreeViewPropsBuilder::from(component.get_props())
             .with_foreground(Color::Yellow)
-            .with_title(Some(String::from("aaa")))
+            .with_title("aaa")
             .hidden()
             .with_node(None)
             .build();
@@ -1349,15 +1354,30 @@ mod tests {
         );
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Yellow);
-        assert_eq!(component.props.texts.title.as_ref().unwrap(), "aaa");
+        assert_eq!(
+            *component
+                .props
+                .own
+                .get(PROP_TITLE)
+                .as_ref()
+                .unwrap()
+                .unwrap_one()
+                .unwrap_str(),
+            "aaa"
+        );
         assert_eq!(
             component.get_state(),
             Payload::One(Value::Str(String::from("/")))
         );
         assert_eq!(
-            component.props.texts.spans.as_ref().unwrap()[0]
-                .content
-                .as_str(),
+            *component
+                .props
+                .own
+                .get(PROP_HG_STR)
+                .as_ref()
+                .unwrap()
+                .unwrap_one()
+                .unwrap_str(),
             ">>"
         );
         // Events

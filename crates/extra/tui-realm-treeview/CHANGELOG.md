@@ -1,11 +1,18 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.2.1](#021)
   - [0.2.0](#020)
   - [0.1.1](#011)
   - [0.1.0](#010)
 
 ---
+
+## 0.2.1
+
+Released on 02/08/2021
+
+- tui-realm 0.5.1 compatibility
 
 ## 0.2.0
 
