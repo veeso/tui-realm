@@ -28,7 +28,7 @@
  * SOFTWARE.
  */
 use super::borders::{BorderType, Borders};
-use super::{PropPayload, Props};
+use super::{Alignment, BlockTitle, PropPayload, Props};
 
 use tui::style::{Color, Modifier};
 
@@ -136,6 +136,16 @@ impl GenericPropsBuilder {
             props.borders.borders = borders;
             props.borders.variant = variant;
             props.borders.color = color;
+        }
+        self
+    }
+
+    /// ### with_title
+    ///
+    /// Set title to element
+    pub fn with_title<S: AsRef<str>>(&mut self, text: S, alignment: Alignment) -> &mut Self {
+        if let Some(props) = self.props.as_mut() {
+            props.title = Some(BlockTitle::new(text, alignment));
         }
         self
     }
@@ -254,6 +264,7 @@ mod test {
             .rapid_blink()
             .slow_blink()
             .with_custom_color("arrows", Color::Red)
+            .with_title("Omar", Alignment::Center)
             .with_value(
                 "input",
                 PropPayload::One(PropValue::Str(String::from("Hello"))),
@@ -263,6 +274,8 @@ mod test {
         assert_eq!(props.borders.borders, Borders::BOTTOM);
         assert_eq!(props.borders.color, Color::White);
         assert_eq!(props.borders.variant, BorderType::Plain);
+        assert_eq!(props.title.as_ref().unwrap().text(), "Omar");
+        assert_eq!(props.title.as_ref().unwrap().alignment(), Alignment::Center);
         assert!(props.modifiers.intersects(Modifier::BOLD));
         assert!(props.modifiers.intersects(Modifier::ITALIC));
         assert!(props.modifiers.intersects(Modifier::UNDERLINED));
