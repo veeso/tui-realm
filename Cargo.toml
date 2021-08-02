@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm"
-version = "0.5.1"
+version = "0.5.2"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]
@@ -14,8 +14,8 @@ readme = "README.md"
 repository = "https://github.com/veeso/tui-realm"
 
 [dependencies]
-tui = { version = "0.15.0", default-features = false, features = ["crossterm"] }
-crossterm = { version = "0.19" }
+tui = { version = "0.16.0", default-features = false, features = ["crossterm"] }
+crossterm = { version = "0.20" }
 
 [dev-dependencies]
 pretty_assertions = "0.7.2"
