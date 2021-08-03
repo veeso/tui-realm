@@ -269,8 +269,14 @@ pub enum PropValue {
     F64(f64),
     F32(f32),
     Str(String),
-    Color(Color),
+    // -- tui props
+    Alignment(Alignment),
+    Dataset(Dataset),
     InputType(InputType),
+    Shape(Shape),
+    Style(Style),
+    Table(Table),
+    TextSpan(TextSpan),
 }
 ```
 

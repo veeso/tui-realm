@@ -1,6 +1,6 @@
-//! ## Keymap
+//! ## Title
 //!
-//! Keymap contains pub constants which can be used in the `update` function to match messages
+//! `title` is the module which defines properties for block title
 
 /**
  * MIT License
@@ -25,19 +25,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-extern crate crossterm;
-extern crate tuirealm;
-use tuirealm::event::{KeyCode, KeyEvent, KeyModifiers};
-use tuirealm::Msg;
+use super::Alignment;
 
-// -- keys
+/// ## BlockTitle
+///
+/// Title properties for block containing the component
+#[derive(Clone)]
+pub struct BlockTitle {
+    text: String,
+    alignment: Alignment,
+}
 
-pub const MSG_KEY_ESC: Msg = Msg::OnKey(KeyEvent {
-    code: KeyCode::Esc,
-    modifiers: KeyModifiers::NONE,
-});
-#[allow(dead_code)]
-pub const MSG_KEY_TAB: Msg = Msg::OnKey(KeyEvent {
-    code: KeyCode::Tab,
-    modifiers: KeyModifiers::NONE,
-});
+impl BlockTitle {
+    pub fn new<S: AsRef<str>>(text: S, alignment: Alignment) -> Self {
+        Self {
+            text: text.as_ref().to_string(),
+            alignment,
+        }
+    }
+
+    /// ### text
+    ///
+    /// get text alignment
+    pub fn text(&self) -> &str {
+        self.text.as_str()
+    }
+
+    /// ### alignment
+    ///
+    /// get block alignment
+    pub fn alignment(&self) -> Alignment {
+        self.alignment
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_props_title() {
+        let title: BlockTitle = BlockTitle::new("Omar", Alignment::Center);
+        assert_eq!(title.text(), "Omar");
+        assert_eq!(title.alignment, Alignment::Center); // not dropped
+        assert_eq!(title.alignment, Alignment::Center); // not dropped
+    }
+}

@@ -35,12 +35,14 @@ pub mod borders;
 pub mod builder;
 pub mod dataset;
 pub mod texts;
+pub mod title;
 
 // Exports
 pub use borders::{Borders, BordersProps};
 pub use builder::{GenericPropsBuilder, PropsBuilder};
 pub use dataset::Dataset;
 pub use texts::{Table, TableBuilder, TextSpan};
+pub use title::BlockTitle;
 pub use tui::layout::Alignment;
 
 // -- Props
@@ -51,10 +53,11 @@ pub use tui::layout::Alignment;
 #[derive(Clone)]
 pub struct Props {
     // Values
-    pub visible: bool,         // Is the element visible ON CREATE?
-    pub foreground: Color,     // Foreground color
-    pub background: Color,     // Background color
-    pub borders: BordersProps, // Borders
+    pub visible: bool,             // Is the element visible ON CREATE?
+    pub foreground: Color,         // Foreground color
+    pub background: Color,         // Background color
+    pub borders: BordersProps,     // Borders
+    pub title: Option<BlockTitle>, // Block title
     pub modifiers: Modifier,
     pub palette: HashMap<&'static str, Color>, // Use palette to store extra colors
     pub own: HashMap<&'static str, PropPayload>, // Own properties (extra)
@@ -68,6 +71,7 @@ impl Default for Props {
             foreground: Color::Reset,
             background: Color::Reset,
             borders: BordersProps::default(),
+            title: None,
             modifiers: Modifier::empty(),
             palette: HashMap::new(),
             own: HashMap::new(),
@@ -503,6 +507,7 @@ mod tests {
         assert_eq!(props.borders.borders, Borders::ALL);
         assert_eq!(props.borders.color, Color::Reset);
         assert_eq!(props.borders.variant, BorderType::Plain);
+        assert_eq!(props.title.is_none(), true);
         assert_eq!(props.modifiers, Modifier::empty());
         assert_eq!(props.palette.len(), 0);
         assert_eq!(props.own.len(), 0);
