@@ -19,7 +19,7 @@
 
 ## 0.6.0
 
-Released on ??
+Released on 03/08/2021
 
 - ❗ Compatibility with tui `0.16` and crossterm `0.20` ❗
   - You can now set the block title alignment
