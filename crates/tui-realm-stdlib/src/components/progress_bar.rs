@@ -25,7 +25,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -37,7 +39,6 @@ use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 const PROP_PROGRESS: &str = "progress";
 const PROP_LABEL: &str = "label";
-const PROP_TITLE: &str = "title";
 
 pub struct ProgressBarPropsBuilder {
     props: Option<Props>,
@@ -120,12 +121,9 @@ impl ProgressBarPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -188,10 +186,6 @@ impl Component for ProgressBar {
         // Make a Span
         if self.props.visible {
             // Text
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
             let label: String = match self.props.own.get(PROP_LABEL).as_ref() {
                 Some(PropPayload::One(PropValue::Str(t))) => t.to_string(),
                 _ => String::default(),
@@ -201,7 +195,8 @@ impl Component for ProgressBar {
                 Some(PropPayload::One(PropValue::F64(ratio))) => *ratio,
                 _ => 0.0,
             };
-            let div: Block = crate::utils::get_block(&self.props.borders, title, true);
+            let div: Block =
+                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), true);
             // Make progress bar
             render.render_widget(
                 Gauge::default()
@@ -289,7 +284,7 @@ mod test {
                 .with_progress(0.60)
                 .with_progbar_color(Color::Red)
                 .with_background(Color::Blue)
-                .with_title("Downloading file...")
+                .with_title("Downloading file...", Alignment::Center)
                 .with_label("60% - ETA: 00:20")
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .build(),
@@ -299,8 +294,12 @@ mod test {
             PropPayload::One(PropValue::Str(String::from("60% - ETA: 00:20")))
         );
         assert_eq!(
-            *component.props.own.get(PROP_TITLE).unwrap(),
-            PropPayload::One(PropValue::Str(String::from("Downloading file...")))
+            component.props.title.as_ref().unwrap().text(),
+            "Downloading file..."
+        );
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
         );
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.background, Color::Blue);

@@ -28,7 +28,9 @@
  */
 use crate::utils::calc_utf8_cursor_position;
 use tuirealm::event::{Event, KeyCode, KeyModifiers};
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -40,7 +42,6 @@ use tuirealm::{Component, Frame, InputType, Msg, Payload, Value};
 const PROP_VALUE: &str = "value";
 const PROP_INPUT_TYPE: &str = "input_type";
 const PROP_INPUT_LENGHT: &str = "input_length";
-const PROP_LABEL: &str = "label";
 
 pub struct InputPropsBuilder {
     props: Option<Props>,
@@ -123,12 +124,9 @@ impl InputPropsBuilder {
     /// ### with_label
     ///
     /// Set input label
-    pub fn with_label<S: AsRef<str>>(&mut self, text: S) -> &mut Self {
+    pub fn with_label<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_LABEL,
-                PropPayload::One(PropValue::Str(text.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -345,14 +343,13 @@ impl Component for Input {
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
-            let title: Option<&str> = match self.props.own.get(PROP_LABEL).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let div: Block = crate::utils::get_block(&self.props.borders, title, self.states.focus);
+            let div: Block = crate::utils::get_block(
+                &self.props.borders,
+                self.props.title.as_ref(),
+                self.states.focus,
+            );
             let p: Paragraph =
                 Paragraph::new(self.states.render_value(Self::get_input_type(&self.props)))
                     .style(match self.states.focus {
@@ -584,6 +581,7 @@ mod tests {
                 .visible()
                 .with_input_len(5)
                 .with_value(String::from("home"))
+                .with_label("input", Alignment::Center)
                 .with_foreground(Color::Red)
                 .with_background(Color::White)
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
@@ -595,6 +593,11 @@ mod tests {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(component.props.title.as_ref().unwrap().text(), "input");
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
+        );
         assert_eq!(
             *component.props.own.get(PROP_VALUE).unwrap(),
             PropPayload::One(PropValue::Str(String::from("home")))

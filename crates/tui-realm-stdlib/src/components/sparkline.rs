@@ -26,7 +26,9 @@ use std::collections::LinkedList;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -37,7 +39,6 @@ use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 // -- Props
 const PROP_DATA: &str = "data";
 const PROP_MAX_ENTRIES: &str = "max-bars";
-const PROP_TITLE: &str = "title";
 
 pub struct SparklinePropsBuilder {
     props: Option<Props>,
@@ -120,12 +121,9 @@ impl SparklinePropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -280,11 +278,8 @@ impl Component for Sparkline {
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let block: Block = crate::utils::get_block(&self.props.borders, title, true);
+            let block: Block =
+                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), true);
             // Get max elements
             let data_max_len: u64 = self
                 .props
@@ -380,7 +375,7 @@ mod test {
                 .visible()
                 .with_background(Color::White)
                 .with_foreground(Color::Black)
-                .with_title(String::from("bandwidth"))
+                .with_title("bandwidth", Alignment::Center)
                 .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
                 .with_max_entries(8)
                 .with_data(&[
@@ -394,6 +389,11 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Yellow);
+        assert_eq!(component.props.title.as_ref().unwrap().text(), "bandwidth");
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
+        );
         assert_eq!(
             *component.props.own.get(PROP_MAX_ENTRIES).unwrap(),
             PropPayload::One(PropValue::U64(8))

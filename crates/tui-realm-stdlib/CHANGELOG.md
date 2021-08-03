@@ -1,9 +1,18 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.6.0](#060)
   - [0.5.0](#050)
 
 ---
+
+## 0.6.0
+
+Released on 03/08/2021
+
+- Compatibility with `tui-realm 0.6.0`
+- ❗ Breaking changes ❗
+  - from now on `with_title` functions takes both title text and alignment
 
 ## 0.5.0
 

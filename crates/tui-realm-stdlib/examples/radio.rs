@@ -34,7 +34,10 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tui_realm_stdlib::components::{label, radio};
-use tuirealm::props::borders::{BorderType, Borders};
+use tuirealm::props::{
+    borders::{BorderType, Borders},
+    Alignment,
+};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -91,7 +94,7 @@ fn main() {
             radio::RadioPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_color(Color::LightYellow)
-                .with_title("Select flavour")
+                .with_title("Select flavour", Alignment::Center)
                 .with_options(&[
                     "vanilla".to_string(),
                     "chocolate".to_string(),
@@ -107,7 +110,7 @@ fn main() {
             radio::RadioPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Black)
                 .with_color(Color::Black)
-                .with_title("Select flavour")
+                .with_title("Select flavour", Alignment::Center)
                 .rewind(true)
                 .with_options(&[
                     "vanilla".to_string(),
@@ -180,15 +183,15 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_RADIO, &MSG_KEY_TAB) => {
+                (COMPONENT_RADIO, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_RADIO_INVERTED);
                     None
                 }
-                (COMPONENT_RADIO_INVERTED, &MSG_KEY_TAB) => {
+                (COMPONENT_RADIO_INVERTED, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_RADIO);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

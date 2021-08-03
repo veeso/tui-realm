@@ -26,7 +26,9 @@
  * SOFTWARE.
  */
 use tuirealm::event::{Event, KeyCode};
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -38,7 +40,6 @@ use tuirealm::{Component, Frame, Msg, Payload, Value};
 const PROP_CHOICES: &str = "choices";
 const PROP_REWIND: &str = "rewind";
 const PROP_SELECTED: &str = "selected";
-const PROP_TITLE: &str = "title";
 
 // -- Props
 
@@ -143,12 +144,9 @@ impl CheckboxPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -353,12 +351,11 @@ impl Component for Checkbox {
                     ])
                 })
                 .collect();
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let block: Block =
-                crate::utils::get_block(&self.props.borders, title, self.states.focus);
+            let block: Block = crate::utils::get_block(
+                &self.props.borders,
+                self.props.title.as_ref(),
+                self.states.focus,
+            );
             let checkbox: Tabs = Tabs::new(choices)
                 .block(block)
                 .select(self.states.choice)
@@ -554,7 +551,7 @@ mod test {
         // Make component
         let mut component: Checkbox = Checkbox::new(
             CheckboxPropsBuilder::default()
-                .with_title("Which food do you prefer?")
+                .with_title("Which food do you prefer?", Alignment::Center)
                 .with_options(&["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta", "Falafel"])
                 .visible()
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
@@ -571,6 +568,14 @@ mod test {
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
         assert_eq!(
+            component.props.title.as_ref().unwrap().text(),
+            "Which food do you prefer?"
+        );
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
+        );
+        assert_eq!(
             *component
                 .props
                 .own
@@ -583,10 +588,6 @@ mod test {
         assert_eq!(
             *component.props.own.get(PROP_SELECTED).unwrap(),
             PropPayload::Vec(vec![PropValue::Usize(1), PropValue::Usize(5)])
-        );
-        assert_eq!(
-            component.props.own.get(PROP_TITLE).unwrap(),
-            &PropPayload::One(PropValue::Str("Which food do you prefer?".to_string()))
         );
         assert_eq!(
             component.props.own.get(PROP_CHOICES).unwrap(),

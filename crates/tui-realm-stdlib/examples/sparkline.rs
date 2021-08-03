@@ -40,7 +40,10 @@ use tui_realm_stdlib::components::{
     label,
     sparkline::{Sparkline, SparklinePropsBuilder},
 };
-use tuirealm::props::borders::{BorderType, Borders};
+use tuirealm::props::{
+    borders::{BorderType, Borders},
+    Alignment,
+};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -110,7 +113,10 @@ fn main() {
             SparklinePropsBuilder::default()
                 .visible()
                 .with_foreground(Color::LightYellow)
-                .with_title(String::from("bandwidth (Mbps) *data is fake*"))
+                .with_title(
+                    String::from("bandwidth (Mbps) *data is fake*"),
+                    Alignment::Center,
+                )
                 .with_borders(Borders::ALL, BorderType::Thick, Color::LightYellow)
                 .with_data(&data)
                 .build(),
@@ -182,7 +188,7 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

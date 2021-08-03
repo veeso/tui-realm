@@ -9,7 +9,7 @@
 [![Build](https://github.com/veeso/tui-realm-stdlib/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm-stdlib/actions) [![Build](https://github.com/veeso/tui-realm-stdlib/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm-stdlib/actions) [![Build](https://github.com/veeso/tui-realm-stdlib/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm-stdlib/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm-stdlib/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm-stdlib?branch=main)
 
 Developed by Christian Visintin  
-Current version: 0.5.0 (31/07/2021)
+Current version: 0.6.0 (03/08/2021)
 
 ---
 
@@ -55,19 +55,19 @@ tui-realm-stdlib is the standard component library for [tui-realm](https://githu
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
-tui-realm-stdlib = "0.5.0"
+tui-realm-stdlib = "0.6.0"
 ```
 
 Since this library requires `crossterm` too, you'll also need to add it to your Cargo.toml
 
 ```toml
-crossterm = "0.19.0"
+crossterm = "0.20.0"
 ```
 
-Latest version of tui-realm-stdlib requires **tui-realm 0.5.1**
+Latest version of tui-realm-stdlib requires **tui-realm 0.6.0**
 
 ```toml
-tuirealm = "0.5.1"
+tuirealm = "0.6.0"
 ```
 
 ## Examples

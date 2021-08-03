@@ -34,7 +34,10 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tui_realm_stdlib::components::{checkbox, label};
-use tuirealm::props::borders::{BorderType, Borders};
+use tuirealm::props::{
+    borders::{BorderType, Borders},
+    Alignment,
+};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -91,7 +94,7 @@ fn main() {
             checkbox::CheckboxPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_color(Color::LightYellow)
-                .with_title("Select flavour")
+                .with_title("Select flavour", Alignment::Left)
                 .with_options(&["vanilla", "chocolate", "coconut", "hazelnut"])
                 .build(),
         )),
@@ -102,7 +105,7 @@ fn main() {
             checkbox::CheckboxPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Black)
                 .with_color(Color::Black)
-                .with_title("Select flavour")
+                .with_title("Select flavour", Alignment::Right)
                 .with_options(&["vanilla", "chocolate", "coconut", "hazelnut"])
                 .rewind(true)
                 .build(),
@@ -170,15 +173,15 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_CHECKBOX, &MSG_KEY_TAB) => {
+                (COMPONENT_CHECKBOX, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_CHECKBOX_INVERTED);
                     None
                 }
-                (COMPONENT_CHECKBOX_INVERTED, &MSG_KEY_TAB) => {
+                (COMPONENT_CHECKBOX_INVERTED, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_CHECKBOX);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

@@ -34,7 +34,10 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tui_realm_stdlib::components::{input, label};
-use tuirealm::props::borders::{BorderType, Borders};
+use tuirealm::props::{
+    borders::{BorderType, Borders},
+    Alignment,
+};
 use tuirealm::{InputType, Msg, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -94,7 +97,7 @@ fn main() {
                 .with_foreground(Color::LightCyan)
                 .with_input(InputType::Text)
                 .with_input_len(16)
-                .with_label(String::from("text input len 16"))
+                .with_label(String::from("text input len 16"), Alignment::Left)
                 .build(),
         )),
     );
@@ -105,7 +108,7 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
                 .with_input(InputType::Number)
-                .with_label(String::from("number"))
+                .with_label(String::from("number"), Alignment::Left)
                 .build(),
         )),
     );
@@ -116,7 +119,7 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightBlue)
                 .with_foreground(Color::LightBlue)
                 .with_input(InputType::Password)
-                .with_label(String::from("password"))
+                .with_label(String::from("password"), Alignment::Left)
                 .build(),
         )),
     );
@@ -184,19 +187,19 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_INPUT_TEXT, &MSG_KEY_TAB) => {
+                (COMPONENT_INPUT_TEXT, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_INPUT_NUMBER);
                     None
                 }
-                (COMPONENT_INPUT_NUMBER, &MSG_KEY_TAB) => {
+                (COMPONENT_INPUT_NUMBER, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_INPUT_PASSWORD);
                     None
                 }
-                (COMPONENT_INPUT_PASSWORD, &MSG_KEY_TAB) => {
+                (COMPONENT_INPUT_PASSWORD, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_INPUT_TEXT);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

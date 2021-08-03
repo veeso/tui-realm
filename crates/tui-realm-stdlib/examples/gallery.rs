@@ -40,7 +40,7 @@ use tui_realm_stdlib::components::{
     checkbox, input, label, list, paragraph, progress_bar, radio, span, textarea,
 };
 use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::props::{TableBuilder, TextSpan};
+use tuirealm::props::{Alignment, TableBuilder, TextSpan};
 use tuirealm::{InputType, Msg, PropPayload, PropValue, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -133,7 +133,7 @@ fn init_view() -> View {
                 .with_color(Color::Cyan)
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Magenta)
                 .with_value(vec![1])
-                .with_title("Select ice-cream flavours")
+                .with_title("Select ice-cream flavours", Alignment::Left)
                 .with_options(&[
                     "Vanilla",
                     "Chocolate",
@@ -154,7 +154,10 @@ fn init_view() -> View {
                 .with_foreground(Color::LightYellow)
                 .with_input(InputType::Text)
                 .with_input_len(16)
-                .with_label(String::from("Type in your username (max length 16)"))
+                .with_label(
+                    String::from("Type in your username (max length 16)"),
+                    Alignment::Left,
+                )
                 .build(),
         )),
     );
@@ -185,7 +188,7 @@ fn init_view() -> View {
             .with_background(Color::White)
             .with_foreground(Color::Black)
             .with_borders(Borders::ALL, BorderType::Rounded, Color::Gray)
-            .with_title("A poem for you")
+            .with_title("A poem for you", Alignment::Center)
             .with_texts(vec![
                 TextSpan::new("Lorem ipsum dolor sit amet").underlined().fg(Color::Green),
                 TextSpan::from(", consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
@@ -203,7 +206,7 @@ fn init_view() -> View {
                 .with_progbar_color(Color::Yellow)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Yellow)
                 .with_progress(0.64)
-                .with_title("Downloading termscp 0.5.0")
+                .with_title("Downloading termscp 0.5.0", Alignment::Center)
                 .with_label("64.2% - ETA 00:48")
                 .build(),
         )),
@@ -221,7 +224,10 @@ fn init_view() -> View {
                 )
                 .with_inverted_color(Color::Black)
                 .with_value(1)
-                .with_title("Will you use tui-realm in your next project?")
+                .with_title(
+                    "Will you use tui-realm in your next project?",
+                    Alignment::Right,
+                )
                 .with_options(&["Yes!", "No", "Maybe"])
                 .build(),
         )),
@@ -260,7 +266,7 @@ fn init_view() -> View {
                 .with_max_scroll_step(4)
                 .with_highlighted_color(Color::LightBlue)
                 .scrollable(true)
-                .with_title("My scrollable data")
+                .with_title("My scrollable data", Alignment::Center)
                 .with_rows(
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
@@ -322,7 +328,7 @@ fn init_view() -> View {
             list::ListPropsBuilder::default()
                 .with_foreground(Color::Green)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::LightGreen)
-                .with_title("My data")
+                .with_title("My data", Alignment::Center)
                 .with_rows(
                     TableBuilder::default()
                         .add_col(TextSpan::from("2021-04-17T18:32:00"))
@@ -363,7 +369,7 @@ fn init_view() -> View {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightRed)
                 .with_highlighted_str(Some("🎵"))
                 .with_max_scroll_step(3)
-                .with_title("Scrollable textarea")
+                .with_title("Scrollable textarea", Alignment::Left)
                 .with_texts(
                     vec![
                         TextSpan::new("About TermSCP").bold().underlined().fg(Color::Yellow),
@@ -440,31 +446,31 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_CHECKBOX, &MSG_KEY_TAB) => {
+                (COMPONENT_CHECKBOX, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_INPUT);
                     // Update progress
                     let msg = update_progress(&mut self.view);
                     self.update(msg)
                 }
-                (COMPONENT_INPUT, &MSG_KEY_TAB) => {
+                (COMPONENT_INPUT, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_RADIO);
                     // Update progress
                     let msg = update_progress(&mut self.view);
                     self.update(msg)
                 }
-                (COMPONENT_RADIO, &MSG_KEY_TAB) => {
+                (COMPONENT_RADIO, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_SCROLLIST);
                     // Update progress
                     let msg = update_progress(&mut self.view);
                     self.update(msg)
                 }
-                (COMPONENT_SCROLLIST, &MSG_KEY_TAB) => {
+                (COMPONENT_SCROLLIST, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_TEXTAREA);
                     // Update progress
                     let msg = update_progress(&mut self.view);
                     self.update(msg)
                 }
-                (COMPONENT_TEXTAREA, &MSG_KEY_TAB) => {
+                (COMPONENT_TEXTAREA, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_CHECKBOX);
                     // Update progress
                     let msg = update_progress(&mut self.view);
@@ -482,7 +488,7 @@ impl Update for Model {
                     let msg = update_progress(&mut self.view);
                     self.update(msg)
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit
                     self.quit();
                     None

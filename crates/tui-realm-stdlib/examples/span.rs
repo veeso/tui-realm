@@ -174,15 +174,15 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_LABEL, &MSG_KEY_TAB) => {
+                (COMPONENT_LABEL, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_LABEL_2);
                     None
                 }
-                (COMPONENT_LABEL_2, &MSG_KEY_TAB) => {
+                (COMPONENT_LABEL_2, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_LABEL);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

@@ -28,7 +28,9 @@ use std::collections::LinkedList;
  */
 use tuirealm::event::Event;
 use tuirealm::event::KeyCode;
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -45,7 +47,6 @@ const PROP_DISABLED: &str = "disabled";
 const PROP_LABEL_STYLE: &str = "label-style";
 const PROP_MAX_BARS: &str = "max-bars";
 const PROP_VALUE_STYLE: &str = "value-style";
-const PROP_TITLE: &str = "title";
 
 pub struct BarChartPropsBuilder {
     props: Option<Props>,
@@ -128,12 +129,9 @@ impl BarChartPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -477,11 +475,8 @@ impl Component for BarChart {
                 true => true,
                 false => self.states.focus,
             };
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let block: Block = crate::utils::get_block(&self.props.borders, title, active);
+            let block: Block =
+                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), active);
             // Get max elements
             let data_max_len: u64 = self
                 .props
@@ -653,7 +648,7 @@ mod test {
                 .disabled(false)
                 .with_background(Color::White)
                 .with_foreground(Color::Black)
-                .with_title(String::from("my incomes"))
+                .with_title("my incomes", Alignment::Center)
                 .with_label_style(Style::default().fg(Color::Yellow))
                 .with_bar_style(Style::default().fg(Color::LightYellow))
                 .with_bar_gap(2)
@@ -683,6 +678,11 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Yellow);
+        assert_eq!(component.props.title.as_ref().unwrap().text(), "my incomes");
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
+        );
         assert_eq!(
             *component.props.own.get(PROP_BAR_GAP).unwrap(),
             PropPayload::One(PropValue::U16(2))
@@ -770,7 +770,7 @@ mod test {
                 .disabled(true)
                 .with_background(Color::White)
                 .with_foreground(Color::Black)
-                .with_title(String::from("my incomes"))
+                .with_title("my incomes", Alignment::Center)
                 .with_label_style(Style::default().fg(Color::Yellow))
                 .with_bar_style(Style::default().fg(Color::LightYellow))
                 .with_bar_gap(2)
