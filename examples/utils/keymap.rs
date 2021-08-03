@@ -27,7 +27,7 @@
  */
 extern crate crossterm;
 extern crate tuirealm;
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use tuirealm::event::{KeyCode, KeyEvent, KeyModifiers};
 use tuirealm::Msg;
 
 // -- keys
