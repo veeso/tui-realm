@@ -8,7 +8,7 @@
 //! ### Adding `tui-realm` as dependency
 //!
 //! ```toml
-//! tuirealm = "0.5.1"
+//! tuirealm = "0.6.0"
 //! ```
 //!
 //! ## Examples

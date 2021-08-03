@@ -268,7 +268,7 @@ I will implement everything in a single file in this case and I will reproduce s
                         let msg = self.view.update(COMPONENT_LABEL, props);
                         self.update(msg)
                     }
-                    (_, &MSG_KEY_ESC) => {
+                    (_, key) if key == &MSG_KEY_ESC => {
                         // Quit on esc
                         self.quit();
                         None
