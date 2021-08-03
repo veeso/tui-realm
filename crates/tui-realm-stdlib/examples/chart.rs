@@ -42,7 +42,7 @@ use tui_realm_stdlib::components::{
 };
 use tuirealm::props::{
     borders::{BorderType, Borders},
-    Dataset,
+    Alignment, Dataset,
 };
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
@@ -130,7 +130,7 @@ fn main() {
                 .disabled(true)
                 .with_background(Color::Reset)
                 .with_foreground(Color::Reset)
-                .with_title(String::from("Temperatures in room"))
+                .with_title(String::from("Temperatures in room"), Alignment::Center)
                 .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
                 .with_x_style(Style::default().fg(Color::LightBlue))
                 .with_x_title("Time")
@@ -228,7 +228,7 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

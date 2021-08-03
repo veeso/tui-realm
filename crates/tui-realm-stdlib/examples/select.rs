@@ -34,7 +34,10 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tui_realm_stdlib::components::{label, select};
-use tuirealm::props::borders::{BorderType, Borders};
+use tuirealm::props::{
+    borders::{BorderType, Borders},
+    Alignment,
+};
 use tuirealm::{Msg, Payload, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -93,7 +96,7 @@ fn main() {
                 .with_background(Color::White)
                 .with_foreground(Color::LightRed)
                 .with_highlighted_str(Some(">> "))
-                .with_title("Select a flavour")
+                .with_title("Select a flavour", Alignment::Center)
                 .with_options(&[
                     "vanilla".to_string(),
                     "chocolate".to_string(),
@@ -110,7 +113,7 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Cyan)
                 .with_foreground(Color::Cyan)
                 .with_highlighted_color(Color::LightBlue)
-                .with_title("Select a fruit")
+                .with_title("Select a fruit", Alignment::Left)
                 .rewind(true)
                 .with_options(&[
                     "lemon".to_string(),
@@ -193,15 +196,15 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_SELECT, &MSG_KEY_TAB) => {
+                (COMPONENT_SELECT, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_SELECT_HG);
                     None
                 }
-                (COMPONENT_SELECT_HG, &MSG_KEY_TAB) => {
+                (COMPONENT_SELECT_HG, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_SELECT);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

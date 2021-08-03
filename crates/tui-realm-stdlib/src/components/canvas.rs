@@ -26,7 +26,9 @@
  * SOFTWARE.
  */
 use tuirealm::event::Event;
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, Shape};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder, Shape,
+};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -40,7 +42,6 @@ use tuirealm::{Component, Frame, Msg, Payload};
 const PROP_X_BOUNDS: &str = "x-bounds";
 const PROP_Y_BOUNDS: &str = "y-bounds";
 const PROP_SHAPES: &str = "shapes";
-const PROP_TITLE: &str = "title";
 
 pub struct CanvasPropsBuilder {
     props: Option<Props>,
@@ -113,12 +114,9 @@ impl CanvasPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -337,12 +335,11 @@ impl Component for Canvas {
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.visible {
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let mut block: Block =
-                crate::utils::get_block(&self.props.borders, title, self.states.focus);
+            let mut block: Block = crate::utils::get_block(
+                &self.props.borders,
+                self.props.title.as_ref(),
+                self.states.focus,
+            );
             block = block.style(Style::default().bg(self.props.background));
             // Get properties
             let x_bounds: [f64; 2] = self
@@ -452,7 +449,7 @@ mod test {
                 .hidden()
                 .visible()
                 .with_background(Color::Black)
-                .with_title(String::from("playing risiko"))
+                .with_title("playing risiko", Alignment::Center)
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_x_bounds((-180.0, 180.0))
                 .with_y_bounds((-90.0, 90.0))
@@ -484,6 +481,14 @@ mod test {
         assert!(component.props.own.get(PROP_SHAPES).is_some());
         assert!(component.props.own.get(PROP_X_BOUNDS).is_some());
         assert!(component.props.own.get(PROP_Y_BOUNDS).is_some());
+        assert_eq!(
+            component.props.title.as_ref().unwrap().text(),
+            "playing risiko"
+        );
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
+        );
         // focus
         component.active();
         assert_eq!(component.states.focus, true);
@@ -503,7 +508,7 @@ mod test {
                 .hidden()
                 .visible()
                 .with_background(Color::Black)
-                .with_title(String::from("playing risiko"))
+                .with_title("playing risiko", Alignment::Center)
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_x_bounds((-180.0, 180.0))
                 .with_y_bounds((-90.0, 90.0))

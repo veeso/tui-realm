@@ -27,7 +27,8 @@
  */
 use tuirealm::event::KeyCode;
 use tuirealm::props::{
-    BordersProps, PropPayload, PropValue, Props, PropsBuilder, Table as TextTable,
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+    Table as TextTable,
 };
 use tuirealm::tui::{
     layout::{Corner, Rect},
@@ -44,7 +45,6 @@ const PROP_SCROLLABLE: &str = "scrollable";
 const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_MAX_STEP: &str = "max-step";
 const PROP_TABLE: &str = "table";
-const PROP_TITLE: &str = "title";
 
 pub struct ListPropsBuilder {
     props: Option<Props>,
@@ -220,12 +220,9 @@ impl ListPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -419,11 +416,8 @@ impl Component for List {
                 true => self.states.focus,
                 false => true,
             };
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let div: Block = crate::utils::get_block(&self.props.borders, title, active);
+            let div: Block =
+                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), active);
             // Make list entries
             let list_items: Vec<ListItem> = match self.props.own.get(PROP_TABLE).as_ref() {
                 Some(PropPayload::One(PropValue::Table(table))) => table
@@ -629,7 +623,7 @@ mod tests {
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
                 .scrollable(true)
-                .with_title("my data")
+                .with_title("my data", Alignment::Center)
                 .with_rows(
                     TableBuilder::default()
                         .add_col(TextSpan::from("name"))
@@ -673,6 +667,11 @@ mod tests {
         assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
         assert!(component.props.modifiers.intersects(Modifier::REVERSED));
         assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
+        assert_eq!(component.props.title.as_ref().unwrap().text(), "my data");
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
+        );
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);

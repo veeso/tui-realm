@@ -28,7 +28,9 @@
  * SOFTWARE.
  */
 use tuirealm::event::KeyCode;
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan,
+};
 use tuirealm::tui::{
     layout::{Corner, Rect},
     style::{Color, Modifier, Style},
@@ -41,7 +43,6 @@ use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_MAX_STEP: &str = "max-step";
 const PROP_SPANS: &str = "spans";
-const PROP_TITLE: &str = "title";
 
 pub struct TextareaPropsBuilder {
     props: Option<Props>,
@@ -194,12 +195,9 @@ impl TextareaPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -397,11 +395,11 @@ impl Component for Textarea {
                     .collect(),
                 _ => Vec::new(),
             };
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let div: Block = crate::utils::get_block(&self.props.borders, title, self.states.focus);
+            let div: Block = crate::utils::get_block(
+                &self.props.borders,
+                self.props.title.as_ref(),
+                self.states.focus,
+            );
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
             // Make component
@@ -557,7 +555,7 @@ mod tests {
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
-                .with_title("textarea")
+                .with_title("textarea", Alignment::Center)
                 .with_texts(vec![
                     TextSpan::from("welcome to "),
                     TextSpan::from("tui-realm"),
@@ -585,9 +583,10 @@ mod tests {
                 PropValue::TextSpan(TextSpan::from("tui-realm")),
             ])
         );
+        assert_eq!(component.props.title.as_ref().unwrap().text(), "textarea");
         assert_eq!(
-            component.props.own.get(PROP_TITLE).unwrap(),
-            &PropPayload::One(PropValue::Str("textarea".to_string()))
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
         );
         assert_eq!(
             component.props.own.get(PROP_HIGHLIGHTED_TXT).unwrap(),

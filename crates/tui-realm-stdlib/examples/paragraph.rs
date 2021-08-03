@@ -34,10 +34,10 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tui_realm_stdlib::components::{label, paragraph};
-use tuirealm::props::TextSpan;
+use tuirealm::props::{Alignment, TextSpan};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
-use tuirealm::tui::layout::{Alignment, Constraint, Direction, Layout};
+use tuirealm::tui::layout::{Constraint, Direction, Layout};
 use tuirealm::tui::style::Color;
 
 const COMPONENT_PARAGRAPH: &str = "paragraph1";
@@ -92,7 +92,7 @@ fn main() {
                 .bold()
                 .with_background(Color::White)
                 .with_foreground(Color::Black)
-                .with_title("A poem for you")
+                .with_title("A poem for you", Alignment::Center)
                 .with_texts(vec![
                     TextSpan::new("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
                     TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
@@ -109,7 +109,7 @@ fn main() {
                 .with_foreground(Color::LightBlue)
                 .with_text_alignment(Alignment::Center)
                 .with_trim(true)
-                .with_title("A poem for you")
+                .with_title("A poem for you", Alignment::Left)
                 .with_texts(vec![
                     TextSpan::new("Lorem ipsum dolor sit amet, ").underlined().fg(Color::Green),
                     TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus Duis augue diam, tempor vitae posuere et, tempus mattis ligula."),
@@ -178,15 +178,15 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_PARAGRAPH, &MSG_KEY_TAB) => {
+                (COMPONENT_PARAGRAPH, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_PARAGRAPH_2);
                     None
                 }
-                (COMPONENT_PARAGRAPH_2, &MSG_KEY_TAB) => {
+                (COMPONENT_PARAGRAPH_2, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_PARAGRAPH);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

@@ -35,7 +35,7 @@ use std::time::{Duration, Instant};
 
 use tui_realm_stdlib::components::{label, textarea};
 use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::props::TextSpan;
+use tuirealm::props::{Alignment, TextSpan};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -95,7 +95,7 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightRed)
                 .with_highlighted_str(Some("🎵"))
                 .with_max_scroll_step(2)
-                .with_title("Scrollable textarea")
+                .with_title("Scrollable textarea", Alignment::Center)
                 .with_texts(
                     vec![
                         TextSpan::new("About TermSCP").bold().underlined().fg(Color::Yellow),
@@ -118,7 +118,7 @@ fn main() {
                 .italic()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightRed)
                 .with_highlighted_str(Some("🎵"))
-                .with_title("Scrollble textarea")
+                .with_title("Scrollble textarea", Alignment::Left)
                 .with_texts(
                     vec![
                         TextSpan::new("About TermSCP").bold().underlined().fg(Color::Yellow),
@@ -193,15 +193,15 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_TEXTAREA, &MSG_KEY_TAB) => {
+                (COMPONENT_TEXTAREA, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_TEXTAREA_2);
                     None
                 }
-                (COMPONENT_TEXTAREA_2, &MSG_KEY_TAB) => {
+                (COMPONENT_TEXTAREA_2, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_TEXTAREA);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

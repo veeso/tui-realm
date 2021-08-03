@@ -35,7 +35,7 @@ use std::time::{Duration, Instant};
 
 use tui_realm_stdlib::components::{label, list};
 use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::props::{TableBuilder, TextSpan};
+use tuirealm::props::{Alignment, TableBuilder, TextSpan};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -93,7 +93,7 @@ fn main() {
         Box::new(list::List::new(
             list::ListPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_title("My table data")
+                .with_title("My table data", Alignment::Center)
                 .with_rows(
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
@@ -153,7 +153,7 @@ fn main() {
         Box::new(list::List::new(
             list::ListPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_title("My table data")
+                .with_title("My table data", Alignment::Center)
                 .with_rows(
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
@@ -216,7 +216,7 @@ fn main() {
                 .with_highlighted_str(Some("🚀"))
                 .with_highlighted_color(Color::LightBlue)
                 .scrollable(true)
-                .with_title("My table data")
+                .with_title("My table data", Alignment::Left)
                 .with_rows(
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
@@ -280,7 +280,7 @@ fn main() {
                 .with_max_scroll_step(4)
                 .scrollable(true)
                 .with_highlighted_color(Color::LightBlue)
-                .with_title("My table data")
+                .with_title("My table data", Alignment::Left)
                 .with_rows(
                     TableBuilder::default()
                         .add_col(TextSpan::from("0"))
@@ -400,15 +400,15 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_SCROLLTABLE, &MSG_KEY_TAB) => {
+                (COMPONENT_SCROLLTABLE, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_SCROLLTABLE_2);
                     None
                 }
-                (COMPONENT_SCROLLTABLE_2, &MSG_KEY_TAB) => {
+                (COMPONENT_SCROLLTABLE_2, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_SCROLLTABLE);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

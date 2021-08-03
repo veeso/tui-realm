@@ -26,7 +26,9 @@
  * SOFTWARE.
  */
 use tuirealm::event::KeyCode;
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -40,7 +42,6 @@ use tuirealm::{event::Event, Component, Frame, Msg, Payload, Value};
 const PROP_CHOICES: &str = "choices";
 const PROP_OPTION: &str = "option";
 const PROP_REWIND: &str = "rewind";
-const PROP_TITLE: &str = "title";
 
 pub struct RadioPropsBuilder {
     props: Option<Props>,
@@ -143,12 +144,9 @@ impl RadioPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -304,12 +302,11 @@ impl Component for Radio {
                 ),
                 false => (Color::Reset, self.props.foreground, Color::Reset),
             };
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let block: Block =
-                crate::utils::get_block(&self.props.borders, title, self.states.focus);
+            let block: Block = crate::utils::get_block(
+                &self.props.borders,
+                self.props.title.as_ref(),
+                self.states.focus,
+            );
             let radio: Tabs = Tabs::new(choices)
                 .block(block)
                 .select(self.states.choice)
@@ -479,7 +476,7 @@ mod test {
                 .with_color(Color::Red)
                 .with_inverted_color(Color::Blue)
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_title("C'est oui ou bien c'est non?")
+                .with_title("C'est oui ou bien c'est non?", Alignment::Center)
                 .with_options(&["Oui!", "Non", "Peut-être"])
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_value(1)
@@ -503,8 +500,12 @@ mod test {
             false
         );
         assert_eq!(
-            component.props.own.get(PROP_TITLE).unwrap(),
-            &PropPayload::One(PropValue::Str("C'est oui ou bien c'est non?".to_string()))
+            component.props.title.as_ref().unwrap().text(),
+            "C'est oui ou bien c'est non?"
+        );
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
         );
         assert_eq!(
             component.props.own.get(PROP_CHOICES).unwrap(),

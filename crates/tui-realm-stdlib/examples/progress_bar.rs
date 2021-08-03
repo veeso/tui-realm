@@ -34,7 +34,10 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tui_realm_stdlib::components::{label, progress_bar};
-use tuirealm::props::borders::{BorderType, Borders};
+use tuirealm::props::{
+    borders::{BorderType, Borders},
+    Alignment,
+};
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -93,7 +96,7 @@ fn main() {
                 .with_progbar_color(Color::Yellow)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Yellow)
                 .with_progress(0.64)
-                .with_title("Downloading termscp 0.5.0")
+                .with_title("Downloading termscp 0.5.0", Alignment::Center)
                 .with_label("64.2% - ETA 00:48")
                 .build(),
         )),
@@ -106,7 +109,7 @@ fn main() {
                 .with_progbar_color(Color::LightBlue)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::LightBlue)
                 .with_progress(0.0)
-                .with_title("Downloading termscp 0.5.0")
+                .with_title("Downloading termscp 0.5.0", Alignment::Center)
                 .with_label("0.0% - ETA --:--")
                 .build(),
         )),
@@ -172,15 +175,15 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_PROGRESSBAR, &MSG_KEY_TAB) => {
+                (COMPONENT_PROGRESSBAR, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_PROGRESSBAR_2);
                     None
                 }
-                (COMPONENT_PROGRESSBAR_2, &MSG_KEY_TAB) => {
+                (COMPONENT_PROGRESSBAR_2, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_PROGRESSBAR);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

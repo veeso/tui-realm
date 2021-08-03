@@ -28,7 +28,9 @@
 use std::collections::LinkedList;
 use tuirealm::event::Event;
 use tuirealm::event::KeyCode;
-use tuirealm::props::{BordersProps, Dataset, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, Dataset, PropPayload, PropValue, Props, PropsBuilder,
+};
 use tuirealm::tui::{
     layout::Rect,
     style::{Color, Style},
@@ -48,7 +50,6 @@ const PROP_Y_STYLE: &str = "y-style";
 const PROP_Y_TITLE: &str = "y-title";
 const PROP_DATA: &str = "data";
 const PROP_DISABLED: &str = "disabled";
-const PROP_TITLE: &str = "title";
 
 pub struct ChartPropsBuilder {
     props: Option<Props>,
@@ -131,12 +132,9 @@ impl ChartPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -532,11 +530,8 @@ impl Component for Chart {
                 true => true,
                 false => self.states.focus,
             };
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let block: Block = crate::utils::get_block(&self.props.borders, title, active);
+            let block: Block =
+                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), active);
             // Get data
             let data: Vec<TuiDataset> = self.data(self.states.cursor, area.width as usize);
             // Create widget
@@ -737,7 +732,7 @@ mod test {
                 .with_background(Color::Reset)
                 .with_foreground(Color::Reset)
                 .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
-                .with_title(String::from("average temperatures in Udine"))
+                .with_title("average temperatures in Udine", Alignment::Center)
                 .with_x_bounds((0.0, 11.0))
                 .with_x_labels(&[
                     "january",
@@ -807,6 +802,14 @@ mod test {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Yellow);
+        assert_eq!(
+            component.props.title.as_ref().unwrap().text(),
+            "average temperatures in Udine"
+        );
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
+        );
         assert_eq!(
             *component.props.own.get(PROP_X_BOUNDS).unwrap(),
             PropPayload::Tup2((PropValue::F64(0.0), PropValue::F64(11.0)))
@@ -891,7 +894,7 @@ mod test {
                 .disabled(true)
                 .with_background(Color::Reset)
                 .with_foreground(Color::Reset)
-                .with_title(String::from("average temperatures in Udine"))
+                .with_title("average temperatures in Udine", Alignment::Center)
                 .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
                 .with_x_bounds((0.0, 11.0))
                 .with_x_labels(&[

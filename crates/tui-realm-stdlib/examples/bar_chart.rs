@@ -38,6 +38,7 @@ use tui_realm_stdlib::components::{
     label,
 };
 use tuirealm::props::borders::{BorderType, Borders};
+use tuirealm::props::Alignment;
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -95,7 +96,7 @@ fn main() {
                 .hidden()
                 .visible()
                 .disabled(false)
-                .with_title(String::from("my incomes"))
+                .with_title("my incomes", Alignment::Center)
                 .with_label_style(Style::default().fg(Color::Yellow))
                 .with_bar_style(Style::default().fg(Color::LightYellow))
                 .with_bar_gap(6)
@@ -129,7 +130,7 @@ fn main() {
                 .disabled(true)
                 .with_background(Color::White)
                 .with_foreground(Color::Black)
-                .with_title(String::from("my incomes"))
+                .with_title("my incomes", Alignment::Left)
                 .with_label_style(Style::default().fg(Color::Yellow))
                 .with_bar_style(Style::default().fg(Color::LightYellow))
                 .with_bar_gap(4)
@@ -216,15 +217,15 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_CHART1, &MSG_KEY_TAB) => {
+                (COMPONENT_CHART1, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_CHART2);
                     None
                 }
-                (COMPONENT_CHART2, &MSG_KEY_TAB) => {
+                (COMPONENT_CHART2, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_CHART1);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

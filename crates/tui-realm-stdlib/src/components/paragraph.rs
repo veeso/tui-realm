@@ -30,7 +30,7 @@
  * SOFTWARE.
  */
 use tuirealm::props::{
-    Alignment, BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan,
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan,
 };
 use tuirealm::tui::{
     layout::Rect,
@@ -44,7 +44,6 @@ use tuirealm::{event::Event, Component, Frame, Msg, Payload};
 
 const PROP_SPANS: &str = "spans";
 const PROP_ALIGNMENT: &str = "text-align";
-const PROP_TITLE: &str = "title";
 const PROP_TRIM: &str = "wrap";
 
 pub struct ParagraphPropsBuilder {
@@ -198,12 +197,9 @@ impl ParagraphPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -290,11 +286,8 @@ impl Component for Paragraph {
                 _ => Vec::new(),
             };
             // Make container div
-            let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-                _ => None,
-            };
-            let div: Block = crate::utils::get_block(&self.props.borders, title, true);
+            let div: Block =
+                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), true);
             // Text properties
             let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
                 Some(PropPayload::One(PropValue::Alignment(alignment))) => *alignment,
@@ -402,7 +395,7 @@ mod tests {
                     TextSpan::from("welcome to "),
                     TextSpan::from("tui-realm"),
                 ])
-                .with_title("paragraph")
+                .with_title("paragraph", Alignment::Center)
                 .with_trim(true)
                 .with_text_alignment(Alignment::Center)
                 .build(),
@@ -420,6 +413,11 @@ mod tests {
         assert_eq!(component.props.borders.borders, Borders::ALL);
         assert_eq!(component.props.borders.variant, BorderType::Double);
         assert_eq!(component.props.borders.color, Color::Red);
+        assert_eq!(component.props.title.as_ref().unwrap().text(), "paragraph");
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
+        );
         assert_eq!(
             component.props.own.get(PROP_SPANS).unwrap(),
             &PropPayload::Vec(vec![
@@ -427,9 +425,10 @@ mod tests {
                 PropValue::TextSpan(TextSpan::from("tui-realm")),
             ])
         );
+        assert_eq!(component.props.title.as_ref().unwrap().text(), "paragraph");
         assert_eq!(
-            component.props.own.get(PROP_TITLE).unwrap(),
-            &PropPayload::One(PropValue::Str("paragraph".to_string()))
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
         );
         assert_eq!(
             *component.props.own.get(PROP_ALIGNMENT).unwrap(),

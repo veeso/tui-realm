@@ -29,7 +29,7 @@
 extern crate textwrap;
 extern crate unicode_width;
 // local
-use tuirealm::props::{BordersProps, TextSpan};
+use tuirealm::props::{BlockTitle, BordersProps, TextSpan};
 use tuirealm::Props;
 // ext
 use tuirealm::tui::style::{Color, Modifier, Style};
@@ -120,7 +120,7 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
 /// ### get_block
 ///
 /// Get block
-pub fn get_block<'a>(props: &BordersProps, title: Option<&str>, focus: bool) -> Block<'a> {
+pub fn get_block<'a>(props: &BordersProps, title: Option<&BlockTitle>, focus: bool) -> Block<'a> {
     let div: Block = Block::default()
         .borders(props.borders)
         .border_style(match focus {
@@ -130,7 +130,9 @@ pub fn get_block<'a>(props: &BordersProps, title: Option<&str>, focus: bool) -> 
         .border_type(props.variant);
     // Set title
     match title.as_ref() {
-        Some(t) => div.title(t.to_string()),
+        Some(t) => div
+            .title(t.text().to_string())
+            .title_alignment(t.alignment()),
         None => div,
     }
 }
@@ -147,7 +149,7 @@ pub fn calc_utf8_cursor_position(chars: &[char]) -> u16 {
 mod test {
 
     use super::*;
-    use tuirealm::props::builder::PropsBuilder;
+    use tuirealm::props::{builder::PropsBuilder, Alignment};
     use tuirealm::tui::widgets::{BorderType, Borders};
     use tuirealm::GenericPropsBuilder;
 
@@ -217,7 +219,11 @@ mod test {
             variant: BorderType::Rounded,
             color: Color::Red,
         };
-        get_block(&props, Some("title"), true);
+        get_block(
+            &props,
+            Some(&BlockTitle::new("title", Alignment::Center)),
+            true,
+        );
         get_block(&props, None, false);
     }
 

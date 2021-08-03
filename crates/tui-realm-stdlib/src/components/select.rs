@@ -28,7 +28,9 @@
  */
 use tuirealm::event::KeyCode;
 use tuirealm::props::borders::Borders;
-use tuirealm::props::{BordersProps, PropPayload, PropValue, Props, PropsBuilder};
+use tuirealm::props::{
+    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+};
 use tuirealm::tui::{
     layout::{Constraint, Corner, Direction, Layout, Rect},
     style::{Color, Style},
@@ -44,7 +46,6 @@ const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
 const PROP_SELECTED: &str = "selected";
 const PROP_CHOICES: &str = "choices";
 const PROP_REWIND: &str = "rewind";
-const PROP_TITLE: &str = "title";
 
 pub struct SelectPropsBuilder {
     props: Option<Props>,
@@ -172,12 +173,9 @@ impl SelectPropsBuilder {
     /// ### with_title
     ///
     /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(title, alignment));
         }
         self
     }
@@ -354,16 +352,14 @@ impl Select {
             None => String::default(),
             Some(s) => s.clone(),
         };
-        let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-            Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-            _ => None,
-        };
         let block: Block = Block::default()
             .borders(Borders::LEFT | Borders::TOP | Borders::RIGHT)
             .border_style(self.props.borders.style())
             .style(Style::default().bg(self.props.background));
-        let block: Block = match title.as_ref() {
-            Some(t) => block.title(t.to_string()),
+        let block: Block = match self.props.title.as_ref() {
+            Some(t) => block
+                .title(t.text().to_string())
+                .title_alignment(t.alignment()),
             None => block,
         };
         let p: Paragraph = Paragraph::new(selected_text)
@@ -413,11 +409,11 @@ impl Select {
     ///
     /// Render component when tab is closed
     fn render_closed_tab(&self, render: &mut Frame, area: Rect) {
-        let title: Option<&str> = match self.props.own.get(PROP_TITLE).as_ref() {
-            Some(PropPayload::One(PropValue::Str(t))) => Some(t),
-            _ => None,
-        };
-        let div: Block = crate::utils::get_block(&self.props.borders, title, self.states.focus);
+        let div: Block = crate::utils::get_block(
+            &self.props.borders,
+            self.props.title.as_ref(),
+            self.states.focus,
+        );
         let selected_text: String = match self.states.choices.get(self.states.selected) {
             None => String::default(),
             Some(s) => s.clone(),
@@ -648,7 +644,7 @@ mod test {
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_highlighted_color(Color::Red)
                 .with_highlighted_str(Some(">>"))
-                .with_title("C'est oui ou bien c'est non?")
+                .with_title("C'est oui ou bien c'est non?", Alignment::Center)
                 .with_options(&["Oui!", "Non", "Peut-être"])
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_value(1)
@@ -684,8 +680,12 @@ mod test {
             PropPayload::One(PropValue::Usize(1))
         );
         assert_eq!(
-            component.props.own.get(PROP_TITLE).unwrap(),
-            &PropPayload::One(PropValue::Str("C'est oui ou bien c'est non?".to_string()))
+            component.props.title.as_ref().unwrap().text(),
+            "C'est oui ou bien c'est non?"
+        );
+        assert_eq!(
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
         );
         assert_eq!(
             component.props.own.get(PROP_CHOICES).unwrap(),

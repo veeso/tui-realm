@@ -34,7 +34,10 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 use tui_realm_stdlib::components::{input, label};
-use tuirealm::props::borders::{BorderType, Borders};
+use tuirealm::props::{
+    borders::{BorderType, Borders},
+    Alignment,
+};
 use tuirealm::{InputType, Msg, Payload, PropsBuilder, Update, Value, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -91,7 +94,7 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
                 .with_input(InputType::Text)
-                .with_label(String::from("Type in something nice"))
+                .with_label(String::from("Type in something nice"), Alignment::Center)
                 .build(),
         )),
     );
@@ -160,7 +163,7 @@ impl Update for Model {
                     let msg = self.view.update(COMPONENT_LABEL, props);
                     self.update(msg)
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None
