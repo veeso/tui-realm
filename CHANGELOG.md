@@ -21,9 +21,45 @@
 
 Released on ??
 
-- Compatibility with tui `0.16` and crossterm `0.20`
-- Added `title` to `Props`
-- `BlockTitle` type in `Props`
+- ❗ Compatibility with tui `0.16` and crossterm `0.20` ❗
+  - You can now set the block title alignment
+    - Added `title` to `Props`
+    - `BlockTitle` type in `Props`, which is made up of `text` and `alignment`. Use this instead of setting title in `own` map
+  - 🔴 A really bad new in `Msg` matching 😭
+
+      in crossterm `0.20` to solve an issue they removed the `#[derive(Eq, PartialEq)]` from `KeyEvent`.
+      This has now caused an issue when matching against `OnKey` events:
+
+      ```txt
+      error: to use a constant of type `KeyEvent` in a pattern, `KeyEvent` must be annotated with `#[derive(PartialEq, Eq)]`
+      ```
+
+      To solve this issue you must from now on use a guard match to match keys:
+
+      ```rust
+      fn update(model: &mut Model, view: &mut View, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
+          let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
+          match ref_msg {
+              None => None, // Exit after None
+              Some(msg) => match msg {
+                  (COMPONENT_COUNTER1, key) if key == &MSG_KEY_TAB => {
+                      view.active(COMPONENT_COUNTER2);
+                      None
+                  }
+                  (COMPONENT_COUNTER2, key) if key == &MSG_KEY_TAB => {
+                      view.active(COMPONENT_COUNTER1);
+                      None
+                  }
+                  (_, key) if key == &MSG_KEY_ESC => {
+                      // Quit on esc
+                      model.quit();
+                      None
+                  }
+                  _ => None,
+              },
+          }
+      }
+      ```
 
 ## 0.5.1
 

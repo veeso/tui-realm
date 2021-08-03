@@ -157,15 +157,15 @@ fn update(model: &mut Model, view: &mut View, msg: Option<(String, Msg)>) -> Opt
     match ref_msg {
         None => None, // Exit after None
         Some(msg) => match msg {
-            (COMPONENT_COUNTER1, &MSG_KEY_TAB) => {
+            (COMPONENT_COUNTER1, key) if key == &MSG_KEY_TAB => {
                 view.active(COMPONENT_COUNTER2);
                 None
             }
-            (COMPONENT_COUNTER2, &MSG_KEY_TAB) => {
+            (COMPONENT_COUNTER2, key) if key == &MSG_KEY_TAB => {
                 view.active(COMPONENT_COUNTER1);
                 None
             }
-            (_, &MSG_KEY_ESC) => {
+            (_, key) if key == &MSG_KEY_ESC => {
                 // Quit on esc
                 model.quit();
                 None
