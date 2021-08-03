@@ -9,7 +9,7 @@
 [![Build](https://github.com/veeso/tui-realm/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm?branch=main)
 
 Developed by Christian Visintin  
-Current version: 0.6.0 (31/07/2021)
+Current version: 0.6.0 (03/08/2021)
 
 ---
 
@@ -57,7 +57,7 @@ tuirealm = "0.6.0"
 Since this library requires `crossterm` too, you'll also need to add it to your Cargo.toml
 
 ```toml
-crossterm = "0.20.0"
+crossterm = "0.20"
 ```
 
 You don't need tui as dependency, since you can access to tui via `tuirealm::tui::*`
