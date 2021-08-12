@@ -4,12 +4,12 @@
   <img src="docs/images/tui-realm-treeview.svg" width="256" height="256" />
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm-treeview.svg)](https://github.com/veeso/tui-realm-treeview) [![Downloads](https://img.shields.io/crates/d/tui-realm-treeview.svg)](https://crates.io/crates/tui-realm-treeview) [![Crates.io](https://img.shields.io/badge/crates.io-v0.2.1-orange.svg)](https://crates.io/crates/tui-realm-treeview) [![Docs](https://docs.rs/tui-realm-treeview/badge.svg)](https://docs.rs/tui-realm-treeview)  
+[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm-treeview.svg)](https://github.com/veeso/tui-realm-treeview) [![Downloads](https://img.shields.io/crates/d/tui-realm-treeview.svg)](https://crates.io/crates/tui-realm-treeview) [![Crates.io](https://img.shields.io/badge/crates.io-v0.3.0-orange.svg)](https://crates.io/crates/tui-realm-treeview) [![Docs](https://docs.rs/tui-realm-treeview/badge.svg)](https://docs.rs/tui-realm-treeview)  
 
 [![Build](https://github.com/veeso/tui-realm-treeview/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm-treeview/actions) [![Build](https://github.com/veeso/tui-realm-treeview/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm-treeview/actions) [![Build](https://github.com/veeso/tui-realm-treeview/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm-treeview/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm-treeview/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm-treeview?branch=main)
 
 Developed by Christian Visintin  
-Current version: 0.2.1 (02/08/2021)
+Current version: 0.3.0 (12/08/2021)
 
 ---
 
@@ -41,7 +41,7 @@ tui-realm-treeview is an implementation of a **treeview component** for [tui-rea
 ### Add tui-realm-treeview to your Cargo.toml 🦀
 
 ```toml
-tui-realm-treeview = "0.2.1"
+tui-realm-treeview = "0.3.0"
 ```
 
 ### Use the treeview component

@@ -8,7 +8,7 @@
 //! ### Adding `tui-realm-treeview` as dependency
 //!
 //! ```toml
-//! tui-realm-treeview = "0.2.1"
+//! tui-realm-treeview = "0.3.0"
 //! ```
 //!
 //! ## Setup a tree component
@@ -17,7 +17,7 @@
 //! extern crate tui_realm_treeview;
 //! extern crate tuirealm;
 //!
-//! use tuirealm::{props::Borders, PropsBuilder, Msg, Payload, Update, Value};
+//! use tuirealm::{props::{Alignment, Borders}, PropsBuilder, Msg, Payload, Update, Value};
 //! use tuirealm::tui::style::Color;
 //! use tuirealm::tui::widgets::BorderType;
 //! use tui_realm_treeview::{Node, Tree, TreeView, TreeViewPropsBuilder};
@@ -49,7 +49,7 @@
 //!             .with_borders(Borders::ALL, BorderType::Double, Color::LightYellow)
 //!             .with_background(Color::Black)
 //!             .with_foreground(Color::LightYellow)
-//!             .with_title("/dev/sda")
+//!             .with_title("/dev/sda", Alignment::Left)
 //!             .with_highlighted_str("🚀")
 //!             .with_tree(tree.root())
 //!             .build(),
@@ -127,7 +127,7 @@ use tuirealm::tui::{
 };
 use tuirealm::{
     event::{Event, KeyCode},
-    props::BordersProps,
+    props::{Alignment, BlockTitle, BordersProps},
     Component, Frame, Msg, Payload, PropPayload, PropValue, Props, PropsBuilder, Value,
 };
 
@@ -313,7 +313,7 @@ impl Node {
     /// Search for `id` inside Node's children (or is itself)
     pub fn query(&self, id: &str) -> Option<&Self> {
         if self.id() == id {
-            Some(&self)
+            Some(self)
         } else {
             // Recurse search
             self.children
@@ -634,7 +634,6 @@ const PROP_TREE: &str = "tree";
 const PROP_INITIAL_NODE: &str = "initial_node";
 const PROP_KEEP_STATE: &str = "keep_state";
 const PROP_MAX_STEPS: &str = "max_steps";
-const PROP_TITLE: &str = "title";
 const PROP_HG_STR: &str = "hg-str";
 
 /// ## TreeViewPropsBuilder
@@ -722,12 +721,9 @@ impl TreeViewPropsBuilder {
     /// ### with_title
     ///
     /// Set box title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S) -> &mut Self {
+    pub fn with_title<S: AsRef<str>>(&mut self, text: S, alignment: Alignment) -> &mut Self {
         if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TITLE,
-                PropPayload::One(PropValue::Str(title.as_ref().to_string())),
-            );
+            props.title = Some(BlockTitle::new(text, alignment));
         }
         self
     }
@@ -844,8 +840,10 @@ impl<'a> TreeView<'a> {
             })
             .border_type(self.props.borders.variant);
         // Set title
-        match self.props.own.get(PROP_TITLE).as_ref() {
-            Some(PropPayload::One(PropValue::Str(t))) => div.title(t.to_string()),
+        match self.props.title.as_ref() {
+            Some(title) => div
+                .title(title.text().to_string())
+                .title_alignment(title.alignment()),
             _ => div,
         }
     }
@@ -1314,7 +1312,7 @@ mod tests {
                 .with_borders(Borders::ALL, BorderType::Double, Color::Red)
                 .with_background(Color::White)
                 .with_foreground(Color::Red)
-                .with_title("C:\\")
+                .with_title("C:\\", Alignment::Center)
                 .with_highlighted_str(">>")
                 .with_tree(tree.root())
                 .keep_state(false)
@@ -1344,7 +1342,7 @@ mod tests {
         // Update
         let props = TreeViewPropsBuilder::from(component.get_props())
             .with_foreground(Color::Yellow)
-            .with_title("aaa")
+            .with_title("aaa", Alignment::Center)
             .hidden()
             .with_node(None)
             .build();
@@ -1354,16 +1352,10 @@ mod tests {
         );
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Yellow);
+        assert_eq!(component.props.title.as_ref().unwrap().text(), "aaa");
         assert_eq!(
-            *component
-                .props
-                .own
-                .get(PROP_TITLE)
-                .as_ref()
-                .unwrap()
-                .unwrap_one()
-                .unwrap_str(),
-            "aaa"
+            component.props.title.as_ref().unwrap().alignment(),
+            Alignment::Center
         );
         assert_eq!(
             component.get_state(),

@@ -29,7 +29,10 @@ use std::path::{Path, PathBuf};
 use std::thread::sleep;
 use std::time::Duration;
 use tui_realm_stdlib::{input, label};
-use tuirealm::props::borders::{BorderType, Borders};
+use tuirealm::props::{
+    borders::{BorderType, Borders},
+    Alignment,
+};
 use tuirealm::{Msg, Payload, PropsBuilder, Update, Value, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
@@ -144,7 +147,7 @@ fn main() {
         Box::new(input::Input::new(
             input::InputPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightBlue)
-                .with_label(String::from("Go to..."))
+                .with_label("Go to...", Alignment::Left)
                 .with_foreground(Color::LightBlue)
                 .build(),
         )),
@@ -158,7 +161,7 @@ fn main() {
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
                 .with_background(Color::Black)
-                .with_title(title)
+                .with_title(title, Alignment::Left)
                 .with_tree(model.tree.root())
                 .with_highlighted_str("🚀")
                 .keep_state(true)
@@ -240,12 +243,12 @@ impl Update for Model {
                         self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
                     )
                     .with_tree(self.tree.root())
-                    .with_title(self.path.to_string_lossy())
+                    .with_title(self.path.to_string_lossy(), Alignment::Left)
                     .build();
                     let msg = self.view.update(COMPONENT_TREEVIEW, props);
                     self.update(msg)
                 }
-                (COMPONENT_TREEVIEW, &MSG_KEY_BACKSPACE) => {
+                (COMPONENT_TREEVIEW, key) if key == &MSG_KEY_BACKSPACE => {
                     // Update tree
                     match self.upper_dir() {
                         None => None,
@@ -257,7 +260,7 @@ impl Update for Model {
                                 self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
                             )
                             .with_tree(self.tree.root())
-                            .with_title(self.path.to_string_lossy())
+                            .with_title(self.path.to_string_lossy(), Alignment::Left)
                             .build();
                             let msg = self.view.update(COMPONENT_TREEVIEW, props);
                             self.update(msg)
@@ -272,20 +275,20 @@ impl Update for Model {
                         self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
                     )
                     .with_tree(self.tree.root())
-                    .with_title(self.path.to_string_lossy())
+                    .with_title(self.path.to_string_lossy(), Alignment::Left)
                     .build();
                     let msg = self.view.update(COMPONENT_TREEVIEW, props);
                     self.update(msg)
                 }
-                (COMPONENT_INPUT, &MSG_KEY_TAB) => {
+                (COMPONENT_INPUT, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_TREEVIEW);
                     None
                 }
-                (COMPONENT_TREEVIEW, &MSG_KEY_TAB) => {
+                (COMPONENT_TREEVIEW, key) if key == &MSG_KEY_TAB => {
                     self.view.active(COMPONENT_INPUT);
                     None
                 }
-                (_, &MSG_KEY_ESC) => {
+                (_, key) if key == &MSG_KEY_ESC => {
                     // Quit on esc
                     self.quit();
                     None

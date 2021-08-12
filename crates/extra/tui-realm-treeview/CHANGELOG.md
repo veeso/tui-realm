@@ -1,12 +1,20 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.3.0](#030)
   - [0.2.1](#021)
   - [0.2.0](#020)
   - [0.1.1](#011)
   - [0.1.0](#010)
 
 ---
+
+## 0.3.0
+
+Released on 12/08/2021
+
+- tui-realm 0.6.0 compatibility
+- added `alignment` to `with_title`
 
 ## 0.2.1
 
