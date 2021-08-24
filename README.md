@@ -19,7 +19,7 @@ Current version: 0.6.0 (03/08/2021)
     - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
     - [Create a tui-realm application](#create-a-tui-realm-application)
     - [Run examples](#run-examples)
-    - [Apps using tui-realm](#apps-using-tui-realm)
+  - [Apps using tui-realm 🚀](#apps-using-tui-realm-)
   - [Standard components library 🎨](#standard-components-library-)
   - [Community components 🏘️](#community-components-️)
   - [Guides 🎓](#guides-)
@@ -76,7 +76,9 @@ Still confused about how tui-realm works? Don't worry, try with the examples:
     cargo run --example demo
     ```
 
-### Apps using tui-realm
+---
+
+## Apps using tui-realm 🚀
 
 - [termusic](https://github.com/tramhao/termusic)
 - [termscp](https://github.com/veeso/termscp)
