@@ -19,12 +19,12 @@ Current version: 0.6.0 (03/08/2021)
     - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
     - [Create a tui-realm application](#create-a-tui-realm-application)
     - [Run examples](#run-examples)
-  - [Apps using tui-realm 🚀](#apps-using-tui-realm-)
   - [Standard components library 🎨](#standard-components-library-)
   - [Community components 🏘️](#community-components-️)
   - [Guides 🎓](#guides-)
   - [Documentation 📚](#documentation-)
   - [About other backends](#about-other-backends)
+  - [Apps using tui-realm 🚀](#apps-using-tui-realm-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
   - [Buy me a coffee ☕](#buy-me-a-coffee-)
@@ -78,15 +78,6 @@ Still confused about how tui-realm works? Don't worry, try with the examples:
 
 ---
 
-## Apps using tui-realm 🚀
-
-- [termusic](https://github.com/tramhao/termusic)
-- [termscp](https://github.com/veeso/termscp)
-
-Want to add yours? Open an issue using the `New app/component` template 😄
-
----
-
 ## Standard components library 🎨
 
 Tui-realm comes with an optional standard library of components I thought would have been useful for most of the applications.
@@ -125,6 +116,15 @@ Well the reasons are these two:
 
 1. There's no reason to use the other backends: I use crossterm in termscp, and I don't find any advantage in using termion or other backends. Crossterm is cross platform and works perfectly fine.
 2. Implementing the support for the other backends would force me in creating a mapper for input events from the different backends into a common type. Is it possible? Yes it is, but I'm really not interested in implementing it.
+
+---
+
+## Apps using tui-realm 🚀
+
+- [termusic](https://github.com/tramhao/termusic)
+- [termscp](https://github.com/veeso/termscp)
+
+Want to add yours? Open an issue using the `New app/component` template 😄
 
 ---
 
