@@ -78,6 +78,7 @@ Still confused about how tui-realm works? Don't worry, try with the examples:
 
 ### Apps using tui-realm
 
+- [termusic](https://github.com/tramhao/termusic)
 - [termscp](https://github.com/veeso/termscp)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
