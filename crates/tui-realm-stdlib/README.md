@@ -25,6 +25,7 @@ Current version: 0.6.1 (03/08/2021)
     - [Checkbox](#checkbox)
     - [Input](#input)
     - [Label](#label)
+    - [Line gauge](#line-gauge)
     - [List](#list)
     - [Paragraph](#paragraph)
     - [Progress bar](#progress-bar)
@@ -264,6 +265,35 @@ A text label. Provides the possibility to display a simple text, with the possib
 
 ---
 
+### Line gauge
+
+A line indicating progress. The progress bar provides the possibility to show the current progress and to show a label above it.
+
+**Events**:
+
+| Event                | Message            | Behaviour          |
+|----------------------|--------------------|--------------------|
+| `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
+
+**Update**: None
+
+**State**: None
+
+**Properties**:
+
+- `with_progbar_color`: set progress bar color
+- `with_background`: set background color
+- `with_progress`: set progress. **WARNING**: must be in range 0.0,1.0
+- `with_borders`: set border properties
+- `with_label`: set progress bar label
+- `with_title`: set progress bar title
+- `with_line_normal`: use default line
+- `with_line_rounded`: use roundeed line
+- `with_line_tick`: use thick line
+- `with_line_doubled` use double line
+
+---
+
 ### List
 
 a list of rows with the possibility to scroll text with arrows. In order to scroll, the component must be active.
@@ -284,7 +314,7 @@ Events will be reported only when set as `Scrollable`
 
 **Update**: None
 
-**State**: None
+**State**: If `scrollable`, returns current list index, otherwise None
 
 **Properties**:
 
@@ -339,7 +369,7 @@ A text paragraph. Like in HTML this has to be considered a block element, and su
 
 ### Progress bar
 
-A progress bar. The progress bar provides the possibility to show the current progress and to show a label above it.
+A progress bar or basically a gauge. The progress bar provides the possibility to show the current progress and to show a label above it.
 
 **Events**:
 
@@ -502,7 +532,7 @@ Events will be reported only when set as `Scrollable`
 
 **Update**: None
 
-**State**: None
+**State**: If `scrollable`, returns current list index, otherwise None
 
 **Properties**:
 
