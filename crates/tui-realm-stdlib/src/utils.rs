@@ -1,6 +1,6 @@
-//! ## Components
+//! ## Utils
 //!
-//! `Components` provides a "standard" library of components.
+//! `Utilities functions to work with components
 
 /**
  * MIT License
@@ -99,7 +99,8 @@ pub fn wrap_spans<'a>(spans: &[TextSpan], width: usize, props: &Props) -> Vec<Sp
 
 /// ### use_or_default_styles
 ///
-/// Returns the styles to be used; in case in span are default, use props'
+/// Returns the styles to be used; in case in span are default, use props'.
+/// The values returned are `(foreground, background, modifiers)`
 pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, Modifier) {
     (
         match span.fg {
@@ -119,7 +120,8 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
 
 /// ### get_block
 ///
-/// Get block
+/// Get block for component with title and colors.
+/// Color is given to block only if `focus` value is `true`
 pub fn get_block<'a>(props: &BordersProps, title: Option<&BlockTitle>, focus: bool) -> Block<'a> {
     let div: Block = Block::default()
         .borders(props.borders)
