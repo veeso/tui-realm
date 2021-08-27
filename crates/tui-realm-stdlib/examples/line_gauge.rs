@@ -33,18 +33,18 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tui_realm_stdlib::{Label, LabelPropsBuilder, Select, SelectPropsBuilder};
+use tui_realm_stdlib::{Label, LabelPropsBuilder, LineGauge, LineGaugePropsBuilder};
 use tuirealm::props::{
     borders::{BorderType, Borders},
     Alignment,
 };
-use tuirealm::{Msg, Payload, PropsBuilder, Update, View};
+use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
 use tuirealm::tui::style::Color;
 
-const COMPONENT_SELECT: &str = "select";
-const COMPONENT_SELECT_HG: &str = "select-hg";
+const COMPONENT_PROGRESSBAR: &str = "prog1";
+const COMPONENT_PROGRESSBAR_2: &str = "prog2";
 const COMPONENT_EVENT: &str = "LABEL";
 
 struct Model {
@@ -89,40 +89,29 @@ fn main() {
     let mut myview: View = View::init();
     // Mount the component you need; we'll use a Label and an Input
     myview.mount(
-        COMPONENT_SELECT,
-        Box::new(Select::new(
-            SelectPropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Rounded, Color::LightRed)
-                .with_background(Color::White)
-                .with_foreground(Color::LightRed)
-                .with_highlighted_str(Some(">> "))
-                .with_title("Select a flavour", Alignment::Center)
-                .with_options(&[
-                    "vanilla".to_string(),
-                    "chocolate".to_string(),
-                    "coconut".to_string(),
-                    "hazelnut".to_string(),
-                ])
+        COMPONENT_PROGRESSBAR,
+        Box::new(LineGauge::new(
+            LineGaugePropsBuilder::default()
+                .with_background(Color::Black)
+                .with_progbar_color(Color::Yellow)
+                .with_borders(Borders::ALL, BorderType::Thick, Color::Yellow)
+                .with_progress(0.64)
+                .with_title("Downloading termscp 0.5.0", Alignment::Center)
+                .with_label("64.2% - ETA 00:48")
+                .with_line_rounded()
                 .build(),
         )),
     );
     myview.mount(
-        COMPONENT_SELECT_HG,
-        Box::new(Select::new(
-            SelectPropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Rounded, Color::Cyan)
-                .with_foreground(Color::Cyan)
-                .with_highlighted_color(Color::LightBlue)
-                .with_title("Select a fruit", Alignment::Left)
-                .rewind(true)
-                .with_options(&[
-                    "lemon".to_string(),
-                    "orange".to_string(),
-                    "apple".to_string(),
-                    "banana".to_string(),
-                    "watermelon".to_string(),
-                ])
-                .with_value(3)
+        COMPONENT_PROGRESSBAR_2,
+        Box::new(LineGauge::new(
+            LineGaugePropsBuilder::default()
+                .with_background(Color::Black)
+                .with_progbar_color(Color::LightBlue)
+                .with_progress(0.80)
+                .with_title("Downloading termscp 0.5.0", Alignment::Center)
+                .with_label("0.0% - ETA --:--")
+                .with_line_thick()
                 .build(),
         )),
     );
@@ -131,12 +120,11 @@ fn main() {
         Box::new(Label::new(
             LabelPropsBuilder::default()
                 .with_foreground(Color::Cyan)
-                .with_text(String::from("Event will appear here"))
                 .build(),
         )),
     );
     // We need to give focus to input then
-    myview.active(COMPONENT_SELECT);
+    myview.active(COMPONENT_PROGRESSBAR);
     // Now we use the Model struct to keep track of some states
     let mut model: Model = Model::new(myview);
     // let's loop until quit is true
@@ -162,14 +150,6 @@ fn main() {
 }
 
 fn view(ctx: &mut Context, view: &View) {
-    let select_len1: u16 = match view.get_state(COMPONENT_SELECT) {
-        Some(Payload::One(_)) => 3,
-        _ => 8,
-    };
-    let select_len2: u16 = match view.get_state(COMPONENT_SELECT_HG) {
-        Some(Payload::One(_)) => 3,
-        _ => 8,
-    };
     let _ = ctx.terminal.draw(|f| {
         // Prepare chunks
         let chunks = Layout::default()
@@ -177,15 +157,15 @@ fn view(ctx: &mut Context, view: &View) {
             .margin(1)
             .constraints(
                 [
-                    Constraint::Length(select_len1),
-                    Constraint::Length(select_len2),
                     Constraint::Length(3),
+                    Constraint::Length(3),
+                    Constraint::Length(1),
                 ]
                 .as_ref(),
             )
             .split(f.size());
-        view.render(COMPONENT_SELECT, f, chunks[0]);
-        view.render(COMPONENT_SELECT_HG, f, chunks[1]);
+        view.render(COMPONENT_PROGRESSBAR, f, chunks[0]);
+        view.render(COMPONENT_PROGRESSBAR_2, f, chunks[1]);
         view.render(COMPONENT_EVENT, f, chunks[2]);
     });
 }
@@ -196,12 +176,12 @@ impl Update for Model {
         match ref_msg {
             None => None, // Exit after None
             Some(msg) => match msg {
-                (COMPONENT_SELECT, key) if key == &MSG_KEY_TAB => {
-                    self.view.active(COMPONENT_SELECT_HG);
+                (COMPONENT_PROGRESSBAR, key) if key == &MSG_KEY_TAB => {
+                    self.view.active(COMPONENT_PROGRESSBAR_2);
                     None
                 }
-                (COMPONENT_SELECT_HG, key) if key == &MSG_KEY_TAB => {
-                    self.view.active(COMPONENT_SELECT);
+                (COMPONENT_PROGRESSBAR_2, key) if key == &MSG_KEY_TAB => {
+                    self.view.active(COMPONENT_PROGRESSBAR);
                     None
                 }
                 (_, key) if key == &MSG_KEY_ESC => {

@@ -33,7 +33,7 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tui_realm_stdlib::components::{input, label};
+use tui_realm_stdlib::{Input, InputPropsBuilder, Label, LabelPropsBuilder};
 use tuirealm::props::{
     borders::{BorderType, Borders},
     Alignment,
@@ -89,8 +89,8 @@ fn main() {
     // Mount the component you need; we'll use a Label and an Input
     myview.mount(
         COMPONENT_INPUT,
-        Box::new(input::Input::new(
-            input::InputPropsBuilder::default()
+        Box::new(Input::new(
+            InputPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
                 .with_input(InputType::Text)
@@ -100,8 +100,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_LABEL,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .with_foreground(Color::Cyan)
                 .with_text(String::from("Your input will appear in after a submit"))
                 .build(),
@@ -154,11 +154,10 @@ impl Update for Model {
             Some(msg) => match msg {
                 (COMPONENT_INPUT, Msg::OnChange(Payload::One(Value::Str(input)))) => {
                     // Update span
-                    let props = label::LabelPropsBuilder::from(
-                        self.view.get_props(COMPONENT_LABEL).unwrap(),
-                    )
-                    .with_text(format!("You typed: '{}'", input))
-                    .build();
+                    let props =
+                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_LABEL).unwrap())
+                            .with_text(format!("You typed: '{}'", input))
+                            .build();
                     // Report submit
                     let msg = self.view.update(COMPONENT_LABEL, props);
                     self.update(msg)

@@ -44,6 +44,6 @@
  * SOFTWARE.
  */
 // Export
-pub mod components;
+mod components;
 pub mod utils;
 pub use components::*;

@@ -26,21 +26,22 @@
  * SOFTWARE.
  */
 // Modules
-pub mod bar_chart;
-pub mod canvas;
-pub mod chart;
-pub mod checkbox;
-pub mod input;
-pub mod label;
-pub mod list;
-pub mod paragraph;
-pub mod progress_bar;
-pub mod radio;
-pub mod select;
-pub mod span;
-pub mod sparkline;
-pub mod table;
-pub mod textarea;
+mod bar_chart;
+mod canvas;
+mod chart;
+mod checkbox;
+mod input;
+mod label;
+mod line_gauge;
+mod list;
+mod paragraph;
+mod progress_bar;
+mod radio;
+mod select;
+mod span;
+mod sparkline;
+mod table;
+mod textarea;
 
 // Exports
 pub use bar_chart::{BarChart, BarChartPropsBuilder};
@@ -49,6 +50,7 @@ pub use chart::{Chart, ChartPropsBuilder};
 pub use checkbox::{Checkbox, CheckboxPropsBuilder};
 pub use input::{Input, InputPropsBuilder};
 pub use label::{Label, LabelPropsBuilder};
+pub use line_gauge::{LineGauge, LineGaugePropsBuilder};
 pub use list::{List, ListPropsBuilder};
 pub use paragraph::{Paragraph, ParagraphPropsBuilder};
 pub use progress_bar::{ProgressBar, ProgressBarPropsBuilder};

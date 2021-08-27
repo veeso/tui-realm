@@ -33,7 +33,7 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tui_realm_stdlib::components::{label, table};
+use tui_realm_stdlib::{Label, LabelPropsBuilder, Table, TablePropsBuilder};
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::props::{Alignment, TableBuilder, TextSpan};
 use tuirealm::{Msg, PropsBuilder, Update, View};
@@ -89,8 +89,8 @@ fn main() {
     // Mount the component you need; we'll use a Label and an Input
     myview.mount(
         COMPONENT_TABLE,
-        Box::new(table::Table::new(
-            table::TablePropsBuilder::default()
+        Box::new(Table::new(
+            TablePropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_col_spacing(3)
                 .with_header(&["Key", "Msg", "Description"])
@@ -133,8 +133,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_SCROLLTABLE,
-        Box::new(table::Table::new(
-            table::TablePropsBuilder::default()
+        Box::new(Table::new(
+            TablePropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_highlighted_str(Some("🚀"))
                 .with_highlighted_color(Color::LightBlue)
@@ -180,8 +180,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_SCROLLTABLE_2,
-        Box::new(table::Table::new(
-            table::TablePropsBuilder::default()
+        Box::new(Table::new(
+            TablePropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
@@ -228,8 +228,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_EVENT,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .with_foreground(Color::Cyan)
                 .build(),
         )),
@@ -304,11 +304,10 @@ impl Update for Model {
                 }
                 (component, event) => {
                     // Update span
-                    let props = label::LabelPropsBuilder::from(
-                        self.view.get_props(COMPONENT_EVENT).unwrap(),
-                    )
-                    .with_text(format!("{} => '{:?}'", component, event))
-                    .build();
+                    let props =
+                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
+                            .with_text(format!("{} => '{:?}'", component, event))
+                            .build();
                     // Report submit
                     let _ = self.view.update(COMPONENT_EVENT, props);
                     None

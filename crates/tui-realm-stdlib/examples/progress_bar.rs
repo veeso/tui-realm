@@ -33,7 +33,7 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tui_realm_stdlib::components::{label, progress_bar};
+use tui_realm_stdlib::{Label, LabelPropsBuilder, ProgressBar, ProgressBarPropsBuilder};
 use tuirealm::props::{
     borders::{BorderType, Borders},
     Alignment,
@@ -90,8 +90,8 @@ fn main() {
     // Mount the component you need; we'll use a Label and an Input
     myview.mount(
         COMPONENT_PROGRESSBAR,
-        Box::new(progress_bar::ProgressBar::new(
-            progress_bar::ProgressBarPropsBuilder::default()
+        Box::new(ProgressBar::new(
+            ProgressBarPropsBuilder::default()
                 .with_background(Color::Black)
                 .with_progbar_color(Color::Yellow)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Yellow)
@@ -103,8 +103,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_PROGRESSBAR_2,
-        Box::new(progress_bar::ProgressBar::new(
-            progress_bar::ProgressBarPropsBuilder::default()
+        Box::new(ProgressBar::new(
+            ProgressBarPropsBuilder::default()
                 .with_background(Color::Black)
                 .with_progbar_color(Color::LightBlue)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::LightBlue)
@@ -116,8 +116,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_EVENT,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .with_foreground(Color::Cyan)
                 .build(),
         )),
@@ -190,11 +190,10 @@ impl Update for Model {
                 }
                 (component, event) => {
                     // Update span
-                    let props = label::LabelPropsBuilder::from(
-                        self.view.get_props(COMPONENT_EVENT).unwrap(),
-                    )
-                    .with_text(format!("{} => '{:?}'", component, event))
-                    .build();
+                    let props =
+                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
+                            .with_text(format!("{} => '{:?}'", component, event))
+                            .build();
                     // Report submit
                     let _ = self.view.update(COMPONENT_EVENT, props);
                     None

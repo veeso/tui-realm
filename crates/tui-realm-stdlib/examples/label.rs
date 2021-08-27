@@ -33,7 +33,7 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tui_realm_stdlib::components::label;
+use tui_realm_stdlib::{Label, LabelPropsBuilder};
 use tuirealm::props::Alignment;
 use tuirealm::{Msg, PropsBuilder, Update, View};
 // tui
@@ -87,8 +87,8 @@ fn main() {
     // Mount the component you need; we'll use a Label and an Input
     myview.mount(
         COMPONENT_LABEL,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .bold()
                 .with_background(Color::Red)
                 .with_foreground(Color::Black)
@@ -98,8 +98,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_LABEL_2,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .bold()
                 .with_foreground(Color::LightBlue)
                 .with_text(String::from("Label without background"))
@@ -109,8 +109,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_EVENT,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .with_foreground(Color::Cyan)
                 .with_text(String::from("Event will appear here"))
                 .build(),
@@ -184,11 +184,10 @@ impl Update for Model {
                 }
                 (component, event) => {
                     // Update span
-                    let props = label::LabelPropsBuilder::from(
-                        self.view.get_props(COMPONENT_EVENT).unwrap(),
-                    )
-                    .with_text(format!("{} => '{:?}'", component, event))
-                    .build();
+                    let props =
+                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
+                            .with_text(format!("{} => '{:?}'", component, event))
+                            .build();
                     // Report submit
                     let _ = self.view.update(COMPONENT_EVENT, props);
                     None

@@ -1,10 +1,22 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.6.1](#061)
   - [0.6.0](#060)
   - [0.5.0](#050)
 
 ---
+
+## 0.6.1
+
+Released on 27/08/2021
+
+- New components 🎉
+  - ProgressLine component (aka tui-rs LineGauge)
+- Table/list state:
+  - If table or list is set as `scrollable`, then `get_state` will return the index of the selected entry.
+- ❗ Breaking changes ❗
+  - Removed `public` access to components module. Just access to components and to props builder from `tui_realm_stdlib::COMPONENT_NAME`
 
 ## 0.6.0
 

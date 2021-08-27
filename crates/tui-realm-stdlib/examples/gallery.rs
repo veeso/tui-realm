@@ -36,8 +36,10 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 // realm
-use tui_realm_stdlib::components::{
-    checkbox, input, label, list, paragraph, progress_bar, radio, span, textarea,
+use tui_realm_stdlib::{
+    Checkbox, CheckboxPropsBuilder, Input, InputPropsBuilder, Label, LabelPropsBuilder, List,
+    ListPropsBuilder, Paragraph, ParagraphPropsBuilder, ProgressBar, ProgressBarPropsBuilder,
+    Radio, RadioPropsBuilder, Span, SpanPropsBuilder, Textarea, TextareaPropsBuilder,
 };
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::props::{Alignment, TableBuilder, TextSpan};
@@ -128,8 +130,8 @@ fn init_view() -> View {
     // Checkbox
     view.mount(
         COMPONENT_CHECKBOX,
-        Box::new(checkbox::Checkbox::new(
-            checkbox::CheckboxPropsBuilder::default()
+        Box::new(Checkbox::new(
+            CheckboxPropsBuilder::default()
                 .with_color(Color::Cyan)
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Magenta)
                 .with_value(vec![1])
@@ -148,8 +150,8 @@ fn init_view() -> View {
     // Input
     view.mount(
         COMPONENT_INPUT,
-        Box::new(input::Input::new(
-            input::InputPropsBuilder::default()
+        Box::new(Input::new(
+            InputPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
                 .with_input(InputType::Text)
@@ -164,8 +166,8 @@ fn init_view() -> View {
     // Label
     view.mount(
         COMPONENT_LABEL,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .bold()
                 .italic()
                 .rapid_blink()
@@ -182,8 +184,8 @@ fn init_view() -> View {
     // Paragraph
     view.mount(
         COMPONENT_PARAGRAPH,
-        Box::new(paragraph::Paragraph::new(
-            paragraph::ParagraphPropsBuilder::default()
+        Box::new(Paragraph::new(
+            ParagraphPropsBuilder::default()
             .italic()
             .with_background(Color::White)
             .with_foreground(Color::Black)
@@ -200,8 +202,8 @@ fn init_view() -> View {
     // Progres bar
     view.mount(
         COMPONENT_PROGBAR,
-        Box::new(progress_bar::ProgressBar::new(
-            progress_bar::ProgressBarPropsBuilder::default()
+        Box::new(ProgressBar::new(
+            ProgressBarPropsBuilder::default()
                 .with_background(Color::Black)
                 .with_progbar_color(Color::Yellow)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Yellow)
@@ -214,8 +216,8 @@ fn init_view() -> View {
     // Radio
     view.mount(
         COMPONENT_RADIO,
-        Box::new(radio::Radio::new(
-            radio::RadioPropsBuilder::default()
+        Box::new(Radio::new(
+            RadioPropsBuilder::default()
                 .with_color(Color::Magenta)
                 .with_borders(
                     Borders::BOTTOM | Borders::TOP,
@@ -235,8 +237,8 @@ fn init_view() -> View {
     // Span
     view.mount(
         COMPONENT_SPAN,
-        Box::new(span::Span::new(
-            span::SpanPropsBuilder::default()
+        Box::new(Span::new(
+            SpanPropsBuilder::default()
                 .bold()
                 .with_foreground(Color::Green)
                 .with_background(Color::Black)
@@ -259,8 +261,8 @@ fn init_view() -> View {
     // ScrollList
     view.mount(
         COMPONENT_SCROLLIST,
-        Box::new(list::List::new(
-            list::ListPropsBuilder::default()
+        Box::new(List::new(
+            ListPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
                 .with_highlighted_str(Some("🚀"))
                 .with_max_scroll_step(4)
@@ -324,8 +326,8 @@ fn init_view() -> View {
     // Table
     view.mount(
         COMPONENT_TABLE,
-        Box::new(list::List::new(
-            list::ListPropsBuilder::default()
+        Box::new(List::new(
+            ListPropsBuilder::default()
                 .with_foreground(Color::Green)
                 .with_borders(Borders::ALL, BorderType::Thick, Color::LightGreen)
                 .with_title("My data", Alignment::Center)
@@ -362,8 +364,8 @@ fn init_view() -> View {
     // Textarea
     view.mount(
         COMPONENT_TEXTAREA,
-        Box::new(textarea::Textarea::new(
-            textarea::TextareaPropsBuilder::default()
+        Box::new(Textarea::new(
+            TextareaPropsBuilder::default()
                 .with_foreground(Color::White)
                 .italic()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightRed)
@@ -477,11 +479,10 @@ impl Update for Model {
                     self.update(msg)
                 }
                 (comp, Msg::OnSubmit(payload)) => {
-                    let props = label::LabelPropsBuilder::from(
-                        self.view.get_props(COMPONENT_LABEL).unwrap(),
-                    )
-                    .with_text(format!("GOT SUBMIT EVENT FROM '{}': {:?}", comp, payload))
-                    .build();
+                    let props =
+                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_LABEL).unwrap())
+                            .with_text(format!("GOT SUBMIT EVENT FROM '{}': {:?}", comp, payload))
+                            .build();
                     // Report submit
                     self.view.update(COMPONENT_LABEL, props);
                     // Update progress
@@ -512,7 +513,7 @@ fn update_progress(view: &mut View) -> Option<(String, Msg)> {
     };
     view.update(
         COMPONENT_PROGBAR,
-        progress_bar::ProgressBarPropsBuilder::from(props)
+        ProgressBarPropsBuilder::from(props)
             .with_progress(new_prog)
             .with_label(format!("{:.2}% - ETA 00:30", new_prog * 100.0))
             .build(),

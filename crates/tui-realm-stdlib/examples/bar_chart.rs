@@ -33,10 +33,7 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tui_realm_stdlib::components::{
-    bar_chart::{BarChart, BarChartPropsBuilder},
-    label,
-};
+use tui_realm_stdlib::{BarChart, BarChartPropsBuilder, Label, LabelPropsBuilder};
 use tuirealm::props::borders::{BorderType, Borders};
 use tuirealm::props::Alignment;
 use tuirealm::{Msg, PropsBuilder, Update, View};
@@ -157,8 +154,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_EVENT,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .with_foreground(Color::Cyan)
                 .with_text(String::from("Event will appear here"))
                 .build(),
@@ -232,11 +229,10 @@ impl Update for Model {
                 }
                 (component, event) => {
                     // Update span
-                    let props = label::LabelPropsBuilder::from(
-                        self.view.get_props(COMPONENT_EVENT).unwrap(),
-                    )
-                    .with_text(format!("{} => '{:?}'", component, event))
-                    .build();
+                    let props =
+                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
+                            .with_text(format!("{} => '{:?}'", component, event))
+                            .build();
                     // Report submit
                     let _ = self.view.update(COMPONENT_EVENT, props);
                     None

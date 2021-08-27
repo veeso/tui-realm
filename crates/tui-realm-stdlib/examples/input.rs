@@ -33,7 +33,7 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tui_realm_stdlib::components::{input, label};
+use tui_realm_stdlib::{Input, InputPropsBuilder, Label, LabelPropsBuilder};
 use tuirealm::props::{
     borders::{BorderType, Borders},
     Alignment,
@@ -91,8 +91,8 @@ fn main() {
     // Mount the component you need; we'll use a Label and an Input
     myview.mount(
         COMPONENT_INPUT_TEXT,
-        Box::new(input::Input::new(
-            input::InputPropsBuilder::default()
+        Box::new(Input::new(
+            InputPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightCyan)
                 .with_foreground(Color::LightCyan)
                 .with_input(InputType::Text)
@@ -103,8 +103,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_INPUT_NUMBER,
-        Box::new(input::Input::new(
-            input::InputPropsBuilder::default()
+        Box::new(Input::new(
+            InputPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_foreground(Color::LightYellow)
                 .with_input(InputType::Number)
@@ -114,8 +114,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_INPUT_PASSWORD,
-        Box::new(input::Input::new(
-            input::InputPropsBuilder::default()
+        Box::new(Input::new(
+            InputPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightBlue)
                 .with_foreground(Color::LightBlue)
                 .with_input(InputType::Password)
@@ -125,8 +125,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_EVENT,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .with_foreground(Color::Cyan)
                 .with_text(String::from("Event will appear here"))
                 .build(),
@@ -206,11 +206,10 @@ impl Update for Model {
                 }
                 (component, event) => {
                     // Update span
-                    let props = label::LabelPropsBuilder::from(
-                        self.view.get_props(COMPONENT_EVENT).unwrap(),
-                    )
-                    .with_text(format!("{} => '{:?}'", component, event))
-                    .build();
+                    let props =
+                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
+                            .with_text(format!("{} => '{:?}'", component, event))
+                            .build();
                     // Report submit
                     let _ = self.view.update(COMPONENT_EVENT, props);
                     None

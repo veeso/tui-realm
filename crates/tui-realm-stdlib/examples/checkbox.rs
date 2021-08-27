@@ -33,7 +33,7 @@ use utils::keymap::*;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use tui_realm_stdlib::components::{checkbox, label};
+use tui_realm_stdlib::{Checkbox, CheckboxPropsBuilder, Label, LabelPropsBuilder};
 use tuirealm::props::{
     borders::{BorderType, Borders},
     Alignment,
@@ -90,8 +90,8 @@ fn main() {
     // Mount the component you need; we'll use a Label and an Input
     myview.mount(
         COMPONENT_CHECKBOX,
-        Box::new(checkbox::Checkbox::new(
-            checkbox::CheckboxPropsBuilder::default()
+        Box::new(Checkbox::new(
+            CheckboxPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
                 .with_color(Color::LightYellow)
                 .with_title("Select flavour", Alignment::Left)
@@ -101,8 +101,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_CHECKBOX_INVERTED,
-        Box::new(checkbox::Checkbox::new(
-            checkbox::CheckboxPropsBuilder::default()
+        Box::new(Checkbox::new(
+            CheckboxPropsBuilder::default()
                 .with_borders(Borders::ALL, BorderType::Rounded, Color::Black)
                 .with_color(Color::Black)
                 .with_title("Select flavour", Alignment::Right)
@@ -113,8 +113,8 @@ fn main() {
     );
     myview.mount(
         COMPONENT_EVENT,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
+        Box::new(Label::new(
+            LabelPropsBuilder::default()
                 .with_foreground(Color::Cyan)
                 .with_text(String::from("Event will appear here"))
                 .build(),
@@ -188,11 +188,10 @@ impl Update for Model {
                 }
                 (component, event) => {
                     // Update span
-                    let props = label::LabelPropsBuilder::from(
-                        self.view.get_props(COMPONENT_EVENT).unwrap(),
-                    )
-                    .with_text(format!("{} => '{:?}'", component, event))
-                    .build();
+                    let props =
+                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
+                            .with_text(format!("{} => '{:?}'", component, event))
+                            .build();
                     // Report submit
                     let _ = self.view.update(COMPONENT_EVENT, props);
                     None
