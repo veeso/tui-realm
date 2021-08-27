@@ -36,7 +36,7 @@ use tuirealm::tui::{
     text::Span,
     widgets::{Block, BorderType, Borders, Cell, Row, Table as TuiTable, TableState},
 };
-use tuirealm::{event::Event, Component, Frame, Msg, Payload};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload, Value};
 
 // -- Props
 
@@ -690,9 +690,12 @@ impl Component for Table {
     /// ### get_state
     ///
     /// Get current state from component
-    /// For this component returns always None
+    /// For this component returns None if not scrollable, otherwise returns the index of the list
     fn get_state(&self) -> Payload {
-        Payload::None
+        match self.scrollable() {
+            true => Payload::One(Value::Usize(self.states.list_index)),
+            false => Payload::None,
+        }
     }
 
     // -- events
@@ -894,7 +897,7 @@ mod tests {
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
         // Get value
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(0)));
         // Event
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
@@ -984,7 +987,7 @@ mod tests {
         assert_eq!(component.update(props), Msg::None);
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.visible, false);
-        // Get value
+        // Get value (not scrollable)
         assert_eq!(component.get_state(), Payload::None);
         // Event
         assert_eq!(

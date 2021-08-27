@@ -36,7 +36,7 @@ use tuirealm::tui::{
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, List as TuiList, ListItem, ListState},
 };
-use tuirealm::{event::Event, Component, Frame, Msg, Payload};
+use tuirealm::{event::Event, Component, Frame, Msg, Payload, Value};
 
 // -- Props
 
@@ -277,7 +277,7 @@ impl ListPropsBuilder {
 
 struct OwnStates {
     focus: bool,
-    list_index: usize, // Index of selected item in textarea
+    list_index: usize, // Index of selected item in list
     list_len: usize,   // Lines in text area
 }
 
@@ -569,9 +569,12 @@ impl Component for List {
     /// ### get_state
     ///
     /// Get current state from component
-    /// For this component returns always None
+    /// For this component returns None if not scrollable, otherwise returns the index of the list
     fn get_state(&self) -> Payload {
-        Payload::None
+        match self.scrollable() {
+            true => Payload::One(Value::Usize(self.states.list_index)),
+            false => Payload::None,
+        }
     }
 
     // -- events
@@ -764,7 +767,7 @@ mod tests {
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
         // Get value
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), Payload::One(Value::Usize(0)));
         // Event
         assert_eq!(
             component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
