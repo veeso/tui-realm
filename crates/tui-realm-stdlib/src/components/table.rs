@@ -613,8 +613,8 @@ impl Component for Table {
             });
         // Fix list index
         self.states.fix_list_index();
-        // disable if scrollable
-        if self.scrollable() {
+        // disable if NOT scrollable
+        if !self.scrollable() {
             self.blur();
         }
         // Return None
@@ -995,5 +995,72 @@ mod tests {
             Msg::OnKey(KeyEvent::from(KeyCode::Delete))
         );
         assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+    }
+
+    #[test]
+    fn test_components_table_was_scrollable() {
+        let mut component: Table = Table::new(
+            TablePropsBuilder::default()
+                .with_foreground(Color::Red)
+                .with_background(Color::Blue)
+                .with_highlighted_color(Color::Yellow)
+                .hidden()
+                .visible()
+                .bold()
+                .italic()
+                .rapid_blink()
+                .reversed()
+                .slow_blink()
+                .strikethrough()
+                .underlined()
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .with_highlighted_str(Some("🚀"))
+                .with_max_scroll_step(4)
+                .scrollable(true)
+                .with_table(
+                    TableBuilder::default()
+                        .add_col(TextSpan::from("KeyCode::Down"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Up"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor up"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::PageDown"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down by 8"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::PageUp"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("ove cursor up by 8"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::End"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to last item"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Home"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to first item"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Char(_)"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Return pressed key"))
+                        .build(),
+                )
+                .with_header(&["Event", "Message", "Behaviour"])
+                .with_col_spacing(2)
+                .with_row_height(3)
+                .with_widths(&[33, 33, 33])
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .build(),
+        );
+        component.active();
+        assert_eq!(component.states.focus, true);
+        let props = TablePropsBuilder::from(component.get_props())
+            .scrollable(false)
+            .build();
+        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.states.focus, false);
     }
 }

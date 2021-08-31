@@ -492,8 +492,8 @@ impl Component for List {
             });
         // Fix list index
         self.states.fix_list_index();
-        // disable if scrollable
-        if self.scrollable() {
+        // disable if NOT scrollable
+        if !self.scrollable() {
             self.blur();
         }
         // Return None
@@ -836,5 +836,43 @@ mod tests {
             Msg::OnKey(KeyEvent::from(KeyCode::Delete))
         );
         assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+    }
+
+    #[test]
+    fn test_components_list_was_scrollable() {
+        let mut component: List = List::new(
+            ListPropsBuilder::default()
+                .with_foreground(Color::Red)
+                .with_background(Color::Blue)
+                .hidden()
+                .visible()
+                .bold()
+                .italic()
+                .rapid_blink()
+                .reversed()
+                .slow_blink()
+                .strikethrough()
+                .underlined()
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .with_rows(
+                    TableBuilder::default()
+                        .add_col(TextSpan::from("name"))
+                        .add_col(TextSpan::from("age"))
+                        .add_row()
+                        .add_col(TextSpan::from("omar"))
+                        .add_col(TextSpan::from("24"))
+                        .build(),
+                )
+                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
+                .scrollable(true)
+                .build(),
+        );
+        component.active();
+        assert_eq!(component.states.focus, true);
+        let props = ListPropsBuilder::from(component.get_props())
+            .scrollable(false)
+            .build();
+        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.states.focus, false);
     }
 }
