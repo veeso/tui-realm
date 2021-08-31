@@ -1,11 +1,19 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.6.2](#062)
   - [0.6.1](#061)
   - [0.6.0](#060)
   - [0.5.0](#050)
 
 ---
+
+## 0.6.2
+
+Released on 31/08/2021
+
+- Bugfix
+  - [Issue 3](https://github.com/veeso/tui-realm-stdlib/issues/3): Table/list lose focus when updating and component is scrollable
 
 ## 0.6.1
 
