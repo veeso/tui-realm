@@ -1,10 +1,10 @@
 [package]
 name = "tuirealm"
-version = "0.6.0"
+version = "1.0.0"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]
-description = "A tui-rs framework to build interfaces, inspired by React and Elm."
+description = "A tui-rs framework to build tui interfaces, inspired by React and Elm."
 documentation = "https://docs.rs/tuirealm"
 homepage = "https://github.com/veeso/tui-realm"
 include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
@@ -14,8 +14,9 @@ readme = "README.md"
 repository = "https://github.com/veeso/tui-realm"
 
 [dependencies]
-tui = { version = "0.16.0", default-features = false, features = ["crossterm"] }
+bitflags = "1.3.2"
 crossterm = { version = "0.20" }
+tui = { version = "0.16.0", default-features = false, features = ["crossterm"] }
 
 [dev-dependencies]
 pretty_assertions = "0.7.2"
