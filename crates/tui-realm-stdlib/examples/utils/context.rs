@@ -30,11 +30,13 @@ extern crate crossterm;
 use super::input::InputHandler;
 
 // Includes
+#[cfg(target_family = "unix")]
 use crossterm::event::DisableMouseCapture;
+#[cfg(target_family = "unix")]
 use crossterm::execute;
-use crossterm::terminal::{
-    disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
-};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+#[cfg(target_family = "unix")]
+use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
 use std::io::{stdout, Stdout};
 use tuirealm::tui::backend::CrosstermBackend;
 use tuirealm::tui::Terminal;
@@ -53,18 +55,16 @@ impl Context {
     /// Instantiates a new Context
     pub fn new() -> Context {
         let _ = enable_raw_mode();
-        // Create terminal
-        let mut stdout = stdout();
-        assert!(execute!(stdout, EnterAlternateScreen).is_ok());
         Context {
             input_hnd: InputHandler::new(),
-            terminal: Terminal::new(CrosstermBackend::new(stdout)).unwrap(),
+            terminal: Terminal::new(CrosstermBackend::new(Self::init_stdout())).unwrap(),
         }
     }
 
     /// ### enter_alternate_screen
     ///
     /// Enter alternate screen (gui window)
+    #[cfg(target_family = "unix")]
     pub fn enter_alternate_screen(&mut self) {
         let _ = execute!(
             self.terminal.backend_mut(),
@@ -73,9 +73,16 @@ impl Context {
         );
     }
 
+    /// ### enter_alternate_screen
+    ///
+    /// Enter alternate screen (gui window)
+    #[cfg(target_family = "windows")]
+    pub fn enter_alternate_screen(&self) {}
+
     /// ### leave_alternate_screen
     ///
     /// Go back to normal screen (gui window)
+    #[cfg(target_family = "unix")]
     pub fn leave_alternate_screen(&mut self) {
         let _ = execute!(
             self.terminal.backend_mut(),
@@ -84,11 +91,29 @@ impl Context {
         );
     }
 
+    /// ### leave_alternate_screen
+    ///
+    /// Go back to normal screen (gui window)
+    #[cfg(target_family = "windows")]
+    pub fn leave_alternate_screen(&self) {}
+
     /// ### clear_screen
     ///
     /// Clear terminal screen
     pub fn clear_screen(&mut self) {
         let _ = self.terminal.clear();
+    }
+
+    #[cfg(target_family = "unix")]
+    fn init_stdout() -> Stdout {
+        let mut stdout = stdout();
+        assert!(execute!(stdout, EnterAlternateScreen).is_ok());
+        stdout
+    }
+
+    #[cfg(target_family = "windows")]
+    fn init_stdout() -> Stdout {
+        stdout()
     }
 }
 
@@ -96,6 +121,7 @@ impl Drop for Context {
     fn drop(&mut self) {
         // Re-enable terminal stuff
         self.leave_alternate_screen();
+        self.clear_screen();
         let _ = disable_raw_mode();
     }
 }

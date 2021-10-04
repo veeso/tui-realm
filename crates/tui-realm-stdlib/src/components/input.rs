@@ -467,9 +467,12 @@ impl Component for Input {
                     Msg::None
                 }
                 KeyCode::Char(ch) => {
-                    // Check if modifiers is NOT CTRL OR ALT
-                    if !key.modifiers.intersects(KeyModifiers::CONTROL)
-                        && !key.modifiers.intersects(KeyModifiers::ALT)
+                    // Check if modifiers is NOT CTRL OR ALT, BUT CAN BE CRTL+ALT
+                    if (!key.modifiers.intersects(KeyModifiers::CONTROL)
+                        && !key.modifiers.intersects(KeyModifiers::ALT))
+                        || key.modifiers == KeyModifiers::CONTROL | KeyModifiers::ALT
+                        || key.modifiers
+                            == KeyModifiers::CONTROL | KeyModifiers::ALT | KeyModifiers::SHIFT
                     {
                         // Push char to input
                         let prev_input = self.states.input.clone();
@@ -640,6 +643,30 @@ mod tests {
         assert_eq!(
             component.get_state(),
             Payload::One(Value::Str(String::from("home")))
+        );
+        // CTRL+ALT
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::new(
+                KeyCode::Char('a'),
+                KeyModifiers::CONTROL | KeyModifiers::ALT
+            ))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("homea"))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("home"))))
+        );
+        // CTRL + ALT + SHIFT
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::new(
+                KeyCode::Char('a'),
+                KeyModifiers::CONTROL | KeyModifiers::SHIFT | KeyModifiers::ALT
+            ))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("homea"))))
+        );
+        assert_eq!(
+            component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
+            Msg::OnChange(Payload::One(Value::Str(String::from("home"))))
         );
         //assert_eq!(component.render().unwrap().cursor, 4);
         assert_eq!(component.states.cursor, 4);

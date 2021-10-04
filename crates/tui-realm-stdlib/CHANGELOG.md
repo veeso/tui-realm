@@ -1,12 +1,19 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.6.3](#063)
   - [0.6.2](#062)
   - [0.6.1](#061)
   - [0.6.0](#060)
   - [0.5.0](#050)
 
 ---
+
+## 0.6.3
+
+Released on 04/10/2021
+
+- Input: Escape input if is KEY + (ALT or CTRL), but NOT if is CTRL+ALT+KEY or CTRL+ALT+SHIFT+KEY
 
 ## 0.6.2
 
