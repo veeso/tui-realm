@@ -8,7 +8,7 @@
 //! ### Adding `tui-realm-stdlib` as dependency
 //!
 //! ```toml
-//! tui-realm-stdlib = "0.6.2"
+//! tui-realm-stdlib = "0.6.3"
 //! ```
 //!
 

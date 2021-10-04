@@ -4,7 +4,7 @@
   <img src="docs/images/tui-realm.svg" width="256" height="256" />
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm-stdlib.svg)](https://github.com/veeso/tui-realm-stdlib) [![Downloads](https://img.shields.io/crates/d/tui-realm-stdlib.svg)](https://crates.io/crates/tui-realm-stdlib) [![Crates.io](https://img.shields.io/badge/crates.io-v0.6.2-orange.svg)](https://crates.io/crates/tui-realm-stdlib) [![Docs](https://docs.rs/tui-realm-stdlib/badge.svg)](https://docs.rs/tui-realm-stdlib)  
+[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm-stdlib.svg)](https://github.com/veeso/tui-realm-stdlib) [![Downloads](https://img.shields.io/crates/d/tui-realm-stdlib.svg)](https://crates.io/crates/tui-realm-stdlib) [![Crates.io](https://img.shields.io/badge/crates.io-v0.6.3-orange.svg)](https://crates.io/crates/tui-realm-stdlib) [![Docs](https://docs.rs/tui-realm-stdlib/badge.svg)](https://docs.rs/tui-realm-stdlib)  
 
 [![Build](https://github.com/veeso/tui-realm-stdlib/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm-stdlib/actions) [![Build](https://github.com/veeso/tui-realm-stdlib/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm-stdlib/actions) [![Build](https://github.com/veeso/tui-realm-stdlib/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm-stdlib/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm-stdlib/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm-stdlib?branch=main)
 
@@ -56,7 +56,7 @@ tui-realm-stdlib is the standard component library for [tui-realm](https://githu
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
-tui-realm-stdlib = "0.6.2"
+tui-realm-stdlib = "0.6.3"
 ```
 
 Since this library requires `crossterm` too, you'll also need to add it to your Cargo.toml
