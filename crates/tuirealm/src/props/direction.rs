@@ -1,6 +1,6 @@
-//! ## Title
+//! ## Direction
 //!
-//! `title` is the module which defines properties for block title
+//! Describes a generic direction
 
 /**
  * MIT License
@@ -25,51 +25,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::Alignment;
 
-/// ## BlockTitle
+/// ## Direction
 ///
-/// Title properties for block containing the component
-#[derive(Clone)]
-pub struct BlockTitle {
-    text: String,
-    alignment: Alignment,
-}
-
-impl BlockTitle {
-    pub fn new<S: AsRef<str>>(text: S, alignment: Alignment) -> Self {
-        Self {
-            text: text.as_ref().to_string(),
-            alignment,
-        }
-    }
-
-    /// ### text
-    ///
-    /// get text alignment
-    pub fn text(&self) -> &str {
-        self.text.as_str()
-    }
-
-    /// ### alignment
-    ///
-    /// get block alignment
-    pub fn alignment(&self) -> Alignment {
-        self.alignment
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    use pretty_assertions::assert_eq;
-
-    #[test]
-    fn test_props_title() {
-        let title: BlockTitle = BlockTitle::new("Omar", Alignment::Center);
-        assert_eq!(title.text(), "Omar");
-        assert_eq!(title.alignment, Alignment::Center); // not dropped
-        assert_eq!(title.alignment, Alignment::Center); // not dropped
-    }
+/// Defines the 4 directions
+#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
+pub enum Direction {
+    Down,
+    Left,
+    Right,
+    Up,
 }

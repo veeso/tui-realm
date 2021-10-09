@@ -1,6 +1,6 @@
-//! ## View
+//! ## Shape
 //!
-//! TODO: complete
+//! This module exposes the shape attribute type
 
 /**
  * MIT License
@@ -25,39 +25,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::Component;
-// -- ext
-use std::collections::HashMap;
+use super::Color;
+use tui::widgets::canvas::{Line, Map, Rectangle};
 
-type WrappedComponent<Msg> = Box<dyn Component<Msg>>;
-
-/// ## View
+/// ## Shape
 ///
-/// View is the wrapper and manager for all the components.
-/// A View is a container for all the components in a certain layout.
-/// Each View can have only one focused component at the time. At least one component must be always focused
-pub struct View<Msg> {
-    /// Components Mounted onto View
-    components: HashMap<String, WrappedComponent<Msg>>,
-    // TODO: add publisher
-    /// Current active component
-    focus: Option<String>, // TODO: change
-    /// Focus stack; used to determine which component should hold focus in case the current element is blurred
-    focus_stack: Vec<String>,
+/// Describes the shape to draw on the canvas
+#[derive(Clone, Debug)]
+pub enum Shape {
+    Label((f64, f64, String, Color)),
+    Layer,
+    Line(Line),
+    Map(Map),
+    Points((Vec<(f64, f64)>, Color)),
+    Rectangle(Rectangle),
 }
 
-impl<Msg> View<Msg> {
-    /// ### init
-    ///
-    /// Initialize a new `View`
-    pub fn init() -> Self {
-        Self {
-            components: HashMap::new(),
-            focus: None,
-            focus_stack: Vec::new(),
+impl PartialEq for Shape {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Shape::Label(a), Shape::Label(b)) => a == b,
+            (Shape::Layer, Shape::Layer) => true,
+            (Shape::Line(a), Shape::Line(b)) => {
+                a.x1 == b.x1 && a.x2 == b.x2 && a.y1 == b.y1 && a.y2 == b.y2 && a.color == b.color
+            }
+            (Shape::Map(a), Shape::Map(b)) => a.color == b.color,
+            (Shape::Points(a), Shape::Points(b)) => a == b,
+            (Shape::Rectangle(a), Shape::Rectangle(b)) => {
+                a.x == b.x
+                    && a.y == b.y
+                    && a.width == b.width
+                    && a.height == b.height
+                    && a.color == b.color
+            }
+            (_, _) => false,
         }
     }
-
-    // TODO: query(); attr(); poll();
-    // TODO: onresize
 }

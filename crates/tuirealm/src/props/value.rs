@@ -1,6 +1,6 @@
-//! ## Props
+//! ## Value
 //!
-//! `Props` is the module which defines properties for layout components
+//! This module exposes the prop values
 
 /**
  * MIT License
@@ -25,65 +25,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-// ext
+use super::{Alignment, Color, Dataset, InputType, Shape, Style, Table, TextSpan};
 use std::collections::{HashMap, LinkedList};
-use tui::style::{Color, Modifier, Style};
-use tui::widgets::canvas::{Line, Map, Rectangle};
-
-// modules
-pub mod borders;
-pub mod builder;
-pub mod dataset;
-pub mod texts;
-pub mod title;
-
-// Exports
-pub use borders::{Borders, BordersProps};
-pub use builder::{GenericPropsBuilder, PropsBuilder};
-pub use dataset::Dataset;
-pub use texts::{Table, TableBuilder, TextSpan};
-pub use title::BlockTitle;
-pub use tui::layout::Alignment;
-
-// -- Props
-
-/// ## Props
-///
-/// Props holds all the possible properties for a layout component
-#[derive(Clone)]
-pub struct Props {
-    // Values
-    pub visible: bool,             // Is the element visible ON CREATE?
-    pub foreground: Color,         // Foreground color
-    pub background: Color,         // Background color
-    pub borders: BordersProps,     // Borders
-    pub title: Option<BlockTitle>, // Block title
-    pub modifiers: Modifier,
-    pub palette: HashMap<&'static str, Color>, // Use palette to store extra colors
-    pub own: HashMap<&'static str, PropPayload>, // Own properties (extra)
-}
-
-impl Default for Props {
-    fn default() -> Self {
-        Self {
-            // Values
-            visible: true,
-            foreground: Color::Reset,
-            background: Color::Reset,
-            borders: BordersProps::default(),
-            title: None,
-            modifiers: Modifier::empty(),
-            palette: HashMap::new(),
-            own: HashMap::new(),
-        }
-    }
-}
 
 // -- Prop value
 
 /// ## PropPayload
 ///
-/// Payload describes a property initial value payload, which contains the actual value in different kind of storage
+/// The payload contains the actual value for user defined properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum PropPayload {
     One(PropValue),
@@ -119,6 +68,7 @@ pub enum PropValue {
     Str(String),
     // -- tui props
     Alignment(Alignment),
+    Color(Color),
     Dataset(Dataset),
     InputType(InputType),
     Shape(Shape),
@@ -443,78 +393,16 @@ impl PropValue {
     }
 }
 
-// -- Input Type
-
-/// ## InputType
-///
-/// Input type for text inputs
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum InputType {
-    Text,
-    Number,
-    Password,
-}
-
-// -- Shape
-
-/// ## Shape
-///
-/// Describes the shape to draw on the canvas
-#[derive(Clone, Debug)]
-pub enum Shape {
-    //Label((f64, f64, String, Color)),
-    Layer,
-    Line(Line),
-    Map(Map),
-    Points((Vec<(f64, f64)>, Color)),
-    Rectangle(Rectangle),
-}
-
-impl PartialEq for Shape {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            //(Shape::Label(a), Shape::Label(b)) => a == b,
-            (Shape::Layer, Shape::Layer) => true,
-            (Shape::Line(a), Shape::Line(b)) => {
-                a.x1 == b.x1 && a.x2 == b.x2 && a.y1 == b.y1 && a.y2 == b.y2 && a.color == b.color
-            }
-            (Shape::Map(a), Shape::Map(b)) => a.color == b.color,
-            (Shape::Points(a), Shape::Points(b)) => a == b,
-            (Shape::Rectangle(a), Shape::Rectangle(b)) => {
-                a.x == b.x
-                    && a.y == b.y
-                    && a.width == b.width
-                    && a.height == b.height
-                    && a.color == b.color
-            }
-            (_, _) => false,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
-    use super::borders::BorderType;
     use super::*;
 
-    #[test]
-    fn test_props_default() {
-        let props: Props = Props::default();
-        assert_eq!(props.visible, true);
-        assert_eq!(props.background, Color::Reset);
-        assert_eq!(props.foreground, Color::Reset);
-        assert_eq!(props.borders.borders, Borders::ALL);
-        assert_eq!(props.borders.color, Color::Reset);
-        assert_eq!(props.borders.variant, BorderType::Plain);
-        assert_eq!(props.title.is_none(), true);
-        assert_eq!(props.modifiers, Modifier::empty());
-        assert_eq!(props.palette.len(), 0);
-        assert_eq!(props.own.len(), 0);
-    }
+    use crate::tui::widgets::canvas::Map;
+    use std::collections::HashMap;
 
     #[test]
-    fn test_props_values() {
+    fn prop_values() {
         PropPayload::One(PropValue::Usize(2));
         PropPayload::Tup2((PropValue::Bool(true), PropValue::Usize(128)));
         PropPayload::Tup3((
@@ -609,7 +497,7 @@ mod tests {
     }
 
     #[test]
-    fn test_props_unwrap_values() {
+    fn unwrap_prop_values() {
         assert_eq!(
             *PropValue::Alignment(Alignment::Center).unwrap_alignment(),
             Alignment::Center
@@ -653,7 +541,7 @@ mod tests {
     }
 
     #[test]
-    fn test_props_unwrap_payloads() {
+    fn unwrap_prop_payloads() {
         assert_eq!(
             *PropPayload::One(PropValue::Bool(false))
                 .unwrap_one()

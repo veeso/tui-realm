@@ -14,8 +14,10 @@ readme = "README.md"
 repository = "https://github.com/veeso/tui-realm"
 
 [dependencies]
-bitflags = "1.3.2"
-crossterm = { version = "0.20" }
+bitflags = "^1.0.0"
+crossterm = "0.20"
+lazy_static = "^1.0.0"
+regex = "^1.0.0"
 tui = { version = "0.16.0", default-features = false, features = ["crossterm"] }
 
 [dev-dependencies]

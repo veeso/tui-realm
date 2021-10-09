@@ -25,8 +25,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tui::{
-    style::Style,
+use super::Style;
+use crate::tui::{
     symbols::Marker,
     widgets::{Dataset as TuiDataset, GraphType},
 };
@@ -153,7 +153,7 @@ mod test {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn test_props_dataset() {
+    fn dataset() {
         let mut dataset: Dataset = Dataset::default()
             .name("Avg temperatures")
             .graph_type(GraphType::Scatter)

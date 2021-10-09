@@ -43,10 +43,9 @@ pub use crossterm::event::{
 pub enum Event {
     /// A keyboard event
     Keyboard(KeyEvent),
-    /// A mouse event
-    Mouse(MouseEvent),
     /// This event is raised after the terminal window is resized
-    Resize(u16, u16),
+    WindowResize(u16, u16),
+    /// A ui tick event (should be configurable)
     Tick,
 }
 
@@ -116,48 +115,3 @@ bitflags! {
         const ALT = 0b0000_0100;
     }
 }
-
-// -- mouse
-
-/// ## MouseEvent
-///
-/// A mouse event
-#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
-pub struct MouseEvent {
-    /// The kind of mouse event that was caused.
-    pub kind: MouseEventKind,
-    /// The column that the event occurred on.
-    pub column: u16,
-    /// The row that the event occurred on.
-    pub row: u16,
-    /// The key modifiers active when the event occurred.
-    pub modifiers: KeyModifiers,
-}
-
-#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
-pub enum MouseEventKind {
-    /// Pressed mouse button. Contains the button that was pressed.
-    Down(MouseButton),
-    /// Released mouse button. Contains the button that was released.
-    Up(MouseButton),
-    /// Moved the mouse cursor while pressing the contained mouse button.
-    Drag(MouseButton),
-    /// Moved the mouse cursor while not pressing a mouse button.
-    Moved,
-    /// Scrolled mouse wheel downwards (towards the user).
-    ScrollDown,
-    /// Scrolled mouse wheel upwards (away from the user).
-    ScrollUp,
-}
-
-#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
-pub enum MouseButton {
-    /// Left mouse button.
-    Left,
-    /// Right mouse button.
-    Right,
-    /// Middle mouse button.
-    Middle,
-}
-
-// TODO: Publisher

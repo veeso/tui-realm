@@ -1,6 +1,6 @@
-//! ## View
+//! ## Builder
 //!
-//! TODO: complete
+//! `Builder` is the module which defines the prop builder trait.
 
 /**
  * MIT License
@@ -25,39 +25,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::Component;
-// -- ext
-use std::collections::HashMap;
+use super::{AttrSelector, Attribute, Props};
 
-type WrappedComponent<Msg> = Box<dyn Component<Msg>>;
+// -- Props builder
 
-/// ## View
+/// ## PropsBuilder
 ///
-/// View is the wrapper and manager for all the components.
-/// A View is a container for all the components in a certain layout.
-/// Each View can have only one focused component at the time. At least one component must be always focused
-pub struct View<Msg> {
-    /// Components Mounted onto View
-    components: HashMap<String, WrappedComponent<Msg>>,
-    // TODO: add publisher
-    /// Current active component
-    focus: Option<String>, // TODO: change
-    /// Focus stack; used to determine which component should hold focus in case the current element is blurred
-    focus_stack: Vec<String>,
-}
-
-impl<Msg> View<Msg> {
-    /// ### init
+/// The PropsBuilder trait just defines the method build, which all the builders must implement.
+/// This method must return the Props hold by the ProspBuilder.
+/// If you're looking on how to implement a Props Builder, check out the project examples
+/// and the stdlib repository at <https://github.com/veeso/tui-realm-stdlib>
+pub trait PropsBuilder {
+    /// ### build
     ///
-    /// Initialize a new `View`
-    pub fn init() -> Self {
-        Self {
-            components: HashMap::new(),
-            focus: None,
-            focus_stack: Vec::new(),
-        }
+    /// Build Props from builder
+    /// You shouldn't allow this method to be called twice.
+    /// Panic is ok.
+    fn build(&mut self) -> Props;
+
+    /// ### hidden
+    ///
+    /// Initialize props with visible set to False
+    fn hidden(&mut self) -> &mut Self {
+        self.props_mut()
+            .set(AttrSelector::Display, Attribute::Flag(false));
+        self
     }
 
-    // TODO: query(); attr(); poll();
-    // TODO: onresize
+    /// ### visible
+    ///
+    /// Initialize props with visible set to True
+    fn visible(&mut self) -> &mut Self {
+        self.props_mut()
+            .set(AttrSelector::Display, Attribute::Flag(true));
+        self
+    }
+
+    fn props_mut(&mut self) -> &mut Props;
 }
