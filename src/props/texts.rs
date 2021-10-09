@@ -193,7 +193,7 @@ mod test {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn test_props_text_table() {
+    fn tables() {
         let table: Table = TableBuilder::default()
             .add_col(TextSpan::from("name"))
             .add_col(TextSpan::from("age"))
@@ -221,7 +221,7 @@ mod test {
     }
 
     #[test]
-    fn test_props_text_span() {
+    fn text_span() {
         // from str
         let span: TextSpan = TextSpan::from("Hello!");
         assert_eq!(span.content.as_str(), "Hello!");

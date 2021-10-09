@@ -25,34 +25,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tui::style::{Color, Style};
+use super::{Color, Style};
 
 // Exports
-pub use tui::widgets::{BorderType, Borders};
+pub use tui::widgets::{BorderType, Borders as BorderSides};
 
 // -- Border
 
-/// ## BordersProps
+/// ## Borders
 ///
 /// Defines the properties of the borders
-#[derive(Clone)]
-pub struct BordersProps {
-    pub borders: Borders,
-    pub variant: BorderType,
+#[derive(Clone, Debug, PartialEq)]
+pub struct Borders {
+    pub sides: BorderSides,
+    pub modifiers: BorderType,
     pub color: Color,
 }
 
-impl Default for BordersProps {
+impl Default for Borders {
     fn default() -> Self {
-        BordersProps {
-            borders: Borders::ALL,
-            variant: BorderType::Plain,
+        Borders {
+            sides: BorderSides::ALL,
+            modifiers: BorderType::Plain,
             color: Color::Reset,
         }
     }
 }
 
-impl BordersProps {
+impl Borders {
+    /// ### sides
+    ///
+    /// Set border sides
+    pub fn sides(mut self, borders: BorderSides) -> Self {
+        self.sides = borders;
+        self
+    }
+
+    pub fn modifiers(mut self, modifiers: BorderType) -> Self {
+        self.modifiers = modifiers;
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = color;
+        self
+    }
+
     /// ### style
     ///
     /// Get Border style
@@ -69,14 +87,21 @@ mod test {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn test_props_borders() {
+    fn borders() {
         // Default
-        let mut props: BordersProps = BordersProps::default();
-        assert_eq!(props.borders, Borders::ALL);
-        assert_eq!(props.variant, BorderType::Plain);
+        let props: Borders = Borders::default();
+        assert_eq!(props.sides, BorderSides::ALL);
+        assert_eq!(props.modifiers, BorderType::Plain);
         assert_eq!(props.color, Color::Reset);
+        // Build
+        let props = Borders::default()
+            .sides(BorderSides::TOP)
+            .modifiers(BorderType::Double)
+            .color(Color::Yellow);
+        assert_eq!(props.sides, BorderSides::TOP);
+        assert_eq!(props.modifiers, BorderType::Double);
+        assert_eq!(props.color, Color::Yellow);
         // Get style
-        props.color = Color::Yellow;
         let style: Style = props.style();
         assert_eq!(*style.fg.as_ref().unwrap(), Color::Yellow);
     }

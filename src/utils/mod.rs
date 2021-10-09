@@ -1,6 +1,6 @@
-//! ## tui
+//! ## Utils
 //!
-//! `tui` just exposes the tui modules, in order to include the entire library inside realm
+//! This module exposes utilities
 
 /**
  * MIT License
@@ -25,4 +25,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-pub use tuirs::*;
+pub mod parser;
+mod types;
+
+// export types
+pub use types::{Email, PhoneNumber};
