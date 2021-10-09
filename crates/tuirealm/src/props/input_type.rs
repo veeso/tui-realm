@@ -133,7 +133,7 @@ impl InputType {
 
     // -- input validate
     fn char_valid_for_email(input: &str, c: char) -> bool {
-        c.is_alphabetic() // Must be alphabetic
+        c.is_alphanumeric() // Must be alphanumeric
             || [
                 '.', '!', '#', '$', '%', '&', '\'', '*', '+', '/', '\\', '=', '?', '^', '_', '`',
                 '{', '|', '}', '~', '-',
@@ -159,6 +159,7 @@ impl InputType {
             || (c == 'b' && input.len() == 2)
             || (c == ',' && input.starts_with("rgb"))
             || (c == '(' && input.starts_with("rgb") && !input.contains('('))
+            || (c.is_digit(10) && input.starts_with("rgb"))
             || (c == ')' && input.len() >= 15 && !input.contains(')')) // rgb(xxx,xxx,xxx)
     }
 }
