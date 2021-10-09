@@ -101,7 +101,7 @@ mod test {
         let phone = PhoneNumber::new(None, "345-777-6117");
         assert!(phone.prefix.is_none());
         assert_eq!(phone.number.as_str(), "3457776117");
-        assert_eq!(phone.phone_number().as_str(), "+3457776117");
+        assert_eq!(phone.phone_number().as_str(), "3457776117");
     }
 
     #[test]
