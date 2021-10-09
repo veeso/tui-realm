@@ -4,12 +4,69 @@
   <img src="docs/images/tui-realm.svg" width="256" height="256" />
 </p>
 
+<p align="center">~ A tui-rs framework inspired by Elm and React ~</p>
+<p align="center">
+  <a href="/docs/get-started.md" target="_blank">Get started</a>
+  ·
+  <a href="https://github.com/veeso/tui-realm-stdlib" target="_blank">Standard Library</a>
+  ·
+  <a href="https://docs.rs/tuirealm" target="_blank">Documentation</a>
+</p>
+
+<p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
+<p align="center">Current version: 1.0.0 (FIXME:/10/2021)</p>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm.svg)](https://github.com/veeso/tui-realm) [![Downloads](https://img.shields.io/crates/d/tuirealm.svg)](https://crates.io/crates/tuirealm) [![Crates.io](https://img.shields.io/badge/crates.io-v0.6.0-orange.svg)](https://crates.io/crates/tuirealm) [![Docs](https://docs.rs/tuirealm/badge.svg)](https://docs.rs/tuirealm)  
 
-[![Build](https://github.com/veeso/tui-realm/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Build](https://github.com/veeso/tui-realm/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm?branch=main)
-
-Developed by Christian Visintin  
-Current version: 0.6.0 (03/08/2021)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"
+    ><img
+      src="https://img.shields.io/badge/License-MIT-teal.svg"
+      alt="License-MIT"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm/stargazers"
+    ><img
+      src="https://img.shields.io/github/stars/veeso/tui-realm.svg"
+      alt="Repo stars"
+  /></a>
+  <a href="https://crates.io/crates/tuirealm"
+    ><img
+      src="https://img.shields.io/crates/d/tuirealm.svg"
+      alt="Downloads counter"
+  /></a>
+  <a href="https://crates.io/crates/tuirealm"
+    ><img
+      src="https://img.shields.io/crates/v/tuirealm.svg"
+      alt="Latest version"
+  /></a>
+</p>
+<p align="center">
+  <a href="https://github.com/veeso/tui-realm/actions"
+    ><img
+      src="https://github.com/veeso/tui-realm/workflows/Linux/badge.svg"
+      alt="Linux CI"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm/actions"
+    ><img
+      src="https://github.com/veeso/tui-realm/workflows/MacOS/badge.svg"
+      alt="MacOS CI"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm/actions"
+    ><img
+      src="https://github.com/veeso/tui-realm/workflows/Windows/badge.svg"
+      alt="Windows CI"
+  /></a>
+  <a href="https://coveralls.io/github/veeso/tui-realm"
+    ><img
+      src="https://coveralls.io/repos/github/veeso/tui-realm/badge.svg"
+      alt="Coveralls"
+  /></a>
+  <a href="https://docs.rs/tuirealm"
+    ><img
+      src="https://docs.rs/tuirealm/badge.svg"
+      alt="Docs"
+  /></a>
+</p>
 
 ---
 
