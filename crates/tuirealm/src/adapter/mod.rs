@@ -27,5 +27,8 @@
  */
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
 
+// -- crossterm
 #[cfg(feature = "with-crossterm")]
 pub mod crossterm;
+#[cfg(feature = "with-crossterm")]
+pub use self::crossterm::{Frame, Terminal};
