@@ -16,8 +16,6 @@
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
 <p align="center">Current version: 1.0.0 (FIXME:/10/2021)</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm.svg)](https://github.com/veeso/tui-realm) [![Downloads](https://img.shields.io/crates/d/tuirealm.svg)](https://crates.io/crates/tuirealm) [![Crates.io](https://img.shields.io/badge/crates.io-v0.6.0-orange.svg)](https://crates.io/crates/tuirealm) [![Docs](https://docs.rs/tuirealm/badge.svg)](https://docs.rs/tuirealm)  
-
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
     ><img
@@ -38,6 +36,11 @@
     ><img
       src="https://img.shields.io/crates/v/tuirealm.svg"
       alt="Latest version"
+  /></a>
+  <a href="https://www.buymeacoffee.com/veeso">
+    <img
+      src="https://img.shields.io/badge/Donate-BuyMeACoffee-yellow.svg"
+      alt="Buy me a coffee"
   /></a>
 </p>
 <p align="center">
@@ -205,6 +208,10 @@ View tui-realm's changelog [HERE](CHANGELOG.md)
 If you like tui-realm and you're grateful for the work I've done, please consider a little donation 🥳
 
 [![Buy-me-a-coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=veeso&button_colour=404040&font_colour=ffffff&font_family=Comic&outline_colour=ffffff&coffee_colour=FFDD00)](https://www.buymeacoffee.com/veeso)
+
+or you can also directly make a donation on PayPal:
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/chrisintin)
 
 ---
 
