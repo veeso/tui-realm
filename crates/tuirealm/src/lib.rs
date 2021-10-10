@@ -56,6 +56,7 @@ use std::io::Stdout;
 use tuirs::{backend::CrosstermBackend, layout::Rect, Frame as TuiFrame};
 
 // -- modules
+pub mod adapter;
 pub mod command;
 pub mod event;
 pub mod props;
