@@ -153,5 +153,5 @@ pub trait Update<Msg: PartialEq> {
     /// update the current state handling a message from the view.
     /// This function may return a Message,
     /// so this function has to be intended to be call recursively if necessary
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg>;
+    fn update(&mut self, view: &mut View<Msg>, msg: Option<Msg>) -> Option<Msg>;
 }
