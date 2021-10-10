@@ -15,7 +15,7 @@ repository = "https://github.com/veeso/tui-realm"
 
 [dependencies]
 bitflags = "^1.0.0"
-crossterm = "0.20"
+crossterm = { version = "0.20", optional = true }
 lazy_static = "^1.0.0"
 regex = "^1.0.0"
 tui = { version = "0.16.0", default-features = false, features = ["crossterm"] }
@@ -23,6 +23,10 @@ tui = { version = "0.16.0", default-features = false, features = ["crossterm"] }
 [dev-dependencies]
 pretty_assertions = "0.7.2"
 rand = "0.8.4"
+
+[features]
+default = [ "with-crossterm" ]
+with-crossterm = [ "crossterm" ]
 
 [[example]]
 name = "demo"

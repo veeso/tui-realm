@@ -25,14 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-extern crate crossterm;
-
 use bitflags::bitflags;
-pub use crossterm::event::{
-    Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
-    KeyModifiers as XtermKeyModifiers, MouseButton as XtermMouseButton,
-    MouseEvent as XtermMouseEvent, MouseEventKind as XtermMouseEventKind,
-};
 
 // -- event
 
@@ -47,6 +40,8 @@ pub enum Event {
     WindowResize(u16, u16),
     /// A ui tick event (should be configurable)
     Tick,
+    /// Unhandled event; Empty event
+    None,
 }
 
 // -- keyboard
@@ -56,8 +51,8 @@ pub enum Event {
 /// A keyboard event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 pub struct KeyEvent {
-    code: Key,
-    modifiers: KeyModifiers,
+    pub code: Key,
+    pub modifiers: KeyModifiers,
 }
 
 /// ## Key
@@ -113,5 +108,39 @@ bitflags! {
         const SHIFT = 0b0000_0001;
         const CONTROL = 0b0000_0010;
         const ALT = 0b0000_0100;
+    }
+}
+
+impl KeyEvent {
+    pub fn new(code: Key, modifiers: KeyModifiers) -> Self {
+        Self { code, modifiers }
+    }
+}
+
+impl From<Key> for KeyEvent {
+    fn from(k: Key) -> Self {
+        Self::new(k, KeyModifiers::empty())
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn new_key_event() {
+        let k = KeyEvent::new(Key::Down, KeyModifiers::CONTROL);
+        assert_eq!(k.code, Key::Down);
+        assert_eq!(k.modifiers, KeyModifiers::CONTROL);
+    }
+
+    #[test]
+    fn key_event_from_key() {
+        let k = KeyEvent::from(Key::Up);
+        assert_eq!(k.code, Key::Up);
+        assert_eq!(k.modifiers, KeyModifiers::empty());
     }
 }
