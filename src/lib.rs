@@ -52,8 +52,7 @@ extern crate regex;
 extern crate tui as tuirs;
 
 // Ext
-use std::io::Stdout;
-use tuirs::{backend::CrosstermBackend, layout::Rect, Frame as TuiFrame};
+use tuirs::layout::Rect;
 
 // -- modules
 pub mod adapter;
@@ -66,18 +65,12 @@ pub mod utils;
 pub mod tui;
 mod view;
 // -- export
+pub use adapter::{Frame, Terminal};
 pub use command::{Cmd, CmdResult};
 pub use event::Event;
 pub use props::{AttrSelector, Attribute, PropsBuilder};
 pub use state::{State, Value};
 pub use view::View;
-
-// -- Types
-
-/// ## Frame
-///
-/// Frame represents the Frame where the view will be displayed in
-pub type Frame<'a> = TuiFrame<'a, CrosstermBackend<Stdout>>;
 
 // -- Component traits
 
