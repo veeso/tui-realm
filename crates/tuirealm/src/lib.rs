@@ -61,9 +61,9 @@ pub mod command;
 pub mod event;
 pub mod props;
 mod state;
-pub mod utils;
-//pub mod props;
+// TODO: terminal
 pub mod tui;
+pub mod utils;
 mod view;
 // -- export
 pub use adapter::{Frame, Terminal};

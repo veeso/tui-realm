@@ -27,7 +27,10 @@
  */
 use bitflags::bitflags;
 
+// -- modules
 mod listener;
+// -- export
+pub use listener::{EventListener, ListenerError, ListenerResult};
 
 // -- event
 
