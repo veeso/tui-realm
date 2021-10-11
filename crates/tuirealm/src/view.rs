@@ -29,16 +29,16 @@ use crate::{Component, Update};
 // -- ext
 use std::collections::HashMap;
 
-type WrappedComponent<Msg> = Box<dyn Component<Msg>>;
+type WrappedComponent<Msg, UserEvent> = Box<dyn Component<Msg, UserEvent>>;
 
 /// ## View
 ///
 /// View is the wrapper and manager for all the components.
 /// A View is a container for all the components in a certain layout.
 /// Each View can have only one focused component at the time. At least one component must be always focused
-pub struct View<Msg> {
+pub struct View<Msg, UserEvent> {
     /// Components Mounted onto View
-    components: HashMap<String, WrappedComponent<Msg>>,
+    components: HashMap<String, WrappedComponent<Msg, UserEvent>>,
     // TODO: add publisher
     // TODO: add subs
     /// Current active component
@@ -47,7 +47,7 @@ pub struct View<Msg> {
     focus_stack: Vec<String>,
 }
 
-impl<Msg> View<Msg> {
+impl<Msg, UserEvent> View<Msg, UserEvent> {
     /// ### init
     ///
     /// Initialize a new `View`

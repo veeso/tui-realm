@@ -36,6 +36,7 @@ use crossterm::event::{
     KeyModifiers as XtermKeyModifiers,
 };
 use std::io::Stdout;
+use std::marker::PhantomData;
 use std::time::Duration;
 
 // -- Frame
@@ -51,7 +52,9 @@ pub type Terminal = TuiTerminal<CrosstermBackend<Stdout>>;
 
 // -- converters
 
-impl From<XtermEvent> for Event {
+impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> From<XtermEvent>
+    for Event<U>
+{
     fn from(e: XtermEvent) -> Self {
         match e {
             XtermEvent::Key(key) => Self::Keyboard(key.into()),
@@ -118,16 +121,26 @@ impl From<XtermKeyModifiers> for KeyModifiers {
 /// The input listener for crossterm.
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
 /// or you can use it directly in the event listener, calling `default_input_listener()` in the `EventListenerCfg`
-pub struct CrosstermInputListener;
+pub struct CrosstermInputListener<
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+> {
+    ghost: PhantomData<U>,
+}
 
-impl Default for CrosstermInputListener {
+impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Default
+    for CrosstermInputListener<U>
+{
     fn default() -> Self {
-        Self {}
+        Self {
+            ghost: PhantomData::default(),
+        }
     }
 }
 
-impl Poll for CrosstermInputListener {
-    fn poll(&mut self) -> ListenerResult<Option<Event>> {
+impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Poll<U>
+    for CrosstermInputListener<U>
+{
+    fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         if let Ok(available) = xterm::poll(Duration::from_millis(10)) {
             match available {
                 true => {
@@ -150,6 +163,7 @@ impl Poll for CrosstermInputListener {
 mod test {
 
     use super::*;
+    use crate::event::MockEvent;
 
     use pretty_assertions::assert_eq;
 
@@ -204,18 +218,19 @@ mod test {
 
     #[test]
     fn adapt_crossterm_event() {
+        type AppEvent = Event<MockEvent>;
         assert_eq!(
-            Event::from(XtermEvent::Resize(24, 48)),
+            AppEvent::from(XtermEvent::Resize(24, 48)),
             Event::WindowResize(24, 48)
         );
         assert_eq!(
-            Event::from(XtermEvent::Key(XtermKeyEvent::from(
+            AppEvent::from(XtermEvent::Key(XtermKeyEvent::from(
                 XtermKeyCode::Backspace
             ))),
             Event::Keyboard(KeyEvent::from(Key::Backspace))
         );
         assert_eq!(
-            Event::from(XtermEvent::Mouse(XtermMouseEvent {
+            AppEvent::from(XtermEvent::Mouse(XtermMouseEvent {
                 kind: XtermMouseEventKind::Moved,
                 column: 0,
                 row: 0,

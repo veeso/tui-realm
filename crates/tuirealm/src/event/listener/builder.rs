@@ -32,12 +32,15 @@ use super::{Duration, EventListener, InputEventListener, Listener, Poll};
 /// The event listener configurator is used to setup an event listener.
 /// Once you're done with configuration just call `start()` and the event listener will start and the listener
 /// will be returned.
-pub struct EventListenerCfg {
-    listeners: Vec<Listener>,
+pub struct EventListenerCfg<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send>
+{
+    listeners: Vec<Listener<U>>,
     tick_interval: Option<Duration>,
 }
 
-impl Default for EventListenerCfg {
+impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Default
+    for EventListenerCfg<U>
+{
     fn default() -> Self {
         Self {
             listeners: Vec::default(),
@@ -46,11 +49,11 @@ impl Default for EventListenerCfg {
     }
 }
 
-impl EventListenerCfg {
+impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> EventListenerCfg<U> {
     /// ### start
     ///
     /// Create the event listener with the parameters provided and start the workers
-    pub fn start(self) -> EventListener {
+    pub fn start(self) -> EventListener<U> {
         EventListener::start(self.listeners, self.tick_interval)
     }
 
@@ -66,7 +69,7 @@ impl EventListenerCfg {
     /// ### listener
     ///
     /// Add a new listener to the the event listener
-    pub fn listener(mut self, poll: Box<dyn Poll>, interval: Duration) -> Self {
+    pub fn listener(mut self, poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
         self.listeners.push(Listener::new(poll, interval));
         self
     }
@@ -75,7 +78,7 @@ impl EventListenerCfg {
     ///
     /// Add to the event listener the default input event listener for the backend configured.
     pub fn default_input_listener(self, interval: Duration) -> Self {
-        self.listener(Box::new(InputEventListener::default()), interval)
+        self.listener(Box::new(InputEventListener::<U>::default()), interval)
     }
 }
 
@@ -84,12 +87,13 @@ mod test {
 
     use super::*;
     use crate::event::listener::mock::MockPoll;
+    use crate::event::MockEvent;
 
     use pretty_assertions::assert_eq;
 
     #[test]
     fn should_configure_and_start_event_listener() {
-        let builder = EventListenerCfg::default();
+        let builder = EventListenerCfg::<MockEvent>::default();
         assert!(builder.listeners.is_empty());
         assert!(builder.tick_interval.is_none());
         let builder = builder.tick_interval(Duration::from_secs(10));

@@ -36,18 +36,22 @@ use std::time::{Duration, Instant};
 /// ## EventListenerWorker
 ///
 /// worker for event listener
-pub(super) struct EventListenerWorker {
-    listeners: Vec<Listener>,
-    sender: mpsc::Sender<ListenerMsg>,
+pub(super) struct EventListenerWorker<
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+> {
+    listeners: Vec<Listener<U>>,
+    sender: mpsc::Sender<ListenerMsg<U>>,
     running: Arc<RwLock<bool>>,
     next_tick: Instant,
     tick_interval: Option<Duration>,
 }
 
-impl EventListenerWorker {
+impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send>
+    EventListenerWorker<U>
+{
     pub(super) fn new(
-        listeners: Vec<Listener>,
-        sender: mpsc::Sender<ListenerMsg>,
+        listeners: Vec<Listener<U>>,
+        sender: mpsc::Sender<ListenerMsg<U>>,
         running: Arc<RwLock<bool>>,
         tick_interval: Option<Duration>,
     ) -> Self {
@@ -118,7 +122,7 @@ impl EventListenerWorker {
     /// ### send_tick
     ///
     /// Send tick to listener and calc next tick
-    fn send_tick(&mut self) -> Result<(), mpsc::SendError<ListenerMsg>> {
+    fn send_tick(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<U>>> {
         // Send tick
         match self.sender.send(ListenerMsg::Tick) {
             // Terminate thread on send failed
@@ -136,8 +140,8 @@ impl EventListenerWorker {
     /// Poll and send poll to listener. Calc next poll.
     /// Returns only the messages, while the None returned by poll are discarded
     #[allow(clippy::needless_collect)]
-    fn poll(&mut self) -> Result<(), mpsc::SendError<ListenerMsg>> {
-        let msg: Vec<ListenerMsg> = self
+    fn poll(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<U>>> {
+        let msg: Vec<ListenerMsg<U>> = self
             .listeners
             .iter_mut()
             .map(|x| {
@@ -198,6 +202,7 @@ mod test {
     use super::super::{ListenerError, ListenerResult};
     use super::*;
     use crate::event::listener::mock::MockPoll;
+    use crate::event::MockEvent;
     use crate::event::{Key, KeyEvent};
     use crate::Event;
 
@@ -208,7 +213,7 @@ mod test {
         let (tx, rx) = mpsc::channel();
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
-        let mut worker = EventListenerWorker::new(
+        let mut worker = EventListenerWorker::<MockEvent>::new(
             vec![Listener::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5),
@@ -231,7 +236,7 @@ mod test {
         let (tx, rx) = mpsc::channel();
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
-        let mut worker = EventListenerWorker::new(
+        let mut worker = EventListenerWorker::<MockEvent>::new(
             vec![Listener::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5),
@@ -254,7 +259,7 @@ mod test {
         let (tx, rx) = mpsc::channel();
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
-        let mut worker = EventListenerWorker::new(
+        let mut worker = EventListenerWorker::<MockEvent>::new(
             vec![Listener::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5),
@@ -295,7 +300,7 @@ mod test {
         let (tx, rx) = mpsc::channel();
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
-        let worker = EventListenerWorker::new(
+        let worker = EventListenerWorker::<MockEvent>::new(
             vec![Listener::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(3),
@@ -331,7 +336,7 @@ mod test {
         let (tx, _) = mpsc::channel();
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
-        let mut worker = EventListenerWorker::new(vec![], tx, running_t, None);
+        let mut worker = EventListenerWorker::<MockEvent>::new(vec![], tx, running_t, None);
         worker.calc_next_tick();
     }
 }
