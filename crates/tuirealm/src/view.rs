@@ -59,12 +59,13 @@ impl<Msg> View<Msg> {
         }
     }
 
-    // TODO: pub fn update(&mut self, model: Box<&mut dyn Update>, e: Event) -> Option<Msg> {}
+    // TODO: pub fn update(&mut self, model: Box<&mut dyn Update>, strategy: Strategy) -> Option<Msg> {}
 
     // TODO: subscriptions
 
     // TODO: query(); attr(); poll();
-    // TODO: onresize
+
+    // TODO: strategy (One, UpTo(usize), All, Process)
 }
 
 // TODO: typedef sub

@@ -127,7 +127,7 @@ impl Default for CrosstermInputListener {
 }
 
 impl Poll for CrosstermInputListener {
-    fn poll(&self) -> ListenerResult<Option<Event>> {
+    fn poll(&mut self) -> ListenerResult<Option<Event>> {
         if let Ok(available) = xterm::poll(Duration::from_millis(10)) {
             match available {
                 true => {
