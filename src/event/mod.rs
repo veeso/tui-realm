@@ -26,6 +26,7 @@
  * SOFTWARE.
  */
 use bitflags::bitflags;
+use std::fmt;
 
 // -- modules
 mod listener;
@@ -37,8 +38,8 @@ pub use listener::{EventListener, EventListenerCfg, ListenerError, ListenerResul
 /// ## Event
 ///
 /// An event raised by a user interaction
-#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
-pub enum Event {
+#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd)]
+pub enum Event<UserEvent: fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd> {
     /// A keyboard event
     Keyboard(KeyEvent),
     /// This event is raised after the terminal window is resized
@@ -47,7 +48,9 @@ pub enum Event {
     Tick,
     /// Unhandled event; Empty event
     None,
-    // TODO: User(U)
+    /// User event; won't be used by standard library or event listener;
+    /// but can be used in user define event listeners
+    User(UserEvent),
 }
 
 // -- keyboard
@@ -148,5 +151,16 @@ mod test {
         let k = KeyEvent::from(Key::Up);
         assert_eq!(k.code, Key::Up);
         assert_eq!(k.modifiers, KeyModifiers::empty());
+    }
+}
+
+#[cfg(test)]
+pub use mock::MockEvent;
+
+#[cfg(test)]
+pub mod mock {
+    #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd)]
+    pub enum MockEvent {
+        None,
     }
 }

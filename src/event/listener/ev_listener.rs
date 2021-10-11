@@ -34,17 +34,17 @@ use std::time::{Duration, Instant};
 ///
 /// A listener is a wrapper around the poll trait object, which also defines an interval, which defines
 /// the amount of time between each poll() call.
-pub struct Listener {
-    poll: Box<dyn Poll>,
+pub struct Listener<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> {
+    poll: Box<dyn Poll<U>>,
     interval: Duration,
     next_poll: Instant,
 }
 
-impl Listener {
+impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Listener<U> {
     /// ### new
     ///
     /// Define a new `Listener`
-    pub fn new(poll: Box<dyn Poll>, interval: Duration) -> Self {
+    pub fn new(poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
         Self {
             poll,
             interval,
@@ -76,7 +76,7 @@ impl Listener {
     /// ### poll
     ///
     /// Calls poll on the inner `Poll` trait object.
-    pub fn poll(&mut self) -> ListenerResult<Option<Event>> {
+    pub fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         self.poll.poll()
     }
 
@@ -93,12 +93,14 @@ mod test {
 
     use super::*;
     use crate::event::listener::mock::MockPoll;
+    use crate::event::MockEvent;
 
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_single_listener() {
-        let mut listener = Listener::new(Box::new(MockPoll::default()), Duration::from_secs(5));
+        let mut listener =
+            Listener::<MockEvent>::new(Box::new(MockPoll::default()), Duration::from_secs(5));
         assert!(listener.next_poll() <= Instant::now());
         assert_eq!(listener.should_poll(), true);
         assert!(listener.poll().ok().unwrap().is_some());

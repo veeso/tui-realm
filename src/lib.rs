@@ -133,13 +133,17 @@ pub trait MockComponent {
 ///
 /// Don't forget you can find an example in the `examples/` directory and you can discover many more information
 /// about components in the repository documentation.
-pub trait Component<Msg: PartialEq>: MockComponent {
+pub trait Component<
+    Msg: PartialEq,
+    UserEvent: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd,
+>: MockComponent
+{
     /// ### on
     ///
     /// Handle input event and update internal states.
     /// Returns a Msg to the view.
     /// If `None` is returned it means there's no message to return for the provided event.
-    fn on(&mut self, ev: Event) -> Option<Msg>;
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg>;
 }
 
 // -- update
@@ -147,11 +151,15 @@ pub trait Component<Msg: PartialEq>: MockComponent {
 /// ## Update
 ///
 /// The update trait defines the prototype of the function to be used to handle the events coming from the View.
-pub trait Update<Msg: PartialEq> {
+pub trait Update<
+    Msg: PartialEq,
+    UserEvent: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd,
+>
+{
     /// ### update
     ///
     /// update the current state handling a message from the view.
     /// This function may return a Message,
     /// so this function has to be intended to be call recursively if necessary
-    fn update(&mut self, view: &mut View<Msg>, msg: Option<Msg>) -> Option<Msg>;
+    fn update(&mut self, view: &mut View<Msg, UserEvent>, msg: Option<Msg>) -> Option<Msg>;
 }
