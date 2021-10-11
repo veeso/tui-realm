@@ -29,12 +29,14 @@ extern crate crossterm;
 
 use super::{Event, Key, KeyEvent, KeyModifiers};
 
+use crate::event::{ListenerError, ListenerResult, Poll};
 use crate::tui::{backend::CrosstermBackend, Frame as TuiFrame, Terminal as TuiTerminal};
 use crossterm::event::{
-    Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
+    self as xterm, Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
     KeyModifiers as XtermKeyModifiers,
 };
 use std::io::Stdout;
+use std::time::Duration;
 
 // -- Frame
 /// ## Frame
@@ -106,6 +108,41 @@ impl From<XtermKeyModifiers> for KeyModifiers {
             km.insert(KeyModifiers::ALT);
         }
         km
+    }
+}
+
+// -- Event listener
+
+/// ## CrosstermInputListener
+///
+/// The input listener for crossterm.
+/// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
+/// or you can use it directly in the event listener, calling `default_input_listener()` in the `EventListenerCfg`
+pub struct CrosstermInputListener;
+
+impl Default for CrosstermInputListener {
+    fn default() -> Self {
+        Self {}
+    }
+}
+
+impl Poll for CrosstermInputListener {
+    fn poll(&self) -> ListenerResult<Option<Event>> {
+        if let Ok(available) = xterm::poll(Duration::from_millis(10)) {
+            match available {
+                true => {
+                    // Read event
+                    if let Ok(ev) = xterm::read() {
+                        Ok(Some(Event::from(ev)))
+                    } else {
+                        Err(ListenerError::PollFailed)
+                    }
+                }
+                false => Ok(None),
+            }
+        } else {
+            Err(ListenerError::PollFailed)
+        }
     }
 }
 
