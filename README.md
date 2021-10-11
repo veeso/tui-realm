@@ -46,18 +46,23 @@
 <p align="center">
   <a href="https://github.com/veeso/tui-realm/actions"
     ><img
-      src="https://github.com/veeso/tui-realm/workflows/Linux/badge.svg"
-      alt="Linux CI"
+      src="https://github.com/veeso/tui-realm/workflows/Crossterm/badge.svg"
+      alt="Crossterm CI"
   /></a>
   <a href="https://github.com/veeso/tui-realm/actions"
     ><img
-      src="https://github.com/veeso/tui-realm/workflows/MacOS/badge.svg"
-      alt="MacOS CI"
+      src="https://github.com/veeso/tui-realm/workflows/Termion/badge.svg"
+      alt="Termion CI"
   /></a>
   <a href="https://github.com/veeso/tui-realm/actions"
     ><img
-      src="https://github.com/veeso/tui-realm/workflows/Windows/badge.svg"
-      alt="Windows CI"
+      src="https://github.com/veeso/tui-realm/workflows/Rustbox/badge.svg"
+      alt="Rustbox CI"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm/actions"
+    ><img
+      src="https://github.com/veeso/tui-realm/workflows/Pancurses/badge.svg"
+      alt="Pancurses CI"
   /></a>
   <a href="https://coveralls.io/github/veeso/tui-realm"
     ><img

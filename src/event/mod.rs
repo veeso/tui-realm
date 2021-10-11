@@ -30,7 +30,7 @@ use bitflags::bitflags;
 // -- modules
 mod listener;
 // -- export
-pub use listener::{EventListener, ListenerError, ListenerResult};
+pub use listener::{EventListener, EventListenerCfg, ListenerError, ListenerResult, Poll};
 
 // -- event
 
@@ -47,6 +47,7 @@ pub enum Event {
     Tick,
     /// Unhandled event; Empty event
     None,
+    // TODO: User(U)
 }
 
 // -- keyboard
