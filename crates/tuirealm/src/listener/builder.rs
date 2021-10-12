@@ -36,7 +36,7 @@ pub struct EventListenerCfg<U>
 where
     U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
-    listeners: Vec<Port<U>>,
+    ports: Vec<Port<U>>,
     tick_interval: Option<Duration>,
 }
 
@@ -46,7 +46,7 @@ where
 {
     fn default() -> Self {
         Self {
-            listeners: Vec::default(),
+            ports: Vec::default(),
             tick_interval: None,
         }
     }
@@ -60,7 +60,7 @@ where
     ///
     /// Create the event listener with the parameters provided and start the workers
     pub fn start(self) -> EventListener<U> {
-        EventListener::start(self.listeners, self.tick_interval)
+        EventListener::start(self.ports, self.tick_interval)
     }
 
     /// ### tick_interval
@@ -72,11 +72,11 @@ where
         self
     }
 
-    /// ### listener
+    /// ### port
     ///
-    /// Add a new listener to the the event listener
-    pub fn listener(mut self, poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
-        self.listeners.push(Port::new(poll, interval));
+    /// Add a new Port (Poll, Interval) to the the event listener
+    pub fn port(mut self, poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
+        self.ports.push(Port::new(poll, interval));
         self
     }
 
@@ -84,7 +84,7 @@ where
     ///
     /// Add to the event listener the default input event listener for the backend configured.
     pub fn default_input_listener(self, interval: Duration) -> Self {
-        self.listener(Box::new(InputEventListener::<U>::default()), interval)
+        self.port(Box::new(InputEventListener::<U>::default()), interval)
     }
 }
 
@@ -100,14 +100,14 @@ mod test {
     #[test]
     fn should_configure_and_start_event_listener() {
         let builder = EventListenerCfg::<MockEvent>::default();
-        assert!(builder.listeners.is_empty());
+        assert!(builder.ports.is_empty());
         assert!(builder.tick_interval.is_none());
         let builder = builder.tick_interval(Duration::from_secs(10));
         assert_eq!(builder.tick_interval.unwrap(), Duration::from_secs(10));
         let builder = builder
             .default_input_listener(Duration::from_millis(200))
-            .listener(Box::new(MockPoll::default()), Duration::from_secs(300));
-        assert_eq!(builder.listeners.len(), 2);
+            .port(Box::new(MockPoll::default()), Duration::from_secs(300));
+        assert_eq!(builder.ports.len(), 2);
         let mut listener = builder.start();
         assert!(listener.stop().is_ok());
     }
