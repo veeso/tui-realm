@@ -36,9 +36,10 @@ use std::time::{Duration, Instant};
 /// ## EventListenerWorker
 ///
 /// worker for event listener
-pub(super) struct EventListenerWorker<
+pub(super) struct EventListenerWorker<U>
+where
     U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
-> {
+{
     listeners: Vec<Listener<U>>,
     sender: mpsc::Sender<ListenerMsg<U>>,
     running: Arc<RwLock<bool>>,
@@ -46,8 +47,9 @@ pub(super) struct EventListenerWorker<
     tick_interval: Option<Duration>,
 }
 
-impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send>
-    EventListenerWorker<U>
+impl<U> EventListenerWorker<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
 {
     pub(super) fn new(
         listeners: Vec<Listener<U>>,

@@ -32,14 +32,17 @@ use super::{Duration, EventListener, InputEventListener, Listener, Poll};
 /// The event listener configurator is used to setup an event listener.
 /// Once you're done with configuration just call `start()` and the event listener will start and the listener
 /// will be returned.
-pub struct EventListenerCfg<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send>
+pub struct EventListenerCfg<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
 {
     listeners: Vec<Listener<U>>,
     tick_interval: Option<Duration>,
 }
 
-impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Default
-    for EventListenerCfg<U>
+impl<U> Default for EventListenerCfg<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
 {
     fn default() -> Self {
         Self {
@@ -49,7 +52,10 @@ impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Def
     }
 }
 
-impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> EventListenerCfg<U> {
+impl<U> EventListenerCfg<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send + 'static,
+{
     /// ### start
     ///
     /// Create the event listener with the parameters provided and start the workers
