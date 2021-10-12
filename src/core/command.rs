@@ -79,6 +79,7 @@ pub enum Direction {
 /// It reports a "logical" change on the `MockComponent`.
 /// The `Component` then, must return a certain user defined `Msg` based on the value of the `CmdResult`.
 #[derive(Debug, PartialEq, Clone)]
+#[allow(clippy::large_enum_variant)]
 pub enum CmdResult {
     /// A key event has "bounced" against the component and will be returned to the user.
     KeyBounced(KeyEvent),

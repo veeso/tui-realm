@@ -97,6 +97,7 @@ impl Props {
 ///
 /// Describes a single attribute in the component properties.
 #[derive(Debug, PartialEq, Clone)]
+#[allow(clippy::large_enum_variant)]
 pub enum Attribute {
     Alignment(Alignment),
     Borders(Borders),
