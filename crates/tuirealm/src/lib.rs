@@ -64,7 +64,7 @@ pub mod utils;
 // -- export
 pub use self::core::command::{self, Cmd, CmdResult};
 pub use self::core::event::{self, Event};
-pub use self::core::props::{self, AttrSelector, Attribute, Props, PropsBuilder};
+pub use self::core::props::{self, AttrValue, Attribute, Props, PropsBuilder};
 pub use self::core::subscription;
 pub use self::core::{Component, MockComponent, Update, View};
 pub use self::core::{State, Value};
