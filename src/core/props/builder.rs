@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::{AttrSelector, Attribute, Props};
+use super::{AttrValue, Attribute, Props};
 
 // -- Props builder
 
@@ -48,7 +48,7 @@ pub trait PropsBuilder {
     /// Initialize props with visible set to False
     fn hidden(&mut self) -> &mut Self {
         self.props_mut()
-            .set(AttrSelector::Display, Attribute::Flag(false));
+            .set(Attribute::Display, AttrValue::Flag(false));
         self
     }
 
@@ -57,7 +57,7 @@ pub trait PropsBuilder {
     /// Initialize props with visible set to True
     fn visible(&mut self) -> &mut Self {
         self.props_mut()
-            .set(AttrSelector::Display, Attribute::Flag(true));
+            .set(Attribute::Display, AttrValue::Flag(true));
         self
     }
 
