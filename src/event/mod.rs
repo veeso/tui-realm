@@ -53,6 +53,12 @@ pub enum Event<UserEvent: fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOr
     User(UserEvent),
 }
 
+/// ## NoUserEvent
+///
+/// When using event you can use this as type parameter if you don't want to use user events
+#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd)]
+pub enum NoUserEvent {}
+
 // -- keyboard
 
 /// ## KeyEvent

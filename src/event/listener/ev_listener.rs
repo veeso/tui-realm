@@ -34,13 +34,19 @@ use std::time::{Duration, Instant};
 ///
 /// A listener is a wrapper around the poll trait object, which also defines an interval, which defines
 /// the amount of time between each poll() call.
-pub struct Listener<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> {
+pub struct Listener<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+{
     poll: Box<dyn Poll<U>>,
     interval: Duration,
     next_poll: Instant,
 }
 
-impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Listener<U> {
+impl<U> Listener<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+{
     /// ### new
     ///
     /// Define a new `Listener`

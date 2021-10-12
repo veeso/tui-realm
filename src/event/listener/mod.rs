@@ -67,8 +67,9 @@ pub enum ListenerError {
 ///
 /// The poll trait defines the function `poll`, which will be called by the event listener
 /// dedicated thread to poll for events.
-pub trait Poll<UserEvent: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd>:
-    Send
+pub trait Poll<UserEvent>: Send
+where
+    UserEvent: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd,
 {
     /// ### poll
     ///
@@ -84,7 +85,10 @@ pub trait Poll<UserEvent: std::fmt::Debug + Eq + PartialEq + Copy + Clone + Part
 /// ## EventListener
 ///
 /// The event listener...
-pub struct EventListener<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> {
+pub struct EventListener<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+{
     /// Indicates whether the worker should keep running
     running: Arc<RwLock<bool>>,
     /// Interval between each Tick event. If `None` no Tick will be sent
@@ -95,7 +99,10 @@ pub struct EventListener<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + Pa
     thread: Option<JoinHandle<()>>,
 }
 
-impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> EventListener<U> {
+impl<U> EventListener<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send + 'static,
+{
     /// ### start
     ///
     /// Create a new `EventListener` and start it.
@@ -188,14 +195,18 @@ impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Eve
 /// ## ListenerMsg
 ///
 /// Listener message is returned by the listener thread
-enum ListenerMsg<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> {
+enum ListenerMsg<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+{
     Error(ListenerError),
     Tick,
     User(Event<U>),
 }
 
-impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> From<ListenerMsg<U>>
-    for ListenerResult<Option<Event<U>>>
+impl<U> From<ListenerMsg<U>> for ListenerResult<Option<Event<U>>>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
 {
     fn from(msg: ListenerMsg<U>) -> Self {
         match msg {
