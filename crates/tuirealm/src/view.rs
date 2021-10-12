@@ -36,18 +36,18 @@ type WrappedComponent<Msg, UserEvent> = Box<dyn Component<Msg, UserEvent>>;
 /// View is the wrapper and manager for all the components.
 /// A View is a container for all the components in a certain layout.
 /// Each View can have only one focused component at the time. At least one component must be always focused
-pub struct View<Msg, UserEvent> {
+pub struct View<'a, Msg, UserEvent> {
     /// Components Mounted onto View
     components: HashMap<String, WrappedComponent<Msg, UserEvent>>,
     // TODO: add publisher
     // TODO: add subs
     /// Current active component
-    focus: Option<String>, // TODO: change
+    focus: Option<&'a str>, // TODO: change
     /// Focus stack; used to determine which component should hold focus in case the current element is blurred
     focus_stack: Vec<String>,
 }
 
-impl<Msg, UserEvent> View<Msg, UserEvent> {
+impl<'a, Msg, UserEvent> View<'_, Msg, UserEvent> {
     /// ### init
     ///
     /// Initialize a new `View`

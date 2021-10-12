@@ -38,7 +38,7 @@ use std::time::{Duration, Instant};
 /// worker for event listener
 pub(super) struct EventListenerWorker<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     listeners: Vec<Listener<U>>,
     sender: mpsc::Sender<ListenerMsg<U>>,
@@ -49,7 +49,7 @@ where
 
 impl<U> EventListenerWorker<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     pub(super) fn new(
         listeners: Vec<Listener<U>>,

@@ -38,8 +38,11 @@ pub use listener::{EventListener, EventListenerCfg, ListenerError, ListenerResul
 /// ## Event
 ///
 /// An event raised by a user interaction
-#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd)]
-pub enum Event<UserEvent: fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd> {
+#[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
+pub enum Event<UserEvent>
+where
+    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+{
     /// A keyboard event
     Keyboard(KeyEvent),
     /// This event is raised after the terminal window is resized
@@ -165,7 +168,7 @@ pub use mock::MockEvent;
 
 #[cfg(test)]
 pub mod mock {
-    #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd)]
+    #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
     pub enum MockEvent {
         None,
     }
