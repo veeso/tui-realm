@@ -27,6 +27,7 @@
  */
 pub mod command;
 pub mod event;
+pub mod props;
 mod state;
 mod view;
 
