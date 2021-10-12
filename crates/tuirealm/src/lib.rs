@@ -57,21 +57,19 @@ use tuirs::layout::Rect;
 
 // -- modules
 pub mod adapter;
-pub mod command;
-pub mod event;
+mod core;
+pub mod listener;
 pub mod props;
-mod state;
 // TODO: terminal
 pub mod tui;
 pub mod utils;
-mod view;
 // -- export
+pub use self::core::command::{self, Cmd, CmdResult};
+pub use self::core::event::{self, Event};
+pub use self::core::View;
+pub use self::core::{State, Value};
 pub use adapter::{Frame, Terminal};
-pub use command::{Cmd, CmdResult};
-pub use event::Event;
 pub use props::{AttrSelector, Attribute, PropsBuilder};
-pub use state::{State, Value};
-pub use view::View;
 
 // -- Component traits
 

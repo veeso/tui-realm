@@ -29,7 +29,7 @@ extern crate crossterm;
 
 use super::{Event, Key, KeyEvent, KeyModifiers};
 
-use crate::event::{ListenerError, ListenerResult, Poll};
+use crate::listener::{ListenerError, ListenerResult, Poll};
 use crate::tui::{backend::CrosstermBackend, Frame as TuiFrame, Terminal as TuiTerminal};
 use crossterm::event::{
     self as xterm, Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
@@ -167,7 +167,7 @@ where
 mod test {
 
     use super::*;
-    use crate::event::MockEvent;
+    use crate::core::event::MockEvent;
 
     use pretty_assertions::assert_eq;
 

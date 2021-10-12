@@ -1,6 +1,6 @@
-//! ## adapters
+//! ## Core
 //!
-//! this module contains the event converter for the different backends
+//! Core implements the core functionalities and types for tui-realm
 
 /**
  * MIT License
@@ -25,12 +25,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::core::event::{Event, Key, KeyEvent, KeyModifiers};
+pub mod command;
+pub mod event;
+mod state;
+mod view;
 
-// -- crossterm
-#[cfg(feature = "with-crossterm")]
-pub mod crossterm;
-#[cfg(feature = "with-crossterm")]
-pub use self::crossterm::CrosstermInputListener as InputEventListener;
-#[cfg(feature = "with-crossterm")]
-pub use self::crossterm::{Frame, Terminal};
+// -- export
+pub use command::Cmd;
+pub use state::{State, Value};
+pub use view::View;
