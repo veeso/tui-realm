@@ -54,7 +54,7 @@ pub type Terminal = TuiTerminal<CrosstermBackend<Stdout>>;
 
 impl<U> From<XtermEvent> for Event<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     fn from(e: XtermEvent) -> Self {
         match e {
@@ -124,14 +124,14 @@ impl From<XtermKeyModifiers> for KeyModifiers {
 /// or you can use it directly in the event listener, calling `default_input_listener()` in the `EventListenerCfg`
 pub struct CrosstermInputListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     ghost: PhantomData<U>,
 }
 
 impl<U> Default for CrosstermInputListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     fn default() -> Self {
         Self {
@@ -142,7 +142,7 @@ where
 
 impl<U> Poll<U> for CrosstermInputListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         if let Ok(available) = xterm::poll(Duration::from_millis(10)) {

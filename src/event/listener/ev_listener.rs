@@ -36,7 +36,7 @@ use std::time::{Duration, Instant};
 /// the amount of time between each poll() call.
 pub struct Listener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     poll: Box<dyn Poll<U>>,
     interval: Duration,
@@ -45,7 +45,7 @@ where
 
 impl<U> Listener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     /// ### new
     ///

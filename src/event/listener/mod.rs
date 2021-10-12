@@ -69,7 +69,7 @@ pub enum ListenerError {
 /// dedicated thread to poll for events.
 pub trait Poll<UserEvent>: Send
 where
-    UserEvent: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd,
+    UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
     /// ### poll
     ///
@@ -87,7 +87,7 @@ where
 /// The event listener...
 pub struct EventListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     /// Indicates whether the worker should keep running
     running: Arc<RwLock<bool>>,
@@ -101,7 +101,7 @@ where
 
 impl<U> EventListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send + 'static,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     /// ### start
     ///
@@ -197,7 +197,7 @@ where
 /// Listener message is returned by the listener thread
 enum ListenerMsg<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     Error(ListenerError),
     Tick,
@@ -206,7 +206,7 @@ where
 
 impl<U> From<ListenerMsg<U>> for ListenerResult<Option<Event<U>>>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     fn from(msg: ListenerMsg<U>) -> Self {
         match msg {
@@ -286,13 +286,11 @@ pub mod mock {
 
     use std::marker::PhantomData;
 
-    pub struct MockPoll<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> {
+    pub struct MockPoll<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> {
         ghost: PhantomData<U>,
     }
 
-    impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Default
-        for MockPoll<U>
-    {
+    impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> Default for MockPoll<U> {
         fn default() -> Self {
             Self {
                 ghost: PhantomData::default(),
@@ -300,9 +298,7 @@ pub mod mock {
         }
     }
 
-    impl<U: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd + Send> Poll<U>
-        for MockPoll<U>
-    {
+    impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> Poll<U> for MockPoll<U> {
         fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
             Ok(Some(Event::Keyboard(KeyEvent::from(Key::Enter))))
         }

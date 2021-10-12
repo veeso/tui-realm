@@ -133,10 +133,10 @@ pub trait MockComponent {
 ///
 /// Don't forget you can find an example in the `examples/` directory and you can discover many more information
 /// about components in the repository documentation.
-pub trait Component<
+pub trait Component<Msg, UserEvent>: MockComponent
+where
     Msg: PartialEq,
-    UserEvent: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd,
->: MockComponent
+    UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
     /// ### on
     ///
@@ -151,10 +151,10 @@ pub trait Component<
 /// ## Update
 ///
 /// The update trait defines the prototype of the function to be used to handle the events coming from the View.
-pub trait Update<
+pub trait Update<Msg, UserEvent>
+where
     Msg: PartialEq,
-    UserEvent: std::fmt::Debug + Eq + PartialEq + Copy + Clone + PartialOrd,
->
+    UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
     /// ### update
     ///
