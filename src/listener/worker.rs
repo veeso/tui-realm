@@ -203,9 +203,9 @@ mod test {
 
     use super::super::{ListenerError, ListenerResult};
     use super::*;
-    use crate::event::listener::mock::MockPoll;
-    use crate::event::MockEvent;
-    use crate::event::{Key, KeyEvent};
+    use crate::core::event::MockEvent;
+    use crate::core::event::{Key, KeyEvent};
+    use crate::listener::mock::MockPoll;
     use crate::Event;
 
     use pretty_assertions::assert_eq;

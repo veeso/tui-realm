@@ -92,8 +92,8 @@ where
 mod test {
 
     use super::*;
-    use crate::event::listener::mock::MockPoll;
-    use crate::event::MockEvent;
+    use crate::core::event::MockEvent;
+    use crate::listener::mock::MockPoll;
 
     use pretty_assertions::assert_eq;
 

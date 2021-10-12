@@ -28,11 +28,6 @@
 use bitflags::bitflags;
 use std::fmt;
 
-// -- modules
-mod listener;
-// -- export
-pub use listener::{EventListener, EventListenerCfg, ListenerError, ListenerResult, Poll};
-
 // -- event
 
 /// ## Event

@@ -222,8 +222,8 @@ mod test {
 
     use super::mock::MockPoll;
     use super::*;
-    use crate::event::MockEvent;
-    use crate::event::{Key, KeyEvent};
+    use crate::core::event::MockEvent;
+    use crate::core::event::{Key, KeyEvent};
 
     use pretty_assertions::assert_eq;
 
@@ -282,7 +282,7 @@ mod test {
 pub mod mock {
 
     use super::{Event, ListenerResult, Poll};
-    use crate::event::{Key, KeyEvent};
+    use crate::core::event::{Key, KeyEvent};
 
     use std::marker::PhantomData;
 
