@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::{Listener, ListenerMsg};
+use super::{ListenerMsg, Port};
 use std::ops::{Add, Sub};
 use std::sync::{mpsc, Arc, RwLock};
 use std::thread;
@@ -40,7 +40,7 @@ pub(super) struct EventListenerWorker<U>
 where
     U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
-    listeners: Vec<Listener<U>>,
+    ports: Vec<Port<U>>,
     sender: mpsc::Sender<ListenerMsg<U>>,
     running: Arc<RwLock<bool>>,
     next_tick: Instant,
@@ -52,13 +52,13 @@ where
     U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     pub(super) fn new(
-        listeners: Vec<Listener<U>>,
+        ports: Vec<Port<U>>,
         sender: mpsc::Sender<ListenerMsg<U>>,
         running: Arc<RwLock<bool>>,
         tick_interval: Option<Duration>,
     ) -> Self {
         Self {
-            listeners,
+            ports,
             sender,
             running,
             next_tick: Instant::now(),
@@ -80,9 +80,9 @@ where
     fn next_event(&self) -> Duration {
         let now = Instant::now();
         let fallback_time = now.add(Duration::from_secs(60));
-        // Get first upcoming event from listeners
+        // Get first upcoming event from ports
         let min_listener_event = self
-            .listeners
+            .ports
             .iter()
             .map(|x| x.next_poll())
             .min()
@@ -144,7 +144,7 @@ where
     #[allow(clippy::needless_collect)]
     fn poll(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<U>>> {
         let msg: Vec<ListenerMsg<U>> = self
-            .listeners
+            .ports
             .iter_mut()
             .map(|x| {
                 if x.should_poll() {
@@ -184,7 +184,7 @@ where
             if !self.running() {
                 break;
             }
-            // Iter listeners and Send messages
+            // Iter ports and Send messages
             if self.poll().is_err() {
                 break;
             }
@@ -203,9 +203,9 @@ mod test {
 
     use super::super::{ListenerError, ListenerResult};
     use super::*;
-    use crate::core::event::MockEvent;
     use crate::core::event::{Key, KeyEvent};
-    use crate::listener::mock::MockPoll;
+    use crate::mock::MockEvent;
+    use crate::mock::MockPoll;
     use crate::Event;
 
     use pretty_assertions::assert_eq;
@@ -216,7 +216,7 @@ mod test {
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
-            vec![Listener::new(
+            vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5),
             )],
@@ -239,7 +239,7 @@ mod test {
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
-            vec![Listener::new(
+            vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5),
             )],
@@ -262,7 +262,7 @@ mod test {
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
-            vec![Listener::new(
+            vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5),
             )],
@@ -303,7 +303,7 @@ mod test {
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
         let worker = EventListenerWorker::<MockEvent>::new(
-            vec![Listener::new(
+            vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(3),
             )],

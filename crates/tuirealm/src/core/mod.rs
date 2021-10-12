@@ -30,6 +30,7 @@ mod component;
 pub mod event;
 pub mod props;
 mod state;
+pub mod subscription;
 mod view;
 
 // -- export

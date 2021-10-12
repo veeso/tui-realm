@@ -118,6 +118,7 @@ bitflags! {
     ///
     /// Defines special key states, such as shift, control, alt...
     pub struct KeyModifiers: u8 {
+        const NONE = 0b0000_0000;
         const SHIFT = 0b0000_0001;
         const CONTROL = 0b0000_0010;
         const ALT = 0b0000_0100;
@@ -155,16 +156,5 @@ mod test {
         let k = KeyEvent::from(Key::Up);
         assert_eq!(k.code, Key::Up);
         assert_eq!(k.modifiers, KeyModifiers::empty());
-    }
-}
-
-#[cfg(test)]
-pub use mock::MockEvent;
-
-#[cfg(test)]
-pub mod mock {
-    #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
-    pub enum MockEvent {
-        None,
     }
 }

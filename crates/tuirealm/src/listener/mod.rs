@@ -28,7 +28,7 @@
  */
 // -- modules
 mod builder;
-mod ev_listener;
+mod port;
 mod worker;
 
 // -- export
@@ -37,7 +37,7 @@ pub use builder::EventListenerCfg;
 
 // -- internal
 use super::Event;
-pub use ev_listener::Listener;
+pub use port::Port;
 use worker::EventListenerWorker;
 
 use std::sync::{mpsc, Arc, RwLock};
@@ -111,9 +111,9 @@ where
     /// - `tick_interval` is the interval used to send the `Tick` event. If `None`, no tick will be sent.
     ///     Tick should be used only when you need to handle the tick in the interface through the Subscriptions.
     ///     The tick should have in this case, the same value (or less) of the refresh rate of the TUI.
-    pub(self) fn start(listeners: Vec<Listener<U>>, tick_interval: Option<Duration>) -> Self {
+    pub(self) fn start(ports: Vec<Port<U>>, tick_interval: Option<Duration>) -> Self {
         // Prepare channel and running state
-        let (recv, running, thread) = Self::setup_thread(listeners, tick_interval);
+        let (recv, running, thread) = Self::setup_thread(ports, tick_interval);
         Self {
             running,
             tick_interval,
@@ -146,11 +146,11 @@ where
     ///
     /// Restart worker if previously died.
     /// Blocks if the thread hadn't actually died before, since this function will first try to join previously thread
-    pub fn restart(&mut self, listeners: Vec<Listener<U>>) -> ListenerResult<()> {
+    pub fn restart(&mut self, ports: Vec<Port<U>>) -> ListenerResult<()> {
         // Stop first
         self.stop()?;
         // Re-init thread
-        let (recv, running, thread) = Self::setup_thread(listeners, self.tick_interval);
+        let (recv, running, thread) = Self::setup_thread(ports, self.tick_interval);
         self.recv = recv;
         self.running = running;
         self.thread = Some(thread);
@@ -172,7 +172,7 @@ where
     ///
     /// Setup the thread and returns the structs necessary to interact with it
     fn setup_thread(
-        listeners: Vec<Listener<U>>,
+        ports: Vec<Port<U>>,
         tick_interval: Option<Duration>,
     ) -> (
         mpsc::Receiver<ListenerMsg<U>>,
@@ -184,7 +184,7 @@ where
         let running_t = Arc::clone(&running);
         // Start thread
         let thread = thread::spawn(move || {
-            EventListenerWorker::new(listeners, sender, running_t, tick_interval).run();
+            EventListenerWorker::new(ports, sender, running_t, tick_interval).run();
         });
         (recv, running, thread)
     }
@@ -220,10 +220,9 @@ where
 #[cfg(test)]
 mod test {
 
-    use super::mock::MockPoll;
     use super::*;
-    use crate::core::event::MockEvent;
     use crate::core::event::{Key, KeyEvent};
+    use crate::mock::{MockEvent, MockPoll};
 
     use pretty_assertions::assert_eq;
 
@@ -231,7 +230,7 @@ mod test {
     fn worker_should_run_thread() {
         const POLL_TIMEOUT: Duration = Duration::from_millis(100);
         let mut listener = EventListener::<MockEvent>::start(
-            vec![Listener::new(
+            vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(10),
             )],
@@ -262,7 +261,7 @@ mod test {
         assert!(listener.stop().is_ok());
         // Restart
         assert!(listener
-            .restart(vec![Listener::new(
+            .restart(vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5)
             )])
@@ -276,31 +275,5 @@ mod test {
         );
         // Stop
         assert!(listener.stop().is_ok());
-    }
-}
-#[cfg(test)]
-pub mod mock {
-
-    use super::{Event, ListenerResult, Poll};
-    use crate::core::event::{Key, KeyEvent};
-
-    use std::marker::PhantomData;
-
-    pub struct MockPoll<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> {
-        ghost: PhantomData<U>,
-    }
-
-    impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> Default for MockPoll<U> {
-        fn default() -> Self {
-            Self {
-                ghost: PhantomData::default(),
-            }
-        }
-    }
-
-    impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> Poll<U> for MockPoll<U> {
-        fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
-            Ok(Some(Event::Keyboard(KeyEvent::from(Key::Enter))))
-        }
     }
 }

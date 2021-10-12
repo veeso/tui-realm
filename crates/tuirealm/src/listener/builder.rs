@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::{Duration, EventListener, InputEventListener, Listener, Poll};
+use super::{Duration, EventListener, InputEventListener, Poll, Port};
 
 /// ## EventListenerCfg
 ///
@@ -36,7 +36,7 @@ pub struct EventListenerCfg<U>
 where
     U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
-    listeners: Vec<Listener<U>>,
+    listeners: Vec<Port<U>>,
     tick_interval: Option<Duration>,
 }
 
@@ -76,7 +76,7 @@ where
     ///
     /// Add a new listener to the the event listener
     pub fn listener(mut self, poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
-        self.listeners.push(Listener::new(poll, interval));
+        self.listeners.push(Port::new(poll, interval));
         self
     }
 
@@ -92,8 +92,8 @@ where
 mod test {
 
     use super::*;
-    use crate::core::event::MockEvent;
-    use crate::listener::mock::MockPoll;
+    use crate::mock::MockEvent;
+    use crate::mock::MockPoll;
 
     use pretty_assertions::assert_eq;
 

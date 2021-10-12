@@ -84,7 +84,7 @@ pub enum CmdResult {
     KeyBounced(KeyEvent),
     /// The component has changed state. The new state is reported.
     /// Box is used to reduce size
-    Changed(Box<State>),
+    Changed(State),
     /// The command could not be applied. Useful to report errors
     Invalid(Cmd),
     /// No result to report
