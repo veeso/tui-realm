@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::{AttrSelector, Attribute, Event, MockComponent, State};
+use crate::{AttrValue, Attribute, Event, MockComponent, State};
 use std::fmt;
 
 /// ## Subscription
@@ -90,7 +90,7 @@ pub enum SubClause {
     Always,
     /// Forward event if target component has provided attribute with the provided value
     /// If the attribute doesn't exist on component, result is always `false`.
-    HasAttribute(AttrSelector, Attribute),
+    HasAttrValue(Attribute, AttrValue),
     /// Forward event if target component has provided state
     HasState(State),
     /// Forward event if the inner clause is `false`
@@ -130,7 +130,7 @@ impl SubClause {
     pub(crate) fn forward(&self, target: &dyn MockComponent) -> bool {
         match self {
             Self::Always => true,
-            Self::HasAttribute(query, value) => Self::has_attribute(query, value, target),
+            Self::HasAttrValue(query, value) => Self::has_attribute(query, value, target),
             Self::HasState(state) => Self::has_state(state, target),
             Self::Not(clause) => !(clause.forward(target)),
             Self::And(a, b) => (a.forward(target)) && (b.forward(target)),
@@ -140,7 +140,7 @@ impl SubClause {
 
     // -- privates
 
-    fn has_attribute(query: &AttrSelector, value: &Attribute, target: &dyn MockComponent) -> bool {
+    fn has_attribute(query: &Attribute, value: &AttrValue, target: &dyn MockComponent) -> bool {
         match target.query(*query) {
             None => false,
             Some(v) => *value == v,
@@ -165,15 +165,15 @@ mod test {
     fn subscription_should_forward() {
         let ev: Event<MockEvent> = Event::Tick;
         let mut component = MockFooInput::default();
-        component.attr(AttrSelector::Focus, Attribute::Flag(true));
+        component.attr(Attribute::Focus, AttrValue::Flag(true));
         let sub = Subscription::new(
             "foo",
             ev.clone(),
-            SubClause::HasAttribute(AttrSelector::Focus, Attribute::Flag(true)),
+            SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
         );
         assert_eq!(sub.forward("foo", &ev, &component), true);
         // False clause
-        component.attr(AttrSelector::Focus, Attribute::Flag(false));
+        component.attr(Attribute::Focus, AttrValue::Flag(false));
         assert_eq!(sub.forward("foo", &ev, &component), false);
         // False event
         assert_eq!(
@@ -194,9 +194,9 @@ mod test {
     #[test]
     fn clause_has_attribute_should_forward() {
         let mut component = MockFooInput::default();
-        let clause = SubClause::HasAttribute(AttrSelector::Focus, Attribute::Flag(true));
+        let clause = SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true));
         assert_eq!(clause.forward(&component), false); // Has no focus
-        component.attr(AttrSelector::Focus, Attribute::Flag(true));
+        component.attr(Attribute::Focus, AttrValue::Flag(true));
         assert_eq!(clause.forward(&component), true); // Has focus
     }
 
@@ -212,12 +212,12 @@ mod test {
     #[test]
     fn clause_not_should_forward() {
         let mut component = MockFooInput::default();
-        let clause = SubClause::not(SubClause::HasAttribute(
-            AttrSelector::Focus,
-            Attribute::Flag(true),
+        let clause = SubClause::not(SubClause::HasAttrValue(
+            Attribute::Focus,
+            AttrValue::Flag(true),
         ));
         assert_eq!(clause.forward(&component), true); // Has no focus
-        component.attr(AttrSelector::Focus, Attribute::Flag(true));
+        component.attr(Attribute::Focus, AttrValue::Flag(true));
         assert_eq!(clause.forward(&component), false); // Has focus
     }
 
@@ -225,15 +225,15 @@ mod test {
     fn clause_and_should_forward() {
         let mut component = MockFooInput::default();
         let clause = SubClause::and(
-            SubClause::HasAttribute(AttrSelector::Focus, Attribute::Flag(true)),
+            SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
             SubClause::HasState(State::One(Value::String(String::from("a")))),
         );
         assert_eq!(clause.forward(&component), false); // Has no focus and has no state 'a'
-        component.attr(AttrSelector::Focus, Attribute::Flag(true));
+        component.attr(Attribute::Focus, AttrValue::Flag(true));
         assert_eq!(clause.forward(&component), false); // Has focus and has no state 'a'
         component.perform(Cmd::Type('a'));
         assert_eq!(clause.forward(&component), true); // Has focus and has state 'a'
-        component.attr(AttrSelector::Focus, Attribute::Flag(false));
+        component.attr(Attribute::Focus, AttrValue::Flag(false));
         assert_eq!(clause.forward(&component), false); // Has no focus and has state 'a'
     }
 
@@ -241,15 +241,15 @@ mod test {
     fn clause_or_should_forward() {
         let mut component = MockFooInput::default();
         let clause = SubClause::or(
-            SubClause::HasAttribute(AttrSelector::Focus, Attribute::Flag(true)),
+            SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
             SubClause::HasState(State::One(Value::String(String::from("a")))),
         );
         assert_eq!(clause.forward(&component), false); // Has no focus and has no state 'a'
-        component.attr(AttrSelector::Focus, Attribute::Flag(true));
+        component.attr(Attribute::Focus, AttrValue::Flag(true));
         assert_eq!(clause.forward(&component), true); // Has focus and has no state 'a'
         component.perform(Cmd::Type('a'));
         assert_eq!(clause.forward(&component), true); // Has focus and has state 'a'
-        component.attr(AttrSelector::Focus, Attribute::Flag(false));
+        component.attr(Attribute::Focus, AttrValue::Flag(false));
         assert_eq!(clause.forward(&component), true); // Has no focus and has state 'a'
     }
 }

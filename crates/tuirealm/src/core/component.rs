@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 use crate::tui::layout::Rect;
-use crate::{AttrSelector, Attribute, Cmd, CmdResult, Event, Frame, State, View};
+use crate::{AttrValue, Attribute, Cmd, CmdResult, Event, Frame, State, View};
 
 /// ## MockComponent
 ///
@@ -53,13 +53,13 @@ pub trait MockComponent {
     /// ### query
     ///
     /// Query attribute of component properties.
-    fn query(&self, attr: AttrSelector) -> Option<Attribute>;
+    fn query(&self, attr: Attribute) -> Option<AttrValue>;
 
     /// ### attr
     ///
     /// Set attribute to properties.
     /// `query` describes the name, while `attr` the value it'll take
-    fn attr(&mut self, query: AttrSelector, attr: Attribute);
+    fn attr(&mut self, attr: Attribute, value: AttrValue);
 
     /// ### state
     ///

@@ -5,9 +5,7 @@
 use super::{MockEvent, MockMsg};
 use crate::command::Direction;
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
-use crate::{
-    AttrSelector, Attribute, Cmd, CmdResult, Component, MockComponent, Props, State, Value,
-};
+use crate::{AttrValue, Attribute, Cmd, CmdResult, Component, MockComponent, Props, State, Value};
 
 /// ## MockInput
 ///
@@ -29,11 +27,11 @@ impl Default for MockInput {
 impl MockComponent for MockInput {
     fn view(&mut self, _: &mut crate::Frame, _: crate::tui::layout::Rect) {}
 
-    fn query(&self, attr: AttrSelector) -> Option<Attribute> {
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
         self.props.get(attr)
     }
 
-    fn attr(&mut self, query: AttrSelector, attr: Attribute) {
+    fn attr(&mut self, query: Attribute, attr: AttrValue) {
         self.props.set(query, attr);
     }
 
@@ -113,11 +111,11 @@ impl MockComponent for MockFooInput {
         self.component.view(frame, area);
     }
 
-    fn query(&self, attr: AttrSelector) -> Option<Attribute> {
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
         self.component.query(attr)
     }
 
-    fn attr(&mut self, query: AttrSelector, attr: Attribute) {
+    fn attr(&mut self, query: Attribute, attr: AttrValue) {
         self.component.attr(query, attr)
     }
 
@@ -172,11 +170,11 @@ impl MockComponent for MockBarInput {
         self.component.view(frame, area);
     }
 
-    fn query(&self, attr: AttrSelector) -> Option<Attribute> {
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
         self.component.query(attr)
     }
 
-    fn attr(&mut self, query: AttrSelector, attr: Attribute) {
+    fn attr(&mut self, query: Attribute, attr: AttrValue) {
         self.component.attr(query, attr)
     }
 

@@ -56,7 +56,7 @@ pub use value::{PropPayload, PropValue};
 /// too many attributes at the same time.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Props {
-    attrs: HashMap<AttrSelector, Attribute>,
+    attrs: HashMap<Attribute, AttrValue>,
 }
 
 impl Default for Props {
@@ -71,7 +71,7 @@ impl Props {
     /// ### get
     ///
     /// Get, if any, the attribute associated to the selector
-    pub fn get(&self, query: AttrSelector) -> Option<Attribute> {
+    pub fn get(&self, query: Attribute) -> Option<AttrValue> {
         self.attrs.get(&query).cloned()
     }
 
@@ -79,26 +79,26 @@ impl Props {
     ///
     /// Get, if any, the attribute associated to the selector
     /// or return the fallback value `default`
-    pub fn get_or(&self, query: AttrSelector, default: Attribute) -> Attribute {
+    pub fn get_or(&self, query: Attribute, default: AttrValue) -> AttrValue {
         self.get(query).unwrap_or(default)
     }
 
     /// ### set
     ///
     /// Set a new attribute into Properties
-    pub fn set(&mut self, query: AttrSelector, value: Attribute) {
+    pub fn set(&mut self, query: Attribute, value: AttrValue) {
         self.attrs.insert(query, value);
     }
 }
 
-// -- Attributes
+// -- AttrValues
 
-/// ## Attribute
+/// ## AttrValue
 ///
 /// Describes a single attribute in the component properties.
 #[derive(Debug, PartialEq, Clone)]
 #[allow(clippy::large_enum_variant)]
-pub enum Attribute {
+pub enum AttrValue {
     Alignment(Alignment),
     Borders(Borders),
     Color(Color),
@@ -117,12 +117,12 @@ pub enum Attribute {
     Payload(PropPayload),
 }
 
-/// ## AttrSelector
+/// ## Attribute
 ///
 /// Describes a "selector" to query an attribute on props.
 /// The selector must identify uniquely an attribute in the properties.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
-pub enum AttrSelector {
+pub enum Attribute {
     Alignment,
     Background,
     Borders,
