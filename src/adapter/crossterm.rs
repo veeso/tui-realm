@@ -167,7 +167,7 @@ where
 mod test {
 
     use super::*;
-    use crate::core::event::MockEvent;
+    use crate::mock::MockEvent;
 
     use pretty_assertions::assert_eq;
 

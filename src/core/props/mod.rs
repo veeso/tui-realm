@@ -113,7 +113,7 @@ pub enum Attribute {
     TextModifiers(TextModifiers),
     Title((String, Alignment)),
     /// User defined complex attribute value
-    Payload(Box<PropPayload>),
+    Payload(PropPayload),
 }
 
 /// ## AttrSelector

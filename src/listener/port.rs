@@ -1,4 +1,4 @@
-//! ## Listener
+//! ## Port
 //!
 //! This module exposes the poll wrapper to include in the worker
 
@@ -30,11 +30,12 @@ use super::{Event, ListenerResult, Poll};
 use std::ops::Add;
 use std::time::{Duration, Instant};
 
-/// ## Listener
+/// ## Port
 ///
-/// A listener is a wrapper around the poll trait object, which also defines an interval, which defines
+/// A port is a wrapper around the poll trait object, which also defines an interval, which defines
 /// the amount of time between each poll() call.
-pub struct Listener<U>
+/// Its purpose is to listen for incoming events of a user-defined type
+pub struct Port<U>
 where
     U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
@@ -43,13 +44,13 @@ where
     next_poll: Instant,
 }
 
-impl<U> Listener<U>
+impl<U> Port<U>
 where
     U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     /// ### new
     ///
-    /// Define a new `Listener`
+    /// Define a new `Port`
     pub fn new(poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
         Self {
             poll,
@@ -60,7 +61,7 @@ where
 
     /// ### interval
     ///
-    /// Returns the interval for the current `Listener`
+    /// Returns the interval for the current `Port`
     pub fn interval(&self) -> &Duration {
         &self.interval
     }
@@ -98,15 +99,15 @@ where
 mod test {
 
     use super::*;
-    use crate::core::event::MockEvent;
-    use crate::listener::mock::MockPoll;
+    use crate::mock::MockEvent;
+    use crate::mock::MockPoll;
 
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_single_listener() {
         let mut listener =
-            Listener::<MockEvent>::new(Box::new(MockPoll::default()), Duration::from_secs(5));
+            Port::<MockEvent>::new(Box::new(MockPoll::default()), Duration::from_secs(5));
         assert!(listener.next_poll() <= Instant::now());
         assert_eq!(listener.should_poll(), true);
         assert!(listener.poll().ok().unwrap().is_some());
