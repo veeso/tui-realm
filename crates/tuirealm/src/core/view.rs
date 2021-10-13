@@ -249,7 +249,7 @@ mod test {
     use crate::{
         event::{Key, KeyEvent},
         mock::{MockBarInput, MockEvent, MockFooInput, MockMsg},
-        Value,
+        StateValue,
     };
 
     use pretty_assertions::assert_eq;
@@ -380,7 +380,7 @@ mod test {
         view.mount(INPUT_FOO, Box::new(MockFooInput::default()));
         assert_eq!(
             view.state(INPUT_FOO).unwrap(),
-            State::One(Value::String(String::from("")))
+            State::One(StateValue::String(String::from("")))
         );
         assert_eq!(view.state(INPUT_BAR), None);
     }

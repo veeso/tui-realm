@@ -85,7 +85,7 @@ where
 /// ## EventListener
 ///
 /// The event listener...
-pub struct EventListener<U>
+pub(crate) struct EventListener<U>
 where
     U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {

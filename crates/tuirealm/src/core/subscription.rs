@@ -67,10 +67,24 @@ where
         }
     }
 
+    /// ### target
+    ///
+    /// Returns sub target
+    pub(crate) fn target(&self) -> &str {
+        self.target.as_str()
+    }
+
+    /// ### event
+    ///
+    /// Returns a reference to the event
+    pub(crate) fn event(&self) -> &Event<U> {
+        &self.ev
+    }
+
     /// ### forward
     ///
     /// Returns whether to forward event to component
-    pub fn forward(&self, id: &str, ev: &Event<U>, component: &dyn MockComponent) -> bool {
+    pub(crate) fn forward(&self, id: &str, ev: &Event<U>, component: &dyn MockComponent) -> bool {
         self.target.as_str() == id && &self.ev == ev && self.when.forward(component)
     }
 }
@@ -157,7 +171,7 @@ mod test {
 
     use super::*;
     use crate::mock::{MockEvent, MockFooInput};
-    use crate::{Cmd, Value};
+    use crate::{Cmd, StateValue};
 
     use pretty_assertions::assert_eq;
 
@@ -170,6 +184,12 @@ mod test {
             "foo",
             ev.clone(),
             SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
+        );
+        assert_eq!(sub.target(), "foo");
+        assert_eq!(sub.event(), &ev);
+        assert_eq!(
+            sub.when,
+            SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
         );
         assert_eq!(sub.forward("foo", &ev, &component), true);
         // False clause
@@ -203,7 +223,7 @@ mod test {
     #[test]
     fn clause_has_state_should_forward() {
         let mut component = MockFooInput::default();
-        let clause = SubClause::HasState(State::One(Value::String(String::from("a"))));
+        let clause = SubClause::HasState(State::One(StateValue::String(String::from("a"))));
         assert_eq!(clause.forward(&component), false); // Has no state 'a'
         component.perform(Cmd::Type('a'));
         assert_eq!(clause.forward(&component), true); // Has state 'a'
@@ -226,7 +246,7 @@ mod test {
         let mut component = MockFooInput::default();
         let clause = SubClause::and(
             SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
-            SubClause::HasState(State::One(Value::String(String::from("a")))),
+            SubClause::HasState(State::One(StateValue::String(String::from("a")))),
         );
         assert_eq!(clause.forward(&component), false); // Has no focus and has no state 'a'
         component.attr(Attribute::Focus, AttrValue::Flag(true));
@@ -242,7 +262,7 @@ mod test {
         let mut component = MockFooInput::default();
         let clause = SubClause::or(
             SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
-            SubClause::HasState(State::One(Value::String(String::from("a")))),
+            SubClause::HasState(State::One(StateValue::String(String::from("a")))),
         );
         assert_eq!(clause.forward(&component), false); // Has no focus and has no state 'a'
         component.attr(Attribute::Focus, AttrValue::Flag(true));
