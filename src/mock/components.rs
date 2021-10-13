@@ -5,7 +5,9 @@
 use super::{MockEvent, MockMsg};
 use crate::command::Direction;
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
-use crate::{AttrValue, Attribute, Cmd, CmdResult, Component, MockComponent, Props, State, Value};
+use crate::{
+    AttrValue, Attribute, Cmd, CmdResult, Component, MockComponent, Props, State, StateValue,
+};
 
 /// ## MockInput
 ///
@@ -36,18 +38,18 @@ impl MockComponent for MockInput {
     }
 
     fn state(&self) -> State {
-        State::One(Value::String(self.states.text.clone()))
+        State::One(StateValue::String(self.states.text.clone()))
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
         match cmd {
             Cmd::Move(Direction::Left) => {
                 self.states.left();
-                CmdResult::Changed(State::One(Value::Usize(self.states.cursor)))
+                CmdResult::Changed(State::One(StateValue::Usize(self.states.cursor)))
             }
             Cmd::Move(Direction::Right) => {
                 self.states.right();
-                CmdResult::Changed(State::One(Value::Usize(self.states.cursor)))
+                CmdResult::Changed(State::One(StateValue::Usize(self.states.cursor)))
             }
             Cmd::Type(ch) => {
                 self.states.input(ch);
@@ -147,7 +149,9 @@ impl Component<MockMsg, MockEvent> for MockFooInput {
             _ => Cmd::None,
         };
         match self.component.perform(cmd) {
-            CmdResult::Changed(State::One(Value::String(s))) => Some(MockMsg::FooInputChanged(s)),
+            CmdResult::Changed(State::One(StateValue::String(s))) => {
+                Some(MockMsg::FooInputChanged(s))
+            }
             _ => None,
         }
     }
@@ -206,7 +210,9 @@ impl Component<MockMsg, MockEvent> for MockBarInput {
             _ => Cmd::None,
         };
         match self.component.perform(cmd) {
-            CmdResult::Changed(State::One(Value::String(s))) => Some(MockMsg::BarInputChanged(s)),
+            CmdResult::Changed(State::One(StateValue::String(s))) => {
+                Some(MockMsg::BarInputChanged(s))
+            }
             _ => None,
         }
     }

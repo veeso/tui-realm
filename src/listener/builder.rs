@@ -59,7 +59,7 @@ where
     /// ### start
     ///
     /// Create the event listener with the parameters provided and start the workers
-    pub fn start(self) -> EventListener<U> {
+    pub(crate) fn start(self) -> EventListener<U> {
         EventListener::start(self.ports, self.tick_interval)
     }
 

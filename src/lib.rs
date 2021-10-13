@@ -58,14 +58,13 @@ mod core;
 pub mod listener;
 #[cfg(test)]
 pub mod mock;
-// TODO: terminal
 pub mod tui;
 pub mod utils;
 // -- export
+pub use self::core::application::{self, Application};
 pub use self::core::command::{self, Cmd, CmdResult};
 pub use self::core::event::{self, Event};
 pub use self::core::props::{self, AttrValue, Attribute, Props, PropsBuilder};
 pub use self::core::subscription;
-pub use self::core::{Component, MockComponent, Update, View};
-pub use self::core::{State, Value};
+pub use self::core::{Component, MockComponent, State, StateValue, Update, View};
 pub use adapter::{Frame, Terminal};

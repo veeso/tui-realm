@@ -2,7 +2,6 @@
 //!
 //! Core implements the core functionalities and types for tui-realm
 
-pub mod command;
 /**
  * MIT License
  *
@@ -26,6 +25,8 @@ pub mod command;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+pub mod application;
+pub mod command;
 mod component;
 pub mod event;
 pub mod props;
@@ -36,5 +37,5 @@ mod view;
 // -- export
 pub use command::Cmd;
 pub use component::{Component, MockComponent, Update};
-pub use state::{State, Value};
+pub use state::{State, StateValue};
 pub use view::View;

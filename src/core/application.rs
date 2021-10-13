@@ -1,6 +1,6 @@
-//! ## State
+//! ## Application
 //!
-//! This module exposes the state type and values
+//! This module exposes the Application, which is the core struct of tui-realm.
 
 /**
  * MIT License
@@ -25,47 +25,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::props::Color;
-use crate::utils::{Email, PhoneNumber};
-use std::collections::{HashMap, LinkedList};
+use crate::listener::{EventListener, EventListenerCfg};
+use crate::subscription::Subscription;
+use crate::{Update, View};
 
-/// ## State
+use std::fmt;
+
+/// ## Application
 ///
-/// State describes a component state
-#[derive(Debug, PartialEq, Clone)]
-pub enum State {
-    One(StateValue),
-    Tup2((StateValue, StateValue)),
-    Tup3((StateValue, StateValue, StateValue)),
-    Tup4((StateValue, StateValue, StateValue, StateValue)),
-    Vec(Vec<StateValue>),
-    Map(HashMap<String, StateValue>),
-    Linked(LinkedList<State>),
-    None,
+/// TODO:
+pub struct Application<'a, Msg, UserEvent>
+where
+    Msg: PartialEq,
+    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+{
+    listener: EventListener<UserEvent>,
+    subs: Vec<Subscription<UserEvent>>,
+    view: View<'a, Msg, UserEvent>,
 }
 
-/// ## StateValue
+// TODO: can we render everything from here?
+
+impl<'a, Msg, UserEvent> Application<'a, Msg, UserEvent>
+where
+    Msg: PartialEq,
+    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+{
+    // TODO: new takes listenerCfg
+
+    // TODO: pub fn tick(&mut self, model: &mut dyn Update, strategy: PollStrategy) {}
+
+    // TODO: view bridge
+}
+
+/// ## PollStrategy
 ///
-/// StateValue describes the value contained in a State
-#[derive(Debug, PartialEq, Clone)]
-pub enum StateValue {
-    Bool(bool),
-    U8(u8),
-    U16(u16),
-    U32(u32),
-    U64(u64),
-    U128(u128),
-    Usize(usize),
-    I8(i8),
-    I16(i16),
-    I32(i32),
-    I64(i64),
-    I128(i128),
-    F64(f64),
-    Isize(isize),
-    String(String),
-    // -- input types
-    Color(Color),
-    Email(Email),
-    PhoneNumber(PhoneNumber),
+/// TODO:
+pub enum PollStrategy {
+    One,
+    UpTo(usize),
 }
