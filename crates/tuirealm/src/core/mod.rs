@@ -38,4 +38,8 @@ mod view;
 pub use command::Cmd;
 pub use component::{Component, MockComponent, Update};
 pub use state::{State, StateValue};
-pub use view::View;
+pub use view::{View, ViewError};
+
+// -- internal
+pub(crate) use subscription::Subscription;
+pub(crate) use view::WrappedComponent;

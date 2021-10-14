@@ -69,7 +69,7 @@ pub enum ListenerError {
 /// dedicated thread to poll for events.
 pub trait Poll<UserEvent>: Send
 where
-    UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + 'static,
 {
     /// ### poll
     ///
@@ -87,12 +87,12 @@ where
 /// The event listener...
 pub(crate) struct EventListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
+    /// Max Time to wait when calling `recv()` on thread receiver
+    poll_timeout: Duration,
     /// Indicates whether the worker should keep running
     running: Arc<RwLock<bool>>,
-    /// Interval between each Tick event. If `None` no Tick will be sent
-    tick_interval: Option<Duration>,
     /// Msg receiver from worker
     recv: mpsc::Receiver<ListenerMsg<U>>,
     /// Join handle for worker
@@ -111,12 +111,23 @@ where
     /// - `tick_interval` is the interval used to send the `Tick` event. If `None`, no tick will be sent.
     ///     Tick should be used only when you need to handle the tick in the interface through the Subscriptions.
     ///     The tick should have in this case, the same value (or less) of the refresh rate of the TUI.
-    pub(self) fn start(ports: Vec<Port<U>>, tick_interval: Option<Duration>) -> Self {
+    ///
+    /// > Panics if `poll_timeout` is 0
+    pub(self) fn start(
+        ports: Vec<Port<U>>,
+        poll_timeout: Duration,
+        tick_interval: Option<Duration>,
+    ) -> Self {
+        if poll_timeout == Duration::ZERO {
+            panic!(
+                "poll timeout cannot be 0 (see <https://github.com/rust-lang/rust/issues/39364>)"
+            )
+        }
         // Prepare channel and running state
         let (recv, running, thread) = Self::setup_thread(ports, tick_interval);
         Self {
             running,
-            tick_interval,
+            poll_timeout,
             recv,
             thread: Some(thread),
         }
@@ -142,26 +153,11 @@ where
         }
     }
 
-    /// ### restart
-    ///
-    /// Restart worker if previously died.
-    /// Blocks if the thread hadn't actually died before, since this function will first try to join previously thread
-    pub fn restart(&mut self, ports: Vec<Port<U>>) -> ListenerResult<()> {
-        // Stop first
-        self.stop()?;
-        // Re-init thread
-        let (recv, running, thread) = Self::setup_thread(ports, self.tick_interval);
-        self.recv = recv;
-        self.running = running;
-        self.thread = Some(thread);
-        Ok(())
-    }
-
     /// ### poll
     ///
     /// Checks whether there are new events available from event
-    pub fn poll(&self, timeout: Duration) -> ListenerResult<Option<Event<U>>> {
-        match self.recv.recv_timeout(timeout) {
+    pub fn poll(&self) -> ListenerResult<Option<Event<U>>> {
+        match self.recv.recv_timeout(self.poll_timeout) {
             Ok(msg) => ListenerResult::from(msg),
             Err(mpsc::RecvTimeoutError::Timeout) => Ok(None),
             Err(_) => Err(ListenerError::PollFailed),
@@ -187,6 +183,15 @@ where
             EventListenerWorker::new(ports, sender, running_t, tick_interval).run();
         });
         (recv, running, thread)
+    }
+}
+
+impl<U> Drop for EventListener<U>
+where
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+{
+    fn drop(&mut self) {
+        let _ = self.stop();
     }
 }
 
@@ -228,52 +233,40 @@ mod test {
 
     #[test]
     fn worker_should_run_thread() {
-        const POLL_TIMEOUT: Duration = Duration::from_millis(100);
         let mut listener = EventListener::<MockEvent>::start(
             vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(10),
             )],
+            Duration::from_millis(10),
             Some(Duration::from_secs(3)),
         );
         // Wait 1 second
         thread::sleep(Duration::from_secs(1));
         // Poll (event)
         assert_eq!(
-            listener.poll(POLL_TIMEOUT).ok().unwrap().unwrap(),
+            listener.poll().ok().unwrap().unwrap(),
             Event::Keyboard(KeyEvent::from(Key::Enter))
         );
         // Poll (tick)
-        assert_eq!(
-            listener.poll(POLL_TIMEOUT).ok().unwrap().unwrap(),
-            Event::Tick
-        );
+        assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
         // Poll (None)
-        assert!(listener.poll(POLL_TIMEOUT).ok().unwrap().is_none());
+        assert!(listener.poll().ok().unwrap().is_none());
         // Wait 3 seconds
         thread::sleep(Duration::from_secs(3));
         // New tick
-        assert_eq!(
-            listener.poll(POLL_TIMEOUT).ok().unwrap().unwrap(),
-            Event::Tick
-        );
+        assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
         // Stop
         assert!(listener.stop().is_ok());
-        // Restart
-        assert!(listener
-            .restart(vec![Port::new(
-                Box::new(MockPoll::default()),
-                Duration::from_secs(5)
-            )])
-            .is_ok());
-        // Wait 1 second
-        thread::sleep(Duration::from_secs(1));
-        // Poll (event)
-        assert_eq!(
-            listener.poll(POLL_TIMEOUT).ok().unwrap().unwrap(),
-            Event::Keyboard(KeyEvent::from(Key::Enter))
+    }
+
+    #[test]
+    #[should_panic]
+    fn event_listener_with_poll_timeout_zero_should_panic() {
+        EventListener::<MockEvent>::start(
+            vec![],
+            Duration::from_millis(0),
+            Some(Duration::from_secs(3)),
         );
-        // Stop
-        assert!(listener.stop().is_ok());
     }
 }

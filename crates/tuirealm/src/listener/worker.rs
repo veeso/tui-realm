@@ -49,7 +49,7 @@ where
 
 impl<U> EventListenerWorker<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     pub(super) fn new(
         ports: Vec<Port<U>>,

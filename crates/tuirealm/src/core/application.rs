@@ -25,22 +25,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::listener::{EventListener, EventListenerCfg};
-use crate::subscription::Subscription;
-use crate::{Update, View};
+use super::{Subscription, WrappedComponent};
+use crate::listener::{EventListener, EventListenerCfg, ListenerError};
+use crate::tui::layout::Rect;
+use crate::{AttrValue, Attribute, Event, Frame, State, Sub, Update, View, ViewError};
 
 use std::fmt;
+use thiserror::Error;
+
+/// ## ApplicationResult
+///
+/// Result retuned by `Application`.
+/// Ok depends on method
+/// Err is always `ApplicationError`
+pub type ApplicationResult<T> = Result<T, ApplicationError>;
 
 /// ## Application
 ///
-/// TODO:
+/// The application defines a tui-realm application.
+/// It will handle events, subscriptions and the view too.
+/// It provides functions to interact with the view (mount, umount, query, etc), but also
+/// the main function: `tick()`. See [tick](#tick)
 pub struct Application<'a, Msg, UserEvent>
 where
     Msg: PartialEq,
-    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     listener: EventListener<UserEvent>,
-    subs: Vec<Subscription<UserEvent>>,
+    subs: Vec<Subscription<'a, UserEvent>>,
     view: View<'a, Msg, UserEvent>,
 }
 
@@ -49,19 +61,268 @@ where
 impl<'a, Msg, UserEvent> Application<'a, Msg, UserEvent>
 where
     Msg: PartialEq,
-    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    // TODO: new takes listenerCfg
+    /// ### init
+    ///
+    /// Initialize a new `Application`.
+    /// The event listener is immediately created and started.
+    pub fn init(listener_cfg: EventListenerCfg<UserEvent>) -> Self {
+        Self {
+            listener: listener_cfg.start(),
+            subs: Vec::new(),
+            view: View::default(),
+        }
+    }
 
-    // TODO: pub fn tick(&mut self, model: &mut dyn Update, strategy: PollStrategy) {}
+    /// ### restart_listener
+    ///
+    /// Restart listener in case the previous listener has died or if you want to start a new one with a new configuration.
+    ///
+    /// > The listener has died if you received a `ApplicationError::Listener(ListenerError::ListenerDied))`
+    pub fn restart_listener(
+        &mut self,
+        listener_cfg: EventListenerCfg<UserEvent>,
+    ) -> ApplicationResult<()> {
+        self.listener.stop()?;
+        self.listener = listener_cfg.start();
+        Ok(())
+    }
 
-    // TODO: view bridge
+    /// ### tick
+    ///
+    /// The tick method makes the application to run once.
+    /// The workflow of the tick method is the following one:
+    ///
+    /// 1. The event listener is fetched according to the provided `PollStrategy`
+    /// 2. All the received events are sent to the current active component
+    /// 3. All the received events are forwarded to the subscribed components which satisfy the received events and conditions.
+    /// 4. The Msg, are sent in order to the `update()` function of the provided `Update` trait object.
+    ///
+    /// As soon as function returns, you should call the `view()` method.
+    ///
+    /// > You can also call `view` from the `update()` if you need it
+    pub fn tick(
+        &mut self,
+        model: &mut dyn Update<Msg, UserEvent>,
+        strategy: PollStrategy,
+    ) -> ApplicationResult<()> {
+        // Poll event listener
+        let events = self.poll(strategy)?;
+        // Forward to active element
+        let mut msg: Vec<Msg> = Vec::new();
+        let msg: Vec<Msg> = events
+            .into_iter()
+            .map(|ev| {
+                // Forward event to active component
+                let mut msg: Vec<Option<Msg>> = vec![self.forward_to_active_component(ev.clone())];
+                // Forward to subscriptions
+            })
+            .collect()?;
+        // TODO:
+        todo!()
+    }
+
+    // -- view bridge
+
+    /// ### mount
+    ///
+    /// Mount component to view and associate subscriptions for it.
+    /// Returns error if component is already mounted
+    pub fn mount(
+        &mut self,
+        id: &'a str,
+        component: WrappedComponent<Msg, UserEvent>,
+        subs: Vec<Sub<UserEvent>>,
+    ) -> ApplicationResult<()> {
+        // Mount
+        self.view.mount(id, component)?;
+        // Subscribe
+        subs.into_iter()
+            .for_each(|x| self.subs.push(Subscription::new(id, x)));
+        Ok(())
+    }
+
+    /// ### umount
+    ///
+    /// Umount component associated to `id` and remove all its subscriptions.
+    /// Returns Error if the component doesn't exist
+    pub fn umount(&mut self, id: &'a str) -> ApplicationResult<()> {
+        self.view.umount(id)?;
+        self.unsubscribe(id);
+        Ok(())
+    }
+
+    /// ### mounted
+    ///
+    /// Returns whether component `id` is mounted
+    pub fn mounted(&self, id: &'a str) -> bool {
+        self.view.mounted(id)
+    }
+
+    /// ### view
+    ///
+    /// Render component called `id`
+    pub fn view(&mut self, id: &'a str, f: &mut Frame, area: Rect) {
+        self.view.view(id, f, area);
+    }
+
+    /// ### query
+    ///
+    /// Query view component for a certain `AttrValue`
+    /// Returns error if the component doesn't exist
+    /// Returns None if the attribute doesn't exist.
+    pub fn query(&self, id: &'a str, query: Attribute) -> ApplicationResult<Option<AttrValue>> {
+        self.view.query(id, query).map_err(ApplicationError::from)
+    }
+
+    /// ### attr
+    ///
+    /// Set attribute for component `id`
+    /// Returns error if the component doesn't exist
+    pub fn attr(
+        &mut self,
+        id: &'a str,
+        attr: Attribute,
+        value: AttrValue,
+    ) -> ApplicationResult<()> {
+        self.view
+            .attr(id, attr, value)
+            .map_err(ApplicationError::from)
+    }
+
+    /// ### state
+    ///
+    /// Get state for component `id`.
+    /// Returns `Err` if component doesn't exist
+    pub fn state(&self, id: &'a str) -> ApplicationResult<State> {
+        self.view.state(id).map_err(ApplicationError::from)
+    }
+
+    /// ### active
+    ///
+    /// Shorthand for `attr(id, Attribute::Focus(AttrValue::Flag(true)))`.
+    /// It also sets the component as the current one having focus.
+    /// Previous active component, if any, GETS PUSHED to the STACK
+    /// Returns error: if component doesn't exist. Use `mounted()` to check if component exists
+    ///
+    /// > NOTE: users should always use this function to give focus to components.
+    pub fn active(&mut self, id: &'a str) -> ApplicationResult<()> {
+        self.view.active(id).map_err(ApplicationError::from)
+    }
+
+    /// ### blur
+    ///
+    /// Blur selected element AND DON'T PUSH CURRENT ACTIVE ELEMENT INTO THE STACK
+    /// Shorthand for `attr(id, Attribute::Focus(AttrValue::Flag(false)))`.
+    /// It also unset the current focus and give it to the first element in stack.
+    /// Returns error: if no component has focus
+    ///
+    /// > NOTE: users should always use this function to remove focus to components.
+    pub fn blur(&mut self) -> ApplicationResult<()> {
+        self.view.blur().map_err(ApplicationError::from)
+    }
+
+    // -- private
+
+    /// ### unsubscribe
+    ///
+    /// remove all subscriptions for component
+    fn unsubscribe(&mut self, id: &'a str) {
+        self.subs.retain(|x| x.target() != id)
+    }
+
+    /// ### poll
+    ///
+    /// Poll listener according to provided strategy
+    fn poll(&mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Event<UserEvent>>> {
+        match strategy {
+            PollStrategy::Once => self
+                .poll_listener()
+                .map(|x| x.map(|x| vec![x]).unwrap_or(vec![])),
+            PollStrategy::UpTo(times) => self.poll_times(times),
+        }
+    }
+
+    /// ### poll_times
+    ///
+    /// Poll event listener up to `t` times
+    fn poll_times(&mut self, t: usize) -> ApplicationResult<Vec<Event<UserEvent>>> {
+        let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(t);
+        for _ in 0..t {
+            match self.poll_listener() {
+                Err(err) => return Err(err),
+                Ok(None) => break,
+                Ok(Some(ev)) => evs.push(ev),
+            }
+        }
+        Ok(evs)
+    }
+
+    /// ### poll_listener
+    ///
+    /// Poll event listener once
+    fn poll_listener(&mut self) -> ApplicationResult<Option<Event<UserEvent>>> {
+        self.listener.poll().map_err(ApplicationError::from)
+    }
+
+    /// ### forward_to_active_component
+    ///
+    /// Forward event to current active component, if any.
+    fn forward_to_active_component(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
+        self.view
+            .focus()
+            .map(|x| self.view.forward(x, ev).ok().unwrap())
+            .flatten()
+    }
+
+    /// ### forward_to_subscriptions
+    ///
+    /// Forward event to subscriptions interested in this event.
+    fn forward_to_subscriptions(&mut self, ev: Event<UserEvent>) -> Vec<Option<Msg>> {
+        self.subs
+            .iter()
+            .filter(|x| {
+                let component = self.view.component(x.target()).unwrap();
+                x.forward(&ev, component)
+            })
+            .map(|x| x.target())
+            .map(|x| self.view.forward(x, ev.clone()).ok().unwrap())
+            .collect()
+    }
 }
 
 /// ## PollStrategy
 ///
-/// TODO:
+/// Poll strategy defines how to call `poll` on the event listener.
 pub enum PollStrategy {
-    One,
+    /// The poll() function will be called once, will update and then will return
+    Once,
+    /// The poll() function will be called up to `n` times, until it will return `None`.
     UpTo(usize),
+}
+
+// -- error
+
+/// ## ApplicationError
+///
+/// Error variants returned by `Application`
+#[derive(Debug, Error)]
+pub enum ApplicationError {
+    #[error("Listener error: {0}")]
+    Listener(ListenerError),
+    #[error("View error: {0}")]
+    View(ViewError),
+}
+
+impl From<ListenerError> for ApplicationError {
+    fn from(e: ListenerError) -> Self {
+        Self::Listener(e)
+    }
+}
+
+impl From<ViewError> for ApplicationError {
+    fn from(e: ViewError) -> Self {
+        Self::View(e)
+    }
 }
