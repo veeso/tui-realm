@@ -28,6 +28,13 @@
 use crate::{AttrValue, Attribute, Event, MockComponent, State};
 use std::fmt;
 
+/// ## Sub
+///
+/// Public type to define a subscription.
+pub struct Sub<UserEvent>(Event<UserEvent>, SubClause)
+where
+    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd;
+
 /// ## Subscription
 ///
 /// Defines a subscription for a component.
@@ -43,27 +50,30 @@ use std::fmt;
 ///     - when: a clause that must be satisfied to forward the event to the component.
 ///
 ///
-pub struct Subscription<UserEvent>
+pub(crate) struct Subscription<'a, UserEvent>
 where
     UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
-    target: String,
+    /// Target component
+    target: &'a str,
+    /// Event to forward and listen to
     ev: Event<UserEvent>,
+    /// Restrict forwarding clauses
     when: SubClause,
 }
 
-impl<U> Subscription<U>
+impl<'a, U> Subscription<'a, U>
 where
-    U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     /// ### new
     ///
     /// Instantiates a new `Subscription`
-    pub fn new<S: AsRef<str>>(target: S, ev: Event<U>, when: SubClause) -> Self {
+    pub fn new(target: &'a str, sub: Sub<U>) -> Self {
         Self {
-            target: target.as_ref().to_string(),
-            ev,
-            when,
+            target,
+            ev: sub.0,
+            when: sub.1,
         }
     }
 
@@ -71,7 +81,7 @@ where
     ///
     /// Returns sub target
     pub(crate) fn target(&self) -> &str {
-        self.target.as_str()
+        self.target
     }
 
     /// ### event
@@ -84,8 +94,8 @@ where
     /// ### forward
     ///
     /// Returns whether to forward event to component
-    pub(crate) fn forward(&self, id: &str, ev: &Event<U>, component: &dyn MockComponent) -> bool {
-        self.target.as_str() == id && &self.ev == ev && self.when.forward(component)
+    pub(crate) fn forward(&self, ev: &Event<U>, component: &dyn MockComponent) -> bool {
+        &self.ev == ev && self.when.forward(component)
     }
 }
 
@@ -171,7 +181,7 @@ mod test {
 
     use super::*;
     use crate::mock::{MockEvent, MockFooInput};
-    use crate::{Cmd, StateValue};
+    use crate::{command::Cmd, StateValue};
 
     use pretty_assertions::assert_eq;
 
@@ -182,8 +192,10 @@ mod test {
         component.attr(Attribute::Focus, AttrValue::Flag(true));
         let sub = Subscription::new(
             "foo",
-            ev.clone(),
-            SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
+            Sub(
+                ev.clone(),
+                SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
+            ),
         );
         assert_eq!(sub.target(), "foo");
         assert_eq!(sub.event(), &ev);
@@ -191,17 +203,14 @@ mod test {
             sub.when,
             SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
         );
-        assert_eq!(sub.forward("foo", &ev, &component), true);
+        assert_eq!(sub.forward(&ev, &component), true);
         // False clause
         component.attr(Attribute::Focus, AttrValue::Flag(false));
-        assert_eq!(sub.forward("foo", &ev, &component), false);
+        assert_eq!(sub.forward(&ev, &component), false);
         // False event
-        assert_eq!(
-            sub.forward("foo", &Event::User(MockEvent::Foo), &component),
-            false
-        );
+        assert_eq!(sub.forward(&Event::User(MockEvent::Foo), &component), false);
         // False id
-        assert_eq!(sub.forward("bar", &Event::Tick, &component), false);
+        assert_eq!(sub.forward(&Event::WindowResize(0, 0), &component), false);
     }
 
     #[test]

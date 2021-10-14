@@ -46,7 +46,7 @@ where
 
 impl<U> Port<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     /// ### new
     ///

@@ -142,7 +142,7 @@ where
 
 impl<U> Poll<U> for CrosstermInputListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         if let Ok(available) = xterm::poll(Duration::from_millis(10)) {

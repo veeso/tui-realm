@@ -26,7 +26,10 @@
  * SOFTWARE.
  */
 use crate::tui::layout::Rect;
-use crate::{AttrValue, Attribute, Cmd, CmdResult, Event, Frame, State, View};
+use crate::{
+    command::{Cmd, CmdResult},
+    AttrValue, Attribute, Event, Frame, State, View,
+};
 
 /// ## MockComponent
 ///

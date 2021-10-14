@@ -6,7 +6,8 @@ use super::{MockEvent, MockMsg};
 use crate::command::Direction;
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
 use crate::{
-    AttrValue, Attribute, Cmd, CmdResult, Component, MockComponent, Props, State, StateValue,
+    command::{Cmd, CmdResult},
+    AttrValue, Attribute, Component, MockComponent, Props, State, StateValue,
 };
 
 /// ## MockInput

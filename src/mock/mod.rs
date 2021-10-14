@@ -41,7 +41,9 @@ impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> Default fo
     }
 }
 
-impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> Poll<U> for MockPoll<U> {
+impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static> Poll<U>
+    for MockPoll<U>
+{
     fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         Ok(Some(Event::Keyboard(KeyEvent::from(Key::Enter))))
     }

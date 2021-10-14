@@ -61,10 +61,11 @@ pub mod mock;
 pub mod tui;
 pub mod utils;
 // -- export
-pub use self::core::application::{self, Application};
-pub use self::core::command::{self, Cmd, CmdResult};
+pub use self::core::application::{self, Application, ApplicationError};
+pub use self::core::command;
 pub use self::core::event::{self, Event};
 pub use self::core::props::{self, AttrValue, Attribute, Props, PropsBuilder};
-pub use self::core::subscription;
-pub use self::core::{Component, MockComponent, State, StateValue, Update, View};
+pub use self::core::subscription::{Sub, SubClause};
+pub use self::core::{Component, MockComponent, State, StateValue, Update, View, ViewError};
 pub use adapter::{Frame, Terminal};
+pub use listener::ListenerError;
