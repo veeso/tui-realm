@@ -29,6 +29,7 @@ use crate::tui::layout::Rect;
 use crate::{AttrValue, Attribute, Component, Event, Frame, State};
 // -- ext
 use std::collections::HashMap;
+use std::hash::Hash;
 use thiserror::Error;
 
 /// ## WrappedComponent
@@ -60,21 +61,23 @@ pub enum ViewError {
 /// View is the wrapper and manager for all the components.
 /// A View is a container for all the components in a certain layout.
 /// Each View can have only one focused component at the time. At least one component must be always focused
-pub struct View<Msg, UserEvent>
+pub struct View<ComponentId, Msg, UserEvent>
 where
+    ComponentId: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
     UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
     /// Components Mounted onto View
-    components: HashMap<String, WrappedComponent<Msg, UserEvent>>,
+    components: HashMap<ComponentId, WrappedComponent<Msg, UserEvent>>,
     /// Current active component
-    focus: Option<String>,
+    focus: Option<ComponentId>,
     /// Focus stack; used to determine which component should hold focus in case the current element is blurred
-    focus_stack: Vec<String>,
+    focus_stack: Vec<ComponentId>,
 }
 
-impl<Msg, UserEvent> Default for View<Msg, UserEvent>
+impl<K, Msg, UserEvent> Default for View<K, Msg, UserEvent>
 where
+    K: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
     UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
@@ -87,8 +90,9 @@ where
     }
 }
 
-impl<Msg, UserEvent> View<Msg, UserEvent>
+impl<K, Msg, UserEvent> View<K, Msg, UserEvent>
 where
+    K: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
     UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
@@ -96,14 +100,11 @@ where
     ///
     /// Mount component on View.
     /// Returns error if the component is already mounted
-    pub fn mount<S>(&mut self, id: S, component: WrappedComponent<Msg, UserEvent>) -> ViewResult<()>
-    where
-        S: AsRef<str>,
-    {
-        if self.mounted(id.as_ref()) {
+    pub fn mount(&mut self, id: K, component: WrappedComponent<Msg, UserEvent>) -> ViewResult<()> {
+        if self.mounted(&id) {
             Err(ViewError::ComponentAlreadyMounted)
         } else {
-            self.components.insert(id.as_ref().to_string(), component);
+            self.components.insert(id, component);
             Ok(())
         }
     }
@@ -111,58 +112,46 @@ where
     /// ### umount
     ///
     /// Umount component from View
-    pub fn umount<S>(&mut self, id: S) -> ViewResult<()>
-    where
-        S: AsRef<str>,
-    {
-        if !self.mounted(id.as_ref()) {
+    pub fn umount(&mut self, id: &K) -> ViewResult<()> {
+        if !self.mounted(id) {
             return Err(ViewError::ComponentNotFound);
         }
-        if self.has_focus(id.as_ref()) {
+        if self.has_focus(id) {
             let _ = self.blur();
         }
         // Remove component from stack
-        self.pop_from_stack(id.as_ref());
+        self.pop_from_stack(id);
         // Umount
-        self.components.remove(id.as_ref());
+        self.components.remove(id);
         Ok(())
     }
 
     /// ### mounted
     ///
     /// Returns whether component `id` is mounted
-    pub fn mounted<S>(&self, id: S) -> bool
-    where
-        S: AsRef<str>,
-    {
-        self.components.contains_key(id.as_ref())
+    pub fn mounted(&self, id: &K) -> bool {
+        self.components.contains_key(id)
     }
 
     /// ### focus
     ///
     /// Returns current active element (if any)
-    pub(crate) fn focus(&self) -> Option<&str> {
-        self.focus.as_deref()
+    pub(crate) fn focus(&self) -> Option<&K> {
+        self.focus.as_ref()
     }
 
     /// ### component
     ///
     /// Returns reference to component associated to `id`
-    pub(crate) fn component<S>(&self, id: S) -> Option<&dyn Component<Msg, UserEvent>>
-    where
-        S: AsRef<str>,
-    {
-        self.components.get(id.as_ref()).map(|x| x.as_ref())
+    pub(crate) fn component(&self, id: &K) -> Option<&dyn Component<Msg, UserEvent>> {
+        self.components.get(id).map(|x| x.as_ref())
     }
 
     /// ### view
     ///
     /// Render component called `id`
-    pub fn view<S>(&mut self, id: S, f: &mut Frame, area: Rect)
-    where
-        S: AsRef<str>,
-    {
-        if let Some(c) = self.components.get_mut(id.as_ref()) {
+    pub fn view(&mut self, id: &K, f: &mut Frame, area: Rect) {
+        if let Some(c) = self.components.get_mut(id) {
             c.view(f, area);
         }
     }
@@ -171,11 +160,8 @@ where
     ///
     /// Forward `event` (call `on()`) on component `id` and return a `Msg` if any.
     /// Returns error if the component doesn't exist
-    pub(crate) fn forward<S>(&mut self, id: S, event: Event<UserEvent>) -> ViewResult<Option<Msg>>
-    where
-        S: AsRef<str>,
-    {
-        match self.components.get_mut(id.as_ref()) {
+    pub(crate) fn forward(&mut self, id: &K, event: Event<UserEvent>) -> ViewResult<Option<Msg>> {
+        match self.components.get_mut(id) {
             None => Err(ViewError::ComponentNotFound),
             Some(c) => Ok(c.on(event)),
         }
@@ -186,11 +172,8 @@ where
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
-    pub fn query<S>(&self, id: S, query: Attribute) -> ViewResult<Option<AttrValue>>
-    where
-        S: AsRef<str>,
-    {
-        match self.components.get(id.as_ref()) {
+    pub fn query(&self, id: &K, query: Attribute) -> ViewResult<Option<AttrValue>> {
+        match self.components.get(id) {
             None => Err(ViewError::ComponentNotFound),
             Some(c) => Ok(c.query(query)),
         }
@@ -200,11 +183,8 @@ where
     ///
     /// Set attribute for component `id`
     /// Returns error if the component doesn't exist
-    pub fn attr<S>(&mut self, id: S, attr: Attribute, value: AttrValue) -> ViewResult<()>
-    where
-        S: AsRef<str>,
-    {
-        if let Some(c) = self.components.get_mut(id.as_ref()) {
+    pub fn attr(&mut self, id: &K, attr: Attribute, value: AttrValue) -> ViewResult<()> {
+        if let Some(c) = self.components.get_mut(id) {
             c.attr(attr, value);
             Ok(())
         } else {
@@ -216,12 +196,9 @@ where
     ///
     /// Get state for component `id`.
     /// Returns `Err` if component doesn't exist
-    pub fn state<S>(&self, id: S) -> ViewResult<State>
-    where
-        S: AsRef<str>,
-    {
+    pub fn state(&self, id: &K) -> ViewResult<State> {
         self.components
-            .get(id.as_ref())
+            .get(id)
             .map(|c| c.state())
             .ok_or(ViewError::ComponentNotFound)
     }
@@ -236,15 +213,12 @@ where
     /// Returns error: if component doesn't exist. Use `mounted()` to check if component exists
     ///
     /// > NOTE: users should always use this function to give focus to components.
-    pub fn active<S>(&mut self, id: S) -> ViewResult<()>
-    where
-        S: AsRef<str>,
-    {
-        if let Some(c) = self.components.get_mut(id.as_ref()) {
+    pub fn active(&mut self, id: K) -> ViewResult<()> {
+        if let Some(c) = self.components.get_mut(&id) {
             // Set attribute
             c.attr(Attribute::Focus, AttrValue::Flag(true));
             // Move current focus
-            self.change_focus(id.as_ref());
+            self.change_focus(&id);
             Ok(())
         } else {
             Err(ViewError::ComponentNotFound)
@@ -261,7 +235,7 @@ where
     /// > NOTE: users should always use this function to remove focus to components.
     pub fn blur(&mut self) -> ViewResult<()> {
         if let Some(id) = self.focus.take() {
-            if let Some(c) = self.components.get_mut(id.as_str()) {
+            if let Some(c) = self.components.get_mut(&id) {
                 c.attr(Attribute::Focus, AttrValue::Flag(false));
             }
             self.focus_to_last();
@@ -278,25 +252,22 @@ where
     /// Push component `id` to focus stack
     /// In case it is already in the focus stack,
     /// it will be first removed from it.
-    fn push_to_stack<S>(&mut self, id: S)
-    where
-        S: AsRef<str>,
-    {
-        self.pop_from_stack(id.as_ref());
-        self.focus_stack.push(id.as_ref().to_string());
+    fn push_to_stack(&mut self, id: K) {
+        self.pop_from_stack(&id);
+        self.focus_stack.push(id);
     }
 
     /// ### pop_from_stack
     ///
     /// Pop component `id` from focus stack
-    fn pop_from_stack(&mut self, id: &str) {
-        self.focus_stack.retain(|x| *x != id);
+    fn pop_from_stack(&mut self, id: &K) {
+        self.focus_stack.retain(|x| x != id);
     }
 
     /// ### has_focus
     ///
     /// Returns whether `who` has focus
-    fn has_focus(&self, who: &str) -> bool {
+    fn has_focus(&self, who: &K) -> bool {
         match self.focus.as_ref() {
             None => false,
             Some(id) => who == id,
@@ -309,14 +280,14 @@ where
     /// Then pop from stack `new_focus` and set it to current `focus`.
     ///
     /// > Panics if `new_focus` doesn't exist in components
-    fn change_focus(&mut self, new_focus: &str) {
+    fn change_focus(&mut self, new_focus: &K) {
         if let Some(focus) = self.focus.take() {
             self.push_to_stack(focus);
         }
         self.pop_from_stack(new_focus);
         // Get key from focus_stack (otherwise lifetime won't be valid)
-        let key = self.components.keys().find(|x| **x == new_focus).unwrap();
-        self.focus = Some(key.to_string());
+        let key = self.components.keys().find(|x| *x == new_focus).unwrap();
+        self.focus = Some(key.clone());
     }
 
     /// ### focus_to_last
@@ -331,7 +302,7 @@ where
     /// ### take_last_from_stack
     ///
     /// Take last element from stack if any
-    fn take_last_from_stack(&mut self) -> Option<String> {
+    fn take_last_from_stack(&mut self) -> Option<K> {
         self.focus_stack.pop()
     }
 }
@@ -342,19 +313,15 @@ mod test {
     use super::*;
     use crate::{
         event::{Key, KeyEvent},
-        mock::{MockBarInput, MockEvent, MockFooInput, MockMsg},
+        mock::{MockBarInput, MockComponentId, MockEvent, MockFooInput, MockMsg},
         StateValue,
     };
 
     use pretty_assertions::assert_eq;
 
-    const INPUT_FOO: &'static str = "INPUT_FOO";
-    const INPUT_BAR: &'static str = "INPUT_BAR";
-    const INPUT_OMAR: &'static str = "INPUT_OMAR";
-
     #[test]
     fn default_view_should_be_empty() {
-        let view: View<MockMsg, MockEvent> = View::default();
+        let view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         assert!(view.components.is_empty());
         assert_eq!(view.focus, None);
         assert!(view.focus_stack.is_empty());
@@ -362,46 +329,50 @@ mod test {
 
     #[test]
     fn view_should_mount_and_umount_components() {
-        let mut view: View<MockMsg, MockEvent> = View::default();
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         // Mount foo
         assert!(view
-            .mount(INPUT_FOO, Box::new(MockFooInput::default()))
+            .mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
             .is_ok());
         assert_eq!(view.components.len(), 1);
-        assert!(view.mounted(INPUT_FOO));
-        assert!(view.component(INPUT_FOO).is_some());
-        assert!(view.component(INPUT_BAR).is_none());
-        assert_eq!(view.mounted(INPUT_BAR), false);
+        assert!(view.mounted(&MockComponentId::InputFoo));
+        assert!(view.component(&MockComponentId::InputFoo).is_some());
+        assert!(view.component(&MockComponentId::InputBar).is_none());
+        assert_eq!(view.mounted(&MockComponentId::InputBar), false);
         // Mount bar
         assert!(view
-            .mount(INPUT_BAR, Box::new(MockBarInput::default()))
+            .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
             .is_ok());
         assert_eq!(view.components.len(), 2);
-        assert!(view.mounted(INPUT_BAR));
+        assert!(view.mounted(&MockComponentId::InputBar));
         // Mount twice
         assert!(view
-            .mount(INPUT_BAR, Box::new(MockBarInput::default()))
+            .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
             .is_err());
         assert_eq!(view.components.len(), 2);
-        assert!(view.mounted(INPUT_BAR));
+        assert!(view.mounted(&MockComponentId::InputBar));
         // Umount
-        assert!(view.umount(INPUT_FOO).is_ok());
+        assert!(view.umount(&MockComponentId::InputFoo).is_ok());
         assert_eq!(view.components.len(), 1);
-        assert_eq!(view.mounted(INPUT_FOO), false);
-        assert_eq!(view.mounted(INPUT_BAR), true);
-        assert!(view.umount(INPUT_BAR).is_ok());
+        assert_eq!(view.mounted(&MockComponentId::InputFoo), false);
+        assert_eq!(view.mounted(&MockComponentId::InputBar), true);
+        assert!(view.umount(&MockComponentId::InputBar).is_ok());
         assert_eq!(view.components.len(), 0);
-        assert_eq!(view.mounted(INPUT_BAR), false);
+        assert_eq!(view.mounted(&MockComponentId::InputBar), false);
         // Umount twice
-        assert!(view.umount(INPUT_BAR).is_err());
+        assert!(view.umount(&MockComponentId::InputBar).is_err());
     }
 
     #[test]
     fn view_should_compile_with_dynamic_names() {
-        let mut view: View<MockMsg, MockEvent> = View::default();
-        let names: Vec<String> = (0..10).map(|x| format!("INPUT_{}", x)).collect();
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
+        let names: Vec<MockComponentId> = (0..10)
+            .map(|x| MockComponentId::Dyn(format!("INPUT_{}", x)))
+            .collect();
         names.iter().for_each(|x| {
-            assert!(view.mount(x, Box::new(MockBarInput::default())).is_ok());
+            assert!(view
+                .mount(x.clone(), Box::new(MockBarInput::default()))
+                .is_ok());
         });
         assert_eq!(view.components.len(), 10);
         names.iter().for_each(|x| assert!(view.mounted(x)));
@@ -409,58 +380,61 @@ mod test {
 
     #[test]
     fn view_should_handle_focus() {
-        let mut view: View<MockMsg, MockEvent> = View::default();
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         assert!(view
-            .mount(INPUT_FOO, Box::new(MockFooInput::default()))
+            .mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
             .is_ok());
         assert!(view
-            .mount(INPUT_BAR, Box::new(MockBarInput::default()))
+            .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
             .is_ok());
         assert!(view
-            .mount(INPUT_OMAR, Box::new(MockBarInput::default()))
+            .mount(
+                MockComponentId::InputOmar,
+                Box::new(MockBarInput::default())
+            )
             .is_ok());
         // Active foo
-        assert!(view.active(INPUT_FOO).is_ok());
-        assert_eq!(view.focus(), Some(INPUT_FOO));
-        assert!(view.has_focus(INPUT_FOO));
-        assert_eq!(view.focus.as_deref().unwrap(), INPUT_FOO);
+        assert!(view.active(MockComponentId::InputFoo).is_ok());
+        assert_eq!(view.focus(), Some(&MockComponentId::InputFoo));
+        assert!(view.has_focus(&MockComponentId::InputFoo));
+        assert_eq!(view.focus.to_owned().unwrap(), MockComponentId::InputFoo);
         assert!(view.focus_stack.is_empty());
         // Give focus to BAR
-        assert!(view.active(INPUT_BAR).is_ok());
-        assert!(view.has_focus(INPUT_BAR));
+        assert!(view.active(MockComponentId::InputBar).is_ok());
+        assert!(view.has_focus(&MockComponentId::InputBar));
         assert_eq!(view.focus_stack.len(), 1);
         // Give focus to OMAR
-        assert!(view.active(INPUT_OMAR).is_ok());
-        assert!(view.has_focus(INPUT_OMAR));
+        assert!(view.active(MockComponentId::InputOmar).is_ok());
+        assert!(view.has_focus(&MockComponentId::InputOmar));
         assert_eq!(view.focus_stack.len(), 2);
         // Give focus back to FOO
-        assert!(view.active(INPUT_FOO).is_ok());
-        assert!(view.has_focus(INPUT_FOO));
+        assert!(view.active(MockComponentId::InputFoo).is_ok());
+        assert!(view.has_focus(&MockComponentId::InputFoo));
         assert_eq!(view.focus_stack.len(), 2);
         // Umount FOO
-        assert!(view.umount(INPUT_FOO).is_ok());
+        assert!(view.umount(&MockComponentId::InputFoo).is_ok());
         // OMAR should have focus
-        assert!(view.has_focus(INPUT_OMAR));
+        assert!(view.has_focus(&MockComponentId::InputOmar));
         assert_eq!(view.focus_stack.len(), 1);
         // Umount BAR
-        assert!(view.umount(INPUT_BAR).is_ok());
+        assert!(view.umount(&MockComponentId::InputBar).is_ok());
         // Give focus to unexisting component
-        assert!(view.active(INPUT_BAR).is_err());
+        assert!(view.active(MockComponentId::InputBar).is_err());
         // OMAR should still have focus, but focus will be empty
-        assert!(view.has_focus(INPUT_OMAR));
+        assert!(view.has_focus(&MockComponentId::InputOmar));
         assert_eq!(view.focus_stack.len(), 0);
         // Remount BAR
         assert!(view
-            .mount(INPUT_BAR, Box::new(MockBarInput::default()))
+            .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
             .is_ok());
         // Active BAR
-        assert!(view.active(INPUT_BAR).is_ok());
+        assert!(view.active(MockComponentId::InputBar).is_ok());
         // Blur
         assert!(view.blur().is_ok());
         // Focus should be held by OMAR, but BAR should not be in stack
-        assert!(view.has_focus(INPUT_OMAR));
+        assert!(view.has_focus(&MockComponentId::InputOmar));
         assert_eq!(view.focus_stack.len(), 0);
-        assert!(view.mounted(INPUT_BAR));
+        assert!(view.mounted(&MockComponentId::InputBar));
         // Blur again
         assert!(view.blur().is_ok());
         // None has focus
@@ -469,46 +443,64 @@ mod test {
 
     #[test]
     fn view_should_forward_events() {
-        let mut view: View<MockMsg, MockEvent> = View::default();
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         assert!(view
-            .mount(INPUT_FOO, Box::new(MockFooInput::default()))
+            .mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
             .is_ok());
         let ev: Event<MockEvent> = Event::Keyboard(KeyEvent::from(Key::Char('a')));
         assert_eq!(
-            view.forward(INPUT_FOO, ev).ok().unwrap().unwrap(),
+            view.forward(&MockComponentId::InputFoo, ev)
+                .ok()
+                .unwrap()
+                .unwrap(),
             MockMsg::FooInputChanged(String::from("a"))
         );
         // To non-existing component
-        assert!(view.forward(INPUT_BAR, Event::Tick).is_err());
+        assert!(view
+            .forward(&MockComponentId::InputBar, Event::Tick)
+            .is_err());
     }
 
     #[test]
     fn view_should_read_and_write_attributes() {
-        let mut view: View<MockMsg, MockEvent> = View::default();
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         assert!(view
-            .mount(INPUT_FOO, Box::new(MockFooInput::default()))
-            .is_ok());
-        assert_eq!(view.query(INPUT_FOO, Attribute::Focus).ok().unwrap(), None);
-        assert!(view.query(INPUT_BAR, Attribute::Focus).is_err());
-        assert!(view
-            .attr(INPUT_FOO, Attribute::Focus, AttrValue::Flag(true))
+            .mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
             .is_ok());
         assert_eq!(
-            view.query(INPUT_FOO, Attribute::Focus).ok().unwrap(),
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .unwrap(),
+            None
+        );
+        assert!(view
+            .query(&MockComponentId::InputBar, Attribute::Focus)
+            .is_err());
+        assert!(view
+            .attr(
+                &MockComponentId::InputFoo,
+                Attribute::Focus,
+                AttrValue::Flag(true)
+            )
+            .is_ok());
+        assert_eq!(
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .unwrap(),
             Some(AttrValue::Flag(true))
         );
     }
 
     #[test]
     fn view_should_read_state() {
-        let mut view: View<MockMsg, MockEvent> = View::default();
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         assert!(view
-            .mount(INPUT_FOO, Box::new(MockFooInput::default()))
+            .mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
             .is_ok());
         assert_eq!(
-            view.state(INPUT_FOO).unwrap(),
+            view.state(&MockComponentId::InputFoo).unwrap(),
             State::One(StateValue::String(String::from("")))
         );
-        assert!(view.state(INPUT_BAR).is_err());
+        assert!(view.state(&MockComponentId::InputBar).is_err());
     }
 }

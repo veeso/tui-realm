@@ -25,6 +25,17 @@ pub enum MockEvent {
     Hello(String),
 }
 
+/// ## MockComponentId
+///
+/// Mock component id type
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
+pub enum MockComponentId {
+    InputBar,
+    InputFoo,
+    InputOmar,
+    Dyn(String),
+}
+
 // -- poll
 
 /// ## MockPoll
@@ -80,10 +91,10 @@ impl MockModel {
     }
 }
 
-impl Update<MockMsg, MockEvent> for MockModel {
+impl Update<MockComponentId, MockMsg, MockEvent> for MockModel {
     fn update(
         &mut self,
-        _view: &mut crate::View<MockMsg, MockEvent>,
+        _view: &mut crate::View<MockComponentId, MockMsg, MockEvent>,
         msg: Option<MockMsg>,
     ) -> Option<MockMsg> {
         (self.validate)(msg)

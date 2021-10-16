@@ -31,6 +31,8 @@ use crate::{
     AttrValue, Attribute, Event, Frame, State, View,
 };
 
+use std::hash::Hash;
+
 /// ## MockComponent
 ///
 /// A Mock Component represents a component which defines all the properties and states it can handle and represent
@@ -107,8 +109,9 @@ where
 /// ## Update
 ///
 /// The update trait defines the prototype of the function to be used to handle the events coming from the View.
-pub trait Update<Msg, UserEvent>
+pub trait Update<ComponentId, Msg, UserEvent>
 where
+    ComponentId: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
     UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
@@ -117,5 +120,9 @@ where
     /// update the current state handling a message from the view.
     /// This function may return a Message,
     /// so this function has to be intended to be call recursively if necessary
-    fn update(&mut self, view: &mut View<Msg, UserEvent>, msg: Option<Msg>) -> Option<Msg>;
+    fn update(
+        &mut self,
+        view: &mut View<ComponentId, Msg, UserEvent>,
+        msg: Option<Msg>,
+    ) -> Option<Msg>;
 }
