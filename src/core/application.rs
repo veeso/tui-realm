@@ -33,6 +33,7 @@ use crate::{
 };
 
 use std::fmt;
+use std::hash::Hash;
 use thiserror::Error;
 
 /// ## ApplicationResult
@@ -48,18 +49,20 @@ pub type ApplicationResult<T> = Result<T, ApplicationError>;
 /// It will handle events, subscriptions and the view too.
 /// It provides functions to interact with the view (mount, umount, query, etc), but also
 /// the main function: `tick()`. See [tick](#tick)
-pub struct Application<Msg, UserEvent>
+pub struct Application<ComponentId, Msg, UserEvent>
 where
+    ComponentId: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
     UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     listener: EventListener<UserEvent>,
-    subs: Vec<Subscription<UserEvent>>,
-    view: View<Msg, UserEvent>,
+    subs: Vec<Subscription<ComponentId, UserEvent>>,
+    view: View<ComponentId, Msg, UserEvent>,
 }
 
-impl<Msg, UserEvent> Application<Msg, UserEvent>
+impl<K, Msg, UserEvent> Application<K, Msg, UserEvent>
 where
+    K: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
     UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
@@ -104,7 +107,7 @@ where
     /// > You can also call `view` from the `update()` if you need it
     pub fn tick(
         &mut self,
-        model: &mut dyn Update<Msg, UserEvent>,
+        model: &mut dyn Update<K, Msg, UserEvent>,
         strategy: PollStrategy,
     ) -> ApplicationResult<()> {
         // Poll event listener
@@ -133,17 +136,17 @@ where
     /// NOTE: if subs vector contains duplicated, these will be discarded
     pub fn mount(
         &mut self,
-        id: &str,
+        id: K,
         component: WrappedComponent<Msg, UserEvent>,
         subs: Vec<Sub<UserEvent>>,
     ) -> ApplicationResult<()> {
         // Mount
-        self.view.mount(id, component)?;
+        self.view.mount(id.clone(), component)?;
         // Subscribe
         subs.into_iter().for_each(|x| {
             // Push only if not already subscribed
-            let subscription = Subscription::new(id, x);
-            if !self.subscribed(id, subscription.event()) {
+            let subscription = Subscription::new(id.clone(), x);
+            if !self.subscribed(&id, subscription.event()) {
                 self.subs.push(subscription);
             }
         });
@@ -154,7 +157,7 @@ where
     ///
     /// Umount component associated to `id` and remove ALL its SUBSCRIPTIONS.
     /// Returns Error if the component doesn't exist
-    pub fn umount(&mut self, id: &str) -> ApplicationResult<()> {
+    pub fn umount(&mut self, id: &K) -> ApplicationResult<()> {
         self.view.umount(id)?;
         self.unsubscribe_component(id);
         Ok(())
@@ -163,14 +166,14 @@ where
     /// ### mounted
     ///
     /// Returns whether component `id` is mounted
-    pub fn mounted(&self, id: &str) -> bool {
+    pub fn mounted(&self, id: &K) -> bool {
         self.view.mounted(id)
     }
 
     /// ### view
     ///
     /// Render component called `id`
-    pub fn view(&mut self, id: &str, f: &mut Frame, area: Rect) {
+    pub fn view(&mut self, id: &K, f: &mut Frame, area: Rect) {
         self.view.view(id, f, area);
     }
 
@@ -179,7 +182,7 @@ where
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
-    pub fn query(&self, id: &str, query: Attribute) -> ApplicationResult<Option<AttrValue>> {
+    pub fn query(&self, id: &K, query: Attribute) -> ApplicationResult<Option<AttrValue>> {
         self.view.query(id, query).map_err(ApplicationError::from)
     }
 
@@ -187,7 +190,7 @@ where
     ///
     /// Set attribute for component `id`
     /// Returns error if the component doesn't exist
-    pub fn attr(&mut self, id: &str, attr: Attribute, value: AttrValue) -> ApplicationResult<()> {
+    pub fn attr(&mut self, id: &K, attr: Attribute, value: AttrValue) -> ApplicationResult<()> {
         self.view
             .attr(id, attr, value)
             .map_err(ApplicationError::from)
@@ -197,7 +200,7 @@ where
     ///
     /// Get state for component `id`.
     /// Returns `Err` if component doesn't exist
-    pub fn state(&self, id: &str) -> ApplicationResult<State> {
+    pub fn state(&self, id: &K) -> ApplicationResult<State> {
         self.view.state(id).map_err(ApplicationError::from)
     }
 
@@ -209,8 +212,8 @@ where
     /// Returns error: if component doesn't exist. Use `mounted()` to check if component exists
     ///
     /// > NOTE: users should always use this function to give focus to components.
-    pub fn active(&mut self, id: &str) -> ApplicationResult<()> {
-        self.view.active(id).map_err(ApplicationError::from)
+    pub fn active(&mut self, id: &K) -> ApplicationResult<()> {
+        self.view.active(id.clone()).map_err(ApplicationError::from)
     }
 
     /// ### blur
@@ -231,11 +234,11 @@ where
     ///
     /// Subscribe component to a certain event.
     /// Returns Error if the component doesn't exist or if the component is already subscribed to this event
-    pub fn subscribe(&mut self, id: &str, sub: Sub<UserEvent>) -> ApplicationResult<()> {
+    pub fn subscribe(&mut self, id: &K, sub: Sub<UserEvent>) -> ApplicationResult<()> {
         if !self.view.mounted(id) {
             return Err(ViewError::ComponentNotFound.into());
         }
-        let subscription = Subscription::new(id, sub);
+        let subscription = Subscription::new(id.clone(), sub);
         if self.subscribed(id, subscription.event()) {
             return Err(ApplicationError::AlreadySubscribed);
         }
@@ -247,11 +250,7 @@ where
     ///
     /// Unsubscribe a component from a certain event.
     /// Returns error if the component doesn't exist or if the component is not subscribed to this event
-    pub fn unsubscribe(
-        &mut self,
-        id: &str,
-        ev: SubEventClause<UserEvent>,
-    ) -> ApplicationResult<()> {
+    pub fn unsubscribe(&mut self, id: &K, ev: SubEventClause<UserEvent>) -> ApplicationResult<()> {
         if !self.view.mounted(id) {
             return Err(ViewError::ComponentNotFound.into());
         }
@@ -267,14 +266,14 @@ where
     /// ### unsubscribe_component
     ///
     /// remove all subscriptions for component
-    fn unsubscribe_component(&mut self, id: &str) {
+    fn unsubscribe_component(&mut self, id: &K) {
         self.subs.retain(|x| x.target() != id)
     }
 
     /// ### subscribed
     ///
     /// Returns whether component `id` is subscribed to event described by `clause`
-    fn subscribed(&self, id: &str, clause: &SubEventClause<UserEvent>) -> bool {
+    fn subscribed(&self, id: &K, clause: &SubEventClause<UserEvent>) -> bool {
         self.subs
             .iter()
             .any(|s| s.target() == id && s.event() == clause)
@@ -320,8 +319,8 @@ where
     fn forward_to_active_component(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.view
             .focus()
-            .map(|x| x.to_string())
-            .map(|x| self.view.forward(x, ev).ok().unwrap())
+            .cloned()
+            .map(|x| self.view.forward(&x, ev).ok().unwrap())
             .flatten()
     }
 
@@ -355,7 +354,7 @@ where
     /// This function ALWAYS return `None` to the caller.
     fn recurse_update(
         &mut self,
-        model: &mut dyn Update<Msg, UserEvent>,
+        model: &mut dyn Update<K, Msg, UserEvent>,
         msg: Option<Msg>,
     ) -> Option<Msg> {
         if let Some(msg) = model.update(&mut self.view, msg) {
@@ -409,59 +408,77 @@ impl From<ViewError> for ApplicationError {
 mod test {
 
     use super::*;
-    use crate::mock::{MockBarInput, MockEvent, MockFooInput, MockModel, MockMsg, MockPoll};
+    use crate::mock::{
+        MockBarInput, MockComponentId, MockEvent, MockFooInput, MockModel, MockMsg, MockPoll,
+    };
     use crate::{StateValue, SubClause};
 
     use pretty_assertions::assert_eq;
     use std::time::Duration;
 
-    const INPUT_FOO: &'static str = "INPUT_FOO";
-    const INPUT_BAR: &'static str = "INPUT_BAR";
-
     #[test]
     fn should_initialize_application() {
-        let application: Application<MockMsg, MockEvent> = Application::init(listener_config());
+        let application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config());
         assert!(application.subs.is_empty());
-        assert_eq!(application.view.mounted(INPUT_FOO), false);
+        assert_eq!(application.view.mounted(&MockComponentId::InputFoo), false);
     }
 
     #[test]
     fn should_restart_listener() {
-        let mut application: Application<MockMsg, MockEvent> = Application::init(listener_config());
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config());
         assert!(application.restart_listener(listener_config()).is_ok());
     }
 
     #[test]
     fn should_manipulate_components() {
-        let mut application: Application<MockMsg, MockEvent> = Application::init(listener_config());
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config());
         // Mount
         assert!(application
-            .mount(INPUT_FOO, Box::new(MockFooInput::default()), vec![])
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
             .is_ok());
         // Remount
         assert!(application
-            .mount(INPUT_FOO, Box::new(MockFooInput::default()), vec![])
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
             .is_err());
         // Mount bar
         assert!(application
-            .mount(INPUT_BAR, Box::new(MockBarInput::default()), vec![])
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockBarInput::default()),
+                vec![]
+            )
             .is_ok());
         // Mounted
-        assert!(application.mounted(INPUT_FOO));
-        assert!(application.mounted(INPUT_BAR));
-        assert_eq!(application.mounted("CICCIO"), false);
+        assert!(application.mounted(&MockComponentId::InputFoo));
+        assert!(application.mounted(&MockComponentId::InputBar));
+        assert_eq!(application.mounted(&MockComponentId::InputOmar), false);
         // Attribute and Query
         assert!(application
-            .query(INPUT_FOO, Attribute::InputLength)
+            .query(&MockComponentId::InputFoo, Attribute::InputLength)
             .ok()
             .unwrap()
             .is_none());
         assert!(application
-            .attr(INPUT_FOO, Attribute::InputLength, AttrValue::Length(8))
+            .attr(
+                &MockComponentId::InputFoo,
+                Attribute::InputLength,
+                AttrValue::Length(8)
+            )
             .is_ok());
         assert_eq!(
             application
-                .query(INPUT_FOO, Attribute::InputLength)
+                .query(&MockComponentId::InputFoo, Attribute::InputLength)
                 .ok()
                 .unwrap()
                 .unwrap(),
@@ -469,29 +486,30 @@ mod test {
         );
         // State
         assert_eq!(
-            application.state(INPUT_FOO).ok().unwrap(),
+            application.state(&MockComponentId::InputFoo).ok().unwrap(),
             State::One(StateValue::String(String::default()))
         );
         // Active / blur
-        assert!(application.active(INPUT_FOO).is_ok());
-        assert!(application.active(INPUT_BAR).is_ok());
-        assert!(application.active("CICCIO").is_err());
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        assert!(application.active(&MockComponentId::InputBar).is_ok());
+        assert!(application.active(&MockComponentId::InputOmar).is_err());
         assert!(application.blur().is_ok());
         assert!(application.blur().is_ok());
         // no focus
         assert!(application.blur().is_err());
         // Umount
-        assert!(application.umount(INPUT_FOO).is_ok());
-        assert!(application.umount(INPUT_FOO).is_err());
-        assert!(application.umount(INPUT_BAR).is_ok());
+        assert!(application.umount(&MockComponentId::InputFoo).is_ok());
+        assert!(application.umount(&MockComponentId::InputFoo).is_err());
+        assert!(application.umount(&MockComponentId::InputBar).is_ok());
     }
 
     #[test]
     fn should_subscribe_components() {
-        let mut application: Application<MockMsg, MockEvent> = Application::init(listener_config());
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config());
         assert!(application
             .mount(
-                INPUT_FOO,
+                MockComponentId::InputFoo,
                 Box::new(MockFooInput::default()),
                 vec![
                     Sub::new(SubEventClause::Tick, SubClause::Always),
@@ -510,7 +528,7 @@ mod test {
         // Subscribe for another event
         assert!(application
             .subscribe(
-                INPUT_FOO,
+                &MockComponentId::InputFoo,
                 Sub::new(
                     SubEventClause::User(MockEvent::Foo),
                     SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(false))
@@ -521,7 +539,7 @@ mod test {
         // Try to re-subscribe
         assert!(application
             .subscribe(
-                INPUT_FOO,
+                &MockComponentId::InputFoo,
                 Sub::new(
                     SubEventClause::User(MockEvent::Foo),
                     SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(false))
@@ -531,7 +549,7 @@ mod test {
         // Subscribe for unexisting component
         assert!(application
             .subscribe(
-                INPUT_BAR,
+                &MockComponentId::InputBar,
                 Sub::new(
                     SubEventClause::User(MockEvent::Foo),
                     SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(false))
@@ -540,32 +558,42 @@ mod test {
             .is_err());
         // Unsubscribe element
         assert!(application
-            .unsubscribe(INPUT_FOO, SubEventClause::User(MockEvent::Foo))
+            .unsubscribe(
+                &MockComponentId::InputFoo,
+                SubEventClause::User(MockEvent::Foo)
+            )
             .is_ok());
         // Unsubcribe twice
         assert!(application
-            .unsubscribe(INPUT_FOO, SubEventClause::User(MockEvent::Foo))
+            .unsubscribe(
+                &MockComponentId::InputFoo,
+                SubEventClause::User(MockEvent::Foo)
+            )
             .is_err());
     }
 
     #[test]
     fn should_do_tick() {
-        let mut application: Application<MockMsg, MockEvent> =
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
         let mut model = MockModel::new(validate_should_do_tick);
         // Mount foo and bar
         assert!(application
-            .mount(INPUT_FOO, Box::new(MockFooInput::default()), vec![])
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
             .is_ok());
         assert!(application
             .mount(
-                INPUT_BAR,
+                MockComponentId::InputBar,
                 Box::new(MockFooInput::default()),
                 vec![Sub::new(SubEventClause::Tick, SubClause::Always)]
             )
             .is_ok());
         // Active FOO
-        assert!(application.active(INPUT_FOO).is_ok());
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
         /*
          * Here we should:
          *
@@ -575,7 +603,7 @@ mod test {
          */
         assert!(application.tick(&mut model, PollStrategy::UpTo(5)).is_ok());
         // Active BAR
-        assert!(application.active(INPUT_BAR).is_ok());
+        assert!(application.active(&MockComponentId::InputBar).is_ok());
         // Tick
         /*
          * Here we should:

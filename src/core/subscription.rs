@@ -63,28 +63,30 @@ where
 ///     - when: a clause that must be satisfied to forward the event to the component.
 ///
 ///
-pub(crate) struct Subscription<UserEvent>
+pub(crate) struct Subscription<ComponentId, UserEvent>
 where
+    ComponentId: std::fmt::Debug + Eq + PartialEq + Clone,
     UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
     /// Target component
-    target: String,
+    target: ComponentId,
     /// Event to forward and listen to
     ev: EventClause<UserEvent>,
     /// Restrict forwarding clauses
     when: SubClause,
 }
 
-impl<U> Subscription<U>
+impl<K, U> Subscription<K, U>
 where
+    K: fmt::Debug + Eq + PartialEq + Clone,
     U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     /// ### new
     ///
     /// Instantiates a new `Subscription`
-    pub fn new(target: &str, sub: Sub<U>) -> Self {
+    pub fn new(target: K, sub: Sub<U>) -> Self {
         Self {
-            target: target.to_string(),
+            target,
             ev: sub.0,
             when: sub.1,
         }
@@ -93,8 +95,8 @@ where
     /// ### target
     ///
     /// Returns sub target
-    pub(crate) fn target(&self) -> &str {
-        self.target.as_str()
+    pub(crate) fn target(&self) -> &K {
+        &self.target
     }
 
     /// ### event
@@ -295,7 +297,7 @@ impl SubClause {
 mod test {
 
     use super::*;
-    use crate::mock::{MockEvent, MockFooInput};
+    use crate::mock::{MockComponentId, MockEvent, MockFooInput};
     use crate::{command::Cmd, MockComponent, StateValue};
 
     use pretty_assertions::assert_eq;
@@ -306,13 +308,13 @@ mod test {
         let mut component = MockFooInput::default();
         component.attr(Attribute::Focus, AttrValue::Flag(true));
         let sub = Subscription::new(
-            "foo",
+            MockComponentId::InputFoo,
             Sub(
                 EventClause::WindowResize,
                 SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
             ),
         );
-        assert_eq!(sub.target(), "foo");
+        assert_eq!(sub.target(), &MockComponentId::InputFoo);
         assert_eq!(sub.event(), &EventClause::<MockEvent>::WindowResize);
         assert_eq!(
             sub.when,
