@@ -97,30 +97,34 @@ where
     /// 1. The event listener is fetched according to the provided `PollStrategy`
     /// 2. All the received events are sent to the current active component
     /// 3. All the received events are forwarded to the subscribed components which satisfy the received events and conditions.
-    /// 4. The Msg, are sent in order to the `update()` function of the provided `Update` trait object.
+    /// 4. Returns the messages. Once messages are returned call `Application::update()`
     ///
     /// As soon as function returns, you should call the `view()` method.
     ///
     /// > You can also call `view` from the `update()` if you need it
-    pub fn tick(
-        &mut self,
-        model: &mut dyn Update<Msg, UserEvent>,
-        strategy: PollStrategy,
-    ) -> ApplicationResult<()> {
+    pub fn tick(&'a mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Msg>> {
         // Poll event listener
         let events = self.poll(strategy)?;
         // Forward to active element
-        let mut msg: Vec<Msg> = Vec::new();
-        let msg: Vec<Msg> = events
-            .into_iter()
-            .map(|ev| {
-                // Forward event to active component
-                let mut msg: Vec<Option<Msg>> = vec![self.forward_to_active_component(ev.clone())];
-                // Forward to subscriptions
-            })
-            .collect()?;
-        // TODO:
-        todo!()
+        let mut messages: Vec<Msg> = events
+            .iter()
+            .map(|x| self.forward_to_active_component(x.clone()))
+            .flatten()
+            .collect();
+        // Forward to subscriptions and extend vector
+        // NOTE: don't change this code ever and never. Putting the line below into an iterator won't build :)
+        messages.extend(self.forward_to_subscriptions(events).into_iter());
+        // Return messages
+        Ok(messages)
+    }
+
+    /// ### update
+    ///
+    /// Call update on model for each message returned by `tick()`
+    pub fn update(&mut self, model: &mut dyn Update<Msg, UserEvent>, messages: Vec<Msg>) {
+        messages.into_iter().for_each(|msg| {
+            assert!(self.recurse_update(model, Some(msg)).is_none());
+        });
     }
 
     // -- view bridge
@@ -239,7 +243,7 @@ where
         match strategy {
             PollStrategy::Once => self
                 .poll_listener()
-                .map(|x| x.map(|x| vec![x]).unwrap_or(vec![])),
+                .map(|x| x.map(|x| vec![x]).unwrap_or_default()),
             PollStrategy::UpTo(times) => self.poll_times(times),
         }
     }
@@ -278,17 +282,42 @@ where
 
     /// ### forward_to_subscriptions
     ///
-    /// Forward event to subscriptions interested in this event.
-    fn forward_to_subscriptions(&mut self, ev: Event<UserEvent>) -> Vec<Option<Msg>> {
-        self.subs
-            .iter()
-            .filter(|x| {
-                let component = self.view.component(x.target()).unwrap();
-                x.forward(&ev, component)
-            })
-            .map(|x| x.target())
-            .map(|x| self.view.forward(x, ev.clone()).ok().unwrap())
-            .collect()
+    /// Forward events to subscriptions listening to the incoming event.
+    fn forward_to_subscriptions(&'a mut self, events: Vec<Event<UserEvent>>) -> Vec<Msg> {
+        let mut messages: Vec<Msg> = Vec::new();
+        // NOTE: don't touch this code again and don't try to use iterators, cause it's not gonna work :)
+        for ev in events.iter() {
+            for sub in self.subs.iter() {
+                if !sub.forward(
+                    ev,
+                    |q| self.view.component(sub.target()).unwrap().query(q),
+                    || self.view.component(sub.target()).unwrap().state(),
+                ) {
+                    continue;
+                }
+                if let Some(msg) = self.view.forward(sub.target(), ev.clone()).ok().unwrap() {
+                    messages.push(msg);
+                }
+            }
+        }
+        messages
+    }
+
+    /// ### update
+    ///
+    /// Calls update on model passing the view as a mutable reference.
+    /// This method will keep calling `update` on model until `None` is returned.
+    /// This function ALWAYS return `None` to the caller.
+    fn recurse_update(
+        &mut self,
+        model: &mut dyn Update<Msg, UserEvent>,
+        msg: Option<Msg>,
+    ) -> Option<Msg> {
+        if let Some(msg) = model.update(&mut self.view, msg) {
+            self.recurse_update(model, Some(msg))
+        } else {
+            None
+        }
     }
 }
 

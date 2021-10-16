@@ -143,7 +143,7 @@ where
     /// ### component
     ///
     /// Returns reference to component associated to `id`
-    pub(crate) fn component(&mut self, id: &'a str) -> Option<&dyn Component<Msg, UserEvent>> {
+    pub(crate) fn component(&self, id: &'a str) -> Option<&dyn Component<Msg, UserEvent>> {
         self.components.get(id).map(|x| x.as_ref())
     }
 
