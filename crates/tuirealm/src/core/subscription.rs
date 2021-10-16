@@ -36,6 +36,18 @@ pub struct Sub<UserEvent>(EventClause<UserEvent>, SubClause)
 where
     UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd;
 
+impl<U> Sub<U>
+where
+    U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+{
+    /// ### new
+    ///
+    /// Creates a new `Sub`
+    pub fn new(event_clause: EventClause<U>, sub_clause: SubClause) -> Self {
+        Self(event_clause, sub_clause)
+    }
+}
+
 /// ## Subscription
 ///
 /// Defines a subscription for a component.
@@ -83,6 +95,13 @@ where
     /// Returns sub target
     pub(crate) fn target(&self) -> &str {
         self.target
+    }
+
+    /// ### event
+    ///
+    /// Returns reference to subscription event clause
+    pub(crate) fn event(&self) -> &EventClause<U> {
+        &self.ev
     }
 
     /// ### forward
@@ -294,6 +313,7 @@ mod test {
             ),
         );
         assert_eq!(sub.target(), "foo");
+        assert_eq!(sub.event(), &EventClause::<MockEvent>::WindowResize);
         assert_eq!(
             sub.when,
             SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
@@ -440,5 +460,13 @@ mod test {
             clause.forward(|q| component.query(q), || component.state()),
             true
         ); // Has no focus and has state 'a'
+    }
+
+    #[test]
+    fn should_create_a_sub() {
+        let actual: Sub<MockEvent> = Sub::new(EventClause::Tick, SubClause::Always);
+        let expected: Sub<MockEvent> = Sub(EventClause::Tick, SubClause::Always);
+        assert_eq!(actual.0, expected.0);
+        assert_eq!(actual.1, expected.1);
     }
 }
