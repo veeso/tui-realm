@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use crate::{AttrValue, Attribute, Event, MockComponent, State};
+use crate::{AttrValue, Attribute, Event, State};
 use std::fmt;
 
 /// ## Sub
@@ -94,8 +94,17 @@ where
     /// ### forward
     ///
     /// Returns whether to forward event to component
-    pub(crate) fn forward(&self, ev: &Event<U>, component: &dyn MockComponent) -> bool {
-        &self.ev == ev && self.when.forward(component)
+    pub(crate) fn forward<HasAttrFn, GetStateFn>(
+        &self,
+        ev: &Event<U>,
+        has_attr_fn: HasAttrFn,
+        get_state_fn: GetStateFn,
+    ) -> bool
+    where
+        HasAttrFn: Fn(Attribute) -> Option<AttrValue>,
+        GetStateFn: Fn() -> State,
+    {
+        &self.ev == ev && self.when.forward(has_attr_fn, get_state_fn)
     }
 }
 
@@ -151,28 +160,83 @@ impl SubClause {
     /// ### forward
     ///
     /// Returns whether the subscription clause is satisfied
-    pub(crate) fn forward(&self, target: &dyn MockComponent) -> bool {
+    pub(crate) fn forward<HasAttrFn, GetStateFn>(
+        &self,
+        has_attr_fn: HasAttrFn,
+        get_state_fn: GetStateFn,
+    ) -> bool
+    where
+        HasAttrFn: Fn(Attribute) -> Option<AttrValue>,
+        GetStateFn: Fn() -> State,
+    {
+        self.check_forwarding(has_attr_fn, get_state_fn).0
+    }
+
+    fn check_forwarding<HasAttrFn, GetStateFn>(
+        &self,
+        has_attr_fn: HasAttrFn,
+        get_state_fn: GetStateFn,
+    ) -> (bool, HasAttrFn, GetStateFn)
+    where
+        HasAttrFn: Fn(Attribute) -> Option<AttrValue>,
+        GetStateFn: Fn() -> State,
+    {
         match self {
-            Self::Always => true,
-            Self::HasAttrValue(query, value) => Self::has_attribute(query, value, target),
-            Self::HasState(state) => Self::has_state(state, target),
-            Self::Not(clause) => !(clause.forward(target)),
-            Self::And(a, b) => (a.forward(target)) && (b.forward(target)),
-            Self::Or(a, b) => (a.forward(target)) || (b.forward(target)),
+            Self::Always => (true, has_attr_fn, get_state_fn),
+            Self::HasAttrValue(query, value) => {
+                let (fwd, has_attr_fn) = Self::has_attribute(query, value, has_attr_fn);
+                (fwd, has_attr_fn, get_state_fn)
+            }
+            Self::HasState(state) => {
+                let (fwd, get_state_fn) = Self::has_state(state, get_state_fn);
+                (fwd, has_attr_fn, get_state_fn)
+            }
+            Self::Not(clause) => {
+                let (fwd, has_attr_fn, get_state_fn) =
+                    clause.check_forwarding(has_attr_fn, get_state_fn);
+                (!fwd, has_attr_fn, get_state_fn)
+            }
+            Self::And(a, b) => {
+                let (fwd_a, has_attr_fn, get_state_fn) =
+                    a.check_forwarding(has_attr_fn, get_state_fn);
+                let (fwd_b, has_attr_fn, get_state_fn) =
+                    b.check_forwarding(has_attr_fn, get_state_fn);
+                (fwd_a && fwd_b, has_attr_fn, get_state_fn)
+            }
+            Self::Or(a, b) => {
+                let (fwd_a, has_attr_fn, get_state_fn) =
+                    a.check_forwarding(has_attr_fn, get_state_fn);
+                let (fwd_b, has_attr_fn, get_state_fn) =
+                    b.check_forwarding(has_attr_fn, get_state_fn);
+                (fwd_a || fwd_b, has_attr_fn, get_state_fn)
+            }
         }
     }
 
     // -- privates
 
-    fn has_attribute(query: &Attribute, value: &AttrValue, target: &dyn MockComponent) -> bool {
-        match target.query(*query) {
-            None => false,
-            Some(v) => *value == v,
-        }
+    fn has_attribute<HasAttrFn>(
+        query: &Attribute,
+        value: &AttrValue,
+        has_attr_fn: HasAttrFn,
+    ) -> (bool, HasAttrFn)
+    where
+        HasAttrFn: Fn(Attribute) -> Option<AttrValue>,
+    {
+        (
+            match has_attr_fn(*query) {
+                None => false,
+                Some(v) => *value == v,
+            },
+            has_attr_fn,
+        )
     }
 
-    fn has_state(state: &State, target: &dyn MockComponent) -> bool {
-        target.state() == *state
+    fn has_state<GetStateFn>(state: &State, get_state_fn: GetStateFn) -> (bool, GetStateFn)
+    where
+        GetStateFn: Fn() -> State,
+    {
+        (get_state_fn() == *state, get_state_fn)
     }
 }
 
@@ -181,7 +245,7 @@ mod test {
 
     use super::*;
     use crate::mock::{MockEvent, MockFooInput};
-    use crate::{command::Cmd, StateValue};
+    use crate::{command::Cmd, MockComponent, StateValue};
 
     use pretty_assertions::assert_eq;
 
@@ -203,39 +267,74 @@ mod test {
             sub.when,
             SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
         );
-        assert_eq!(sub.forward(&ev, &component), true);
+        assert_eq!(
+            sub.forward(&ev, |q| component.query(q), || component.state()),
+            true
+        );
         // False clause
         component.attr(Attribute::Focus, AttrValue::Flag(false));
-        assert_eq!(sub.forward(&ev, &component), false);
+        assert_eq!(
+            sub.forward(&ev, |q| component.query(q), || component.state()),
+            false
+        );
         // False event
-        assert_eq!(sub.forward(&Event::User(MockEvent::Foo), &component), false);
+        assert_eq!(
+            sub.forward(
+                &Event::User(MockEvent::Foo),
+                |q| component.query(q),
+                || component.state()
+            ),
+            false
+        );
         // False id
-        assert_eq!(sub.forward(&Event::WindowResize(0, 0), &component), false);
+        assert_eq!(
+            sub.forward(
+                &Event::WindowResize(0, 0),
+                |q| component.query(q),
+                || component.state()
+            ),
+            false
+        );
     }
 
     #[test]
     fn clause_always_should_forward() {
         let component = MockFooInput::default();
         let clause = SubClause::Always;
-        assert_eq!(clause.forward(&component), true);
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            true
+        );
     }
 
     #[test]
     fn clause_has_attribute_should_forward() {
         let mut component = MockFooInput::default();
         let clause = SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true));
-        assert_eq!(clause.forward(&component), false); // Has no focus
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            false
+        ); // Has no focus
         component.attr(Attribute::Focus, AttrValue::Flag(true));
-        assert_eq!(clause.forward(&component), true); // Has focus
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            true
+        ); // Has focus
     }
 
     #[test]
     fn clause_has_state_should_forward() {
         let mut component = MockFooInput::default();
         let clause = SubClause::HasState(State::One(StateValue::String(String::from("a"))));
-        assert_eq!(clause.forward(&component), false); // Has no state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            false
+        ); // Has no state 'a'
         component.perform(Cmd::Type('a'));
-        assert_eq!(clause.forward(&component), true); // Has state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            true
+        ); // Has state 'a'
     }
 
     #[test]
@@ -245,9 +344,15 @@ mod test {
             Attribute::Focus,
             AttrValue::Flag(true),
         ));
-        assert_eq!(clause.forward(&component), true); // Has no focus
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            true
+        ); // Has no focus
         component.attr(Attribute::Focus, AttrValue::Flag(true));
-        assert_eq!(clause.forward(&component), false); // Has focus
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            false
+        ); // Has focus
     }
 
     #[test]
@@ -257,13 +362,25 @@ mod test {
             SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
             SubClause::HasState(State::One(StateValue::String(String::from("a")))),
         );
-        assert_eq!(clause.forward(&component), false); // Has no focus and has no state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            false
+        ); // Has no focus and has no state 'a'
         component.attr(Attribute::Focus, AttrValue::Flag(true));
-        assert_eq!(clause.forward(&component), false); // Has focus and has no state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            false
+        ); // Has focus and has no state 'a'
         component.perform(Cmd::Type('a'));
-        assert_eq!(clause.forward(&component), true); // Has focus and has state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            true
+        ); // Has focus and has state 'a'
         component.attr(Attribute::Focus, AttrValue::Flag(false));
-        assert_eq!(clause.forward(&component), false); // Has no focus and has state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            false
+        ); // Has no focus and has state 'a'
     }
 
     #[test]
@@ -273,12 +390,24 @@ mod test {
             SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
             SubClause::HasState(State::One(StateValue::String(String::from("a")))),
         );
-        assert_eq!(clause.forward(&component), false); // Has no focus and has no state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            false
+        ); // Has no focus and has no state 'a'
         component.attr(Attribute::Focus, AttrValue::Flag(true));
-        assert_eq!(clause.forward(&component), true); // Has focus and has no state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            true
+        ); // Has focus and has no state 'a'
         component.perform(Cmd::Type('a'));
-        assert_eq!(clause.forward(&component), true); // Has focus and has state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            true
+        ); // Has focus and has state 'a'
         component.attr(Attribute::Focus, AttrValue::Flag(false));
-        assert_eq!(clause.forward(&component), true); // Has no focus and has state 'a'
+        assert_eq!(
+            clause.forward(|q| component.query(q), || component.state()),
+            true
+        ); // Has no focus and has state 'a'
     }
 }
