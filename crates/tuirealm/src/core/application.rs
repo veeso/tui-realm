@@ -48,17 +48,17 @@ pub type ApplicationResult<T> = Result<T, ApplicationError>;
 /// It will handle events, subscriptions and the view too.
 /// It provides functions to interact with the view (mount, umount, query, etc), but also
 /// the main function: `tick()`. See [tick](#tick)
-pub struct Application<'a, Msg, UserEvent>
+pub struct Application<Msg, UserEvent>
 where
     Msg: PartialEq,
     UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     listener: EventListener<UserEvent>,
-    subs: Vec<Subscription<'a, UserEvent>>,
-    view: View<'a, Msg, UserEvent>,
+    subs: Vec<Subscription<UserEvent>>,
+    view: View<Msg, UserEvent>,
 }
 
-impl<'a, Msg, UserEvent> Application<'a, Msg, UserEvent>
+impl<Msg, UserEvent> Application<Msg, UserEvent>
 where
     Msg: PartialEq,
     UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
@@ -97,12 +97,16 @@ where
     /// 1. The event listener is fetched according to the provided `PollStrategy`
     /// 2. All the received events are sent to the current active component
     /// 3. All the received events are forwarded to the subscribed components which satisfy the received events and conditions.
-    /// 4. Returns the messages. Once messages are returned call `Application::update()`
+    /// 4. Call update() on model passing each message
     ///
     /// As soon as function returns, you should call the `view()` method.
     ///
     /// > You can also call `view` from the `update()` if you need it
-    pub fn tick(&'a mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Msg>> {
+    pub fn tick(
+        &mut self,
+        model: &mut dyn Update<Msg, UserEvent>,
+        strategy: PollStrategy,
+    ) -> ApplicationResult<()> {
         // Poll event listener
         let events = self.poll(strategy)?;
         // Forward to active element
@@ -112,20 +116,12 @@ where
             .flatten()
             .collect();
         // Forward to subscriptions and extend vector
-        // NOTE: don't change this code ever and never. Putting the line below into an iterator won't build :)
-        messages.extend(self.forward_to_subscriptions(events).into_iter());
-        // NOTE: from now on, since lifetime 'a is borrowed into forward, we cannot call self.
-        // Return messages
-        Ok(messages)
-    }
-
-    /// ### update
-    ///
-    /// Call update on model for each message returned by `tick()`
-    pub fn update(&mut self, model: &mut dyn Update<Msg, UserEvent>, messages: Vec<Msg>) {
+        messages.extend(self.forward_to_subscriptions(events));
+        // Update
         messages.into_iter().for_each(|msg| {
             assert!(self.recurse_update(model, Some(msg)).is_none());
         });
+        Ok(())
     }
 
     // -- view bridge
@@ -137,7 +133,7 @@ where
     /// NOTE: if subs vector contains duplicated, these will be discarded
     pub fn mount(
         &mut self,
-        id: &'a str,
+        id: &str,
         component: WrappedComponent<Msg, UserEvent>,
         subs: Vec<Sub<UserEvent>>,
     ) -> ApplicationResult<()> {
@@ -158,7 +154,7 @@ where
     ///
     /// Umount component associated to `id` and remove ALL its SUBSCRIPTIONS.
     /// Returns Error if the component doesn't exist
-    pub fn umount(&mut self, id: &'a str) -> ApplicationResult<()> {
+    pub fn umount(&mut self, id: &str) -> ApplicationResult<()> {
         self.view.umount(id)?;
         self.unsubscribe_component(id);
         Ok(())
@@ -167,14 +163,14 @@ where
     /// ### mounted
     ///
     /// Returns whether component `id` is mounted
-    pub fn mounted(&self, id: &'a str) -> bool {
+    pub fn mounted(&self, id: &str) -> bool {
         self.view.mounted(id)
     }
 
     /// ### view
     ///
     /// Render component called `id`
-    pub fn view(&mut self, id: &'a str, f: &mut Frame, area: Rect) {
+    pub fn view(&mut self, id: &str, f: &mut Frame, area: Rect) {
         self.view.view(id, f, area);
     }
 
@@ -183,7 +179,7 @@ where
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
-    pub fn query(&self, id: &'a str, query: Attribute) -> ApplicationResult<Option<AttrValue>> {
+    pub fn query(&self, id: &str, query: Attribute) -> ApplicationResult<Option<AttrValue>> {
         self.view.query(id, query).map_err(ApplicationError::from)
     }
 
@@ -191,12 +187,7 @@ where
     ///
     /// Set attribute for component `id`
     /// Returns error if the component doesn't exist
-    pub fn attr(
-        &mut self,
-        id: &'a str,
-        attr: Attribute,
-        value: AttrValue,
-    ) -> ApplicationResult<()> {
+    pub fn attr(&mut self, id: &str, attr: Attribute, value: AttrValue) -> ApplicationResult<()> {
         self.view
             .attr(id, attr, value)
             .map_err(ApplicationError::from)
@@ -206,7 +197,7 @@ where
     ///
     /// Get state for component `id`.
     /// Returns `Err` if component doesn't exist
-    pub fn state(&self, id: &'a str) -> ApplicationResult<State> {
+    pub fn state(&self, id: &str) -> ApplicationResult<State> {
         self.view.state(id).map_err(ApplicationError::from)
     }
 
@@ -218,7 +209,7 @@ where
     /// Returns error: if component doesn't exist. Use `mounted()` to check if component exists
     ///
     /// > NOTE: users should always use this function to give focus to components.
-    pub fn active(&mut self, id: &'a str) -> ApplicationResult<()> {
+    pub fn active(&mut self, id: &str) -> ApplicationResult<()> {
         self.view.active(id).map_err(ApplicationError::from)
     }
 
@@ -240,7 +231,7 @@ where
     ///
     /// Subscribe component to a certain event.
     /// Returns Error if the component doesn't exist or if the component is already subscribed to this event
-    pub fn subscribe(&mut self, id: &'a str, sub: Sub<UserEvent>) -> ApplicationResult<()> {
+    pub fn subscribe(&mut self, id: &str, sub: Sub<UserEvent>) -> ApplicationResult<()> {
         if !self.view.mounted(id) {
             return Err(ViewError::ComponentNotFound.into());
         }
@@ -258,7 +249,7 @@ where
     /// Returns error if the component doesn't exist or if the component is not subscribed to this event
     pub fn unsubscribe(
         &mut self,
-        id: &'a str,
+        id: &str,
         ev: SubEventClause<UserEvent>,
     ) -> ApplicationResult<()> {
         if !self.view.mounted(id) {
@@ -276,18 +267,17 @@ where
     /// ### unsubscribe_component
     ///
     /// remove all subscriptions for component
-    fn unsubscribe_component(&mut self, id: &'a str) {
+    fn unsubscribe_component(&mut self, id: &str) {
         self.subs.retain(|x| x.target() != id)
     }
 
     /// ### subscribed
     ///
     /// Returns whether component `id` is subscribed to event described by `clause`
-    fn subscribed(&self, id: &'a str, clause: &SubEventClause<UserEvent>) -> bool {
+    fn subscribed(&self, id: &str, clause: &SubEventClause<UserEvent>) -> bool {
         self.subs
             .iter()
-            .find(|s| s.target() == id && s.event() == clause)
-            .is_some()
+            .any(|s| s.target() == id && s.event() == clause)
     }
 
     /// ### poll
@@ -330,6 +320,7 @@ where
     fn forward_to_active_component(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.view
             .focus()
+            .map(|x| x.to_string())
             .map(|x| self.view.forward(x, ev).ok().unwrap())
             .flatten()
     }
@@ -337,7 +328,7 @@ where
     /// ### forward_to_subscriptions
     ///
     /// Forward events to subscriptions listening to the incoming event.
-    fn forward_to_subscriptions(&'a mut self, events: Vec<Event<UserEvent>>) -> Vec<Msg> {
+    fn forward_to_subscriptions(&mut self, events: Vec<Event<UserEvent>>) -> Vec<Msg> {
         let mut messages: Vec<Msg> = Vec::new();
         // NOTE: don't touch this code again and don't try to use iterators, cause it's not gonna work :)
         for ev in events.iter() {
@@ -582,10 +573,7 @@ mod test {
          * - receive a Tick from MockPoll, sent to FOO, but won't return a msg
          * - the Tick will be sent also to BAR since is subscribed and will return a `BarTick`
          */
-        let msg = application.tick(PollStrategy::UpTo(5)).ok().unwrap();
-        assert_eq!(msg.len(), 2);
-        // Update
-        application.update(&mut model, msg);
+        assert!(application.tick(&mut model, PollStrategy::UpTo(5)).is_ok());
         // Active BAR
         assert!(application.active(INPUT_BAR).is_ok());
         // Tick
@@ -594,9 +582,7 @@ mod test {
          *
          * - receive an Enter from MockPoll, sent to BAR and will return a `BarSubmit`
          */
-        let msg = application.tick(PollStrategy::Once).ok().unwrap();
-        assert_eq!(msg.len(), 1);
-        application.update(&mut model, msg);
+        assert!(application.tick(&mut model, PollStrategy::Once).is_ok());
     }
 
     fn listener_config() -> EventListenerCfg<MockEvent> {

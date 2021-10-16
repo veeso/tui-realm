@@ -63,28 +63,28 @@ where
 ///     - when: a clause that must be satisfied to forward the event to the component.
 ///
 ///
-pub(crate) struct Subscription<'a, UserEvent>
+pub(crate) struct Subscription<UserEvent>
 where
     UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
     /// Target component
-    target: &'a str,
+    target: String,
     /// Event to forward and listen to
     ev: EventClause<UserEvent>,
     /// Restrict forwarding clauses
     when: SubClause,
 }
 
-impl<'a, U> Subscription<'a, U>
+impl<'a, U> Subscription<U>
 where
     U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
     /// ### new
     ///
     /// Instantiates a new `Subscription`
-    pub fn new(target: &'a str, sub: Sub<U>) -> Self {
+    pub fn new(target: &str, sub: Sub<U>) -> Self {
         Self {
-            target,
+            target: target.to_string(),
             ev: sub.0,
             when: sub.1,
         }
@@ -94,7 +94,7 @@ where
     ///
     /// Returns sub target
     pub(crate) fn target(&self) -> &str {
-        self.target
+        self.target.as_str()
     }
 
     /// ### event

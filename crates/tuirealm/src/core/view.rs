@@ -60,20 +60,20 @@ pub enum ViewError {
 /// View is the wrapper and manager for all the components.
 /// A View is a container for all the components in a certain layout.
 /// Each View can have only one focused component at the time. At least one component must be always focused
-pub struct View<'a, Msg, UserEvent>
+pub struct View<Msg, UserEvent>
 where
     Msg: PartialEq,
     UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
 {
     /// Components Mounted onto View
-    components: HashMap<&'a str, WrappedComponent<Msg, UserEvent>>,
+    components: HashMap<String, WrappedComponent<Msg, UserEvent>>,
     /// Current active component
-    focus: Option<&'a str>,
+    focus: Option<String>,
     /// Focus stack; used to determine which component should hold focus in case the current element is blurred
-    focus_stack: Vec<&'a str>,
+    focus_stack: Vec<String>,
 }
 
-impl<'a, Msg, UserEvent> Default for View<'a, Msg, UserEvent>
+impl<'a, Msg, UserEvent> Default for View<Msg, UserEvent>
 where
     Msg: PartialEq,
     UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
@@ -87,7 +87,7 @@ where
     }
 }
 
-impl<'a, Msg, UserEvent> View<'a, Msg, UserEvent>
+impl<'a, Msg, UserEvent> View<Msg, UserEvent>
 where
     Msg: PartialEq,
     UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
@@ -96,15 +96,14 @@ where
     ///
     /// Mount component on View.
     /// Returns error if the component is already mounted
-    pub fn mount(
-        &mut self,
-        id: &'a str,
-        component: WrappedComponent<Msg, UserEvent>,
-    ) -> ViewResult<()> {
-        if self.mounted(id) {
+    pub fn mount<S>(&mut self, id: S, component: WrappedComponent<Msg, UserEvent>) -> ViewResult<()>
+    where
+        S: AsRef<str>,
+    {
+        if self.mounted(id.as_ref()) {
             Err(ViewError::ComponentAlreadyMounted)
         } else {
-            self.components.insert(id, component);
+            self.components.insert(id.as_ref().to_string(), component);
             Ok(())
         }
     }
@@ -112,46 +111,58 @@ where
     /// ### umount
     ///
     /// Umount component from View
-    pub fn umount(&mut self, id: &'a str) -> ViewResult<()> {
-        if !self.mounted(id) {
+    pub fn umount<S>(&mut self, id: S) -> ViewResult<()>
+    where
+        S: AsRef<str>,
+    {
+        if !self.mounted(id.as_ref()) {
             return Err(ViewError::ComponentNotFound);
         }
         if self.has_focus(id.as_ref()) {
             let _ = self.blur();
         }
         // Remove component from stack
-        self.pop_from_stack(id);
+        self.pop_from_stack(id.as_ref());
         // Umount
-        self.components.remove(id);
+        self.components.remove(id.as_ref());
         Ok(())
     }
 
     /// ### mounted
     ///
     /// Returns whether component `id` is mounted
-    pub fn mounted(&self, id: &'a str) -> bool {
-        self.components.contains_key(id)
+    pub fn mounted<S>(&self, id: S) -> bool
+    where
+        S: AsRef<str>,
+    {
+        self.components.contains_key(id.as_ref())
     }
 
     /// ### focus
     ///
     /// Returns current active element (if any)
-    pub(crate) fn focus(&self) -> Option<&'a str> {
-        self.focus
+    pub(crate) fn focus(&self) -> Option<&str> {
+        self.focus.as_deref()
     }
 
     /// ### component
     ///
     /// Returns reference to component associated to `id`
-    pub(crate) fn component(&self, id: &'a str) -> Option<&dyn Component<Msg, UserEvent>> {
-        self.components.get(id).map(|x| x.as_ref())
+    pub(crate) fn component<S>(&self, id: S) -> Option<&dyn Component<Msg, UserEvent>>
+    where
+        S: AsRef<str>,
+    {
+        self.components.get(id.as_ref()).map(|x| x.as_ref())
     }
 
     /// ### view
     ///
     /// Render component called `id`
-    pub fn view(&mut self, id: &'a str, f: &mut Frame, area: Rect) {
-        if let Some(c) = self.components.get_mut(id) {
+    pub fn view<S>(&mut self, id: S, f: &mut Frame, area: Rect)
+    where
+        S: AsRef<str>,
+    {
+        if let Some(c) = self.components.get_mut(id.as_ref()) {
             c.view(f, area);
         }
     }
@@ -160,12 +171,11 @@ where
     ///
     /// Forward `event` (call `on()`) on component `id` and return a `Msg` if any.
     /// Returns error if the component doesn't exist
-    pub(crate) fn forward(
-        &mut self,
-        id: &'a str,
-        event: Event<UserEvent>,
-    ) -> ViewResult<Option<Msg>> {
-        match self.components.get_mut(id) {
+    pub(crate) fn forward<S>(&mut self, id: S, event: Event<UserEvent>) -> ViewResult<Option<Msg>>
+    where
+        S: AsRef<str>,
+    {
+        match self.components.get_mut(id.as_ref()) {
             None => Err(ViewError::ComponentNotFound),
             Some(c) => Ok(c.on(event)),
         }
@@ -176,8 +186,11 @@ where
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
-    pub fn query(&self, id: &'a str, query: Attribute) -> ViewResult<Option<AttrValue>> {
-        match self.components.get(id) {
+    pub fn query<S>(&self, id: S, query: Attribute) -> ViewResult<Option<AttrValue>>
+    where
+        S: AsRef<str>,
+    {
+        match self.components.get(id.as_ref()) {
             None => Err(ViewError::ComponentNotFound),
             Some(c) => Ok(c.query(query)),
         }
@@ -187,8 +200,11 @@ where
     ///
     /// Set attribute for component `id`
     /// Returns error if the component doesn't exist
-    pub fn attr(&mut self, id: &'a str, attr: Attribute, value: AttrValue) -> ViewResult<()> {
-        if let Some(c) = self.components.get_mut(id) {
+    pub fn attr<S>(&mut self, id: S, attr: Attribute, value: AttrValue) -> ViewResult<()>
+    where
+        S: AsRef<str>,
+    {
+        if let Some(c) = self.components.get_mut(id.as_ref()) {
             c.attr(attr, value);
             Ok(())
         } else {
@@ -200,9 +216,12 @@ where
     ///
     /// Get state for component `id`.
     /// Returns `Err` if component doesn't exist
-    pub fn state(&self, id: &'a str) -> ViewResult<State> {
+    pub fn state<S>(&self, id: S) -> ViewResult<State>
+    where
+        S: AsRef<str>,
+    {
         self.components
-            .get(id)
+            .get(id.as_ref())
             .map(|c| c.state())
             .ok_or(ViewError::ComponentNotFound)
     }
@@ -217,12 +236,15 @@ where
     /// Returns error: if component doesn't exist. Use `mounted()` to check if component exists
     ///
     /// > NOTE: users should always use this function to give focus to components.
-    pub fn active(&mut self, id: &'a str) -> ViewResult<()> {
-        if let Some(c) = self.components.get_mut(id) {
+    pub fn active<S>(&mut self, id: S) -> ViewResult<()>
+    where
+        S: AsRef<str>,
+    {
+        if let Some(c) = self.components.get_mut(id.as_ref()) {
             // Set attribute
             c.attr(Attribute::Focus, AttrValue::Flag(true));
             // Move current focus
-            self.change_focus(id);
+            self.change_focus(id.as_ref());
             Ok(())
         } else {
             Err(ViewError::ComponentNotFound)
@@ -239,7 +261,7 @@ where
     /// > NOTE: users should always use this function to remove focus to components.
     pub fn blur(&mut self) -> ViewResult<()> {
         if let Some(id) = self.focus.take() {
-            if let Some(c) = self.components.get_mut(id) {
+            if let Some(c) = self.components.get_mut(id.as_str()) {
                 c.attr(Attribute::Focus, AttrValue::Flag(false));
             }
             self.focus_to_last();
@@ -256,9 +278,12 @@ where
     /// Push component `id` to focus stack
     /// In case it is already in the focus stack,
     /// it will be first removed from it.
-    fn push_to_stack(&mut self, id: &'a str) {
-        self.pop_from_stack(id);
-        self.focus_stack.push(id);
+    fn push_to_stack<S>(&mut self, id: S)
+    where
+        S: AsRef<str>,
+    {
+        self.pop_from_stack(id.as_ref());
+        self.focus_stack.push(id.as_ref().to_string());
     }
 
     /// ### pop_from_stack
@@ -272,7 +297,7 @@ where
     ///
     /// Returns whether `who` has focus
     fn has_focus(&self, who: &str) -> bool {
-        match self.focus {
+        match self.focus.as_ref() {
             None => false,
             Some(id) => who == id,
         }
@@ -291,7 +316,7 @@ where
         self.pop_from_stack(new_focus);
         // Get key from focus_stack (otherwise lifetime won't be valid)
         let key = self.components.keys().find(|x| **x == new_focus).unwrap();
-        self.focus = Some(key);
+        self.focus = Some(key.to_string());
     }
 
     /// ### focus_to_last
@@ -306,7 +331,7 @@ where
     /// ### take_last_from_stack
     ///
     /// Take last element from stack if any
-    fn take_last_from_stack(&mut self) -> Option<&'a str> {
+    fn take_last_from_stack(&mut self) -> Option<String> {
         self.focus_stack.pop()
     }
 }
@@ -398,7 +423,7 @@ mod test {
         assert!(view.active(INPUT_FOO).is_ok());
         assert_eq!(view.focus(), Some(INPUT_FOO));
         assert!(view.has_focus(INPUT_FOO));
-        assert_eq!(view.focus.unwrap(), INPUT_FOO);
+        assert_eq!(view.focus.as_deref().unwrap(), INPUT_FOO);
         assert!(view.focus_stack.is_empty());
         // Give focus to BAR
         assert!(view.active(INPUT_BAR).is_ok());
