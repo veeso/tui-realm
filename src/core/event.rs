@@ -71,10 +71,6 @@ where
         matches!(self, Self::Tick)
     }
 
-    pub(crate) fn is_none(&self) -> bool {
-        matches!(self, Self::None)
-    }
-
     pub(crate) fn is_user(&self) -> Option<&U> {
         if let Event::User(u) = self {
             Some(u)
@@ -205,8 +201,6 @@ mod test {
         assert!(e.is_keyboard().is_none());
         let e: Event<MockEvent> = Event::Tick;
         assert!(e.is_tick());
-        let e: Event<MockEvent> = Event::None;
-        assert!(e.is_none());
         let e: Event<MockEvent> = Event::User(MockEvent::Bar);
         assert_eq!(e.is_user().unwrap(), &MockEvent::Bar);
     }
