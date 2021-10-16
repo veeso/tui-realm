@@ -146,6 +146,10 @@ impl Component<MockMsg, MockEvent> for MockFooInput {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
             }) => Cmd::Type(ch),
+            Event::Keyboard(KeyEvent {
+                code: Key::Enter,
+                modifiers: KeyModifiers::NONE,
+            }) => return Some(MockMsg::FooSubmit(self.component.states.text.clone())),
             Event::Keyboard(key) => Cmd::Press(key),
             _ => Cmd::None,
         };
@@ -207,6 +211,11 @@ impl Component<MockMsg, MockEvent> for MockBarInput {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
             }) => Cmd::Type(ch),
+            Event::Keyboard(KeyEvent {
+                code: Key::Enter,
+                modifiers: KeyModifiers::NONE,
+            }) => return Some(MockMsg::BarSubmit(self.component.states.text.clone())),
+            Event::Tick => return Some(MockMsg::BarTick),
             Event::Keyboard(key) => Cmd::Press(key),
             _ => Cmd::None,
         };
