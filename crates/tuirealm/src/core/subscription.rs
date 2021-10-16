@@ -75,7 +75,7 @@ where
     when: SubClause,
 }
 
-impl<'a, U> Subscription<U>
+impl<U> Subscription<U>
 where
     U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
 {
