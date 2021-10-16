@@ -51,6 +51,39 @@ where
     User(UserEvent),
 }
 
+impl<U> Event<U>
+where
+    U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+{
+    pub(crate) fn is_keyboard(&self) -> Option<&KeyEvent> {
+        if let Event::Keyboard(k) = self {
+            Some(k)
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn is_window_resize(&self) -> bool {
+        matches!(self, Self::WindowResize(_, _))
+    }
+
+    pub(crate) fn is_tick(&self) -> bool {
+        matches!(self, Self::Tick)
+    }
+
+    pub(crate) fn is_none(&self) -> bool {
+        matches!(self, Self::None)
+    }
+
+    pub(crate) fn is_user(&self) -> Option<&U> {
+        if let Event::User(u) = self {
+            Some(u)
+        } else {
+            None
+        }
+    }
+}
+
 /// ## NoUserEvent
 ///
 /// When using event you can use this as type parameter if you don't want to use user events
@@ -141,6 +174,7 @@ impl From<Key> for KeyEvent {
 mod test {
 
     use super::*;
+    use crate::mock::MockEvent;
 
     use pretty_assertions::assert_eq;
 
@@ -156,5 +190,24 @@ mod test {
         let k = KeyEvent::from(Key::Up);
         assert_eq!(k.code, Key::Up);
         assert_eq!(k.modifiers, KeyModifiers::empty());
+    }
+
+    #[test]
+    fn check_events() {
+        let e: Event<MockEvent> = Event::Keyboard(KeyEvent::new(Key::Down, KeyModifiers::CONTROL));
+        assert!(e.is_keyboard().is_some());
+        assert_eq!(e.is_window_resize(), false);
+        assert_eq!(e.is_tick(), false);
+        assert_eq!(e.is_tick(), false);
+        assert!(e.is_user().is_none());
+        let e: Event<MockEvent> = Event::WindowResize(0, 24);
+        assert!(e.is_window_resize());
+        assert!(e.is_keyboard().is_none());
+        let e: Event<MockEvent> = Event::Tick;
+        assert!(e.is_tick());
+        let e: Event<MockEvent> = Event::None;
+        assert!(e.is_none());
+        let e: Event<MockEvent> = Event::User(MockEvent::Bar);
+        assert_eq!(e.is_user().unwrap(), &MockEvent::Bar);
     }
 }

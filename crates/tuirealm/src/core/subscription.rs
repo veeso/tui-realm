@@ -25,13 +25,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use crate::event::KeyEvent;
 use crate::{AttrValue, Attribute, Event, State};
 use std::fmt;
 
 /// ## Sub
 ///
 /// Public type to define a subscription.
-pub struct Sub<UserEvent>(Event<UserEvent>, SubClause)
+pub struct Sub<UserEvent>(EventClause<UserEvent>, SubClause)
 where
     UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd;
 
@@ -57,7 +58,7 @@ where
     /// Target component
     target: &'a str,
     /// Event to forward and listen to
-    ev: Event<UserEvent>,
+    ev: EventClause<UserEvent>,
     /// Restrict forwarding clauses
     when: SubClause,
 }
@@ -84,13 +85,6 @@ where
         self.target
     }
 
-    /// ### event
-    ///
-    /// Returns a reference to the event
-    pub(crate) fn event(&self) -> &Event<U> {
-        &self.ev
-    }
-
     /// ### forward
     ///
     /// Returns whether to forward event to component
@@ -104,8 +98,46 @@ where
         HasAttrFn: Fn(Attribute) -> Option<AttrValue>,
         GetStateFn: Fn() -> State,
     {
-        &self.ev == ev && self.when.forward(has_attr_fn, get_state_fn)
+        self.match_event(ev) && self.when.forward(has_attr_fn, get_state_fn)
     }
+
+    /// ### match_event
+    ///
+    /// Check whether event matches.
+    /// This is how events are matched:
+    ///
+    /// - Keyboard: everything must match
+    /// - WindowResize: matches only event type, not sizes
+    /// - Tick: matches tick event
+    /// - None: matches None event
+    /// - UserEvent: depends on UserEvent PartialEq
+    fn match_event(&self, ev: &Event<U>) -> bool {
+        match &self.ev {
+            EventClause::Keyboard(k) => Some(k) == ev.is_keyboard(),
+            EventClause::WindowResize => ev.is_window_resize(),
+            EventClause::Tick => ev.is_tick(),
+            EventClause::User(u) => Some(u) == ev.is_user(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+/// ## EventClause
+///
+/// An event clause indicates on which kind of event the event must be forwarded to the `target` component.
+pub enum EventClause<UserEvent>
+where
+    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+{
+    /// Check whether a certain key has been pressed
+    Keyboard(KeyEvent),
+    /// Check whether window has been resized
+    WindowResize,
+    /// The event will be forwarded on a tick
+    Tick,
+    /// Event will be forwarded on this specific user event.
+    /// The way user event is matched, depends on its partialEq implementation
+    User(UserEvent),
 }
 
 /// ## SubClause
@@ -251,18 +283,17 @@ mod test {
 
     #[test]
     fn subscription_should_forward() {
-        let ev: Event<MockEvent> = Event::Tick;
+        let ev: Event<MockEvent> = Event::WindowResize(1024, 512);
         let mut component = MockFooInput::default();
         component.attr(Attribute::Focus, AttrValue::Flag(true));
         let sub = Subscription::new(
             "foo",
             Sub(
-                ev.clone(),
+                EventClause::WindowResize,
                 SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true)),
             ),
         );
         assert_eq!(sub.target(), "foo");
-        assert_eq!(sub.event(), &ev);
         assert_eq!(
             sub.when,
             SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
