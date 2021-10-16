@@ -73,7 +73,7 @@ where
     focus_stack: Vec<String>,
 }
 
-impl<'a, Msg, UserEvent> Default for View<Msg, UserEvent>
+impl<Msg, UserEvent> Default for View<Msg, UserEvent>
 where
     Msg: PartialEq,
     UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
@@ -87,7 +87,7 @@ where
     }
 }
 
-impl<'a, Msg, UserEvent> View<Msg, UserEvent>
+impl<Msg, UserEvent> View<Msg, UserEvent>
 where
     Msg: PartialEq,
     UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
