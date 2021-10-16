@@ -121,6 +121,12 @@ impl TextSpan {
     }
 }
 
+impl Default for TextSpan {
+    fn default() -> Self {
+        Self::new(String::default())
+    }
+}
+
 impl From<&str> for TextSpan {
     fn from(txt: &str) -> Self {
         TextSpan::new(txt)
@@ -222,6 +228,12 @@ mod test {
 
     #[test]
     fn text_span() {
+        // default
+        let span: TextSpan = TextSpan::default();
+        assert_eq!(span.content.as_str(), "");
+        assert_eq!(span.modifiers, Modifier::empty());
+        assert_eq!(span.fg, Color::Reset);
+        assert_eq!(span.bg, Color::Reset);
         // from str
         let span: TextSpan = TextSpan::from("Hello!");
         assert_eq!(span.content.as_str(), "Hello!");
