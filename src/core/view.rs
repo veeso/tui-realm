@@ -213,16 +213,10 @@ where
     /// Returns error: if component doesn't exist. Use `mounted()` to check if component exists
     ///
     /// > NOTE: users should always use this function to give focus to components.
-    pub fn active(&mut self, id: K) -> ViewResult<()> {
-        if let Some(c) = self.components.get_mut(&id) {
-            // Set attribute
-            c.attr(Attribute::Focus, AttrValue::Flag(true));
-            // Move current focus
-            self.change_focus(&id);
-            Ok(())
-        } else {
-            Err(ViewError::ComponentNotFound)
-        }
+    pub fn active(&mut self, id: &K) -> ViewResult<()> {
+        self.set_focus(id, true)?;
+        self.change_focus(id);
+        Ok(())
     }
 
     /// ### blur
@@ -235,9 +229,7 @@ where
     /// > NOTE: users should always use this function to remove focus to components.
     pub fn blur(&mut self) -> ViewResult<()> {
         if let Some(id) = self.focus.take() {
-            if let Some(c) = self.components.get_mut(&id) {
-                c.attr(Attribute::Focus, AttrValue::Flag(false));
-            }
+            self.set_focus(&id, false)?;
             self.focus_to_last();
             Ok(())
         } else {
@@ -282,6 +274,9 @@ where
     /// > Panics if `new_focus` doesn't exist in components
     fn change_focus(&mut self, new_focus: &K) {
         if let Some(focus) = self.focus.take() {
+            // Remove focus (can't return error)
+            let _ = self.set_focus(&focus, false);
+            // Push to stack
             self.push_to_stack(focus);
         }
         self.pop_from_stack(new_focus);
@@ -295,7 +290,7 @@ where
     /// Give focus to the last component in the stack
     fn focus_to_last(&mut self) {
         if let Some(focus) = self.take_last_from_stack() {
-            let _ = self.active(focus);
+            let _ = self.active(&focus);
         }
     }
 
@@ -304,6 +299,18 @@ where
     /// Take last element from stack if any
     fn take_last_from_stack(&mut self) -> Option<K> {
         self.focus_stack.pop()
+    }
+
+    /// ### set_focus
+    ///
+    /// Set focus value for component
+    fn set_focus(&mut self, id: &K, value: bool) -> ViewResult<()> {
+        if let Some(c) = self.components.get_mut(id) {
+            c.attr(Attribute::Focus, AttrValue::Flag(value));
+            Ok(())
+        } else {
+            Err(ViewError::ComponentNotFound)
+        }
     }
 }
 
@@ -394,21 +401,42 @@ mod test {
             )
             .is_ok());
         // Active foo
-        assert!(view.active(MockComponentId::InputFoo).is_ok());
+        assert!(view.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(view.focus(), Some(&MockComponentId::InputFoo));
         assert!(view.has_focus(&MockComponentId::InputFoo));
+        assert_eq!(
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .unwrap()
+                .unwrap(),
+            AttrValue::Flag(true)
+        );
         assert_eq!(view.focus.to_owned().unwrap(), MockComponentId::InputFoo);
         assert!(view.focus_stack.is_empty());
         // Give focus to BAR
-        assert!(view.active(MockComponentId::InputBar).is_ok());
+        assert!(view.active(&MockComponentId::InputBar).is_ok());
+        assert_eq!(
+            view.query(&MockComponentId::InputBar, Attribute::Focus)
+                .ok()
+                .unwrap()
+                .unwrap(),
+            AttrValue::Flag(true)
+        );
+        assert_eq!(
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .unwrap()
+                .unwrap(),
+            AttrValue::Flag(false)
+        );
         assert!(view.has_focus(&MockComponentId::InputBar));
         assert_eq!(view.focus_stack.len(), 1);
         // Give focus to OMAR
-        assert!(view.active(MockComponentId::InputOmar).is_ok());
+        assert!(view.active(&MockComponentId::InputOmar).is_ok());
         assert!(view.has_focus(&MockComponentId::InputOmar));
         assert_eq!(view.focus_stack.len(), 2);
         // Give focus back to FOO
-        assert!(view.active(MockComponentId::InputFoo).is_ok());
+        assert!(view.active(&MockComponentId::InputFoo).is_ok());
         assert!(view.has_focus(&MockComponentId::InputFoo));
         assert_eq!(view.focus_stack.len(), 2);
         // Umount FOO
@@ -419,7 +447,7 @@ mod test {
         // Umount BAR
         assert!(view.umount(&MockComponentId::InputBar).is_ok());
         // Give focus to unexisting component
-        assert!(view.active(MockComponentId::InputBar).is_err());
+        assert!(view.active(&MockComponentId::InputBar).is_err());
         // OMAR should still have focus, but focus will be empty
         assert!(view.has_focus(&MockComponentId::InputOmar));
         assert_eq!(view.focus_stack.len(), 0);
@@ -428,7 +456,7 @@ mod test {
             .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
             .is_ok());
         // Active BAR
-        assert!(view.active(MockComponentId::InputBar).is_ok());
+        assert!(view.active(&MockComponentId::InputBar).is_ok());
         // Blur
         assert!(view.blur().is_ok());
         // Focus should be held by OMAR, but BAR should not be in stack
