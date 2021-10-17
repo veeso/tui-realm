@@ -116,6 +116,7 @@ pub enum Attribute {
     TextProps,
     TextWrap,
     Title,
+    Value,
     Width,
     /// User defined selector
     Custom(&'static str),
@@ -137,6 +138,7 @@ pub enum AttrValue {
     Flag(bool),
     InputType(InputType),
     Length(usize),
+    Number(isize),
     Shape(Shape),
     Size(u16),
     String(String),
@@ -205,6 +207,13 @@ impl AttrValue {
         match self {
             AttrValue::Length(x) => x,
             _ => panic!("AttrValue is not Length"),
+        }
+    }
+
+    pub fn unwrap_number(self) -> isize {
+        match self {
+            AttrValue::Number(x) => x,
+            _ => panic!("AttrValue is not Number"),
         }
     }
 
@@ -280,123 +289,57 @@ mod test {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn unwrapping_alignment_should_unwrap() {
+    fn unwrapping_should_unwrap() {
         assert_eq!(
             AttrValue::Alignment(Alignment::Center).unwrap_alignment(),
             Alignment::Center
         );
-    }
-
-    #[test]
-    fn unwrapping_borders_should_unwrap() {
         assert_eq!(
             AttrValue::Borders(Borders::default()).unwrap_borders(),
             Borders::default()
         );
-    }
-
-    #[test]
-    fn unwrapping_color_should_unwrap() {
         assert_eq!(AttrValue::Color(Color::Red).unwrap_color(), Color::Red);
-    }
-
-    #[test]
-    fn unwrapping_dataset_should_unwrap() {
         assert_eq!(
             AttrValue::Dataset(Dataset::default()).unwrap_dataset(),
             Dataset::default()
         );
-    }
-
-    #[test]
-    fn unwrapping_direction_should_unwrap() {
         assert_eq!(
             AttrValue::Direction(Direction::Left).unwrap_direction(),
             Direction::Left
         );
-    }
-
-    #[test]
-    fn unwrapping_flag_should_unwrap() {
         assert_eq!(AttrValue::Flag(true).unwrap_flag(), true);
-    }
-
-    #[test]
-
-    fn unwrapping_inputtype_should_unwrap() {
         assert_eq!(
             AttrValue::InputType(InputType::Number).unwrap_input_type(),
             InputType::Number
         );
-    }
-
-    #[test]
-    fn unwrapping_length_should_unwrap() {
         assert_eq!(AttrValue::Length(12).unwrap_length(), 12);
-    }
-
-    #[test]
-    fn unwrapping_shape_should_unwrap() {
+        assert_eq!(AttrValue::Number(-24).unwrap_number(), -24);
         assert_eq!(AttrValue::Shape(Shape::Layer).unwrap_shape(), Shape::Layer);
-    }
-
-    #[test]
-    fn unwrapping_size_should_unwrap() {
         assert_eq!(AttrValue::Size(12).unwrap_size(), 12);
-    }
-
-    #[test]
-
-    fn unwrapping_string_should_unwrap() {
         assert_eq!(
             AttrValue::String(String::from("pippo")).unwrap_string(),
             String::from("pippo")
         );
-    }
-
-    #[test]
-    fn unwrapping_style_should_unwrap() {
         assert_eq!(
             AttrValue::Style(Style::default()).unwrap_style(),
             Style::default()
         );
-    }
-
-    #[test]
-
-    fn unwrapping_table_should_unwrap() {
         assert_eq!(
             AttrValue::Table(Table::default()).unwrap_table(),
             Table::default()
         );
-    }
-
-    #[test]
-    fn unwrapping_text_should_unwrap() {
         assert_eq!(
             AttrValue::Text(TextSpan::default()).unwrap_text(),
             TextSpan::default()
         );
-    }
-
-    #[test]
-    fn unwrapping_textmodifiers_should_unwrap() {
         assert_eq!(
             AttrValue::TextModifiers(TextModifiers::BOLD).unwrap_text_modifiers(),
             TextModifiers::BOLD
         );
-    }
-
-    #[test]
-    fn unwrapping_title_should_unwrap() {
         assert_eq!(
             AttrValue::Title((String::from("pippo"), Alignment::Left)).unwrap_title(),
             (String::from("pippo"), Alignment::Left)
         );
-    }
-
-    #[test]
-    fn unwrapping_payload_should_unwrap() {
         assert_eq!(
             AttrValue::Payload(PropPayload::None).unwrap_payload(),
             PropPayload::None
@@ -449,6 +392,12 @@ mod test {
     #[should_panic]
     fn unwrapping_length_should_panic_if_not_identity() {
         AttrValue::Flag(true).unwrap_length();
+    }
+
+    #[test]
+    #[should_panic]
+    fn unwrapping_number_should_panic_if_not_identity() {
+        AttrValue::Flag(true).unwrap_number();
     }
 
     #[test]
