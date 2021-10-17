@@ -27,7 +27,6 @@
  */
 use super::{terminal, Application, Id, Msg};
 
-use tuirealm::props::TextSpan;
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
 use tuirealm::{AttrValue, Attribute, NoUserEvent, Terminal, Update, View};
 
@@ -90,9 +89,10 @@ impl Update<Id, Msg, NoUserEvent> for Model {
                     self.quit = true; // Terminate
                     None
                 }
+                Msg::Clock => None,
                 Msg::DigitCounterBlur => {
                     // Give focus to letter counter
-                    assert!(view.active(Id::LetterCounter).is_ok());
+                    assert!(view.active(&Id::LetterCounter).is_ok());
                     None
                 }
                 Msg::DigitCounterChanged(v) => {
@@ -101,17 +101,14 @@ impl Update<Id, Msg, NoUserEvent> for Model {
                         .attr(
                             &Id::Label,
                             Attribute::Text,
-                            AttrValue::Text(TextSpan::from(format!(
-                                "DigitCounter has now value: {}",
-                                v
-                            )))
+                            AttrValue::String(format!("DigitCounter has now value: {}", v))
                         )
                         .is_ok());
                     None
                 }
                 Msg::LetterCounterBlur => {
                     // Give focus to digit counter
-                    assert!(view.active(Id::DigitCounter).is_ok());
+                    assert!(view.active(&Id::DigitCounter).is_ok());
                     None
                 }
                 Msg::LetterCounterChanged(v) => {
@@ -120,10 +117,7 @@ impl Update<Id, Msg, NoUserEvent> for Model {
                         .attr(
                             &Id::Label,
                             Attribute::Text,
-                            AttrValue::Text(TextSpan::from(format!(
-                                "LetterCounter has now value: {}",
-                                v
-                            )))
+                            AttrValue::String(format!("LetterCounter has now value: {}", v))
                         )
                         .is_ok());
                     None

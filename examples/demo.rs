@@ -46,6 +46,7 @@ use crate::app::terminal;
 #[derive(Debug, PartialEq)]
 pub enum Msg {
     AppClose,
+    Clock,
     DigitCounterChanged(isize),
     DigitCounterBlur,
     LetterCounterChanged(isize),
@@ -81,7 +82,7 @@ fn main() {
             Id::Label,
             Box::new(
                 Label::default()
-                    .text("Waiting for a Msg")
+                    .text("Waiting for a Msg...")
                     .alignment(Alignment::Left)
                     .background(Color::Reset)
                     .foreground(Color::LightYellow)
@@ -126,14 +127,21 @@ fn main() {
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {
         // Tick
-        if let Err(e) = app.tick(&mut model, PollStrategy::UpTo(5)) {
-            assert!(app
-                .attr(
-                    &Id::Label,
-                    Attribute::Text,
-                    AttrValue::String(format!("Application error: {}", e)),
-                )
-                .is_ok());
+        match app.tick(&mut model, PollStrategy::Once) {
+            Err(err) => {
+                assert!(app
+                    .attr(
+                        &Id::Label,
+                        Attribute::Text,
+                        AttrValue::String(format!("Application error: {}", err)),
+                    )
+                    .is_ok());
+            }
+            Ok(sz) if sz > 0 => {
+                // NOTE: redraw if at least one msg has been processed
+                model.redraw = true;
+            }
+            _ => {}
         }
         // Redraw
         if model.redraw {

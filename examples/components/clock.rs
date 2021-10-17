@@ -79,7 +79,8 @@ impl Clock {
         let since_the_epoch = self.get_epoch_time();
         let hours = (since_the_epoch / 3600) % 24;
         let minutes = (since_the_epoch / 60) % 60;
-        format!("{:02}:{:02}", hours, minutes)
+        let seconds = since_the_epoch % 60;
+        format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
     }
 
     fn get_epoch_time(&self) -> u64 {
@@ -93,8 +94,6 @@ impl Clock {
 
 impl MockComponent for Clock {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
-        // Set text
-        self.attr(Attribute::Text, AttrValue::String(self.time_to_str()));
         // Render
         self.component.view(frame, area);
     }
@@ -121,9 +120,12 @@ impl Component<Msg, NoUserEvent> for Clock {
     fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
         if let Event::Tick = ev {
             self.states.tick();
+            // Set text
+            self.attr(Attribute::Text, AttrValue::String(self.time_to_str()));
+            Some(Msg::Clock)
+        } else {
+            None
         }
-        let _ = self.perform(Cmd::None);
-        None
     }
 }
 
