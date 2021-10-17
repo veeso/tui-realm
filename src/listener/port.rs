@@ -37,7 +37,7 @@ use std::time::{Duration, Instant};
 /// Its purpose is to listen for incoming events of a user-defined type
 pub struct Port<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     poll: Box<dyn Poll<U>>,
     interval: Duration,
@@ -46,7 +46,7 @@ where
 
 impl<U> Port<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     /// ### new
     ///

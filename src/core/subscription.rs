@@ -27,18 +27,17 @@
  */
 use crate::event::KeyEvent;
 use crate::{AttrValue, Attribute, Event, State};
-use std::fmt;
 
 /// ## Sub
 ///
 /// Public type to define a subscription.
 pub struct Sub<UserEvent>(EventClause<UserEvent>, SubClause)
 where
-    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd;
+    UserEvent: Eq + PartialEq + Clone + PartialOrd;
 
 impl<U> Sub<U>
 where
-    U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    U: Eq + PartialEq + Clone + PartialOrd,
 {
     /// ### new
     ///
@@ -65,8 +64,8 @@ where
 ///
 pub(crate) struct Subscription<ComponentId, UserEvent>
 where
-    ComponentId: std::fmt::Debug + Eq + PartialEq + Clone,
-    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    ComponentId: Eq + PartialEq + Clone,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
     /// Target component
     target: ComponentId,
@@ -78,8 +77,8 @@ where
 
 impl<K, U> Subscription<K, U>
 where
-    K: fmt::Debug + Eq + PartialEq + Clone,
-    U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    K: Eq + PartialEq + Clone,
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     /// ### new
     ///
@@ -148,7 +147,7 @@ where
 /// An event clause indicates on which kind of event the event must be forwarded to the `target` component.
 pub enum EventClause<UserEvent>
 where
-    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
     /// Check whether a certain key has been pressed
     Keyboard(KeyEvent),

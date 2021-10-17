@@ -26,7 +26,6 @@
  * SOFTWARE.
  */
 use bitflags::bitflags;
-use std::fmt;
 
 // -- event
 
@@ -36,7 +35,7 @@ use std::fmt;
 #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
 pub enum Event<UserEvent>
 where
-    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
     /// A keyboard event
     Keyboard(KeyEvent),
@@ -53,7 +52,7 @@ where
 
 impl<U> Event<U>
 where
-    U: fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    U: Eq + PartialEq + Clone + PartialOrd,
 {
     pub(crate) fn is_keyboard(&self) -> Option<&KeyEvent> {
         if let Event::Keyboard(k) = self {
