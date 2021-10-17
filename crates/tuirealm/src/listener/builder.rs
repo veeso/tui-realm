@@ -34,7 +34,7 @@ use super::{Duration, EventListener, InputEventListener, Poll, Port};
 /// will be returned.
 pub struct EventListenerCfg<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     ports: Vec<Port<U>>,
     tick_interval: Option<Duration>,
@@ -43,7 +43,7 @@ where
 
 impl<U> Default for EventListenerCfg<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     fn default() -> Self {
         Self {
@@ -56,7 +56,7 @@ where
 
 impl<U> EventListenerCfg<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     /// ### start
     ///

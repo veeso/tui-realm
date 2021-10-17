@@ -69,7 +69,7 @@ pub enum ListenerError {
 /// dedicated thread to poll for events.
 pub trait Poll<UserEvent>: Send
 where
-    UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + 'static,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd + 'static,
 {
     /// ### poll
     ///
@@ -87,7 +87,7 @@ where
 /// The event listener...
 pub(crate) struct EventListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     /// Max Time to wait when calling `recv()` on thread receiver
     poll_timeout: Duration,
@@ -101,7 +101,7 @@ where
 
 impl<U> EventListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     /// ### start
     ///
@@ -188,7 +188,7 @@ where
 
 impl<U> Drop for EventListener<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     fn drop(&mut self) {
         let _ = self.stop();
@@ -202,7 +202,7 @@ where
 /// Listener message is returned by the listener thread
 enum ListenerMsg<U>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     Error(ListenerError),
     Tick,
@@ -211,7 +211,7 @@ where
 
 impl<U> From<ListenerMsg<U>> for ListenerResult<Option<Event<U>>>
 where
-    U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     fn from(msg: ListenerMsg<U>) -> Self {
         match msg {

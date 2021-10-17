@@ -41,11 +41,11 @@ pub enum MockComponentId {
 /// ## MockPoll
 ///
 /// Mock poll implementation
-pub struct MockPoll<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> {
+pub struct MockPoll<U: Eq + PartialEq + Clone + PartialOrd + Send> {
     ghost: PhantomData<U>,
 }
 
-impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> Default for MockPoll<U> {
+impl<U: Eq + PartialEq + Clone + PartialOrd + Send> Default for MockPoll<U> {
     fn default() -> Self {
         Self {
             ghost: PhantomData::default(),
@@ -53,9 +53,7 @@ impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send> Default fo
     }
 }
 
-impl<U: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static> Poll<U>
-    for MockPoll<U>
-{
+impl<U: Eq + PartialEq + Clone + PartialOrd + Send + 'static> Poll<U> for MockPoll<U> {
     fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         Ok(Some(Event::Keyboard(KeyEvent::from(Key::Enter))))
     }

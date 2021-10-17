@@ -32,7 +32,6 @@ use crate::{
     AttrValue, Attribute, Event, Frame, State, Sub, SubEventClause, Update, View, ViewError,
 };
 
-use std::fmt;
 use std::hash::Hash;
 use thiserror::Error;
 
@@ -51,9 +50,9 @@ pub type ApplicationResult<T> = Result<T, ApplicationError>;
 /// the main function: `tick()`. See [tick](#tick)
 pub struct Application<ComponentId, Msg, UserEvent>
 where
-    ComponentId: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
+    ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     listener: EventListener<UserEvent>,
     subs: Vec<Subscription<ComponentId, UserEvent>>,
@@ -62,9 +61,9 @@ where
 
 impl<K, Msg, UserEvent> Application<K, Msg, UserEvent>
 where
-    K: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
+    K: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: fmt::Debug + Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     /// ### init
     ///
@@ -101,6 +100,7 @@ where
     /// 2. All the received events are sent to the current active component
     /// 3. All the received events are forwarded to the subscribed components which satisfy the received events and conditions.
     /// 4. Call update() on model passing each message
+    /// 5. Returns the amount of processed messages
     ///
     /// As soon as function returns, you should call the `view()` method.
     ///
@@ -109,9 +109,10 @@ where
         &mut self,
         model: &mut dyn Update<K, Msg, UserEvent>,
         strategy: PollStrategy,
-    ) -> ApplicationResult<()> {
+    ) -> ApplicationResult<usize> {
         // Poll event listener
         let events = self.poll(strategy)?;
+        println!("EV {}", events.len());
         // Forward to active element
         let mut messages: Vec<Msg> = events
             .iter()
@@ -121,10 +122,11 @@ where
         // Forward to subscriptions and extend vector
         messages.extend(self.forward_to_subscriptions(events));
         // Update
+        let msg_len = messages.len();
         messages.into_iter().for_each(|msg| {
             assert!(self.recurse_update(model, Some(msg)).is_none());
         });
-        Ok(())
+        Ok(msg_len)
     }
 
     // -- view bridge
@@ -588,7 +590,7 @@ mod test {
         assert!(application
             .mount(
                 MockComponentId::InputBar,
-                Box::new(MockFooInput::default()),
+                Box::new(MockBarInput::default()),
                 vec![Sub::new(SubEventClause::Tick, SubClause::Always)]
             )
             .is_ok());
@@ -601,16 +603,30 @@ mod test {
          * - receive a Tick from MockPoll, sent to FOO, but won't return a msg
          * - the Tick will be sent also to BAR since is subscribed and will return a `BarTick`
          */
-        assert!(application.tick(&mut model, PollStrategy::UpTo(5)).is_ok());
+        assert_eq!(
+            application
+                .tick(&mut model, PollStrategy::UpTo(5))
+                .ok()
+                .unwrap(),
+            2
+        );
         // Active BAR
         assert!(application.active(&MockComponentId::InputBar).is_ok());
+        // Wait 200ms (wait for poll)
+        std::thread::sleep(Duration::from_millis(200));
         // Tick
         /*
          * Here we should:
          *
          * - receive an Enter from MockPoll, sent to BAR and will return a `BarSubmit`
          */
-        assert!(application.tick(&mut model, PollStrategy::Once).is_ok());
+        assert_eq!(
+            application
+                .tick(&mut model, PollStrategy::Once)
+                .ok()
+                .unwrap(),
+            1
+        );
     }
 
     fn listener_config() -> EventListenerCfg<MockEvent> {

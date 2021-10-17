@@ -63,9 +63,9 @@ pub enum ViewError {
 /// Each View can have only one focused component at the time. At least one component must be always focused
 pub struct View<ComponentId, Msg, UserEvent>
 where
-    ComponentId: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
+    ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
     /// Components Mounted onto View
     components: HashMap<ComponentId, WrappedComponent<Msg, UserEvent>>,
@@ -77,9 +77,9 @@ where
 
 impl<K, Msg, UserEvent> Default for View<K, Msg, UserEvent>
 where
-    K: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
+    K: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
     fn default() -> Self {
         Self {
@@ -92,9 +92,9 @@ where
 
 impl<K, Msg, UserEvent> View<K, Msg, UserEvent>
 where
-    K: std::fmt::Debug + Eq + PartialEq + Clone + Hash,
+    K: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: std::fmt::Debug + Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
     /// ### mount
     ///
