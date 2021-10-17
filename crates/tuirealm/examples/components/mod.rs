@@ -27,7 +27,7 @@
  */
 use super::Msg;
 
-use tuirealm::props::{Alignment, Borders, Style};
+use tuirealm::props::{Alignment, Borders, Color, Style};
 
 use tuirealm::tui::widgets::Block;
 
@@ -49,7 +49,7 @@ pub(crate) fn get_block<'a>(props: Borders, title: (String, Alignment), focus: b
         .borders(props.sides)
         .border_style(match focus {
             true => props.style(),
-            false => Style::default(),
+            false => Style::default().fg(Color::Reset).bg(Color::Reset),
         })
         .border_type(props.modifiers)
         .title(title.0)
