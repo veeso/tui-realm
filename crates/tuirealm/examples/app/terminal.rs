@@ -2,6 +2,7 @@
 //!
 //! terminal helper
 
+use crossterm::terminal::{disable_raw_mode as tui_disable_raw_mode, enable_raw_mode};
 /**
  * MIT License
  *
@@ -38,6 +39,7 @@ use tuirealm::tui::backend::CrosstermBackend;
 use tuirealm::Terminal;
 
 pub fn init() -> Terminal {
+    let _ = enable_raw_mode();
     Terminal::new(CrosstermBackend::new(get_stdout())).unwrap()
 }
 
@@ -87,6 +89,10 @@ fn get_stdout() -> Stdout {
     let mut stdout = stdout();
     assert!(execute!(stdout, EnterAlternateScreen).is_ok());
     stdout
+}
+
+pub fn disable_raw_mode() {
+    let _ = tui_disable_raw_mode();
 }
 
 #[cfg(target_family = "windows")]

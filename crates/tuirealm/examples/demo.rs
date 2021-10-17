@@ -144,4 +144,5 @@ fn main() {
     // Terminate terminal
     terminal::leave_alternate_screen(&mut model.terminal);
     terminal::clear_screen(&mut model.terminal);
+    terminal::disable_raw_mode();
 }

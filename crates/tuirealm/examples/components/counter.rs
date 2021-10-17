@@ -103,11 +103,7 @@ impl MockComponent for Counter {
         // Check if visible
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Get properties
-            let text = self
-                .props
-                .get_or(Attribute::Value, AttrValue::Number(0))
-                .unwrap_number()
-                .to_string();
+            let text = self.states.counter.to_string();
             let alignment = self
                 .props
                 .get_or(Attribute::Alignment, AttrValue::Alignment(Alignment::Left))
