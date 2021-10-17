@@ -112,7 +112,6 @@ where
     ) -> ApplicationResult<usize> {
         // Poll event listener
         let events = self.poll(strategy)?;
-        println!("EV {}", events.len());
         // Forward to active element
         let mut messages: Vec<Msg> = events
             .iter()
@@ -215,7 +214,7 @@ where
     ///
     /// > NOTE: users should always use this function to give focus to components.
     pub fn active(&mut self, id: &K) -> ApplicationResult<()> {
-        self.view.active(id.clone()).map_err(ApplicationError::from)
+        self.view.active(id).map_err(ApplicationError::from)
     }
 
     /// ### blur
