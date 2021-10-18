@@ -1,6 +1,6 @@
-//! ## crossterm
+//! ## Event
 //!
-//! this module contains the adapters for crossterm
+//! event adapter for crossterm
 
 /**
  * MIT License
@@ -25,32 +25,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-extern crate crossterm;
-
 use super::{Event, Key, KeyEvent, KeyModifiers};
 
-use crate::listener::{ListenerError, ListenerResult, Poll};
-use crate::tui::{backend::CrosstermBackend, Frame as TuiFrame, Terminal as TuiTerminal};
 use crossterm::event::{
-    self as xterm, Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
+    Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
     KeyModifiers as XtermKeyModifiers,
 };
-use std::io::Stdout;
-use std::marker::PhantomData;
-use std::time::Duration;
-
-// -- Frame
-/// ## Frame
-///
-/// Frame represents the Frame where the view will be displayed in
-pub type Frame<'a> = TuiFrame<'a, CrosstermBackend<Stdout>>;
-
-/// ## Terminal
-///
-/// Terminal must be used to interact with the terminal in tui applications
-pub type Terminal = TuiTerminal<CrosstermBackend<Stdout>>;
-
-// -- converters
 
 impl<U> From<XtermEvent> for Event<U>
 where
@@ -112,54 +92,6 @@ impl From<XtermKeyModifiers> for KeyModifiers {
             km.insert(KeyModifiers::ALT);
         }
         km
-    }
-}
-
-// -- Event listener
-
-/// ## CrosstermInputListener
-///
-/// The input listener for crossterm.
-/// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
-/// or you can use it directly in the event listener, calling `default_input_listener()` in the `EventListenerCfg`
-pub struct CrosstermInputListener<U>
-where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
-{
-    ghost: PhantomData<U>,
-}
-
-impl<U> Default for CrosstermInputListener<U>
-where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
-{
-    fn default() -> Self {
-        Self {
-            ghost: PhantomData::default(),
-        }
-    }
-}
-
-impl<U> Poll<U> for CrosstermInputListener<U>
-where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
-{
-    fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
-        if let Ok(available) = xterm::poll(Duration::from_millis(10)) {
-            match available {
-                true => {
-                    // Read event
-                    if let Ok(ev) = xterm::read() {
-                        Ok(Some(Event::from(ev)))
-                    } else {
-                        Err(ListenerError::PollFailed)
-                    }
-                }
-                false => Ok(None),
-            }
-        } else {
-            Err(ListenerError::PollFailed)
-        }
     }
 }
 

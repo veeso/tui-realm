@@ -6,4 +6,6 @@ ignore:
     - "/*"
     - "C:/*"
     - "../*"
+    - "src/adapter/*"
     - "src/mock/*"
+    - src/terminal.rs

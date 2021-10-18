@@ -25,10 +25,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::{terminal, Application, Id, Msg};
+use super::{Application, Id, Msg};
 
+use tuirealm::terminal::TerminalBridge;
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
-use tuirealm::{AttrValue, Attribute, NoUserEvent, Terminal, Update, View};
+use tuirealm::{AttrValue, Attribute, NoUserEvent, Update, View};
 
 pub struct Model {
     /// Indicates that the application must quit
@@ -36,7 +37,7 @@ pub struct Model {
     /// Tells whether to redraw interface
     pub redraw: bool,
     /// Used to draw to terminal
-    pub terminal: Terminal,
+    pub terminal: TerminalBridge,
 }
 
 impl Default for Model {
@@ -44,7 +45,7 @@ impl Default for Model {
         Self {
             quit: false,
             redraw: true,
-            terminal: terminal::init(),
+            terminal: TerminalBridge::new().expect("Cannot initialize terminal"),
         }
     }
 }
@@ -53,6 +54,7 @@ impl Model {
     pub fn view(&mut self, app: &mut Application<Id, Msg, NoUserEvent>) {
         assert!(self
             .terminal
+            .raw_mut()
             .draw(|f| {
                 let chunks = Layout::default()
                     .direction(Direction::Vertical)

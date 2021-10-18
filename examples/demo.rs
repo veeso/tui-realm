@@ -40,8 +40,6 @@ mod components;
 use app::model::Model;
 use components::{Clock, DigitCounter, Label, LetterCounter};
 
-use crate::app::terminal;
-
 // Let's define the messages handled by our app. NOTE: it must derive `PartialEq`
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -122,7 +120,9 @@ fn main() {
         .is_ok());
     // Active letter counter
     assert!(app.active(&Id::LetterCounter).is_ok());
-    terminal::enter_alternate_screen(&mut model.terminal);
+    // Enter alternate screen
+    assert!(model.terminal.enter_alternate_screen().is_ok());
+    assert!(model.terminal.enable_raw_mode().is_ok());
     // Main loop
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {
@@ -150,7 +150,7 @@ fn main() {
         }
     }
     // Terminate terminal
-    terminal::leave_alternate_screen(&mut model.terminal);
-    terminal::clear_screen(&mut model.terminal);
-    terminal::disable_raw_mode();
+    assert!(model.terminal.leave_alternate_screen().is_ok());
+    assert!(model.terminal.disable_raw_mode().is_ok());
+    assert!(model.terminal.clear_screen().is_ok());
 }
