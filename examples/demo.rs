@@ -121,8 +121,8 @@ fn main() {
     // Active letter counter
     assert!(app.active(&Id::LetterCounter).is_ok());
     // Enter alternate screen
-    assert!(model.terminal.enter_alternate_screen().is_ok());
-    assert!(model.terminal.enable_raw_mode().is_ok());
+    let _ = model.terminal.enter_alternate_screen();
+    let _ = model.terminal.enable_raw_mode();
     // Main loop
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {
@@ -150,7 +150,7 @@ fn main() {
         }
     }
     // Terminate terminal
-    assert!(model.terminal.leave_alternate_screen().is_ok());
-    assert!(model.terminal.disable_raw_mode().is_ok());
-    assert!(model.terminal.clear_screen().is_ok());
+    let _ = model.terminal.leave_alternate_screen();
+    let _ = model.terminal.disable_raw_mode();
+    let _ = model.terminal.clear_screen();
 }

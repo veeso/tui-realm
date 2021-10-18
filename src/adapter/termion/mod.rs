@@ -1,6 +1,6 @@
-//! ## crossterm
+//! ## termion
 //!
-//! this module contains the adapters for crossterm
+//! this module contains the adapters for termion
 
 /**
  * MIT License
@@ -25,26 +25,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-extern crate crossterm;
+extern crate termion;
 
 mod event;
 mod listener;
 mod terminal;
 
 // -- export
-pub use listener::CrosstermInputListener;
+pub use listener::TermionInputListener;
 
 use super::{Event, Key, KeyEvent, KeyModifiers};
-use crate::tui::{backend::CrosstermBackend, Frame as TuiFrame, Terminal as TuiTerminal};
+use crate::tui::{backend::TermionBackend, Frame as TuiFrame, Terminal as TuiTerminal};
 use std::io::Stdout;
+use termion::{input::MouseTerminal, raw::RawTerminal, screen::AlternateScreen};
 
 // -- Frame
 /// ## Frame
 ///
 /// Frame represents the Frame where the view will be displayed in
-pub type Frame<'a> = TuiFrame<'a, CrosstermBackend<Stdout>>;
+pub type Frame<'a> =
+    TuiFrame<'a, TermionBackend<AlternateScreen<MouseTerminal<RawTerminal<Stdout>>>>>;
 
 /// ## Terminal
 ///
 /// Terminal must be used to interact with the terminal in tui applications
-pub type Terminal = TuiTerminal<CrosstermBackend<Stdout>>;
+pub type Terminal =
+    TuiTerminal<TermionBackend<AlternateScreen<MouseTerminal<RawTerminal<Stdout>>>>>;

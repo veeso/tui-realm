@@ -42,6 +42,10 @@ pub enum TerminalError {
     CannotLeaveAlternateMode,
     #[error("cannot toggle raw mode")]
     CannotToggleRawMode,
+    #[error("cannot clear screen")]
+    CannotClear,
+    #[error("backend doesn't support this command")]
+    Unsupported,
 }
 
 /// ## TerminalBridge

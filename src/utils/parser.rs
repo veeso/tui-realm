@@ -69,6 +69,8 @@ lazy_static! {
 /// ## example
 ///
 /// ```rust
+/// use tuirealm::utils::parser::*;
+/// use tuirealm::utils::Email;
 /// assert_eq!(parse_email("christian.visintin@gmail.com").unwrap(), Email::new("christian.visintin", "gmail.com"));
 /// ```
 pub fn parse_email(s: &str) -> Option<Email> {
@@ -89,8 +91,10 @@ pub fn parse_email(s: &str) -> Option<Email> {
 /// ## example
 ///
 /// ```rust
-/// assert_eq!(parse_phone_number("+39 345 777 6117").unwrap(), PhoneNumber::new("39", "3457776117"));
-/// assert_eq!(parse_phone_number("0039 345 777 6117").unwrap(), PhoneNumber::new("39", "3457776117"));
+/// use tuirealm::utils::parser::*;
+/// use tuirealm::utils::PhoneNumber;
+/// assert_eq!(parse_phone_number("+39 345 777 6117").unwrap(), PhoneNumber::new(Some("39"), "3457776117"));
+/// assert_eq!(parse_phone_number("0039 345 777 6117").unwrap(), PhoneNumber::new(Some("39"), "3457776117"));
 /// ```
 pub fn parse_phone_number(s: &str) -> Option<PhoneNumber> {
     match PHONE_NUMBER_REGEX.captures(s) {
@@ -302,8 +306,8 @@ pub fn parse_color(color: &str) -> Option<Color> {
 ///
 /// Try to parse a color in hex format, such as:
 ///
-///     - #f0ab05
-///     - #AA33BC
+/// - "#f0ab05"
+/// - "#AA33BC"
 fn parse_hex_color(color: &str) -> Option<Color> {
     COLOR_HEX_REGEX.captures(color).map(|groups| {
         Color::Rgb(
@@ -324,9 +328,9 @@ fn parse_hex_color(color: &str) -> Option<Color> {
 ///
 /// Try to parse a color in rgb format, such as:
 ///
-///     - rgb(255, 64, 32)
-///     - rgb(255,64,32)
-///     - 255, 64, 32
+/// - "rgb(255, 64, 32)"
+/// - "rgb(255,64,32)"
+/// - "255, 64, 32"
 fn parse_rgb_color(color: &str) -> Option<Color> {
     COLOR_RGB_REGEX.captures(color).map(|groups| {
         Color::Rgb(
