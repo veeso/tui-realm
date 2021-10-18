@@ -53,9 +53,14 @@ pub enum InputType {
     UnsignedInteger,
     /// Custom field; displayed as plain text.
     /// You must provide the function to call on `validate` and the function to call on `char_valid`
+    /// The `validate()` callback, is used to tell whether the entire input value is valid,
+    /// while the `char_valid()` callback is used to tell whether the input char is allowed to be pushed to input value
+    /// (e.g. an email address is `valid` if contains the name, the '@' and the domain;
+    /// but `char_valid` allows characters, numbers, symbol and up to one '@')
     Custom(fn(&str) -> bool, fn(&str, char) -> bool),
     /// Custom validation password; text will be shadowed by provided char
-    /// You must provide the function to call on `validate` and the function to call on `char_valid`
+    /// You must provide the function to call on `validate` and the function to call on `char_valid`.
+    /// See `Custom` for callbacks meaning
     CustomPassword(char, fn(&str) -> bool, fn(&str, char) -> bool),
 }
 
