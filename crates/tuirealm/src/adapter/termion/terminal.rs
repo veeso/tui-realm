@@ -1,6 +1,6 @@
 //! ## Terminal
 //!
-//! terminal bridge adapter for crossterm
+//! terminal bridge adapter for termion
 
 /**
  * MIT License
@@ -26,51 +26,29 @@
  * SOFTWARE.
  */
 use crate::terminal::{TerminalBridge, TerminalError, TerminalResult};
-use crate::tui::backend::CrosstermBackend;
+use crate::tui::backend::TermionBackend;
 use crate::Terminal;
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-#[cfg(target_family = "unix")]
-use crossterm::{
-    event::DisableMouseCapture,
-    execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen},
-};
 use std::io::stdout;
+#[cfg(target_family = "unix")]
+use termion::screen::AlternateScreen;
+use termion::{input::MouseTerminal, raw::IntoRawMode};
 
 impl TerminalBridge {
     pub(crate) fn adapt_new_terminal() -> TerminalResult<Terminal> {
-        Terminal::new(CrosstermBackend::new(stdout()))
+        let screen = stdout()
+            .into_raw_mode()
             .map_err(|_| TerminalError::CannotConnectStdout)
+            .map(MouseTerminal::from)
+            .map(AlternateScreen::from)?;
+        Terminal::new(TermionBackend::new(screen)).map_err(|_| TerminalError::CannotConnectStdout)
     }
 
-    #[cfg(target_family = "unix")]
     pub(crate) fn adapt_enter_alternate_screen(&mut self) -> TerminalResult<()> {
-        execute!(
-            self.raw_mut().backend_mut(),
-            EnterAlternateScreen,
-            DisableMouseCapture
-        )
-        .map_err(|_| TerminalError::CannotEnterAlternateMode)
+        Err(TerminalError::Unsupported)
     }
 
-    #[cfg(target_family = "windows")]
-    pub(crate) fn adapt_enter_alternate_screen(&mut self) -> TerminalResult<()> {
-        Ok(())
-    }
-
-    #[cfg(target_family = "unix")]
     pub(crate) fn adapt_leave_alternate_screen(&mut self) -> TerminalResult<()> {
-        execute!(
-            self.raw_mut().backend_mut(),
-            LeaveAlternateScreen,
-            DisableMouseCapture
-        )
-        .map_err(|_| TerminalError::CannotLeaveAlternateMode)
-    }
-
-    #[cfg(target_family = "windows")]
-    pub(crate) fn adapt_leave_alternate_screen(&mut self) -> TerminalResult<()> {
-        Ok(())
+        Err(TerminalError::Unsupported)
     }
 
     pub(crate) fn adapt_clear_screen(&mut self) -> TerminalResult<()> {
@@ -80,10 +58,10 @@ impl TerminalBridge {
     }
 
     pub(crate) fn adapt_enable_raw_mode(&mut self) -> TerminalResult<()> {
-        enable_raw_mode().map_err(|_| TerminalError::CannotToggleRawMode)
+        Err(TerminalError::Unsupported)
     }
 
     pub(crate) fn adapt_disable_raw_mode(&mut self) -> TerminalResult<()> {
-        disable_raw_mode().map_err(|_| TerminalError::CannotToggleRawMode)
+        Err(TerminalError::Unsupported)
     }
 }

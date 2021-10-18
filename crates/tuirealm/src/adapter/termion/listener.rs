@@ -1,6 +1,6 @@
 //! ## Listener
 //!
-//! input listener adapter for crossterm
+//! input listener adapter for termion
 
 /**
  * MIT License
@@ -28,23 +28,23 @@
 use super::Event;
 
 use crate::listener::{ListenerError, ListenerResult, Poll};
-use crossterm::event as xterm;
+use std::io::stdin;
 use std::marker::PhantomData;
-use std::time::Duration;
+use termion::input::TermRead;
 
-/// ## CrosstermInputListener
+/// ## TermionInputListener
 ///
-/// The input listener for crossterm.
-/// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
+/// The input listener for termion.
+/// If termion is enabled, this will already be exported as `InputEventListener` in the `adapter` module
 /// or you can use it directly in the event listener, calling `default_input_listener()` in the `EventListenerCfg`
-pub struct CrosstermInputListener<U>
+pub struct TermionInputListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     ghost: PhantomData<U>,
 }
 
-impl<U> Default for CrosstermInputListener<U>
+impl<U> Default for TermionInputListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
@@ -55,17 +55,15 @@ where
     }
 }
 
-impl<U> Poll<U> for CrosstermInputListener<U>
+impl<U> Poll<U> for TermionInputListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
-        match xterm::poll(Duration::from_millis(5)) {
-            Ok(true) => xterm::read()
-                .map(|x| Some(Event::from(x)))
-                .map_err(|_| ListenerError::PollFailed),
-            Ok(false) => Ok(None),
-            Err(_) => Err(ListenerError::PollFailed),
+        match stdin().events().next() {
+            Some(Ok(ev)) => Ok(Some(Event::from(ev))),
+            Some(Err(_)) => Err(ListenerError::PollFailed),
+            None => Ok(None),
         }
     }
 }
