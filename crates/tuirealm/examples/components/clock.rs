@@ -54,7 +54,7 @@ impl Clock {
 
     pub fn alignment(mut self, a: Alignment) -> Self {
         self.component
-            .attr(Attribute::Alignment, AttrValue::Alignment(a));
+            .attr(Attribute::TextAlign, AttrValue::Alignment(a));
         self
     }
 
