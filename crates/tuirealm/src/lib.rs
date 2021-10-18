@@ -58,6 +58,7 @@ mod core;
 pub mod listener;
 #[cfg(test)]
 pub mod mock;
+pub mod terminal;
 pub mod tui;
 pub mod utils;
 // -- export
