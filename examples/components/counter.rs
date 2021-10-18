@@ -73,7 +73,7 @@ impl Counter {
     }
 
     pub fn alignment(mut self, a: Alignment) -> Self {
-        self.attr(Attribute::Alignment, AttrValue::Alignment(a));
+        self.attr(Attribute::TextAlign, AttrValue::Alignment(a));
         self
     }
 
@@ -106,7 +106,7 @@ impl MockComponent for Counter {
             let text = self.states.counter.to_string();
             let alignment = self
                 .props
-                .get_or(Attribute::Alignment, AttrValue::Alignment(Alignment::Left))
+                .get_or(Attribute::TextAlign, AttrValue::Alignment(Alignment::Left))
                 .unwrap_alignment();
             let foreground = self
                 .props

@@ -93,32 +93,72 @@ impl Props {
 ///
 /// Describes a "selector" to query an attribute on props.
 /// The selector must identify uniquely an attribute in the properties.
+/// Check each attribute documentation to see how they're supposed to be used, but remember that
+/// when implementing a component, you're free to use each attribute as you prefer!
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 pub enum Attribute {
+    /// Layout alignment
     Alignment,
+    /// Background color or style
     Background,
+    /// Borders styles
     Borders,
+    /// Main color
     Color,
+    /// Component content. Generic purpose
     Content,
+    /// Dataset of component; should be associated to `AttrValue::Dataset`
+    Dataset,
+    /// Component layout direction
     Direction,
+    /// Whether to display or not the component. This should be reserved to hide components.
+    /// As shown in stdlib and in example, its value should be `AttrValue::Flag` and should be checked on top of the
+    /// `view()` method to choose whether to or not to render the component.
     Display,
+    /// Reserved for tracking focus on component.
+    /// You should not implement focus by yourself, since it's already read/written by the `active()` and `blur()` methods on
+    /// view/application. When implementing a component, its value should be read-only.
+    /// The value is always `AttrValue::Flag`
     Focus,
+    /// Should be used to use a different color from `Color::Reset` when component is not enabled.
     FocusColor,
+    /// Foreground color or style
     Foreground,
+    /// Height size. Useful when building layouts or containers
     Height,
+    /// String to prepend to highlighted items in list or other
     HighlightedStr,
+    /// Maximum input length for input fields
     InputLength,
+    /// Input type for input fields
     InputType,
+    /// A map of colors for complex components
+    Palette,
+    /// Intended to decide whether to rewind when reaching boundaries on list/tables
     Rewind,
+    /// Intended to store a `AttrValue::Shape`
+    Shape,
+    /// Should be used to choose whether to make list interactive (scrollable) or not
     Scroll,
-    Step,
+    /// Intended as scroll step for fast scroll, for example when using `PageUp`
+    ScrollStep,
+    /// Component style
+    Style,
+    /// Component text content
     Text,
+    /// Text align
+    TextAlign,
+    /// Text properties
     TextProps,
+    /// Whether to wrap text (or how)
     TextWrap,
+    /// Component box title
     Title,
+    /// A generic component value
     Value,
+    /// Component width; useful when using containers or layouts
     Width,
-    /// User defined selector
+    /// A user defined property
     Custom(&'static str),
 }
 
