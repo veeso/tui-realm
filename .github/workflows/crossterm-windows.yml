@@ -1,0 +1,28 @@
+name: Windows
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --no-fail-fast --no-default-features --features with-crossterm
+      - name: Examples
+        run: cargo build --all-targets --examples
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --lib --no-default-features --features with-crossterm -- -Dwarnings

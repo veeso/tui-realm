@@ -51,6 +51,11 @@
   /></a>
   <a href="https://github.com/veeso/tui-realm/actions"
     ><img
+      src="https://github.com/veeso/tui-realm/workflows/Crossterm-Windows/badge.svg"
+      alt="Crossterm CI (Windows)"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm/actions"
+    ><img
       src="https://github.com/veeso/tui-realm/workflows/Termion/badge.svg"
       alt="Termion CI"
   /></a>
