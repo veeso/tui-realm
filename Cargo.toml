@@ -24,7 +24,6 @@ tui = { version = "0.16.0", default-features = false }
 
 [dev-dependencies]
 pretty_assertions = "0.7.2"
-rand = "0.8.4"
 
 [features]
 default = [ "with-crossterm" ]
