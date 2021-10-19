@@ -1,4 +1,4 @@
-# tui-realm-derive
+# tuirealm_derive
 
 <p align="center">
   <img src="https://rawcdn.githack.com/veeso/tui-realm/39c38c3bd905f724403481514adb2cf2b4e69a7b/docs/images/tui-realm.svg" width="256" height="256" />
@@ -24,7 +24,7 @@
   /></a>
   <a href="https://github.com/veeso/tui-realm/stargazers"
     ><img
-      src="https://img.shields.io/github/stars/veeso/tui-realm-derive.svg"
+      src="https://img.shields.io/github/stars/veeso/tuirealm_derive.svg"
       alt="Repo stars"
   /></a>
   <a href="https://crates.io/crates/tuirealm_derive"
@@ -44,9 +44,9 @@
   /></a>
 </p>
 <p align="center">
-  <a href="https://github.com/veeso/tui-realm-derive/actions"
+  <a href="https://github.com/veeso/tuirealm_derive/actions"
     ><img
-      src="https://github.com/veeso/tui-realm-derive/workflows/Build/badge.svg"
+      src="https://github.com/veeso/tuirealm_derive/workflows/Build/badge.svg"
       alt="Build CI"
   /></a>
   <a href="https://docs.rs/tuirealm_derive"
@@ -58,13 +58,13 @@
 
 ---
 
-- [tui-realm-derive](#tui-realm-derive)
-  - [About tui-realm-derive 👑](#about-tui-realm-derive-)
+- [tuirealm_derive](#tuirealm_derive)
+  - [About tuirealm_derive 👑](#about-tuirealm_derive-)
   - [Get started 🏁](#get-started-)
   - [Changelog ⏳](#changelog-)
   - [License 📃](#license-)
 
-## About tui-realm-derive 👑
+## About tuirealm_derive 👑
 
 TODO!
 

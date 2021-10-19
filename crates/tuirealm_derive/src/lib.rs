@@ -1,6 +1,6 @@
-//! # tui-realm-derive
+//! # tuirealm_derive
 //!
-//! [tui-realm](https://github.com/veeso/tui-realm-derive) provides the derive macro
+//! [tuirealm_derive](https://github.com/veeso/tuirealm_derive) provides the derive macro
 //! to automatically implement `MockComponent` for a [tui-realm](https://github.com/veeso/tui-realm) component.
 //!
 //! ## Get Started
@@ -41,71 +41,53 @@
  */
 use proc_macro::{self, TokenStream};
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput, MetaItem};
+use syn::{parse_macro_input, DeriveInput, FieldsNamed};
 
-#[proc_macro_derive(MockComponent, attributes(component))]
+#[proc_macro_derive(MockComponent)]
 pub fn mock_component(input: TokenStream) -> TokenStream {
-    let DeriveInput {
-        ident, data, attrs, ..
-    } = parse_macro_input!(input);
+    let DeriveInput { ident, data, .. } = parse_macro_input!(input);
 
     if let syn::Data::Struct(s) = data {
-        // Let's get the name of the field with type `MockComponent`
-        let field = attrs
-            .iter()
-            .filter(|attr| attr.path.is_ident("component"))
-            .map(|attr| {
-                attr.parse_meta()
-                    .expect("Could not parse meta for component")
-            })
-            .map(|attr| {
-                if let syn::Meta::List(syn::MetaList {
-                    path: _,
-                    paren_token: _,
-                    nested,
-                }) = attr
+        // Check if "component" exists
+        match s.fields {
+            syn::Fields::Named(FieldsNamed { named, .. }) => {
+                if named
+                    .iter()
+                    .find(|x| x.ident.as_ref().unwrap() == "component")
+                    .is_none()
                 {
-                    panic!("Found our attribute with contents: {:?}", nested);
+                    panic!("`component` not found for struct '{}'", ident);
                 }
-                "ciccio"
-            });
-
+            }
+            _ => panic!("struct {} does not contain named fields", ident),
+        }
+        // Implement MockComponent for type
         let output = quote! {
-            impl #ident {
-                fn describe() {
-                    println!("test", stringify!(#ident));
+            impl tuirealm::MockComponent for #ident {
+                fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::tui::layout::Rect) {
+                    self.component.view(frame, area);
+                }
+
+                fn query(&self, attr: tuirealm::Attribute) -> Option<tuirealm::AttrValue> {
+                    self.component.query(attr)
+                }
+
+                fn attr(&mut self, query: tuirealm::Attribute, attr: tuirealm::AttrValue) {
+                    self.component.attr(query, attr)
+                }
+
+                fn state(&self) -> tuirealm::State {
+                    self.component.state()
+                }
+
+                fn perform(&mut self, cmd: tuirealm::Cmd) -> tuirealm::CmdResult {
+                    self.component.perform(cmd)
                 }
             }
         };
 
-        //let output = quote! {
-        //    impl MockComponent for #field {
-        //        fn describe() {
-        //            println!("{} is {}.", stringify!(#ident), #description);
-        //        }
-        //    }
-        //};
-
         output.into()
     } else {
         panic!("MockComponent must be derived by a `Struct`")
-    }
-}
-
-#[cfg(test)]
-mod tests {
-
-    use crate::MockComponent;
-
-    #[derive(MockComponent)]
-    pub struct Dummy {
-        #[component]
-        pub foo: usize,
-    }
-
-    #[test]
-    fn should_impl_mock() {
-        let d = Dummy { foo: 5 };
-        d.describe();
     }
 }
