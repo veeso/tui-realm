@@ -172,6 +172,8 @@ If you're not using the default features, be sure to enable the **derive** featu
 tuirealm = { version = "^1.0.0", default-features = false, features = ["derive", "with-termion"] }
 ```
 
+>⚠️ tuirealm_derive requires tui-realm >= 1.0.0; the old API is not supported
+
 Then you need to include tuirealm in your project using the `macro use` directive:
 
 > src/lib.rs
