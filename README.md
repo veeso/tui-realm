@@ -85,7 +85,7 @@
   - [Documentation 📚](#documentation-)
   - [About other backends](#about-other-backends)
   - [Apps using tui-realm 🚀](#apps-using-tui-realm-)
-  - [Buy me a coffee ☕](#buy-me-a-coffee-)
+  - [Support the developer ☕](#support-the-developer-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
   - [License 📃](#license-)
@@ -188,15 +188,14 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 
 ---
 
-## Buy me a coffee ☕
+## Support the developer ☕
 
 If you like tui-realm and you're grateful for the work I've done, please consider a little donation 🥳
 
-[![Buy-me-a-coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=veeso&button_colour=404040&font_colour=ffffff&font_family=Comic&outline_colour=ffffff&coffee_colour=FFDD00)](https://www.buymeacoffee.com/veeso)
+You can make a donation with one of these platforms:
 
-or you can also directly make a donation on PayPal:
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/chrisintin)
+[![Buy-me-a-coffee](https://img.shields.io/badge/Donate-BuyMeACoffee-yellow.svg)](https://www.buymeacoffee.com/veeso)
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/chrisintin)
 
 ---
 
