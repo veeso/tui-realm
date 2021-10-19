@@ -1,0 +1,29 @@
+[package]
+name = "tui-realm-derive"
+version = "0.1.0"
+authors = ["Christian Visintin"]
+edition = "2018"
+categories = ["command-line-utilities"]
+description = "Derive macro for automatically implementing MockComponent for Component"
+documentation = "https://docs.rs/tui-realm-derive"
+homepage = "https://github.com/veeso/tui-realm-derive"
+include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+keywords = ["tui", "terminal"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/veeso/tui-realm-derive"
+
+[lib]
+name = "tui-realm-derive"
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = "1.0"
+
+[dev-dependencies]
+tuirealm = "1.0"
+
+[features]
+
