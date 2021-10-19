@@ -96,7 +96,7 @@ impl MockInputStates {
 
 // -- component impl
 
-// TODO: #[derive(MockComponent)]
+#[derive(MockComponent)]
 pub struct MockFooInput {
     component: MockInput,
 }
@@ -106,28 +106,6 @@ impl Default for MockFooInput {
         Self {
             component: MockInput::default(),
         }
-    }
-}
-
-impl MockComponent for MockFooInput {
-    fn view(&mut self, frame: &mut crate::Frame, area: tuirs::layout::Rect) {
-        self.component.view(frame, area);
-    }
-
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.component.query(attr)
-    }
-
-    fn attr(&mut self, query: Attribute, attr: AttrValue) {
-        self.component.attr(query, attr)
-    }
-
-    fn state(&self) -> State {
-        self.component.state()
-    }
-
-    fn perform(&mut self, cmd: Cmd) -> CmdResult {
-        self.component.perform(cmd)
     }
 }
 
@@ -162,6 +140,7 @@ impl Component<MockMsg, MockEvent> for MockFooInput {
     }
 }
 
+#[derive(MockComponent)]
 pub struct MockBarInput {
     component: MockInput,
 }
@@ -171,28 +150,6 @@ impl Default for MockBarInput {
         Self {
             component: MockInput::default(),
         }
-    }
-}
-
-impl MockComponent for MockBarInput {
-    fn view(&mut self, frame: &mut crate::Frame, area: tuirs::layout::Rect) {
-        self.component.view(frame, area);
-    }
-
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.component.query(attr)
-    }
-
-    fn attr(&mut self, query: Attribute, attr: AttrValue) {
-        self.component.attr(query, attr)
-    }
-
-    fn state(&self) -> State {
-        self.component.state()
-    }
-
-    fn perform(&mut self, cmd: Cmd) -> CmdResult {
-        self.component.perform(cmd)
     }
 }
 
