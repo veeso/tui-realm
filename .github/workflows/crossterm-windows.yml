@@ -1,4 +1,4 @@
-name: Windows
+name: Crossterm (Windows)
 
 on: [push, pull_request]
 
