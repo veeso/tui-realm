@@ -66,7 +66,7 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
             const _: () = {
                 use ::tuirealm::command::{Cmd, CmdResult};
                 use ::tuirealm::tui::layout::Rect;
-                use ::tuirealm::{Attribute, AttrValue, , Frame, MockComponent, State};
+                use ::tuirealm::{Attribute, AttrValue, Frame, MockComponent, State};
                 impl MockComponent for #ident {
                     fn view(&mut self, frame: &mut Frame, area: Rect) {
                         self.component.view(frame, area);
