@@ -10,7 +10,7 @@
   ·
   <a href="https://github.com/veeso/tui-realm" target="_blank">tui-realm</a>
   ·
-  <a href="https://docs.rs/tui-realm-derive" target="_blank">Documentation</a>
+  <a href="https://docs.rs/tuirealm_derive" target="_blank">Documentation</a>
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
@@ -27,14 +27,14 @@
       src="https://img.shields.io/github/stars/veeso/tui-realm-derive.svg"
       alt="Repo stars"
   /></a>
-  <a href="https://crates.io/crates/tui-realm-derive"
+  <a href="https://crates.io/crates/tuirealm_derive"
     ><img
-      src="https://img.shields.io/crates/d/tui-realm-derive.svg"
+      src="https://img.shields.io/crates/d/tuirealm_derive.svg"
       alt="Downloads counter"
   /></a>
-  <a href="https://crates.io/crates/tui-realm-derive"
+  <a href="https://crates.io/crates/tuirealm_derive"
     ><img
-      src="https://img.shields.io/crates/v/tui-realm-derive.svg"
+      src="https://img.shields.io/crates/v/tuirealm_derive.svg"
       alt="Latest version"
   /></a>
   <a href="https://www.buymeacoffee.com/veeso">
@@ -49,9 +49,9 @@
       src="https://github.com/veeso/tui-realm-derive/workflows/Build/badge.svg"
       alt="Build CI"
   /></a>
-  <a href="https://docs.rs/tui-realm-derive"
+  <a href="https://docs.rs/tuirealm_derive"
     ><img
-      src="https://docs.rs/tui-realm-derive/badge.svg"
+      src="https://docs.rs/tuirealm_derive/badge.svg"
       alt="Docs"
   /></a>
 </p>
