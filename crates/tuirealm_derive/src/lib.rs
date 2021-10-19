@@ -63,27 +63,32 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
         }
         // Implement MockComponent for type
         let output = quote! {
-            impl tuirealm::MockComponent for #ident {
-                fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::tui::layout::Rect) {
-                    self.component.view(frame, area);
-                }
+            const _: () = {
+                use ::tuirealm::command::{Cmd, CmdResult};
+                use ::tuirealm::tui::layout::Rect;
+                use ::tuirealm::{Attribute, AttrValue, , Frame, MockComponent, State};
+                impl MockComponent for #ident {
+                    fn view(&mut self, frame: &mut Frame, area: Rect) {
+                        self.component.view(frame, area);
+                    }
 
-                fn query(&self, attr: tuirealm::Attribute) -> Option<tuirealm::AttrValue> {
-                    self.component.query(attr)
-                }
+                    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+                        self.component.query(attr)
+                    }
 
-                fn attr(&mut self, query: tuirealm::Attribute, attr: tuirealm::AttrValue) {
-                    self.component.attr(query, attr)
-                }
+                    fn attr(&mut self, query: Attribute, attr: AttrValue) {
+                        self.component.attr(query, attr)
+                    }
 
-                fn state(&self) -> tuirealm::State {
-                    self.component.state()
-                }
+                    fn state(&self) -> State {
+                        self.component.state()
+                    }
 
-                fn perform(&mut self, cmd: tuirealm::Cmd) -> tuirealm::CmdResult {
-                    self.component.perform(cmd)
+                    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+                        self.component.perform(cmd)
+                    }
                 }
-            }
+            };
         };
 
         output.into()
