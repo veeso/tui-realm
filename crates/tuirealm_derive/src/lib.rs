@@ -39,11 +39,73 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use proc_macro::{self, TokenStream};
+use quote::quote;
+use syn::{parse_macro_input, DeriveInput, MetaItem};
+
+#[proc_macro_derive(MockComponent, attributes(component))]
+pub fn mock_component(input: TokenStream) -> TokenStream {
+    let DeriveInput {
+        ident, data, attrs, ..
+    } = parse_macro_input!(input);
+
+    if let syn::Data::Struct(s) = data {
+        // Let's get the name of the field with type `MockComponent`
+        let field = attrs
+            .iter()
+            .filter(|attr| attr.path.is_ident("component"))
+            .map(|attr| {
+                attr.parse_meta()
+                    .expect("Could not parse meta for component")
+            })
+            .map(|attr| {
+                if let syn::Meta::List(syn::MetaList {
+                    path: _,
+                    paren_token: _,
+                    nested,
+                }) = attr
+                {
+                    panic!("Found our attribute with contents: {:?}", nested);
+                }
+                "ciccio"
+            });
+
+        let output = quote! {
+            impl #ident {
+                fn describe() {
+                    println!("test", stringify!(#ident));
+                }
+            }
+        };
+
+        //let output = quote! {
+        //    impl MockComponent for #field {
+        //        fn describe() {
+        //            println!("{} is {}.", stringify!(#ident), #description);
+        //        }
+        //    }
+        //};
+
+        output.into()
+    } else {
+        panic!("MockComponent must be derived by a `Struct`")
+    }
+}
 
 #[cfg(test)]
 mod tests {
+
+    use crate::MockComponent;
+
+    #[derive(MockComponent)]
+    pub struct Dummy {
+        #[component]
+        pub foo: usize,
+    }
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn should_impl_mock() {
+        let d = Dummy { foo: 5 };
+        d.describe();
     }
 }
