@@ -1,6 +1,6 @@
 [package]
 name = "tui-realm-derive"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]
@@ -23,7 +23,7 @@ quote = "1.0"
 syn = "1.0"
 
 [dev-dependencies]
-tuirealm = "1.0"
+#tuirealm = "1.0"
+tuirealm = { git = "https://github.com/veeso/tui-realm", branch = "new-api" }
 
 [features]
-
