@@ -49,8 +49,13 @@ extern crate bitflags;
 #[macro_use]
 extern crate lazy_static;
 extern crate regex;
+extern crate self as tuirealm;
 extern crate thiserror;
 extern crate tui as tuirs;
+#[cfg(feature = "derive")]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate tuirealm_derive;
 
 // -- modules
 pub mod adapter;
@@ -70,3 +75,8 @@ pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause
 pub use self::core::{Component, MockComponent, State, StateValue, Update, View, ViewError};
 pub use adapter::{Frame, Terminal};
 pub use listener::{EventListenerCfg, ListenerError};
+
+// -- derive
+#[cfg(feature = "derive")]
+#[doc(hidden)]
+pub use tuirealm_derive::*;

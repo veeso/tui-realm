@@ -194,14 +194,15 @@ impl OwnStates {
 
 // -- Counter components
 
+#[derive(MockComponent)]
 pub struct LetterCounter {
-    counter: Counter,
+    component: Counter,
 }
 
 impl LetterCounter {
     pub fn new(initial_value: isize) -> Self {
         Self {
-            counter: Counter::default()
+            component: Counter::default()
                 .alignment(Alignment::Center)
                 .background(Color::Reset)
                 .borders(
@@ -214,28 +215,6 @@ impl LetterCounter {
                 .value(initial_value)
                 .label("Letter counter"),
         }
-    }
-}
-
-impl MockComponent for LetterCounter {
-    fn view(&mut self, frame: &mut Frame, area: Rect) {
-        self.counter.view(frame, area);
-    }
-
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.counter.query(attr)
-    }
-
-    fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.counter.attr(attr, value)
-    }
-
-    fn state(&self) -> State {
-        self.counter.state()
-    }
-
-    fn perform(&mut self, cmd: Cmd) -> CmdResult {
-        self.counter.perform(cmd)
     }
 }
 
@@ -267,14 +246,15 @@ impl Component<Msg, NoUserEvent> for LetterCounter {
     }
 }
 
+#[derive(MockComponent)]
 pub struct DigitCounter {
-    counter: Counter,
+    component: Counter,
 }
 
 impl DigitCounter {
     pub fn new(initial_value: isize) -> Self {
         Self {
-            counter: Counter::default()
+            component: Counter::default()
                 .alignment(Alignment::Center)
                 .background(Color::Reset)
                 .borders(
@@ -287,28 +267,6 @@ impl DigitCounter {
                 .value(initial_value)
                 .label("Digit counter"),
         }
-    }
-}
-
-impl MockComponent for DigitCounter {
-    fn view(&mut self, frame: &mut Frame, area: Rect) {
-        self.counter.view(frame, area);
-    }
-
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.counter.query(attr)
-    }
-
-    fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.counter.attr(attr, value)
-    }
-
-    fn state(&self) -> State {
-        self.counter.state()
-    }
-
-    fn perform(&mut self, cmd: Cmd) -> CmdResult {
-        self.counter.perform(cmd)
     }
 }
 

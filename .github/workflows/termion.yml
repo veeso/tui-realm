@@ -19,10 +19,10 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --no-fail-fast --no-default-features --features with-termion
+          args: --no-fail-fast --no-default-features --features derive --features with-termion
       - name: Examples
-        run: cargo build --all-targets --examples
+        run: cargo build --all-targets --no-default-features --features derive --features with-termion --examples
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
-        run: cargo clippy --lib --no-default-features --features with-termion -- -Dwarnings
+        run: cargo clippy --lib --no-default-features --features derive --features with-termion -- -Dwarnings
