@@ -6,7 +6,7 @@
 
 <p align="center">~ Automatically implements MockComponent ~</p>
 <p align="center">
-  <a href="#get-started" target="_blank">Get started</a>
+  <a href="#get-started-">Get started</a>
   ·
   <a href="https://github.com/veeso/tui-realm" target="_blank">tui-realm</a>
   ·
