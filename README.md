@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.0.0 (FIXME:/10/2021)</p>
+<p align="center">Current version: 1.0.0 (FIXME:/10/2021)</p> TODO: add youtube crash course video link
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -77,14 +77,14 @@
   - [About tui-realm 👑](#about-tui-realm-)
   - [Get started 🏁](#get-started-)
     - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
-    - [Create a tui-realm application](#create-a-tui-realm-application)
-    - [Run examples](#run-examples)
+    - [Create a tui-realm application 🪂](#create-a-tui-realm-application-)
+    - [Run examples 🔍](#run-examples-)
   - [Standard components library 🎨](#standard-components-library-)
   - [Community components 🏘️](#community-components-️)
   - [Guides 🎓](#guides-)
   - [Documentation 📚](#documentation-)
-  - [About other backends](#about-other-backends)
   - [Apps using tui-realm 🚀](#apps-using-tui-realm-)
+  - [Legacy API 📜](#legacy-api-)
   - [Support the developer ☕](#support-the-developer-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
@@ -94,56 +94,114 @@
 
 ## About tui-realm 👑
 
-tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React But that's not all: the components communicate with the ui engine via a system based on **Messages** and events, providing you with the possibility to implement `update` functions as happens in Elm. In addition, the components are organized inside **Views**, which manages mounting/umounting and focus for you.
+tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React. But that's not all: the components communicate with the ui engine via a system based on **Messages** and **Events**, providing you with the possibility to implement `update` routines as happens in Elm. In addition, the components are organized inside the **View**, which manages mounting/umounting, focus and event forwarding for you.
 
 And that's also explains the reason of the name: Realm stands for React and Elm.
 
-Tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
+tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
 
-![Demo](docs/images/demo.gif)
+```rust
+pub enum Msg {
+    AppClose,
+    Clock,
+    DigitCounterChanged(isize),
+    DigitCounterBlur,
+    LetterCounterChanged(isize),
+    LetterCounterBlur,
+}
+
+// ...
+
+impl Update<Id, Msg, NoUserEvent> for Model {
+    fn update(&mut self, view: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
+        if let Some(msg) = msg {
+            // Set redraw
+            self.redraw = true;
+            // Match message
+            match msg {
+                Msg::AppClose => {
+                    self.quit = true; // Terminate
+                    None
+                }
+                Msg::DigitCounterBlur => {
+                    // Give focus to letter counter
+                    assert!(view.active(&Id::LetterCounter).is_ok());
+                    None
+                }
+                Msg::DigitCounterChanged(v) => {
+                    // Update label
+                    assert!(view
+                        .attr(
+                            &Id::Label,
+                            Attribute::Text,
+                            AttrValue::String(format!("DigitCounter has now value: {}", v))
+                        )
+                        .is_ok());
+                    None
+                }
+            }
+        } else {
+            None
+        }
+    }
+}
+```
+
+See tui-realm in action in the [Example](#run-examples) or if you want to read more about tui-realm start reading the official guide [HERE](docs/en/get-started.md).
 
 ---
 
 ## Get started 🏁
 
-⚠ Warning: tui-realm works only with **crossterm** as backend ⚠
+> ⚠️ Warning: currently tui-realm supports these backends: crossterm, termion
 
 ### Add tui-realm to your Cargo.toml 🦀
 
-```toml
-tuirealm = "0.6.0"
-```
-
-Since this library requires `crossterm` too, you'll also need to add it to your Cargo.toml
+If you want the default features, just add tuirealm 1.x version:
 
 ```toml
-crossterm = "0.20"
+tuirealm = "^1.0.0"
 ```
 
-You don't need tui as dependency, since you can access to tui via `tuirealm::tui::*`
+otherwise you can specify the features you want to add:
 
-### Create a tui-realm application
+```toml
+tuirealm = { version = "^1.0.0", default-features = false, features = [ "derive", "with-termion" ] }
+```
 
-View how to implement a tui-realm application in the [related guide](docs/get-started.md).
+Supported features are:
 
-### Run examples
+- `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
+- `with-crossterm` (*default*): use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
+- `with-termion` (*default*): use [termion](https://github.com/redox-os/termion) as backend for tui.
+
+> ⚠️ You can enable only one backend at the time and at least one must be enabled in order to build.
+> ❗ You don't need tui as a dependency, since you can access to tui types via `use tuirealm::tui::`
+
+### Create a tui-realm application 🪂
+
+View how to implement a tui-realm application in the [related guide](/docs/get-started.md).
+
+### Run examples 🔍
 
 Still confused about how tui-realm works? Don't worry, try with the examples:
 
-- [demo](examples/demo.rs): a simple application which shows how tui-realm works
+- [demo](/examples/demo.rs): a simple application which shows how tui-realm works
 
     ```sh
     cargo run --example demo
     ```
+
+or take some time to watch my [tui-realm Crash Course](FIXME: put link here) on my Youtube channel.
+
+FIXME: youtube badge
 
 ---
 
 ## Standard components library 🎨
 
 Tui-realm comes with an optional standard library of components I thought would have been useful for most of the applications.
-If you want to use it, just add the [tui-realm-stdlib](https://crates.io/crates/tui-realm-stdlib) to your `Cargo.toml` dependencies.
-
-For each component, the standard library provides a `PropsBuilder` in the same module (e.g. `input::Input => input::InputPropsBuilder`), which provides methods to set only the properties actually used by the component.
+If you want to use it, just add the [tui-realm-stdlib](https://github.com/veeso/tui-realm-stdlib) to your `Cargo.toml` dependencies.
 
 ## Community components 🏘️
 
@@ -157,9 +215,9 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 
 ## Guides 🎓
 
-- [Get Started Guide](docs/get-started.md)
-- [The UI lifecycle](docs/lifecycle.md)
-- [Implement components](docs/new-components.md)
+- [Get Started Guide](/docs/en/get-started.md)
+- [The UI lifecycle](/docs/en/lifecycle.md)
+- [Implement components](/docs/en/new-components.md)
 
 ---
 
@@ -169,22 +227,16 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 
 ---
 
-## About other backends
-
-As you've probably already noticed, tuirealm only supports `crossterm` as backend for the terminal, even if `tui` supports `termion` and other libraries. Why this?
-Well the reasons are these two:
-
-1. There's no reason to use the other backends: I use crossterm in termscp, and I don't find any advantage in using termion or other backends. Crossterm is cross platform and works perfectly fine.
-2. Implementing the support for the other backends would force me in creating a mapper for input events from the different backends into a common type. Is it possible? Yes it is, but I'm really not interested in implementing it.
-
----
-
 ## Apps using tui-realm 🚀
 
 - [termusic](https://github.com/tramhao/termusic)
 - [termscp](https://github.com/veeso/termscp)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
+
+## Legacy API 📜
+
+Looking for the old ugly tui-realm API? You can find it [here](https://github.com/veeso/tui-realm/tree/legacy)
 
 ---
 
