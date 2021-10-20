@@ -111,6 +111,8 @@ pub enum Attribute {
     Dataset,
     /// Component layout direction
     Direction,
+    /// Describes whether the component is disabled (e.g. an Input)
+    Disabled,
     /// Whether to display or not the component. This should be reserved to hide components.
     /// As shown in stdlib and in example, its value should be `AttrValue::Flag` and should be checked on top of the
     /// `view()` method to choose whether to or not to render the component.
