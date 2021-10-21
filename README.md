@@ -75,6 +75,7 @@
 
 - [tui-realm](#tui-realm)
   - [About tui-realm 👑](#about-tui-realm-)
+  - [Features 🎁](#features-)
   - [Get started 🏁](#get-started-)
     - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
     - [Create a tui-realm application 🪂](#create-a-tui-realm-application-)
@@ -100,54 +101,19 @@ And that's also explains the reason of the name: Realm stands for React and Elm.
 
 tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
 
-```rust
-pub enum Msg {
-    AppClose,
-    Clock,
-    DigitCounterChanged(isize),
-    DigitCounterBlur,
-    LetterCounterChanged(isize),
-    LetterCounterBlur,
-}
-
-// ...
-
-impl Update<Id, Msg, NoUserEvent> for Model {
-    fn update(&mut self, view: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
-        if let Some(msg) = msg {
-            // Set redraw
-            self.redraw = true;
-            // Match message
-            match msg {
-                Msg::AppClose => {
-                    self.quit = true; // Terminate
-                    None
-                }
-                Msg::DigitCounterBlur => {
-                    // Give focus to letter counter
-                    assert!(view.active(&Id::LetterCounter).is_ok());
-                    None
-                }
-                Msg::DigitCounterChanged(v) => {
-                    // Update label
-                    assert!(view
-                        .attr(
-                            &Id::Label,
-                            Attribute::Text,
-                            AttrValue::String(format!("DigitCounter has now value: {}", v))
-                        )
-                        .is_ok());
-                    None
-                }
-            }
-        } else {
-            None
-        }
-    }
-}
-```
+![Demo](/docs/images/demo.gif)
 
 See tui-realm in action in the [Example](#run-examples) or if you want to read more about tui-realm start reading the official guide [HERE](docs/en/get-started.md).
+
+## Features 🎁
+
+- ⌨️ **Event-driven**
+- ⚛️ Based on **React** and **Elm**
+- 🍲 **Boilerplate** code
+- 🚀 Quick-setup
+- 🎯 Single **focus** and **states** management
+- 🙂 Easy to learn
+- 🤖 Adaptable to any use case
 
 ---
 
