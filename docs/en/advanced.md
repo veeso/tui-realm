@@ -5,6 +5,7 @@
   - [Subscriptions](#subscriptions)
   - [Ports](#ports)
   - [Custom events](#custom-events)
+  - [Best practice](#best-practice)
 
 ---
 
@@ -21,3 +22,7 @@
 ---
 
 ## Custom events
+
+---
+
+## Best practice
