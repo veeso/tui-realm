@@ -2,7 +2,7 @@
 name = "tuirealm_derive"
 version = "1.0.0"
 authors = ["Christian Visintin"]
-edition = "2018"
+edition = "2021"
 categories = ["command-line-utilities"]
 description = "Derive macro which automatically implements the MockComponent trait"
 documentation = "https://docs.rs/tuirealm_derive"
