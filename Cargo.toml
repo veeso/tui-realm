@@ -2,7 +2,7 @@
 name = "tuirealm"
 version = "1.0.0"
 authors = ["Christian Visintin"]
-edition = "2018"
+edition = "2021"
 categories = ["command-line-utilities"]
 description = "A tui-rs framework to build tui interfaces, inspired by React and Elm."
 documentation = "https://docs.rs/tuirealm"
