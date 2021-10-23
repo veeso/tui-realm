@@ -289,8 +289,8 @@ where
             PollStrategy::Once => self
                 .poll_listener()
                 .map(|x| x.map(|x| vec![x]).unwrap_or_default()),
-            PollStrategy::UpTo(times) => self.poll_times(times),
             PollStrategy::TryFor(timeout) => self.poll_with_timeout(timeout),
+            PollStrategy::UpTo(times) => self.poll_times(times),
         }
     }
 
@@ -394,10 +394,10 @@ where
 pub enum PollStrategy {
     /// The poll() function will be called once
     Once,
-    /// The poll() function will be called up to `n` times, until it will return `None`.
-    UpTo(usize),
     /// The application will keep waiting for events for the provided duration
     TryFor(Duration),
+    /// The poll() function will be called up to `n` times, until it will return `None`.
+    UpTo(usize),
 }
 
 // -- error

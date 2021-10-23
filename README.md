@@ -182,8 +182,8 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 ## Guides 🎓
 
 - [Get Started Guide](/docs/en/get-started.md)
-- [The UI lifecycle](/docs/en/lifecycle.md)
-- [Implement components](/docs/en/new-components.md)
+- [Advanced concepts](/docs/en/advanced.md)
+- [Migrating from tui-realm 0.x to 1.x](/docs/en/migrating-legacy.md)
 
 ---
 
