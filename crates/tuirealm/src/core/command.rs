@@ -45,6 +45,8 @@ pub enum Cmd {
     Move(Direction),
     /// An expansion of `Move` which defines the scroll. The step should be defined in props, if any.
     Scroll(Direction),
+    /// Describes a movement with a position
+    GoTo(Position),
     /// User submit field
     Submit,
     /// User "deleted" something
@@ -74,6 +76,16 @@ pub enum Direction {
     Up,
 }
 
+/// ## Position
+///
+/// Describes position on movement
+#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
+pub enum Position {
+    Begin,
+    End,
+    At(usize),
+}
+
 // -- Command result
 
 /// ## CmdResult
@@ -87,6 +99,8 @@ pub enum CmdResult {
     /// The component has changed state. The new state is reported.
     /// Box is used to reduce size
     Changed(State),
+    /// Value submit result
+    Submit(State),
     /// The command could not be applied. Useful to report errors
     Invalid(Cmd),
     /// Custom cmd result

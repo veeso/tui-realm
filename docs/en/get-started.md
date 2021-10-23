@@ -27,6 +27,7 @@
 ## An introduction to realm
 
 TODO: youtube link
+> 👀 If you prefer there's also a crash course of tui-realm on my [Youtube Channel]() where I cover all of these arguments
 
 tui-realm is a tui-rs **framework** which provides an easy way to implement stateful application.
 First of all, let's give a look to the main features of tui-realm and why you should opt for this framework when building
@@ -238,8 +239,6 @@ where
 }
 
 pub enum Cmd {
-    /// User pressed a certain key
-    Press(KeyEvent),
     /// Describes a "user" typed a character
     Type(char),
     /// Describes a "cursor" movement, or a movement of another kind
