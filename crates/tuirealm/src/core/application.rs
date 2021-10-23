@@ -33,6 +33,7 @@ use crate::{
 };
 
 use std::hash::Hash;
+use std::time::{Duration, Instant};
 use thiserror::Error;
 
 /// ## ApplicationResult
@@ -289,6 +290,7 @@ where
                 .poll_listener()
                 .map(|x| x.map(|x| vec![x]).unwrap_or_default()),
             PollStrategy::UpTo(times) => self.poll_times(times),
+            PollStrategy::TryFor(timeout) => self.poll_with_timeout(timeout),
         }
     }
 
@@ -301,6 +303,22 @@ where
             match self.poll_listener() {
                 Err(err) => return Err(err),
                 Ok(None) => break,
+                Ok(Some(ev)) => evs.push(ev),
+            }
+        }
+        Ok(evs)
+    }
+
+    /// ### poll_with_timeout
+    ///
+    /// Poll event listener until `timeout` is elapsed
+    fn poll_with_timeout(&mut self, timeout: Duration) -> ApplicationResult<Vec<Event<UserEvent>>> {
+        let started = Instant::now();
+        let mut evs: Vec<Event<UserEvent>> = Vec::new();
+        while started.elapsed() < timeout {
+            match self.poll_listener() {
+                Err(err) => return Err(err),
+                Ok(None) => continue,
                 Ok(Some(ev)) => evs.push(ev),
             }
         }
@@ -378,6 +396,8 @@ pub enum PollStrategy {
     Once,
     /// The poll() function will be called up to `n` times, until it will return `None`.
     UpTo(usize),
+    /// The application will keep waiting for events for the provided duration
+    TryFor(Duration),
 }
 
 // -- error
@@ -624,8 +644,7 @@ mod test {
         // Active BAR
         assert!(application.active(&MockComponentId::InputBar).is_ok());
         // Wait 200ms (wait for poll)
-        std::thread::sleep(Duration::from_millis(200));
-        // Tick
+        std::thread::sleep(Duration::from_millis(100));
         /*
          * Here we should:
          *
@@ -637,6 +656,14 @@ mod test {
                 .ok()
                 .unwrap(),
             1
+        );
+        // Let's try TryFor strategy
+        assert!(
+            application
+                .tick(&mut model, PollStrategy::TryFor(Duration::from_millis(300)))
+                .ok()
+                .unwrap()
+                >= 3
         );
     }
 
