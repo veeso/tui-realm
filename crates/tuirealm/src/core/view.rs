@@ -259,7 +259,7 @@ where
     /// ### has_focus
     ///
     /// Returns whether `who` has focus
-    fn has_focus(&self, who: &K) -> bool {
+    pub(crate) fn has_focus(&self, who: &K) -> bool {
         match self.focus.as_ref() {
             None => false,
             Some(id) => who == id,
