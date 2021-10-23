@@ -333,6 +333,10 @@ where
         // NOTE: don't touch this code again and don't try to use iterators, cause it's not gonna work :)
         for ev in events.iter() {
             for sub in self.subs.iter() {
+                // ! Active component must be different from sub !
+                if self.view.has_focus(sub.target()) {
+                    continue;
+                }
                 if !sub.forward(
                     ev,
                     |q| self.view.component(sub.target()).unwrap().query(q),
@@ -409,6 +413,7 @@ impl From<ViewError> for ApplicationError {
 mod test {
 
     use super::*;
+    use crate::event::{Key, KeyEvent};
     use crate::mock::{
         MockBarInput, MockComponentId, MockEvent, MockFooInput, MockModel, MockMsg, MockPoll,
     };
@@ -590,7 +595,14 @@ mod test {
             .mount(
                 MockComponentId::InputBar,
                 Box::new(MockBarInput::default()),
-                vec![Sub::new(SubEventClause::Tick, SubClause::Always)]
+                vec![
+                    Sub::new(SubEventClause::Tick, SubClause::Always),
+                    Sub::new(
+                        // NOTE: won't be thrown, since requires focus
+                        SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
+                        SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
+                    )
+                ]
             )
             .is_ok());
         // Active FOO
