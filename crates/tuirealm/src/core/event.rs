@@ -45,8 +45,8 @@ where
     Tick,
     /// Unhandled event; Empty event
     None,
-    /// User event; won't be used by standard library or event listener;
-    /// but can be used in user define event listeners
+    /// User event; won't be used by standard library or by default input event listener;
+    /// but can be used in user defined ports
     User(UserEvent),
 }
 

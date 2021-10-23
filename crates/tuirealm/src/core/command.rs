@@ -50,6 +50,12 @@ pub enum Cmd {
     Scroll(Direction),
     /// User submit field
     Submit,
+    /// User "deleted" something
+    Delete,
+    /// User toggled something
+    Toggle,
+    /// User changed something
+    Change,
     /// A user defined amount of time has passed and the component should be updated
     Tick,
     /// A user defined command type. You won't find these kind of Command in the stdlib, but you can use them in your own components.

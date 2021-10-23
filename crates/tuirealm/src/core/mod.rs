@@ -36,10 +36,35 @@ mod view;
 
 // -- export
 pub use command::Cmd;
-pub use component::{Component, MockComponent, Update};
+pub use component::{Component, MockComponent};
 pub use state::{State, StateValue};
 pub use view::{View, ViewError};
 
 // -- internal
 pub(crate) use subscription::Subscription;
 pub(crate) use view::WrappedComponent;
+
+use std::hash::Hash;
+
+// -- Update
+
+/// ## Update
+///
+/// The update trait defines the prototype of the function to be used to handle the events coming from the View.
+pub trait Update<ComponentId, Msg, UserEvent>
+where
+    ComponentId: Eq + PartialEq + Clone + Hash,
+    Msg: PartialEq,
+    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+{
+    /// ### update
+    ///
+    /// update the current state handling a message from the view.
+    /// This function may return a Message,
+    /// so this function has to be intended to be call recursively if necessary
+    fn update(
+        &mut self,
+        view: &mut View<ComponentId, Msg, UserEvent>,
+        msg: Option<Msg>,
+    ) -> Option<Msg>;
+}

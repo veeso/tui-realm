@@ -118,26 +118,7 @@ where
         HasAttrFn: Fn(Attribute) -> Option<AttrValue>,
         GetStateFn: Fn() -> State,
     {
-        self.match_event(ev) && self.when.forward(has_attr_fn, get_state_fn)
-    }
-
-    /// ### match_event
-    ///
-    /// Check whether event matches.
-    /// This is how events are matched:
-    ///
-    /// - Keyboard: everything must match
-    /// - WindowResize: matches only event type, not sizes
-    /// - Tick: matches tick event
-    /// - None: matches None event
-    /// - UserEvent: depends on UserEvent PartialEq
-    fn match_event(&self, ev: &Event<U>) -> bool {
-        match &self.ev {
-            EventClause::Keyboard(k) => Some(k) == ev.is_keyboard(),
-            EventClause::WindowResize => ev.is_window_resize(),
-            EventClause::Tick => ev.is_tick(),
-            EventClause::User(u) => Some(u) == ev.is_user(),
-        }
+        self.ev.forward(ev) && self.when.forward(has_attr_fn, get_state_fn)
     }
 }
 
@@ -149,6 +130,8 @@ pub enum EventClause<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
+    /// Forward, no matter what kind of event
+    Any,
     /// Check whether a certain key has been pressed
     Keyboard(KeyEvent),
     /// Check whether window has been resized
@@ -158,6 +141,33 @@ where
     /// Event will be forwarded on this specific user event.
     /// The way user event is matched, depends on its partialEq implementation
     User(UserEvent),
+}
+
+impl<U> EventClause<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd,
+{
+    /// ### forward
+    ///
+    /// Check whether to forward based on even type and event clause.
+    ///
+    /// This is how events are forwarded:
+    ///
+    /// - Any: Forward, no matter what kind of event
+    /// - Keyboard: everything must match
+    /// - WindowResize: matches only event type, not sizes
+    /// - Tick: matches tick event
+    /// - None: matches None event
+    /// - UserEvent: depends on UserEvent PartialEq
+    fn forward(&self, ev: &Event<U>) -> bool {
+        match self {
+            EventClause::Any => true,
+            EventClause::Keyboard(k) => Some(k) == ev.is_keyboard(),
+            EventClause::WindowResize => ev.is_window_resize(),
+            EventClause::Tick => ev.is_tick(),
+            EventClause::User(u) => Some(u) == ev.is_user(),
+        }
+    }
 }
 
 /// ## SubClause
@@ -296,6 +306,7 @@ impl SubClause {
 mod test {
 
     use super::*;
+    use crate::event::Key;
     use crate::mock::{MockComponentId, MockEvent, MockFooInput};
     use crate::{command::Cmd, MockComponent, StateValue};
 
@@ -345,6 +356,62 @@ mod test {
                 |q| component.query(q),
                 || component.state()
             ),
+            false
+        );
+    }
+
+    #[test]
+    fn event_clause_any_should_forward() {
+        assert!(EventClause::<MockEvent>::Any.forward(&Event::Tick));
+    }
+
+    #[test]
+    fn event_clause_keyboard_should_forward() {
+        assert_eq!(
+            EventClause::<MockEvent>::Keyboard(KeyEvent::from(Key::Enter))
+                .forward(&Event::Keyboard(KeyEvent::from(Key::Enter))),
+            true
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::Keyboard(KeyEvent::from(Key::Enter))
+                .forward(&Event::Keyboard(KeyEvent::from(Key::Backspace))),
+            false
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::Keyboard(KeyEvent::from(Key::Enter)).forward(&Event::Tick),
+            false
+        );
+    }
+
+    #[test]
+    fn event_clause_window_resize_should_forward() {
+        assert_eq!(
+            EventClause::<MockEvent>::WindowResize.forward(&Event::WindowResize(0, 0)),
+            true
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::WindowResize.forward(&Event::Tick),
+            false
+        );
+    }
+
+    #[test]
+    fn event_clause_tick_should_forward() {
+        assert_eq!(EventClause::<MockEvent>::Tick.forward(&Event::Tick), true);
+        assert_eq!(
+            EventClause::<MockEvent>::Tick.forward(&Event::WindowResize(0, 0)),
+            false
+        );
+    }
+
+    #[test]
+    fn event_clause_user_should_forward() {
+        assert_eq!(
+            EventClause::<MockEvent>::User(MockEvent::Foo).forward(&Event::User(MockEvent::Foo)),
+            true
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::User(MockEvent::Foo).forward(&Event::Tick),
             false
         );
     }
