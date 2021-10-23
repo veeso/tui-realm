@@ -28,10 +28,8 @@
 use crate::tui::layout::Rect;
 use crate::{
     command::{Cmd, CmdResult},
-    AttrValue, Attribute, Event, Frame, State, View,
+    AttrValue, Attribute, Event, Frame, State,
 };
-
-use std::hash::Hash;
 
 /// ## MockComponent
 ///
@@ -102,27 +100,4 @@ where
     /// Returns a Msg to the view.
     /// If `None` is returned it means there's no message to return for the provided event.
     fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg>;
-}
-
-// -- update
-
-/// ## Update
-///
-/// The update trait defines the prototype of the function to be used to handle the events coming from the View.
-pub trait Update<ComponentId, Msg, UserEvent>
-where
-    ComponentId: Eq + PartialEq + Clone + Hash,
-    Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
-{
-    /// ### update
-    ///
-    /// update the current state handling a message from the view.
-    /// This function may return a Message,
-    /// so this function has to be intended to be call recursively if necessary
-    fn update(
-        &mut self,
-        view: &mut View<ComponentId, Msg, UserEvent>,
-        msg: Option<Msg>,
-    ) -> Option<Msg>;
 }
