@@ -26,7 +26,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::event::KeyEvent;
 use super::State;
 
 // -- Command
@@ -40,8 +39,6 @@ use super::State;
 /// `Component` in a match case.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 pub enum Cmd {
-    /// User pressed a certain key
-    Press(KeyEvent),
     /// Describes a "user" typed a character
     Type(char),
     /// Describes a "cursor" movement, or a movement of another kind
@@ -87,13 +84,13 @@ pub enum Direction {
 #[derive(Debug, PartialEq, Clone)]
 #[allow(clippy::large_enum_variant)]
 pub enum CmdResult {
-    /// A key event has "bounced" against the component and will be returned to the user.
-    KeyBounced(KeyEvent),
     /// The component has changed state. The new state is reported.
     /// Box is used to reduce size
     Changed(State),
     /// The command could not be applied. Useful to report errors
     Invalid(Cmd),
+    /// Custom cmd result
+    Custom(&'static str),
     /// No result to report
     None,
 }
