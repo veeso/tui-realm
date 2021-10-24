@@ -130,6 +130,8 @@ pub enum Attribute {
     Height,
     /// String to prepend to highlighted items in list or other
     HighlightedStr,
+    /// Color to apply to highlighted items
+    HighlightedColor,
     /// Maximum input length for input fields
     InputLength,
     /// Input type for input fields
