@@ -335,8 +335,7 @@ impl MockComponent for Canvas {
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let mut block: Block =
-                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), focus);
+            let mut block: Block = crate::utils::get_block(&borders, title.as_ref(), focus);
             block = block.style(Style::default().bg(background));
             // Get properties
             let x_bounds: [f64; 2] = self

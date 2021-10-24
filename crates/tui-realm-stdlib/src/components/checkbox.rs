@@ -347,8 +347,7 @@ impl MockComponent for Checkbox {
                     ])
                 })
                 .collect();
-            let block: Block =
-                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), focus);
+            let block: Block = crate::utils::get_block(&borders, title.as_ref(), focus);
             let checkbox: Tabs = Tabs::new(choices)
                 .block(block)
                 .select(self.states.choice)
@@ -387,7 +386,7 @@ impl MockComponent for Checkbox {
         self.props = props;
         // CmdResult none
         if prev_selection != self.states.selection {
-            CmdResult::Changed(self.get_state())
+            CmdResult::Changed(self.state())
         } else {
             CmdResult::None
         }
@@ -424,11 +423,11 @@ impl MockComponent for Checkbox {
                     // Select index
                     self.states.toggle();
                     // Return CmdResult On Change
-                    CmdResult::Changed(self.get_state())
+                    CmdResult::Changed(self.state())
                 }
                 KeyCode::Enter => {
                     // Return Submit
-                    CmdResult::Submit(self.get_state())
+                    CmdResult::Submit(self.state())
                 }
                 _ => {
                     // Return key event to activity
@@ -617,71 +616,47 @@ mod test {
             .build();
         assert_eq!(
             component.update(props),
-            CmdResult::Changed(Payload::Vec(vec![Value::Usize(1)]))
+            CmdResult::Changed(State::Vec(vec![Value::Usize(1)]))
         );
         // Get value
-        assert_eq!(component.get_state(), State::Vec(vec![Value::Usize(1)]));
+        assert_eq!(component.state(), State::Vec(vec![Value::Usize(1)]));
         // Handle events
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
-            CmdResult::None,
-        );
-        assert_eq!(component.get_state(), State::Vec(vec![Value::Usize(1)]));
+        assert_eq!(component.on(Cmd::Move(Direction::Left)), CmdResult::None,);
+        assert_eq!(component.state(), State::Vec(vec![Value::Usize(1)]));
         // Toggle
         assert_eq!(
             component.on(Cmd::Key(KeyCmd::from(KeyCode::Char(' ')))),
-            CmdResult::Changed(Payload::Vec(vec![Value::Usize(1), StateValue::Usize(0)]))
+            CmdResult::Changed(State::Vec(vec![Value::Usize(1), StateValue::Usize(0)]))
         );
         // Left again
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
-            CmdResult::None,
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Left)), CmdResult::None,);
         assert_eq!(component.states.choice, 0);
         // Right
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
-            CmdResult::None,
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
         // Toggle
         assert_eq!(
             component.on(Cmd::Key(KeyCmd::from(KeyCode::Char(' ')))),
-            CmdResult::Changed(Payload::Vec(vec![Value::Usize(0)]))
+            CmdResult::Changed(State::Vec(vec![Value::Usize(0)]))
         );
         // Right again
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
-            CmdResult::None,
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
         assert_eq!(component.states.choice, 2);
         // Right again
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
-            CmdResult::None,
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
         assert_eq!(component.states.choice, 3);
         // Right again
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
-            CmdResult::None,
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
         assert_eq!(component.states.choice, 4);
         // Right again
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
-            CmdResult::None,
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
         assert_eq!(component.states.choice, 5);
         // Right again
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
-            CmdResult::None,
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
         assert_eq!(component.states.choice, 5);
         // Submit
         assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Enter))),
-            CmdResult::Submit(Payload::Vec(vec![Value::Usize(0)])),
+            component.on(Cmd::Submit),
+            CmdResult::Submit(State::Vec(vec![Value::Usize(0)])),
         );
         // Any key
         assert_eq!(

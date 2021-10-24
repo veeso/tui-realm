@@ -2,7 +2,6 @@
 //!
 //! A sparkline over more lines
 
-use std::collections::LinkedList;
 /**
  * MIT License
  *
@@ -26,198 +25,12 @@ use std::collections::LinkedList;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
 };
-use tuirealm::tui::{
-    layout::Rect,
-    style::{Color, Style},
-    widgets::{Block, BorderType, Borders, Sparkline as TuiSparkline},
-};
-use tuirealm::{event::Event, CmdResult, Component, Frame, Payload};
-
-// -- Props
-const PROP_DATA: &str = "data";
-const PROP_MAX_ENTRIES: &str = "max-bars";
-
-pub struct SparklinePropsBuilder {
-    props: Option<Props>,
-}
-
-impl Default for SparklinePropsBuilder {
-    fn default() -> Self {
-        Self {
-            props: Some(Props::default()),
-        }
-    }
-}
-
-impl PropsBuilder for SparklinePropsBuilder {
-    fn build(&mut self) -> Props {
-        self.props.take().unwrap()
-    }
-
-    fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-}
-
-impl From<Props> for SparklinePropsBuilder {
-    fn from(props: Props) -> Self {
-        Self { props: Some(props) }
-    }
-}
-
-impl SparklinePropsBuilder {
-    /// ### with_foreground
-    ///
-    /// Set foreground color for component
-    pub fn with_foreground(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.foreground = color;
-        }
-        self
-    }
-
-    /// ### with_background
-    ///
-    /// Set background color for component
-    pub fn with_background(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.background = color;
-        }
-        self
-    }
-
-    /// ### with_borders
-    ///
-    /// Set component borders style
-    pub fn with_borders(
-        &mut self,
-        borders: Borders,
-        variant: BorderType,
-        color: Color,
-    ) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.borders = BordersProps {
-                borders,
-                variant,
-                color,
-            }
-        }
-        self
-    }
-
-    /// ### with_title
-    ///
-    /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.title = Some(BlockTitle::new(title, alignment));
-        }
-        self
-    }
-
-    /// ### with_max_entries
-    ///
-    /// Define maximum amount of entries to be displayed
-    pub fn with_max_entries(&mut self, max: u64) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_MAX_ENTRIES, PropPayload::One(PropValue::U64(max)));
-        }
-        self
-    }
-
-    /// ### with_data
-    ///
-    /// Define chart data
-    pub fn with_data(&mut self, data: &[u64]) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            // Create linked list
-            let mut list: LinkedList<PropPayload> = LinkedList::new();
-            data.iter()
-                .for_each(|value| list.push_back(PropPayload::One(PropValue::U64(*value))));
-            props.own.insert(PROP_DATA, PropPayload::Linked(list));
-        }
-        self
-    }
-
-    /// ### push_record_back
-    ///
-    /// Just pushes a record to the back of the data
-    pub fn push_record_back(&mut self, value: u64) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            match props.own.get_mut(PROP_DATA) {
-                Some(PropPayload::Linked(list)) => {
-                    list.push_back(PropPayload::One(PropValue::U64(value)));
-                }
-                _ => {
-                    // Create list
-                    let mut l: LinkedList<PropPayload> = LinkedList::new();
-                    l.push_back(PropPayload::One(PropValue::U64(value)));
-                    props.own.insert(PROP_DATA, PropPayload::Linked(l));
-                }
-            }
-        }
-        self
-    }
-
-    /// ### push_record_front
-    ///
-    /// Just pushes a record to the front of the data
-    pub fn push_record_front(&mut self, value: u64) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            match props.own.get_mut(PROP_DATA) {
-                Some(PropPayload::Linked(list)) => {
-                    list.push_front(PropPayload::One(PropValue::U64(value)));
-                }
-                _ => {
-                    // Create list
-                    let mut l: LinkedList<PropPayload> = LinkedList::new();
-                    l.push_front(PropPayload::One(PropValue::U64(value)));
-                    props.own.insert(PROP_DATA, PropPayload::Linked(l));
-                }
-            }
-        }
-        self
-    }
-
-    /// ### pop_record_back
-    ///
-    /// Pop first record on the back of the data list
-    pub fn pop_record_back(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            if let Some(PropPayload::Linked(list)) = props.own.get_mut(PROP_DATA) {
-                list.pop_back();
-            }
-        }
-        self
-    }
-
-    /// ### pop_record_front
-    ///
-    /// Pop first record on the front of the data list
-    pub fn pop_record_front(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            if let Some(PropPayload::Linked(list)) = props.own.get_mut(PROP_DATA) {
-                list.pop_front();
-            }
-        }
-        self
-    }
-}
+use tuirealm::tui::{layout::Rect, widgets::Sparkline as TuiSparkline};
+use tuirealm::{Frame, MockComponent, State};
 
 // -- component
 
@@ -228,12 +41,51 @@ pub struct Sparkline {
     props: Props,
 }
 
+impl Default for Sparkline {
+    fn default() -> Self {
+        Self {
+            props: Props::default(),
+        }
+    }
+}
+
 impl Sparkline {
-    /// ### new
-    ///
-    /// Instantiates a new `Sparkline`
-    pub fn new(props: Props) -> Self {
-        Self { props }
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    pub fn background(mut self, bg: Color) -> Self {
+        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
+        self.props.set(
+            Attribute::Title,
+            AttrValue::Title(t.as_ref().to_string(), a),
+        );
+        self
+    }
+
+    pub fn max_entries(mut self, max: usize) -> Self {
+        self.props.set(Attribute::Width, AttrValue::Length(max));
+        self
+    }
+
+    pub fn data(mut self, data: &[u64]) -> Self {
+        self.props.set(
+            Attribute::Content,
+            AttrValue::Payload(PropPayload::Vec(
+                data.into_iter().map(PropValue::U64).collect(),
+            )),
+        );
+        self
     }
 
     /// ### data_len
@@ -241,12 +93,8 @@ impl Sparkline {
     /// Retrieve current data len from properties
     fn data_len(&self) -> usize {
         self.props
-            .own
-            .get(PROP_DATA)
-            .map(|x| match x {
-                PropPayload::Linked(l) => l.len(),
-                _ => 0,
-            })
+            .get(Attribute::Content)
+            .map(|x| x.unwrap_payload().unwrap_vec().len())
             .unwrap_or(0)
     }
 
@@ -254,17 +102,16 @@ impl Sparkline {
     ///
     /// Get data to be displayed, starting from provided index at `start` with a max length of `len`
     fn data(&self, max: usize) -> Vec<u64> {
-        match self.props.own.get(PROP_DATA) {
-            Some(PropPayload::Linked(list)) => {
+        match self
+            .props
+            .get(Attribute::Content)
+            .map(|x| x.unwrap_payload())
+        {
+            Some(PropPayload::Vec(list)) => {
                 let mut data: Vec<u64> = Vec::with_capacity(max);
-                for item in list.iter() {
-                    if let PropPayload::One(PropValue::U64(item)) = item {
-                        data.push(*item);
-                    }
-                    if data.len() >= max {
-                        break;
-                    }
-                }
+                list.iter()
+                    .map(|x| x.unwrap_u64())
+                    .for_each(|x| data.push(*x));
                 data
             }
             _ => Vec::new(),
@@ -273,86 +120,59 @@ impl Sparkline {
 }
 
 impl MockComponent for Sparkline {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    fn render(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let block: Block =
-                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), true);
-            // Get max elements
-            let data_max_len: u64 = self
+            let foreground = self
                 .props
-                .own
-                .get(PROP_MAX_ENTRIES)
-                .map(|x| *x.unwrap_one().unwrap_u64())
-                .unwrap_or(self.data_len() as u64);
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let title = self
+                .props
+                .get_or(
+                    Attribute::Title,
+                    AttrValue::Title((String::default(), Alignment::Center)),
+                )
+                .unwrap_title();
+            let borders = self
+                .props
+                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+                .unwrap_borders();
+            let max_entries = self
+                .props
+                .get_or(Attribute::Width, AttrValue::Length(self.data_len()))
+                .unwrap_length();
             // Get data
-            let data: Vec<u64> = self.data(data_max_len as usize);
+            let data: Vec<u64> = self.data(max_entries);
             // Create widget
             let widget: TuiSparkline = TuiSparkline::default()
-                .block(block)
+                .block(crate::utils::get_block(borders, title, false, None))
                 .data(data.as_slice())
-                .max(data_max_len)
+                .max(max_entries as u64)
                 .style(Style::default().fg(foreground).bg(background));
             // Render
             render.render_widget(widget, area);
         }
     }
 
-    /// ### update
-    ///
-    /// Update component properties
-    /// Properties should first be retrieved through `get_props` which creates a builder from
-    /// existing properties and then edited before calling update.
-    /// Returns a CmdResult to the view
-    fn update(&mut self, props: Props) -> CmdResult {
-        self.props = props;
-        CmdResult::None
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
     }
 
-    /// ### get_props
-    ///
-    /// Returns a props builder starting from component properties.
-    /// This returns a prop builder in order to make easier to create
-    /// new properties for the element.
-    fn get_props(&self) -> Props {
-        self.props.clone()
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        self.props.set(attr, value)
     }
 
-    /// ### on
-    ///
-    /// Handle input event and update internal states.
-    /// Returns a CmdResult to the view
-    fn on(&mut self, ev: Event) -> CmdResult {
-        if let Cmd::Key(key) = ev {
-            Cmd::None(key)
-        } else {
-            CmdResult::None
-        }
-    }
-
-    /// ### get_state
-    ///
-    /// Get current state from component
-    /// This component always returns `None`
-    fn get_state(&self) -> Payload {
+    fn state(&self) -> State {
         State::None
     }
 
-    // -- events
-
-    /// ### blur
-    ///
-    /// Remove focus
-    /// Sparkline doesn't support focus
-    fn blur(&mut self) {}
-
-    /// ### active
-    ///
-    /// Active component; basically give focus
-    /// Sparkline doesn't support focus
-    fn active(&mut self) {}
+    fn perform(&mut self, _cmd: Cmd) -> CmdResult {
+        CmdResult::None
+    }
 }
 
 #[cfg(test)]
@@ -360,96 +180,23 @@ mod test {
 
     use super::*;
 
-    use crossterm::event::{KeyCode, KeyEvent};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_sparkline() {
-        let mut component: Sparkline = Sparkline::new(
-            SparklinePropsBuilder::default()
-                .hidden()
-                .visible()
-                .with_background(Color::White)
-                .with_foreground(Color::Black)
-                .with_title("bandwidth", Alignment::Center)
-                .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
-                .with_max_entries(8)
-                .with_data(&[
-                    60, 80, 90, 88, 76, 101, 98, 93, 96, 102, 110, 99, 88, 75, 34, 45, 67, 102,
-                ])
-                .build(),
-        );
-        assert_eq!(component.props.foreground, Color::Black);
-        assert_eq!(component.props.background, Color::White);
-        assert_eq!(component.props.visible, true);
-        assert_eq!(component.props.borders.borders, Borders::ALL);
-        assert_eq!(component.props.borders.variant, BorderType::Double);
-        assert_eq!(component.props.borders.color, Color::Yellow);
-        assert_eq!(component.props.title.as_ref().unwrap().text(), "bandwidth");
-        assert_eq!(
-            component.props.title.as_ref().unwrap().alignment(),
-            Alignment::Center
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_MAX_ENTRIES).unwrap(),
-            PropPayload::One(PropValue::U64(8))
-        );
-        assert!(component.props.own.get(PROP_DATA).is_some());
-        // focus
-        component.active();
-        component.blur();
+        let mut component = Sparkline::default()
+            .background(Color::White)
+            .foreground(Color::Black)
+            .title("bandwidth", Alignment::Center)
+            .borders(Borders::default())
+            .max_entries(8)
+            .data(&[
+                60, 80, 90, 88, 76, 101, 98, 93, 96, 102, 110, 99, 88, 75, 34, 45, 67, 102,
+            ]);
         // Commands
-        assert_eq!(component.get_state(), State::None);
-        // other keys
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
-            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
-        );
+        assert_eq!(component.state(), State::None);
         // component funcs
         assert_eq!(component.data_len(), 18);
         assert_eq!(component.data(4), vec![60, 80, 90, 88]);
-        // Push
-        assert_eq!(
-            component.update(
-                SparklinePropsBuilder::from(component.get_props())
-                    .push_record_back(101)
-                    .push_record_front(66)
-                    .build()
-            ),
-            CmdResult::None
-        );
-        assert_eq!(
-            component.data(100),
-            vec![
-                66, 60, 80, 90, 88, 76, 101, 98, 93, 96, 102, 110, 99, 88, 75, 34, 45, 67, 102, 101
-            ]
-        );
-        // Pop
-        assert_eq!(
-            component.update(
-                SparklinePropsBuilder::from(component.get_props())
-                    .pop_record_back()
-                    .pop_record_back()
-                    .pop_record_back()
-                    .pop_record_front()
-                    .pop_record_front()
-                    .build()
-            ),
-            CmdResult::None
-        );
-        assert_eq!(
-            component.data(100),
-            vec![80, 90, 88, 76, 101, 98, 93, 96, 102, 110, 99, 88, 75, 34, 45]
-        );
-        // Update and test empty data
-        assert_eq!(
-            component.update(
-                SparklinePropsBuilder::from(component.get_props())
-                    .with_data(&[])
-                    .build()
-            ),
-            CmdResult::None
-        );
-        assert_eq!(component.data(8), vec![]);
     }
 }

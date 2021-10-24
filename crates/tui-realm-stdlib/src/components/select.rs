@@ -26,184 +26,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::event::KeyCode;
-use tuirealm::props::borders::Borders;
-use tuirealm::props::{
-    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
-};
+use tuirealm::command::{Cmd, CmdResult, Direction};
+use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, Color, Props, Style};
 use tuirealm::tui::{
-    layout::{Constraint, Corner, Direction, Layout, Rect},
-    style::{Color, Style},
+    layout::{Constraint, Corner, Direction as LayoutDirection, Layout, Rect},
     text::Spans,
-    widgets::{Block, BorderType, List, ListItem, ListState, Paragraph},
+    widgets::{Block, List, ListItem, ListState, Paragraph},
 };
-use tuirealm::{event::Event, CmdResult, Component, Frame, Payload, Value};
-
-// -- props
-
-const COLOR_HIGHLIGHTED: &str = "highlighted";
-const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
-const PROP_SELECTED: &str = "selected";
-const PROP_CHOICES: &str = "choices";
-const PROP_REWIND: &str = "rewind";
-
-pub struct SelectPropsBuilder {
-    props: Option<Props>,
-}
-
-impl Default for SelectPropsBuilder {
-    fn default() -> Self {
-        Self {
-            props: Some(Props::default()),
-        }
-    }
-}
-
-impl PropsBuilder for SelectPropsBuilder {
-    fn build(&mut self) -> Props {
-        self.props.take().unwrap()
-    }
-
-    fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-}
-
-impl From<Props> for SelectPropsBuilder {
-    fn from(props: Props) -> Self {
-        SelectPropsBuilder { props: Some(props) }
-    }
-}
-
-impl SelectPropsBuilder {
-    /// ### with_foreground
-    ///
-    /// Set foreground color
-    pub fn with_foreground(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.foreground = color;
-        }
-        self
-    }
-
-    /// ### with_background
-    ///
-    /// Set inverted color
-    pub fn with_background(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.background = color;
-        }
-        self
-    }
-
-    pub fn with_highlighted_color(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.palette.insert(COLOR_HIGHLIGHTED, color);
-        }
-        self
-    }
-
-    /// ### with_highlighted_str
-    ///
-    /// Display a symbol to highlighted line in scroll table
-    pub fn with_highlighted_str(&mut self, s: Option<&str>) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            match s {
-                None => {
-                    props.own.remove(PROP_HIGHLIGHTED_TXT);
-                }
-                Some(s) => {
-                    props.own.insert(
-                        PROP_HIGHLIGHTED_TXT,
-                        PropPayload::One(PropValue::Str(s.to_string())),
-                    );
-                }
-            }
-        }
-        self
-    }
-
-    /// ### with_borders
-    ///
-    /// Set component borders style
-    pub fn with_borders(
-        &mut self,
-        borders: Borders,
-        variant: BorderType,
-        color: Color,
-    ) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.borders = BordersProps {
-                borders,
-                variant,
-                color,
-            }
-        }
-        self
-    }
-
-    /// ### with_options
-    ///
-    /// Set options for radio group
-    pub fn with_options<S: AsRef<str>>(&mut self, options: &[S]) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_CHOICES,
-                PropPayload::Vec(
-                    options
-                        .iter()
-                        .map(|x| PropValue::Str(x.as_ref().to_string()))
-                        .collect(),
-                ),
-            );
-        }
-        self
-    }
-
-    /// ### with_title
-    ///
-    /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.title = Some(BlockTitle::new(title, alignment));
-        }
-        self
-    }
-
-    /// ### with_value
-    ///
-    /// Set initial value for choice
-    pub fn with_value(&mut self, index: usize) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_SELECTED, PropPayload::One(PropValue::Usize(index)));
-        }
-        self
-    }
-
-    /// ### rewind
-    ///
-    /// If true, moving below or beyond limit will rewind the selected record
-    pub fn rewind(&mut self, rewind: bool) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_REWIND, PropPayload::One(PropValue::Bool(rewind)));
-        }
-        self
-    }
-}
+use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- states
 
@@ -212,7 +42,6 @@ impl SelectPropsBuilder {
 /// Component states
 struct OwnStates {
     choices: Vec<String>, // Available choices
-    focus: bool,
     selected: usize,
     tab_open: bool,
 }
@@ -221,7 +50,6 @@ impl Default for OwnStates {
     fn default() -> Self {
         Self {
             choices: Vec::new(),
-            focus: false,
             selected: 0,
             tab_open: false,
         }
@@ -271,6 +99,12 @@ impl OwnStates {
         }
     }
 
+    pub fn select(&mut self, i: usize) {
+        if i < self.choices.len() {
+            self.selected = i;
+        }
+    }
+
     /// ### close_tab
     ///
     /// Close tab
@@ -300,26 +134,72 @@ pub struct Select {
     states: OwnStates,
 }
 
-impl Select {
-    /// ### new
-    ///
-    /// Instantiate a new Select component
-    pub fn new(props: Props) -> Self {
-        // Make states
-        let mut states: OwnStates = OwnStates::default();
-        // Update choices (vec of TextSpan to String)
-        let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
-            Some(PropPayload::Vec(choices)) => {
-                choices.iter().map(|x| x.unwrap_str().as_str()).collect()
-            }
-            _ => Vec::new(),
-        };
-        states.set_choices(&choices);
-        // Get value
-        if let Some(PropPayload::One(PropValue::Usize(choice))) = props.own.get(PROP_SELECTED) {
-            states.selected = *choice;
+impl Default for Select {
+    fn default() -> Self {
+        Self {
+            props: Props::default(),
+            states: OwnStates::default(),
         }
-        Self { props, states }
+    }
+}
+
+impl Select {
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    pub fn background(mut self, bg: Color) -> Self {
+        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
+        self.props.set(
+            Attribute::Title,
+            AttrValue::Title(t.as_ref().to_string(), a),
+        );
+        self
+    }
+
+    pub fn highlighted_str<S: AsRef<str>>(mut self, s: S) -> Self {
+        self.props.set(
+            Attribute::HighlightedStr,
+            AttrValue::String(s.as_ref().to_string()),
+        );
+        self
+    }
+
+    pub fn highlighted_color(mut self, c: Color) -> Self {
+        self.props
+            .set(Attribute::HighlightedColor, AttrValue::Color(c));
+        self
+    }
+
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self
+    }
+
+    pub fn rewind(mut self, r: bool) -> Self {
+        self.props.set(Attribute::Rewind, AttrValue::Flag(r));
+        self
+    }
+
+    pub fn choices<S: AsRef<str>>(mut self, choices: &[S]) -> Self {
+        self.states.set_choices(choices);
+        self
+    }
+
+    pub fn value(mut self, i: usize) -> Self {
+        // Set state
+        self.states.select(i);
+        self
     }
 
     /// ### render_open_tab
@@ -333,17 +213,23 @@ impl Select {
             .iter()
             .map(|x| ListItem::new(Spans::from(x.clone())))
             .collect();
+        let foreground = self
+            .props
+            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let background = self
+            .props
+            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+            .unwrap_color();
         let hg: Color = self
             .props
-            .palette
-            .get(COLOR_HIGHLIGHTED)
-            .cloned()
-            .unwrap_or(foreground);
+            .get_or(Attribute::HighlightedColor, AttrValue::Color(foreground))
+            .unwrap_color();
         // Make colors
         let (bg, hg): (Color, Color) = (background, hg);
         // Prepare layout
         let chunks = Layout::default()
-            .direction(Direction::Vertical)
+            .direction(LayoutDirection::Vertical)
             .margin(0)
             .constraints([Constraint::Length(2), Constraint::Min(1)].as_ref())
             .split(area);
@@ -352,20 +238,31 @@ impl Select {
             None => String::default(),
             Some(s) => s.clone(),
         };
+        let borders = self
+            .props
+            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+            .unwrap_borders();
         let block: Block = Block::default()
             .borders(Borders::LEFT | Borders::TOP | Borders::RIGHT)
-            .border_style(self.props.borders.style())
+            .border_style(borders.style())
             .style(Style::default().bg(background));
-        let block: Block = match self.props.title.as_ref() {
-            Some(t) => block
-                .title(t.text().to_string())
-                .title_alignment(t.alignment()),
+        let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+        let block = match title {
+            Some(text, alignment) => block.title(text).title_alignment(alignment),
             None => block,
         };
+        let focus = self
+            .props
+            .get_or(Attribute::Focus, AttrValue::Flag(false))
+            .unwrap_flag();
+        let inactive_style = self
+            .props
+            .get(Attribute::FocusStyle)
+            .map(|x| x.unwrap_style());
         let p: Paragraph = Paragraph::new(selected_text)
             .style(match focus {
-                true => self.props.borders.style(),
-                false => Style::default(),
+                true => borders.style(),
+                false => inactive_style.unwrap_or(Style::default()),
             })
             .block(block);
         render.render_widget(p, chunks[0]);
@@ -376,7 +273,7 @@ impl Select {
                 Block::default()
                     .borders(Borders::LEFT | Borders::BOTTOM | Borders::RIGHT)
                     .border_style(match focus {
-                        true => self.props.borders.style(),
+                        true => borders.style(),
                         false => Style::default(),
                     })
                     .style(Style::default().bg(background)),
@@ -395,10 +292,12 @@ impl Select {
                     .add_modifier(self.props.modifiers),
             );
         // Highlighted symbol
-        if let Some(PropPayload::One(PropValue::Str(highlight))) =
-            self.props.own.get(PROP_HIGHLIGHTED_TXT)
+        if let Some(hg_str) = self
+            .props
+            .get(Attribute::HighlightedStr)
+            .map(|x| x.unwrap_string())
         {
-            list = list.highlight_symbol(highlight);
+            list = list.highlight_symbol(hg_str);
         }
         let mut state: ListState = ListState::default();
         state.select(Some(self.states.selected));
@@ -409,8 +308,36 @@ impl Select {
     ///
     /// Render component when tab is closed
     fn render_closed_tab(&self, render: &mut Frame, area: Rect) {
-        let div: Block =
-            crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), focus);
+        let foreground = self
+            .props
+            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let background = self
+            .props
+            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let borders = self
+            .props
+            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+            .unwrap_borders();
+        let block: Block = Block::default()
+            .borders(Borders::LEFT | Borders::TOP | Borders::RIGHT)
+            .border_style(borders.style())
+            .style(Style::default().bg(background));
+        let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+        let block = match title {
+            Some(text, alignment) => block.title(text).title_alignment(alignment),
+            None => block,
+        };
+        let focus = self
+            .props
+            .get_or(Attribute::Focus, AttrValue::Flag(false))
+            .unwrap_flag();
+        let inactive_style = self
+            .props
+            .get(Attribute::FocusStyle)
+            .map(|x| x.unwrap_style());
+        let div: Block = crate::utils::get_block(borders, title, focus, inactive_style);
         let selected_text: String = match self.states.choices.get(self.states.selected) {
             None => String::default(),
             Some(s) => s.clone(),
@@ -425,19 +352,14 @@ impl Select {
     }
 
     fn rewind(&self) -> bool {
-        match self.props.own.get(PROP_REWIND) {
-            Some(PropPayload::One(PropValue::Bool(b))) => *b,
-            _ => false,
-        }
+        self.props
+            .get_or(Attribute::Rewind, AttrValue::Flag(false))
+            .unwrap_flag()
     }
 }
 
 impl MockComponent for Select {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             match self.states.is_tab_open() {
                 true => self.render_open_tab(render, area),
@@ -446,121 +368,68 @@ impl MockComponent for Select {
         }
     }
 
-    /// ### update
-    ///
-    /// Update component properties
-    /// Properties should first be retrieved through `get_props` which creates a builder from
-    /// existing properties and then edited before calling update.
-    /// Returns a CmdResult to the view
-    fn update(&mut self, props: Props) -> CmdResult {
-        let prev_index: usize = self.states.selected;
-        // Reset choices
-        let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
-            Some(PropPayload::Vec(choices)) => {
-                choices.iter().map(|x| x.unwrap_str().as_str()).collect()
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
+    }
+
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        match attr {
+            Attribute::Content => {
+                // Reset choices
+                let choices: Vec<&str> = value
+                    .unwrap_payload()
+                    .unwrap_vec()
+                    .iter()
+                    .map(|x| x.unwrap_str().as_str())
+                    .collect();
+                self.states.set_choices(choices);
             }
-            _ => Vec::new(),
-        };
-        self.states.set_choices(&choices);
-        // Get value
-        if let Some(PropPayload::One(PropValue::Usize(choice))) = props.own.get(PROP_SELECTED) {
-            self.states.selected = *choice;
-        }
-        self.props = props;
-        // CmdResult none
-        if prev_index != self.states.selected {
-            CmdResult::Changed(self.get_state())
-        } else {
-            CmdResult::None
+            Attribute::Value => {
+                self.states
+                    .select(value.unwrap_payload().unwrap_one().unwrap_usize());
+            }
+            attr => {
+                self.props.set(attr, value);
+            }
         }
     }
 
-    /// ### get_props
-    ///
-    /// Returns a copy of the component properties.
-    fn get_props(&self) -> Props {
-        self.props.clone()
+    fn state(&self) -> State {
+        State::One(StateValue::Usize(self.states.selected))
     }
 
-    /// ### on
-    ///
-    /// Handle input event and update internal states.
-    /// Returns a CmdResult to the view.
-    fn on(&mut self, ev: Event) -> CmdResult {
-        // Match event
-        if let Cmd::Key(key) = ev {
-            match key.code {
-                KeyCode::Down => {
-                    // Increment choice
-                    self.states.next_choice(self.rewind());
-                    // Return CmdResult On Change or None if tab is closed
-                    match self.states.is_tab_open() {
-                        false => CmdResult::None,
-                        true => {
-                            CmdResult::Changed(Payload::One(Value::Usize(self.states.selected)))
-                        }
-                    }
-                }
-                KeyCode::Up => {
-                    // Decrement choice
-                    self.states.prev_choice(self.rewind());
-                    // Return CmdResult On Change or None if tab is closed
-                    match self.states.is_tab_open() {
-                        false => CmdResult::None,
-                        true => {
-                            CmdResult::Changed(Payload::One(Value::Usize(self.states.selected)))
-                        }
-                    }
-                }
-                KeyCode::Enter => {
-                    // Open or close tab
-                    if self.states.is_tab_open() {
-                        self.states.close_tab();
-                        CmdResult::Submit(Payload::One(Value::Usize(self.states.selected)))
-                    } else {
-                        self.states.open_tab();
-                        CmdResult::None
-                    }
-                }
-                _ => {
-                    // Return key event to activity
-                    Cmd::None(key)
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        match cmd {
+            Cmd::Move(Direction::Down) => {
+                // Increment choice
+                self.states.next_choice(self.is_rewind());
+                // Return CmdResult On Change or None if tab is closed
+                match self.states.is_tab_open() {
+                    false => CmdResult::None,
+                    true => CmdResult::Changed(self.state()),
                 }
             }
-        } else {
-            // Ignore event
-            CmdResult::None
+            Cmd::Move(Direction::Up) => {
+                // Increment choice
+                self.states.prev_choice(self.is_rewind());
+                // Return CmdResult On Change or None if tab is closed
+                match self.states.is_tab_open() {
+                    false => CmdResult::None,
+                    true => CmdResult::Changed(self.state()),
+                }
+            }
+            Cmd::Submit => {
+                // Open or close tab
+                if self.states.is_tab_open() {
+                    self.states.close_tab();
+                    CmdResult::Submit(self.state())
+                } else {
+                    self.states.open_tab();
+                    CmdResult::None
+                }
+            }
+            _ => CmdResult::None,
         }
-    }
-
-    /// ### get_state
-    ///
-    /// Get current state from component
-    /// For this component returns the index of the selected choice, but only when the tab is closed
-    /// Returns None otherwise
-    fn get_state(&self) -> Payload {
-        match self.states.is_tab_open() {
-            false => State::One(Value::Usize(self.states.selected)),
-            true => State::None,
-        }
-    }
-
-    // -- events
-
-    /// ### blur
-    ///
-    /// Blur component
-    fn blur(&mut self) {
-        focus = false;
-        // Tab gets closed
-        self.states.close_tab();
-    }
-
-    /// ### active
-    ///
-    /// Active component
-    fn active(&mut self) {
-        focus = true;
     }
 }
 
@@ -569,9 +438,9 @@ mod test {
 
     use super::*;
 
-    use crossterm::event::{KeyCode, KeyEvent};
-
     use pretty_assertions::assert_eq;
+
+    use tuirealm::props::{PropPayload, PropValue};
 
     #[test]
     fn test_components_select_states() {
@@ -634,69 +503,16 @@ mod test {
     #[test]
     fn test_components_select() {
         // Make component
-        let mut component: Select = Select::new(
-            SelectPropsBuilder::default()
-                .hidden()
-                .visible()
-                .with_foreground(Color::Red)
-                .with_background(Color::Blue)
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_highlighted_color(Color::Red)
-                .with_highlighted_str(Some(">>"))
-                .with_title("C'est oui ou bien c'est non?", Alignment::Center)
-                .with_options(&["Oui!", "Non", "Peut-être"])
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_value(1)
-                .rewind(false)
-                .build(),
-        );
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.background, Color::Blue);
-        assert_eq!(component.props.visible, true);
-        assert_eq!(component.props.borders.borders, Borders::ALL);
-        assert_eq!(component.props.borders.variant, BorderType::Double);
-        assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(
-            *component
-                .props
-                .own
-                .get(PROP_REWIND)
-                .unwrap()
-                .unwrap_one()
-                .unwrap_bool(),
-            false
-        );
-        assert_eq!(
-            *component.props.palette.get(COLOR_HIGHLIGHTED).unwrap(),
-            Color::Red
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_HIGHLIGHTED_TXT).unwrap(),
-            PropPayload::One(PropValue::Str(String::from(">>")))
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_SELECTED).unwrap(),
-            PropPayload::One(PropValue::Usize(1))
-        );
-        assert_eq!(
-            component.props.title.as_ref().unwrap().text(),
-            "C'est oui ou bien c'est non?"
-        );
-        assert_eq!(
-            component.props.title.as_ref().unwrap().alignment(),
-            Alignment::Center
-        );
-        assert_eq!(
-            component.props.own.get(PROP_CHOICES).unwrap(),
-            &PropPayload::Vec(vec![
-                PropValue::Str(String::from("Oui!")),
-                PropValue::Str(String::from("Non")),
-                PropValue::Str(String::from("Peut-être")),
-            ])
-        );
-        // Focus
-        component.active();
-        assert_eq!(component.states.focus, true);
+        let mut component = Select::default()
+            .foreground(Color::Red)
+            .background(Color::Black)
+            .borders(Borders::default())
+            .highlighted_color(Color::Red)
+            .highlighted_str(">>")
+            .title("C'est oui ou bien c'est non?", Alignment::Center)
+            .choices(&["Oui!", "Non", "Peut-être"])
+            .value(1)
+            .rewind(false);
         assert_eq!(component.states.is_tab_open(), false);
         component.states.open_tab();
         assert_eq!(component.states.is_tab_open(), true);
@@ -704,81 +520,59 @@ mod test {
         assert_eq!(component.states.focus, false);
         assert_eq!(component.states.is_tab_open(), false);
         // Update
-        let props = SelectPropsBuilder::from(component.get_props())
-            .with_foreground(Color::Red)
-            .hidden()
-            .build();
-        assert_eq!(component.update(props), CmdResult::None);
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.visible, false);
-        let props = SelectPropsBuilder::from(component.get_props())
-            .with_value(2)
-            .hidden()
-            .build();
-        assert_eq!(
-            component.update(props),
-            CmdResult::Changed(Payload::One(Value::Usize(2)))
+        component.attr(
+            Attribute::Value,
+            AttrValue::Payload(PropPayload::One(PropValue::Usize(2))),
         );
         // Get value
-        assert_eq!(component.get_state(), State::One(Value::Usize(2)));
+        assert_eq!(component.state(), State::One(StateValue::Usize(2)));
         // Open tab
-        component.states.open_tab();
-        assert_eq!(component.get_state(), State::None);
         // Events
         // Move cursor
         assert_eq!(
             component.on(Cmd::Move(Direction::Up)),
-            CmdResult::Changed(Payload::One(Value::Usize(1))),
+            CmdResult::Changed(State::One(StateValue::Usize(1))),
         );
         assert_eq!(
             component.on(Cmd::Move(Direction::Up)),
-            CmdResult::Changed(Payload::One(Value::Usize(0))),
+            CmdResult::Changed(State::One(StateValue::Usize(0))),
         );
         // Upper boundary
         assert_eq!(
             component.on(Cmd::Move(Direction::Up)),
-            CmdResult::Changed(Payload::One(Value::Usize(0))),
+            CmdResult::Changed(State::One(StateValue::Usize(0))),
         );
         // Move down
         assert_eq!(
             component.on(Cmd::Move(Direction::Down)),
-            CmdResult::Changed(Payload::One(Value::Usize(1))),
+            CmdResult::Changed(State::One(StateValue::Usize(1))),
         );
         assert_eq!(
             component.on(Cmd::Move(Direction::Down)),
-            CmdResult::Changed(Payload::One(Value::Usize(2))),
+            CmdResult::Changed(State::One(StateValue::Usize(2))),
         );
         // Lower boundary
         assert_eq!(
             component.on(Cmd::Move(Direction::Down)),
-            CmdResult::Changed(Payload::One(Value::Usize(2))),
+            CmdResult::Changed(State::One(StateValue::Usize(2))),
         );
         // Press enter
         assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Enter))),
-            CmdResult::Submit(Payload::One(Value::Usize(2))),
+            component.on(Cmd::Submit),
+            CmdResult::Submit(State::One(StateValue::Usize(2))),
         );
         // Tab should be closed
         assert_eq!(component.states.is_tab_open(), false);
         // Re open
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Enter))),
-            CmdResult::None,
-        );
+        assert_eq!(component.on(Cmd::Submit), CmdResult::None);
         assert_eq!(component.states.is_tab_open(), true);
         // Move arrows
         assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Enter))),
-            CmdResult::Submit(Payload::One(Value::Usize(2))),
+            component.on(Cmd::Submit),
+            CmdResult::Submit(State::One(StateValue::Usize(2))),
         );
         assert_eq!(component.states.is_tab_open(), false);
-        assert_eq!(component.on(Cmd::Move(Direction::Down)), CmdResult::None,);
-        assert_eq!(component.on(Cmd::Move(Direction::Up)), CmdResult::None,);
-        // Char
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
-            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
-        );
-        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
+        assert_eq!(component.on(Cmd::Move(Direction::Down)), CmdResult::None);
+        assert_eq!(component.on(Cmd::Move(Direction::Up)), CmdResult::None);
     }
 }

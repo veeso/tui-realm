@@ -354,7 +354,7 @@ mod tests {
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.visible, false);
         // Get value
-        assert_eq!(component.get_state(), State::None);
+        assert_eq!(component.state(), State::None);
         // Event
         assert_eq!(
             component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),

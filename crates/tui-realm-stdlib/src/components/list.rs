@@ -416,8 +416,7 @@ impl MockComponent for List {
                 true => focus,
                 false => true,
             };
-            let div: Block =
-                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), active);
+            let div: Block = crate::utils::get_block(&borders, title.as_ref(), active);
             // Make list entries
             let list_items: Vec<ListItem> = match self.props.own.get(PROP_TABLE).as_ref() {
                 Some(PropPayload::One(PropValue::Table(table))) => table
@@ -572,7 +571,7 @@ impl MockComponent for List {
     /// For this component returns None if not scrollable, otherwise returns the index of the list
     fn get_state(&self) -> Payload {
         match self.scrollable() {
-            true => State::One(Value::Usize(self.states.list_index)),
+            true => State::One(StateValue::Usize(self.states.list_index)),
             false => State::None,
         }
     }
@@ -746,7 +745,7 @@ mod tests {
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
         // Get value
-        assert_eq!(component.get_state(), State::One(Value::Usize(0)));
+        assert_eq!(component.state(), State::One(StateValue::Usize(0)));
         // Event
         assert_eq!(
             component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),
@@ -808,7 +807,7 @@ mod tests {
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.visible, false);
         // Get value
-        assert_eq!(component.get_state(), State::None);
+        assert_eq!(component.state(), State::None);
         // Event
         assert_eq!(
             component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),

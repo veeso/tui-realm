@@ -237,7 +237,7 @@ impl Table {
     }
 
     pub fn table(mut self, t: PropTable) -> Self {
-        self.props.set(Attribute::Value, AttrValue::Table(t));
+        self.props.set(Attribute::Content, AttrValue::Table(t));
         self
     }
 
@@ -264,7 +264,7 @@ impl Table {
             _ => {
                 // Get amount of columns (maximum len of row elements)
                 let columns: usize =
-                    match self.props.get(Attribute::Value).map(|x| x.unwrap_table()) {
+                    match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
                         Some(rows) => rows.iter().map(|col| col.len()).max().unwrap_or(0),
                         _ => 0,
                     };
@@ -279,16 +279,8 @@ impl Table {
 }
 
 impl MockComponent for Table {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    /// If focused, cursor is also set (if supported by widget)
     fn view(&self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let alignment = self
-                .props
-                .get_or(Attribute::TextAlign, AttrValue::Alignment(Alignment::Left))
-                .unwrap_alignment();
             let foreground = self
                 .props
                 .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
@@ -332,7 +324,10 @@ impl MockComponent for Table {
                 .get_or(Attribute::Height, AttrValue::Size(1))
                 .unwrap_size();
             // Make rows
-            let rows: Vec<Row> = match self.props.get(Attribute::Value).map(|x| x.unwrap_payload())
+            let rows: Vec<Row> = match self
+                .props
+                .get(Attribute::Content)
+                .map(|x| x.unwrap_payload())
             {
                 Some(PropPayload::One(PropValue::Table(table))) => table
                     .iter()
@@ -440,7 +435,11 @@ impl MockComponent for Table {
         self.props.set(attr, value);
         // Update list len and fix index
         self.set_list_len(
-            match self.props.get(Attribute::Value).map(|x| x.unwrap_payload()) {
+            match self
+                .props
+                .get(Attribute::Content)
+                .map(|x| x.unwrap_payload())
+            {
                 Some(PropPayload::Vec(spans)) => spans.len(),
                 _ => 0,
             },
@@ -642,7 +641,7 @@ mod tests {
         assert_eq!(component.states.list_index, 0);
         // Update
         component.attr(
-            Attribute::Value,
+            Attribute::Content,
             AttrValue::Table(
                 TableBuilder::default()
                     .add_col(TextSpan::from("name"))
@@ -654,7 +653,7 @@ mod tests {
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
         // Get value
-        assert_eq!(component.get_state(), State::One(StateValue::Usize(0)));
+        assert_eq!(component.state(), State::One(StateValue::Usize(0)));
     }
 
     #[test]
@@ -704,6 +703,6 @@ mod tests {
                     .build(),
             );
         // Get value (not scrollable)
-        assert_eq!(component.get_state(), State::None);
+        assert_eq!(component.state(), State::None);
     }
 }

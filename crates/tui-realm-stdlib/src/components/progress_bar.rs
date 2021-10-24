@@ -25,139 +25,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+    TextModifiers,
 };
-use tuirealm::tui::{
-    layout::Rect,
-    style::{Color, Style},
-    widgets::{Block, BorderType, Borders, Gauge},
-};
-use tuirealm::{event::Event, CmdResult, Component, Frame, Payload};
-
-// -- Props
-
-const PROP_PROGRESS: &str = "progress";
-const PROP_LABEL: &str = "label";
-
-pub struct ProgressBarPropsBuilder {
-    props: Option<Props>,
-}
-
-impl Default for ProgressBarPropsBuilder {
-    fn default() -> Self {
-        ProgressBarPropsBuilder {
-            props: Some(Props::default()),
-        }
-    }
-}
-
-impl PropsBuilder for ProgressBarPropsBuilder {
-    fn build(&mut self) -> Props {
-        self.props.take().unwrap()
-    }
-
-    fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-}
-
-impl From<Props> for ProgressBarPropsBuilder {
-    fn from(props: Props) -> Self {
-        ProgressBarPropsBuilder { props: Some(props) }
-    }
-}
-
-impl ProgressBarPropsBuilder {
-    /// ### with_progbar_color
-    ///
-    /// Set progbar color for component
-    pub fn with_progbar_color(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.foreground = color;
-        }
-        self
-    }
-
-    /// ### with_background
-    ///
-    /// Set background color for component
-    pub fn with_background(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.background = color;
-        }
-        self
-    }
-
-    /// ### with_borders
-    ///
-    /// Set component borders style
-    pub fn with_borders(
-        &mut self,
-        borders: Borders,
-        variant: BorderType,
-        color: Color,
-    ) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.borders = BordersProps {
-                borders,
-                variant,
-                color,
-            }
-        }
-        self
-    }
-
-    /// ### with_title
-    ///
-    /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.title = Some(BlockTitle::new(title, alignment));
-        }
-        self
-    }
-
-    /// ### with_label
-    ///
-    /// Set label to display on progress bar
-    pub fn with_label<S: AsRef<str>>(&mut self, label: S) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_LABEL,
-                PropPayload::One(PropValue::Str(label.as_ref().to_string())),
-            );
-        }
-        self
-    }
-
-    /// ### with_progress
-    ///
-    /// Set progress percentage
-    /// Progress must be in range [0.0,1.0] or will panic
-    pub fn with_progress(&mut self, prog: f64) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            assert!(
-                (0.0..=1.0).contains(&prog),
-                "Progress must be in range [0.0,1.0]"
-            );
-            props
-                .own
-                .insert(PROP_PROGRESS, PropPayload::One(PropValue::F64(prog)));
-        }
-        self
-    }
-}
+use tuirealm::tui::{layout::Rect, widgets::Gauge};
+use tuirealm::{Frame, MockComponent, State};
 
 // -- Component
 
@@ -168,35 +42,95 @@ pub struct ProgressBar {
     props: Props,
 }
 
+impl Default for ProgressBar {
+    fn default() -> Self {
+        Self {
+            props: Props::default(),
+        }
+    }
+}
+
 impl ProgressBar {
-    /// ### new
-    ///
-    /// Instantiates a new `ProgressBar` component.
-    pub fn new(props: Props) -> Self {
-        ProgressBar { props }
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    pub fn background(mut self, bg: Color) -> Self {
+        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.props
+            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self
+    }
+
+    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
+        self.props.set(
+            Attribute::Title,
+            AttrValue::Title(t.as_ref().to_string(), a),
+        );
+        self
+    }
+
+    pub fn label<S: AsRef<str>>(mut self, s: S) -> Self {
+        self.props
+            .set(Attribute::Text, AttrValue::String(s.as_ref().to_string()));
+        self
+    }
+
+    pub fn progress(mut self, p: f64) -> Self {
+        if p < 0.0 || p > 1.0 {
+            panic!("Progress value must be in range [0.0, 1.0]");
+        }
+        self.props.set(
+            Attribute::Value,
+            AttrValue::Payload(PropPayload::One(PropValue::F64(p))),
+        );
+        self
     }
 }
 
 impl MockComponent for ProgressBar {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Text
-            let label: String = match self.props.own.get(PROP_LABEL).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => t.to_string(),
-                _ => String::default(),
-            };
+            let label = self
+                .props
+                .get_or(Attribute::Text, AttrValue::String(String::default()))
+                .unwrap_string();
+            let foreground = self
+                .props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let borders = self
+                .props
+                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+                .unwrap_borders();
+            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
             // Get percentage
-            let percentage: f64 = match self.props.own.get(PROP_PROGRESS) {
-                Some(PropPayload::One(PropValue::F64(ratio))) => *ratio,
-                _ => 0.0,
-            };
-            let div: Block =
-                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), true);
+            let percentage = self
+                .props
+                .get_or(
+                    Attribute::Value,
+                    AttrValue::Payload(PropPayload::One(PropValue::F64(0.0))),
+                )
+                .unwrap_payload()
+                .unwrap_one()
+                .unwrap_f64();
+            let div = crate::utils::get_block(borders, title, true, None);
             // Make progress bar
             render.render_widget(
                 Gauge::default()
@@ -214,57 +148,21 @@ impl MockComponent for ProgressBar {
         }
     }
 
-    /// ### update
-    ///
-    /// Update component properties
-    /// Properties should first be retrieved through `get_props` which creates a builder from
-    /// existing properties and then edited before calling update.
-    /// Returns a CmdResult to the view
-    fn update(&mut self, props: Props) -> CmdResult {
-        self.props = props;
-        // Return None
-        CmdResult::None
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
     }
 
-    /// ### get_props
-    ///
-    /// Returns a copy of the component properties.
-    fn get_props(&self) -> Props {
-        self.props.clone()
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        self.props.set(attr, value)
     }
 
-    /// ### on
-    ///
-    /// Handle input event and update internal states.
-    /// Returns a CmdResult to the view.
-    fn on(&mut self, ev: Event) -> CmdResult {
-        // Return key
-        if let Cmd::Key(key) = ev {
-            Cmd::None(key)
-        } else {
-            CmdResult::None
-        }
-    }
-
-    /// ### get_state
-    ///
-    /// Get current state from component
-    /// For this component returns always None
-    fn get_state(&self) -> Payload {
+    fn state(&self) -> State {
         State::None
     }
 
-    // -- events
-
-    /// ### blur
-    ///
-    /// Blur component
-    fn blur(&mut self) {}
-
-    /// ### active
-    ///
-    /// Active component
-    fn active(&mut self) {}
+    fn perform(&mut self, _cmd: Cmd) -> CmdResult {
+        CmdResult::None
+    }
 }
 
 #[cfg(test)]
@@ -272,72 +170,30 @@ mod test {
 
     use super::*;
 
-    use crossterm::event::{KeyCode, KeyEvent};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_progress_bar() {
-        let mut component: ProgressBar = ProgressBar::new(
-            ProgressBarPropsBuilder::default()
-                .hidden()
-                .visible()
-                .with_progress(0.60)
-                .with_progbar_color(Color::Red)
-                .with_background(Color::Blue)
-                .with_title("Downloading file...", Alignment::Center)
-                .with_label("60% - ETA: 00:20")
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .build(),
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_LABEL).unwrap(),
-            PropPayload::One(PropValue::Str(String::from("60% - ETA: 00:20")))
-        );
-        assert_eq!(
-            component.props.title.as_ref().unwrap().text(),
-            "Downloading file..."
-        );
-        assert_eq!(
-            component.props.title.as_ref().unwrap().alignment(),
-            Alignment::Center
-        );
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.background, Color::Blue);
-        assert_eq!(component.props.visible, true);
-        assert_eq!(component.props.borders.borders, Borders::ALL);
-        assert_eq!(component.props.borders.variant, BorderType::Double);
-        assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(
-            *component.props.own.get(PROP_PROGRESS).unwrap(),
-            PropPayload::One(PropValue::F64(0.60))
-        );
+        let mut component = ProgressBar::default()
+            .background(Color::Red)
+            .foreground(Color::White)
+            .progress(0.60)
+            .title("Downloading file...", Alignment::Center)
+            .label("60% - ETA 00:20")
+            .borders(Borders::default());
         // Get value
-        assert_eq!(component.get_state(), State::None);
-        component.active();
-        component.blur();
-        // Update
-        let props = ProgressBarPropsBuilder::from(component.get_props())
-            .with_progbar_color(Color::Yellow)
-            .hidden()
-            .build();
-        assert_eq!(component.update(props), CmdResult::None);
-        assert_eq!(component.props.foreground, Color::Yellow);
-        assert_eq!(component.props.visible, false);
-        // Event
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),
-            Cmd::None(KeyCmd::from(KeyCode::Delete))
-        );
-        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
+        assert_eq!(component.state(), State::None);
     }
 
     #[test]
     #[should_panic]
     fn test_components_progress_bar_bad_prog() {
-        ProgressBar::new(
-            ProgressBarPropsBuilder::default()
-                .with_progress(60.0)
-                .build(),
-        );
+        ProgressBar::default()
+            .background(Color::Red)
+            .foreground(Color::White)
+            .progress(6.0)
+            .title("Downloading file...", Alignment::Center)
+            .label("60% - ETA 00:20")
+            .borders(Borders::default())
     }
 }

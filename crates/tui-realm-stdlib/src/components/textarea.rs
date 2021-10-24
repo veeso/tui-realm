@@ -203,10 +203,6 @@ impl Textarea {
 }
 
 impl MockComponent for Textarea {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    /// If focused, cursor is also set (if supported by widget)
     fn view(&mut self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
@@ -227,10 +223,6 @@ impl MockComponent for Textarea {
                         .collect(),
                     _ => Vec::new(),
                 };
-            let alignment = self
-                .props
-                .get_or(Attribute::TextAlign, AttrValue::Alignment(Alignment::Left))
-                .unwrap_alignment();
             let foreground = self
                 .props
                 .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
@@ -381,7 +373,7 @@ mod tests {
         assert_eq!(component.states.list_index, 1); // Kept
         assert_eq!(component.states.list_len, 3);
         // get value
-        assert_eq!(component.get_state(), State::None);
+        assert_eq!(component.state(), State::None);
         // Render
         assert_eq!(component.states.list_index, 1);
         // Handle inputs

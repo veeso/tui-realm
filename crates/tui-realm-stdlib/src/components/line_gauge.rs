@@ -263,8 +263,7 @@ impl MockComponent for LineGauge {
                 Some(PropPayload::One(PropValue::F64(ratio))) => *ratio,
                 _ => 0.0,
             };
-            let div: Block =
-                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), true);
+            let div: Block = crate::utils::get_block(&borders, title.as_ref(), true);
             // Make progress bar
             render.render_widget(
                 TuiLineGauge::default()
@@ -386,7 +385,7 @@ mod test {
             PropPayload::One(PropValue::U8(LINE_DOUBLE))
         );
         // Get value
-        assert_eq!(component.get_state(), State::None);
+        assert_eq!(component.state(), State::None);
         component.active();
         component.blur();
         // Update

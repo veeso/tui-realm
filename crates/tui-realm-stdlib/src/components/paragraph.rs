@@ -286,8 +286,7 @@ impl MockComponent for Paragraph {
                 _ => Vec::new(),
             };
             // Make container div
-            let div: Block =
-                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), true);
+            let div: Block = crate::utils::get_block(&borders, title.as_ref(), true);
             // Text properties
             let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
                 Some(PropPayload::One(PropValue::Alignment(alignment))) => *alignment,
@@ -456,7 +455,7 @@ mod tests {
                 .build(),
         );
         // get value
-        assert_eq!(component.get_state(), State::None);
+        assert_eq!(component.state(), State::None);
         // On key
         assert_eq!(
             component.on(Cmd::Delete),

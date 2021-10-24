@@ -31,8 +31,8 @@ Current version: 1.0.0 (FIXME: 03/08/2021)
     - [Progress bar](#progress-bar)
     - [Radio](#radio)
     - [Select](#select)
-    - [Sparkline](#sparkline)
     - [Span](#span)
+    - [Sparkline](#sparkline)
     - [Table](#table)
     - [Textarea](#textarea)
     - [Utilities](#utilities)
@@ -106,9 +106,9 @@ If you have more data than the maximum amount of bars that can be displayed, you
 
 While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
 
-**Events**:
+**Commands**:
 
-| Event                | Message         | Behaviour                                      |
+| Cmd                | CmdResult         | Behaviour                                      |
 |----------------------|-----------------|------------------------------------------------|
 | `KeyCode::Right`     | `None`          | Move the cursor right                          |
 | `KeyCode::Left`      | `None`          | Move the cursor left                           |
@@ -144,9 +144,9 @@ If you have more data than the maximum amount of bars that can be displayed, you
 
 While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
 
-**Events**:
+**Commands**:
 
-| Event                | Message         | Behaviour                                      |
+| Cmd                | CmdResult         | Behaviour                                      |
 |----------------------|-----------------|------------------------------------------------|
 | `KeyCode::Right`     | `None`          | Move the cursor right                          |
 | `KeyCode::Left`      | `None`          | Move the cursor left                           |
@@ -176,9 +176,9 @@ While in active mode (default) you can put as many entries as you wish. You can 
 
 A checkbox group. Provides the possibility to select between multiple options, when `get_state` is invoked returns a vector of index; each index represents the index of the item selected.
 
-**Events**:
+**Commands**:
 
-| Event                | Message         | Behaviour                                      |
+| Cmd                | CmdResult         | Behaviour                                      |
 |----------------------|-----------------|------------------------------------------------|
 | `KeyCode::Right`     | `None`          | Increment the selected choice index by 1       |
 | `KeyCode::Left`      | `None`          | Decrement the selected choice index by 1       |
@@ -239,9 +239,9 @@ An input text. Provides the possiblity to input a text with the possibility to s
 
 A text label. Provides the possibility to display a simple text, with the possibility to set modifiers and colors.
 
-**Events**:
+**Commands**:
 
-| Event                | Message            | Behaviour          |
+| Cmd                | CmdResult            | Behaviour          |
 |----------------------|--------------------|--------------------|
 | `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
 
@@ -269,9 +269,9 @@ A text label. Provides the possibility to display a simple text, with the possib
 
 A line indicating progress. The progress bar provides the possibility to show the current progress and to show a label above it.
 
-**Events**:
+**Commands**:
 
-| Event                | Message            | Behaviour          |
+| Cmd                | CmdResult            | Behaviour          |
 |----------------------|--------------------|--------------------|
 | `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
 
@@ -298,11 +298,11 @@ A line indicating progress. The progress bar provides the possibility to show th
 
 a list of rows with the possibility to scroll text with arrows. In order to scroll, the component must be active.
 
-**Events**:
+**Commands**:
 
 Events will be reported only when set as `Scrollable`
 
-| Event               | Message | Behaviour                 |
+| Cmd               | CmdResult | Behaviour                 |
 |---------------------|---------|---------------------------|
 | `Move(Down)`     | `OnKey` | Move cursor down          |
 | `Move(Up)`       | `OnKey` | Move cursor up            |
@@ -338,9 +338,9 @@ Events will be reported only when set as `Scrollable`
 
 A text paragraph. Like in HTML this has to be considered a block element, and supports multi-line texts with different styles. The text is automatically wrapped.
 
-**Events**:
+**Commands**:
 
-| Event                | Message            | Behaviour          |
+| Cmd                | CmdResult            | Behaviour          |
 |----------------------|--------------------|--------------------|
 | `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
 
@@ -371,24 +371,19 @@ A text paragraph. Like in HTML this has to be considered a block element, and su
 
 A progress bar or basically a gauge. The progress bar provides the possibility to show the current progress and to show a label above it.
 
-**Events**:
-
-| Event                | Message            | Behaviour          |
-|----------------------|--------------------|--------------------|
-| `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
-
-**Update**: None
+**Commands**: None
 
 **State**: None
 
 **Properties**:
 
-- `with_progbar_color`: set progress bar color
-- `with_background`: set background color
-- `with_progress`: set progress. **WARNING**: must be in range 0.0,1.0
-- `with_borders`: set border properties
-- `with_label`: set progress bar label
-- `with_title`: set progress bar title
+- `Background(Color)`: set background color
+- `Borders(Borders)`: set border properties
+- `Foreground(Color)`: set progress bar color
+- `Text(String)`: set progress bar label
+- `TextProps(TextModifiers)`: set text modifiers
+- `Title(Title)`: set progress bar title
+- `Value(Payload(One(F64)))`: set progress. **WARNING**: must be in range 0.0,1.0
 
 ---
 
@@ -396,87 +391,57 @@ A progress bar or basically a gauge. The progress bar provides the possibility t
 
 A radio button group. Provides the possibility to select a single option in a group of options. When `get_state` is invoked returns the index of the selected option as Unsigned.
 
-**Events**:
+**Commands**:
 
-| Event                | Message         | Behaviour                                        |
+| Cmd                  | CmdResult       | Behaviour                                        |
 |----------------------|-----------------|--------------------------------------------------|
-| `KeyCode::Right`     | `Changed`      | Change the selected option to current item index |
-| `KeyCode::Left`      | `Changed`      | Change the selected option to current item index |
-| `KeyCode::Enter`     | `Submit`      | Just returns the index of the selected item      |
-| `KeyCode::Char(_)`   | `OnKey`         |                                                |
+| `Move(Right)`        | `Changed`       | Change the selected option to current item index |
+| `Move(Left)`         | `Changed`       | Change the selected option to current item index |
+| `Submit`             | `Submit`        | Just returns the index of the selected item      |
 
-**Update**: `Msg::Changed` if the choice changed, `Msg::None` otherwise.
-
-**State**: the state returned is an `Unsigned` containing the index of the selected item in the radio group.
+**State**: the state returned is `One(Usize)` containing the index of the selected item in the radio group.
 
 **Properties**:
 
-- `with_color`: foreground color
-- `with_inverted_colors`: color used when item is at current index
-- `with_borders`: set borders properties for component
-- `with_options`: set radio options
-- `with_title`: set radio title
-- `with_value`: set default selected item by its index
-- `rewind`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
+- `Background(Color)`: color used when item is at current index
+- `Borders(Borders)`: set borders properties for component
+- `Content(Payload(Vec(String)))`: set radio options
+- `FocusStyle(Style)`: inactive style
+- `Foreground(Color)`: foreground color
+- `Rewind(Flag)`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
+- `Title(Title)`: set radio title
+- `Value(Payload(One(String)))`: set default selected item by its index
 
 ---
 
 ### Select
 
-A select like in HTML. Provides the possibility to select a single option in a group of options. When `get_state` is invoked returns the index of the selected option as Unsigned, but only if the selection tab is closed. Returns `Payload::None` otherwise. The tab can be opened with `<ENTER>`; once opened you can move with arrows to select the entry. To close the form, you need to press `<ENTER>` again. Once the tab is closed, a `Msg::Submit` is raised with the selected index.
+A select like in HTML. Provides the possibility to select a single option in a group of options. When `state` is invoked returns the index of the selected option as Unsigned, but only if the selection tab is closed. Returns `State::None` otherwise. The tab can be opened with `Cmd::Submit`; once opened you can move with arrows to select the entry. To close the form, you need to press `Cmd::Submit` again. Once the tab is closed, a `CmdResult::Submit` is raised with the selected index.
 If the component loses focus, the selection tab is automatically closed
 This component should have a variable size in the layout to be displayed properly. Please view the example: `examples/select.rs`.
 
-**Events**:
+**Commands**:
 
-| Command              | Result                | Behaviour                        |
-|----------------------|--------------------------|----------------------------------|
-| `Move(Up)`           | `Changed` | `None`      | Move select up, if tab is open   |
-| `Move(Down)`         | `Changed` | `None`      | Move select down, if tab is open |
-| `KeyCode::Enter`     | `Submit` | `None`      | Open or close the select tab     |
-| `KeyCode::Char(_)`   | `OnKey`         |                                                |
+| Command      | Result             | Behaviour                                                      |
+|--------------|--------------------|----------------------------------------------------------------|
+| `Move(Up)`   | `Changed` | `None` | Move select up, if tab is open                                 |
+| `Move(Down)` | `Changed` | `None` | Move select down, if tab is open                               |
+| `Submit`     | `Submit` | `None`  | Open or close the select tab; Returns state if tab gets closed |
 
-**Update**: `Msg::Changed` if the choice changed, `Msg::None` otherwise.
-
-**State**: the state returned is an `Unsigned` containing the index of the selected item in the radio group.
+**State**: the state returned is `One(Usize)` containing the index of the selected item in the radio group.
 
 **Properties**:
 
-- `with_foreground`: foreground color
-- `with_background`: background color
-- `with_highlighted_color`: a different color for highlighted entry; `foreground` otherwise
-- `with_highlighted_symbol`: cursor for highlighted entry in selection tab.
-- `with_borders`: set borders properties for component
-- `with_options`: set select options
-- `with_title`: set select title
-- `with_value`: set default selected item by its index
-- `rewind`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
-
----
-
-### Sparkline
-
-A sparkline chart.
-
-**Events**:
-
-| Event                | Message         | Behaviour                                      |
-|----------------------|-----------------|------------------------------------------------|
-| `KeyCode::Char(_)`   | `OnKey`         |                                                |
-
-**State**: `None`.
-
-**Properties**:
-
-- `with_foreground`: foreground color
-- `with_background`: background color
-- `with_label`: label for sparkline
-- `with_max_entries`: maximum amount of entries to display. If not provided, will be the maximum allowed by the area width.
-- `with_data`: set data for sparkline. Is a vec of u64
-- `push_record_back`: Just push the provided record to the back of data (end)
-- `push_record_front`: Just push the provided record to the front of data (begin)
-- `pop_record_front`: Pops the first element of data
-- `pop_record_back`: Pops the last element of data
+- `Background(Color)`: background color
+- `Borders(Borders)`: set borders properties for component
+- `Content(Payload(Vec(String)))`: set select options
+- `FocusStyle(Style)`: inactive style
+- `Foreground(Color)`: foreground color
+- `HighlightedColor(Color)`: a different color for highlighted entry; `foreground` otherwise
+- `HighlightedStr(String)`: cursor for highlighted entry in selection tab.
+- `Rewind(Flag)`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
+- `Title(Title)`: set select title
+- `Value(Payload(One(Usize)))`: set default selected item by its index
 
 ---
 
@@ -484,31 +449,35 @@ A sparkline chart.
 
 A span is an in-line component which supports text with different styles.
 
-**Events**:
-
-| Event                | Message            | Behaviour          |
-|----------------------|--------------------|--------------------|
-| `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
-
-**Update**: None
+**Commands**: None
 
 **State**: None
 
 **Properties**:
 
-- `with_foreground`: set foreground color
-- `with_background`: set background color
-- `bold`: set text bold
-- `italic`: set text italic
-- `rapid_blink`: set rapid blink for text
-- `reversed`: reverses colors
-- `slow_blink` set slow blink for test
-- `strikethrough`: set strikethrough for text
-- `underlined`: set underlined text
-- `with_borders`: set border properties
-- `with_spans`: set paragraph text
-- `with_title` set block title
-- `with_text_alignment`: set text alignment
+- `Alignment(Alignment)`: set text alignment
+- `Background(Color)`: set background color
+- `Foreground(Color)`: set foreground color
+- `Text(Payload(Vec(TextSpan)))` set text spans
+- `TextProps(TextModifiers)`: set text modifiers
+
+---
+
+### Sparkline
+
+A sparkline chart.
+
+**Commands**: None
+
+**State**: `None`.
+
+**Properties**:
+
+- `Background(Color)`: background color
+- `Content(Payload(Vec(U64)))`: set data for sparkline. Is a vec of u64
+- `Foreground(Color)`: foreground color
+- `Title(Title)`: label for sparkline
+- `Width(Length)`: maximum amount of entries to display. If not provided, will be the maximum allowed by the area width.
 
 ---
 
@@ -516,11 +485,11 @@ A span is an in-line component which supports text with different styles.
 
 a table of rows with the possibility to scroll text with arrows. In order to scroll, the component must be active.
 
-**Events**:
+**Commands**:
 
 Events will be reported only when set as `Scrollable`
 
-| Event         | Message          | Behaviour                 |
+| Cmd           | CmdResult        | Behaviour                 |
 |---------------|------------------|---------------------------|
 | `GoTo(Begin)` | `Changed | None` | Move cursor to first item |
 | `GoTo(End)`   | `Changed | None` | Move cursor to last item  |
@@ -535,6 +504,7 @@ Events will be reported only when set as `Scrollable`
 
 - `Background(Color)`: set background color
 - `Borders(Borders)`: set border properties
+- `Content(Table)`: set table
 - `Custom("col-spacing", Size)`: column spacing
 - `FocusStyle(Style)`: inactive style
 - `Foreground(Color)`: set foreground color
@@ -546,7 +516,6 @@ Events will be reported only when set as `Scrollable`
 - `Text(Payload(Vec(String)))`: set table headers
 - `TextProps(TextModifiers)`: set text modifiers
 - `Title(Title)`: set block title
-- `Value(Table)`: set table
 - `Width(Payload(Vec(U16)))`: set col widths
 
 ---
@@ -555,7 +524,7 @@ Events will be reported only when set as `Scrollable`
 
 A textarea is like a paragraph, but has the possibility to scroll the text.
 
-**Events**:
+**Commands**:
 
 | Cmd                 | Result | Behaviour                 |
 |---------------------|--------|---------------------------|

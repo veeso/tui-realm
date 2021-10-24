@@ -530,8 +530,7 @@ impl MockComponent for Chart {
                 true => true,
                 false => focus,
             };
-            let block: Block =
-                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), active);
+            let block: Block = crate::utils::get_block(&borders, title.as_ref(), active);
             // Get data
             let data: Vec<TuiDataset> = self.data(self.states.cursor, area.width as usize);
             // Create widget
@@ -831,18 +830,12 @@ mod test {
         component.blur();
         assert_eq!(component.states.focus, false);
         // Commands
-        assert_eq!(component.get_state(), State::None);
+        assert_eq!(component.state(), State::None);
         // -> Right
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
-            CmdResult::None
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None);
         assert_eq!(component.states.cursor, 1);
         // <- Left
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
-            CmdResult::None
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Left)), CmdResult::None);
         assert_eq!(component.states.cursor, 0);
         // End
         assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
@@ -980,16 +973,16 @@ mod test {
         component.blur();
         assert_eq!(component.states.focus, false);
         // Commands
-        assert_eq!(component.get_state(), State::None);
+        assert_eq!(component.state(), State::None);
         // -> Right
         assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            component.on(Cmd::Move(Direction::Right)),
             Cmd::None(KeyCmd::from(KeyCode::Right))
         );
         assert_eq!(component.states.cursor, 0);
         // <- Left
         assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
+            component.on(Cmd::Move(Direction::Left)),
             Cmd::None(KeyCmd::from(KeyCode::Left))
         );
         assert_eq!(component.states.cursor, 0);
