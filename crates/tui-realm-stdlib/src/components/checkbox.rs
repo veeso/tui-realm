@@ -35,7 +35,7 @@ use tuirealm::tui::{
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, Tabs},
 };
-use tuirealm::{Component, Frame, Msg, Payload, Value};
+use tuirealm::{CmdResult, Component, Frame, Payload, Value};
 
 const PROP_CHOICES: &str = "choices";
 const PROP_REWIND: &str = "rewind";
@@ -310,21 +310,17 @@ impl Checkbox {
     }
 }
 
-impl Component for Checkbox {
+impl MockComponent for Checkbox {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
-        if self.props.visible {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make colors
-            let (bg, fg, block_color): (Color, Color, Color) = match &self.states.focus {
-                true => (
-                    self.props.foreground,
-                    self.props.background,
-                    self.props.foreground,
-                ),
-                false => (Color::Reset, self.props.foreground, Color::Reset),
+            let (bg, fg, block_color): (Color, Color, Color) = match &focus {
+                true => (foreground, background, foreground),
+                false => (Color::Reset, foreground, Color::Reset),
             };
             // Make choices
             let choices: Vec<Spans> = self
@@ -337,7 +333,7 @@ impl Component for Checkbox {
                         true => "☑ ",
                         false => "☐ ",
                     };
-                    let (fg, bg) = match self.states.focus {
+                    let (fg, bg) = match focus {
                         true => match self.states.choice == idx {
                             true => (fg, bg),
                             false => (bg, fg),
@@ -351,11 +347,8 @@ impl Component for Checkbox {
                     ])
                 })
                 .collect();
-            let block: Block = crate::utils::get_block(
-                &self.props.borders,
-                self.props.title.as_ref(),
-                self.states.focus,
-            );
+            let block: Block =
+                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), focus);
             let checkbox: Tabs = Tabs::new(choices)
                 .block(block)
                 .select(self.states.choice)
@@ -369,8 +362,8 @@ impl Component for Checkbox {
     /// Update component properties
     /// Properties should first be retrieved through `get_props` which creates a builder from
     /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
+    /// Returns a CmdResult to the view
+    fn update(&mut self, props: Props) -> CmdResult {
         let prev_selection = self.states.selection.clone();
         // Reset choices
         let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
@@ -392,11 +385,11 @@ impl Component for Checkbox {
                 .collect();
         }
         self.props = props;
-        // Msg none
+        // CmdResult none
         if prev_selection != self.states.selection {
-            Msg::OnChange(self.get_state())
+            CmdResult::Changed(self.get_state())
         } else {
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -410,41 +403,41 @@ impl Component for Checkbox {
     /// ### on
     ///
     /// Handle input event and update internal states.
-    /// Returns a Msg to the view.
-    fn on(&mut self, ev: Event) -> Msg {
+    /// Returns a CmdResult to the view.
+    fn on(&mut self, ev: Event) -> CmdResult {
         // Match event
-        if let Event::Key(key) = ev {
+        if let Cmd::Key(key) = ev {
             match key.code {
                 KeyCode::Right => {
                     // Increment choice
                     self.states.next_choice(self.rewind());
-                    // Return Msg On Change
-                    Msg::None
+                    // Return CmdResult On Change
+                    CmdResult::None
                 }
                 KeyCode::Left => {
                     // Decrement choice
                     self.states.prev_choice(self.rewind());
-                    // Return Msg On Change
-                    Msg::None
+                    // Return CmdResult On Change
+                    CmdResult::None
                 }
                 KeyCode::Char(' ') => {
                     // Select index
                     self.states.toggle();
-                    // Return Msg On Change
-                    Msg::OnChange(self.get_state())
+                    // Return CmdResult On Change
+                    CmdResult::Changed(self.get_state())
                 }
                 KeyCode::Enter => {
                     // Return Submit
-                    Msg::OnSubmit(self.get_state())
+                    CmdResult::Submit(self.get_state())
                 }
                 _ => {
                     // Return key event to activity
-                    Msg::OnKey(key)
+                    Cmd::None(key)
                 }
             }
         } else {
             // Ignore event
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -453,11 +446,11 @@ impl Component for Checkbox {
     /// Get current state from component
     /// For this component returns the vec of selected items
     fn get_state(&self) -> Payload {
-        Payload::Vec(
+        State::Vec(
             self.states
                 .selection
                 .iter()
-                .map(|x| Value::Usize(*x))
+                .map(|x| StateValue::Usize(*x))
                 .collect(),
         )
     }
@@ -468,14 +461,14 @@ impl Component for Checkbox {
     ///
     /// Blur component
     fn blur(&mut self) {
-        self.states.focus = false;
+        focus = false;
     }
 
     /// ### active
     ///
     /// Active component
     fn active(&mut self) {
-        self.states.focus = true;
+        focus = true;
     }
 }
 
@@ -615,7 +608,7 @@ mod test {
             .with_color(Color::Yellow)
             .hidden()
             .build();
-        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.update(props), CmdResult::None);
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Yellow);
         let props = CheckboxPropsBuilder::from(component.get_props())
@@ -624,77 +617,77 @@ mod test {
             .build();
         assert_eq!(
             component.update(props),
-            Msg::OnChange(Payload::Vec(vec![Value::Usize(1)]))
+            CmdResult::Changed(Payload::Vec(vec![Value::Usize(1)]))
         );
         // Get value
-        assert_eq!(component.get_state(), Payload::Vec(vec![Value::Usize(1)]));
+        assert_eq!(component.get_state(), State::Vec(vec![Value::Usize(1)]));
         // Handle events
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
-            Msg::None,
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
+            CmdResult::None,
         );
-        assert_eq!(component.get_state(), Payload::Vec(vec![Value::Usize(1)]));
+        assert_eq!(component.get_state(), State::Vec(vec![Value::Usize(1)]));
         // Toggle
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Char(' ')))),
-            Msg::OnChange(Payload::Vec(vec![Value::Usize(1), Value::Usize(0)]))
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char(' ')))),
+            CmdResult::Changed(Payload::Vec(vec![Value::Usize(1), StateValue::Usize(0)]))
         );
         // Left again
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
-            Msg::None,
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
+            CmdResult::None,
         );
         assert_eq!(component.states.choice, 0);
         // Right
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::None,
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::None,
         );
         // Toggle
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Char(' ')))),
-            Msg::OnChange(Payload::Vec(vec![Value::Usize(0)]))
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char(' ')))),
+            CmdResult::Changed(Payload::Vec(vec![Value::Usize(0)]))
         );
         // Right again
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::None,
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::None,
         );
         assert_eq!(component.states.choice, 2);
         // Right again
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::None,
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::None,
         );
         assert_eq!(component.states.choice, 3);
         // Right again
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::None,
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::None,
         );
         assert_eq!(component.states.choice, 4);
         // Right again
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::None,
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::None,
         );
         assert_eq!(component.states.choice, 5);
         // Right again
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::None,
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::None,
         );
         assert_eq!(component.states.choice, 5);
         // Submit
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::OnSubmit(Payload::Vec(vec![Value::Usize(0)])),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Enter))),
+            CmdResult::Submit(Payload::Vec(vec![Value::Usize(0)])),
         );
         // Any key
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
+            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
         );
-        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 }

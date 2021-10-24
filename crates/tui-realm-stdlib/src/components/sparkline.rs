@@ -34,7 +34,7 @@ use tuirealm::tui::{
     style::{Color, Style},
     widgets::{Block, BorderType, Borders, Sparkline as TuiSparkline},
 };
-use tuirealm::{event::Event, Component, Frame, Msg, Payload};
+use tuirealm::{event::Event, CmdResult, Component, Frame, Payload};
 
 // -- Props
 const PROP_DATA: &str = "data";
@@ -272,12 +272,12 @@ impl Sparkline {
     }
 }
 
-impl Component for Sparkline {
+impl MockComponent for Sparkline {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     fn render(&self, render: &mut Frame, area: Rect) {
-        if self.props.visible {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let block: Block =
                 crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), true);
             // Get max elements
@@ -294,11 +294,7 @@ impl Component for Sparkline {
                 .block(block)
                 .data(data.as_slice())
                 .max(data_max_len)
-                .style(
-                    Style::default()
-                        .fg(self.props.foreground)
-                        .bg(self.props.background),
-                );
+                .style(Style::default().fg(foreground).bg(background));
             // Render
             render.render_widget(widget, area);
         }
@@ -309,10 +305,10 @@ impl Component for Sparkline {
     /// Update component properties
     /// Properties should first be retrieved through `get_props` which creates a builder from
     /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
+    /// Returns a CmdResult to the view
+    fn update(&mut self, props: Props) -> CmdResult {
         self.props = props;
-        Msg::None
+        CmdResult::None
     }
 
     /// ### get_props
@@ -327,12 +323,12 @@ impl Component for Sparkline {
     /// ### on
     ///
     /// Handle input event and update internal states.
-    /// Returns a Msg to the view
-    fn on(&mut self, ev: Event) -> Msg {
-        if let Event::Key(key) = ev {
-            Msg::OnKey(key)
+    /// Returns a CmdResult to the view
+    fn on(&mut self, ev: Event) -> CmdResult {
+        if let Cmd::Key(key) = ev {
+            Cmd::None(key)
         } else {
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -341,7 +337,7 @@ impl Component for Sparkline {
     /// Get current state from component
     /// This component always returns `None`
     fn get_state(&self) -> Payload {
-        Payload::None
+        State::None
     }
 
     // -- events
@@ -403,11 +399,11 @@ mod test {
         component.active();
         component.blur();
         // Commands
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), State::None);
         // other keys
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
+            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
         );
         // component funcs
         assert_eq!(component.data_len(), 18);
@@ -420,7 +416,7 @@ mod test {
                     .push_record_front(66)
                     .build()
             ),
-            Msg::None
+            CmdResult::None
         );
         assert_eq!(
             component.data(100),
@@ -439,7 +435,7 @@ mod test {
                     .pop_record_front()
                     .build()
             ),
-            Msg::None
+            CmdResult::None
         );
         assert_eq!(
             component.data(100),
@@ -452,7 +448,7 @@ mod test {
                     .with_data(&[])
                     .build()
             ),
-            Msg::None
+            CmdResult::None
         );
         assert_eq!(component.data(8), vec![]);
     }

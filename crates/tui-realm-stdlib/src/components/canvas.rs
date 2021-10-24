@@ -35,7 +35,7 @@ use tuirealm::tui::{
     widgets::canvas::{Canvas as TuiCanvas, Context, Line, Map, MapResolution, Points, Rectangle},
     widgets::{Block, BorderType, Borders},
 };
-use tuirealm::{Component, Frame, Msg, Payload};
+use tuirealm::{CmdResult, Component, Frame, Payload};
 
 // -- Props
 
@@ -328,19 +328,16 @@ impl Canvas {
     }
 }
 
-impl Component for Canvas {
+impl MockComponent for Canvas {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
-        if self.props.visible {
-            let mut block: Block = crate::utils::get_block(
-                &self.props.borders,
-                self.props.title.as_ref(),
-                self.states.focus,
-            );
-            block = block.style(Style::default().bg(self.props.background));
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
+            let mut block: Block =
+                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), focus);
+            block = block.style(Style::default().bg(background));
             // Get properties
             let x_bounds: [f64; 2] = self
                 .props
@@ -367,7 +364,7 @@ impl Component for Canvas {
             };
             // Make canvas
             let canvas = TuiCanvas::default()
-                .background_color(self.props.background)
+                .background_color(background)
                 .block(block)
                 .x_bounds(x_bounds)
                 .y_bounds(y_bounds)
@@ -382,10 +379,10 @@ impl Component for Canvas {
     /// Update component properties
     /// Properties should first be retrieved through `get_props` which creates a builder from
     /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
+    /// Returns a CmdResult to the view
+    fn update(&mut self, props: Props) -> CmdResult {
         self.props = props;
-        Msg::None
+        CmdResult::None
     }
 
     /// ### get_props
@@ -400,12 +397,12 @@ impl Component for Canvas {
     /// ### on
     ///
     /// Handle input event and update internal states.
-    /// Returns a Msg to the view
-    fn on(&mut self, ev: Event) -> Msg {
-        if let Event::Key(key) = ev {
-            Msg::OnKey(key)
+    /// Returns a CmdResult to the view
+    fn on(&mut self, ev: Event) -> CmdResult {
+        if let Cmd::Key(key) = ev {
+            Cmd::None(key)
         } else {
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -414,7 +411,7 @@ impl Component for Canvas {
     /// Get current state from component
     /// This component always returns `None`
     fn get_state(&self) -> Payload {
-        Payload::None
+        State::None
     }
 
     // -- events
@@ -423,14 +420,14 @@ impl Component for Canvas {
     ///
     /// Blur component; basically remove focus
     fn blur(&mut self) {
-        self.states.focus = false;
+        focus = false;
     }
 
     /// ### active
     ///
     /// Active component; basically give focus
     fn active(&mut self) {
-        self.states.focus = true;
+        focus = true;
     }
 }
 
@@ -496,8 +493,8 @@ mod test {
         assert_eq!(component.states.focus, false);
         // Keys
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
+            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
         );
     }
 

@@ -35,7 +35,7 @@ use tuirealm::tui::{
     text::Spans,
     widgets::{Block, BorderType, Borders, Tabs},
 };
-use tuirealm::{event::Event, Component, Frame, Msg, Payload, Value};
+use tuirealm::{event::Event, CmdResult, Component, Frame, Payload, Value};
 
 // -- Props
 
@@ -278,14 +278,14 @@ impl Radio {
     }
 }
 
-impl Component for Radio {
+impl MockComponent for Radio {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     #[cfg(not(tarpaulin_include))]
     fn render(&self, render: &mut Frame, area: Rect) {
-        if self.props.visible {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make choices
             let choices: Vec<Spans> = self
                 .states
@@ -294,19 +294,12 @@ impl Component for Radio {
                 .map(|x| Spans::from(x.clone()))
                 .collect();
             // Make colors
-            let (bg, fg, block_color): (Color, Color, Color) = match &self.states.focus {
-                true => (
-                    self.props.foreground,
-                    self.props.background,
-                    self.props.foreground,
-                ),
-                false => (Color::Reset, self.props.foreground, Color::Reset),
+            let (bg, fg, block_color): (Color, Color, Color) = match &focus {
+                true => (foreground, background, foreground),
+                false => (Color::Reset, foreground, Color::Reset),
             };
-            let block: Block = crate::utils::get_block(
-                &self.props.borders,
-                self.props.title.as_ref(),
-                self.states.focus,
-            );
+            let block: Block =
+                crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), focus);
             let radio: Tabs = Tabs::new(choices)
                 .block(block)
                 .select(self.states.choice)
@@ -321,8 +314,8 @@ impl Component for Radio {
     /// Update component properties
     /// Properties should first be retrieved through `get_props` which creates a builder from
     /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
+    /// Returns a CmdResult to the view
+    fn update(&mut self, props: Props) -> CmdResult {
         let prev_index: usize = self.states.choice;
         // Reset choices
         let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
@@ -337,11 +330,11 @@ impl Component for Radio {
             self.states.choice = *choice;
         }
         self.props = props;
-        // Msg none
+        // CmdResult none
         if prev_index != self.states.choice {
-            Msg::OnChange(self.get_state())
+            CmdResult::Changed(self.get_state())
         } else {
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -355,35 +348,35 @@ impl Component for Radio {
     /// ### on
     ///
     /// Handle input event and update internal states.
-    /// Returns a Msg to the view.
-    fn on(&mut self, ev: Event) -> Msg {
+    /// Returns a CmdResult to the view.
+    fn on(&mut self, ev: Event) -> CmdResult {
         // Match event
-        if let Event::Key(key) = ev {
+        if let Cmd::Key(key) = ev {
             match key.code {
                 KeyCode::Right => {
                     // Increment choice
                     self.states.next_choice(self.rewind());
-                    // Return Msg On Change
-                    Msg::OnChange(self.get_state())
+                    // Return CmdResult On Change
+                    CmdResult::Changed(self.get_state())
                 }
                 KeyCode::Left => {
                     // Decrement choice
                     self.states.prev_choice(self.rewind());
-                    // Return Msg On Change
-                    Msg::OnChange(self.get_state())
+                    // Return CmdResult On Change
+                    CmdResult::Changed(self.get_state())
                 }
                 KeyCode::Enter => {
                     // Return Submit
-                    Msg::OnSubmit(self.get_state())
+                    CmdResult::Submit(self.get_state())
                 }
                 _ => {
                     // Return key event to activity
-                    Msg::OnKey(key)
+                    Cmd::None(key)
                 }
             }
         } else {
             // Ignore event
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -392,7 +385,7 @@ impl Component for Radio {
     /// Get current state from component
     /// For this component returns the index of the selected choice
     fn get_state(&self) -> Payload {
-        Payload::One(Value::Usize(self.states.choice))
+        State::One(Value::Usize(self.states.choice))
     }
 
     // -- events
@@ -401,14 +394,14 @@ impl Component for Radio {
     ///
     /// Blur component
     fn blur(&mut self) {
-        self.states.focus = false;
+        focus = false;
     }
 
     /// ### active
     ///
     /// Active component
     fn active(&mut self) {
-        self.states.focus = true;
+        focus = true;
     }
 }
 
@@ -533,7 +526,7 @@ mod test {
             .with_color(Color::Red)
             .hidden()
             .build();
-        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.update(props), CmdResult::None);
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.visible, false);
         let props = RadioPropsBuilder::from(component.get_props())
@@ -542,51 +535,51 @@ mod test {
             .build();
         assert_eq!(
             component.update(props),
-            Msg::OnChange(Payload::One(Value::Usize(2)))
+            CmdResult::Changed(Payload::One(Value::Usize(2)))
         );
         // Get value
         component.states.choice = 1;
-        assert_eq!(component.get_state(), Payload::One(Value::Usize(1)));
+        assert_eq!(component.get_state(), State::One(Value::Usize(1)));
         // Handle events
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
-            Msg::OnChange(Payload::One(Value::Usize(0))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
+            CmdResult::Changed(Payload::One(Value::Usize(0))),
         );
-        assert_eq!(component.get_state(), Payload::One(Value::Usize(0)));
+        assert_eq!(component.get_state(), State::One(Value::Usize(0)));
         // Left again
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
-            Msg::OnChange(Payload::One(Value::Usize(0))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
+            CmdResult::Changed(Payload::One(Value::Usize(0))),
         );
-        assert_eq!(component.get_state(), Payload::One(Value::Usize(0)));
+        assert_eq!(component.get_state(), State::One(Value::Usize(0)));
         // Right
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::OnChange(Payload::One(Value::Usize(1))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::Changed(Payload::One(Value::Usize(1))),
         );
-        assert_eq!(component.get_state(), Payload::One(Value::Usize(1)));
+        assert_eq!(component.get_state(), State::One(Value::Usize(1)));
         // Right again
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::OnChange(Payload::One(Value::Usize(2))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::Changed(Payload::One(Value::Usize(2))),
         );
-        assert_eq!(component.get_state(), Payload::One(Value::Usize(2)));
+        assert_eq!(component.get_state(), State::One(Value::Usize(2)));
         // Right again
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::OnChange(Payload::One(Value::Usize(2))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::Changed(Payload::One(Value::Usize(2))),
         );
-        assert_eq!(component.get_state(), Payload::One(Value::Usize(2)));
+        assert_eq!(component.get_state(), State::One(Value::Usize(2)));
         // Submit
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::OnSubmit(Payload::One(Value::Usize(2))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Enter))),
+            CmdResult::Submit(Payload::One(Value::Usize(2))),
         );
         // Any key
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
+            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
         );
-        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 }

@@ -27,241 +27,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::event::KeyCode;
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan,
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+    TextModifiers, TextSpan,
 };
 use tuirealm::tui::{
     layout::{Corner, Rect},
-    style::{Color, Modifier, Style},
-    widgets::{Block, BorderType, Borders, List, ListItem, ListState},
+    widgets::{List, ListItem, ListState},
 };
-use tuirealm::{event::Event, Component, Frame, Msg, Payload};
-
-// -- Props
-
-const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
-const PROP_MAX_STEP: &str = "max-step";
-const PROP_SPANS: &str = "spans";
-
-pub struct TextareaPropsBuilder {
-    props: Option<Props>,
-}
-
-impl Default for TextareaPropsBuilder {
-    fn default() -> Self {
-        TextareaPropsBuilder {
-            props: Some(Props::default()),
-        }
-    }
-}
-
-impl PropsBuilder for TextareaPropsBuilder {
-    fn build(&mut self) -> Props {
-        self.props.take().unwrap()
-    }
-
-    fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-}
-
-impl From<Props> for TextareaPropsBuilder {
-    fn from(props: Props) -> Self {
-        TextareaPropsBuilder { props: Some(props) }
-    }
-}
-
-impl TextareaPropsBuilder {
-    /// ### with_foreground
-    ///
-    /// Set foreground color for area
-    pub fn with_foreground(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.foreground = color;
-        }
-        self
-    }
-
-    /// ### with_background
-    ///
-    /// Set background color for area
-    pub fn with_background(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.background = color;
-        }
-        self
-    }
-
-    /// ### with_borders
-    ///
-    /// Set component borders style
-    pub fn with_borders(
-        &mut self,
-        borders: Borders,
-        variant: BorderType,
-        color: Color,
-    ) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.borders = BordersProps {
-                borders,
-                variant,
-                color,
-            }
-        }
-        self
-    }
-
-    /// ### bold
-    ///
-    /// Set bold property for component
-    pub fn bold(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::BOLD;
-        }
-        self
-    }
-
-    /// ### italic
-    ///
-    /// Set italic property for component
-    pub fn italic(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::ITALIC;
-        }
-        self
-    }
-
-    /// ### underlined
-    ///
-    /// Set underlined property for component
-    pub fn underlined(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::UNDERLINED;
-        }
-        self
-    }
-
-    /// ### slow_blink
-    ///
-    /// Set slow_blink property for component
-    pub fn slow_blink(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::SLOW_BLINK;
-        }
-        self
-    }
-
-    /// ### rapid_blink
-    ///
-    /// Set rapid_blink property for component
-    pub fn rapid_blink(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::RAPID_BLINK;
-        }
-        self
-    }
-
-    /// ### reversed
-    ///
-    /// Set reversed property for component
-    pub fn reversed(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::REVERSED;
-        }
-        self
-    }
-
-    /// ### strikethrough
-    ///
-    /// Set strikethrough property for component
-    pub fn strikethrough(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::CROSSED_OUT;
-        }
-        self
-    }
-
-    /// ### with_title
-    ///
-    /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.title = Some(BlockTitle::new(title, alignment));
-        }
-        self
-    }
-
-    /// ### with_texts
-    ///
-    /// Set spans
-    pub fn with_texts(&mut self, spans: Vec<TextSpan>) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_SPANS,
-                PropPayload::Vec(spans.into_iter().map(PropValue::TextSpan).collect()),
-            );
-        }
-        self
-    }
-
-    /// ### with_highlighted_str
-    ///
-    /// Display a symbol to highlighted line in scroll table
-    pub fn with_highlighted_str(&mut self, s: Option<&str>) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            match s {
-                None => {
-                    props.own.remove(PROP_HIGHLIGHTED_TXT);
-                }
-                Some(s) => {
-                    props.own.insert(
-                        PROP_HIGHLIGHTED_TXT,
-                        PropPayload::One(PropValue::Str(s.to_string())),
-                    );
-                }
-            }
-        }
-        self
-    }
-
-    /// ### with_max_scroll_step
-    ///
-    /// Defines the max step for PAGEUP/PAGEDOWN keys
-    pub fn with_max_scroll_step(&mut self, step: usize) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_MAX_STEP, PropPayload::One(PropValue::Usize(step)));
-        }
-        self
-    }
-}
+use tuirealm::{Frame, MockComponent, State};
 
 // -- States
 
 struct OwnStates {
     list_index: usize, // Index of selected item in textarea
     list_len: usize,   // Lines in text area
-    focus: bool,       // Has focus?
 }
 
 impl OwnStates {
     /// ### set_list_len
     ///
-    /// Set list length
+    /// Set list length and fix list index
     pub fn set_list_len(&mut self, len: usize) {
         self.list_len = len;
+        self.fix_list_index();
     }
 
     /// ### incr_list_index
@@ -345,186 +135,211 @@ impl OwnStates {
 /// ## Textarea
 ///
 /// represents a read-only text component without any container.
+#[derive(Default)]
 pub struct Textarea {
     props: Props,
     states: OwnStates,
 }
 
 impl Textarea {
-    /// ### new
-    ///
-    /// Instantiates a new `Textarea` component.
-    pub fn new(props: Props) -> Self {
-        let len: usize = match props.own.get(PROP_SPANS).as_ref() {
-            Some(PropPayload::Vec(s)) => s.len(),
-            _ => 0,
-        };
-        Textarea {
-            props,
-            states: OwnStates {
-                list_index: 0,
-                list_len: len,
-                focus: false,
-            },
-        }
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    pub fn background(mut self, bg: Color) -> Self {
+        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self
+    }
+
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.props
+            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self
+    }
+
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
+        self.props.set(
+            Attribute::Title,
+            AttrValue::Title(t.as_ref().to_string(), a),
+        );
+        self
+    }
+
+    pub fn step(mut self, step: usize) -> Self {
+        self.props
+            .set(Attribute::ScrollStep, AttrValue::Length(step));
+        self
+    }
+
+    pub fn highlighted_str<S: AsRef<str>>(mut self, s: S) -> Self {
+        self.props.set(
+            Attribute::HighlightedStr,
+            AttrValue::String(s.as_ref().to_string()),
+        );
+        self
+    }
+
+    pub fn text_rows(mut self, rows: Vec<TextSpan>) -> Self {
+        self.states.set_list_len(rows.len());
+        self.props.set(
+            Attribute::Text,
+            AttrValue::Payload(PropPayload::Vec(
+                rows.into_iter().map(PropValue::TextSpan).collect(),
+            )),
+        );
+        self
     }
 }
 
-impl Component for Textarea {
+impl MockComponent for Textarea {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
-    #[cfg(not(tarpaulin_include))]
-    fn render(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         // Make a Span
-        if self.props.visible {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text items
-            let lines: Vec<ListItem> = match self.props.own.get(PROP_SPANS).as_ref() {
-                Some(PropPayload::Vec(spans)) => spans
-                    .iter()
-                    .map(|x| x.unwrap_text_span())
-                    .map(|x| {
-                        crate::utils::wrap_spans(
-                            vec![x.clone()].as_slice(),
-                            area.width as usize,
-                            &self.props,
-                        )
-                    })
-                    .map(ListItem::new)
-                    .collect(),
-                _ => Vec::new(),
-            };
-            let div: Block = crate::utils::get_block(
-                &self.props.borders,
-                self.props.title.as_ref(),
-                self.states.focus,
-            );
+            let lines: Vec<ListItem> =
+                match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
+                    Some(PropPayload::Vec(spans)) => spans
+                        .iter()
+                        .map(|x| x.unwrap_text_span())
+                        .map(|x| {
+                            crate::utils::wrap_spans(
+                                vec![x.clone()].as_slice(),
+                                area.width as usize,
+                                &self.props,
+                            )
+                        })
+                        .map(ListItem::new)
+                        .collect(),
+                    _ => Vec::new(),
+                };
+            let alignment = self
+                .props
+                .get_or(Attribute::TextAlign, AttrValue::Alignment(Alignment::Left))
+                .unwrap_alignment();
+            let foreground = self
+                .props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let modifiers = self
+                .props
+                .get_or(
+                    Attribute::TextProps,
+                    AttrValue::TextModifiers(TextModifiers::empty()),
+                )
+                .unwrap_text_modifiers();
+            let title = self
+                .props
+                .get_or(
+                    Attribute::Title,
+                    AttrValue::Title((String::default(), Alignment::Center)),
+                )
+                .unwrap_title();
+            let borders = self
+                .props
+                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+                .unwrap_borders();
+            let focus = self
+                .props
+                .get_or(Attribute::Focus, AttrValue::Flag(false))
+                .unwrap_flag();
+            let inactive_style = self
+                .props
+                .get(Attribute::FocusStyle)
+                .map(|x| x.unwrap_style());
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
             // Make component
             let mut list = List::new(lines)
-                .block(div)
+                .block(crate::utils::get_block(
+                    borders,
+                    title,
+                    focus,
+                    inactive_style,
+                ))
                 .start_corner(Corner::TopLeft)
-                .style(
-                    Style::default()
-                        .fg(self.props.foreground)
-                        .bg(self.props.background),
-                );
+                .style(Style::default().fg(foreground).bg(background));
             // Highlighted symbol
-            if let Some(PropPayload::One(PropValue::Str(highlight))) =
-                self.props.own.get(PROP_HIGHLIGHTED_TXT)
+            if let Some(hg_str) = self
+                .props
+                .get(Attribute::HighlightedStr)
+                .map(|x| x.unwrap_string())
             {
-                list = list.highlight_symbol(highlight);
+                list = list.highlight_symbol(hg_str);
             }
             render.render_stateful_widget(list, area, &mut state);
         }
     }
 
-    /// ### update
-    ///
-    /// Update component properties
-    /// Properties should first be retrieved through `get_props` which creates a builder from
-    /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
-        self.props = props;
-        // re-Set list length
-        self.states
-            .set_list_len(match self.props.own.get(PROP_SPANS).as_ref() {
-                Some(PropPayload::Vec(s)) => s.len(),
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
+    }
+
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        self.props.set(attr, value);
+        // Update list len and fix index
+        self.set_list_len(
+            match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
+                Some(PropPayload::Vec(spans)) => spans.len(),
                 _ => 0,
-            });
-        // Fix list index
+            },
+        );
         self.states.fix_list_index();
-        // Return None
-        Msg::None
     }
 
-    /// ### get_props
-    ///
-    /// Returns a copy of the component properties.
-    fn get_props(&self) -> Props {
-        self.props.clone()
+    fn state(&self) -> State {
+        State::None
     }
 
-    /// ### on
-    ///
-    /// Handle input event and update internal states.
-    /// Returns a Msg to the view.
-    fn on(&mut self, ev: Event) -> Msg {
-        // Return key
-        if let Event::Key(key) = ev {
-            match key.code {
-                KeyCode::Down => {
-                    // Update states
-                    self.states.incr_list_index();
-                    Msg::OnKey(key)
-                }
-                KeyCode::Up => {
-                    // Update states
-                    self.states.decr_list_index();
-                    Msg::OnKey(key)
-                }
-                KeyCode::PageDown => {
-                    // Scroll by step
-                    let step: usize =
-                        self.states
-                            .calc_max_step_ahead(match self.props.own.get(PROP_MAX_STEP) {
-                                Some(PropPayload::One(PropValue::Usize(step))) => *step,
-                                _ => 8,
-                            });
-                    (0..step).for_each(|_| self.states.incr_list_index());
-                    Msg::OnKey(key)
-                }
-                KeyCode::PageUp => {
-                    // Update states
-                    let step: usize =
-                        self.states
-                            .calc_max_step_behind(match self.props.own.get(PROP_MAX_STEP) {
-                                Some(PropPayload::One(PropValue::Usize(step))) => *step,
-                                _ => 8,
-                            });
-                    (0..step).for_each(|_| self.states.decr_list_index());
-                    Msg::OnKey(key)
-                }
-                KeyCode::End => {
-                    self.states.list_index_at_last();
-                    Msg::OnKey(key)
-                }
-                KeyCode::Home => {
-                    self.states.list_index_at_first();
-                    Msg::OnKey(key)
-                }
-                _ => Msg::OnKey(key),
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        match cmd {
+            Cmd::Move(Direction::Down) => {
+                self.states.incr_list_index();
             }
-        } else {
-            Msg::None
+            Cmd::Move(Direction::Up) => {
+                self.states.decr_list_index();
+            }
+            Cmd::Scroll(Direction::Down) => {
+                let step = self
+                    .props
+                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
+                    .unwrap_length();
+                (0..step).for_each(|_| self.states.incr_list_index());
+            }
+            Cmd::Scroll(Direction::Up) => {
+                let step = self
+                    .props
+                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
+                    .unwrap_length();
+                (0..step).for_each(|_| self.states.decr_list_index());
+            }
+            Cmd::GoTo(Position::Begin) => {
+                self.states.list_index_at_first();
+            }
+            Cmd::GoTo(Position::End) => {
+                self.states.list_index_at_last();
+            }
+            _ => {}
         }
-    }
-
-    /// ### get_state
-    ///
-    /// Get current state from component
-    /// For this component returns always None
-    fn get_state(&self) -> Payload {
-        Payload::None
-    }
-
-    // -- events
-
-    /// ### blur
-    ///
-    /// Blur component
-    fn blur(&mut self) {
-        self.states.focus = false;
-    }
-
-    /// ### active
-    ///
-    /// Active component
-    fn active(&mut self) {
-        self.states.focus = true;
+        CmdResult::None
     }
 }
 
@@ -533,158 +348,65 @@ mod tests {
 
     use super::*;
 
-    use crossterm::event::KeyEvent;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_textarea() {
         // Make component
-        let mut component: Textarea = Textarea::new(
-            TextareaPropsBuilder::default()
-                .with_foreground(Color::Red)
-                .with_background(Color::Blue)
-                .hidden()
-                .visible()
-                .bold()
-                .italic()
-                .rapid_blink()
-                .reversed()
-                .slow_blink()
-                .strikethrough()
-                .underlined()
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_highlighted_str(Some("🚀"))
-                .with_max_scroll_step(4)
-                .with_title("textarea", Alignment::Center)
-                .with_texts(vec![
-                    TextSpan::from("welcome to "),
-                    TextSpan::from("tui-realm"),
-                ])
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .build(),
-        );
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.background, Color::Blue);
-        assert_eq!(component.props.visible, true);
-        assert!(component.props.modifiers.intersects(Modifier::BOLD));
-        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
-        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
-        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
-        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
-        assert_eq!(component.props.borders.borders, Borders::ALL);
-        assert_eq!(component.props.borders.variant, BorderType::Double);
-        assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(
-            component.props.own.get(PROP_SPANS).unwrap(),
-            &PropPayload::Vec(vec![
-                PropValue::TextSpan(TextSpan::from("welcome to ")),
-                PropValue::TextSpan(TextSpan::from("tui-realm")),
-            ])
-        );
-        assert_eq!(component.props.title.as_ref().unwrap().text(), "textarea");
-        assert_eq!(
-            component.props.title.as_ref().unwrap().alignment(),
-            Alignment::Center
-        );
-        assert_eq!(
-            component.props.own.get(PROP_HIGHLIGHTED_TXT).unwrap(),
-            &PropPayload::One(PropValue::Str(String::from("🚀")))
-        );
-        assert_eq!(
-            component.props.own.get(PROP_MAX_STEP).unwrap(),
-            &PropPayload::One(PropValue::Usize(4))
-        );
-        // Verify states
-        assert_eq!(component.states.list_index, 0);
-        assert_eq!(component.states.list_len, 2);
-        assert_eq!(component.states.focus, false);
-        // Focus
-        component.active();
-        assert_eq!(component.states.focus, true);
-        component.blur();
-        assert_eq!(component.states.focus, false);
-        // Update
-        let props = TextareaPropsBuilder::from(component.get_props())
-            .with_foreground(Color::Red)
-            .build();
-        assert_eq!(component.update(props), Msg::None);
-        assert_eq!(component.props.foreground, Color::Red);
+        let mut component = Textarea::default()
+            .foreground(Color::Red)
+            .background(Color::Blue)
+            .modifiers(TextModifiers::BOLD)
+            .borders(Borders::default())
+            .highlighted_str("🚀")
+            .step(4)
+            .title("textarea", Alignment::Center)
+            .text_rows(vec![
+                TextSpan::from("welcome to "),
+                TextSpan::from("tui-realm"),
+            ]);
         // Increment list index
         component.states.list_index += 1;
         assert_eq!(component.states.list_index, 1);
-        // Update
-        component.update(
-            TextareaPropsBuilder::from(component.get_props())
-                .hidden()
-                .with_texts(vec![
-                    TextSpan::from("welcome "),
-                    TextSpan::from("to "),
-                    TextSpan::from("tui-realm"),
-                ])
-                .build(),
-        );
-        assert_eq!(
-            component.props.own.get(PROP_SPANS).unwrap(),
-            &PropPayload::Vec(vec![
-                PropValue::TextSpan(TextSpan::from("welcome ")),
-                PropValue::TextSpan(TextSpan::from("to ")),
+        // Add one row
+        component.attr(
+            Attribute::Text,
+            AttrValue::Payload(PropPayload::Vec(vec![
+                PropValue::TextSpan(TextSpan::from("welcome")),
+                PropValue::TextSpan(TextSpan::from("to")),
                 PropValue::TextSpan(TextSpan::from("tui-realm")),
-            ])
+            ])),
         );
-        assert_eq!(component.props.visible, false);
         // Verify states
         assert_eq!(component.states.list_index, 1); // Kept
         assert_eq!(component.states.list_len, 3);
         // get value
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), State::None);
         // Render
         assert_eq!(component.states.list_index, 1);
         // Handle inputs
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Down))
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Down)), Cmd::None);
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be decremented
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Up))
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Up)), CmdResult::None);
         // Index should be incremented
         assert_eq!(component.states.list_index, 1);
         // Index should be 2
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
-            Msg::OnKey(KeyEvent::from(KeyCode::PageDown))
-        );
+        assert_eq!(component.on(Cmd::Scroll(Direction::Down)), CmdResult::None);
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be 0
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
-            Msg::OnKey(KeyEvent::from(KeyCode::PageUp))
-        );
+        assert_eq!(component.on(Cmd::Scroll(Direction::Up)), CmdResult::None);
         // End
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::End))),
-            Msg::OnKey(KeyEvent::from(KeyCode::End))
-        );
+        assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
         assert_eq!(component.states.list_index, 2);
         // Home
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Home))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Home))
-        );
+        assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
         // Index should be incremented
         assert_eq!(component.states.list_index, 0);
         // On key
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Backspace))
-        );
-        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+        assert_eq!(component.on(Cmd::Delete), CmdResult::None);
+        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 }

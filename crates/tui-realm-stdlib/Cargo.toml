@@ -1,6 +1,6 @@
 [package]
 name = "tui-realm-stdlib"
-version = "0.6.1"
+version = "1.0.0"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]
@@ -14,7 +14,8 @@ readme = "README.md"
 repository = "https://github.com/veeso/tui-realm-stdlib"
 
 [dependencies]
-tuirealm = "0.6.0"
+#tuirealm = { version = "^1.0.0", default-features = false, features = [ "derive" ]} 
+tuirealm = { git = "https://github.com/veeso/tui-realm", branch = "new-api", default-features = false, features = [ "derive" ] } 
 textwrap = "0.14.0"
 unicode-width = "0.1.8"
 
@@ -22,6 +23,13 @@ unicode-width = "0.1.8"
 crossterm = { version = "0.20" }
 pretty_assertions = "0.7.2"
 rand = "0.8.4"
+#tuirealm = "^1.0.0"
+tuirealm = { git = "https://github.com/veeso/tui-realm", branch = "new-api", default-features = true }
+
+[features]
+default = [ "with-crossterm" ]
+with-crossterm = [ "tuirealm/with-crossterm" ]
+with-termion = [ "tuirealm/with-termion" ]
 
 # -- components
 

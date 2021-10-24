@@ -31,7 +31,7 @@ use tuirealm::tui::{
     style::{Color, Modifier, Style},
     widgets::Paragraph,
 };
-use tuirealm::{event::Event, Component, Frame, Msg, Payload};
+use tuirealm::{event::Event, CmdResult, Component, Frame, Payload};
 
 const PROP_ALIGNMENT: &str = "text-alignment";
 const PROP_TEXT: &str = "text";
@@ -212,14 +212,14 @@ impl Label {
     }
 }
 
-impl Component for Label {
+impl MockComponent for Label {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span
-        if self.props.visible {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text
             let text: String = match self.props.own.get(PROP_TEXT).as_ref() {
                 Some(PropPayload::One(PropValue::Str(t))) => t.to_string(),
@@ -234,8 +234,8 @@ impl Component for Label {
                 Paragraph::new(text)
                     .style(
                         Style::default()
-                            .fg(self.props.foreground)
-                            .bg(self.props.background)
+                            .fg(foreground)
+                            .bg(background)
                             .add_modifier(self.props.modifiers),
                     )
                     .alignment(alignment),
@@ -249,11 +249,11 @@ impl Component for Label {
     /// Update component properties
     /// Properties should first be retrieved through `get_props` which creates a builder from
     /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
+    /// Returns a CmdResult to the view
+    fn update(&mut self, props: Props) -> CmdResult {
         self.props = props;
         // Return None
-        Msg::None
+        CmdResult::None
     }
 
     /// ### get_props
@@ -266,13 +266,13 @@ impl Component for Label {
     /// ### on
     ///
     /// Handle input event and update internal states.
-    /// Returns a Msg to the view.
-    fn on(&mut self, ev: Event) -> Msg {
+    /// Returns a CmdResult to the view.
+    fn on(&mut self, ev: Event) -> CmdResult {
         // Return key
-        if let Event::Key(key) = ev {
-            Msg::OnKey(key)
+        if let Cmd::Key(key) = ev {
+            Cmd::None(key)
         } else {
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -281,7 +281,7 @@ impl Component for Label {
     /// Get current state from component
     /// For this component returns always None
     fn get_state(&self) -> Payload {
-        Payload::None
+        State::None
     }
 
     // -- events
@@ -350,17 +350,17 @@ mod tests {
             .with_foreground(Color::Red)
             .hidden()
             .build();
-        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.update(props), CmdResult::None);
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.visible, false);
         // Get value
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), State::None);
         // Event
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Delete))
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),
+            Cmd::None(KeyCmd::from(KeyCode::Delete))
         );
-        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 
     #[test]

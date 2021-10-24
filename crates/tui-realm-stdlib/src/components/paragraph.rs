@@ -38,7 +38,7 @@ use tuirealm::tui::{
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, Paragraph as TuiParagraph, Wrap},
 };
-use tuirealm::{event::Event, Component, Frame, Msg, Payload};
+use tuirealm::{event::Event, CmdResult, Component, Frame, Payload};
 
 // -- Props
 
@@ -261,14 +261,14 @@ impl Paragraph {
     }
 }
 
-impl Component for Paragraph {
+impl MockComponent for Paragraph {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
         // Make a Span
-        if self.props.visible {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text items
             let text: Vec<Spans> = match self.props.own.get(PROP_SPANS).as_ref() {
                 Some(PropPayload::Vec(spans)) => spans
@@ -301,11 +301,7 @@ impl Component for Paragraph {
             render.render_widget(
                 TuiParagraph::new(text)
                     .block(div)
-                    .style(
-                        Style::default()
-                            .fg(self.props.foreground)
-                            .bg(self.props.background),
-                    )
+                    .style(Style::default().fg(foreground).bg(background))
                     .alignment(alignment)
                     .wrap(Wrap { trim }),
                 area,
@@ -318,11 +314,11 @@ impl Component for Paragraph {
     /// Update component properties
     /// Properties should first be retrieved through `get_props` which creates a builder from
     /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
+    /// Returns a CmdResult to the view
+    fn update(&mut self, props: Props) -> CmdResult {
         self.props = props;
         // Return None
-        Msg::None
+        CmdResult::None
     }
 
     /// ### get_props
@@ -335,13 +331,13 @@ impl Component for Paragraph {
     /// ### on
     ///
     /// Handle input event and update internal states.
-    /// Returns a Msg to the view.
-    fn on(&mut self, ev: Event) -> Msg {
+    /// Returns a CmdResult to the view.
+    fn on(&mut self, ev: Event) -> CmdResult {
         // Return key
-        if let Event::Key(key) = ev {
-            Msg::OnKey(key)
+        if let Cmd::Key(key) = ev {
+            Cmd::None(key)
         } else {
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -350,7 +346,7 @@ impl Component for Paragraph {
     /// Get current state from component
     /// For this component returns always None
     fn get_state(&self) -> Payload {
-        Payload::None
+        State::None
     }
 
     // -- events
@@ -446,7 +442,7 @@ mod tests {
             .with_foreground(Color::Green)
             .hidden()
             .build();
-        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.update(props), CmdResult::None);
         assert_eq!(component.props.visible, false);
         assert_eq!(component.props.foreground, Color::Green);
         // Update
@@ -460,12 +456,12 @@ mod tests {
                 .build(),
         );
         // get value
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), State::None);
         // On key
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Backspace))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Backspace))
+            component.on(Cmd::Delete),
+            Cmd::None(KeyCmd::from(KeyCode::Backspace))
         );
-        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 }

@@ -37,7 +37,7 @@ use tuirealm::tui::{
     text::Span,
     widgets::{Axis, Block, BorderType, Borders, Chart as TuiChart, Dataset as TuiDataset},
 };
-use tuirealm::{Component, Frame, Msg, Payload};
+use tuirealm::{CmdResult, Component, Frame, Payload};
 
 // -- Props
 const PROP_X_BOUNDS: &str = "x-bounds";
@@ -518,17 +518,17 @@ impl<'a> Chart {
     }
 }
 
-impl Component for Chart {
+impl MockComponent for Chart {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
-        if self.props.visible {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // If component is disabled, will be displayed as `active`; as focus state otherwise
             let active: bool = match self.disabled() {
                 true => true,
-                false => self.states.focus,
+                false => focus,
             };
             let block: Block =
                 crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), active);
@@ -558,9 +558,7 @@ impl Component for Chart {
             {
                 x_axis = x_axis.title(Span::styled(
                     title,
-                    Style::default()
-                        .fg(self.props.foreground)
-                        .bg(self.props.background),
+                    Style::default().fg(foreground).bg(background),
                 ));
             }
             // -- y axis
@@ -586,9 +584,7 @@ impl Component for Chart {
             {
                 y_axis = y_axis.title(Span::styled(
                     title,
-                    Style::default()
-                        .fg(self.props.foreground)
-                        .bg(self.props.background),
+                    Style::default().fg(foreground).bg(background),
                 ));
             }
             // Build widget
@@ -606,12 +602,12 @@ impl Component for Chart {
     /// Update component properties
     /// Properties should first be retrieved through `get_props` which creates a builder from
     /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
+    /// Returns a CmdResult to the view
+    fn update(&mut self, props: Props) -> CmdResult {
         self.props = props;
         // Reset cursor
         self.states.reset_cursor();
-        Msg::None
+        CmdResult::None
     }
 
     /// ### get_props
@@ -626,38 +622,38 @@ impl Component for Chart {
     /// ### on
     ///
     /// Handle input event and update internal states.
-    /// Returns a Msg to the view
-    fn on(&mut self, ev: Event) -> Msg {
-        if let Event::Key(key) = ev {
+    /// Returns a CmdResult to the view
+    fn on(&mut self, ev: Event) -> CmdResult {
+        if let Cmd::Key(key) = ev {
             if self.disabled() {
-                Msg::OnKey(key)
+                Cmd::None(key)
             } else {
                 match key.code {
                     KeyCode::Left => {
                         // Move cursor left; msg None
                         self.states.move_cursor_left();
-                        Msg::None
+                        CmdResult::None
                     }
                     KeyCode::Right => {
-                        // Move cursor right; Msg None
+                        // Move cursor right; CmdResult None
                         self.states.move_cursor_right(self.max_dataset_len());
-                        Msg::None
+                        CmdResult::None
                     }
                     KeyCode::End => {
                         // Cursor at last position
                         self.states.cursor_at_end(self.max_dataset_len());
-                        Msg::None
+                        CmdResult::None
                     }
                     KeyCode::Home => {
                         // Cursor at first positon
                         self.states.reset_cursor();
-                        Msg::None
+                        CmdResult::None
                     }
-                    _ => Msg::OnKey(key),
+                    _ => Cmd::None(key),
                 }
             }
         } else {
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -666,7 +662,7 @@ impl Component for Chart {
     /// Get current state from component
     /// This component always returns `None`
     fn get_state(&self) -> Payload {
-        Payload::None
+        State::None
     }
 
     // -- events
@@ -675,7 +671,7 @@ impl Component for Chart {
     ///
     /// Blur component; basically remove focus
     fn blur(&mut self) {
-        self.states.focus = false;
+        focus = false;
     }
 
     /// ### active
@@ -684,7 +680,7 @@ impl Component for Chart {
     /// Works only if not disabled
     fn active(&mut self) {
         if !self.disabled() {
-            self.states.focus = true;
+            focus = true;
         }
     }
 }
@@ -835,35 +831,29 @@ mod test {
         component.blur();
         assert_eq!(component.states.focus, false);
         // Commands
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), State::None);
         // -> Right
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::None
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            CmdResult::None
         );
         assert_eq!(component.states.cursor, 1);
         // <- Left
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
-            Msg::None
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
+            CmdResult::None
         );
         assert_eq!(component.states.cursor, 0);
         // End
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::End))),
-            Msg::None
-        );
+        assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
         assert_eq!(component.states.cursor, 11);
         // Home
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Home))),
-            Msg::None
-        );
+        assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
         assert_eq!(component.states.cursor, 0);
         // other keys
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
+            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
         );
         // component funcs
         assert_eq!(component.data_len(), 2);
@@ -878,7 +868,7 @@ mod test {
                     .with_data(&[])
                     .build()
             ),
-            Msg::None
+            CmdResult::None
         );
         assert_eq!(component.max_dataset_len(), 0);
         // Cursor is reset
@@ -990,35 +980,29 @@ mod test {
         component.blur();
         assert_eq!(component.states.focus, false);
         // Commands
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), State::None);
         // -> Right
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Right))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Right))
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Right))),
+            Cmd::None(KeyCmd::from(KeyCode::Right))
         );
         assert_eq!(component.states.cursor, 0);
         // <- Left
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Left))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Left))
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Left))),
+            Cmd::None(KeyCmd::from(KeyCode::Left))
         );
         assert_eq!(component.states.cursor, 0);
         // End
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::End))),
-            Msg::OnKey(KeyEvent::from(KeyCode::End))
-        );
+        assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
         assert_eq!(component.states.cursor, 0);
         // Home
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Home))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Home))
-        );
+        assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
         assert_eq!(component.states.cursor, 0);
         // other keys
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
+            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
         );
         // component funcs
         assert_eq!(component.data_len(), 2);
@@ -1034,7 +1018,7 @@ mod test {
                     .push_record(1, (10.2, 11.2))
                     .build()
             ),
-            Msg::None
+            CmdResult::None
         );
         assert_eq!(component.max_dataset_len(), 14);
         // Pop records
@@ -1046,7 +1030,7 @@ mod test {
                     .pop_record_front(1)
                     .build()
             ),
-            Msg::None
+            CmdResult::None
         );
         assert_eq!(component.max_dataset_len(), 13);
         // Update and test empty data
@@ -1057,7 +1041,7 @@ mod test {
                     .with_data(&[])
                     .build()
             ),
-            Msg::None
+            CmdResult::None
         );
         assert_eq!(component.max_dataset_len(), 0);
         // Cursor is reset

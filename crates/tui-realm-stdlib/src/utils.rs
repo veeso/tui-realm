@@ -29,7 +29,7 @@
 extern crate textwrap;
 extern crate unicode_width;
 // local
-use tuirealm::props::{BlockTitle, BordersProps, TextSpan};
+use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, TextModifiers, TextSpan};
 use tuirealm::Props;
 // ext
 use tuirealm::tui::style::{Color, Modifier, Style};
@@ -104,15 +104,24 @@ pub fn wrap_spans<'a>(spans: &[TextSpan], width: usize, props: &Props) -> Vec<Sp
 pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, Modifier) {
     (
         match span.fg {
-            Color::Reset => props.foreground,
+            Color::Reset => props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color(),
             _ => span.fg,
         },
         match span.bg {
-            Color::Reset => props.background,
+            Color::Reset => props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color(),
             _ => span.bg,
         },
         match span.modifiers.is_empty() {
-            true => props.modifiers,
+            true => props
+                .get_or(
+                    Attribute::TextProps,
+                    AttrValue::TextModifiers(TextModifiers::NONE),
+                )
+                .unwrap_text_modifiers(),
             false => span.modifiers,
         },
     )
@@ -120,23 +129,22 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
 
 /// ### get_block
 ///
-/// Get block for component with title and colors.
-/// Color is given to block only if `focus` value is `true`
-pub fn get_block<'a>(props: &BordersProps, title: Option<&BlockTitle>, focus: bool) -> Block<'a> {
-    let div: Block = Block::default()
-        .borders(props.borders)
+/// Get block
+pub(crate) fn get_block<'a>(
+    props: Borders,
+    title: (String, Alignment),
+    focus: bool,
+    inactive_style: Option<Style>,
+) -> Block<'a> {
+    Block::default()
+        .borders(props.sides)
         .border_style(match focus {
             true => props.style(),
-            false => Style::default(),
+            false => inactive_style.unwrap_or(Style::default().fg(Color::Reset).bg(Color::Reset)),
         })
-        .border_type(props.variant);
-    // Set title
-    match title.as_ref() {
-        Some(t) => div
-            .title(t.text().to_string())
-            .title_alignment(t.alignment()),
-        None => div,
-    }
+        .border_type(props.modifiers)
+        .title(title.0)
+        .title_alignment(title.1)
 }
 
 /// ### calc_utf8_cursor_position
@@ -151,19 +159,19 @@ pub fn calc_utf8_cursor_position(chars: &[char]) -> u16 {
 mod test {
 
     use super::*;
-    use tuirealm::props::{builder::PropsBuilder, Alignment};
-    use tuirealm::tui::widgets::{BorderType, Borders};
-    use tuirealm::GenericPropsBuilder;
+    use tuirealm::props::{Alignment, BorderSides, BorderType, Props};
 
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_utils_wrap_spans() {
-        let props: Props = GenericPropsBuilder::default()
-            .bold()
-            .with_foreground(Color::Red)
-            .with_background(Color::White)
-            .build();
+        let mut props: Props = Props::default();
+        props.set(
+            Attribute::TextProps,
+            AttrValue::TextModifiers(TextModifiers::BOLD),
+        );
+        props.set(Attribute::Foreground, AttrValue::Color(Color::Red));
+        props.set(Attribute::Background, AttrValue::Color(Color::White));
         // Prepare spans; let's start with two simple spans, which fits the line
         let spans: Vec<TextSpan> = vec![TextSpan::from("hello, "), TextSpan::from("world!")];
         assert_eq!(wrap_spans(&spans, 64, &props).len(), 1);
@@ -192,11 +200,13 @@ mod test {
 
     #[test]
     fn test_components_utils_use_or_default_styles() {
-        let props: Props = GenericPropsBuilder::default()
-            .bold()
-            .with_foreground(Color::Red)
-            .with_background(Color::White)
-            .build();
+        let mut props: Props = Props::default();
+        props.set(
+            Attribute::TextProps,
+            AttrValue::TextModifiers(TextModifiers::BOLD),
+        );
+        props.set(Attribute::Foreground, AttrValue::Color(Color::Red));
+        props.set(Attribute::Background, AttrValue::Color(Color::White));
         let span: TextSpan = TextSpan::from("test")
             .underlined()
             .fg(Color::Yellow)
@@ -216,16 +226,11 @@ mod test {
 
     #[test]
     fn test_components_utils_get_block() {
-        let props: BordersProps = BordersProps {
-            borders: Borders::ALL,
-            variant: BorderType::Rounded,
-            color: Color::Red,
-        };
-        get_block(
-            &props,
-            Some(&BlockTitle::new("title", Alignment::Center)),
-            true,
-        );
+        let props = Borders::default()
+            .sides(BorderSides::ALL)
+            .color(Color::Red)
+            .modifiers(BorderType::Rounded);
+        get_block(&props, Some("title", Alignment::Center), true);
         get_block(&props, None, false);
     }
 

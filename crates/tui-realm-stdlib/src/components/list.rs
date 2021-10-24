@@ -36,7 +36,7 @@ use tuirealm::tui::{
     text::{Span, Spans},
     widgets::{Block, BorderType, Borders, List as TuiList, ListItem, ListState},
 };
-use tuirealm::{event::Event, Component, Frame, Msg, Payload, Value};
+use tuirealm::{event::Event, CmdResult, Component, Frame, Payload, Value};
 
 // -- Props
 
@@ -405,15 +405,15 @@ impl List {
     }
 }
 
-impl Component for List {
+impl MockComponent for List {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
-        if self.props.visible {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let active: bool = match self.scrollable() {
-                true => self.states.focus,
+                true => focus,
                 false => true,
             };
             let div: Block =
@@ -440,15 +440,15 @@ impl Component for List {
                 _ => Vec::new(),
             };
             let highlighted_color: Color = match self.props.palette.get(COLOR_HIGHLIGHTED) {
-                None => match self.states.focus {
-                    true => self.props.background,
-                    false => self.props.foreground,
+                None => match focus {
+                    true => background,
+                    false => foreground,
                 },
                 Some(color) => *color,
             };
             let (fg, bg): (Color, Color) = match active {
-                true => (self.props.background, highlighted_color),
-                false => (highlighted_color, self.props.background),
+                true => (background, highlighted_color),
+                false => (highlighted_color, background),
             };
             // Make list
             let mut list = TuiList::new(list_items)
@@ -481,8 +481,8 @@ impl Component for List {
     /// Update component properties
     /// Properties should first be retrieved through `get_props` which creates a builder from
     /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
+    /// Returns a CmdResult to the view
+    fn update(&mut self, props: Props) -> CmdResult {
         self.props = props;
         // re-Set list length
         self.states
@@ -497,7 +497,7 @@ impl Component for List {
             self.blur();
         }
         // Return None
-        Msg::None
+        CmdResult::None
     }
 
     /// ### get_props
@@ -510,21 +510,21 @@ impl Component for List {
     /// ### on
     ///
     /// Handle input event and update internal states.
-    /// Returns a Msg to the view.
-    fn on(&mut self, ev: Event) -> Msg {
+    /// Returns a CmdResult to the view.
+    fn on(&mut self, ev: Event) -> CmdResult {
         // Return key
-        if let Event::Key(key) = ev {
+        if let Cmd::Key(key) = ev {
             if self.scrollable() {
                 match key.code {
                     KeyCode::Down => {
                         // Go down
                         self.states.incr_list_index();
-                        Msg::OnKey(key)
+                        Cmd::None(key)
                     }
                     KeyCode::Up => {
                         // Go up
                         self.states.decr_list_index();
-                        Msg::OnKey(key)
+                        Cmd::None(key)
                     }
                     KeyCode::PageDown => {
                         // Scroll by step
@@ -535,7 +535,7 @@ impl Component for List {
                             },
                         );
                         (0..step).for_each(|_| self.states.incr_list_index());
-                        Msg::OnKey(key)
+                        Cmd::None(key)
                     }
                     KeyCode::PageUp => {
                         // Scroll by step
@@ -546,23 +546,23 @@ impl Component for List {
                             },
                         );
                         (0..step).for_each(|_| self.states.decr_list_index());
-                        Msg::OnKey(key)
+                        Cmd::None(key)
                     }
                     KeyCode::End => {
                         self.states.list_index_at_last();
-                        Msg::OnKey(key)
+                        Cmd::None(key)
                     }
                     KeyCode::Home => {
                         self.states.list_index_at_first();
-                        Msg::OnKey(key)
+                        Cmd::None(key)
                     }
-                    _ => Msg::OnKey(key),
+                    _ => Cmd::None(key),
                 }
             } else {
-                Msg::OnKey(key)
+                Cmd::None(key)
             }
         } else {
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -572,8 +572,8 @@ impl Component for List {
     /// For this component returns None if not scrollable, otherwise returns the index of the list
     fn get_state(&self) -> Payload {
         match self.scrollable() {
-            true => Payload::One(Value::Usize(self.states.list_index)),
-            false => Payload::None,
+            true => State::One(Value::Usize(self.states.list_index)),
+            false => State::None,
         }
     }
 
@@ -583,7 +583,7 @@ impl Component for List {
     ///
     /// Blur component
     fn blur(&mut self) {
-        self.states.focus = false;
+        focus = false;
     }
 
     /// ### active
@@ -591,7 +591,7 @@ impl Component for List {
     /// Active component
     fn active(&mut self) {
         if self.scrollable() {
-            self.states.focus = true;
+            focus = true;
         }
     }
 }
@@ -702,53 +702,32 @@ mod tests {
         // Check messages
         // Handle inputs
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Down))
+            component.on(Cmd::Move(Direction::Down)),
+            CmdResult::OnMove(Direction::Down)
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be decremented
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Up))
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Up)), CmdResult::None);
         // Index should be incremented
         assert_eq!(component.states.list_index, 1);
         // Index should be 2
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
-            Msg::OnKey(KeyEvent::from(KeyCode::PageDown))
-        );
+        assert_eq!(component.on(Cmd::Scroll(Direction::Down)), CmdResult::None);
         // Index should be incremented
         assert_eq!(component.states.list_index, 5);
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::PageDown))),
-            Msg::OnKey(KeyEvent::from(KeyCode::PageDown))
-        );
+        assert_eq!(component.on(Cmd::Scroll(Direction::Down)), CmdResult::None);
         // Index should be incremented
         assert_eq!(component.states.list_index, 8);
         // Index should be 0
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
-            Msg::OnKey(KeyEvent::from(KeyCode::PageUp))
-        );
+        assert_eq!(component.on(Cmd::Scroll(Direction::Up)), CmdResult::None);
         assert_eq!(component.states.list_index, 4);
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::PageUp))),
-            Msg::OnKey(KeyEvent::from(KeyCode::PageUp))
-        );
+        assert_eq!(component.on(Cmd::Scroll(Direction::Up)), CmdResult::None);
         assert_eq!(component.states.list_index, 0);
         // End
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::End))),
-            Msg::OnKey(KeyEvent::from(KeyCode::End))
-        );
+        assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
         assert_eq!(component.states.list_index, 8);
         // Home
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Home))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Home))
-        );
+        assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
         assert_eq!(component.states.list_index, 0);
         // Update
         let props = ListPropsBuilder::from(component.get_props())
@@ -761,19 +740,19 @@ mod tests {
                     .build(),
             )
             .build();
-        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.update(props), CmdResult::None);
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.visible, false);
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
         // Get value
-        assert_eq!(component.get_state(), Payload::One(Value::Usize(0)));
+        assert_eq!(component.get_state(), State::One(Value::Usize(0)));
         // Event
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Delete))
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),
+            Cmd::None(KeyCmd::from(KeyCode::Delete))
         );
-        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 
     #[test]
@@ -825,16 +804,16 @@ mod tests {
             .with_foreground(Color::Red)
             .hidden()
             .build();
-        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.update(props), CmdResult::None);
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.visible, false);
         // Get value
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), State::None);
         // Event
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Delete))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Delete))
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),
+            Cmd::None(KeyCmd::from(KeyCode::Delete))
         );
-        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 }

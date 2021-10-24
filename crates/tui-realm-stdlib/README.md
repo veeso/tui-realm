@@ -9,7 +9,7 @@
 [![Build](https://github.com/veeso/tui-realm-stdlib/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm-stdlib/actions) [![Build](https://github.com/veeso/tui-realm-stdlib/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm-stdlib/actions) [![Build](https://github.com/veeso/tui-realm-stdlib/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm-stdlib/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm-stdlib/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm-stdlib?branch=main)
 
 Developed by Christian Visintin  
-Current version: 0.6.1 (03/08/2021)
+Current version: 1.0.0 (FIXME: 03/08/2021)
 
 ---
 
@@ -112,8 +112,8 @@ While in active mode (default) you can put as many entries as you wish. You can 
 |----------------------|-----------------|------------------------------------------------|
 | `KeyCode::Right`     | `None`          | Move the cursor right                          |
 | `KeyCode::Left`      | `None`          | Move the cursor left                           |
-| `KeyCode::End`       | `None`          | Move "cursor" to the end of chart              |
-| `KeyCode::Home`      | `None`          | Move "cursor" to the first entry of the chart  |
+| `GoTo(End)`       | `None`          | Move "cursor" to the end of chart              |
+| `GoTo(Begin)`      | `None`          | Move "cursor" to the first entry of the chart  |
 | `KeyCode::Char(_)`   | `OnKey`         |                                                |
 
 **State**: `None`.
@@ -150,8 +150,8 @@ While in active mode (default) you can put as many entries as you wish. You can 
 |----------------------|-----------------|------------------------------------------------|
 | `KeyCode::Right`     | `None`          | Move the cursor right                          |
 | `KeyCode::Left`      | `None`          | Move the cursor left                           |
-| `KeyCode::End`       | `None`          | Move "cursor" to the end of chart              |
-| `KeyCode::Home`      | `None`          | Move "cursor" to the first entry of the chart  |
+| `GoTo(End)`       | `None`          | Move "cursor" to the end of chart              |
+| `GoTo(Begin)`      | `None`          | Move "cursor" to the first entry of the chart  |
 | `KeyCode::Char(_)`   | `OnKey`         |                                                |
 
 **State**: `None`.
@@ -182,11 +182,11 @@ A checkbox group. Provides the possibility to select between multiple options, w
 |----------------------|-----------------|------------------------------------------------|
 | `KeyCode::Right`     | `None`          | Increment the selected choice index by 1       |
 | `KeyCode::Left`      | `None`          | Decrement the selected choice index by 1       |
-| `KeyCode::Char(' ')` | `OnChange`      | Check or uncheck the item at the current index |
-| `KeyCode::Enter`     | `OnSubmit`      | Just returns the selection                     |
+| `KeyCode::Char(' ')` | `Changed`      | Check or uncheck the item at the current index |
+| `KeyCode::Enter`     | `Submit`      | Just returns the selection                     |
 | `KeyCode::Char(_)`   | `OnKey`         |                                                |
 
-**Update**: `Msg::OnChange` if the selection changed, `Msg::None` otherwise.
+**Update**: `Msg::Changed` if the selection changed, `Msg::None` otherwise.
 
 **State**: the state returned is a `VecOfUsize` containing the indexes of the selected item in the checkbox group.
 
@@ -204,34 +204,34 @@ A checkbox group. Provides the possibility to select between multiple options, w
 
 ### Input
 
-An input text. Provides the possiblity to input a text with the possibility to set the input length and the input type (number, password, text). It also allows to use arrows to move the cursor inside of the input box. When `get_state` is invoked, returns the current content of the input as String or as Number based on the current input type.
+An input text. Provides the possiblity to input a text with the possibility to set the input length and the input type (number, password, text, ...). It also allows to use arrows to move the cursor inside of the input box. When `state` is invoked, returns the current content of the input as String or as Number based on the current input type.
 
-**Events**:
+**Commands**:
 
-| Event                | Message           | Behaviour                                            |
+| Command              | Result            | Behaviour                                            |
 |----------------------|-------------------|------------------------------------------------------|
-| `KeyCode::Backspace` | `OnChange | None` | Remove previous character in input                   |
-| `KeyCode::Delete`    | `OnChange | None` | Delete next character in input                       |
-| `KeyCode::Enter`     | `OnSubmit`        | Submit input                                         |
-| `KeyCode::Left`      | `None`            | Move cursor left                                     |
-| `KeyCode::Right`     | `None`            | Move cursor right                                    |
-| `KeyCode::End`       | `None`            | Move cursor at the end of input                      |
-| `KeyCode::Home`      | `None`            | Move cursor at the beginning of input                |
-| `KeyCode::Char(_)`   | `OnChange | None` | Push character, if allowed by method, into the input |
+| `Cancel`             | `Changed | None`  | Delete next character in input                       |
+| `Delete`             | `Changed | None`  | Remove previous character in input                   |
+| `GoTo(Begin)`        | `None`            | Move cursor at the end of input                      |
+| `GoTo(End)`          | `None`            | Move cursor at the beginning of input                |
+| `Move(Left)`         | `None`            | Move cursor left                                     |
+| `Move(Right)`        | `None`            | Move cursor right                                    |
+| `Submit`             | `Submit | None`   | Submit input                                         |
+| `Type(ch)`           | `Changed | None`  | Push character, if allowed by method, into the input |
 
-**Update**: `Msg::OnChange` if the value changed, `Msg::None` otherwise.
-
-**State**: the state returned is a `Str` or an `Unsigned` based on the selected input type containing the current value of the input.
+**State**: the state returned is a `State::One(StateValue::String)` if the input is valid, `State::None` otherwise.
 
 **Properties**:
 
-- `with_foreground`: foreground color
-- `with_background`: background color
-- `with_borders`: set borders properties for component
-- `with_label`: set input label
-- `with_input`: set the input type
-- `with_input_len`: set the maximum input length
-- `with_value`: set initial value for the input
+- `Background(Color)`: background color
+- `Borders(Borders)`: set borders properties for component
+- `Display(Flag)`: if False component is hidden
+- `FocusStyle(Style)`: style for when component is not active
+- `Foreground(Color)`: foreground color
+- `InputLength(Length)`: set the maximum input length
+- `InputType(InputType)`: set the input type
+- `Title(Title)`: set input box title
+- `Value(String)`: set value for the input
 
 ---
 
@@ -304,12 +304,12 @@ Events will be reported only when set as `Scrollable`
 
 | Event               | Message | Behaviour                 |
 |---------------------|---------|---------------------------|
-| `KeyCode::Down`     | `OnKey` | Move cursor down          |
-| `KeyCode::Up`       | `OnKey` | Move cursor up            |
-| `KeyCode::PageDown` | `OnKey` | Move cursor down by 8     |
-| `KeyCode::PageUp`   | `OnKey` | Move cursor up by 8       |
-| `KeyCode::End`      | `OnKey` | Move cursor to last item  |
-| `KeyCode::Home`     | `OnKey` | Move cursor to first item |
+| `Move(Down)`     | `OnKey` | Move cursor down          |
+| `Move(Up)`       | `OnKey` | Move cursor up            |
+| `Scroll(Down)` | `OnKey` | Move cursor down by 8     |
+| `Scroll(Up)`   | `OnKey` | Move cursor up by 8       |
+| `GoTo(End)`      | `OnKey` | Move cursor to last item  |
+| `GoTo(Begin)`     | `OnKey` | Move cursor to first item |
 | `KeyCode::Char(_)`  | `OnKey` | Return pressed key        |
 
 **Update**: None
@@ -400,12 +400,12 @@ A radio button group. Provides the possibility to select a single option in a gr
 
 | Event                | Message         | Behaviour                                        |
 |----------------------|-----------------|--------------------------------------------------|
-| `KeyCode::Right`     | `OnChange`      | Change the selected option to current item index |
-| `KeyCode::Left`      | `OnChange`      | Change the selected option to current item index |
-| `KeyCode::Enter`     | `OnSubmit`      | Just returns the index of the selected item      |
+| `KeyCode::Right`     | `Changed`      | Change the selected option to current item index |
+| `KeyCode::Left`      | `Changed`      | Change the selected option to current item index |
+| `KeyCode::Enter`     | `Submit`      | Just returns the index of the selected item      |
 | `KeyCode::Char(_)`   | `OnKey`         |                                                |
 
-**Update**: `Msg::OnChange` if the choice changed, `Msg::None` otherwise.
+**Update**: `Msg::Changed` if the choice changed, `Msg::None` otherwise.
 
 **State**: the state returned is an `Unsigned` containing the index of the selected item in the radio group.
 
@@ -423,20 +423,20 @@ A radio button group. Provides the possibility to select a single option in a gr
 
 ### Select
 
-A select like in HTML. Provides the possibility to select a single option in a group of options. When `get_state` is invoked returns the index of the selected option as Unsigned, but only if the selection tab is closed. Returns `Payload::None` otherwise. The tab can be opened with `<ENTER>`; once opened you can move with arrows to select the entry. To close the form, you need to press `<ENTER>` again. Once the tab is closed, a `Msg::OnSubmit` is raised with the selected index.
+A select like in HTML. Provides the possibility to select a single option in a group of options. When `get_state` is invoked returns the index of the selected option as Unsigned, but only if the selection tab is closed. Returns `Payload::None` otherwise. The tab can be opened with `<ENTER>`; once opened you can move with arrows to select the entry. To close the form, you need to press `<ENTER>` again. Once the tab is closed, a `Msg::Submit` is raised with the selected index.
 If the component loses focus, the selection tab is automatically closed
 This component should have a variable size in the layout to be displayed properly. Please view the example: `examples/select.rs`.
 
 **Events**:
 
-| Event                | Message                  | Behaviour                        |
+| Command              | Result                | Behaviour                        |
 |----------------------|--------------------------|----------------------------------|
-| `KeyCode::Up`        | `OnChange` | `None`      | Move select up, if tab is open   |
-| `KeyCode::Down`      | `OnChange` | `None`      | Move select down, if tab is open |
-| `KeyCode::Enter`     | `OnSubmit` | `None`      | Open or close the select tab     |
+| `Move(Up)`           | `Changed` | `None`      | Move select up, if tab is open   |
+| `Move(Down)`         | `Changed` | `None`      | Move select down, if tab is open |
+| `KeyCode::Enter`     | `Submit` | `None`      | Open or close the select tab     |
 | `KeyCode::Char(_)`   | `OnKey`         |                                                |
 
-**Update**: `Msg::OnChange` if the choice changed, `Msg::None` otherwise.
+**Update**: `Msg::Changed` if the choice changed, `Msg::None` otherwise.
 
 **State**: the state returned is an `Unsigned` containing the index of the selected item in the radio group.
 
@@ -520,37 +520,34 @@ a table of rows with the possibility to scroll text with arrows. In order to scr
 
 Events will be reported only when set as `Scrollable`
 
-| Event               | Message | Behaviour                 |
-|---------------------|---------|---------------------------|
-| `KeyCode::Down`     | `OnKey` | Move cursor down          |
-| `KeyCode::Up`       | `OnKey` | Move cursor up            |
-| `KeyCode::PageDown` | `OnKey` | Move cursor down by 8     |
-| `KeyCode::PageUp`   | `OnKey` | Move cursor up by 8       |
-| `KeyCode::End`      | `OnKey` | Move cursor to last item  |
-| `KeyCode::Home`     | `OnKey` | Move cursor to first item |
-| `KeyCode::Char(_)`  | `OnKey` | Return pressed key        |
+| Event         | Message          | Behaviour                 |
+|---------------|------------------|---------------------------|
+| `GoTo(Begin)` | `Changed | None` | Move cursor to first item |
+| `GoTo(End)`   | `Changed | None` | Move cursor to last item  |
+| `Move(Down)`  | `Changed | None` | Move cursor down          |
+| `Move(Up)`    | `Changed | None` | Move cursor up            |
+| `Scroll(Down)`| `Changed | None` | Move cursor down by 8     |
+| `Scroll(Up)`  | `Changed | None` | Move cursor up by 8       |
 
-**Update**: None
-
-**State**: If `scrollable`, returns current list index, otherwise None
+**State**: If `scrollable`, returns current `One(Usize(index))`, otherwise None
 
 **Properties**:
 
-- `with_foreground`: set foreground color
-- `with_background`: set background color
-- `scrollable`: mark the list as scrollable
-- `bold`: set text bold
-- `italic`: set text italic
-- `rapid_blink`: set rapid blink for text
-- `reversed`: reverses colors
-- `slow_blink` set slow blink for test
-- `strikethrough`: set strikethrough for text
-- `underlined`: set underlined text
-- `with_borders`: set border properties
-- `with_headers`: define headers for table
-- `with_col_spacing`: spacing between columns
-- `with_row_height`: Height of each row
-- `with_table`: set block title and table entries
+- `Background(Color)`: set background color
+- `Borders(Borders)`: set border properties
+- `Custom("col-spacing", Size)`: column spacing
+- `FocusStyle(Style)`: inactive style
+- `Foreground(Color)`: set foreground color
+- `Height(Size)`: set row height
+- `HighlightedColor(Color)`: set highlighted color
+- `HighlightedStr(String)`: set highlighted string
+- `Scroll(Flag)`: set whether is scrollable
+- `ScrollStep(Length)`: set scroll step
+- `Text(Payload(Vec(String)))`: set table headers
+- `TextProps(TextModifiers)`: set text modifiers
+- `Title(Title)`: set block title
+- `Value(Table)`: set table
+- `Width(Payload(Vec(U16)))`: set col widths
 
 ---
 
@@ -560,30 +557,28 @@ A textarea is like a paragraph, but has the possibility to scroll the text.
 
 **Events**:
 
-| Event               | Message | Behaviour                 |
-|---------------------|---------|---------------------------|
-| `KeyCode::Down`     | `OnKey` | Move cursor down          |
-| `KeyCode::Up`       | `OnKey` | Move cursor up            |
-| `KeyCode::PageDown` | `OnKey` | Move cursor down by 8     |
-| `KeyCode::PageUp`   | `OnKey` | Move cursor up by 8       |
-| `KeyCode::End`      | `OnKey` | Move cursor to last item  |
-| `KeyCode::Home`     | `OnKey` | Move cursor to first item |
-| `KeyCode::Char(_)`  | `OnKey` | Return pressed key        |
+| Cmd                 | Result | Behaviour                 |
+|---------------------|--------|---------------------------|
+| `Move(Down)`        | `None` | Move cursor down          |
+| `Move(Up)`          | `None` | Move cursor up            |
+| `Scroll(Down)`      | `None` | Move cursor down by 8     |
+| `Scroll(Up)`        | `None` | Move cursor up by 8       |
+| `GoTo(End)`         | `None` | Move cursor to last item  |
+| `GoTo(Begin)`       | `None` | Move cursor to first item |
 
 **Properties**:
 
-- `with_foreground`: set foreground color
-- `with_background`: set background color
-- `bold`: set text bold
-- `italic`: set text italic
-- `rapid_blink`: set rapid blink for text
-- `reversed`: reverses colors
-- `slow_blink` set slow blink for test
-- `strikethrough`: set strikethrough for text
-- `underlined`: set underlined text
-- `with_borders`: set border properties
-- `with_title`: set block title
-- `with_texts`: set and text spans
+- `Background(Color)`: set background color
+- `Borders(Borders)`: set border properties
+- `FocusStyle(Style)`: inactive style
+- `Foreground(Color)`: set foreground color
+- `HighlightedStr(String)`: set highlighted string
+- `ScrollStep(Length)`: set scroll step
+- `Text(Payload(Vec(TextSpan)))`: set text spans
+- `TextProps(TextModifiers)`: set text modifiers
+- `Title(Title)`: set block title
+
+**State**: None
 
 ---
 

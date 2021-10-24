@@ -37,7 +37,7 @@ use tuirealm::tui::{
     text::Spans,
     widgets::{Block, BorderType, List, ListItem, ListState, Paragraph},
 };
-use tuirealm::{event::Event, Component, Frame, Msg, Payload, Value};
+use tuirealm::{event::Event, CmdResult, Component, Frame, Payload, Value};
 
 // -- props
 
@@ -338,9 +338,9 @@ impl Select {
             .palette
             .get(COLOR_HIGHLIGHTED)
             .cloned()
-            .unwrap_or(self.props.foreground);
+            .unwrap_or(foreground);
         // Make colors
-        let (bg, hg): (Color, Color) = (self.props.background, hg);
+        let (bg, hg): (Color, Color) = (background, hg);
         // Prepare layout
         let chunks = Layout::default()
             .direction(Direction::Vertical)
@@ -355,7 +355,7 @@ impl Select {
         let block: Block = Block::default()
             .borders(Borders::LEFT | Borders::TOP | Borders::RIGHT)
             .border_style(self.props.borders.style())
-            .style(Style::default().bg(self.props.background));
+            .style(Style::default().bg(background));
         let block: Block = match self.props.title.as_ref() {
             Some(t) => block
                 .title(t.text().to_string())
@@ -363,7 +363,7 @@ impl Select {
             None => block,
         };
         let p: Paragraph = Paragraph::new(selected_text)
-            .style(match self.states.focus {
+            .style(match focus {
                 true => self.props.borders.style(),
                 false => Style::default(),
             })
@@ -375,17 +375,17 @@ impl Select {
             .block(
                 Block::default()
                     .borders(Borders::LEFT | Borders::BOTTOM | Borders::RIGHT)
-                    .border_style(match self.states.focus {
+                    .border_style(match focus {
                         true => self.props.borders.style(),
                         false => Style::default(),
                     })
-                    .style(Style::default().bg(self.props.background)),
+                    .style(Style::default().bg(background)),
             )
             .start_corner(Corner::TopLeft)
             .style(
                 Style::default()
-                    .fg(self.props.foreground)
-                    .bg(self.props.background)
+                    .fg(foreground)
+                    .bg(background)
                     .add_modifier(self.props.modifiers),
             )
             .highlight_style(
@@ -409,20 +409,15 @@ impl Select {
     ///
     /// Render component when tab is closed
     fn render_closed_tab(&self, render: &mut Frame, area: Rect) {
-        let div: Block = crate::utils::get_block(
-            &self.props.borders,
-            self.props.title.as_ref(),
-            self.states.focus,
-        );
+        let div: Block =
+            crate::utils::get_block(&self.props.borders, self.props.title.as_ref(), focus);
         let selected_text: String = match self.states.choices.get(self.states.selected) {
             None => String::default(),
             Some(s) => s.clone(),
         };
         let p: Paragraph = Paragraph::new(selected_text)
-            .style(match self.states.focus {
-                true => Style::default()
-                    .fg(self.props.foreground)
-                    .bg(self.props.background),
+            .style(match focus {
+                true => Style::default().fg(foreground).bg(background),
                 false => Style::default(),
             })
             .block(div);
@@ -437,13 +432,13 @@ impl Select {
     }
 }
 
-impl Component for Select {
+impl MockComponent for Select {
     /// ### render
     ///
     /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
     /// If focused, cursor is also set (if supported by widget)
     fn render(&self, render: &mut Frame, area: Rect) {
-        if self.props.visible {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             match self.states.is_tab_open() {
                 true => self.render_open_tab(render, area),
                 false => self.render_closed_tab(render, area),
@@ -456,8 +451,8 @@ impl Component for Select {
     /// Update component properties
     /// Properties should first be retrieved through `get_props` which creates a builder from
     /// existing properties and then edited before calling update.
-    /// Returns a Msg to the view
-    fn update(&mut self, props: Props) -> Msg {
+    /// Returns a CmdResult to the view
+    fn update(&mut self, props: Props) -> CmdResult {
         let prev_index: usize = self.states.selected;
         // Reset choices
         let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
@@ -472,11 +467,11 @@ impl Component for Select {
             self.states.selected = *choice;
         }
         self.props = props;
-        // Msg none
+        // CmdResult none
         if prev_index != self.states.selected {
-            Msg::OnChange(self.get_state())
+            CmdResult::Changed(self.get_state())
         } else {
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -490,47 +485,51 @@ impl Component for Select {
     /// ### on
     ///
     /// Handle input event and update internal states.
-    /// Returns a Msg to the view.
-    fn on(&mut self, ev: Event) -> Msg {
+    /// Returns a CmdResult to the view.
+    fn on(&mut self, ev: Event) -> CmdResult {
         // Match event
-        if let Event::Key(key) = ev {
+        if let Cmd::Key(key) = ev {
             match key.code {
                 KeyCode::Down => {
                     // Increment choice
                     self.states.next_choice(self.rewind());
-                    // Return Msg On Change or None if tab is closed
+                    // Return CmdResult On Change or None if tab is closed
                     match self.states.is_tab_open() {
-                        false => Msg::None,
-                        true => Msg::OnChange(Payload::One(Value::Usize(self.states.selected))),
+                        false => CmdResult::None,
+                        true => {
+                            CmdResult::Changed(Payload::One(Value::Usize(self.states.selected)))
+                        }
                     }
                 }
                 KeyCode::Up => {
                     // Decrement choice
                     self.states.prev_choice(self.rewind());
-                    // Return Msg On Change or None if tab is closed
+                    // Return CmdResult On Change or None if tab is closed
                     match self.states.is_tab_open() {
-                        false => Msg::None,
-                        true => Msg::OnChange(Payload::One(Value::Usize(self.states.selected))),
+                        false => CmdResult::None,
+                        true => {
+                            CmdResult::Changed(Payload::One(Value::Usize(self.states.selected)))
+                        }
                     }
                 }
                 KeyCode::Enter => {
                     // Open or close tab
                     if self.states.is_tab_open() {
                         self.states.close_tab();
-                        Msg::OnSubmit(Payload::One(Value::Usize(self.states.selected)))
+                        CmdResult::Submit(Payload::One(Value::Usize(self.states.selected)))
                     } else {
                         self.states.open_tab();
-                        Msg::None
+                        CmdResult::None
                     }
                 }
                 _ => {
                     // Return key event to activity
-                    Msg::OnKey(key)
+                    Cmd::None(key)
                 }
             }
         } else {
             // Ignore event
-            Msg::None
+            CmdResult::None
         }
     }
 
@@ -541,8 +540,8 @@ impl Component for Select {
     /// Returns None otherwise
     fn get_state(&self) -> Payload {
         match self.states.is_tab_open() {
-            false => Payload::One(Value::Usize(self.states.selected)),
-            true => Payload::None,
+            false => State::One(Value::Usize(self.states.selected)),
+            true => State::None,
         }
     }
 
@@ -552,7 +551,7 @@ impl Component for Select {
     ///
     /// Blur component
     fn blur(&mut self) {
-        self.states.focus = false;
+        focus = false;
         // Tab gets closed
         self.states.close_tab();
     }
@@ -561,7 +560,7 @@ impl Component for Select {
     ///
     /// Active component
     fn active(&mut self) {
-        self.states.focus = true;
+        focus = true;
     }
 }
 
@@ -709,7 +708,7 @@ mod test {
             .with_foreground(Color::Red)
             .hidden()
             .build();
-        assert_eq!(component.update(props), Msg::None);
+        assert_eq!(component.update(props), CmdResult::None);
         assert_eq!(component.props.foreground, Color::Red);
         assert_eq!(component.props.visible, false);
         let props = SelectPropsBuilder::from(component.get_props())
@@ -718,74 +717,68 @@ mod test {
             .build();
         assert_eq!(
             component.update(props),
-            Msg::OnChange(Payload::One(Value::Usize(2)))
+            CmdResult::Changed(Payload::One(Value::Usize(2)))
         );
         // Get value
-        assert_eq!(component.get_state(), Payload::One(Value::Usize(2)));
+        assert_eq!(component.get_state(), State::One(Value::Usize(2)));
         // Open tab
         component.states.open_tab();
-        assert_eq!(component.get_state(), Payload::None);
+        assert_eq!(component.get_state(), State::None);
         // Events
         // Move cursor
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
-            Msg::OnChange(Payload::One(Value::Usize(1))),
+            component.on(Cmd::Move(Direction::Up)),
+            CmdResult::Changed(Payload::One(Value::Usize(1))),
         );
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
-            Msg::OnChange(Payload::One(Value::Usize(0))),
+            component.on(Cmd::Move(Direction::Up)),
+            CmdResult::Changed(Payload::One(Value::Usize(0))),
         );
         // Upper boundary
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
-            Msg::OnChange(Payload::One(Value::Usize(0))),
+            component.on(Cmd::Move(Direction::Up)),
+            CmdResult::Changed(Payload::One(Value::Usize(0))),
         );
         // Move down
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
-            Msg::OnChange(Payload::One(Value::Usize(1))),
+            component.on(Cmd::Move(Direction::Down)),
+            CmdResult::Changed(Payload::One(Value::Usize(1))),
         );
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
-            Msg::OnChange(Payload::One(Value::Usize(2))),
+            component.on(Cmd::Move(Direction::Down)),
+            CmdResult::Changed(Payload::One(Value::Usize(2))),
         );
         // Lower boundary
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
-            Msg::OnChange(Payload::One(Value::Usize(2))),
+            component.on(Cmd::Move(Direction::Down)),
+            CmdResult::Changed(Payload::One(Value::Usize(2))),
         );
         // Press enter
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::OnSubmit(Payload::One(Value::Usize(2))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Enter))),
+            CmdResult::Submit(Payload::One(Value::Usize(2))),
         );
         // Tab should be closed
         assert_eq!(component.states.is_tab_open(), false);
         // Re open
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::None,
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Enter))),
+            CmdResult::None,
         );
         assert_eq!(component.states.is_tab_open(), true);
         // Move arrows
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Enter))),
-            Msg::OnSubmit(Payload::One(Value::Usize(2))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Enter))),
+            CmdResult::Submit(Payload::One(Value::Usize(2))),
         );
         assert_eq!(component.states.is_tab_open(), false);
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Down))),
-            Msg::None,
-        );
-        assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Up))),
-            Msg::None,
-        );
+        assert_eq!(component.on(Cmd::Move(Direction::Down)), CmdResult::None,);
+        assert_eq!(component.on(Cmd::Move(Direction::Up)), CmdResult::None,);
         // Char
         assert_eq!(
-            component.on(Event::Key(KeyEvent::from(KeyCode::Char('a')))),
-            Msg::OnKey(KeyEvent::from(KeyCode::Char('a'))),
+            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
+            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
         );
-        assert_eq!(component.on(Event::Resize(0, 0)), Msg::None);
+        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 }
