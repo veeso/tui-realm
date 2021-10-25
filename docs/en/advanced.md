@@ -160,7 +160,7 @@ In addition to these, it is also possible to combine Sub clauses using expressio
 
 Using `And` and `Or` you can create even long expression and keep in mind that they are evaluated recursively, so for example:
 
-`And(Or(A, And(B, C)), And(D, Or(E, F)))` is evaluated as `(A && (B && C)) || (D && (E || F))`
+`And(Or(A, And(B, C)), And(D, Or(E, F)))` is evaluated as `(A || (B && C)) && (D && (E || F))`
 
 ---
 
