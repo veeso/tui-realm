@@ -25,174 +25,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::props::{Alignment, PropPayload, PropValue, Props, PropsBuilder};
-use tuirealm::tui::{
-    layout::Rect,
-    style::{Color, Modifier, Style},
-    widgets::Paragraph,
-};
-use tuirealm::{event::Event, CmdResult, Component, Frame, Payload};
-
-const PROP_ALIGNMENT: &str = "text-alignment";
-const PROP_TEXT: &str = "text";
-
-// -- Props
-
-pub struct LabelPropsBuilder {
-    props: Option<Props>,
-}
-
-impl Default for LabelPropsBuilder {
-    fn default() -> Self {
-        LabelPropsBuilder {
-            props: Some(Props::default()),
-        }
-    }
-}
-
-impl PropsBuilder for LabelPropsBuilder {
-    fn build(&mut self) -> Props {
-        self.props.take().unwrap()
-    }
-
-    fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-}
-
-impl From<Props> for LabelPropsBuilder {
-    fn from(props: Props) -> Self {
-        LabelPropsBuilder { props: Some(props) }
-    }
-}
-
-impl LabelPropsBuilder {
-    /// ### with_foreground
-    ///
-    /// Set foreground color for component
-    pub fn with_foreground(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.foreground = color;
-        }
-        self
-    }
-
-    /// ### with_background
-    ///
-    /// Set background color for component
-    pub fn with_background(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.background = color;
-        }
-        self
-    }
-
-    /// ### bold
-    ///
-    /// Set bold property for component
-    pub fn bold(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::BOLD;
-        }
-        self
-    }
-
-    /// ### italic
-    ///
-    /// Set italic property for component
-    pub fn italic(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::ITALIC;
-        }
-        self
-    }
-
-    /// ### underlined
-    ///
-    /// Set underlined property for component
-    pub fn underlined(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::UNDERLINED;
-        }
-        self
-    }
-
-    /// ### slow_blink
-    ///
-    /// Set slow_blink property for component
-    pub fn slow_blink(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::SLOW_BLINK;
-        }
-        self
-    }
-
-    /// ### rapid_blink
-    ///
-    /// Set rapid_blink property for component
-    pub fn rapid_blink(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::RAPID_BLINK;
-        }
-        self
-    }
-
-    /// ### reversed
-    ///
-    /// Set reversed property for component
-    pub fn reversed(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::REVERSED;
-        }
-        self
-    }
-
-    /// ### strikethrough
-    ///
-    /// Set strikethrough property for component
-    pub fn strikethrough(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::CROSSED_OUT;
-        }
-        self
-    }
-
-    /// ### with_text
-    ///
-    /// Set text
-    pub fn with_text<S: AsRef<str>>(&mut self, text: S) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_TEXT,
-                PropPayload::One(PropValue::Str(text.as_ref().to_string())),
-            );
-        }
-        self
-    }
-
-    /// ### with_text_alignment
-    ///
-    /// Set text alignment for paragraph
-    pub fn with_text_alignment(&mut self, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_ALIGNMENT,
-                PropPayload::One(PropValue::Alignment(alignment)),
-            );
-        }
-        self
-    }
-}
+use tuirealm::command::{Cmd, CmdResult};
+use tuirealm::props::{Alignment, AttrValue, Attribute, Color, Props, Style, TextModifiers};
+use tuirealm::tui::{layout::Rect, widgets::Paragraph};
+use tuirealm::{Frame, MockComponent, State};
 
 // -- Component
 
@@ -203,40 +39,79 @@ pub struct Label {
     props: Props,
 }
 
+impl Default for Label {
+    fn default() -> Self {
+        Self {
+            props: Props::default(),
+        }
+    }
+}
+
 impl Label {
-    /// ### new
-    ///
-    /// Instantiates a new `Label` component.
-    pub fn new(props: Props) -> Self {
-        Label { props }
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    pub fn background(mut self, bg: Color) -> Self {
+        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.props
+            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self
+    }
+
+    pub fn text<S: AsRef<str>>(mut self, t: S) -> Self {
+        self.props
+            .set(Attribute::Text, AttrValue::String(t.as_ref().to_string()));
+        self
+    }
+
+    pub fn alignment(mut self, alignment: Alignment) -> Self {
+        self.props
+            .set(Attribute::Alignment, AttrValue::String(alignment));
+        self
     }
 }
 
 impl MockComponent for Label {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Frame, area: Rect) {
+    fn view(&self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text
-            let text: String = match self.props.own.get(PROP_TEXT).as_ref() {
-                Some(PropPayload::One(PropValue::Str(t))) => t.to_string(),
-                _ => String::default(),
-            };
-            // Text properties
-            let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
-                Some(PropPayload::One(PropValue::Alignment(alignment))) => *alignment,
-                _ => Alignment::Left,
-            };
+            let text = self
+                .props
+                .get_or(Attribute::Text, AttrValue::String(String::default()))
+                .unwrap_string();
+            let foreground = self
+                .props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let alignment: Alignment = self
+                .props
+                .get_or(Attribute::Alignment, AttrValue::Alignment(Alignment::Left))
+                .unwrap_alignment();
+            let modifiers = self
+                .props
+                .get_or(
+                    Attribute::TextProps,
+                    AttrValue::TextModifiers(TextModifiers::empty()),
+                )
+                .unwrap_text_modifiers();
             render.render_widget(
                 Paragraph::new(text)
                     .style(
                         Style::default()
                             .fg(foreground)
                             .bg(background)
-                            .add_modifier(self.props.modifiers),
+                            .add_modifier(modifiers),
                     )
                     .alignment(alignment),
                 area,
@@ -244,57 +119,21 @@ impl MockComponent for Label {
         }
     }
 
-    /// ### update
-    ///
-    /// Update component properties
-    /// Properties should first be retrieved through `get_props` which creates a builder from
-    /// existing properties and then edited before calling update.
-    /// Returns a CmdResult to the view
-    fn update(&mut self, props: Props) -> CmdResult {
-        self.props = props;
-        // Return None
-        CmdResult::None
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
     }
 
-    /// ### get_props
-    ///
-    /// Returns a copy of the component properties.
-    fn get_props(&self) -> Props {
-        self.props.clone()
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        self.props.set(attr, value)
     }
 
-    /// ### on
-    ///
-    /// Handle input event and update internal states.
-    /// Returns a CmdResult to the view.
-    fn on(&mut self, ev: Event) -> CmdResult {
-        // Return key
-        if let Cmd::Key(key) = ev {
-            Cmd::None(key)
-        } else {
-            CmdResult::None
-        }
-    }
-
-    /// ### get_state
-    ///
-    /// Get current state from component
-    /// For this component returns always None
-    fn get_state(&self) -> Payload {
+    fn state(&self) -> State {
         State::None
     }
 
-    // -- events
-
-    /// ### blur
-    ///
-    /// Blur component
-    fn blur(&mut self) {}
-
-    /// ### active
-    ///
-    /// Active component
-    fn active(&mut self) {}
+    fn perform(&mut self, _cmd: Cmd) -> CmdResult {
+        CmdResult::None
+    }
 }
 
 #[cfg(test)]
@@ -302,94 +141,17 @@ mod tests {
 
     use super::*;
 
-    use crossterm::event::{KeyCode, KeyEvent};
     use pretty_assertions::assert_eq;
-    use tuirealm::tui::style::Color;
 
     #[test]
     fn test_components_label() {
-        let mut component: Label = Label::new(
-            LabelPropsBuilder::default()
-                .with_foreground(Color::Red)
-                .with_background(Color::Blue)
-                .hidden()
-                .visible()
-                .bold()
-                .italic()
-                .rapid_blink()
-                .reversed()
-                .slow_blink()
-                .strikethrough()
-                .underlined()
-                .with_text(String::from("Hello, world!"))
-                .with_text_alignment(Alignment::Center)
-                .build(),
-        );
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.background, Color::Blue);
-        assert_eq!(component.props.visible, true);
-        assert!(component.props.modifiers.intersects(Modifier::BOLD));
-        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
-        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
-        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
-        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
-        assert_eq!(
-            component.props.own.get(PROP_TEXT).unwrap(),
-            &PropPayload::One(PropValue::Str("Hello, world!".to_string()))
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_ALIGNMENT).unwrap(),
-            PropPayload::One(PropValue::Alignment(Alignment::Center))
-        );
-        component.active();
-        component.blur();
-        // Update
-        let props = LabelPropsBuilder::from(component.get_props())
-            .with_foreground(Color::Red)
-            .hidden()
-            .build();
-        assert_eq!(component.update(props), CmdResult::None);
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.visible, false);
-        // Get value
-        assert_eq!(component.state(), State::None);
-        // Event
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),
-            Cmd::None(KeyCmd::from(KeyCode::Delete))
-        );
-        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
-    }
+        let mut component: Label = Label::default()
+            .alignment(Alignment::Center)
+            .background(Color::Red)
+            .foreground(Color::Yellow)
+            .modifiers(TextModifiers::BOLD)
+            .text("foobar");
 
-    #[test]
-    fn test_components_label_propsbuilder() {
-        let props: Props = LabelPropsBuilder::default()
-            .hidden()
-            .with_background(Color::Blue)
-            .with_foreground(Color::Green)
-            .bold()
-            .italic()
-            .underlined()
-            .strikethrough()
-            .reversed()
-            .rapid_blink()
-            .slow_blink()
-            .with_text(String::from("test"))
-            .build();
-        assert_eq!(props.background, Color::Blue);
-        assert!(props.modifiers.intersects(Modifier::BOLD));
-        assert!(props.modifiers.intersects(Modifier::ITALIC));
-        assert!(props.modifiers.intersects(Modifier::UNDERLINED));
-        assert!(props.modifiers.intersects(Modifier::SLOW_BLINK));
-        assert!(props.modifiers.intersects(Modifier::RAPID_BLINK));
-        assert!(props.modifiers.intersects(Modifier::REVERSED));
-        assert!(props.modifiers.intersects(Modifier::CROSSED_OUT));
-        assert_eq!(props.foreground, Color::Green);
-        assert_eq!(
-            props.own.get(PROP_TEXT).unwrap(),
-            &PropPayload::One(PropValue::Str("test".to_string()))
-        );
+        assert_eq!(component.state(), State::None);
     }
 }

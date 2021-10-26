@@ -29,219 +29,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder, TextSpan,
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+    TextModifiers, TextSpan,
 };
 use tuirealm::tui::{
     layout::Rect,
-    style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, Paragraph as TuiParagraph, Wrap},
+    widgets::{Paragraph as TuiParagraph, Wrap},
 };
-use tuirealm::{event::Event, CmdResult, Component, Frame, Payload};
-
-// -- Props
-
-const PROP_SPANS: &str = "spans";
-const PROP_ALIGNMENT: &str = "text-align";
-const PROP_TRIM: &str = "wrap";
-
-pub struct ParagraphPropsBuilder {
-    props: Option<Props>,
-}
-
-impl Default for ParagraphPropsBuilder {
-    fn default() -> Self {
-        ParagraphPropsBuilder {
-            props: Some(Props::default()),
-        }
-    }
-}
-
-impl PropsBuilder for ParagraphPropsBuilder {
-    fn build(&mut self) -> Props {
-        self.props.take().unwrap()
-    }
-
-    fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-}
-
-impl From<Props> for ParagraphPropsBuilder {
-    fn from(props: Props) -> Self {
-        ParagraphPropsBuilder { props: Some(props) }
-    }
-}
-
-impl ParagraphPropsBuilder {
-    /// ### with_foreground
-    ///
-    /// Set foreground color for area
-    pub fn with_foreground(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.foreground = color;
-        }
-        self
-    }
-
-    /// ### with_background
-    ///
-    /// Set background color for area
-    pub fn with_background(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.background = color;
-        }
-        self
-    }
-
-    /// ### bold
-    ///
-    /// Set bold property for component
-    pub fn bold(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::BOLD;
-        }
-        self
-    }
-
-    /// ### italic
-    ///
-    /// Set italic property for component
-    pub fn italic(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::ITALIC;
-        }
-        self
-    }
-
-    /// ### underlined
-    ///
-    /// Set underlined property for component
-    pub fn underlined(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::UNDERLINED;
-        }
-        self
-    }
-
-    /// ### slow_blink
-    ///
-    /// Set slow_blink property for component
-    pub fn slow_blink(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::SLOW_BLINK;
-        }
-        self
-    }
-
-    /// ### rapid_blink
-    ///
-    /// Set rapid_blink property for component
-    pub fn rapid_blink(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::RAPID_BLINK;
-        }
-        self
-    }
-
-    /// ### reversed
-    ///
-    /// Set reversed property for component
-    pub fn reversed(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::REVERSED;
-        }
-        self
-    }
-
-    /// ### strikethrough
-    ///
-    /// Set strikethrough property for component
-    pub fn strikethrough(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::CROSSED_OUT;
-        }
-        self
-    }
-
-    /// ### with_borders
-    ///
-    /// Set component borders style
-    pub fn with_borders(
-        &mut self,
-        borders: Borders,
-        variant: BorderType,
-        color: Color,
-    ) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.borders = BordersProps {
-                borders,
-                variant,
-                color,
-            }
-        }
-        self
-    }
-
-    /// ### with_title
-    ///
-    /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.title = Some(BlockTitle::new(title, alignment));
-        }
-        self
-    }
-
-    /// ### with_texts
-    ///
-    /// Set spans
-    pub fn with_texts(&mut self, spans: Vec<TextSpan>) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_SPANS,
-                PropPayload::Vec(spans.into_iter().map(PropValue::TextSpan).collect()),
-            );
-        }
-        self
-    }
-
-    /// ### with_text_alignment
-    ///
-    /// Set text alignment for paragraph
-    pub fn with_text_alignment(&mut self, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_ALIGNMENT,
-                PropPayload::One(PropValue::Alignment(alignment)),
-            );
-        }
-        self
-    }
-
-    /// ### with_trim
-    ///
-    /// Set whether wrapped text should be trimmed or not on newlines
-    pub fn with_trim(&mut self, trim: bool) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_TRIM, PropPayload::One(PropValue::Bool(trim)));
-        }
-        self
-    }
-}
+use tuirealm::{Frame, MockComponent, State};
 
 // -- Component
 
@@ -252,25 +50,65 @@ pub struct Paragraph {
     props: Props,
 }
 
+impl Default for Paragraph {
+    fn default() -> Self {
+        Self {
+            props: Props::default(),
+        }
+    }
+}
+
 impl Paragraph {
-    /// ### new
-    ///
-    /// Instantiates a new `Paragraph` component.
-    pub fn new(props: Props) -> Self {
-        Paragraph { props }
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    pub fn background(mut self, bg: Color) -> Self {
+        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.props
+            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self
+    }
+
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    pub fn alignment(mut self, a: Alignment) -> Self {
+        self.props
+            .set(Attribute::Alignment, AttrValue::Alignment(a));
+        self
+    }
+
+    pub fn text(mut self, s: &[TextSpan]) -> Self {
+        self.props.set(
+            Attribute::Text,
+            AttrValue::Payload(PropPayload::Vec(
+                s.into_iter().map(PropValue::TextSpan).collect(),
+            )),
+        );
+        self
+    }
+
+    pub fn wrap(mut self, wrap: bool) -> Self {
+        self.props.set(Attribute::TextWrap, AttrValue::Flag(wrap));
+        self
     }
 }
 
 impl MockComponent for Paragraph {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Frame, area: Rect) {
+    fn view(&self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text items
-            let text: Vec<Spans> = match self.props.own.get(PROP_SPANS).as_ref() {
+            let text: Vec<Spans> = match self.props.get(Attribute::Text).map(|x| x.unwrap_payload())
+            {
                 Some(PropPayload::Vec(spans)) => spans
                     .iter()
                     .map(|x| x.unwrap_text_span())
@@ -285,18 +123,30 @@ impl MockComponent for Paragraph {
                     .collect(),
                 _ => Vec::new(),
             };
-            // Make container div
-            let div: Block = crate::utils::get_block(&borders, title.as_ref(), true);
             // Text properties
-            let alignment: Alignment = match self.props.own.get(PROP_ALIGNMENT) {
-                Some(PropPayload::One(PropValue::Alignment(alignment))) => *alignment,
-                _ => Alignment::Left,
-            };
+            let alignment: Alignment = self
+                .props
+                .get_or(Attribute::Alignment, AttrValue::Alignment(Alignment::Left))
+                .unwrap_alignment();
             // Wrap
-            let trim: bool = match self.props.own.get(PROP_TRIM) {
-                Some(PropPayload::One(PropValue::Bool(trim))) => *trim,
-                _ => false,
-            };
+            let trim = self
+                .props
+                .get_or(Attribute::TextWrap, AttrValue::Flag(false))
+                .unwrap_flag();
+            let foreground = self
+                .props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let borders = self
+                .props
+                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+                .unwrap_borders();
+            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+            let div = crate::utils::get_block(borders, title, true, None);
             render.render_widget(
                 TuiParagraph::new(text)
                     .block(div)
@@ -308,57 +158,21 @@ impl MockComponent for Paragraph {
         }
     }
 
-    /// ### update
-    ///
-    /// Update component properties
-    /// Properties should first be retrieved through `get_props` which creates a builder from
-    /// existing properties and then edited before calling update.
-    /// Returns a CmdResult to the view
-    fn update(&mut self, props: Props) -> CmdResult {
-        self.props = props;
-        // Return None
-        CmdResult::None
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
     }
 
-    /// ### get_props
-    ///
-    /// Returns a copy of the component properties.
-    fn get_props(&self) -> Props {
-        self.props.clone()
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        self.props.set(attr, value)
     }
 
-    /// ### on
-    ///
-    /// Handle input event and update internal states.
-    /// Returns a CmdResult to the view.
-    fn on(&mut self, ev: Event) -> CmdResult {
-        // Return key
-        if let Cmd::Key(key) = ev {
-            Cmd::None(key)
-        } else {
-            CmdResult::None
-        }
-    }
-
-    /// ### get_state
-    ///
-    /// Get current state from component
-    /// For this component returns always None
-    fn get_state(&self) -> Payload {
+    fn state(&self) -> State {
         State::None
     }
 
-    // -- events
-
-    /// ### blur
-    ///
-    /// Blur component
-    fn blur(&mut self) {}
-
-    /// ### active
-    ///
-    /// Active component
-    fn active(&mut self) {}
+    fn perform(&mut self, _cmd: Cmd) -> CmdResult {
+        CmdResult::None
+    }
 }
 
 #[cfg(test)]
@@ -366,101 +180,23 @@ mod tests {
 
     use super::*;
 
-    use crossterm::event::{KeyCode, KeyEvent};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_components_paragraph() {
-        // Make component
-        let mut component: Paragraph = Paragraph::new(
-            ParagraphPropsBuilder::default()
-                .with_foreground(Color::Red)
-                .with_background(Color::Blue)
-                .hidden()
-                .visible()
-                .bold()
-                .italic()
-                .rapid_blink()
-                .reversed()
-                .slow_blink()
-                .strikethrough()
-                .underlined()
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_texts(vec![
-                    TextSpan::from("welcome to "),
-                    TextSpan::from("tui-realm"),
-                ])
-                .with_title("paragraph", Alignment::Center)
-                .with_trim(true)
-                .with_text_alignment(Alignment::Center)
-                .build(),
-        );
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.background, Color::Blue);
-        assert_eq!(component.props.visible, true);
-        assert!(component.props.modifiers.intersects(Modifier::BOLD));
-        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
-        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
-        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
-        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
-        assert_eq!(component.props.borders.borders, Borders::ALL);
-        assert_eq!(component.props.borders.variant, BorderType::Double);
-        assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(component.props.title.as_ref().unwrap().text(), "paragraph");
-        assert_eq!(
-            component.props.title.as_ref().unwrap().alignment(),
-            Alignment::Center
-        );
-        assert_eq!(
-            component.props.own.get(PROP_SPANS).unwrap(),
-            &PropPayload::Vec(vec![
-                PropValue::TextSpan(TextSpan::from("welcome to ")),
-                PropValue::TextSpan(TextSpan::from("tui-realm")),
+        let mut component = Paragraph::default()
+            .background(Color::Blue)
+            .foreground(Color::Red)
+            .modifiers(TextModifiers::BOLD)
+            .alignment(Alignment::Center)
+            .text(&[
+                TextSpan::from("Press "),
+                TextSpan::from("<ESC>").fg(Color::Cyan).bold(),
+                TextSpan::from(" to quit"),
             ])
-        );
-        assert_eq!(component.props.title.as_ref().unwrap().text(), "paragraph");
-        assert_eq!(
-            component.props.title.as_ref().unwrap().alignment(),
-            Alignment::Center
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_ALIGNMENT).unwrap(),
-            PropPayload::One(PropValue::Alignment(Alignment::Center))
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_TRIM).unwrap(),
-            PropPayload::One(PropValue::Bool(true))
-        );
-        // Focus
-        component.active();
-        component.blur();
-        // Update
-        let props = ParagraphPropsBuilder::from(component.get_props())
-            .with_foreground(Color::Green)
-            .hidden()
-            .build();
-        assert_eq!(component.update(props), CmdResult::None);
-        assert_eq!(component.props.visible, false);
-        assert_eq!(component.props.foreground, Color::Green);
-        // Update
-        component.update(
-            ParagraphPropsBuilder::from(component.get_props())
-                .with_texts(vec![
-                    TextSpan::from("welcome"),
-                    TextSpan::from("to"),
-                    TextSpan::from("tui-realm"),
-                ])
-                .build(),
-        );
-        // get value
+            .wrap(true)
+            .title("title", Alignment::Center);
+        // Get value
         assert_eq!(component.state(), State::None);
-        // On key
-        assert_eq!(
-            component.on(Cmd::Delete),
-            Cmd::None(KeyCmd::from(KeyCode::Backspace))
-        );
-        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 }

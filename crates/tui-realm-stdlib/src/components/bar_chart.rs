@@ -2,7 +2,6 @@
 //!
 //! A chart with bars
 
-use std::collections::LinkedList;
 /**
  * MIT License
  *
@@ -26,295 +25,20 @@ use std::collections::LinkedList;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::event::Event;
-use tuirealm::event::KeyCode;
+use std::collections::LinkedList;
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
 };
-use tuirealm::tui::{
-    layout::Rect,
-    style::{Color, Style},
-    widgets::{BarChart as TuiBarChart, Block, BorderType, Borders},
-};
-use tuirealm::{CmdResult, Component, Frame, Payload};
+use tuirealm::tui::{layout::Rect, widgets::BarChart as TuiBarChart};
+use tuirealm::{Frame, MockComponent, State};
 
 // -- Props
-const PROP_BAR_WIDTH: &str = "bar-width";
-const PROP_BAR_GAP: &str = "bar-gap";
-const PROP_BAR_STYLE: &str = "bar-style";
-const PROP_DATA: &str = "data";
-const PROP_DISABLED: &str = "disabled";
-const PROP_LABEL_STYLE: &str = "label-style";
-const PROP_MAX_BARS: &str = "max-bars";
-const PROP_VALUE_STYLE: &str = "value-style";
 
-pub struct BarChartPropsBuilder {
-    props: Option<Props>,
-}
-
-impl Default for BarChartPropsBuilder {
-    fn default() -> Self {
-        Self {
-            props: Some(Props::default()),
-        }
-    }
-}
-
-impl PropsBuilder for BarChartPropsBuilder {
-    fn build(&mut self) -> Props {
-        self.props.take().unwrap()
-    }
-
-    fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-}
-
-impl From<Props> for BarChartPropsBuilder {
-    fn from(props: Props) -> Self {
-        Self { props: Some(props) }
-    }
-}
-
-impl BarChartPropsBuilder {
-    /// ### with_foreground
-    ///
-    /// Set foreground color for component
-    pub fn with_foreground(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.foreground = color;
-        }
-        self
-    }
-
-    /// ### with_background
-    ///
-    /// Set background color for component
-    pub fn with_background(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.background = color;
-        }
-        self
-    }
-
-    /// ### with_borders
-    ///
-    /// Set component borders style
-    pub fn with_borders(
-        &mut self,
-        borders: Borders,
-        variant: BorderType,
-        color: Color,
-    ) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.borders = BordersProps {
-                borders,
-                variant,
-                color,
-            }
-        }
-        self
-    }
-
-    /// ### with_title
-    ///
-    /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.title = Some(BlockTitle::new(title, alignment));
-        }
-        self
-    }
-
-    /// ### with_bar_gap
-    ///
-    /// Define bar gap for chart
-    pub fn with_bar_gap(&mut self, gap: u16) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_BAR_GAP, PropPayload::One(PropValue::U16(gap)));
-        }
-        self
-    }
-
-    /// ### with_bar_style
-    ///
-    /// Define bar style for chart
-    pub fn with_bar_style(&mut self, style: Style) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_BAR_STYLE, PropPayload::One(PropValue::Style(style)));
-        }
-        self
-    }
-
-    /// ### with_bar_width
-    ///
-    /// Define bar width for chart
-    pub fn with_bar_width(&mut self, width: u16) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_BAR_WIDTH, PropPayload::One(PropValue::U16(width)));
-        }
-        self
-    }
-
-    /// ### with_label_style
-    ///
-    /// Define bar style for chart
-    pub fn with_label_style(&mut self, style: Style) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_LABEL_STYLE, PropPayload::One(PropValue::Style(style)));
-        }
-        self
-    }
-
-    /// ### with_max_bars
-    ///
-    /// Define maximum amount of bars to be displayed
-    pub fn with_max_bars(&mut self, max: u64) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_MAX_BARS, PropPayload::One(PropValue::U64(max)));
-        }
-        self
-    }
-
-    /// ### with_value_style
-    ///
-    /// Define style for values
-    pub fn with_value_style(&mut self, style: Style) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_VALUE_STYLE, PropPayload::One(PropValue::Style(style)));
-        }
-        self
-    }
-
-    /// ### with_data
-    ///
-    /// Define chart data
-    pub fn with_data(&mut self, data: &[(&str, u64)]) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            // Create linked list
-            let mut list: LinkedList<PropPayload> = LinkedList::new();
-            data.iter().for_each(|(label, value)| {
-                list.push_back(PropPayload::Tup2((
-                    PropValue::Str(label.to_string()),
-                    PropValue::U64(*value),
-                )))
-            });
-            props.own.insert(PROP_DATA, PropPayload::Linked(list));
-        }
-        self
-    }
-
-    /// ### push_record_back
-    ///
-    /// Just pushes a record to the back of the data
-    pub fn push_record_back(&mut self, (label, value): (&str, u64)) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            match props.own.get_mut(PROP_DATA) {
-                Some(PropPayload::Linked(list)) => {
-                    list.push_back(PropPayload::Tup2((
-                        PropValue::Str(label.to_string()),
-                        PropValue::U64(value),
-                    )));
-                }
-                _ => {
-                    // Create list
-                    let mut l: LinkedList<PropPayload> = LinkedList::new();
-                    l.push_back(PropPayload::Tup2((
-                        PropValue::Str(label.to_string()),
-                        PropValue::U64(value),
-                    )));
-                    props.own.insert(PROP_DATA, PropPayload::Linked(l));
-                }
-            }
-        }
-        self
-    }
-
-    /// ### push_record_front
-    ///
-    /// Just pushes a record to the front of the data
-    pub fn push_record_front(&mut self, (label, value): (&str, u64)) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            match props.own.get_mut(PROP_DATA) {
-                Some(PropPayload::Linked(list)) => {
-                    list.push_front(PropPayload::Tup2((
-                        PropValue::Str(label.to_string()),
-                        PropValue::U64(value),
-                    )));
-                }
-                _ => {
-                    // Create list
-                    let mut l: LinkedList<PropPayload> = LinkedList::new();
-                    l.push_front(PropPayload::Tup2((
-                        PropValue::Str(label.to_string()),
-                        PropValue::U64(value),
-                    )));
-                    props.own.insert(PROP_DATA, PropPayload::Linked(l));
-                }
-            }
-        }
-        self
-    }
-
-    /// ### pop_record_back
-    ///
-    /// Pop first record on the back of the data list
-    pub fn pop_record_back(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            if let Some(PropPayload::Linked(list)) = props.own.get_mut(PROP_DATA) {
-                list.pop_back();
-            }
-        }
-        self
-    }
-
-    /// ### pop_record_front
-    ///
-    /// Pop first record on the front of the data list
-    pub fn pop_record_front(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            if let Some(PropPayload::Linked(list)) = props.own.get_mut(PROP_DATA) {
-                list.pop_front();
-            }
-        }
-        self
-    }
-
-    /// ### disabled
-    ///
-    /// If component is set to `disabled`, then input commands won't work, and colors will be rendered
-    /// as if the component would have focus
-    pub fn disabled(&mut self, disabled: bool) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_DISABLED, PropPayload::One(PropValue::Bool(disabled)));
-        }
-        self
-    }
-}
+use super::props::{
+    BAR_CHART_BARS_GAP, BAR_CHART_BARS_STYLE, BAR_CHART_LABEL_STYLE, BAR_CHART_MAX_BARS,
+    BAR_CHART_VALUES_STYLE,
+};
 
 // -- states
 
@@ -323,15 +47,11 @@ impl BarChartPropsBuilder {
 /// Bar chart states
 struct OwnStates {
     cursor: usize,
-    focus: bool,
 }
 
 impl Default for OwnStates {
     fn default() -> Self {
-        Self {
-            cursor: 0,
-            focus: false,
-        }
+        Self { cursor: 0 }
     }
 }
 
@@ -393,29 +113,71 @@ pub struct BarChart {
     states: OwnStates,
 }
 
-impl BarChart {
-    /// ### new
-    ///
-    /// Instantiates a new `BarChart` component
-    pub fn new(props: Props) -> Self {
+impl Default for BarChart {
+    fn default() -> Self {
         Self {
-            props,
+            props: Props::default(),
             states: OwnStates::default(),
         }
     }
+}
 
-    /// ### disabled
-    ///
-    /// Returns whether the component is in `disabled` mode
-    fn disabled(&self) -> bool {
+impl BarChart {
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    pub fn background(mut self, bg: Color) -> Self {
+        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
+        self.props.set(
+            Attribute::Title,
+            AttrValue::Title(t.as_ref().to_string(), a),
+        );
+        self
+    }
+
+    pub fn disabled(mut self, disabled: bool) -> Self {
         self.props
-            .own
-            .get(PROP_DISABLED)
-            .map(|x| match x {
-                PropPayload::One(PropValue::Bool(disabled)) => *disabled,
-                _ => false,
-            })
-            .unwrap_or(false)
+            .set(Attribute::Disabled, AttrValue::Flag(disabled));
+        self
+    }
+
+    pub fn data(mut self, data: &[(&str, u64)]) -> Self {
+        let mut list: LinkedList<PropPayload> = LinkedList::new();
+        data.into_iter().for_each(|(a, b)| {
+            list.push_back(PropPayload::Tup2(
+                PropValue::Str(a.to_string()),
+                PropValue::U64(*b),
+            ))
+        });
+        self.props.set(
+            Attribute::Dataset,
+            AttrValue::Payload(PropPayload::Linked(list)),
+        );
+        self
+    }
+
+    // TODO: missing custom attributes
+
+    pub fn width(mut self, w: u16) -> Self {
+        self.props.set(Attribute::Width, AttrValue::Size(w));
+        self
+    }
+
+    fn is_disabled(&self) -> bool {
+        self.props
+            .get_or(Attribute::Disabled, AttrValue::Flag(false))
+            .unwrap_flag()
     }
 
     /// ### data_len
@@ -423,20 +185,23 @@ impl BarChart {
     /// Retrieve current data len from properties
     fn data_len(&self) -> usize {
         self.props
-            .own
-            .get(PROP_DATA)
-            .map(|x| match x {
-                PropPayload::Linked(l) => l.len(),
-                _ => 0,
+            .get(Attribute::Dataset)
+            .map(|x| {
+                x.unwrap_payload()
+                    .unwrap_vec()
+                    .iter()
+                    .map(|x| x.unwrap_dataset().get_data().len())
+                    .max()
             })
             .unwrap_or(0)
     }
 
-    /// ### data
-    ///
-    /// Get data to be displayed, starting from provided index at `start` with a max length of `len`
-    fn data(&self, start: usize, len: usize) -> Vec<(&str, u64)> {
-        if let Some(PropPayload::Linked(list)) = self.props.own.get(PROP_DATA) {
+    fn get_data(&self, start: usize, len: usize) -> Vec<(&str, u64)> {
+        if let Some(PropPayload::Linked(list)) = self
+            .props
+            .get(Attribute::Dataset)
+            .map(|x| x.unwrap_payload())
+        {
             // Recalc len
             let len: usize = std::cmp::min(len, self.data_len() - start);
             // Prepare data storage
@@ -464,145 +229,116 @@ impl BarChart {
 }
 
 impl MockComponent for BarChart {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Frame, area: Rect) {
+    fn view(&self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // If component is disabled, will be displayed as `active`; as focus state otherwise
-            let active: bool = match self.disabled() {
+            let foreground = self
+                .props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let borders = self
+                .props
+                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+                .unwrap_borders();
+            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+            let focus = self
+                .props
+                .get_or(Attribute::Focus, AttrValue::Flag(false))
+                .unwrap_flag();
+            let inactive_style = self
+                .props
+                .get(Attribute::FocusStyle)
+                .map(|x| x.unwrap_style());
+            let div = crate::utils::get_block(borders, title, focus, inactive_style);
+            let active: bool = match self.is_disabled() {
                 true => true,
                 false => focus,
             };
-            let block: Block = crate::utils::get_block(&borders, title.as_ref(), active);
             // Get max elements
             let data_max_len: u64 = self
                 .props
-                .own
-                .get(PROP_MAX_BARS)
-                .map(|x| *x.unwrap_one().unwrap_u64())
+                .get(Attribute::Custom(BAR_CHART_MAX_BARS))
+                .map(|x| *x.unwrap_length() as u64)
                 .unwrap_or(self.data_len() as u64);
             // Get data
-            let data: Vec<(&str, u64)> = self.data(self.states.cursor, data_max_len as usize);
+            let data: Vec<(&str, u64)> = self.get_data(self.states.cursor, data_max_len as usize);
             // Create widget
             let mut widget: TuiBarChart = TuiBarChart::default()
-                .block(block)
-                .data(data.as_slice())
+                .block(div)
+                .get_data(data.as_slice())
                 .max(data_max_len);
-            if let Some(PropPayload::One(PropValue::U16(gap))) = self.props.own.get(PROP_BAR_GAP) {
-                widget = widget.bar_gap(*gap);
+            if let Some(PropPayload::One(PropValue::U16(gap))) = self
+                .props
+                .get(Attribute::Custom(BAR_CHART_BARS_GAP))
+                .map(|x| x.unwrap_size())
+            {
+                widget = widget.bar_gap(gap);
             }
             if let Some(PropPayload::One(PropValue::U16(width))) =
-                self.props.own.get(PROP_BAR_WIDTH)
+                self.props.get(Attribute::Width).map(|x| x.unwrap_size())
             {
-                widget = widget.bar_width(*width);
+                widget = widget.bar_width(width);
             }
-            if let Some(PropPayload::One(PropValue::Style(style))) =
-                self.props.own.get(PROP_BAR_STYLE)
+            if let Some(style) = self
+                .props
+                .get(Attribute::Custom(BAR_CHART_BARS_STYLE))
+                .map(|x| x.unwrap_style())
             {
-                widget = widget.bar_style(*style);
+                widget = widget.bar_style(style);
             }
-            if let Some(PropPayload::One(PropValue::Style(style))) =
-                self.props.own.get(PROP_LABEL_STYLE)
+            if let Some(style) = self
+                .props
+                .get(Attribute::Custom(BAR_CHART_LABEL_STYLE))
+                .map(|x| x.unwrap_style())
             {
-                widget = widget.label_style(*style);
+                widget = widget.label_style(style);
             }
-            if let Some(PropPayload::One(PropValue::Style(style))) =
-                self.props.own.get(PROP_VALUE_STYLE)
+            if let Some(style) = self
+                .props
+                .get(Attribute::Custom(BAR_CHART_VALUES_STYLE))
+                .map(|x| x.unwrap_style())
             {
-                widget = widget.value_style(*style);
+                widget = widget.value_style(style);
             }
             // Render
             render.render_widget(widget, area);
         }
     }
 
-    /// ### update
-    ///
-    /// Update component properties
-    /// Properties should first be retrieved through `get_props` which creates a builder from
-    /// existing properties and then edited before calling update.
-    /// Returns a CmdResult to the view
-    fn update(&mut self, props: Props) -> CmdResult {
-        self.props = props;
-        // Reset cursor
-        self.states.reset_cursor();
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
+    }
+
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        self.props.set(attr, value)
+    }
+
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        if !self.is_disabled() {
+            match cmd {
+                Cmd::Move(Direction::Left) => {
+                    self.states.move_cursor_left();
+                }
+                Cmd::Move(Direction::Right) => {
+                    self.states.move_cursor_right(self.max_dataset_len());
+                }
+                Cmd::GoTo(Position::Begin) => {
+                    self.states.reset_cursor();
+                }
+                Cmd::GoTo(Position::End) => {
+                    self.states.cursor_at_end(self.max_dataset_len());
+                }
+                _ => {}
+            }
+        }
         CmdResult::None
     }
 
-    /// ### get_props
-    ///
-    /// Returns a props builder starting from component properties.
-    /// This returns a prop builder in order to make easier to create
-    /// new properties for the element.
-    fn get_props(&self) -> Props {
-        self.props.clone()
-    }
-
-    /// ### on
-    ///
-    /// Handle input event and update internal states.
-    /// Returns a CmdResult to the view
-    fn on(&mut self, ev: Event) -> CmdResult {
-        if let Cmd::Key(key) = ev {
-            if self.disabled() {
-                Cmd::None(key)
-            } else {
-                match key.code {
-                    KeyCode::Left => {
-                        // Move cursor left; msg None
-                        self.states.move_cursor_left();
-                        CmdResult::None
-                    }
-                    KeyCode::Right => {
-                        // Move cursor right; CmdResult None
-                        self.states.move_cursor_right(self.data_len());
-                        CmdResult::None
-                    }
-                    KeyCode::End => {
-                        // Cursor at last position
-                        self.states.cursor_at_end(self.data_len());
-                        CmdResult::None
-                    }
-                    KeyCode::Home => {
-                        // Cursor at first positon
-                        self.states.reset_cursor();
-                        CmdResult::None
-                    }
-                    _ => Cmd::None(key),
-                }
-            }
-        } else {
-            CmdResult::None
-        }
-    }
-
-    /// ### get_state
-    ///
-    /// Get current state from component
-    /// This component always returns `None`
-    fn get_state(&self) -> Payload {
+    fn state(&self) -> State {
         State::None
-    }
-
-    // -- events
-
-    /// ### blur
-    ///
-    /// Blur component; basically remove focus
-    fn blur(&mut self) {
-        focus = false;
-    }
-
-    /// ### active
-    ///
-    /// Active component; basically give focus
-    /// Works only if not disabled
-    fn active(&mut self) {
-        if !self.disabled() {
-            focus = true;
-        }
     }
 }
 
@@ -611,7 +347,6 @@ mod test {
 
     use super::*;
 
-    use crossterm::event::KeyEvent;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -640,73 +375,32 @@ mod test {
 
     #[test]
     fn test_components_bar_chart() {
-        let mut component: BarChart = BarChart::new(
-            BarChartPropsBuilder::default()
-                .hidden()
-                .visible()
-                .disabled(false)
-                .with_background(Color::White)
-                .with_foreground(Color::Black)
-                .with_title("my incomes", Alignment::Center)
-                .with_label_style(Style::default().fg(Color::Yellow))
-                .with_bar_style(Style::default().fg(Color::LightYellow))
-                .with_bar_gap(2)
-                .with_bar_width(4)
-                .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
-                .with_max_bars(6)
-                .with_value_style(Style::default().fg(Color::LightBlue))
-                .with_data(&[
-                    ("january", 250),
-                    ("february", 300),
-                    ("march", 275),
-                    ("april", 312),
-                    ("may", 420),
-                    ("june", 170),
-                    ("july", 220),
-                    ("august", 160),
-                    ("september", 180),
-                    ("october", 470),
-                    ("november", 380),
-                    ("december", 820),
-                ])
-                .build(),
-        );
-        assert_eq!(component.props.foreground, Color::Black);
-        assert_eq!(component.props.background, Color::White);
-        assert_eq!(component.props.visible, true);
-        assert_eq!(component.props.borders.borders, Borders::ALL);
-        assert_eq!(component.props.borders.variant, BorderType::Double);
-        assert_eq!(component.props.borders.color, Color::Yellow);
-        assert_eq!(component.props.title.as_ref().unwrap().text(), "my incomes");
-        assert_eq!(
-            component.props.title.as_ref().unwrap().alignment(),
-            Alignment::Center
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_BAR_GAP).unwrap(),
-            PropPayload::One(PropValue::U16(2))
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_BAR_WIDTH).unwrap(),
-            PropPayload::One(PropValue::U16(4))
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_MAX_BARS).unwrap(),
-            PropPayload::One(PropValue::U64(6))
-        );
-        assert!(component.props.own.get(PROP_DATA).is_some());
-        assert!(component.props.own.get(PROP_BAR_STYLE).is_some());
-        assert!(component.props.own.get(PROP_LABEL_STYLE).is_some());
-        assert!(component.props.own.get(PROP_VALUE_STYLE).is_some());
-        assert_eq!(
-            *component.props.own.get(PROP_DISABLED).unwrap(),
-            PropPayload::One(PropValue::Bool(false))
-        );
-        // focus
-        component.active();
-        assert_eq!(component.states.focus, true);
-        component.blur();
-        assert_eq!(component.states.focus, false);
+        let mut component: BarChart = BarChart::default()
+            .disabled(false)
+            .background(Color::White)
+            .foreground(Color::Black)
+            .title("my incomes", Alignment::Center)
+            .label_style(Style::default().fg(Color::Yellow))
+            .bar_style(Style::default().fg(Color::LightYellow))
+            .bar_gap(2)
+            .bar_width(4)
+            .borders(Borders::default())
+            .max_bars(6)
+            .value_style(Style::default().fg(Color::LightBlue))
+            .data(&[
+                ("january", 250),
+                ("february", 300),
+                ("march", 275),
+                ("april", 312),
+                ("may", 420),
+                ("june", 170),
+                ("july", 220),
+                ("august", 160),
+                ("september", 180),
+                ("october", 470),
+                ("november", 380),
+                ("december", 820),
+            ]);
         // Commands
         assert_eq!(component.state(), State::None);
         // -> Right
@@ -720,138 +414,6 @@ mod test {
         assert_eq!(component.states.cursor, 11);
         // Home
         assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
-        assert_eq!(component.states.cursor, 0);
-        // other keys
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
-            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
-        );
-        // component funcs
-        assert_eq!(component.data_len(), 12);
-        assert_eq!(component.disabled(), false);
-        assert_eq!(
-            component.data(2, 4),
-            vec![("march", 275), ("april", 312), ("may", 420), ("june", 170),]
-        );
-        // Update and test empty data
-        component.states.cursor_at_end(12);
-        assert_eq!(
-            component.update(
-                BarChartPropsBuilder::from(component.get_props())
-                    .with_data(&[])
-                    .build()
-            ),
-            CmdResult::None
-        );
-        assert_eq!(component.data(0, 4), vec![]);
-        // Cursor is reset
-        assert_eq!(component.states.cursor, 0);
-    }
-
-    #[test]
-    fn test_components_bar_chart_disabled() {
-        let mut component: BarChart = BarChart::new(
-            BarChartPropsBuilder::default()
-                .hidden()
-                .visible()
-                .disabled(true)
-                .with_background(Color::White)
-                .with_foreground(Color::Black)
-                .with_title("my incomes", Alignment::Center)
-                .with_label_style(Style::default().fg(Color::Yellow))
-                .with_bar_style(Style::default().fg(Color::LightYellow))
-                .with_bar_gap(2)
-                .with_bar_width(4)
-                .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
-                .with_max_bars(12)
-                .with_value_style(Style::default().fg(Color::LightBlue))
-                .with_data(&[
-                    ("january", 250),
-                    ("february", 300),
-                    ("march", 275),
-                    ("april", 312),
-                    ("may", 420),
-                    ("june", 170),
-                    ("july", 220),
-                    ("august", 160),
-                    ("september", 180),
-                    ("october", 470),
-                    ("november", 380),
-                    ("december", 820),
-                ])
-                .build(),
-        );
-        // focus
-        component.active();
-        assert_eq!(component.states.focus, false); // NOTE: never enabled
-        component.blur();
-        assert_eq!(component.states.focus, false);
-        // Commands
-        assert_eq!(component.state(), State::None);
-        // -> Right
-        assert_eq!(
-            component.on(Cmd::Move(Direction::Right)),
-            Cmd::None(KeyCmd::from(KeyCode::Right))
-        );
-        assert_eq!(component.states.cursor, 0);
-        // <- Left
-        assert_eq!(
-            component.on(Cmd::Move(Direction::Left)),
-            Cmd::None(KeyCmd::from(KeyCode::Left))
-        );
-        assert_eq!(component.states.cursor, 0);
-        // End
-        assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
-        assert_eq!(component.states.cursor, 0);
-        // Home
-        assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
-        assert_eq!(component.states.cursor, 0);
-        // other keys
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
-            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
-        );
-        // component funcs
-        assert_eq!(component.data_len(), 12);
-        assert_eq!(component.disabled(), true);
-        assert_eq!(
-            component.data(2, 4),
-            vec![("march", 275), ("april", 312), ("may", 420), ("june", 170),]
-        );
-        // Add a new record
-        assert_eq!(
-            component.update(
-                BarChartPropsBuilder::from(component.get_props())
-                    .push_record_back(("january", 983))
-                    .push_record_front(("december", 187))
-                    .build()
-            ),
-            CmdResult::None
-        );
-        assert_eq!(component.data_len(), 14);
-        // Pop
-        assert_eq!(
-            component.update(
-                BarChartPropsBuilder::from(component.get_props())
-                    .pop_record_back()
-                    .pop_record_front()
-                    .build()
-            ),
-            CmdResult::None
-        );
-        assert_eq!(component.data_len(), 12);
-        // Update and test empty data
-        component.states.cursor_at_end(12);
-        assert_eq!(
-            component.update(
-                BarChartPropsBuilder::from(component.get_props())
-                    .with_data(&[])
-                    .build()
-            ),
-            CmdResult::None
-        );
-        assert_eq!(component.data(0, 4), vec![]);
-        // Cursor is reset
         assert_eq!(component.states.cursor, 0);
     }
 }

@@ -46,4 +46,5 @@
 // Export
 mod components;
 pub mod utils;
+pub use components::props;
 pub use components::*;

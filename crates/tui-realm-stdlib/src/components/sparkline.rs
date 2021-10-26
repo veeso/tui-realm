@@ -80,7 +80,7 @@ impl Sparkline {
 
     pub fn data(mut self, data: &[u64]) -> Self {
         self.props.set(
-            Attribute::Content,
+            Attribute::Dataset,
             AttrValue::Payload(PropPayload::Vec(
                 data.into_iter().map(PropValue::U64).collect(),
             )),
@@ -93,7 +93,7 @@ impl Sparkline {
     /// Retrieve current data len from properties
     fn data_len(&self) -> usize {
         self.props
-            .get(Attribute::Content)
+            .get(Attribute::Dataset)
             .map(|x| x.unwrap_payload().unwrap_vec().len())
             .unwrap_or(0)
     }
@@ -104,7 +104,7 @@ impl Sparkline {
     fn data(&self, max: usize) -> Vec<u64> {
         match self
             .props
-            .get(Attribute::Content)
+            .get(Attribute::Dataset)
             .map(|x| x.unwrap_payload())
         {
             Some(PropPayload::Vec(list)) => {

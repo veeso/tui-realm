@@ -25,169 +25,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::event::{Event, KeyCode};
-use tuirealm::props::{
-    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
-};
+use tuirealm::command::{Cmd, CmdResult, Direction};
+use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, Color, Props, Style};
 use tuirealm::tui::{
     layout::Rect,
-    style::{Color, Style},
     text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, Tabs},
+    widgets::Tabs,
 };
-use tuirealm::{CmdResult, Component, Frame, Payload, Value};
-
-const PROP_CHOICES: &str = "choices";
-const PROP_REWIND: &str = "rewind";
-const PROP_SELECTED: &str = "selected";
-
-// -- Props
-
-pub struct CheckboxPropsBuilder {
-    props: Option<Props>,
-}
-
-impl Default for CheckboxPropsBuilder {
-    fn default() -> Self {
-        let mut builder = CheckboxPropsBuilder {
-            props: Some(Props::default()),
-        };
-        builder.with_inverted_color(Color::Black);
-        builder
-    }
-}
-
-impl PropsBuilder for CheckboxPropsBuilder {
-    fn build(&mut self) -> Props {
-        self.props.take().unwrap()
-    }
-
-    fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-}
-
-impl From<Props> for CheckboxPropsBuilder {
-    fn from(props: Props) -> Self {
-        CheckboxPropsBuilder { props: Some(props) }
-    }
-}
-
-impl CheckboxPropsBuilder {
-    /// ### with_color
-    ///
-    /// Set Checkbox group color
-    pub fn with_color(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.foreground = color;
-        }
-        self
-    }
-
-    /// ### with_inverted_color
-    ///
-    /// Set inverted color (black is default)
-    pub fn with_inverted_color(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.background = color;
-        }
-        self
-    }
-
-    /// ### with_borders
-    ///
-    /// Set component borders style
-    pub fn with_borders(
-        &mut self,
-        borders: Borders,
-        variant: BorderType,
-        color: Color,
-    ) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.borders = BordersProps {
-                borders,
-                variant,
-                color,
-            }
-        }
-        self
-    }
-
-    /// ### with_options
-    ///
-    /// Set options for radio group
-    pub fn with_options<S: AsRef<str>>(&mut self, options: &[S]) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_CHOICES,
-                PropPayload::Vec(
-                    options
-                        .iter()
-                        .map(|x| PropValue::Str(x.as_ref().to_string()))
-                        .collect(),
-                ),
-            );
-        }
-        self
-    }
-
-    /// ### with_title
-    ///
-    /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.title = Some(BlockTitle::new(title, alignment));
-        }
-        self
-    }
-
-    /// ### with_value
-    ///
-    /// Set selected choices
-    pub fn with_value(&mut self, choices: Vec<usize>) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_SELECTED,
-                PropPayload::Vec(choices.into_iter().map(PropValue::Usize).collect()),
-            );
-        }
-        self
-    }
-
-    /// ### rewind
-    ///
-    /// If true, moving below or beyond limit will rewind the selected record
-    pub fn rewind(&mut self, rewind: bool) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_REWIND, PropPayload::One(PropValue::Bool(rewind)));
-        }
-        self
-    }
-}
+use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- states
 
 /// ## OwnStates
 ///
 /// OwnStates contains states for this component
-#[derive(Clone)]
 struct OwnStates {
     choice: usize,         // Selected option
     choices: Vec<String>,  // Available choices
     selection: Vec<usize>, // Selected options
-    focus: bool,           // has focus?
 }
 
 impl Default for OwnStates {
@@ -196,7 +51,6 @@ impl Default for OwnStates {
             choice: 0,
             choices: Vec::new(),
             selection: Vec::new(),
-            focus: false,
         }
     }
 }
@@ -237,6 +91,12 @@ impl OwnStates {
         }
     }
 
+    pub fn select(&mut self, i: usize) {
+        if i < self.choices.len() && !self.selection.contains(&i) {
+            self.selection.push(i);
+        }
+    }
+
     /// ### has
     ///
     /// Returns whether selection contains option
@@ -273,50 +133,98 @@ pub struct Checkbox {
     states: OwnStates,
 }
 
-impl Checkbox {
-    /// ### new
-    ///
-    /// Instantiate a new Checkbox Group component
-    pub fn new(props: Props) -> Self {
-        // Make states
-        let mut states: OwnStates = OwnStates::default();
-        // Update choices (vec of TextSpan to String)
-        let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
-            Some(PropPayload::Vec(choices)) => {
-                choices.iter().map(|x| x.unwrap_str().as_str()).collect()
-            }
-            _ => Vec::new(),
-        };
-        states.set_choices(&choices);
-        // Get value
-        if let Some(PropPayload::Vec(choices)) = &props.own.get(PROP_SELECTED) {
-            states.selection = choices
-                .clone()
-                .iter()
-                .map(|x| match x {
-                    PropValue::Usize(u) => *u,
-                    _ => 0,
-                })
-                .collect();
-        }
-        Checkbox { props, states }
-    }
-
-    fn rewind(&self) -> bool {
-        match self.props.own.get(PROP_REWIND) {
-            Some(PropPayload::One(PropValue::Bool(b))) => *b,
-            _ => false,
+impl Default for Checkbox {
+    fn default() -> Self {
+        Self {
+            props: Props::default(),
+            states: OwnStates::default(),
         }
     }
 }
 
+impl Checkbox {
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    pub fn background(mut self, bg: Color) -> Self {
+        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
+        self.props.set(
+            Attribute::Title,
+            AttrValue::Title(t.as_ref().to_string(), a),
+        );
+        self
+    }
+
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self
+    }
+
+    pub fn rewind(mut self, r: bool) -> Self {
+        self.props.set(Attribute::Rewind, AttrValue::Flag(r));
+        self
+    }
+
+    pub fn choices<S: AsRef<str>>(mut self, choices: &[S]) -> Self {
+        self.states.set_choices(choices);
+        self
+    }
+
+    pub fn values(mut self, selected: &[usize]) -> Self {
+        // Set state
+        selected.into_iter().for_each(|x| self.states.select(x));
+        self
+    }
+
+    fn rewindable(&self) -> bool {
+        self.props
+            .get_or(Attribute::Rewind, AttrValue::Flag(false))
+            .unwrap_flag()
+    }
+}
+
 impl MockComponent for Checkbox {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Frame, area: Rect) {
+    fn view(&self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
+            let choices: Vec<Spans> = self
+                .states
+                .choices
+                .iter()
+                .map(|x| Spans::from(x.clone()))
+                .collect();
+            let foreground = self
+                .props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let borders = self
+                .props
+                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+                .unwrap_borders();
+            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+            let focus = self
+                .props
+                .get_or(Attribute::Focus, AttrValue::Flag(false))
+                .unwrap_flag();
+            let inactive_style = self
+                .props
+                .get(Attribute::FocusStyle)
+                .map(|x| x.unwrap_style());
+            let div = crate::utils::get_block(borders, title, focus, inactive_style);
             // Make colors
             let (bg, fg, block_color): (Color, Color, Color) = match &focus {
                 true => (foreground, background, foreground),
@@ -347,96 +255,38 @@ impl MockComponent for Checkbox {
                     ])
                 })
                 .collect();
-            let block: Block = crate::utils::get_block(&borders, title.as_ref(), focus);
             let checkbox: Tabs = Tabs::new(choices)
-                .block(block)
+                .block(div)
                 .select(self.states.choice)
                 .style(Style::default().fg(block_color));
             render.render_widget(checkbox, area);
         }
     }
 
-    /// ### update
-    ///
-    /// Update component properties
-    /// Properties should first be retrieved through `get_props` which creates a builder from
-    /// existing properties and then edited before calling update.
-    /// Returns a CmdResult to the view
-    fn update(&mut self, props: Props) -> CmdResult {
-        let prev_selection = self.states.selection.clone();
-        // Reset choices
-        let choices: Vec<&str> = match props.own.get(PROP_CHOICES).as_ref() {
-            Some(PropPayload::Vec(choices)) => {
-                choices.iter().map(|x| x.unwrap_str().as_str()).collect()
-            }
-            _ => Vec::new(),
-        };
-        self.states.set_choices(&choices);
-        // Get value
-        if let Some(PropPayload::Vec(choices)) = &props.own.get(PROP_SELECTED) {
-            self.states.selection = choices
-                .clone()
-                .iter()
-                .map(|x| match x {
-                    PropValue::Usize(u) => *u,
-                    _ => 0,
-                })
-                .collect();
-        }
-        self.props = props;
-        // CmdResult none
-        if prev_selection != self.states.selection {
-            CmdResult::Changed(self.state())
-        } else {
-            CmdResult::None
-        }
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
     }
 
-    /// ### get_props
-    ///
-    /// Returns a copy of the component properties.
-    fn get_props(&self) -> Props {
-        self.props.clone()
-    }
-
-    /// ### on
-    ///
-    /// Handle input event and update internal states.
-    /// Returns a CmdResult to the view.
-    fn on(&mut self, ev: Event) -> CmdResult {
-        // Match event
-        if let Cmd::Key(key) = ev {
-            match key.code {
-                KeyCode::Right => {
-                    // Increment choice
-                    self.states.next_choice(self.rewind());
-                    // Return CmdResult On Change
-                    CmdResult::None
-                }
-                KeyCode::Left => {
-                    // Decrement choice
-                    self.states.prev_choice(self.rewind());
-                    // Return CmdResult On Change
-                    CmdResult::None
-                }
-                KeyCode::Char(' ') => {
-                    // Select index
-                    self.states.toggle();
-                    // Return CmdResult On Change
-                    CmdResult::Changed(self.state())
-                }
-                KeyCode::Enter => {
-                    // Return Submit
-                    CmdResult::Submit(self.state())
-                }
-                _ => {
-                    // Return key event to activity
-                    Cmd::None(key)
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        match attr {
+            Attribute::Content => {
+                // Reset choices
+                let choices: Vec<&str> = value
+                    .unwrap_payload()
+                    .unwrap_vec()
+                    .iter()
+                    .map(|x| x.unwrap_str().as_str())
+                    .collect();
+                self.states.set_choices(choices);
+            }
+            Attribute::Value => {
+                for c in value.unwrap_payload().unwrap_vec() {
+                    self.states.select(c.unwrap_usize());
                 }
             }
-        } else {
-            // Ignore event
-            CmdResult::None
+            attr => {
+                self.props.set(attr, value);
+            }
         }
     }
 
@@ -444,7 +294,7 @@ impl MockComponent for Checkbox {
     ///
     /// Get current state from component
     /// For this component returns the vec of selected items
-    fn get_state(&self) -> Payload {
+    fn state(&self) -> State {
         State::Vec(
             self.states
                 .selection
@@ -454,20 +304,28 @@ impl MockComponent for Checkbox {
         )
     }
 
-    // -- events
-
-    /// ### blur
-    ///
-    /// Blur component
-    fn blur(&mut self) {
-        focus = false;
-    }
-
-    /// ### active
-    ///
-    /// Active component
-    fn active(&mut self) {
-        focus = true;
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        match cmd {
+            Cmd::Move(Direction::Right) => {
+                // Increment choice
+                self.states.next_choice(self.rewindable());
+                CmdResult::Changed(self.state())
+            }
+            Cmd::Move(Direction::Left) => {
+                // Decrement choice
+                self.states.prev_choice(self.rewindable());
+                CmdResult::Changed(self.state())
+            }
+            Cmd::Toggle => {
+                self.states.toggle();
+                CmdResult::Changed(self.state())
+            }
+            Cmd::Submit => {
+                // Return Submit
+                CmdResult::Submit(self.state())
+            }
+            _ => CmdResult::None,
+        }
     }
 }
 
@@ -476,8 +334,8 @@ mod test {
 
     use super::*;
 
-    use crossterm::event::{KeyCode, KeyEvent};
     use pretty_assertions::{assert_eq, assert_ne};
+    use tuirealm::props::{PropPayload, PropValue};
 
     #[test]
     fn test_components_checkbox_states() {
@@ -541,56 +399,24 @@ mod test {
     #[test]
     fn test_components_checkbox() {
         // Make component
-        let mut component: Checkbox = Checkbox::new(
-            CheckboxPropsBuilder::default()
-                .with_title("Which food do you prefer?", Alignment::Center)
-                .with_options(&["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta", "Falafel"])
-                .visible()
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_color(Color::Red)
-                .with_inverted_color(Color::White)
-                .with_value(vec![1, 5])
-                .rewind(false)
-                .build(),
-        );
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.background, Color::White);
-        assert_eq!(component.props.visible, true);
-        assert_eq!(component.props.borders.borders, Borders::ALL);
-        assert_eq!(component.props.borders.variant, BorderType::Double);
-        assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(
-            component.props.title.as_ref().unwrap().text(),
-            "Which food do you prefer?"
-        );
-        assert_eq!(
-            component.props.title.as_ref().unwrap().alignment(),
-            Alignment::Center
-        );
-        assert_eq!(
-            *component
-                .props
-                .own
-                .get(PROP_REWIND)
-                .unwrap()
-                .unwrap_one()
-                .unwrap_bool(),
-            false
-        );
-        assert_eq!(
-            *component.props.own.get(PROP_SELECTED).unwrap(),
-            PropPayload::Vec(vec![PropValue::Usize(1), PropValue::Usize(5)])
-        );
-        assert_eq!(
-            component.props.own.get(PROP_CHOICES).unwrap(),
-            &PropPayload::Vec(vec![
+        let mut component = Checkbox::default()
+            .background(Color::Blue)
+            .foreground(Color::Red)
+            .borders(Borders::default())
+            .title("Which food do you prefer?", Alignment::Center)
+            .choices(&["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta", "Falafel"])
+            .value(&[1, 5])
+            .rewind(false);
+        component.attr(
+            Attribute::Content,
+            AttrValue::Payload(PropPayload::Vec(vec![
                 PropValue::Str(String::from("Pizza")),
                 PropValue::Str(String::from("Hummus")),
                 PropValue::Str(String::from("Ramen")),
                 PropValue::Str(String::from("Gyoza")),
                 PropValue::Str(String::from("Pasta")),
-                PropValue::Str(String::from("Falafel"))
-            ])
+                PropValue::Str(String::from("Falafel")),
+            ])),
         );
         // Verify states
         assert_eq!(component.states.choice, 0);
@@ -602,31 +428,15 @@ mod test {
         assert_eq!(component.states.focus, true);
         component.blur();
         assert_eq!(component.states.focus, false);
-        // Update
-        let props = CheckboxPropsBuilder::from(component.get_props())
-            .with_color(Color::Yellow)
-            .hidden()
-            .build();
-        assert_eq!(component.update(props), CmdResult::None);
-        assert_eq!(component.props.visible, false);
-        assert_eq!(component.props.foreground, Color::Yellow);
-        let props = CheckboxPropsBuilder::from(component.get_props())
-            .with_value(vec![1])
-            .hidden()
-            .build();
-        assert_eq!(
-            component.update(props),
-            CmdResult::Changed(State::Vec(vec![Value::Usize(1)]))
-        );
         // Get value
-        assert_eq!(component.state(), State::Vec(vec![Value::Usize(1)]));
+        assert_eq!(component.state(), State::Vec(vec![StateValue::Usize(1)]));
         // Handle events
         assert_eq!(component.on(Cmd::Move(Direction::Left)), CmdResult::None,);
-        assert_eq!(component.state(), State::Vec(vec![Value::Usize(1)]));
+        assert_eq!(component.state(), State::Vec(vec![StateValue::Usize(1)]));
         // Toggle
         assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char(' ')))),
-            CmdResult::Changed(State::Vec(vec![Value::Usize(1), StateValue::Usize(0)]))
+            component.on(Cmd::Toggle),
+            CmdResult::Changed(State::Vec(vec![StateValue::Usize(1), StateValue::Usize(0)]))
         );
         // Left again
         assert_eq!(component.on(Cmd::Move(Direction::Left)), CmdResult::None,);
@@ -635,8 +445,8 @@ mod test {
         assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
         // Toggle
         assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char(' ')))),
-            CmdResult::Changed(State::Vec(vec![Value::Usize(0)]))
+            component.on(Cmd::Toggle),
+            CmdResult::Changed(State::Vec(vec![StateValue::Usize(0)]))
         );
         // Right again
         assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
@@ -656,13 +466,7 @@ mod test {
         // Submit
         assert_eq!(
             component.on(Cmd::Submit),
-            CmdResult::Submit(State::Vec(vec![Value::Usize(0)])),
+            CmdResult::Submit(State::Vec(vec![StateValue::Usize(0)])),
         );
-        // Any key
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Char('a')))),
-            Cmd::None(KeyCmd::from(KeyCode::Char('a'))),
-        );
-        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 }

@@ -21,6 +21,7 @@ Current version: 1.0.0 (FIXME: 03/08/2021)
   - [Buy me a coffee ☕](#buy-me-a-coffee-)
   - [Components 🎨](#components-)
     - [BarChart](#barchart)
+    - [Canvas](#canvas)
     - [Chart](#chart)
     - [Checkbox](#checkbox)
     - [Input](#input)
@@ -97,6 +98,8 @@ If you like tui-realm-stdlib and you're grateful for the work I've done, please 
 
 ## Components 🎨
 
+> ❗ Props with name preceeded by `$` are constants that can be found in `tui_realm_stdlib::props::`
+
 ### BarChart
 
 A chart with bars. The bar chart can work both in "active" and "disabled" mode.
@@ -108,32 +111,46 @@ While in active mode (default) you can put as many entries as you wish. You can 
 
 **Commands**:
 
-| Cmd                | CmdResult         | Behaviour                                      |
-|----------------------|-----------------|------------------------------------------------|
-| `KeyCode::Right`     | `None`          | Move the cursor right                          |
-| `KeyCode::Left`      | `None`          | Move the cursor left                           |
+| Cmd               | CmdResult       | Behaviour                                      |
+|-------------------|-----------------|------------------------------------------------|
+| `Move(Right)`     | `None`          | Move the cursor right                          |
+| `Move(Left)`      | `None`          | Move the cursor left                           |
 | `GoTo(End)`       | `None`          | Move "cursor" to the end of chart              |
-| `GoTo(Begin)`      | `None`          | Move "cursor" to the first entry of the chart  |
-| `KeyCode::Char(_)`   | `OnKey`         |                                                |
+| `GoTo(Begin)`     | `None`          | Move "cursor" to the first entry of the chart  |
 
 **State**: `None`.
 
 **Properties**:
 
-- `disabled`: Sets the chart in disabled mode
-- `with_foreground`: foreground color
-- `with_background`: background color
-- `with_title`: title for chart
-- `with_label_style`: Sets the style for data labels
-- `with_max_bars`: maximum amount of bars to display. If not provided, will be the maximum allowed by the area width.
-- `with_bar_style`: sets style for bars
-- `with_bar_gap`: sets gap for bars
-- `with_value_style`: Sets style for values
-- `with_data`: set data for chart. Is a vec of tuple of labels and u64
-- `push_record_back`: Just push the provided record to the back of data (end)
-- `push_record_front`: Just push the provided record to the front of data (begin)
-- `pop_record_front`: Pops the first element of data
-- `pop_record_back`: Pops the last element of data
+- `Background(Color)`: background color
+- `Custom($BAR_CHART_BARS_GAP, Size)`: sets gap for bars
+- `Custom($BAR_CHART_BARS_STYLE, Style)`: sets style for bars
+- `Custom($BAR_CHART_LABEL_STYLE, Style)`: Sets the style for data labels
+- `Custom($BAR_CHART_MAX_BARS, Length)`: maximum amount of bars to display. If not provided, will be the maximum allowed by the area width.
+- `Custom($BAR_CHART_VALUES_STYLE, Style)`: Sets style for values
+- `Dataset(Payload(LinkedList(Tup2(String, U64))))`: set data for chart. Is a vec of tuple of labels and u64
+- `Disabled(Flag)`: Sets the chart in disabled mode
+- `Foreground(Color)`: foreground color
+- `Title(Title)`: title for chart
+- `Width(Size)`: Define bar width
+
+### Canvas
+
+Canvas component can be used to draw shapes on the terminal.
+
+**Commands**: None
+
+**State**: None
+
+**Properties**:
+
+- `Background(Color)`: background color
+- `Borders(Borders)`: set borders properties for component
+- `Custom($CANVAS_X_BOUNDS, Payload(Tup2(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
+- `Custom($CANVAS_Y_BOUNDS, Payload(Tup2(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
+- `Foreground(Color)`: foreground color
+- `Shape(Payload(Vec(Shape)))`: set shapes for canvas.
+- `Title(Title)`: title for chart
 
 ### Chart
 
@@ -146,31 +163,32 @@ While in active mode (default) you can put as many entries as you wish. You can 
 
 **Commands**:
 
-| Cmd                | CmdResult         | Behaviour                                      |
-|----------------------|-----------------|------------------------------------------------|
-| `KeyCode::Right`     | `None`          | Move the cursor right                          |
-| `KeyCode::Left`      | `None`          | Move the cursor left                           |
+| Cmd               | CmdResult       | Behaviour                                      |
+|-------------------|-----------------|------------------------------------------------|
+| `GoTo(Begin)`     | `None`          | Move "cursor" to the first entry of the chart  |
 | `GoTo(End)`       | `None`          | Move "cursor" to the end of chart              |
-| `GoTo(Begin)`      | `None`          | Move "cursor" to the first entry of the chart  |
-| `KeyCode::Char(_)`   | `OnKey`         |                                                |
+| `Move(Left)`      | `None`          | Move the cursor left                           |
+| `Move(Right)`     | `None`          | Move the cursor right                          |
 
 **State**: `None`.
 
 **Properties**:
 
-- `disabled`: Sets the chart in disabled mode
-- `with_foreground`: foreground color
-- `with_background`: background color
-- `with_title`: title for chart
-- `with_label_style`: Sets the style for data labels
-- `with_*_bounds`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
-- `with_*_labels`: Set labels for provided axis
-- `with_*_style`: Set style for provided axis
-- `with_*_title`: Set title for axis
-- `with_data`: set data for chart. Is a vec of `Dataset`
-- `push_record`: Just push the provided record to the back of data (end)
-- `pop_record_front`: Pops the first element of data
-- `pop_record_back`: Pops the last element of data
+- `Background(Color)`: background color
+- `Borders(Borders)`: set borders properties for component
+- `Custom($CHART_X_BOUNDS, Payload(Tup2(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
+- `Custom($CHART_X_LABELS, Payload(Vec(String)))`: Set labels for x axis
+- `Custom($CHART_X_STYLE, Style)`: Set style for x axis
+- `Custom($CHART_X_TITLE, String)`: Set title for x axis
+- `Custom($CHART_Y_BOUNDS, Payload(Tup2(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
+- `Custom($CHART_Y_LABELS, Payload(Vec(String)))`: Set labels for y axis
+- `Custom($CHART_Y_STYLE, Style)`: Set style for x axis
+- `Custom($CHART_Y_TITLE, String)`: Set title for x axis
+- `Dataset(Payload(Vec(Dataset)))`: set data for chart. Is a vec of `Dataset`
+- `Disabled(Flag)`: Sets the chart in disabled mode
+- `FocusStyle(Style)`: inactive style
+- `Foreground(Color)`: foreground color
+- `Title(Title)`: title for chart
 
 ### Checkbox
 
@@ -178,27 +196,25 @@ A checkbox group. Provides the possibility to select between multiple options, w
 
 **Commands**:
 
-| Cmd                | CmdResult         | Behaviour                                      |
-|----------------------|-----------------|------------------------------------------------|
-| `KeyCode::Right`     | `None`          | Increment the selected choice index by 1       |
-| `KeyCode::Left`      | `None`          | Decrement the selected choice index by 1       |
-| `KeyCode::Char(' ')` | `Changed`      | Check or uncheck the item at the current index |
-| `KeyCode::Enter`     | `Submit`      | Just returns the selection                     |
-| `KeyCode::Char(_)`   | `OnKey`         |                                                |
+| Cmd           | CmdResult       | Behaviour                                      |
+|---------------|-----------------|------------------------------------------------|
+| `Move(Left)`  | `None`          | Decrement the selected choice index by 1       |
+| `Move(Right)` | `None`          | Increment the selected choice index by 1       |
+| `Submit`      | `Submit`        | Just returns the selection                     |
+| `Toggle`      | `Changed`       | Check or uncheck the item at the current index |
 
-**Update**: `Msg::Changed` if the selection changed, `Msg::None` otherwise.
-
-**State**: the state returned is a `VecOfUsize` containing the indexes of the selected item in the checkbox group.
+**State**: the state returned is `Vec(Usize)` containing the indexes of the selected item in the checkbox group.
 
 **Properties**:
 
-- `with_color`: foreground color
-- `with_inverted_colors`: color used when item is at current index
-- `with_borders`: set borders properties for component
-- `with_options`: set checkbox options
-- `with_title`: set checkbox title
-- `with_value`: set selected by-default items by their index
-- `rewind`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
+- `Background(Color)`: color used when item is at current index
+- `Borders(Borders)`: set borders properties for component
+- `Content(Payload(Vec(String)))`: set checkbox options
+- `FocusStyle(Style)`: inactive style
+- `Foreground(Color)`: foreground color
+- `Rewind(Flag)`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
+- `Title(Title)`: set checkbox title
+- `Value(Payload(Vec(Usize)))`: set selected by-default items by their index
 
 ---
 
@@ -239,29 +255,17 @@ An input text. Provides the possiblity to input a text with the possibility to s
 
 A text label. Provides the possibility to display a simple text, with the possibility to set modifiers and colors.
 
-**Commands**:
-
-| Cmd                | CmdResult            | Behaviour          |
-|----------------------|--------------------|--------------------|
-| `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
-
-**Update**: None
+**Commands**: None
 
 **State**: None
 
 **Properties**:
 
-- `with_foreground`: set foreground color
-- `with_background`: set background color
-- `bold`: set text bold
-- `italic`: set text italic
-- `rapid_blink`: set rapid blink for text
-- `reversed`: reverses colors
-- `slow_blink` set slow blink for test
-- `strikethrough`: set strikethrough for text
-- `underlined`: set underlined text
-- `with_text`: set label text
-- `with_text_alignment`: set text alignment
+- `Alignment(Alignment)`: set text alignment
+- `Background(Color)`: set background color
+- `Foreground(Color)`: set foreground color
+- `Text(String)`: set label text
+- `TextProps(TextModifiers)`: set text modifiers
 
 ---
 
@@ -269,28 +273,24 @@ A text label. Provides the possibility to display a simple text, with the possib
 
 A line indicating progress. The progress bar provides the possibility to show the current progress and to show a label above it.
 
-**Commands**:
-
-| Cmd                | CmdResult            | Behaviour          |
-|----------------------|--------------------|--------------------|
-| `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
-
-**Update**: None
+**Commands**: None
 
 **State**: None
 
 **Properties**:
 
-- `with_progbar_color`: set progress bar color
-- `with_background`: set background color
-- `with_progress`: set progress. **WARNING**: must be in range 0.0,1.0
-- `with_borders`: set border properties
-- `with_label`: set progress bar label
-- `with_title`: set progress bar title
-- `with_line_normal`: use default line
-- `with_line_rounded`: use roundeed line
-- `with_line_tick`: use thick line
-- `with_line_doubled` use double line
+- `Background(Color)`: set background color
+- `Borders(Borders)`: set border properties
+- `Foreground(Color)`: set progress bar color
+- `Text(String)`: set progress bar label
+- `TextProps(TextModifiers)`: set text modifiers
+- `Title(Title)`: set progress bar title
+- `Value(Payload(One(F64)))`: set progress. **WARNING**: must be in range 0.0,1.0
+- `Style(Payload(One(U8)))` defines line gauge style. Allowed values are:
+  - `$LINE_GAUGE_STYLE_NORMAL`
+  - `$LINE_GAUGE_STYLE_DOUBLE`
+  - `$LINE_GAUGE_STYLE_ROUND`
+  - `$LINE_GAUGE_STYLE_THICK`
 
 ---
 
@@ -302,35 +302,29 @@ a list of rows with the possibility to scroll text with arrows. In order to scro
 
 Events will be reported only when set as `Scrollable`
 
-| Cmd               | CmdResult | Behaviour                 |
-|---------------------|---------|---------------------------|
+| Cmd              | CmdResult | Behaviour               |
+|------------------|---------|---------------------------|
+| `GoTo(Begin)`    | `OnKey` | Move cursor to first item |
+| `GoTo(End)`      | `OnKey` | Move cursor to last item  |
 | `Move(Down)`     | `OnKey` | Move cursor down          |
 | `Move(Up)`       | `OnKey` | Move cursor up            |
-| `Scroll(Down)` | `OnKey` | Move cursor down by 8     |
-| `Scroll(Up)`   | `OnKey` | Move cursor up by 8       |
-| `GoTo(End)`      | `OnKey` | Move cursor to last item  |
-| `GoTo(Begin)`     | `OnKey` | Move cursor to first item |
-| `KeyCode::Char(_)`  | `OnKey` | Return pressed key        |
+| `Scroll(Down)`   | `OnKey` | Move cursor down by 8     |
+| `Scroll(Up)`     | `OnKey` | Move cursor up by 8       |
 
-**Update**: None
-
-**State**: If `scrollable`, returns current list index, otherwise None
+**State**: If `scrollable`, returns current list index as `State(One(Usize))`, otherwise None
 
 **Properties**:
 
-- `with_foreground`: set foreground color
-- `with_background`: set background color
-- `scrollable`: mark the list as scrollable
-- `bold`: set text bold
-- `italic`: set text italic
-- `rapid_blink`: set rapid blink for text
-- `reversed`: reverses colors
-- `slow_blink` set slow blink for test
-- `strikethrough`: set strikethrough for text
-- `underlined`: set underlined text
-- `with_borders`: set border properties
-- `with_rows`: set table entries
-- `with_title`: set block title
+- `Background(Color)`: set background color
+- `Borders(Borders)`: set border properties
+- `Content(Table)`: set entries as a table
+- `FocusStyle(Style)`: inactive style
+- `Foreground(Color)`: set foreground color
+- `Rewind(Flag)`: rewind list if boundaries are reached
+- `Scroll(Flag)`: set whether list is scrollable (interactive)
+- `ScrollStep(Length)`: set scroll step
+- `TextProps(TextModifiers)`: set text modifiers
+- `Title(Title)`: set block title
 
 ---
 
@@ -338,32 +332,22 @@ Events will be reported only when set as `Scrollable`
 
 A text paragraph. Like in HTML this has to be considered a block element, and supports multi-line texts with different styles. The text is automatically wrapped.
 
-**Commands**:
-
-| Cmd                | CmdResult            | Behaviour          |
-|----------------------|--------------------|--------------------|
-| `KeyCode::Char(_)`   | `OnKey`            | Return pressed key |
-
-**Update**: None
+**Commands**: None
 
 **State**: None
 
 **Properties**:
 
-- `with_foreground`: set foreground color
-- `with_background`: set background color
-- `bold`: set text bold
-- `italic`: set text italic
-- `rapid_blink`: set rapid blink for text
-- `reversed`: reverses colors
-- `slow_blink` set slow blink for test
-- `strikethrough`: set strikethrough for text
-- `underlined`: set underlined text
-- `with_borders`: set border properties
-- `with_texts`: set paragraph text
-- `with_title` set paragraph title
-- `with_text_alignment`: set text alignment
-- `with_trim`: select whether to trim rows when wrapping
+- `Alignment(Alignment)`: set text alignment
+- `Background(Color)`: set background color
+- `Borders(Borders)`: set border properties
+- `Foreground(Color)`: set foreground color
+- `HighlightedColor(Color)`: a different color for highlighted entry; `foreground` otherwise
+- `HighlightedStr(String)`: cursor for highlighted entry in selection tab.
+- `Text(Payload(Vec(TextSpan)))`: set paragraph text
+- `TextProps(TextModifiers)`: set text modifiers
+- `TextWrap(Flag)`: select whether to trim rows when wrapping
+- `Title(Title)` set paragraph title
 
 ---
 
@@ -395,8 +379,8 @@ A radio button group. Provides the possibility to select a single option in a gr
 
 | Cmd                  | CmdResult       | Behaviour                                        |
 |----------------------|-----------------|--------------------------------------------------|
-| `Move(Right)`        | `Changed`       | Change the selected option to current item index |
 | `Move(Left)`         | `Changed`       | Change the selected option to current item index |
+| `Move(Right)`        | `Changed`       | Change the selected option to current item index |
 | `Submit`             | `Submit`        | Just returns the index of the selected item      |
 
 **State**: the state returned is `One(Usize)` containing the index of the selected item in the radio group.
@@ -424,8 +408,8 @@ This component should have a variable size in the layout to be displayed properl
 
 | Command      | Result             | Behaviour                                                      |
 |--------------|--------------------|----------------------------------------------------------------|
-| `Move(Up)`   | `Changed` | `None` | Move select up, if tab is open                                 |
 | `Move(Down)` | `Changed` | `None` | Move select down, if tab is open                               |
+| `Move(Up)`   | `Changed` | `None` | Move select up, if tab is open                                 |
 | `Submit`     | `Submit` | `None`  | Open or close the select tab; Returns state if tab gets closed |
 
 **State**: the state returned is `One(Usize)` containing the index of the selected item in the radio group.
@@ -474,7 +458,7 @@ A sparkline chart.
 **Properties**:
 
 - `Background(Color)`: background color
-- `Content(Payload(Vec(U64)))`: set data for sparkline. Is a vec of u64
+- `Dataset(Payload(Vec(U64)))`: set data for sparkline. Is a vec of u64
 - `Foreground(Color)`: foreground color
 - `Title(Title)`: label for sparkline
 - `Width(Length)`: maximum amount of entries to display. If not provided, will be the maximum allowed by the area width.
@@ -505,12 +489,13 @@ Events will be reported only when set as `Scrollable`
 - `Background(Color)`: set background color
 - `Borders(Borders)`: set border properties
 - `Content(Table)`: set table
-- `Custom("col-spacing", Size)`: column spacing
+- `Custom($TABLE_COLUMN_SPACING, Size)`: column spacing
 - `FocusStyle(Style)`: inactive style
 - `Foreground(Color)`: set foreground color
 - `Height(Size)`: set row height
 - `HighlightedColor(Color)`: set highlighted color
 - `HighlightedStr(String)`: set highlighted string
+- `Rewind(Flag)`: rewind list if boundaries are reached
 - `Scroll(Flag)`: set whether is scrollable
 - `ScrollStep(Length)`: set scroll step
 - `Text(Payload(Vec(String)))`: set table headers
@@ -528,12 +513,12 @@ A textarea is like a paragraph, but has the possibility to scroll the text.
 
 | Cmd                 | Result | Behaviour                 |
 |---------------------|--------|---------------------------|
+| `GoTo(Begin)`       | `None` | Move cursor to first item |
+| `GoTo(End)`         | `None` | Move cursor to last item  |
 | `Move(Down)`        | `None` | Move cursor down          |
 | `Move(Up)`          | `None` | Move cursor up            |
 | `Scroll(Down)`      | `None` | Move cursor down by 8     |
 | `Scroll(Up)`        | `None` | Move cursor up by 8       |
-| `GoTo(End)`         | `None` | Move cursor to last item  |
-| `GoTo(Begin)`       | `None` | Move cursor to first item |
 
 **Properties**:
 

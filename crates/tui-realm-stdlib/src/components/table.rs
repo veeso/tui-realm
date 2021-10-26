@@ -25,6 +25,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use super::props::TABLE_COLUMN_SPACING;
+
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
@@ -37,15 +39,20 @@ use tuirealm::tui::{
 };
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
-// -- Props
-
-const PROP_COLUMN_SPACING: &str = "col-spacing";
-
 // -- States
 
 struct OwnStates {
     list_index: usize, // Index of selected item in textarea
     list_len: usize,   // Lines in text area
+}
+
+impl Default for OwnStates {
+    fn default() -> Self {
+        Self {
+            list_index: 0,
+            list_len: 0,
+        }
+    }
 }
 
 impl OwnStates {
@@ -59,20 +66,24 @@ impl OwnStates {
     /// ### incr_list_index
     ///
     /// Incremenet list index
-    pub fn incr_list_index(&mut self) {
+    pub fn incr_list_index(&mut self, rewind: bool) {
         // Check if index is at last element
         if self.list_index + 1 < self.list_len {
             self.list_index += 1;
+        } else if rewind {
+            self.list_index = 0;
         }
     }
 
     /// ### decr_list_index
     ///
     /// Decrement list index
-    pub fn decr_list_index(&mut self) {
+    pub fn decr_list_index(&mut self, rewind: bool) {
         // Check if index is bigger than 0
         if self.list_index > 0 {
             self.list_index -= 1;
+        } else if rewind && self.list_len > 0 {
+            self.list_index = self.list_len - 1;
         }
     }
 
@@ -206,7 +217,7 @@ impl Table {
 
     pub fn column_spacing(mut self, w: u16) -> Self {
         self.props
-            .set(Attribute::Custom(PROP_COLUMN_SPACING), AttrValue::Size(w));
+            .set(Attribute::Custom(TABLE_COLUMN_SPACING), AttrValue::Size(w));
         self
     }
 
@@ -241,12 +252,23 @@ impl Table {
         self
     }
 
+    pub fn rewind(mut self, r: bool) -> Self {
+        self.props.set(Attribute::Rewind, AttrValue::Flag(r));
+        self
+    }
+
     /// ### scrollable
     ///
     /// returns the value of the scrollable flag; by default is false
     fn is_scrollable(&self) -> bool {
         self.props
             .get_or(Attribute::Scroll, AttrValue::Flag(false))
+            .unwrap_flag()
+    }
+
+    fn rewindable(&self) -> bool {
+        self.props
+            .get_or(Attribute::Rewind, AttrValue::Flag(false))
             .unwrap_flag()
     }
 
@@ -324,12 +346,9 @@ impl MockComponent for Table {
                 .get_or(Attribute::Height, AttrValue::Size(1))
                 .unwrap_size();
             // Make rows
-            let rows: Vec<Row> = match self
-                .props
-                .get(Attribute::Content)
-                .map(|x| x.unwrap_payload())
+            let rows: Vec<Row> = match self.props.get(Attribute::Content).map(|x| x.unwrap_table())
             {
-                Some(PropPayload::One(PropValue::Table(table))) => table
+                Some(table) => table
                     .iter()
                     .map(|row| {
                         let columns: Vec<Cell> = row
@@ -390,7 +409,7 @@ impl MockComponent for Table {
             // Col spacing
             if let Some(spacing) = self
                 .props
-                .get(Attribute::Custom(PROP_COLUMN_SPACING))
+                .get(Attribute::Custom(TABLE_COLUMN_SPACING))
                 .map(|x| x.unwrap_size())
             {
                 table = table.column_spacing(spacing);
@@ -435,12 +454,8 @@ impl MockComponent for Table {
         self.props.set(attr, value);
         // Update list len and fix index
         self.set_list_len(
-            match self
-                .props
-                .get(Attribute::Content)
-                .map(|x| x.unwrap_payload())
-            {
-                Some(PropPayload::Vec(spans)) => spans.len(),
+            match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
+                Some(spans) => spans.len(),
                 _ => 0,
             },
         );
@@ -458,7 +473,7 @@ impl MockComponent for Table {
         match cmd {
             Cmd::Move(Direction::Down) => {
                 let prev = self.states.list_index;
-                self.states.incr_list_index();
+                self.states.incr_list_index(self.rewindable());
                 if prev != self.states.list_index {
                     CmdResult::Changed(self.state())
                 } else {
@@ -467,7 +482,7 @@ impl MockComponent for Table {
             }
             Cmd::Move(Direction::Up) => {
                 let prev = self.states.list_index;
-                self.states.decr_list_index();
+                self.states.decr_list_index(self.rewindable());
                 if prev != self.states.list_index {
                     CmdResult::Changed(self.state())
                 } else {
@@ -481,7 +496,7 @@ impl MockComponent for Table {
                     .get_or(Attribute::ScrollStep, AttrValue::Length(8))
                     .unwrap_length();
                 let step: usize = self.states.calc_max_step_ahead(step);
-                (0..step).for_each(|_| self.states.incr_list_index());
+                (0..step).for_each(|_| self.states.incr_list_index(false));
                 if prev != self.states.list_index {
                     CmdResult::Changed(self.state())
                 } else {
@@ -495,7 +510,7 @@ impl MockComponent for Table {
                     .get_or(Attribute::ScrollStep, AttrValue::Length(8))
                     .unwrap_length();
                 let step: usize = self.states.calc_max_step_ahead(step);
-                (0..step).for_each(|_| self.states.decr_list_index());
+                (0..step).for_each(|_| self.states.decr_list_index(false));
                 if prev != self.states.list_index {
                     CmdResult::Changed(self.state())
                 } else {
@@ -531,6 +546,40 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
     use tuirealm::props::{TableBuilder, TextSpan};
+
+    #[test]
+    fn table_states() {
+        let mut states = OwnStates::default();
+        assert_eq!(states.list_index, 0);
+        assert_eq!(states.list_len, 0);
+        states.set_list_len(5);
+        assert_eq!(states.list_index, 0);
+        assert_eq!(states.list_len, 5);
+        // Incr
+        states.incr_list_index(true);
+        assert_eq!(states.list_index, 1);
+        states.list_index = 4;
+        states.incr_list_index(false);
+        assert_eq!(states.list_index, 4);
+        states.incr_list_index(true);
+        assert_eq!(states.list_index, 0);
+        // Decr
+        states.decr_list_index(false);
+        assert_eq!(states.list_index, 0);
+        states.decr_list_index(true);
+        assert_eq!(states.list_index, 4);
+        states.decr_list_index(true);
+        assert_eq!(states.list_index, 3);
+        // Begin
+        states.list_index_at_first();
+        assert_eq!(states.list_index, 0);
+        states.list_index_at_last();
+        assert_eq!(states.list_index, 4);
+        // Fix
+        states.set_list_len(3);
+        states.fix_list_index();
+        assert_eq!(states.list_index, 2);
+    }
 
     #[test]
     fn test_component_table_scrolling() {

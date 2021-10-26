@@ -87,14 +87,18 @@ impl ProgressBar {
     }
 
     pub fn progress(mut self, p: f64) -> Self {
-        if p < 0.0 || p > 1.0 {
-            panic!("Progress value must be in range [0.0, 1.0]");
-        }
+        Self::assert_progress(p);
         self.props.set(
             Attribute::Value,
             AttrValue::Payload(PropPayload::One(PropValue::F64(p))),
         );
         self
+    }
+
+    fn assert_progress(p: f64) {
+        if p < 0.0 || p > 1.0 {
+            panic!("Progress value must be in range [0.0, 1.0]");
+        }
     }
 }
 
@@ -153,6 +157,11 @@ impl MockComponent for ProgressBar {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        if let Attribute::Value = attr {
+            if let Attribute::Payload(p) = value {
+                Self::assert_progress(p.unwrap_one().unwrap_f64());
+            }
+        }
         self.props.set(attr, value)
     }
 

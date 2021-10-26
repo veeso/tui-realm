@@ -25,260 +25,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use tuirealm::event::KeyCode;
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, BlockTitle, BordersProps, PropPayload, PropValue, Props, PropsBuilder,
-    Table as TextTable,
+    Alignment, AttrValue, Attribute, Borders, Color, Props, Style, Table, TextModifiers,
 };
 use tuirealm::tui::{
     layout::{Corner, Rect},
-    style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, List as TuiList, ListItem, ListState},
+    widgets::{List as TuiList, ListItem, ListState},
 };
-use tuirealm::{event::Event, CmdResult, Component, Frame, Payload, Value};
-
-// -- Props
-
-const COLOR_HIGHLIGHTED: &str = "highlighted-color";
-const PROP_SCROLLABLE: &str = "scrollable";
-const PROP_HIGHLIGHTED_TXT: &str = "highlighted-txt";
-const PROP_MAX_STEP: &str = "max-step";
-const PROP_TABLE: &str = "table";
-
-pub struct ListPropsBuilder {
-    props: Option<Props>,
-}
-
-impl Default for ListPropsBuilder {
-    fn default() -> Self {
-        ListPropsBuilder {
-            props: Some(Props::default()),
-        }
-    }
-}
-
-impl PropsBuilder for ListPropsBuilder {
-    fn build(&mut self) -> Props {
-        self.props.take().unwrap()
-    }
-
-    fn hidden(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = false;
-        }
-        self
-    }
-
-    fn visible(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.visible = true;
-        }
-        self
-    }
-}
-
-impl From<Props> for ListPropsBuilder {
-    fn from(props: Props) -> Self {
-        ListPropsBuilder { props: Some(props) }
-    }
-}
-
-impl ListPropsBuilder {
-    /// ### with_foreground
-    ///
-    /// Set foreground color for area
-    pub fn with_foreground(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.foreground = color;
-        }
-        self
-    }
-
-    /// ### with_background
-    ///
-    /// Set background color for area
-    pub fn with_background(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.background = color;
-        }
-        self
-    }
-
-    /// ### with_highlighted_color
-    ///
-    /// Set color for highlighted entry
-    pub fn with_highlighted_color(&mut self, color: Color) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.palette.insert(COLOR_HIGHLIGHTED, color);
-        }
-        self
-    }
-
-    /// ### with_borders
-    ///
-    /// Set component borders style
-    pub fn with_borders(
-        &mut self,
-        borders: Borders,
-        variant: BorderType,
-        color: Color,
-    ) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.borders = BordersProps {
-                borders,
-                variant,
-                color,
-            }
-        }
-        self
-    }
-
-    /// ### bold
-    ///
-    /// Set bold property for component
-    pub fn bold(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::BOLD;
-        }
-        self
-    }
-
-    /// ### italic
-    ///
-    /// Set italic property for component
-    pub fn italic(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::ITALIC;
-        }
-        self
-    }
-
-    /// ### underlined
-    ///
-    /// Set underlined property for component
-    pub fn underlined(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::UNDERLINED;
-        }
-        self
-    }
-
-    /// ### slow_blink
-    ///
-    /// Set slow_blink property for component
-    pub fn slow_blink(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::SLOW_BLINK;
-        }
-        self
-    }
-
-    /// ### rapid_blink
-    ///
-    /// Set rapid_blink property for component
-    pub fn rapid_blink(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::RAPID_BLINK;
-        }
-        self
-    }
-
-    /// ### reversed
-    ///
-    /// Set reversed property for component
-    pub fn reversed(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::REVERSED;
-        }
-        self
-    }
-
-    /// ### strikethrough
-    ///
-    /// Set strikethrough property for component
-    pub fn strikethrough(&mut self) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.modifiers |= Modifier::CROSSED_OUT;
-        }
-        self
-    }
-
-    /// ### with_rows
-    ///
-    /// Set rows
-    /// You can define a title if you want. The title will be displayed on the upper border of the box
-    pub fn with_rows(&mut self, table: TextTable) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_TABLE, PropPayload::One(PropValue::Table(table)));
-        }
-        self
-    }
-
-    /// ### with_title
-    ///
-    /// Set title
-    pub fn with_title<S: AsRef<str>>(&mut self, title: S, alignment: Alignment) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.title = Some(BlockTitle::new(title, alignment));
-        }
-        self
-    }
-
-    /// ### with_highlighted_str
-    ///
-    /// Display a symbol to highlighted line in scroll table
-    pub fn with_highlighted_str(&mut self, s: Option<&str>) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            match s {
-                None => {
-                    props.own.remove(PROP_HIGHLIGHTED_TXT);
-                }
-                Some(s) => {
-                    props.own.insert(
-                        PROP_HIGHLIGHTED_TXT,
-                        PropPayload::One(PropValue::Str(s.to_string())),
-                    );
-                }
-            }
-        }
-        self
-    }
-
-    /// ### with_max_scroll_step
-    ///
-    /// Defines the max step for PAGEUP/PAGEDOWN keys
-    pub fn with_max_scroll_step(&mut self, step: usize) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props
-                .own
-                .insert(PROP_MAX_STEP, PropPayload::One(PropValue::Usize(step)));
-        }
-        self
-    }
-
-    /// ### scrollable
-    ///
-    /// Sets whether the list is scrollable
-    pub fn scrollable(&mut self, scrollable: bool) -> &mut Self {
-        if let Some(props) = self.props.as_mut() {
-            props.own.insert(
-                PROP_SCROLLABLE,
-                PropPayload::One(PropValue::Bool(scrollable)),
-            );
-        }
-        self
-    }
-}
+use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- States
 
 struct OwnStates {
-    focus: bool,
     list_index: usize, // Index of selected item in list
     list_len: usize,   // Lines in text area
+}
+
+impl Default for OwnStates {
+    fn default() -> Self {
+        Self {
+            list_index: 0,
+            list_len: 0,
+        }
+    }
 }
 
 impl OwnStates {
@@ -292,20 +63,24 @@ impl OwnStates {
     /// ### incr_list_index
     ///
     /// Incremenet list index
-    pub fn incr_list_index(&mut self) {
+    pub fn incr_list_index(&mut self, rewind: bool) {
         // Check if index is at last element
         if self.list_index + 1 < self.list_len {
             self.list_index += 1;
+        } else if rewind {
+            self.list_index = 0;
         }
     }
 
     /// ### decr_list_index
     ///
     /// Decrement list index
-    pub fn decr_list_index(&mut self) {
+    pub fn decr_list_index(&mut self, rewind: bool) {
         // Check if index is bigger than 0
         if self.list_index > 0 {
             self.list_index -= 1;
+        } else if rewind && self.list_len > 0 {
+            self.list_index = self.list_len - 1;
         }
     }
 
@@ -375,75 +150,175 @@ pub struct List {
     states: OwnStates,
 }
 
-impl List {
-    /// ### new
-    ///
-    /// Instantiates a new `Table` component.
-    pub fn new(props: Props) -> Self {
-        let len: usize = match props.own.get(PROP_TABLE).as_ref() {
-            Some(PropPayload::One(PropValue::Table(t))) => t.len(),
-            _ => 0,
-        };
-        List {
-            props,
-            states: OwnStates {
-                focus: false,
-                list_index: 0,
-                list_len: len,
-            },
-        }
-    }
-
-    /// ### scrollable
-    ///
-    /// returns the value of the scrollable flag; by default is false
-    fn scrollable(&self) -> bool {
-        match self.props.own.get(PROP_SCROLLABLE) {
-            Some(PropPayload::One(PropValue::Bool(scrollable))) => *scrollable,
-            _ => false,
+impl Default for List {
+    fn default() -> Self {
+        Self {
+            props: Props::default(),
+            states: OwnStates::default(),
         }
     }
 }
 
+impl List {
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    pub fn background(mut self, bg: Color) -> Self {
+        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.props
+            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self
+    }
+
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
+        self.props.set(
+            Attribute::Title,
+            AttrValue::Title(t.as_ref().to_string(), a),
+        );
+        self
+    }
+
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self
+    }
+
+    pub fn rewind(mut self, r: bool) -> Self {
+        self.props.set(Attribute::Rewind, AttrValue::Flag(r));
+        self
+    }
+
+    pub fn step(mut self, step: usize) -> Self {
+        self.props
+            .set(Attribute::ScrollStep, AttrValue::Length(step));
+        self
+    }
+
+    pub fn scroll(mut self, scrollable: bool) -> Self {
+        self.props
+            .set(Attribute::Scroll, AttrValue::Flag(scrollable));
+        self
+    }
+
+    pub fn highlighted_str<S: AsRef<str>>(mut self, s: S) -> Self {
+        self.props.set(
+            Attribute::HighlightedStr,
+            AttrValue::String(s.as_ref().to_string()),
+        );
+        self
+    }
+
+    pub fn highlighted_color(mut self, c: Color) -> Self {
+        self.props
+            .set(Attribute::HighlightedColor, AttrValue::Color(c));
+        self
+    }
+
+    pub fn rows(mut self, rows: Table) -> Self {
+        self.states.set_list_len(rows.len());
+        self.states.fix_list_index();
+        self.props.set(Attribute::Content, AttrValue::Table(rows));
+        self
+    }
+
+    fn scrollable(&self) -> bool {
+        self.props
+            .get_or(Attribute::Scroll, AttrValue::Flag(false))
+            .unwrap_flag()
+    }
+
+    fn rewindable(&self) -> bool {
+        self.props
+            .get_or(Attribute::Rewind, AttrValue::Flag(false))
+            .unwrap_flag()
+    }
+}
+
 impl MockComponent for List {
-    /// ### render
-    ///
-    /// Based on the current properties and states, renders a widget using the provided render engine in the provided Area
-    /// If focused, cursor is also set (if supported by widget)
-    fn render(&self, render: &mut Frame, area: Rect) {
+    fn view(&self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
+            let foreground = self
+                .props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let modifiers = self
+                .props
+                .get_or(
+                    Attribute::TextProps,
+                    AttrValue::TextModifiers(TextModifiers::empty()),
+                )
+                .unwrap_text_modifiers();
+            let title = self
+                .props
+                .get_or(
+                    Attribute::Title,
+                    AttrValue::Title((String::default(), Alignment::Center)),
+                )
+                .unwrap_title();
+            let borders = self
+                .props
+                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+                .unwrap_borders();
+            let focus = self
+                .props
+                .get_or(Attribute::Focus, AttrValue::Flag(false))
+                .unwrap_flag();
+            let inactive_style = self
+                .props
+                .get(Attribute::FocusStyle)
+                .map(|x| x.unwrap_style());
             let active: bool = match self.scrollable() {
                 true => focus,
                 false => true,
             };
-            let div: Block = crate::utils::get_block(&borders, title.as_ref(), active);
+            let div = crate::utils::get_block(borders, title.as_ref(), active);
             // Make list entries
-            let list_items: Vec<ListItem> = match self.props.own.get(PROP_TABLE).as_ref() {
-                Some(PropPayload::One(PropValue::Table(table))) => table
-                    .iter()
-                    .map(|row| {
-                        let columns: Vec<Span> = row
-                            .iter()
-                            .map(|col| {
-                                let (fg, bg, modifiers) =
-                                    crate::utils::use_or_default_styles(&self.props, col);
-                                Span::styled(
-                                    col.content.clone(),
-                                    Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                                )
-                            })
-                            .collect();
-                        ListItem::new(Spans::from(columns))
-                    })
-                    .collect(), // Make List item from TextSpan
-                _ => Vec::new(),
-            };
-            let highlighted_color: Color = match self.props.palette.get(COLOR_HIGHLIGHTED) {
+            let list_items: Vec<ListItem> =
+                match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
+                    Some(table) => table
+                        .iter()
+                        .map(|row| {
+                            let columns: Vec<Span> = row
+                                .iter()
+                                .map(|col| {
+                                    let (fg, bg, modifiers) =
+                                        crate::utils::use_or_default_styles(&self.props, col);
+                                    Span::styled(
+                                        col.content.clone(),
+                                        Style::default().add_modifier(modifiers).fg(fg).bg(bg),
+                                    )
+                                })
+                                .collect();
+                            ListItem::new(Spans::from(columns))
+                        })
+                        .collect(), // Make List item from TextSpan
+                    _ => Vec::new(),
+                };
+            let highlighted_color: Color = match self
+                .props
+                .get(Attribute::HighlightedColor)
+                .map(|x| x.unwrap_color())
+            {
                 None => match focus {
                     true => background,
                     false => foreground,
                 },
-                Some(color) => *color,
+                Some(color) => color,
             };
             let (fg, bg): (Color, Color) = match active {
                 true => (background, highlighted_color),
@@ -460,10 +335,12 @@ impl MockComponent for List {
                         .add_modifier(self.props.modifiers),
                 );
             // Highlighted symbol
-            if let Some(PropPayload::One(PropValue::Str(highlight))) =
-                self.props.own.get(PROP_HIGHLIGHTED_TXT)
+            if let Some(hg_str) = self
+                .props
+                .get(Attribute::HighlightedStr)
+                .map(|x| x.unwrap_string())
             {
-                list = list.highlight_symbol(highlight);
+                list = list.highlight_symbol(hg_str);
             }
             if self.scrollable() {
                 let mut state: ListState = ListState::default();
@@ -475,122 +352,96 @@ impl MockComponent for List {
         }
     }
 
-    /// ### update
-    ///
-    /// Update component properties
-    /// Properties should first be retrieved through `get_props` which creates a builder from
-    /// existing properties and then edited before calling update.
-    /// Returns a CmdResult to the view
-    fn update(&mut self, props: Props) -> CmdResult {
-        self.props = props;
-        // re-Set list length
-        self.states
-            .set_list_len(match self.props.own.get(PROP_TABLE).as_ref() {
-                Some(PropPayload::One(PropValue::Table(t))) => t.len(),
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
+    }
+
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        self.props.set(attr, value);
+        // Update list len and fix index
+        self.set_list_len(
+            match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
+                Some(spans) => spans.len(),
                 _ => 0,
-            });
-        // Fix list index
+            },
+        );
         self.states.fix_list_index();
-        // disable if scrollable
-        if self.scrollable() {
-            self.blur();
-        }
-        // Return None
-        CmdResult::None
     }
 
-    /// ### get_props
-    ///
-    /// Returns a copy of the component properties.
-    fn get_props(&self) -> Props {
-        self.props.clone()
-    }
-
-    /// ### on
-    ///
-    /// Handle input event and update internal states.
-    /// Returns a CmdResult to the view.
-    fn on(&mut self, ev: Event) -> CmdResult {
-        // Return key
-        if let Cmd::Key(key) = ev {
-            if self.scrollable() {
-                match key.code {
-                    KeyCode::Down => {
-                        // Go down
-                        self.states.incr_list_index();
-                        Cmd::None(key)
-                    }
-                    KeyCode::Up => {
-                        // Go up
-                        self.states.decr_list_index();
-                        Cmd::None(key)
-                    }
-                    KeyCode::PageDown => {
-                        // Scroll by step
-                        let step: usize = self.states.calc_max_step_ahead(
-                            match self.props.own.get(PROP_MAX_STEP) {
-                                Some(PropPayload::One(PropValue::Usize(step))) => *step,
-                                _ => 8,
-                            },
-                        );
-                        (0..step).for_each(|_| self.states.incr_list_index());
-                        Cmd::None(key)
-                    }
-                    KeyCode::PageUp => {
-                        // Scroll by step
-                        let step: usize = self.states.calc_max_step_behind(
-                            match self.props.own.get(PROP_MAX_STEP) {
-                                Some(PropPayload::One(PropValue::Usize(step))) => *step,
-                                _ => 8,
-                            },
-                        );
-                        (0..step).for_each(|_| self.states.decr_list_index());
-                        Cmd::None(key)
-                    }
-                    KeyCode::End => {
-                        self.states.list_index_at_last();
-                        Cmd::None(key)
-                    }
-                    KeyCode::Home => {
-                        self.states.list_index_at_first();
-                        Cmd::None(key)
-                    }
-                    _ => Cmd::None(key),
-                }
-            } else {
-                Cmd::None(key)
-            }
-        } else {
-            CmdResult::None
-        }
-    }
-
-    /// ### get_state
-    ///
-    /// Get current state from component
-    /// For this component returns None if not scrollable, otherwise returns the index of the list
-    fn get_state(&self) -> Payload {
-        match self.scrollable() {
+    fn state(&self) -> State {
+        match self.is_scrollable() {
             true => State::One(StateValue::Usize(self.states.list_index)),
             false => State::None,
         }
     }
 
-    // -- events
-
-    /// ### blur
-    ///
-    /// Blur component
-    fn blur(&mut self) {
-        focus = false;
-    }
-
-    /// ### active
-    ///
-    /// Active component
-    fn active(&mut self) {
-        if self.scrollable() {
-            focus = true;
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        match cmd {
+            Cmd::Move(Direction::Down) => {
+                let prev = self.states.list_index;
+                self.states.incr_list_index(self.rewindable());
+                if prev != self.states.list_index {
+                    CmdResult::Changed(self.state())
+                } else {
+                    CmdResult::None
+                }
+            }
+            Cmd::Move(Direction::Up) => {
+                let prev = self.states.list_index;
+                self.states.decr_list_index(self.rewindable());
+                if prev != self.states.list_index {
+                    CmdResult::Changed(self.state())
+                } else {
+                    CmdResult::None
+                }
+            }
+            Cmd::Scroll(Direction::Down) => {
+                let prev = self.states.list_index;
+                let step = self
+                    .props
+                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
+                    .unwrap_length();
+                let step: usize = self.states.calc_max_step_ahead(step);
+                (0..step).for_each(|_| self.states.incr_list_index(false));
+                if prev != self.states.list_index {
+                    CmdResult::Changed(self.state())
+                } else {
+                    CmdResult::None
+                }
+            }
+            Cmd::Scroll(Direction::Up) => {
+                let prev = self.states.list_index;
+                let step = self
+                    .props
+                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
+                    .unwrap_length();
+                let step: usize = self.states.calc_max_step_ahead(step);
+                (0..step).for_each(|_| self.states.decr_list_index(false));
+                if prev != self.states.list_index {
+                    CmdResult::Changed(self.state())
+                } else {
+                    CmdResult::None
+                }
+            }
+            Cmd::GoTo(Position::Begin) => {
+                let prev = self.states.list_index;
+                self.states.list_index_at_first();
+                if prev != self.states.list_index {
+                    CmdResult::Changed(self.state())
+                } else {
+                    CmdResult::None
+                }
+            }
+            Cmd::GoTo(Position::End) => {
+                let prev = self.states.list_index;
+                self.states.list_index_at_last();
+                if prev != self.states.list_index {
+                    CmdResult::Changed(self.state())
+                } else {
+                    CmdResult::None
+                }
+            }
+            _ => CmdResult::None,
         }
     }
 }
@@ -598,103 +449,95 @@ impl MockComponent for List {
 #[cfg(test)]
 mod tests {
 
+    use std::io::Seek;
+
     use super::*;
+    use pretty_assertions::assert_eq;
     use tuirealm::props::{TableBuilder, TextSpan};
 
-    use crossterm::event::KeyEvent;
-    use pretty_assertions::assert_eq;
+    #[test]
+    fn list_states() {
+        let mut states = OwnStates::default();
+        assert_eq!(states.list_index, 0);
+        assert_eq!(states.list_len, 0);
+        states.set_list_len(5);
+        assert_eq!(states.list_index, 0);
+        assert_eq!(states.list_len, 5);
+        // Incr
+        states.incr_list_index(true);
+        assert_eq!(states.list_index, 1);
+        states.list_index = 4;
+        states.incr_list_index(false);
+        assert_eq!(states.list_index, 4);
+        states.incr_list_index(true);
+        assert_eq!(states.list_index, 0);
+        // Decr
+        states.decr_list_index(false);
+        assert_eq!(states.list_index, 0);
+        states.decr_list_index(true);
+        assert_eq!(states.list_index, 4);
+        states.decr_list_index(true);
+        assert_eq!(states.list_index, 3);
+        // Begin
+        states.list_index_at_first();
+        assert_eq!(states.list_index, 0);
+        states.list_index_at_last();
+        assert_eq!(states.list_index, 4);
+        // Fix
+        states.set_list_len(3);
+        states.fix_list_index();
+        assert_eq!(states.list_index, 2);
+    }
 
     #[test]
     fn test_components_list_scrollable() {
-        // Make component
-        let mut component: List = List::new(
-            ListPropsBuilder::default()
-                .with_foreground(Color::Red)
-                .with_background(Color::Blue)
-                .with_highlighted_color(Color::Yellow)
-                .hidden()
-                .visible()
-                .bold()
-                .italic()
-                .rapid_blink()
-                .reversed()
-                .slow_blink()
-                .strikethrough()
-                .underlined()
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_highlighted_str(Some("🚀"))
-                .with_max_scroll_step(4)
-                .scrollable(true)
-                .with_title("my data", Alignment::Center)
-                .with_rows(
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("name"))
-                        .add_col(TextSpan::from("age"))
-                        .add_row()
-                        .add_col(TextSpan::from("omar"))
-                        .add_col(TextSpan::from("1"))
-                        .add_row()
-                        .add_col(TextSpan::from("mark"))
-                        .add_col(TextSpan::from("2"))
-                        .add_row()
-                        .add_col(TextSpan::from("tom"))
-                        .add_col(TextSpan::from("3"))
-                        .add_row()
-                        .add_col(TextSpan::from("pippo"))
-                        .add_col(TextSpan::from("5"))
-                        .add_row()
-                        .add_col(TextSpan::from("carl"))
-                        .add_col(TextSpan::from("8"))
-                        .add_row()
-                        .add_col(TextSpan::from("charlie"))
-                        .add_col(TextSpan::from("13"))
-                        .add_row()
-                        .add_col(TextSpan::from("thomas"))
-                        .add_col(TextSpan::from("21"))
-                        .add_row()
-                        .add_col(TextSpan::from("cammello"))
-                        .add_col(TextSpan::from("34"))
-                        .build(),
-                )
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .build(),
-        );
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.background, Color::Blue);
-        assert_eq!(component.props.visible, true);
-        assert!(component.props.modifiers.intersects(Modifier::BOLD));
-        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
-        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
-        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
-        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
-        assert_eq!(component.props.title.as_ref().unwrap().text(), "my data");
-        assert_eq!(
-            component.props.title.as_ref().unwrap().alignment(),
-            Alignment::Center
-        );
-        assert_eq!(component.props.borders.borders, Borders::ALL);
-        assert_eq!(component.props.borders.variant, BorderType::Double);
-        assert_eq!(component.props.borders.color, Color::Red);
-        assert_eq!(
-            component.props.palette.get(COLOR_HIGHLIGHTED).unwrap(),
-            &Color::Yellow
-        );
-        assert_eq!(
-            component.props.own.get(PROP_HIGHLIGHTED_TXT).unwrap(),
-            &PropPayload::One(PropValue::Str(String::from("🚀")))
-        );
-        assert_eq!(
-            component.props.own.get(PROP_MAX_STEP).unwrap(),
-            &PropPayload::One(PropValue::Usize(4))
-        );
-        assert_eq!(component.states.list_len, 9);
+        let mut component = List::default()
+            .foreground(Color::Red)
+            .background(Color::Blue)
+            .highlighted_color(Color::Yellow)
+            .highlighted_str("🚀")
+            .modifiers(TextModifiers::BOLD)
+            .scroll(true)
+            .step(4)
+            .borders(Borders::default())
+            .title("events", Alignment::Center)
+            .rewind(true)
+            .rows(
+                TableBuilder::default()
+                    .add_col(TextSpan::from("KeyCode::Down"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor down"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::Up"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor up"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::PageDown"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor down by 8"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::PageUp"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("ove cursor up by 8"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::End"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor to last item"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::Home"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor to first item"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::Char(_)"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Return pressed key"))
+                    .add_col(TextSpan::from("4th mysterious columns"))
+                    .build(),
+            );
+        assert_eq!(component.states.list_len, 7);
         assert_eq!(component.states.list_index, 0);
-        component.active();
-        assert_eq!(component.states.focus, true);
-        component.blur();
-        assert_eq!(component.states.focus, false);
+        // Own funcs
+        assert_eq!(component.layout().len(), 4);
         // Increment list index
         component.states.list_index += 1;
         assert_eq!(component.states.list_index, 1);
@@ -702,117 +545,112 @@ mod tests {
         // Handle inputs
         assert_eq!(
             component.on(Cmd::Move(Direction::Down)),
-            CmdResult::OnMove(Direction::Down)
+            CmdResult::Changed(State::One(StateValue::Usize(2)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be decremented
-        assert_eq!(component.on(Cmd::Move(Direction::Up)), CmdResult::None);
+        assert_eq!(
+            component.on(Cmd::Move(Direction::Up)),
+            CmdResult::Changed(State::One(StateValue::Usize(1)))
+        );
         // Index should be incremented
         assert_eq!(component.states.list_index, 1);
         // Index should be 2
-        assert_eq!(component.on(Cmd::Scroll(Direction::Down)), CmdResult::None);
+        assert_eq!(
+            component.on(Cmd::Scroll(Direction::Down)),
+            CmdResult::Changed(State::One(StateValue::Usize(5)))
+        );
         // Index should be incremented
         assert_eq!(component.states.list_index, 5);
-        assert_eq!(component.on(Cmd::Scroll(Direction::Down)), CmdResult::None);
+        assert_eq!(
+            component.on(Cmd::Scroll(Direction::Down)),
+            CmdResult::Changed(State::One(StateValue::Usize(6)))
+        );
         // Index should be incremented
-        assert_eq!(component.states.list_index, 8);
+        assert_eq!(component.states.list_index, 6);
         // Index should be 0
-        assert_eq!(component.on(Cmd::Scroll(Direction::Up)), CmdResult::None);
-        assert_eq!(component.states.list_index, 4);
-        assert_eq!(component.on(Cmd::Scroll(Direction::Up)), CmdResult::None);
+        assert_eq!(
+            component.on(Cmd::Scroll(Direction::Up)),
+            CmdResult::Changed(State::One(StateValue::Usize(2)))
+        );
+        assert_eq!(component.states.list_index, 2);
+        assert_eq!(
+            component.on(Cmd::Scroll(Direction::Up)),
+            CmdResult::Changed(State::One(StateValue::Usize(0)))
+        );
         assert_eq!(component.states.list_index, 0);
         // End
-        assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
-        assert_eq!(component.states.list_index, 8);
+        assert_eq!(
+            component.on(Cmd::GoTo(Position::End)),
+            CmdResult::Changed(State::One(StateValue::Usize(6)))
+        );
+        assert_eq!(component.states.list_index, 6);
         // Home
-        assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
+        assert_eq!(
+            component.on(Cmd::GoTo(Position::Begin)),
+            CmdResult::Changed(State::One(StateValue::Usize(0)))
+        );
         assert_eq!(component.states.list_index, 0);
         // Update
-        let props = ListPropsBuilder::from(component.get_props())
-            .with_foreground(Color::Red)
-            .hidden()
-            .with_rows(
+        component.attr(
+            Attribute::Content,
+            AttrValue::Table(
                 TableBuilder::default()
                     .add_col(TextSpan::from("name"))
                     .add_col(TextSpan::from("age"))
+                    .add_col(TextSpan::from("birthdate"))
                     .build(),
-            )
-            .build();
-        assert_eq!(component.update(props), CmdResult::None);
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.visible, false);
+            ),
+        );
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
         // Get value
         assert_eq!(component.state(), State::One(StateValue::Usize(0)));
-        // Event
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),
-            Cmd::None(KeyCmd::from(KeyCode::Delete))
-        );
-        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 
     #[test]
     fn test_components_list() {
-        // Make component
-        let mut component: List = List::new(
-            ListPropsBuilder::default()
-                .with_foreground(Color::Red)
-                .with_background(Color::Blue)
-                .hidden()
-                .visible()
-                .bold()
-                .italic()
-                .rapid_blink()
-                .reversed()
-                .slow_blink()
-                .strikethrough()
-                .underlined()
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .with_rows(
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("name"))
-                        .add_col(TextSpan::from("age"))
-                        .add_row()
-                        .add_col(TextSpan::from("omar"))
-                        .add_col(TextSpan::from("24"))
-                        .build(),
-                )
-                .with_borders(Borders::ALL, BorderType::Double, Color::Red)
-                .build(),
-        );
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.background, Color::Blue);
-        assert_eq!(component.props.visible, true);
-        assert!(component.props.modifiers.intersects(Modifier::BOLD));
-        assert!(component.props.modifiers.intersects(Modifier::ITALIC));
-        assert!(component.props.modifiers.intersects(Modifier::UNDERLINED));
-        assert!(component.props.modifiers.intersects(Modifier::SLOW_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::RAPID_BLINK));
-        assert!(component.props.modifiers.intersects(Modifier::REVERSED));
-        assert!(component.props.modifiers.intersects(Modifier::CROSSED_OUT));
-        assert_eq!(component.props.borders.borders, Borders::ALL);
-        assert_eq!(component.props.borders.variant, BorderType::Double);
-        assert_eq!(component.props.borders.color, Color::Red);
-        component.active();
-        component.blur();
-        // Update
-        let props = ListPropsBuilder::from(component.get_props())
-            .with_foreground(Color::Red)
-            .hidden()
-            .build();
-        assert_eq!(component.update(props), CmdResult::None);
-        assert_eq!(component.props.foreground, Color::Red);
-        assert_eq!(component.props.visible, false);
-        // Get value
+        let mut component = List::default()
+            .foreground(Color::Red)
+            .background(Color::Blue)
+            .highlighted_color(Color::Yellow)
+            .highlighted_str("🚀")
+            .modifiers(TextModifiers::BOLD)
+            .borders(Borders::default())
+            .title("events", Alignment::Center)
+            .rows(
+                TableBuilder::default()
+                    .add_col(TextSpan::from("KeyCode::Down"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor down"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::Up"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor up"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::PageDown"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor down by 8"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::PageUp"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("ove cursor up by 8"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::End"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor to last item"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::Home"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor to first item"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::Char(_)"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Return pressed key"))
+                    .build(),
+            );
+        // Get value (not scrollable)
         assert_eq!(component.state(), State::None);
-        // Event
-        assert_eq!(
-            component.on(Cmd::Key(KeyCmd::from(KeyCode::Delete))),
-            Cmd::None(KeyCmd::from(KeyCode::Delete))
-        );
-        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
     }
 }
