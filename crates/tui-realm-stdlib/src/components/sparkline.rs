@@ -51,38 +51,38 @@ impl Default for Sparkline {
 
 impl Sparkline {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn max_entries(mut self, max: usize) -> Self {
-        self.props.set(Attribute::Width, AttrValue::Length(max));
+        self.attr(Attribute::Width, AttrValue::Length(max));
         self
     }
 
     pub fn data(mut self, data: &[u64]) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Dataset,
             AttrValue::Payload(PropPayload::Vec(
-                data.into_iter().map(PropValue::U64).collect(),
+                data.into_iter().map(|x| PropValue::U64(*x)).collect(),
             )),
         );
         self
@@ -101,7 +101,7 @@ impl Sparkline {
     /// ### data
     ///
     /// Get data to be displayed, starting from provided index at `start` with a max length of `len`
-    fn data(&self, max: usize) -> Vec<u64> {
+    fn get_data(&self, max: usize) -> Vec<u64> {
         match self
             .props
             .get(Attribute::Dataset)
@@ -111,7 +111,7 @@ impl Sparkline {
                 let mut data: Vec<u64> = Vec::with_capacity(max);
                 list.iter()
                     .map(|x| x.unwrap_u64())
-                    .for_each(|x| data.push(*x));
+                    .for_each(|x| data.push(x));
                 data
             }
             _ => Vec::new(),
@@ -146,10 +146,10 @@ impl MockComponent for Sparkline {
                 .get_or(Attribute::Width, AttrValue::Length(self.data_len()))
                 .unwrap_length();
             // Get data
-            let data: Vec<u64> = self.data(max_entries);
+            let data: Vec<u64> = self.get_data(max_entries);
             // Create widget
             let widget: TuiSparkline = TuiSparkline::default()
-                .block(crate::utils::get_block(borders, title, false, None))
+                .block(crate::utils::get_block(borders, Some(title), false, None))
                 .data(data.as_slice())
                 .max(max_entries as u64)
                 .style(Style::default().fg(foreground).bg(background));
@@ -197,6 +197,6 @@ mod test {
         assert_eq!(component.state(), State::None);
         // component funcs
         assert_eq!(component.data_len(), 18);
-        assert_eq!(component.data(4), vec![60, 80, 90, 88]);
+        assert_eq!(component.get_data(4), vec![60, 80, 90, 88]);
     }
 }

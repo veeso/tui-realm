@@ -141,14 +141,18 @@ impl Chart {
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
         self.props.set(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn disabled(mut self, disabled: bool) -> Self {
-        self.props
-            .set(Attribute::Disabled, AttrValue::Flag(disabled));
+        self.attr(Attribute::Disabled, AttrValue::Flag(disabled));
+        self
+    }
+
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
@@ -156,7 +160,7 @@ impl Chart {
         self.props.set(
             Attribute::Dataset,
             AttrValue::Payload(PropPayload::Vec(
-                data.into_iter().map(PropValue::Dataset).collect(),
+                data.into_iter().map(|x| PropValue::Dataset(*x)).collect(),
             )),
         );
         self
@@ -211,14 +215,12 @@ impl Chart {
     }
 
     pub fn x_style(mut self, s: Style) -> Self {
-        self.props
-            .set(Attribute::Custom(CHART_X_STYLE), AttrValue::Style(s));
+        self.attr(Attribute::Custom(CHART_X_STYLE), AttrValue::Style(s));
         self
     }
 
     pub fn y_style(mut self, s: Style) -> Self {
-        self.props
-            .set(Attribute::Custom(CHART_Y_STYLE), AttrValue::Style(s));
+        self.attr(Attribute::Custom(CHART_Y_STYLE), AttrValue::Style(s));
         self
     }
 
@@ -267,6 +269,7 @@ impl Chart {
                     .map(|x| x.unwrap_dataset().get_data().len())
                     .max()
             })
+            .unwrap_or(None)
             .unwrap_or(0)
     }
 
@@ -277,11 +280,11 @@ impl Chart {
         self.props
             .get(Attribute::Dataset)
             .map(|x| {
-                x.unwrap_payload().unwrap_vec().map(|x| {
-                    x.iter()
-                        .map(|x| Self::get_tui_dataset(x.unwrap_dataset(), start, len))
-                        .collect()
-                })
+                x.unwrap_payload()
+                    .unwrap_vec()
+                    .into_iter()
+                    .map(|x| Self::get_tui_dataset(&x.unwrap_dataset(), start, len))
+                    .collect()
             })
             .unwrap_or_default()
     }
@@ -311,7 +314,7 @@ impl<'a> Chart {
 }
 
 impl MockComponent for Chart {
-    fn view(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let foreground = self
                 .props
@@ -350,7 +353,7 @@ impl MockComponent for Chart {
                 .get(Attribute::Custom(CHART_X_BOUNDS))
                 .map(|x| x.unwrap_payload().unwrap_tup2())
             {
-                let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [*floor, *ceil];
+                let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
                 x_axis = x_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);
             }
             if let Some(PropPayload::Vec(labels)) = self
@@ -370,9 +373,13 @@ impl MockComponent for Chart {
                 .get(Attribute::Custom(CHART_X_STYLE))
                 .map(|x| x.unwrap_style())
             {
-                x_axis = x_axis.style(*s);
+                x_axis = x_axis.style(s);
             }
-            if let Some(title) = self.props.get(Attribute::Custom(CHART_X_TITLE)) {
+            if let Some(title) = self
+                .props
+                .get(Attribute::Custom(CHART_X_TITLE))
+                .map(|x| x.unwrap_string())
+            {
                 x_axis = x_axis.title(Span::styled(
                     title,
                     Style::default().fg(foreground).bg(background),
@@ -385,7 +392,7 @@ impl MockComponent for Chart {
                 .get(Attribute::Custom(CHART_Y_BOUNDS))
                 .map(|x| x.unwrap_payload().unwrap_tup2())
             {
-                let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [*floor, *ceil];
+                let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
                 y_axis = y_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);
             }
             if let Some(PropPayload::Vec(labels)) = self
@@ -405,9 +412,13 @@ impl MockComponent for Chart {
                 .get(Attribute::Custom(CHART_Y_STYLE))
                 .map(|x| x.unwrap_style())
             {
-                y_axis = y_axis.style(*s);
+                y_axis = y_axis.style(s);
             }
-            if let Some(title) = self.props.get(Attribute::Custom(CHART_Y_TITLE)) {
+            if let Some(title) = self
+                .props
+                .get(Attribute::Custom(CHART_Y_TITLE))
+                .map(|x| x.unwrap_string())
+            {
                 y_axis = y_axis.title(Span::styled(
                     title,
                     Style::default().fg(foreground).bg(background),
@@ -466,7 +477,6 @@ mod test {
     fn test_components_chart_states() {
         let mut states: OwnStates = OwnStates::default();
         assert_eq!(states.cursor, 0);
-        assert_eq!(states.focus, false);
         // Incr
         states.move_cursor_right(2);
         assert_eq!(states.cursor, 1);
@@ -558,22 +568,31 @@ mod test {
         // Commands
         assert_eq!(component.state(), State::None);
         // -> Right
-        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Right)),
+            CmdResult::None
+        );
         assert_eq!(component.states.cursor, 1);
         // <- Left
-        assert_eq!(component.on(Cmd::Move(Direction::Left)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Left)),
+            CmdResult::None
+        );
         assert_eq!(component.states.cursor, 0);
         // End
-        assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
+        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
         assert_eq!(component.states.cursor, 11);
         // Home
-        assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::Begin)),
+            CmdResult::None
+        );
         assert_eq!(component.states.cursor, 0);
         // component funcs
         assert_eq!(component.data_len(), 2);
         assert_eq!(component.max_dataset_len(), 12);
         assert_eq!(component.is_disabled(), false);
-        assert_eq!(component.data(2, 4).len(), 2);
+        assert_eq!(component.get_data(2, 4).len(), 2);
         // Update and test empty data
         component.states.cursor_at_end(12);
         component.attr(

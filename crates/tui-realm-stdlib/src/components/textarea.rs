@@ -45,6 +45,15 @@ struct OwnStates {
     list_len: usize,   // Lines in text area
 }
 
+impl Default for OwnStates {
+    fn default() -> Self {
+        Self {
+            list_index: 0,
+            list_len: 0,
+        }
+    }
+}
+
 impl OwnStates {
     /// ### set_list_len
     ///
@@ -135,55 +144,61 @@ impl OwnStates {
 /// ## Textarea
 ///
 /// represents a read-only text component without any container.
-#[derive(Default)]
 pub struct Textarea {
     props: Props,
     states: OwnStates,
 }
 
+impl Default for Textarea {
+    fn default() -> Self {
+        Self {
+            props: Props::default(),
+            states: OwnStates::default(),
+        }
+    }
+}
+
 impl Textarea {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn inactive(mut self, s: Style) -> Self {
-        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
-        self.props
-            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn step(mut self, step: usize) -> Self {
-        self.props
-            .set(Attribute::ScrollStep, AttrValue::Length(step));
+        self.attr(Attribute::ScrollStep, AttrValue::Length(step));
         self
     }
 
     pub fn highlighted_str<S: AsRef<str>>(mut self, s: S) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::HighlightedStr,
             AttrValue::String(s.as_ref().to_string()),
         );
@@ -192,7 +207,7 @@ impl Textarea {
 
     pub fn text_rows(mut self, rows: Vec<TextSpan>) -> Self {
         self.states.set_list_len(rows.len());
-        self.props.set(
+        self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
                 rows.into_iter().map(PropValue::TextSpan).collect(),
@@ -263,7 +278,7 @@ impl MockComponent for Textarea {
             let mut list = List::new(lines)
                 .block(crate::utils::get_block(
                     borders,
-                    title,
+                    Some(title),
                     focus,
                     inactive_style,
                 ))
@@ -275,7 +290,7 @@ impl MockComponent for Textarea {
                 .get(Attribute::HighlightedStr)
                 .map(|x| x.unwrap_string())
             {
-                list = list.highlight_symbol(hg_str);
+                list = list.highlight_symbol(&hg_str);
             }
             render.render_stateful_widget(list, area, &mut state);
         }
@@ -288,7 +303,7 @@ impl MockComponent for Textarea {
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         self.props.set(attr, value);
         // Update list len and fix index
-        self.set_list_len(
+        self.states.set_list_len(
             match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
                 Some(PropPayload::Vec(spans)) => spans.len(),
                 _ => 0,
@@ -377,28 +392,39 @@ mod tests {
         // Render
         assert_eq!(component.states.list_index, 1);
         // Handle inputs
-        assert_eq!(component.on(Cmd::Move(Direction::Down)), Cmd::None);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Down)),
+            CmdResult::None
+        );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be decremented
-        assert_eq!(component.on(Cmd::Move(Direction::Up)), CmdResult::None);
+        assert_eq!(component.perform(Cmd::Move(Direction::Up)), CmdResult::None);
         // Index should be incremented
         assert_eq!(component.states.list_index, 1);
         // Index should be 2
-        assert_eq!(component.on(Cmd::Scroll(Direction::Down)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Down)),
+            CmdResult::None
+        );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be 0
-        assert_eq!(component.on(Cmd::Scroll(Direction::Up)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Up)),
+            CmdResult::None
+        );
         // End
-        assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
+        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
         assert_eq!(component.states.list_index, 2);
         // Home
-        assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::Begin)),
+            CmdResult::None
+        );
         // Index should be incremented
         assert_eq!(component.states.list_index, 0);
         // On key
-        assert_eq!(component.on(Cmd::Delete), CmdResult::None);
-        assert_eq!(component.on(Cmd::Resize(0, 0)), CmdResult::None);
+        assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
     }
 }

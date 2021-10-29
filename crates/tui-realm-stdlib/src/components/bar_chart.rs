@@ -124,53 +124,89 @@ impl Default for BarChart {
 
 impl BarChart {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn disabled(mut self, disabled: bool) -> Self {
-        self.props
-            .set(Attribute::Disabled, AttrValue::Flag(disabled));
+        self.attr(Attribute::Disabled, AttrValue::Flag(disabled));
+        self
+    }
+
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
     pub fn data(mut self, data: &[(&str, u64)]) -> Self {
         let mut list: LinkedList<PropPayload> = LinkedList::new();
         data.into_iter().for_each(|(a, b)| {
-            list.push_back(PropPayload::Tup2(
+            list.push_back(PropPayload::Tup2((
                 PropValue::Str(a.to_string()),
                 PropValue::U64(*b),
-            ))
+            )))
         });
-        self.props.set(
+        self.attr(
             Attribute::Dataset,
             AttrValue::Payload(PropPayload::Linked(list)),
         );
         self
     }
 
-    // TODO: missing custom attributes
+    pub fn bar_gap(mut self, gap: u16) -> Self {
+        self.attr(
+            Attribute::Custom(BAR_CHART_BARS_GAP),
+            AttrValue::Payload(PropPayload::One(PropValue::U16(gap))),
+        );
+        self
+    }
+
+    pub fn bar_style(mut self, s: Style) -> Self {
+        self.attr(Attribute::Custom(BAR_CHART_BARS_STYLE), AttrValue::Style(s));
+        self
+    }
+
+    pub fn label_style(mut self, s: Style) -> Self {
+        self.attr(
+            Attribute::Custom(BAR_CHART_LABEL_STYLE),
+            AttrValue::Style(s),
+        );
+        self
+    }
+
+    pub fn max_bars(mut self, l: usize) -> Self {
+        self.attr(Attribute::Custom(BAR_CHART_MAX_BARS), AttrValue::Length(l));
+        self
+    }
+
+    pub fn value_style(mut self, s: Style) -> Self {
+        self.attr(
+            Attribute::Custom(BAR_CHART_VALUES_STYLE),
+            AttrValue::Style(s),
+        );
+        self
+    }
 
     pub fn width(mut self, w: u16) -> Self {
-        self.props.set(Attribute::Width, AttrValue::Size(w));
+        self.attr(Attribute::Width, AttrValue::Size(w));
         self
     }
 
@@ -186,13 +222,7 @@ impl BarChart {
     fn data_len(&self) -> usize {
         self.props
             .get(Attribute::Dataset)
-            .map(|x| {
-                x.unwrap_payload()
-                    .unwrap_vec()
-                    .iter()
-                    .map(|x| x.unwrap_dataset().get_data().len())
-                    .max()
-            })
+            .map(|x| x.unwrap_payload().unwrap_linked().len())
             .unwrap_or(0)
     }
 
@@ -229,7 +259,7 @@ impl BarChart {
 }
 
 impl MockComponent for BarChart {
-    fn view(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let foreground = self
                 .props
@@ -261,25 +291,23 @@ impl MockComponent for BarChart {
             let data_max_len: u64 = self
                 .props
                 .get(Attribute::Custom(BAR_CHART_MAX_BARS))
-                .map(|x| *x.unwrap_length() as u64)
+                .map(|x| x.unwrap_length() as u64)
                 .unwrap_or(self.data_len() as u64);
             // Get data
             let data: Vec<(&str, u64)> = self.get_data(self.states.cursor, data_max_len as usize);
             // Create widget
             let mut widget: TuiBarChart = TuiBarChart::default()
                 .block(div)
-                .get_data(data.as_slice())
+                .data(data.as_slice())
                 .max(data_max_len);
-            if let Some(PropPayload::One(PropValue::U16(gap))) = self
+            if let Some(gap) = self
                 .props
                 .get(Attribute::Custom(BAR_CHART_BARS_GAP))
                 .map(|x| x.unwrap_size())
             {
                 widget = widget.bar_gap(gap);
             }
-            if let Some(PropPayload::One(PropValue::U16(width))) =
-                self.props.get(Attribute::Width).map(|x| x.unwrap_size())
-            {
+            if let Some(width) = self.props.get(Attribute::Width).map(|x| x.unwrap_size()) {
                 widget = widget.bar_width(width);
             }
             if let Some(style) = self
@@ -323,13 +351,13 @@ impl MockComponent for BarChart {
                     self.states.move_cursor_left();
                 }
                 Cmd::Move(Direction::Right) => {
-                    self.states.move_cursor_right(self.max_dataset_len());
+                    self.states.move_cursor_right(self.data_len());
                 }
                 Cmd::GoTo(Position::Begin) => {
                     self.states.reset_cursor();
                 }
                 Cmd::GoTo(Position::End) => {
-                    self.states.cursor_at_end(self.max_dataset_len());
+                    self.states.cursor_at_end(self.data_len());
                 }
                 _ => {}
             }
@@ -353,7 +381,6 @@ mod test {
     fn test_components_bar_chart_states() {
         let mut states: OwnStates = OwnStates::default();
         assert_eq!(states.cursor, 0);
-        assert_eq!(states.focus, false);
         // Incr
         states.move_cursor_right(2);
         assert_eq!(states.cursor, 1);
@@ -383,7 +410,7 @@ mod test {
             .label_style(Style::default().fg(Color::Yellow))
             .bar_style(Style::default().fg(Color::LightYellow))
             .bar_gap(2)
-            .bar_width(4)
+            .width(4)
             .borders(Borders::default())
             .max_bars(6)
             .value_style(Style::default().fg(Color::LightBlue))
@@ -404,16 +431,25 @@ mod test {
         // Commands
         assert_eq!(component.state(), State::None);
         // -> Right
-        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Right)),
+            CmdResult::None
+        );
         assert_eq!(component.states.cursor, 1);
         // <- Left
-        assert_eq!(component.on(Cmd::Move(Direction::Left)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Left)),
+            CmdResult::None
+        );
         assert_eq!(component.states.cursor, 0);
         // End
-        assert_eq!(component.on(Cmd::GoTo(Position::End)), CmdResult::None);
+        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
         assert_eq!(component.states.cursor, 11);
         // Home
-        assert_eq!(component.on(Cmd::GoTo(Position::Begin)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::Begin)),
+            CmdResult::None
+        );
         assert_eq!(component.states.cursor, 0);
     }
 }

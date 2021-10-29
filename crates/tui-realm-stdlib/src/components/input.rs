@@ -128,7 +128,7 @@ impl OwnStates {
     /// Render value as a vec of chars
     pub fn render_value_chars(&self, itype: InputType) -> Vec<char> {
         match itype {
-            InputType::Password(_) | InputType::CustomPassword(_, _) => {
+            InputType::Password(_) | InputType::CustomPassword(_, _, _) => {
                 (0..self.input.len()).map(|_| '*').collect()
             }
             _ => self.input.clone(),
@@ -156,42 +156,40 @@ pub struct Input {
 
 impl Input {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn inactive(mut self, s: Style) -> Self {
-        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn input_type(mut self, itype: InputType) -> Self {
-        self.props
-            .set(Attribute::InputType, AttrValue::InputType(itype));
+        self.attr(Attribute::InputType, AttrValue::InputType(itype));
         self
     }
 
     pub fn input_len(mut self, ilen: usize) -> Self {
-        self.props
-            .set(Attribute::InputLength, AttrValue::Length(ilen));
+        self.attr(Attribute::InputLength, AttrValue::Length(ilen));
         self
     }
 
@@ -254,18 +252,17 @@ impl MockComponent for Input {
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
             let itype = self.get_input_type();
-            let p: Paragraph =
-                Paragraph::new(self.states.render_value(Self::get_input_type(&self.props)))
-                    .style(match focus {
-                        true => Style::default().fg(foreground),
-                        false => Style::default(),
-                    })
-                    .block(crate::utils::get_block(
-                        borders,
-                        title,
-                        focus,
-                        inactive_style,
-                    ));
+            let p: Paragraph = Paragraph::new(self.states.render_value(self.get_input_type()))
+                .style(match focus {
+                    true => Style::default().fg(foreground),
+                    false => Style::default(),
+                })
+                .block(crate::utils::get_block(
+                    borders,
+                    Some(title),
+                    focus,
+                    inactive_style,
+                ));
             render.render_widget(p, area);
             // Set cursor, if focus
             if focus {
@@ -417,7 +414,10 @@ mod tests {
         assert_eq!(states.cursor, 3);
         // Render value
         assert_eq!(states.render_value(InputType::Text).as_str(), "abc");
-        assert_eq!(states.render_value(InputType::Password).as_str(), "***");
+        assert_eq!(
+            states.render_value(InputType::Password('*')).as_str(),
+            "***"
+        );
     }
 
     #[test]
@@ -546,7 +546,7 @@ mod tests {
         // Go at the end
         component.states.cursor = 6;
         // Move right
-        assert_eq!(component.perform(Cmd::End), CmdResult::None);
+        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
         assert_eq!(component.states.cursor, 6);
         // Move left
         assert_eq!(

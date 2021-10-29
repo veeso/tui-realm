@@ -27,7 +27,10 @@
  * SOFTWARE.
  */
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, Color, Props, Style};
+use tuirealm::props::{
+    Alignment, AttrValue, Attribute, BorderSides, Borders, Color, PropPayload, PropValue, Props,
+    Style,
+};
 use tuirealm::tui::{
     layout::{Constraint, Corner, Direction as LayoutDirection, Layout, Rect},
     text::Spans,
@@ -145,30 +148,30 @@ impl Default for Select {
 
 impl Select {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn highlighted_str<S: AsRef<str>>(mut self, s: S) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::HighlightedStr,
             AttrValue::String(s.as_ref().to_string()),
         );
@@ -176,29 +179,39 @@ impl Select {
     }
 
     pub fn highlighted_color(mut self, c: Color) -> Self {
-        self.props
-            .set(Attribute::HighlightedColor, AttrValue::Color(c));
+        self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
         self
     }
 
     pub fn inactive(mut self, s: Style) -> Self {
-        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
     pub fn rewind(mut self, r: bool) -> Self {
-        self.props.set(Attribute::Rewind, AttrValue::Flag(r));
+        self.attr(Attribute::Rewind, AttrValue::Flag(r));
         self
     }
 
     pub fn choices<S: AsRef<str>>(mut self, choices: &[S]) -> Self {
-        self.states.set_choices(choices);
+        self.attr(
+            Attribute::Content,
+            AttrValue::Payload(PropPayload::Vec(
+                choices
+                    .into_iter()
+                    .map(|x| PropValue::Str(x.as_ref().to_string()))
+                    .collect(),
+            )),
+        );
         self
     }
 
     pub fn value(mut self, i: usize) -> Self {
         // Set state
-        self.states.select(i);
+        self.attr(
+            Attribute::Value,
+            AttrValue::Payload(PropPayload::One(PropValue::Usize(i))),
+        );
         self
     }
 
@@ -243,12 +256,12 @@ impl Select {
             .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
             .unwrap_borders();
         let block: Block = Block::default()
-            .borders(Borders::LEFT | Borders::TOP | Borders::RIGHT)
+            .borders(BorderSides::LEFT | BorderSides::TOP | BorderSides::RIGHT)
             .border_style(borders.style())
             .style(Style::default().bg(background));
         let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
         let block = match title {
-            Some(text, alignment) => block.title(text).title_alignment(alignment),
+            Some((text, alignment)) => block.title(text).title_alignment(alignment),
             None => block,
         };
         let focus = self
@@ -271,7 +284,7 @@ impl Select {
         let mut list = List::new(choices)
             .block(
                 Block::default()
-                    .borders(Borders::LEFT | Borders::BOTTOM | Borders::RIGHT)
+                    .borders(BorderSides::LEFT | BorderSides::BOTTOM | BorderSides::RIGHT)
                     .border_style(match focus {
                         true => borders.style(),
                         false => Style::default(),
@@ -279,25 +292,15 @@ impl Select {
                     .style(Style::default().bg(background)),
             )
             .start_corner(Corner::TopLeft)
-            .style(
-                Style::default()
-                    .fg(foreground)
-                    .bg(background)
-                    .add_modifier(self.props.modifiers),
-            )
-            .highlight_style(
-                Style::default()
-                    .fg(bg)
-                    .bg(hg)
-                    .add_modifier(self.props.modifiers),
-            );
+            .style(Style::default().fg(foreground).bg(background))
+            .highlight_style(Style::default().fg(bg).bg(hg));
         // Highlighted symbol
         if let Some(hg_str) = self
             .props
             .get(Attribute::HighlightedStr)
             .map(|x| x.unwrap_string())
         {
-            list = list.highlight_symbol(hg_str);
+            list = list.highlight_symbol(&hg_str);
         }
         let mut state: ListState = ListState::default();
         state.select(Some(self.states.selected));
@@ -321,12 +324,12 @@ impl Select {
             .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
             .unwrap_borders();
         let block: Block = Block::default()
-            .borders(Borders::LEFT | Borders::TOP | Borders::RIGHT)
+            .borders(BorderSides::LEFT | BorderSides::TOP | BorderSides::RIGHT)
             .border_style(borders.style())
             .style(Style::default().bg(background));
         let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
         let block = match title {
-            Some(text, alignment) => block.title(text).title_alignment(alignment),
+            Some((text, alignment)) => block.title(text).title_alignment(alignment),
             None => block,
         };
         let focus = self
@@ -351,7 +354,7 @@ impl Select {
         render.render_widget(p, area);
     }
 
-    fn rewind(&self) -> bool {
+    fn rewindable(&self) -> bool {
         self.props
             .get_or(Attribute::Rewind, AttrValue::Flag(false))
             .unwrap_flag()
@@ -382,7 +385,7 @@ impl MockComponent for Select {
                     .iter()
                     .map(|x| x.unwrap_str().as_str())
                     .collect();
-                self.states.set_choices(choices);
+                self.states.set_choices(&choices);
             }
             Attribute::Value => {
                 self.states
@@ -402,7 +405,7 @@ impl MockComponent for Select {
         match cmd {
             Cmd::Move(Direction::Down) => {
                 // Increment choice
-                self.states.next_choice(self.is_rewind());
+                self.states.next_choice(self.rewindable());
                 // Return CmdResult On Change or None if tab is closed
                 match self.states.is_tab_open() {
                     false => CmdResult::None,
@@ -411,7 +414,7 @@ impl MockComponent for Select {
             }
             Cmd::Move(Direction::Up) => {
                 // Increment choice
-                self.states.prev_choice(self.is_rewind());
+                self.states.prev_choice(self.rewindable());
                 // Return CmdResult On Change or None if tab is closed
                 match self.states.is_tab_open() {
                     false => CmdResult::None,
@@ -516,8 +519,6 @@ mod test {
         assert_eq!(component.states.is_tab_open(), false);
         component.states.open_tab();
         assert_eq!(component.states.is_tab_open(), true);
-        component.blur();
-        assert_eq!(component.states.focus, false);
         assert_eq!(component.states.is_tab_open(), false);
         // Update
         component.attr(
@@ -530,49 +531,52 @@ mod test {
         // Events
         // Move cursor
         assert_eq!(
-            component.on(Cmd::Move(Direction::Up)),
+            component.perform(Cmd::Move(Direction::Up)),
             CmdResult::Changed(State::One(StateValue::Usize(1))),
         );
         assert_eq!(
-            component.on(Cmd::Move(Direction::Up)),
+            component.perform(Cmd::Move(Direction::Up)),
             CmdResult::Changed(State::One(StateValue::Usize(0))),
         );
         // Upper boundary
         assert_eq!(
-            component.on(Cmd::Move(Direction::Up)),
+            component.perform(Cmd::Move(Direction::Up)),
             CmdResult::Changed(State::One(StateValue::Usize(0))),
         );
         // Move down
         assert_eq!(
-            component.on(Cmd::Move(Direction::Down)),
+            component.perform(Cmd::Move(Direction::Down)),
             CmdResult::Changed(State::One(StateValue::Usize(1))),
         );
         assert_eq!(
-            component.on(Cmd::Move(Direction::Down)),
+            component.perform(Cmd::Move(Direction::Down)),
             CmdResult::Changed(State::One(StateValue::Usize(2))),
         );
         // Lower boundary
         assert_eq!(
-            component.on(Cmd::Move(Direction::Down)),
+            component.perform(Cmd::Move(Direction::Down)),
             CmdResult::Changed(State::One(StateValue::Usize(2))),
         );
         // Press enter
         assert_eq!(
-            component.on(Cmd::Submit),
+            component.perform(Cmd::Submit),
             CmdResult::Submit(State::One(StateValue::Usize(2))),
         );
         // Tab should be closed
         assert_eq!(component.states.is_tab_open(), false);
         // Re open
-        assert_eq!(component.on(Cmd::Submit), CmdResult::None);
+        assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
         assert_eq!(component.states.is_tab_open(), true);
         // Move arrows
         assert_eq!(
-            component.on(Cmd::Submit),
+            component.perform(Cmd::Submit),
             CmdResult::Submit(State::One(StateValue::Usize(2))),
         );
         assert_eq!(component.states.is_tab_open(), false);
-        assert_eq!(component.on(Cmd::Move(Direction::Down)), CmdResult::None);
-        assert_eq!(component.on(Cmd::Move(Direction::Up)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Down)),
+            CmdResult::None
+        );
+        assert_eq!(component.perform(Cmd::Move(Direction::Up)), CmdResult::None);
     }
 }

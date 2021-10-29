@@ -156,53 +156,50 @@ pub struct Table {
 
 impl Table {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn inactive(mut self, s: Style) -> Self {
-        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
-        self.props
-            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn step(mut self, step: usize) -> Self {
-        self.props
-            .set(Attribute::ScrollStep, AttrValue::Length(step));
+        self.attr(Attribute::ScrollStep, AttrValue::Length(step));
         self
     }
 
     pub fn scroll(mut self, scrollable: bool) -> Self {
-        self.props
-            .set(Attribute::Scroll, AttrValue::Flag(scrollable));
+        self.attr(Attribute::Scroll, AttrValue::Flag(scrollable));
         self
     }
 
     pub fn highlighted_str<S: AsRef<str>>(mut self, s: S) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::HighlightedStr,
             AttrValue::String(s.as_ref().to_string()),
         );
@@ -210,32 +207,32 @@ impl Table {
     }
 
     pub fn highlighted_color(mut self, c: Color) -> Self {
-        self.props
-            .set(Attribute::HighlightedColor, AttrValue::Color(c));
+        self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
         self
     }
 
     pub fn column_spacing(mut self, w: u16) -> Self {
-        self.props
-            .set(Attribute::Custom(TABLE_COLUMN_SPACING), AttrValue::Size(w));
+        self.attr(Attribute::Custom(TABLE_COLUMN_SPACING), AttrValue::Size(w));
         self
     }
 
     pub fn row_height(mut self, h: u16) -> Self {
-        self.props.set(Attribute::Height, AttrValue::Size(h));
+        self.attr(Attribute::Height, AttrValue::Size(h));
         self
     }
 
     pub fn widths(mut self, w: &[u16]) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Width,
-            AttrValue::Payload(PropPayload::Vec(w.iter().map(PropValue::U16).collect())),
+            AttrValue::Payload(PropPayload::Vec(
+                w.iter().map(|x| PropValue::U16(*x)).collect(),
+            )),
         );
         self
     }
 
     pub fn headers<S: AsRef<str>>(mut self, headers: &[S]) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
                 headers
@@ -248,12 +245,12 @@ impl Table {
     }
 
     pub fn table(mut self, t: PropTable) -> Self {
-        self.props.set(Attribute::Content, AttrValue::Table(t));
+        self.attr(Attribute::Content, AttrValue::Table(t));
         self
     }
 
     pub fn rewind(mut self, r: bool) -> Self {
-        self.props.set(Attribute::Rewind, AttrValue::Flag(r));
+        self.attr(Attribute::Rewind, AttrValue::Flag(r));
         self
     }
 
@@ -280,7 +277,7 @@ impl Table {
         match self.props.get(Attribute::Width).map(|x| x.unwrap_payload()) {
             Some(PropPayload::Vec(widths)) => widths
                 .iter()
-                .map(|x| *x.unwrap_u16())
+                .map(|x| x.unwrap_u16())
                 .map(Constraint::Percentage)
                 .collect(),
             _ => {
@@ -301,7 +298,7 @@ impl Table {
 }
 
 impl MockComponent for Table {
-    fn view(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let foreground = self
                 .props
@@ -387,16 +384,11 @@ impl MockComponent for Table {
             let mut table = TuiTable::new(rows)
                 .block(crate::utils::get_block(
                     borders,
-                    title,
+                    Some(title),
                     focus,
                     inactive_style,
                 ))
-                .highlight_style(
-                    Style::default()
-                        .fg(fg)
-                        .bg(bg)
-                        .add_modifier(self.props.modifiers),
-                )
+                .highlight_style(Style::default().fg(fg).bg(bg).add_modifier(modifiers))
                 .widths(&widths);
             // Highlighted symbol
             if let Some(hg_str) = self
@@ -404,7 +396,7 @@ impl MockComponent for Table {
                 .get(Attribute::HighlightedStr)
                 .map(|x| x.unwrap_string())
             {
-                table = table.highlight_symbol(hg_str);
+                table = table.highlight_symbol(&hg_str);
             }
             // Col spacing
             if let Some(spacing) = self
@@ -453,7 +445,7 @@ impl MockComponent for Table {
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         self.props.set(attr, value);
         // Update list len and fix index
-        self.set_list_len(
+        self.states.set_list_len(
             match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
                 Some(spans) => spans.len(),
                 _ => 0,
@@ -640,51 +632,51 @@ mod tests {
         // Check messages
         // Handle inputs
         assert_eq!(
-            component.on(Cmd::Move(Direction::Down)),
+            component.perform(Cmd::Move(Direction::Down)),
             CmdResult::Changed(State::One(StateValue::Usize(2)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be decremented
         assert_eq!(
-            component.on(Cmd::Move(Direction::Up)),
+            component.perform(Cmd::Move(Direction::Up)),
             CmdResult::Changed(State::One(StateValue::Usize(1)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 1);
         // Index should be 2
         assert_eq!(
-            component.on(Cmd::Scroll(Direction::Down)),
+            component.perform(Cmd::Scroll(Direction::Down)),
             CmdResult::Changed(State::One(StateValue::Usize(5)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 5);
         assert_eq!(
-            component.on(Cmd::Scroll(Direction::Down)),
+            component.perform(Cmd::Scroll(Direction::Down)),
             CmdResult::Changed(State::One(StateValue::Usize(6)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 6);
         // Index should be 0
         assert_eq!(
-            component.on(Cmd::Scroll(Direction::Up)),
+            component.perform(Cmd::Scroll(Direction::Up)),
             CmdResult::Changed(State::One(StateValue::Usize(2)))
         );
         assert_eq!(component.states.list_index, 2);
         assert_eq!(
-            component.on(Cmd::Scroll(Direction::Up)),
+            component.perform(Cmd::Scroll(Direction::Up)),
             CmdResult::Changed(State::One(StateValue::Usize(0)))
         );
         assert_eq!(component.states.list_index, 0);
         // End
         assert_eq!(
-            component.on(Cmd::GoTo(Position::End)),
+            component.perform(Cmd::GoTo(Position::End)),
             CmdResult::Changed(State::One(StateValue::Usize(6)))
         );
         assert_eq!(component.states.list_index, 6);
         // Home
         assert_eq!(
-            component.on(Cmd::GoTo(Position::Begin)),
+            component.perform(Cmd::GoTo(Position::Begin)),
             CmdResult::Changed(State::One(StateValue::Usize(0)))
         );
         assert_eq!(component.states.list_index, 0);

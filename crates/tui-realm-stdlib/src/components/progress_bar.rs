@@ -52,43 +52,41 @@ impl Default for ProgressBar {
 
 impl ProgressBar {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
-        self.props
-            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn label<S: AsRef<str>>(mut self, s: S) -> Self {
-        self.props
-            .set(Attribute::Text, AttrValue::String(s.as_ref().to_string()));
+        self.attr(Attribute::Text, AttrValue::String(s.as_ref().to_string()));
         self
     }
 
     pub fn progress(mut self, p: f64) -> Self {
         Self::assert_progress(p);
-        self.props.set(
+        self.attr(
             Attribute::Value,
             AttrValue::Payload(PropPayload::One(PropValue::F64(p))),
         );
@@ -119,6 +117,13 @@ impl MockComponent for ProgressBar {
                 .props
                 .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
                 .unwrap_color();
+            let modifiers = self
+                .props
+                .get_or(
+                    Attribute::TextProps,
+                    AttrValue::TextModifiers(TextModifiers::empty()),
+                )
+                .unwrap_text_modifiers();
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -143,7 +148,7 @@ impl MockComponent for ProgressBar {
                         Style::default()
                             .fg(foreground)
                             .bg(background)
-                            .add_modifier(self.props.modifiers),
+                            .add_modifier(modifiers),
                     )
                     .label(label)
                     .ratio(percentage),
@@ -158,7 +163,7 @@ impl MockComponent for ProgressBar {
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         if let Attribute::Value = attr {
-            if let Attribute::Payload(p) = value {
+            if let AttrValue::Payload(p) = value {
                 Self::assert_progress(p.unwrap_one().unwrap_f64());
             }
         }
@@ -203,6 +208,6 @@ mod test {
             .progress(6.0)
             .title("Downloading file...", Alignment::Center)
             .label("60% - ETA 00:20")
-            .borders(Borders::default())
+            .borders(Borders::default());
     }
 }

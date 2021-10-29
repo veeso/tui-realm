@@ -26,7 +26,9 @@
  * SOFTWARE.
  */
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, Color, Props, Style};
+use tuirealm::props::{
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+};
 use tuirealm::tui::{layout::Rect, text::Spans, widgets::Tabs};
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
@@ -116,46 +118,57 @@ impl Default for Radio {
 
 impl Radio {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn inactive(mut self, s: Style) -> Self {
-        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
     pub fn rewind(mut self, r: bool) -> Self {
-        self.props.set(Attribute::Rewind, AttrValue::Flag(r));
+        self.attr(Attribute::Rewind, AttrValue::Flag(r));
         self
     }
 
     pub fn choices<S: AsRef<str>>(mut self, choices: &[S]) -> Self {
-        self.states.set_choices(choices);
+        self.attr(
+            Attribute::Content,
+            AttrValue::Payload(PropPayload::Vec(
+                choices
+                    .into_iter()
+                    .map(|x| PropValue::Str(x.as_ref().to_string()))
+                    .collect(),
+            )),
+        );
         self
     }
 
     pub fn value(mut self, i: usize) -> Self {
         // Set state
-        self.states.select(i);
+        self.attr(
+            Attribute::Value,
+            AttrValue::Payload(PropPayload::One(PropValue::Usize(i))),
+        );
         self
     }
 
@@ -226,7 +239,7 @@ impl MockComponent for Radio {
                     .iter()
                     .map(|x| x.unwrap_str().as_str())
                     .collect();
-                self.states.set_choices(choices);
+                self.states.set_choices(&choices);
             }
             Attribute::Value => {
                 self.states
@@ -239,7 +252,7 @@ impl MockComponent for Radio {
     }
 
     fn state(&self) -> State {
-        State::One(StateValue::Usize(self.states.selected))
+        State::One(StateValue::Usize(self.states.choice))
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
@@ -342,37 +355,37 @@ mod test {
         assert_eq!(component.state(), State::One(StateValue::Usize(1)));
         // Handle events
         assert_eq!(
-            component.on(Cmd::Move(Direction::Left)),
+            component.perform(Cmd::Move(Direction::Left)),
             CmdResult::Changed(State::One(StateValue::Usize(0))),
         );
         assert_eq!(component.state(), State::One(StateValue::Usize(0)));
         // Left again
         assert_eq!(
-            component.on(Cmd::Move(Direction::Left)),
+            component.perform(Cmd::Move(Direction::Left)),
             CmdResult::Changed(State::One(StateValue::Usize(0))),
         );
         assert_eq!(component.state(), State::One(StateValue::Usize(0)));
         // Right
         assert_eq!(
-            component.on(Cmd::Move(Direction::Right)),
+            component.perform(Cmd::Move(Direction::Right)),
             CmdResult::Changed(State::One(StateValue::Usize(1))),
         );
         assert_eq!(component.state(), State::One(StateValue::Usize(1)));
         // Right again
         assert_eq!(
-            component.on(Cmd::Move(Direction::Right)),
+            component.perform(Cmd::Move(Direction::Right)),
             CmdResult::Changed(State::One(StateValue::Usize(2))),
         );
         assert_eq!(component.state(), State::One(StateValue::Usize(2)));
         // Right again
         assert_eq!(
-            component.on(Cmd::Move(Direction::Right)),
+            component.perform(Cmd::Move(Direction::Right)),
             CmdResult::Changed(State::One(StateValue::Usize(2))),
         );
         assert_eq!(component.state(), State::One(StateValue::Usize(2)));
         // Submit
         assert_eq!(
-            component.on(Cmd::Submit),
+            component.perform(Cmd::Submit),
             CmdResult::Submit(State::One(StateValue::Usize(2))),
         );
     }

@@ -60,50 +60,56 @@ impl Default for Paragraph {
 
 impl Paragraph {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
-        self.props
-            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn alignment(mut self, a: Alignment) -> Self {
-        self.props
-            .set(Attribute::Alignment, AttrValue::Alignment(a));
+        self.attr(Attribute::Alignment, AttrValue::Alignment(a));
+        self
+    }
+
+    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
+        self.attr(
+            Attribute::Title,
+            AttrValue::Title((t.as_ref().to_string(), a)),
+        );
         self
     }
 
     pub fn text(mut self, s: &[TextSpan]) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
-                s.into_iter().map(PropValue::TextSpan).collect(),
+                s.into_iter().map(|x| PropValue::TextSpan(*x)).collect(),
             )),
         );
         self
     }
 
     pub fn wrap(mut self, wrap: bool) -> Self {
-        self.props.set(Attribute::TextWrap, AttrValue::Flag(wrap));
+        self.attr(Attribute::TextWrap, AttrValue::Flag(wrap));
         self
     }
 }
 
 impl MockComponent for Paragraph {
-    fn view(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text items
@@ -114,7 +120,7 @@ impl MockComponent for Paragraph {
                     .map(|x| x.unwrap_text_span())
                     .map(|x| {
                         let (fg, bg, modifiers) =
-                            crate::utils::use_or_default_styles(&self.props, x);
+                            crate::utils::use_or_default_styles(&self.props, &x);
                         Spans::from(vec![Span::styled(
                             x.content.clone(),
                             Style::default().add_modifier(modifiers).fg(fg).bg(bg),
@@ -141,6 +147,13 @@ impl MockComponent for Paragraph {
                 .props
                 .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
                 .unwrap_color();
+            let modifiers = self
+                .props
+                .get_or(
+                    Attribute::TextProps,
+                    AttrValue::TextModifiers(TextModifiers::empty()),
+                )
+                .unwrap_text_modifiers();
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -150,7 +163,12 @@ impl MockComponent for Paragraph {
             render.render_widget(
                 TuiParagraph::new(text)
                     .block(div)
-                    .style(Style::default().fg(foreground).bg(background))
+                    .style(
+                        Style::default()
+                            .fg(foreground)
+                            .bg(background)
+                            .add_modifier(modifiers),
+                    )
                     .alignment(alignment)
                     .wrap(Wrap { trim }),
                 area,

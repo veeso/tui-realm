@@ -394,7 +394,7 @@ A radio button group. Provides the possibility to select a single option in a gr
 - `Foreground(Color)`: foreground color
 - `Rewind(Flag)`: if true, when moving beyond limits of component, the choice will be rewinded, instead of remaining the same
 - `Title(Title)`: set radio title
-- `Value(Payload(One(String)))`: set default selected item by its index
+- `Value(Payload(One(Usize)))`: set default selected item by its index
 
 ---
 

@@ -26,7 +26,9 @@
  * SOFTWARE.
  */
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, Color, Props, Style};
+use tuirealm::props::{
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+};
 use tuirealm::tui::{
     layout::Rect,
     text::{Span, Spans},
@@ -144,46 +146,59 @@ impl Default for Checkbox {
 
 impl Checkbox {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn inactive(mut self, s: Style) -> Self {
-        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
     pub fn rewind(mut self, r: bool) -> Self {
-        self.props.set(Attribute::Rewind, AttrValue::Flag(r));
+        self.attr(Attribute::Rewind, AttrValue::Flag(r));
         self
     }
 
     pub fn choices<S: AsRef<str>>(mut self, choices: &[S]) -> Self {
-        self.states.set_choices(choices);
+        self.attr(
+            Attribute::Content,
+            AttrValue::Payload(PropPayload::Vec(
+                choices
+                    .into_iter()
+                    .map(|x| PropValue::Str(x.as_ref().to_string()))
+                    .collect(),
+            )),
+        );
         self
     }
 
     pub fn values(mut self, selected: &[usize]) -> Self {
         // Set state
-        selected.into_iter().for_each(|x| self.states.select(x));
+        self.attr(
+            Attribute::Value,
+            AttrValue::Payload(PropPayload::Vec(
+                selected.into_iter().map(|x| PropValue::Usize(*x)).collect(),
+            )),
+        );
         self
     }
 
@@ -195,7 +210,7 @@ impl Checkbox {
 }
 
 impl MockComponent for Checkbox {
-    fn view(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let choices: Vec<Spans> = self
                 .states
@@ -277,7 +292,7 @@ impl MockComponent for Checkbox {
                     .iter()
                     .map(|x| x.unwrap_str().as_str())
                     .collect();
-                self.states.set_choices(choices);
+                self.states.set_choices(&choices);
             }
             Attribute::Value => {
                 for c in value.unwrap_payload().unwrap_vec() {
@@ -405,7 +420,7 @@ mod test {
             .borders(Borders::default())
             .title("Which food do you prefer?", Alignment::Center)
             .choices(&["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta", "Falafel"])
-            .value(&[1, 5])
+            .values(&[1, 5])
             .rewind(false);
         component.attr(
             Attribute::Content,
@@ -422,50 +437,68 @@ mod test {
         assert_eq!(component.states.choice, 0);
         assert_eq!(component.states.selection, vec![1, 5]);
         assert_eq!(component.states.choices.len(), 6);
-        // Focus
-        assert_eq!(component.states.focus, false);
-        component.active();
-        assert_eq!(component.states.focus, true);
-        component.blur();
-        assert_eq!(component.states.focus, false);
         // Get value
         assert_eq!(component.state(), State::Vec(vec![StateValue::Usize(1)]));
         // Handle events
-        assert_eq!(component.on(Cmd::Move(Direction::Left)), CmdResult::None,);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Left)),
+            CmdResult::None,
+        );
         assert_eq!(component.state(), State::Vec(vec![StateValue::Usize(1)]));
         // Toggle
         assert_eq!(
-            component.on(Cmd::Toggle),
+            component.perform(Cmd::Toggle),
             CmdResult::Changed(State::Vec(vec![StateValue::Usize(1), StateValue::Usize(0)]))
         );
         // Left again
-        assert_eq!(component.on(Cmd::Move(Direction::Left)), CmdResult::None,);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Left)),
+            CmdResult::None,
+        );
         assert_eq!(component.states.choice, 0);
         // Right
-        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Right)),
+            CmdResult::None,
+        );
         // Toggle
         assert_eq!(
-            component.on(Cmd::Toggle),
+            component.perform(Cmd::Toggle),
             CmdResult::Changed(State::Vec(vec![StateValue::Usize(0)]))
         );
         // Right again
-        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Right)),
+            CmdResult::None,
+        );
         assert_eq!(component.states.choice, 2);
         // Right again
-        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Right)),
+            CmdResult::None,
+        );
         assert_eq!(component.states.choice, 3);
         // Right again
-        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Right)),
+            CmdResult::None,
+        );
         assert_eq!(component.states.choice, 4);
         // Right again
-        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Right)),
+            CmdResult::None,
+        );
         assert_eq!(component.states.choice, 5);
         // Right again
-        assert_eq!(component.on(Cmd::Move(Direction::Right)), CmdResult::None,);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Right)),
+            CmdResult::None,
+        );
         assert_eq!(component.states.choice, 5);
         // Submit
         assert_eq!(
-            component.on(Cmd::Submit),
+            component.perform(Cmd::Submit),
             CmdResult::Submit(State::Vec(vec![StateValue::Usize(0)])),
         );
     }

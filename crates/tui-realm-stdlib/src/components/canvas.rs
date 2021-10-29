@@ -57,40 +57,40 @@ impl Default for Canvas {
 
 impl Canvas {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn data(mut self, data: &[Shape]) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Shape,
             AttrValue::Payload(PropPayload::Vec(
-                data.into_iter().map(PropValue::Shape).collect(),
+                data.into_iter().map(|x| PropValue::Shape(*x)).collect(),
             )),
         );
         self
     }
 
     pub fn x_bounds(mut self, bounds: (f64, f64)) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Custom(CANVAS_X_BOUNDS),
             AttrValue::Payload(PropPayload::Tup2((
                 PropValue::F64(bounds.0),
@@ -101,7 +101,7 @@ impl Canvas {
     }
 
     pub fn y_bounds(mut self, bounds: (f64, f64)) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Custom(CANVAS_Y_BOUNDS),
             AttrValue::Payload(PropPayload::Tup2((
                 PropValue::F64(bounds.0),
@@ -116,7 +116,7 @@ impl Canvas {
     /// Draw a shape into the canvas `Context`
     fn draw_shape(ctx: &mut Context, shape: &Shape) {
         match shape {
-            Shape::Label((x, y, s, c)) => ctx.print(*x, *y, &s, *c),
+            Shape::Label((x, y, s, c)) => {} /* ctx.print(*x, *y, &s, *c) FIXME: UNSUPPORTED */
             Shape::Layer => ctx.layer(),
             Shape::Line(line) => ctx.draw(line),
             Shape::Map(map) => ctx.draw(map),
@@ -130,7 +130,7 @@ impl Canvas {
 }
 
 impl MockComponent for Canvas {
-    fn view(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let foreground = self
                 .props
@@ -157,15 +157,15 @@ impl MockComponent for Canvas {
                 .get(Attribute::Custom(CANVAS_X_BOUNDS))
                 .map(|x| x.unwrap_payload().unwrap_tup2())
                 .map(|(a, b)| [a.unwrap_f64(), b.unwrap_f64()])
-                .unwrap_or([&0.0, &0.0]);
+                .unwrap_or([0.0, 0.0]);
             let y_bounds: [f64; 2] = self
                 .props
                 .get(Attribute::Custom(CANVAS_X_BOUNDS))
                 .map(|x| x.unwrap_payload().unwrap_tup2())
                 .map(|(a, b)| [a.unwrap_f64(), b.unwrap_f64()])
-                .unwrap_or([&0.0, &0.0]);
+                .unwrap_or([0.0, 0.0]);
             // Get shapes
-            let shapes: Vec<&Shape> = self
+            let shapes: Vec<Shape> = self
                 .props
                 .get(Attribute::Shape)
                 .map(|x| {
@@ -221,7 +221,7 @@ mod test {
             .borders(Borders::default())
             .x_bounds((-180.0, 180.0))
             .y_bounds((-90.0, 90.0))
-            .shapes(vec![
+            .data(&[
                 Shape::Map(Map {
                     resolution: MapResolution::High,
                     color: Color::Rgb(240, 240, 240),

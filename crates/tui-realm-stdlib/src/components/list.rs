@@ -161,58 +161,55 @@ impl Default for List {
 
 impl List {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
-        self.props
-            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
     pub fn borders(mut self, b: Borders) -> Self {
-        self.props.set(Attribute::Borders, AttrValue::Borders(b));
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Title,
-            AttrValue::Title(t.as_ref().to_string(), a),
+            AttrValue::Title((t.as_ref().to_string(), a)),
         );
         self
     }
 
     pub fn inactive(mut self, s: Style) -> Self {
-        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
     pub fn rewind(mut self, r: bool) -> Self {
-        self.props.set(Attribute::Rewind, AttrValue::Flag(r));
+        self.attr(Attribute::Rewind, AttrValue::Flag(r));
         self
     }
 
     pub fn step(mut self, step: usize) -> Self {
-        self.props
-            .set(Attribute::ScrollStep, AttrValue::Length(step));
+        self.attr(Attribute::ScrollStep, AttrValue::Length(step));
         self
     }
 
     pub fn scroll(mut self, scrollable: bool) -> Self {
-        self.props
-            .set(Attribute::Scroll, AttrValue::Flag(scrollable));
+        self.attr(Attribute::Scroll, AttrValue::Flag(scrollable));
         self
     }
 
     pub fn highlighted_str<S: AsRef<str>>(mut self, s: S) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::HighlightedStr,
             AttrValue::String(s.as_ref().to_string()),
         );
@@ -220,15 +217,12 @@ impl List {
     }
 
     pub fn highlighted_color(mut self, c: Color) -> Self {
-        self.props
-            .set(Attribute::HighlightedColor, AttrValue::Color(c));
+        self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
         self
     }
 
     pub fn rows(mut self, rows: Table) -> Self {
-        self.states.set_list_len(rows.len());
-        self.states.fix_list_index();
-        self.props.set(Attribute::Content, AttrValue::Table(rows));
+        self.attr(Attribute::Content, AttrValue::Table(rows));
         self
     }
 
@@ -246,7 +240,7 @@ impl List {
 }
 
 impl MockComponent for List {
-    fn view(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let foreground = self
                 .props
@@ -286,7 +280,7 @@ impl MockComponent for List {
                 true => focus,
                 false => true,
             };
-            let div = crate::utils::get_block(borders, title.as_ref(), active);
+            let div = crate::utils::get_block(borders, Some(title), active, inactive_style);
             // Make list entries
             let list_items: Vec<ListItem> =
                 match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
@@ -328,19 +322,14 @@ impl MockComponent for List {
             let mut list = TuiList::new(list_items)
                 .block(div)
                 .start_corner(Corner::TopLeft)
-                .highlight_style(
-                    Style::default()
-                        .fg(fg)
-                        .bg(bg)
-                        .add_modifier(self.props.modifiers),
-                );
+                .highlight_style(Style::default().fg(fg).bg(bg).add_modifier(modifiers));
             // Highlighted symbol
             if let Some(hg_str) = self
                 .props
                 .get(Attribute::HighlightedStr)
                 .map(|x| x.unwrap_string())
             {
-                list = list.highlight_symbol(hg_str);
+                list = list.highlight_symbol(&hg_str);
             }
             if self.scrollable() {
                 let mut state: ListState = ListState::default();
@@ -359,7 +348,7 @@ impl MockComponent for List {
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         self.props.set(attr, value);
         // Update list len and fix index
-        self.set_list_len(
+        self.states.set_list_len(
             match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
                 Some(spans) => spans.len(),
                 _ => 0,
@@ -369,7 +358,7 @@ impl MockComponent for List {
     }
 
     fn state(&self) -> State {
-        match self.is_scrollable() {
+        match self.scrollable() {
             true => State::One(StateValue::Usize(self.states.list_index)),
             false => State::None,
         }
@@ -448,8 +437,6 @@ impl MockComponent for List {
 
 #[cfg(test)]
 mod tests {
-
-    use std::io::Seek;
 
     use super::*;
     use pretty_assertions::assert_eq;
@@ -536,59 +523,57 @@ mod tests {
             );
         assert_eq!(component.states.list_len, 7);
         assert_eq!(component.states.list_index, 0);
-        // Own funcs
-        assert_eq!(component.layout().len(), 4);
         // Increment list index
         component.states.list_index += 1;
         assert_eq!(component.states.list_index, 1);
         // Check messages
         // Handle inputs
         assert_eq!(
-            component.on(Cmd::Move(Direction::Down)),
+            component.perform(Cmd::Move(Direction::Down)),
             CmdResult::Changed(State::One(StateValue::Usize(2)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be decremented
         assert_eq!(
-            component.on(Cmd::Move(Direction::Up)),
+            component.perform(Cmd::Move(Direction::Up)),
             CmdResult::Changed(State::One(StateValue::Usize(1)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 1);
         // Index should be 2
         assert_eq!(
-            component.on(Cmd::Scroll(Direction::Down)),
+            component.perform(Cmd::Scroll(Direction::Down)),
             CmdResult::Changed(State::One(StateValue::Usize(5)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 5);
         assert_eq!(
-            component.on(Cmd::Scroll(Direction::Down)),
+            component.perform(Cmd::Scroll(Direction::Down)),
             CmdResult::Changed(State::One(StateValue::Usize(6)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 6);
         // Index should be 0
         assert_eq!(
-            component.on(Cmd::Scroll(Direction::Up)),
+            component.perform(Cmd::Scroll(Direction::Up)),
             CmdResult::Changed(State::One(StateValue::Usize(2)))
         );
         assert_eq!(component.states.list_index, 2);
         assert_eq!(
-            component.on(Cmd::Scroll(Direction::Up)),
+            component.perform(Cmd::Scroll(Direction::Up)),
             CmdResult::Changed(State::One(StateValue::Usize(0)))
         );
         assert_eq!(component.states.list_index, 0);
         // End
         assert_eq!(
-            component.on(Cmd::GoTo(Position::End)),
+            component.perform(Cmd::GoTo(Position::End)),
             CmdResult::Changed(State::One(StateValue::Usize(6)))
         );
         assert_eq!(component.states.list_index, 6);
         // Home
         assert_eq!(
-            component.on(Cmd::GoTo(Position::Begin)),
+            component.perform(Cmd::GoTo(Position::Begin)),
             CmdResult::Changed(State::One(StateValue::Usize(0)))
         );
         assert_eq!(component.states.list_index, 0);

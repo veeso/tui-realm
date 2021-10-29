@@ -49,36 +49,33 @@ impl Default for Label {
 
 impl Label {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
-        self.props
-            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
     pub fn text<S: AsRef<str>>(mut self, t: S) -> Self {
-        self.props
-            .set(Attribute::Text, AttrValue::String(t.as_ref().to_string()));
+        self.attr(Attribute::Text, AttrValue::String(t.as_ref().to_string()));
         self
     }
 
     pub fn alignment(mut self, alignment: Alignment) -> Self {
-        self.props
-            .set(Attribute::Alignment, AttrValue::String(alignment));
+        self.attr(Attribute::Alignment, AttrValue::Alignment(alignment));
         self
     }
 }
 
 impl MockComponent for Label {
-    fn view(&self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text

@@ -57,32 +57,30 @@ impl Default for Span {
 
 impl Span {
     pub fn foreground(mut self, fg: Color) -> Self {
-        self.props.set(Attribute::Foreground, AttrValue::Color(fg));
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
     pub fn background(mut self, bg: Color) -> Self {
-        self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
-        self.props
-            .set(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
     pub fn alignment(mut self, a: Alignment) -> Self {
-        self.props
-            .set(Attribute::Alignment, AttrValue::Alignment(a));
+        self.attr(Attribute::Alignment, AttrValue::Alignment(a));
         self
     }
 
     pub fn spans(mut self, s: &[TextSpan]) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
-                s.into_iter().map(PropValue::TextSpan).collect(),
+                s.into_iter().map(|x| PropValue::TextSpan(*x)).collect(),
             )),
         );
         self
@@ -102,7 +100,7 @@ impl MockComponent for Span {
                         .map(|x| {
                             // Keep colors and modifiers, or use default
                             let (fg, bg, modifiers) =
-                                crate::utils::use_or_default_styles(&self.props, x);
+                                crate::utils::use_or_default_styles(&self.props, &x);
                             TuiSpan::styled(
                                 x.content.clone(),
                                 Style::default().add_modifier(modifiers).fg(fg).bg(bg),

@@ -119,7 +119,7 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
             true => props
                 .get_or(
                     Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::NONE),
+                    AttrValue::TextModifiers(TextModifiers::empty()),
                 )
                 .unwrap_text_modifiers(),
             false => span.modifiers,
@@ -132,10 +132,11 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
 /// Get block
 pub(crate) fn get_block<'a>(
     props: Borders,
-    title: (String, Alignment),
+    title: Option<(String, Alignment)>,
     focus: bool,
     inactive_style: Option<Style>,
 ) -> Block<'a> {
+    let title = title.unwrap_or((String::default(), Alignment::Left));
     Block::default()
         .borders(props.sides)
         .border_style(match focus {
@@ -230,8 +231,13 @@ mod test {
             .sides(BorderSides::ALL)
             .color(Color::Red)
             .modifiers(BorderType::Rounded);
-        get_block(&props, Some("title", Alignment::Center), true);
-        get_block(&props, None, false);
+        get_block(
+            props.clone(),
+            Some(("title".to_string(), Alignment::Center)),
+            true,
+            None,
+        );
+        get_block(props, None, false, None);
     }
 
     #[test]
