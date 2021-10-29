@@ -51,6 +51,8 @@ pub enum Cmd {
     Submit,
     /// User "deleted" something
     Delete,
+    /// User "cancelled" something; used to distinguish between Del and Canc
+    Cancel,
     /// User toggled something
     Toggle,
     /// User changed something
