@@ -79,8 +79,8 @@ impl OwnStates {
     /// Set OwnStates choices from a vector of text spans
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
-    pub fn set_choices(&mut self, spans: &[&str]) {
-        self.choices = spans.iter().map(|x| x.to_string()).collect();
+    pub fn set_choices(&mut self, spans: &[String]) {
+        self.choices = spans.to_vec();
         // Keep index if possible
         if self.choice >= self.choices.len() {
             self.choice = match self.choices.len() {
@@ -155,7 +155,7 @@ impl Radio {
             Attribute::Content,
             AttrValue::Payload(PropPayload::Vec(
                 choices
-                    .into_iter()
+                    .iter()
                     .map(|x| PropValue::Str(x.as_ref().to_string()))
                     .collect(),
             )),
@@ -233,11 +233,11 @@ impl MockComponent for Radio {
         match attr {
             Attribute::Content => {
                 // Reset choices
-                let choices: Vec<&str> = value
+                let choices: Vec<String> = value
                     .unwrap_payload()
                     .unwrap_vec()
                     .iter()
-                    .map(|x| x.unwrap_str().as_str())
+                    .map(|x| x.clone().unwrap_str())
                     .collect();
                 self.states.set_choices(&choices);
             }
@@ -291,7 +291,12 @@ mod test {
         let mut states: OwnStates = OwnStates::default();
         assert_eq!(states.choice, 0);
         assert_eq!(states.choices.len(), 0);
-        let choices: &[&str] = &["lemon", "strawberry", "vanilla", "chocolate"];
+        let choices: &[String] = &[
+            "lemon".to_string(),
+            "strawberry".to_string(),
+            "vanilla".to_string(),
+            "chocolate".to_string(),
+        ];
         states.set_choices(choices);
         assert_eq!(states.choice, 0);
         assert_eq!(states.choices.len(), 4);
@@ -309,16 +314,21 @@ mod test {
         states.prev_choice(false);
         assert_eq!(states.choice, 2);
         // Update
-        let choices: &[&str] = &["lemon", "strawberry"];
+        let choices: &[String] = &["lemon".to_string(), "strawberry".to_string()];
         states.set_choices(choices);
         assert_eq!(states.choice, 1); // Move to first index available
         assert_eq!(states.choices.len(), 2);
-        let choices: &[&str] = &[];
+        let choices: &[String] = &[];
         states.set_choices(choices);
         assert_eq!(states.choice, 0); // Move to first index available
         assert_eq!(states.choices.len(), 0);
         // Rewind
-        let choices: &[&str] = &["lemon", "strawberry", "vanilla", "chocolate"];
+        let choices: &[String] = &[
+            "lemon".to_string(),
+            "strawberry".to_string(),
+            "vanilla".to_string(),
+            "chocolate".to_string(),
+        ];
         states.set_choices(choices);
         assert_eq!(states.choice, 0);
         states.prev_choice(true);

@@ -148,10 +148,22 @@ impl OwnStates {
 /// ## Table
 ///
 /// represents a read-only text component without any container.
-#[derive(Default)]
 pub struct Table {
     props: Props,
     states: OwnStates,
+    hg_str: Option<String>, // CRAP CRAP CRAP
+    headers: Vec<String>,   // CRAP CRAP CRAP
+}
+
+impl Default for Table {
+    fn default() -> Self {
+        Self {
+            props: Props::default(),
+            states: OwnStates::default(),
+            hg_str: None,
+            headers: Vec::default(),
+        }
+    }
 }
 
 impl Table {
@@ -277,6 +289,7 @@ impl Table {
         match self.props.get(Attribute::Width).map(|x| x.unwrap_payload()) {
             Some(PropPayload::Vec(widths)) => widths
                 .iter()
+                .cloned()
                 .map(|x| x.unwrap_u16())
                 .map(Constraint::Percentage)
                 .collect(),
@@ -391,12 +404,12 @@ impl MockComponent for Table {
                 .highlight_style(Style::default().fg(fg).bg(bg).add_modifier(modifiers))
                 .widths(&widths);
             // Highlighted symbol
-            if let Some(hg_str) = self
+            self.hg_str = self
                 .props
                 .get(Attribute::HighlightedStr)
-                .map(|x| x.unwrap_string())
-            {
-                table = table.highlight_symbol(&hg_str);
+                .map(|x| x.unwrap_string());
+            if let Some(hg_str) = &self.hg_str {
+                table = table.highlight_symbol(hg_str);
             }
             // Col spacing
             if let Some(spacing) = self
@@ -407,16 +420,19 @@ impl MockComponent for Table {
                 table = table.column_spacing(spacing);
             }
             // Header
-            if let Some(PropPayload::Vec(headers)) =
-                self.props.get(Attribute::Text).map(|x| x.unwrap_payload())
-            {
-                let headers: Vec<&str> = headers
-                    .iter()
-                    .map(|x| match x {
-                        PropValue::Str(s) => s,
-                        _ => "",
-                    })
-                    .collect();
+            self.headers = self
+                .props
+                .get(Attribute::Text)
+                .map(|x| {
+                    x.unwrap_payload()
+                        .unwrap_vec()
+                        .into_iter()
+                        .map(|x| x.unwrap_str())
+                        .collect()
+                })
+                .unwrap_or_default();
+            if !self.headers.is_empty() {
+                let headers: Vec<&str> = self.headers.iter().map(|x| x.as_str()).collect();
                 table = table.header(
                     Row::new(headers)
                         .style(
@@ -501,7 +517,7 @@ impl MockComponent for Table {
                     .props
                     .get_or(Attribute::ScrollStep, AttrValue::Length(8))
                     .unwrap_length();
-                let step: usize = self.states.calc_max_step_ahead(step);
+                let step: usize = self.states.calc_max_step_behind(step);
                 (0..step).for_each(|_| self.states.decr_list_index(false));
                 if prev != self.states.list_index {
                     CmdResult::Changed(self.state())
@@ -700,7 +716,7 @@ mod tests {
     #[test]
     fn test_components_table() {
         // Make component
-        let mut component = Table::default()
+        let component = Table::default()
             .foreground(Color::Red)
             .background(Color::Blue)
             .highlighted_color(Color::Yellow)

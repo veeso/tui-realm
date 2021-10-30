@@ -115,7 +115,7 @@ impl OwnStates {
     /// ### calc_max_step_ahead
     ///
     /// Calculate the max step ahead to scroll list
-    pub fn calc_max_step_ahead(&self, max: usize) -> usize {
+    fn calc_max_step_ahead(&self, max: usize) -> usize {
         let remaining: usize = match self.list_len {
             0 => 0,
             len => len - 1 - self.list_index,
@@ -130,7 +130,7 @@ impl OwnStates {
     /// ### calc_max_step_ahead
     ///
     /// Calculate the max step ahead to scroll list
-    pub fn calc_max_step_behind(&self, max: usize) -> usize {
+    fn calc_max_step_behind(&self, max: usize) -> usize {
         if self.list_index > max {
             max
         } else {
@@ -147,6 +147,7 @@ impl OwnStates {
 pub struct Textarea {
     props: Props,
     states: OwnStates,
+    hg_str: Option<String>, // CRAP CRAP CRAP
 }
 
 impl Default for Textarea {
@@ -154,6 +155,7 @@ impl Default for Textarea {
         Self {
             props: Props::default(),
             states: OwnStates::default(),
+            hg_str: None,
         }
     }
 }
@@ -226,10 +228,11 @@ impl MockComponent for Textarea {
                 match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
                     Some(PropPayload::Vec(spans)) => spans
                         .iter()
+                        .cloned()
                         .map(|x| x.unwrap_text_span())
                         .map(|x| {
                             crate::utils::wrap_spans(
-                                vec![x.clone()].as_slice(),
+                                vec![x].as_slice(),
                                 area.width as usize,
                                 &self.props,
                             )
@@ -283,14 +286,19 @@ impl MockComponent for Textarea {
                     inactive_style,
                 ))
                 .start_corner(Corner::TopLeft)
-                .style(Style::default().fg(foreground).bg(background));
+                .style(
+                    Style::default()
+                        .fg(foreground)
+                        .bg(background)
+                        .add_modifier(modifiers),
+                );
             // Highlighted symbol
-            if let Some(hg_str) = self
+            self.hg_str = self
                 .props
                 .get(Attribute::HighlightedStr)
-                .map(|x| x.unwrap_string())
-            {
-                list = list.highlight_symbol(&hg_str);
+                .map(|x| x.unwrap_string());
+            if let Some(hg_str) = &self.hg_str {
+                list = list.highlight_symbol(hg_str);
             }
             render.render_stateful_widget(list, area, &mut state);
         }
@@ -329,6 +337,7 @@ impl MockComponent for Textarea {
                     .props
                     .get_or(Attribute::ScrollStep, AttrValue::Length(8))
                     .unwrap_length();
+                let step = self.states.calc_max_step_ahead(step);
                 (0..step).for_each(|_| self.states.incr_list_index());
             }
             Cmd::Scroll(Direction::Up) => {
@@ -336,6 +345,7 @@ impl MockComponent for Textarea {
                     .props
                     .get_or(Attribute::ScrollStep, AttrValue::Length(8))
                     .unwrap_length();
+                let step = self.states.calc_max_step_behind(step);
                 (0..step).for_each(|_| self.states.decr_list_index());
             }
             Cmd::GoTo(Position::Begin) => {

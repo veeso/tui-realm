@@ -91,8 +91,8 @@ impl OwnStates {
     /// Set OwnStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
-    pub fn set_choices(&mut self, choices: &[&str]) {
-        self.choices = choices.iter().map(|x| x.to_string()).collect();
+    pub fn set_choices(&mut self, choices: &[String]) {
+        self.choices = choices.to_vec();
         // Keep index if possible
         if self.selected >= self.choices.len() {
             self.selected = match self.choices.len() {
@@ -135,6 +135,7 @@ impl OwnStates {
 pub struct Select {
     props: Props,
     states: OwnStates,
+    hg_str: Option<String>, // CRAP CRAP CRAP
 }
 
 impl Default for Select {
@@ -142,6 +143,7 @@ impl Default for Select {
         Self {
             props: Props::default(),
             states: OwnStates::default(),
+            hg_str: None,
         }
     }
 }
@@ -198,7 +200,7 @@ impl Select {
             Attribute::Content,
             AttrValue::Payload(PropPayload::Vec(
                 choices
-                    .into_iter()
+                    .iter()
                     .map(|x| PropValue::Str(x.as_ref().to_string()))
                     .collect(),
             )),
@@ -218,7 +220,7 @@ impl Select {
     /// ### render_open_tab
     ///
     /// Render component when tab is open
-    fn render_open_tab(&self, render: &mut Frame, area: Rect) {
+    fn render_open_tab(&mut self, render: &mut Frame, area: Rect) {
         // Make choices
         let choices: Vec<ListItem> = self
             .states
@@ -275,7 +277,7 @@ impl Select {
         let p: Paragraph = Paragraph::new(selected_text)
             .style(match focus {
                 true => borders.style(),
-                false => inactive_style.unwrap_or(Style::default()),
+                false => inactive_style.unwrap_or_default(),
             })
             .block(block);
         render.render_widget(p, chunks[0]);
@@ -295,12 +297,12 @@ impl Select {
             .style(Style::default().fg(foreground).bg(background))
             .highlight_style(Style::default().fg(bg).bg(hg));
         // Highlighted symbol
-        if let Some(hg_str) = self
+        self.hg_str = self
             .props
             .get(Attribute::HighlightedStr)
-            .map(|x| x.unwrap_string())
-        {
-            list = list.highlight_symbol(&hg_str);
+            .map(|x| x.unwrap_string());
+        if let Some(hg_str) = &self.hg_str {
+            list = list.highlight_symbol(hg_str);
         }
         let mut state: ListState = ListState::default();
         state.select(Some(self.states.selected));
@@ -319,6 +321,18 @@ impl Select {
             .props
             .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
             .unwrap_color();
+        let inactive_style = self
+            .props
+            .get(Attribute::FocusStyle)
+            .map(|x| x.unwrap_style());
+        let focus = self
+            .props
+            .get_or(Attribute::Focus, AttrValue::Flag(false))
+            .unwrap_flag();
+        let style = match focus {
+            true => Style::default().bg(background).fg(foreground),
+            false => inactive_style.unwrap_or_default(),
+        };
         let borders = self
             .props
             .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -326,31 +340,17 @@ impl Select {
         let block: Block = Block::default()
             .borders(BorderSides::LEFT | BorderSides::TOP | BorderSides::RIGHT)
             .border_style(borders.style())
-            .style(Style::default().bg(background));
+            .style(style);
         let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
         let block = match title {
             Some((text, alignment)) => block.title(text).title_alignment(alignment),
             None => block,
         };
-        let focus = self
-            .props
-            .get_or(Attribute::Focus, AttrValue::Flag(false))
-            .unwrap_flag();
-        let inactive_style = self
-            .props
-            .get(Attribute::FocusStyle)
-            .map(|x| x.unwrap_style());
-        let div: Block = crate::utils::get_block(borders, title, focus, inactive_style);
         let selected_text: String = match self.states.choices.get(self.states.selected) {
             None => String::default(),
             Some(s) => s.clone(),
         };
-        let p: Paragraph = Paragraph::new(selected_text)
-            .style(match focus {
-                true => Style::default().fg(foreground).bg(background),
-                false => Style::default(),
-            })
-            .block(div);
+        let p: Paragraph = Paragraph::new(selected_text).style(style).block(block);
         render.render_widget(p, area);
     }
 
@@ -379,11 +379,11 @@ impl MockComponent for Select {
         match attr {
             Attribute::Content => {
                 // Reset choices
-                let choices: Vec<&str> = value
+                let choices: Vec<String> = value
                     .unwrap_payload()
                     .unwrap_vec()
                     .iter()
-                    .map(|x| x.unwrap_str().as_str())
+                    .map(|x| x.clone().unwrap_str())
                     .collect();
                 self.states.set_choices(&choices);
             }
@@ -451,7 +451,12 @@ mod test {
         assert_eq!(states.selected, 0);
         assert_eq!(states.choices.len(), 0);
         assert_eq!(states.tab_open, false);
-        let choices = vec!["lemon", "strawberry", "vanilla", "chocolate"];
+        let choices: &[String] = &[
+            "lemon".to_string(),
+            "strawberry".to_string(),
+            "vanilla".to_string(),
+            "chocolate".to_string(),
+        ];
         states.set_choices(&choices);
         assert_eq!(states.selected, 0);
         assert_eq!(states.choices.len(), 4);
@@ -480,7 +485,7 @@ mod test {
         states.prev_choice(false);
         assert_eq!(states.selected, 2);
         // Update
-        let choices = vec!["lemon", "strawberry"];
+        let choices: &[String] = &["lemon".to_string(), "strawberry".to_string()];
         states.set_choices(&choices);
         assert_eq!(states.selected, 1); // Move to first index available
         assert_eq!(states.choices.len(), 2);
@@ -489,7 +494,12 @@ mod test {
         assert_eq!(states.selected, 0); // Move to first index available
         assert_eq!(states.choices.len(), 0);
         // Rewind
-        let choices: &[&str] = &["lemon", "strawberry", "vanilla", "chocolate"];
+        let choices: &[String] = &[
+            "lemon".to_string(),
+            "strawberry".to_string(),
+            "vanilla".to_string(),
+            "chocolate".to_string(),
+        ];
         states.set_choices(choices);
         states.open_tab();
         assert_eq!(states.selected, 0);
@@ -519,6 +529,7 @@ mod test {
         assert_eq!(component.states.is_tab_open(), false);
         component.states.open_tab();
         assert_eq!(component.states.is_tab_open(), true);
+        component.states.close_tab();
         assert_eq!(component.states.is_tab_open(), false);
         // Update
         component.attr(
@@ -528,6 +539,7 @@ mod test {
         // Get value
         assert_eq!(component.state(), State::One(StateValue::Usize(2)));
         // Open tab
+        component.states.open_tab();
         // Events
         // Move cursor
         assert_eq!(

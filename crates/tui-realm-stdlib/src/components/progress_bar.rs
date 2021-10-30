@@ -94,7 +94,7 @@ impl ProgressBar {
     }
 
     fn assert_progress(p: f64) {
-        if p < 0.0 || p > 1.0 {
+        if !(0.0..=1.0).contains(&p) {
             panic!("Progress value must be in range [0.0, 1.0]");
         }
     }
@@ -163,7 +163,7 @@ impl MockComponent for ProgressBar {
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         if let Attribute::Value = attr {
-            if let AttrValue::Payload(p) = value {
+            if let AttrValue::Payload(p) = value.clone() {
                 Self::assert_progress(p.unwrap_one().unwrap_f64());
             }
         }
@@ -188,7 +188,7 @@ mod test {
 
     #[test]
     fn test_components_progress_bar() {
-        let mut component = ProgressBar::default()
+        let component = ProgressBar::default()
             .background(Color::Red)
             .foreground(Color::White)
             .progress(0.60)

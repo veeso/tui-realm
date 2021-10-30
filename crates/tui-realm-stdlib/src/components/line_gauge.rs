@@ -142,7 +142,7 @@ impl LineGauge {
     }
 
     fn assert_progress(p: f64) {
-        if p < 0.0 || p > 1.0 {
+        if !(0.0..=1.0).contains(&p) {
             panic!("Progress value must be in range [0.0, 1.0]");
         }
     }
@@ -212,12 +212,12 @@ impl MockComponent for LineGauge {
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         if let Attribute::Style = attr {
-            if let AttrValue::Payload(s) = value {
+            if let AttrValue::Payload(s) = value.clone() {
                 Self::assert_line_style(s.unwrap_one().unwrap_u8());
             }
         }
         if let Attribute::Value = attr {
-            if let AttrValue::Payload(p) = value {
+            if let AttrValue::Payload(p) = value.clone() {
                 Self::assert_progress(p.unwrap_one().unwrap_f64());
             }
         }
@@ -242,7 +242,7 @@ mod test {
 
     #[test]
     fn test_components_progress_bar() {
-        let mut component = LineGauge::default()
+        let component = LineGauge::default()
             .background(Color::Red)
             .foreground(Color::White)
             .progress(0.60)

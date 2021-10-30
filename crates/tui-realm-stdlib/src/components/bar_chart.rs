@@ -158,7 +158,7 @@ impl BarChart {
 
     pub fn data(mut self, data: &[(&str, u64)]) -> Self {
         let mut list: LinkedList<PropPayload> = LinkedList::new();
-        data.into_iter().for_each(|(a, b)| {
+        data.iter().for_each(|(a, b)| {
             list.push_back(PropPayload::Tup2((
                 PropValue::Str(a.to_string()),
                 PropValue::U64(*b),
@@ -226,7 +226,7 @@ impl BarChart {
             .unwrap_or(0)
     }
 
-    fn get_data(&self, start: usize, len: usize) -> Vec<(&str, u64)> {
+    fn get_data(&self, start: usize, len: usize) -> Vec<(String, u64)> {
         if let Some(PropPayload::Linked(list)) = self
             .props
             .get(Attribute::Dataset)
@@ -235,7 +235,7 @@ impl BarChart {
             // Recalc len
             let len: usize = std::cmp::min(len, self.data_len() - start);
             // Prepare data storage
-            let mut data: Vec<(&str, u64)> = Vec::with_capacity(len);
+            let mut data: Vec<(String, u64)> = Vec::with_capacity(len);
             for (cursor, item) in list.iter().enumerate() {
                 // If before start, continue
                 if cursor < start {
@@ -243,7 +243,7 @@ impl BarChart {
                 }
                 // Push item
                 if let PropPayload::Tup2((PropValue::Str(label), PropValue::U64(value))) = item {
-                    data.push((label, *value));
+                    data.push((label.clone(), *value));
                 }
                 // Break
                 if data.len() >= len {
@@ -282,11 +282,12 @@ impl MockComponent for BarChart {
                 .props
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
-            let div = crate::utils::get_block(borders, title, focus, inactive_style);
             let active: bool = match self.is_disabled() {
                 true => true,
                 false => focus,
             };
+            let mut div = crate::utils::get_block(borders, title, active, inactive_style);
+            div = div.style(Style::default().bg(background).fg(foreground));
             // Get max elements
             let data_max_len: u64 = self
                 .props
@@ -294,11 +295,12 @@ impl MockComponent for BarChart {
                 .map(|x| x.unwrap_length() as u64)
                 .unwrap_or(self.data_len() as u64);
             // Get data
-            let data: Vec<(&str, u64)> = self.get_data(self.states.cursor, data_max_len as usize);
+            let data = self.get_data(self.states.cursor, data_max_len as usize);
+            let data_ref: Vec<(&str, u64)> = data.iter().map(|x| (x.0.as_str(), x.1)).collect();
             // Create widget
             let mut widget: TuiBarChart = TuiBarChart::default()
                 .block(div)
-                .data(data.as_slice())
+                .data(data_ref.as_slice())
                 .max(data_max_len);
             if let Some(gap) = self
                 .props
@@ -404,8 +406,6 @@ mod test {
     fn test_components_bar_chart() {
         let mut component: BarChart = BarChart::default()
             .disabled(false)
-            .background(Color::White)
-            .foreground(Color::Black)
             .title("my incomes", Alignment::Center)
             .label_style(Style::default().fg(Color::Yellow))
             .bar_style(Style::default().fg(Color::LightYellow))

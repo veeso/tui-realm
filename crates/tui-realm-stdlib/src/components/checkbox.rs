@@ -111,8 +111,8 @@ impl OwnStates {
     /// Set OwnStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
-    pub fn set_choices(&mut self, choices: &[&str]) {
-        self.choices = choices.iter().map(|x| x.to_string()).collect();
+    pub fn set_choices(&mut self, choices: &[String]) {
+        self.choices = choices.to_vec();
         // Clear selection
         self.selection.clear();
         // Keep index if possible
@@ -183,7 +183,7 @@ impl Checkbox {
             Attribute::Content,
             AttrValue::Payload(PropPayload::Vec(
                 choices
-                    .into_iter()
+                    .iter()
                     .map(|x| PropValue::Str(x.as_ref().to_string()))
                     .collect(),
             )),
@@ -196,7 +196,7 @@ impl Checkbox {
         self.attr(
             Attribute::Value,
             AttrValue::Payload(PropPayload::Vec(
-                selected.into_iter().map(|x| PropValue::Usize(*x)).collect(),
+                selected.iter().map(|x| PropValue::Usize(*x)).collect(),
             )),
         );
         self
@@ -212,12 +212,6 @@ impl Checkbox {
 impl MockComponent for Checkbox {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let choices: Vec<Spans> = self
-                .states
-                .choices
-                .iter()
-                .map(|x| Spans::from(x.clone()))
-                .collect();
             let foreground = self
                 .props
                 .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
@@ -286,15 +280,23 @@ impl MockComponent for Checkbox {
         match attr {
             Attribute::Content => {
                 // Reset choices
-                let choices: Vec<&str> = value
+                let current_selection = self.states.selection.clone();
+                let choices: Vec<String> = value
                     .unwrap_payload()
                     .unwrap_vec()
                     .iter()
-                    .map(|x| x.unwrap_str().as_str())
+                    .cloned()
+                    .map(|x| x.unwrap_str())
                     .collect();
                 self.states.set_choices(&choices);
+                // Preserve selection if possible
+                for c in current_selection.into_iter() {
+                    self.states.select(c);
+                }
             }
             Attribute::Value => {
+                // Clear section
+                self.states.selection.clear();
                 for c in value.unwrap_payload().unwrap_vec() {
                     self.states.select(c.unwrap_usize());
                 }
@@ -324,12 +326,12 @@ impl MockComponent for Checkbox {
             Cmd::Move(Direction::Right) => {
                 // Increment choice
                 self.states.next_choice(self.rewindable());
-                CmdResult::Changed(self.state())
+                CmdResult::None
             }
             Cmd::Move(Direction::Left) => {
                 // Decrement choice
                 self.states.prev_choice(self.rewindable());
-                CmdResult::Changed(self.state())
+                CmdResult::None
             }
             Cmd::Toggle => {
                 self.states.toggle();
@@ -358,7 +360,12 @@ mod test {
         assert_eq!(states.choice, 0);
         assert_eq!(states.choices.len(), 0);
         assert_eq!(states.selection.len(), 0);
-        let choices: &[&str] = &["lemon", "strawberry", "vanilla", "chocolate"];
+        let choices: &[String] = &[
+            "lemon".to_string(),
+            "strawberry".to_string(),
+            "vanilla".to_string(),
+            "chocolate".to_string(),
+        ];
         states.set_choices(choices);
         assert_eq!(states.choice, 0);
         assert_eq!(states.choices.len(), 4);
@@ -387,18 +394,23 @@ mod test {
         assert_eq!(states.has(0), true);
         assert_ne!(states.has(2), true);
         // Update
-        let choices: &[&str] = &["lemon", "strawberry"];
+        let choices: &[String] = &["lemon".to_string(), "strawberry".to_string()];
         states.set_choices(choices);
         assert_eq!(states.choice, 1); // Move to first index available
         assert_eq!(states.choices.len(), 2);
         assert_eq!(states.selection.len(), 0);
-        let choices: &[&str] = &[];
+        let choices: &[String] = &[];
         states.set_choices(choices);
         assert_eq!(states.choice, 0); // Move to first index available
         assert_eq!(states.choices.len(), 0);
         assert_eq!(states.selection.len(), 0);
         // Rewind
-        let choices: &[&str] = &["lemon", "strawberry", "vanilla", "chocolate"];
+        let choices: &[String] = &[
+            "lemon".to_string(),
+            "strawberry".to_string(),
+            "vanilla".to_string(),
+            "chocolate".to_string(),
+        ];
         states.set_choices(choices);
         assert_eq!(states.choice, 0);
         states.prev_choice(true);
@@ -419,9 +431,13 @@ mod test {
             .foreground(Color::Red)
             .borders(Borders::default())
             .title("Which food do you prefer?", Alignment::Center)
-            .choices(&["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta", "Falafel"])
-            .values(&[1, 5])
+            .choices(&["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta"])
+            .values(&[1, 4])
             .rewind(false);
+        // Verify states
+        assert_eq!(component.states.selection, vec![1, 4]);
+        assert_eq!(component.states.choice, 0);
+        assert_eq!(component.states.choices.len(), 5);
         component.attr(
             Attribute::Content,
             AttrValue::Payload(PropPayload::Vec(vec![
@@ -433,11 +449,15 @@ mod test {
                 PropValue::Str(String::from("Falafel")),
             ])),
         );
-        // Verify states
-        assert_eq!(component.states.choice, 0);
-        assert_eq!(component.states.selection, vec![1, 5]);
+        assert_eq!(component.states.selection, vec![1, 4]);
         assert_eq!(component.states.choices.len(), 6);
         // Get value
+        component.attr(
+            Attribute::Value,
+            AttrValue::Payload(PropPayload::Vec(vec![PropValue::Usize(1)])),
+        );
+        assert_eq!(component.states.selection, vec![1]);
+        assert_eq!(component.states.choices.len(), 6);
         assert_eq!(component.state(), State::Vec(vec![StateValue::Usize(1)]));
         // Handle events
         assert_eq!(

@@ -54,12 +54,13 @@ impl OwnStates {
     /// ### append
     ///
     /// Append, if possible according to input type, the character to the input vec
-    pub fn append(&mut self, ch: char, itype: InputType, max_len: Option<usize>) {
+    pub fn append(&mut self, ch: char, itype: &InputType, max_len: Option<usize>) {
         // Check if max length has been reached
         if self.input.len() < max_len.unwrap_or(usize::MAX) {
             // Check whether can push
             if itype.char_valid(self.input.iter().collect::<String>().as_str(), ch) {
-                self.input.push(ch);
+                self.input.insert(self.cursor, ch);
+                self.incr_cursor();
             }
         }
     }
@@ -194,10 +195,7 @@ impl Input {
     }
 
     pub fn value<S: AsRef<str>>(mut self, s: S) -> Self {
-        for ch in s.as_ref().chars() {
-            self.states
-                .append(ch, self.get_input_type(), self.get_input_len());
-        }
+        self.attr(Attribute::Value, AttrValue::String(s.as_ref().to_string()));
         self
     }
 
@@ -254,8 +252,11 @@ impl MockComponent for Input {
             let itype = self.get_input_type();
             let p: Paragraph = Paragraph::new(self.states.render_value(self.get_input_type()))
                 .style(match focus {
-                    true => Style::default().fg(foreground),
-                    false => Style::default(),
+                    true => Style::default()
+                        .fg(foreground)
+                        .bg(background)
+                        .add_modifier(modifiers),
+                    false => inactive_style.unwrap_or_default(),
                 })
                 .block(crate::utils::get_block(
                     borders,
@@ -281,15 +282,16 @@ impl MockComponent for Input {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        let sanitize_input = match attr {
-            Attribute::InputLength | Attribute::InputType | Attribute::Value => true,
-            _ => false,
-        };
+        let sanitize_input = matches!(
+            attr,
+            Attribute::InputLength | Attribute::InputType | Attribute::Value
+        );
         // Check if new input
         let new_input = match attr {
-            Attribute::Value => Some(value.unwrap_string()),
+            Attribute::Value => Some(value.clone().unwrap_string()),
             _ => None,
         };
+        self.props.set(attr, value);
         if sanitize_input {
             let input = match new_input {
                 None => self.states.input.clone(),
@@ -297,14 +299,11 @@ impl MockComponent for Input {
             };
             self.states.input = Vec::new();
             self.states.cursor = 0;
-            self.props.set(attr, value);
             let itype = self.get_input_type();
             let max_len = self.get_input_len();
             for ch in input.into_iter() {
-                self.states.append(ch, itype, max_len);
+                self.states.append(ch, &itype, max_len);
             }
-        } else {
-            self.props.set(attr, value);
         }
     }
 
@@ -361,7 +360,7 @@ impl MockComponent for Input {
                 // Push char to input
                 let prev_input = self.states.input.clone();
                 self.states
-                    .append(ch, self.get_input_type(), self.get_input_len());
+                    .append(ch, &self.get_input_type(), self.get_input_len());
                 // Message on change
                 if prev_input != self.states.input {
                     CmdResult::Changed(self.state())
@@ -384,17 +383,17 @@ mod tests {
     #[test]
     fn test_components_input_states() {
         let mut states: OwnStates = OwnStates::default();
-        states.append('a', InputType::Text, Some(3));
+        states.append('a', &InputType::Text, Some(3));
         assert_eq!(states.input, vec!['a']);
-        states.append('b', InputType::Text, Some(3));
+        states.append('b', &InputType::Text, Some(3));
         assert_eq!(states.input, vec!['a', 'b']);
-        states.append('c', InputType::Text, Some(3));
+        states.append('c', &InputType::Text, Some(3));
         assert_eq!(states.input, vec!['a', 'b', 'c']);
         // Reached length
-        states.append('d', InputType::Text, Some(3));
+        states.append('d', &InputType::Text, Some(3));
         assert_eq!(states.input, vec!['a', 'b', 'c']);
         // Push char to numbers
-        states.append('d', InputType::Number, None);
+        states.append('d', &InputType::Number, None);
         assert_eq!(states.input, vec!['a', 'b', 'c']);
         // move cursor
         // decr cursor
@@ -511,7 +510,7 @@ mod tests {
         );
         assert_eq!(component.states.cursor, 1);
         // Another one (should do nothing)
-        assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
+        assert_eq!(component.perform(Cmd::Cancel), CmdResult::None);
         assert_eq!(
             component.state(),
             State::One(StateValue::String(String::from("h")))

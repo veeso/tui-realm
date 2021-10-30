@@ -83,7 +83,7 @@ impl Canvas {
         self.attr(
             Attribute::Shape,
             AttrValue::Payload(PropPayload::Vec(
-                data.into_iter().map(|x| PropValue::Shape(*x)).collect(),
+                data.iter().map(|x| PropValue::Shape(x.clone())).collect(),
             )),
         );
         self
@@ -116,7 +116,7 @@ impl Canvas {
     /// Draw a shape into the canvas `Context`
     fn draw_shape(ctx: &mut Context, shape: &Shape) {
         match shape {
-            Shape::Label((x, y, s, c)) => {} /* ctx.print(*x, *y, &s, *c) FIXME: UNSUPPORTED */
+            Shape::Label(_) => {} /* ctx.print(*x, *y, &s, *c) FIXME: UNSUPPORTED */
             Shape::Layer => ctx.layer(),
             Shape::Line(line) => ctx.draw(line),
             Shape::Map(map) => ctx.draw(map),
@@ -150,7 +150,7 @@ impl MockComponent for Canvas {
                 .get_or(Attribute::Focus, AttrValue::Flag(false))
                 .unwrap_flag();
             let mut block = crate::utils::get_block(borders, title, focus, None);
-            block = block.style(Style::default().bg(background));
+            block = block.style(Style::default().bg(background).fg(foreground));
             // Get properties
             let x_bounds: [f64; 2] = self
                 .props
@@ -172,6 +172,7 @@ impl MockComponent for Canvas {
                     x.unwrap_payload()
                         .unwrap_vec()
                         .iter()
+                        .cloned()
                         .map(|x| x.unwrap_shape())
                         .collect()
                 })

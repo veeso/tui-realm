@@ -47,11 +47,15 @@ use super::props::{
 /// chart states
 struct OwnStates {
     cursor: usize,
+    data: Vec<Dataset>,
 }
 
 impl Default for OwnStates {
     fn default() -> Self {
-        Self { cursor: 0 }
+        Self {
+            cursor: 0,
+            data: Vec::default(),
+        }
     }
 }
 
@@ -160,7 +164,7 @@ impl Chart {
         self.props.set(
             Attribute::Dataset,
             AttrValue::Payload(PropPayload::Vec(
-                data.into_iter().map(|x| PropValue::Dataset(*x)).collect(),
+                data.iter().cloned().map(PropValue::Dataset).collect(),
             )),
         );
         self
@@ -189,11 +193,11 @@ impl Chart {
     }
 
     pub fn x_labels(mut self, labels: &[&str]) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Custom(CHART_X_LABELS),
             AttrValue::Payload(PropPayload::Vec(
                 labels
-                    .into_iter()
+                    .iter()
                     .map(|x| PropValue::Str(x.to_string()))
                     .collect(),
             )),
@@ -202,11 +206,11 @@ impl Chart {
     }
 
     pub fn y_labels(mut self, labels: &[&str]) -> Self {
-        self.props.set(
+        self.attr(
             Attribute::Custom(CHART_Y_LABELS),
             AttrValue::Payload(PropPayload::Vec(
                 labels
-                    .into_iter()
+                    .iter()
                     .map(|x| PropValue::Str(x.to_string()))
                     .collect(),
             )),
@@ -246,16 +250,6 @@ impl Chart {
             .unwrap_flag()
     }
 
-    /// ### data_len
-    ///
-    /// Retrieve current data len from properties
-    fn data_len(&self) -> usize {
-        self.props
-            .get(Attribute::Dataset)
-            .map(|x| x.unwrap_payload().unwrap_vec().len())
-            .unwrap_or(0)
-    }
-
     /// ### max_dataset_len
     ///
     /// Get the maximum len among the datasets
@@ -266,6 +260,7 @@ impl Chart {
                 x.unwrap_payload()
                     .unwrap_vec()
                     .iter()
+                    .cloned()
                     .map(|x| x.unwrap_dataset().get_data().len())
                     .max()
             })
@@ -276,17 +271,23 @@ impl Chart {
     /// ### data
     ///
     /// Get data to be displayed, starting from provided index at `start` with a max length of `len`
-    fn get_data(&self, start: usize, len: usize) -> Vec<TuiDataset> {
-        self.props
+    fn get_data(&mut self, start: usize, len: usize) -> Vec<TuiDataset> {
+        self.states.data = self
+            .props
             .get(Attribute::Dataset)
             .map(|x| {
                 x.unwrap_payload()
                     .unwrap_vec()
                     .into_iter()
-                    .map(|x| Self::get_tui_dataset(&x.unwrap_dataset(), start, len))
+                    .map(|x| x.unwrap_dataset())
                     .collect()
             })
-            .unwrap_or_default()
+            .unwrap_or_default();
+        self.states
+            .data
+            .iter()
+            .map(|x| Self::get_tui_dataset(x, start, len))
+            .collect()
     }
 }
 
@@ -337,14 +338,11 @@ impl MockComponent for Chart {
                 .props
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
-            let div = crate::utils::get_block(borders, title, focus, inactive_style);
-            // If component is disabled, will be displayed as `active`; as focus state otherwise
             let active: bool = match self.is_disabled() {
                 true => true,
                 false => focus,
             };
-            // Get data
-            let data: Vec<TuiDataset> = self.get_data(self.states.cursor, area.width as usize);
+            let div = crate::utils::get_block(borders, title, active, inactive_style);
             // Create widget
             // -- x axis
             let mut x_axis: Axis = Axis::default();
@@ -364,7 +362,8 @@ impl MockComponent for Chart {
                 x_axis = x_axis.labels(
                     labels
                         .iter()
-                        .map(|x| Span::from(x.unwrap_str().to_string()))
+                        .cloned()
+                        .map(|x| Span::from(x.unwrap_str()))
                         .collect(),
                 );
             }
@@ -403,7 +402,8 @@ impl MockComponent for Chart {
                 y_axis = y_axis.labels(
                     labels
                         .iter()
-                        .map(|x| Span::from(x.unwrap_str().to_string()))
+                        .cloned()
+                        .map(|x| Span::from(x.unwrap_str()))
                         .collect(),
                 );
             }
@@ -424,6 +424,8 @@ impl MockComponent for Chart {
                     Style::default().fg(foreground).bg(background),
                 ));
             }
+            // Get data
+            let data: Vec<TuiDataset> = self.get_data(self.states.cursor, area.width as usize);
             // Build widget
             let widget: TuiChart = TuiChart::new(data).block(div).x_axis(x_axis).y_axis(y_axis);
             // Render
@@ -436,7 +438,8 @@ impl MockComponent for Chart {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value)
+        self.props.set(attr, value);
+        self.states.reset_cursor();
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
@@ -589,7 +592,6 @@ mod test {
         );
         assert_eq!(component.states.cursor, 0);
         // component funcs
-        assert_eq!(component.data_len(), 2);
         assert_eq!(component.max_dataset_len(), 12);
         assert_eq!(component.is_disabled(), false);
         assert_eq!(component.get_data(2, 4).len(), 2);

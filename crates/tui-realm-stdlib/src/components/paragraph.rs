@@ -96,7 +96,7 @@ impl Paragraph {
         self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
-                s.into_iter().map(|x| PropValue::TextSpan(*x)).collect(),
+                s.iter().cloned().map(PropValue::TextSpan).collect(),
             )),
         );
         self
@@ -117,12 +117,13 @@ impl MockComponent for Paragraph {
             {
                 Some(PropPayload::Vec(spans)) => spans
                     .iter()
+                    .cloned()
                     .map(|x| x.unwrap_text_span())
                     .map(|x| {
                         let (fg, bg, modifiers) =
                             crate::utils::use_or_default_styles(&self.props, &x);
                         Spans::from(vec![Span::styled(
-                            x.content.clone(),
+                            x.content,
                             Style::default().add_modifier(modifiers).fg(fg).bg(bg),
                         )])
                     })
@@ -202,7 +203,7 @@ mod tests {
 
     #[test]
     fn test_components_paragraph() {
-        let mut component = Paragraph::default()
+        let component = Paragraph::default()
             .background(Color::Blue)
             .foreground(Color::Red)
             .modifiers(TextModifiers::BOLD)

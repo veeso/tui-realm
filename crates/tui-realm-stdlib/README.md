@@ -18,7 +18,7 @@ Current version: 1.0.0 (FIXME: 03/08/2021)
   - [Get started 🏁](#get-started-)
     - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
   - [Examples](#examples)
-  - [Buy me a coffee ☕](#buy-me-a-coffee-)
+  - [Support the developer ☕](#support-the-developer-)
   - [Components 🎨](#components-)
     - [BarChart](#barchart)
     - [Canvas](#canvas)
@@ -88,11 +88,14 @@ cargo run --example select
 
 ---
 
-## Buy me a coffee ☕
+## Support the developer ☕
 
-If you like tui-realm-stdlib and you're grateful for the work I've done, please consider a little donation 🥳
+If you like tui-realm and you're grateful for the work I've done, please consider a little donation 🥳
 
-[![Buy-me-a-coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=veeso&button_colour=404040&font_colour=ffffff&font_family=Comic&outline_colour=ffffff&coffee_colour=FFDD00)](https://www.buymeacoffee.com/veeso)
+You can make a donation with one of these platforms:
+
+[![Buy-me-a-coffee](https://img.shields.io/badge/-buy_me_a%C2%A0coffee-gray?style=for-the-badge&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/veeso)
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/chrisintin)
 
 ---
 

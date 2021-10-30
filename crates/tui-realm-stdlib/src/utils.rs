@@ -141,7 +141,9 @@ pub(crate) fn get_block<'a>(
         .borders(props.sides)
         .border_style(match focus {
             true => props.style(),
-            false => inactive_style.unwrap_or(Style::default().fg(Color::Reset).bg(Color::Reset)),
+            false => {
+                inactive_style.unwrap_or_else(|| Style::default().fg(Color::Reset).bg(Color::Reset))
+            }
         })
         .border_type(props.modifiers)
         .title(title.0)

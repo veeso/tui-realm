@@ -82,7 +82,7 @@ impl Sparkline {
         self.attr(
             Attribute::Dataset,
             AttrValue::Payload(PropPayload::Vec(
-                data.into_iter().map(|x| PropValue::U64(*x)).collect(),
+                data.iter().map(|x| PropValue::U64(*x)).collect(),
             )),
         );
         self
@@ -110,6 +110,8 @@ impl Sparkline {
             Some(PropPayload::Vec(list)) => {
                 let mut data: Vec<u64> = Vec::with_capacity(max);
                 list.iter()
+                    .cloned()
+                    .take(max)
                     .map(|x| x.unwrap_u64())
                     .for_each(|x| data.push(x));
                 data
@@ -184,7 +186,7 @@ mod test {
 
     #[test]
     fn test_components_sparkline() {
-        let mut component = Sparkline::default()
+        let component = Sparkline::default()
             .background(Color::White)
             .foreground(Color::Black)
             .title("bandwidth", Alignment::Center)

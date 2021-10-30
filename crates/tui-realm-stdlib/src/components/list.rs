@@ -148,6 +148,7 @@ impl OwnStates {
 pub struct List {
     props: Props,
     states: OwnStates,
+    hg_str: Option<String>, // CRAP CRAP CRAP. Thanks to the author of tui-realm for using references every f time
 }
 
 impl Default for List {
@@ -155,6 +156,7 @@ impl Default for List {
         Self {
             props: Props::default(),
             states: OwnStates::default(),
+            hg_str: None,
         }
     }
 }
@@ -324,12 +326,12 @@ impl MockComponent for List {
                 .start_corner(Corner::TopLeft)
                 .highlight_style(Style::default().fg(fg).bg(bg).add_modifier(modifiers));
             // Highlighted symbol
-            if let Some(hg_str) = self
+            self.hg_str = self
                 .props
                 .get(Attribute::HighlightedStr)
-                .map(|x| x.unwrap_string())
-            {
-                list = list.highlight_symbol(&hg_str);
+                .map(|x| x.unwrap_string());
+            if let Some(hg_str) = &self.hg_str {
+                list = list.highlight_symbol(hg_str);
             }
             if self.scrollable() {
                 let mut state: ListState = ListState::default();
@@ -404,7 +406,7 @@ impl MockComponent for List {
                     .props
                     .get_or(Attribute::ScrollStep, AttrValue::Length(8))
                     .unwrap_length();
-                let step: usize = self.states.calc_max_step_ahead(step);
+                let step: usize = self.states.calc_max_step_behind(step);
                 (0..step).for_each(|_| self.states.decr_list_index(false));
                 if prev != self.states.list_index {
                     CmdResult::Changed(self.state())
@@ -596,7 +598,7 @@ mod tests {
 
     #[test]
     fn test_components_list() {
-        let mut component = List::default()
+        let component = List::default()
             .foreground(Color::Red)
             .background(Color::Blue)
             .highlighted_color(Color::Yellow)

@@ -80,7 +80,7 @@ impl Span {
         self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
-                s.into_iter().map(|x| PropValue::TextSpan(*x)).collect(),
+                s.iter().cloned().map(PropValue::TextSpan).collect(),
             )),
         );
         self
@@ -96,13 +96,14 @@ impl MockComponent for Span {
                 match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
                     Some(PropPayload::Vec(spans)) => spans
                         .iter()
+                        .cloned()
                         .map(|x| x.unwrap_text_span())
                         .map(|x| {
                             // Keep colors and modifiers, or use default
                             let (fg, bg, modifiers) =
                                 crate::utils::use_or_default_styles(&self.props, &x);
                             TuiSpan::styled(
-                                x.content.clone(),
+                                x.content,
                                 Style::default().add_modifier(modifiers).fg(fg).bg(bg),
                             )
                         })
@@ -145,7 +146,7 @@ mod tests {
 
     #[test]
     fn test_components_span() {
-        let mut component = Span::default()
+        let component = Span::default()
             .background(Color::Blue)
             .foreground(Color::Red)
             .modifiers(TextModifiers::BOLD)

@@ -142,7 +142,7 @@ mod tests {
 
     #[test]
     fn test_components_label() {
-        let mut component: Label = Label::default()
+        let component: Label = Label::default()
             .alignment(Alignment::Center)
             .background(Color::Red)
             .foreground(Color::Yellow)
