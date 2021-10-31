@@ -28,223 +28,202 @@
 extern crate rand;
 
 mod utils;
+use utils::data_gen::DataGen;
 
-use utils::context::Context;
-use utils::keymap::*;
-
-use rand::{rngs::ThreadRng, thread_rng, Rng};
-use std::thread::sleep;
-use std::time::{Duration, Instant};
-
-use tui_realm_stdlib::{Chart, ChartPropsBuilder, Label, LabelPropsBuilder};
-use tuirealm::props::{
-    borders::{BorderType, Borders},
-    Alignment, Dataset,
-};
-use tuirealm::{Msg, PropsBuilder, Update, View};
+use std::time::Duration;
+use tui_realm_stdlib::Chart;
 // tui
-use tuirealm::tui::layout::{Constraint, Direction, Layout};
-use tuirealm::tui::style::{Color, Style};
+use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::tui::symbols::Marker;
 use tuirealm::tui::widgets::GraphType;
 
-const COMPONENT_CHART1: &str = "chart1";
-const COMPONENT_EVENT: &str = "LABEL";
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::listener::{ListenerResult, Poll};
+use tuirealm::props::{
+    Alignment, AttrValue, Attribute, BorderType, Borders, Color, Dataset, PropPayload, PropValue,
+    Style,
+};
+use tuirealm::terminal::TerminalBridge;
+use tuirealm::{
+    application::PollStrategy,
+    event::{Key, KeyEvent},
+    Application, Component, Event, EventListenerCfg, MockComponent, Update, View,
+};
+
+#[derive(Debug, PartialEq)]
+pub enum Msg {
+    AppClose,
+    None,
+}
+
+// Let's define the component ids for our application
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
+pub enum Id {
+    ChartAlfa,
+}
+
+#[derive(PartialEq, Clone, PartialOrd)]
+enum UserEvent {
+    DataGenerated(Vec<(f64, f64)>),
+}
+
+impl Eq for UserEvent {}
 
 struct Model {
-    quit: bool,               // Becomes true when the user presses <ESC>
-    redraw: bool,             // Tells whether to refresh the UI; performance optimization
-    last_redraw: Instant,     // Last time the ui has been redrawed
-    last_data_fetch: Instant, // Last time data was added
-    start: Instant,
-    view: View,
-    boundaries: (f64, f64),
+    quit: bool,   // Becomes true when the user presses <ESC>
+    redraw: bool, // Tells whether to refresh the UI; performance optimization
+    terminal: TerminalBridge,
+}
+
+impl Default for Model {
+    fn default() -> Self {
+        Self {
+            quit: false,
+            redraw: true,
+            terminal: TerminalBridge::new().expect("Cannot create terminal bridge"),
+        }
+    }
 }
 
 impl Model {
-    fn new(view: View) -> Self {
-        Model {
-            quit: false,
-            redraw: true,
-            last_redraw: Instant::now(),
-            last_data_fetch: Instant::now(),
-            start: Instant::now(),
-            view,
-            boundaries: (0.0, 50.0),
-        }
-    }
-
-    fn quit(&mut self) {
-        self.quit = true;
-    }
-
-    fn redraw(&mut self) {
-        self.redraw = true;
-    }
-
-    fn reset(&mut self) {
-        self.redraw = false;
-        self.last_redraw = Instant::now();
-    }
-
-    fn should_fetch_data(&self) -> bool {
-        self.last_data_fetch.elapsed() >= Duration::from_millis(200)
-    }
-
-    fn data_fetched(&mut self) {
-        self.last_data_fetch = Instant::now();
-        self.boundaries = ((self.boundaries.0 + 1.0), (self.boundaries.1 + 1.0));
-    }
-
-    fn elapsed(&self) -> u64 {
-        ((self.start.elapsed().as_millis() + 1024) * 5) as u64
+    fn view(&mut self, app: &mut Application<Id, Msg, UserEvent>) {
+        let _ = self.terminal.raw_mut().draw(|f| {
+            // Prepare chunks
+            let chunks = Layout::default()
+                .direction(LayoutDirection::Vertical)
+                .margin(1)
+                .constraints([Constraint::Percentage(100)].as_ref())
+                .split(f.size());
+            app.view(&Id::ChartAlfa, f, chunks[0]);
+        });
     }
 }
 
 fn main() {
-    // let's create a context: the context contains the backend of crossterm and the input handler
-    let mut ctx: Context = Context::new();
-    // Enter alternate screen
-    ctx.enter_alternate_screen();
-    // Clear screen
-    ctx.clear_screen();
-    // let's create a `View`, which will contain the components
-    let mut myview: View = View::init();
-    // Init data
-    let mut rand: ThreadRng = thread_rng();
-    let max_val: u64 = 450;
-    let data: Vec<(f64, f64)> = (0..1024)
-        .map(|i| (i as f64, get_rand(&mut rand, max_val)))
-        .collect();
-    let data_avg: Vec<(f64, f64)> = (0..1024)
-        .map(|i| (i as f64, get_rand(&mut rand, max_val)))
-        .collect();
-    myview.mount(
-        COMPONENT_CHART1,
-        Box::new(Chart::new(
-            ChartPropsBuilder::default()
-                .visible()
-                .disabled(true)
-                .with_background(Color::Reset)
-                .with_foreground(Color::Reset)
-                .with_title(String::from("Temperatures in room"), Alignment::Center)
-                .with_borders(Borders::ALL, BorderType::Double, Color::Yellow)
-                .with_x_style(Style::default().fg(Color::LightBlue))
-                .with_x_title("Time")
-                .with_x_bounds((0.0, 50.0))
-                .with_x_labels(&["1Y", "10M", "8M", "6M", "4M", "2M", "now"])
-                .with_y_bounds((0.0, 50.0))
-                .with_y_labels(&[
-                    "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
-                ])
-                .with_y_style(Style::default().fg(Color::Yellow))
-                .with_y_title("Temperature (°C)")
-                .with_data(&[
-                    Dataset::default()
-                        .name("Temperatures")
-                        .graph_type(GraphType::Line)
-                        .marker(Marker::Braille)
-                        .style(Style::default().fg(Color::Cyan))
-                        .data(data),
-                    Dataset::default()
-                        .name("Avg temperatures")
-                        .graph_type(GraphType::Line)
-                        .marker(Marker::Braille)
-                        .style(Style::default().fg(Color::Red))
-                        .data(data_avg),
-                ])
-                .build(),
-        )),
+    let mut model = Model::default();
+    let _ = model.terminal.enable_raw_mode();
+    let _ = model.terminal.enter_alternate_screen();
+    // Setup app
+    let mut app: Application<Id, Msg, UserEvent> = Application::init(
+        EventListenerCfg::default()
+            .default_input_listener(Duration::from_millis(10))
+            .port(
+                Box::new(DataGen::new((0.0, 0.0), (50.0, 35.0))),
+                Duration::from_millis(100),
+            ),
     );
-    myview.mount(
-        COMPONENT_EVENT,
-        Box::new(Label::new(
-            LabelPropsBuilder::default()
-                .with_foreground(Color::Cyan)
-                .with_text(String::from("Event will appear here"))
-                .build(),
-        )),
-    );
+    assert!(app
+        .mount(Id::ChartAlfa, Box::new(ChartAlfa::default()), vec![])
+        .is_ok());
     // We need to give focus to input then
-    myview.active(COMPONENT_CHART1);
+    assert!(app.active(&Id::ChartAlfa).is_ok());
     // Now we use the Model struct to keep track of some states
-    let mut model: Model = Model::new(myview);
+
     // let's loop until quit is true
     while !model.quit {
-        // Listen for input events
-        if let Ok(Some(ev)) = ctx.input_hnd.read_event() {
-            // Pass event to view
-            let msg = model.view.on(ev);
-            model.redraw();
-            // Call the elm friend update
-            model.update(msg);
+        // Tick
+        if let Ok(sz) = app.tick(&mut model, PollStrategy::Once) {
+            if sz > 0 {
+                // NOTE: redraw if at least one msg has been processed
+                model.redraw = true;
+            }
         }
-        // Fetch data
-        if model.should_fetch_data() {
-            model.data_fetched();
-            model.view.update(
-                COMPONENT_CHART1,
-                ChartPropsBuilder::from(model.view.get_props(COMPONENT_CHART1).unwrap())
-                    .pop_record_front(0)
-                    .push_record(0, (model.elapsed() as f64, get_rand(&mut rand, max_val)))
-                    .pop_record_front(1)
-                    .push_record(1, (model.elapsed() as f64, get_rand(&mut rand, max_val)))
-                    .with_x_bounds(model.boundaries)
-                    .build(),
-            );
-            model.redraw();
+        // Redraw
+        if model.redraw {
+            model.view(&mut app);
+            model.redraw = false;
         }
-        // If redraw, draw interface
-        if model.redraw || model.last_redraw.elapsed() > Duration::from_millis(50) {
-            // Call the elm friend vie1 function
-            view(&mut ctx, &model.view);
-            model.reset();
-        }
-        sleep(Duration::from_millis(10));
     }
-    // Let's drop the context finally
-    drop(ctx);
+    // Terminate terminal
+    let _ = model.terminal.leave_alternate_screen();
+    let _ = model.terminal.disable_raw_mode();
+    let _ = model.terminal.clear_screen();
 }
 
-fn view(ctx: &mut Context, view: &View) {
-    let _ = ctx.terminal.draw(|f| {
-        // Prepare chunks
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .margin(1)
-            .constraints([Constraint::Length(15), Constraint::Length(3)].as_ref())
-            .split(f.size());
-        view.render(COMPONENT_CHART1, f, chunks[0]);
-        view.render(COMPONENT_EVENT, f, chunks[1]);
-    });
-}
-
-impl Update for Model {
-    fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
-        let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
-        match ref_msg {
-            None => None, // Exit after None
-            Some(msg) => match msg {
-                (_, key) if key == &MSG_KEY_ESC => {
-                    // Quit on esc
-                    self.quit();
-                    None
-                }
-                (component, event) => {
-                    // Update span
-                    let props =
-                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
-                            .with_text(format!("{} => '{:?}'", component, event))
-                            .build();
-                    // Report submit
-                    let _ = self.view.update(COMPONENT_EVENT, props);
-                    None
-                }
-            },
+impl Update<Id, Msg, UserEvent> for Model {
+    fn update(&mut self, _: &mut View<Id, Msg, UserEvent>, msg: Option<Msg>) -> Option<Msg> {
+        match msg.unwrap_or(Msg::None) {
+            Msg::AppClose => {
+                self.quit = true;
+                None
+            }
+            Msg::None => None,
         }
     }
 }
 
-fn get_rand(rng: &mut ThreadRng, max: u64) -> f64 {
-    rng.gen_range(0..max) as f64 / 10.0
+// -- poll
+
+impl Poll<UserEvent> for DataGen<(f64, f64)> {
+    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+        Ok(Some(Event::User(UserEvent::DataGenerated(self.generate()))))
+    }
+}
+
+// -- components
+
+#[derive(MockComponent)]
+struct ChartAlfa {
+    component: Chart,
+}
+
+impl Default for ChartAlfa {
+    fn default() -> Self {
+        Self {
+            component: Chart::default()
+                .disabled(false)
+                .title("Temperatures in room", Alignment::Center)
+                .borders(
+                    Borders::default()
+                        .modifiers(BorderType::Double)
+                        .color(Color::Yellow),
+                )
+                .x_style(Style::default().fg(Color::LightBlue))
+                .x_title("Time")
+                .x_bounds((0.0, 50.0))
+                .x_labels(&["1Y", "10M", "8M", "6M", "4M", "2M", "now"])
+                .y_style(Style::default().fg(Color::Yellow))
+                .y_title("Temperature (°C)")
+                .y_bounds((0.0, 50.0))
+                .y_labels(&[
+                    "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
+                ]),
+        }
+    }
+}
+
+impl Component<Msg, UserEvent> for ChartAlfa {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
+        let _ = match ev {
+            Event::Keyboard(KeyEvent {
+                code: Key::Left, ..
+            }) => self.perform(Cmd::Move(Direction::Left)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Right, ..
+            }) => self.perform(Cmd::Move(Direction::Right)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Home, ..
+            }) => self.perform(Cmd::GoTo(Position::Begin)),
+            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
+                self.perform(Cmd::GoTo(Position::End))
+            }
+            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            Event::User(UserEvent::DataGenerated(data)) => {
+                // Update data
+                let dataset = Dataset::default()
+                    .name("Temperatures")
+                    .graph_type(GraphType::Line)
+                    .marker(Marker::Braille)
+                    .style(Style::default().fg(Color::Cyan))
+                    .data(data);
+                self.attr(
+                    Attribute::Dataset,
+                    AttrValue::Payload(PropPayload::Vec(vec![PropValue::Dataset(dataset)])),
+                );
+                CmdResult::None
+            }
+            _ => CmdResult::None,
+        };
+        Some(Msg::None)
+    }
 }

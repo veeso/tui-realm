@@ -116,10 +116,10 @@ While in active mode (default) you can put as many entries as you wish. You can 
 
 | Cmd               | CmdResult       | Behaviour                                      |
 |-------------------|-----------------|------------------------------------------------|
-| `Move(Right)`     | `None`          | Move the cursor right                          |
-| `Move(Left)`      | `None`          | Move the cursor left                           |
-| `GoTo(End)`       | `None`          | Move "cursor" to the end of chart              |
 | `GoTo(Begin)`     | `None`          | Move "cursor" to the first entry of the chart  |
+| `GoTo(End)`       | `None`          | Move "cursor" to the end of chart              |
+| `Move(Left)`      | `None`          | Move the cursor left                           |
+| `Move(Right)`     | `None`          | Move the cursor right                          |
 
 **State**: `None`.
 
@@ -244,6 +244,7 @@ An input text. Provides the possiblity to input a text with the possibility to s
 
 - `Background(Color)`: background color
 - `Borders(Borders)`: set borders properties for component
+- `Custom($INPUT_INVALID_STYLE, Style)`: Set style to apply to component when input is invalid
 - `Display(Flag)`: if False component is hidden
 - `FocusStyle(Style)`: style for when component is not active
 - `Foreground(Color)`: foreground color

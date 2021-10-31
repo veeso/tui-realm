@@ -172,10 +172,7 @@ impl BarChart {
     }
 
     pub fn bar_gap(mut self, gap: u16) -> Self {
-        self.attr(
-            Attribute::Custom(BAR_CHART_BARS_GAP),
-            AttrValue::Payload(PropPayload::One(PropValue::U16(gap))),
-        );
+        self.attr(Attribute::Custom(BAR_CHART_BARS_GAP), AttrValue::Size(gap));
         self
     }
 

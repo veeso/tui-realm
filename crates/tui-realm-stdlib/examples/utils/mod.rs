@@ -25,6 +25,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-pub mod context;
-mod input;
-pub mod keymap;
+pub mod data_gen;

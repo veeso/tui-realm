@@ -31,66 +31,66 @@ default = [ "with-crossterm" ]
 with-crossterm = [ "tuirealm/with-crossterm" ]
 with-termion = [ "tuirealm/with-termion" ]
 
-#[[example]]
-#name = "bar-chart"
-#path = "examples/bar_chart.rs"
-#
-#[[example]]
-#name = "canvas"
-#path = "examples/canvas.rs"
-#
-#[[example]]
-#name = "chart"
-#path = "examples/chart.rs"
-#
-#[[example]]
-#name = "checkbox"
-#path = "examples/checkbox.rs"
-#
-#[[example]]
-#name = "input"
-#path = "examples/input.rs"
-#
-#[[example]]
-#name = "label"
-#path = "examples/label.rs"
-#
-#[[example]]
-#name = "line_gauge"
-#path = "examples/line_gauge.rs"
-#
-#[[example]]
-#name = "list"
-#path = "examples/list.rs"
-#
-#[[example]]
-#name = "paragraph"
-#path = "examples/paragraph.rs"
-#
-#[[example]]
-#name = "progress_bar"
-#path = "examples/progress_bar.rs"
-#
-#[[example]]
-#name = "radio"
-#path = "examples/radio.rs"
-#
-#[[example]]
-#name = "select"
-#path = "examples/select.rs"
-#
-#[[example]]
-#name = "span"
-#path = "examples/span.rs"
-#
-#[[example]]
-#name = "sparkline"
-#path = "examples/sparkline.rs"
-#
-#[[example]]
-#name = "table"
-#path = "examples/table.rs"
-#
-#[[example]]
-#name = "textarea"
-#path = "examples/textarea.rs"
+[[example]]
+name = "bar-chart"
+path = "examples/bar_chart.rs"
+
+[[example]]
+name = "canvas"
+path = "examples/canvas.rs"
+
+[[example]]
+name = "chart"
+path = "examples/chart.rs"
+
+[[example]]
+name = "checkbox"
+path = "examples/checkbox.rs"
+
+[[example]]
+name = "input"
+path = "examples/input.rs"
+
+[[example]]
+name = "label"
+path = "examples/label.rs"
+
+[[example]]
+name = "line_gauge"
+path = "examples/line_gauge.rs"
+
+[[example]]
+name = "list"
+path = "examples/list.rs"
+
+[[example]]
+name = "paragraph"
+path = "examples/paragraph.rs"
+
+[[example]]
+name = "progress_bar"
+path = "examples/progress_bar.rs"
+
+[[example]]
+name = "radio"
+path = "examples/radio.rs"
+
+[[example]]
+name = "select"
+path = "examples/select.rs"
+
+[[example]]
+name = "span"
+path = "examples/span.rs"
+
+[[example]]
+name = "sparkline"
+path = "examples/sparkline.rs"
+
+[[example]]
+name = "table"
+path = "examples/table.rs"
+
+[[example]]
+name = "textarea"
+path = "examples/textarea.rs"

@@ -50,6 +50,10 @@ pub const CHART_Y_STYLE: &str = "y-style";
 pub const CHART_X_TITLE: &str = "x-title";
 pub const CHART_Y_TITLE: &str = "y-titles";
 
+// -- input
+
+pub const INPUT_INVALID_STYLE: &str = "invalid-style";
+
 // -- line gauge
 
 pub const LINE_GAUGE_STYLE_NORMAL: u8 = 0;

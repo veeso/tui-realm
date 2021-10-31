@@ -26,6 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+use super::props::INPUT_INVALID_STYLE;
 use crate::utils::calc_utf8_cursor_position;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
@@ -129,8 +130,8 @@ impl OwnStates {
     /// Render value as a vec of chars
     pub fn render_value_chars(&self, itype: InputType) -> Vec<char> {
         match itype {
-            InputType::Password(_) | InputType::CustomPassword(_, _, _) => {
-                (0..self.input.len()).map(|_| '*').collect()
+            InputType::Password(ch) | InputType::CustomPassword(ch, _, _) => {
+                (0..self.input.len()).map(|_| ch).collect()
             }
             _ => self.input.clone(),
         }
@@ -199,6 +200,11 @@ impl Input {
         self
     }
 
+    pub fn invalid_style(mut self, s: Style) -> Self {
+        self.attr(Attribute::Custom(INPUT_INVALID_STYLE), AttrValue::Style(s));
+        self
+    }
+
     fn get_input_len(&self) -> Option<usize> {
         self.props
             .get(Attribute::InputLength)
@@ -210,16 +216,24 @@ impl Input {
             .get_or(Attribute::InputType, AttrValue::InputType(InputType::Text))
             .unwrap_input_type()
     }
+
+    /// ### is_valid
+    ///
+    /// Checks whether current input is valid
+    fn is_valid(&self) -> bool {
+        let value = self.states.get_value();
+        self.get_input_type().validate(value.as_str())
+    }
 }
 
 impl MockComponent for Input {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let foreground = self
+            let mut foreground = self
                 .props
                 .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
                 .unwrap_color();
-            let background = self
+            let mut background = self
                 .props
                 .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
                 .unwrap_color();
@@ -250,6 +264,32 @@ impl MockComponent for Input {
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
             let itype = self.get_input_type();
+            let mut block = crate::utils::get_block(borders, Some(title), focus, inactive_style);
+            // Apply invalid style
+            if focus && !self.is_valid() {
+                if let Some(style) = self
+                    .props
+                    .get(Attribute::Custom(INPUT_INVALID_STYLE))
+                    .map(|x| x.unwrap_style())
+                {
+                    let borders = self
+                        .props
+                        .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+                        .unwrap_borders()
+                        .color(style.fg.unwrap_or(Color::Reset));
+                    let title = self
+                        .props
+                        .get_or(
+                            Attribute::Title,
+                            AttrValue::Title((String::default(), Alignment::Center)),
+                        )
+                        .unwrap_title();
+                    block = crate::utils::get_block(borders, Some(title), focus, None);
+                    foreground = style.fg.unwrap_or(Color::Reset);
+                    background = style.bg.unwrap_or(Color::Reset);
+                }
+            }
+            // Create widget
             let p: Paragraph = Paragraph::new(self.states.render_value(self.get_input_type()))
                 .style(match focus {
                     true => Style::default()
@@ -258,12 +298,7 @@ impl MockComponent for Input {
                         .add_modifier(modifiers),
                     false => inactive_style.unwrap_or_default(),
                 })
-                .block(crate::utils::get_block(
-                    borders,
-                    Some(title),
-                    focus,
-                    inactive_style,
-                ));
+                .block(block);
             render.render_widget(p, area);
             // Set cursor, if focus
             if focus {
@@ -308,10 +343,9 @@ impl MockComponent for Input {
     }
 
     fn state(&self) -> State {
-        let value = self.states.get_value();
         // Validate input
-        if self.get_input_type().validate(value.as_str()) {
-            State::One(StateValue::String(value))
+        if self.is_valid() {
+            State::One(StateValue::String(self.states.get_value()))
         } else {
             State::None
         }

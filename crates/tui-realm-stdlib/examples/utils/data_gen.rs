@@ -1,6 +1,6 @@
-//! ## Keymap
+//! ## DataGen
 //!
-//! Keymap contains pub constants which can be used in the `update` function to match messages
+//! provides a random data generator Poll impl
 
 /**
  * MIT License
@@ -25,19 +25,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-extern crate crossterm;
-extern crate tuirealm;
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use tuirealm::Msg;
+extern crate rand;
 
-// -- keys
+use rand::{thread_rng, Rng};
 
-pub const MSG_KEY_ESC: Msg = Msg::OnKey(KeyEvent {
-    code: KeyCode::Esc,
-    modifiers: KeyModifiers::NONE,
-});
-#[allow(dead_code)]
-pub const MSG_KEY_TAB: Msg = Msg::OnKey(KeyEvent {
-    code: KeyCode::Tab,
-    modifiers: KeyModifiers::NONE,
-});
+pub struct DataGen<T> {
+    max: T,
+    min: T,
+    data: Vec<T>,
+}
+
+impl<T> DataGen<T> {
+    pub fn new(min: T, max: T) -> Self {
+        Self {
+            min,
+            max,
+            data: Vec::new(),
+        }
+    }
+}
+
+impl DataGen<(f64, f64)> {
+    pub fn generate(&mut self) -> Vec<(f64, f64)> {
+        let y_max = self.max.1;
+        let y_min = self.min.1;
+        let x = self.data.last().map(|x| x.0 + 1.0).unwrap_or(0.0);
+        let y = self.get_rand(y_min, y_max);
+        self.data.push((x, y));
+        self.data.clone()
+    }
+
+    fn get_rand(&mut self, min: f64, max: f64) -> f64 {
+        let mut rng = thread_rng();
+        let min = (min * 10.0) as usize;
+        let max = (max * 10.0) as usize;
+        rng.gen_range(min..max) as f64 / 10.0
+    }
+}

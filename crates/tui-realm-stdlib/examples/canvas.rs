@@ -1,7 +1,3 @@
-//! ## Demo
-//!
-//! `Demo` shows how to use tui-realm in a real case
-
 /**
  * MIT License
  *
@@ -25,169 +21,171 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-mod utils;
+use std::time::Duration;
 
-use utils::context::Context;
-use utils::keymap::*;
-
-use std::thread::sleep;
-use std::time::{Duration, Instant};
-
-use tui_realm_stdlib::{Canvas, CanvasPropsBuilder, Label, LabelPropsBuilder};
-use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::props::Alignment;
-use tuirealm::tui::widgets::canvas::MapResolution;
-use tuirealm::{Msg, PropsBuilder, Update, View};
+use tui_realm_stdlib::Canvas;
+use tuirealm::props::{Alignment, Borders, Color, Shape};
+use tuirealm::terminal::TerminalBridge;
+use tuirealm::{
+    application::PollStrategy,
+    event::{Key, KeyEvent},
+    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update, View,
+};
 // tui
-use tuirealm::tui::layout::{Constraint, Direction, Layout};
-use tuirealm::tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::tui::widgets::canvas::{Line, Map, MapResolution, Rectangle};
 
-const COMPONENT_CANVAS: &str = "canvas";
-const COMPONENT_EVENT: &str = "LABEL";
+#[derive(Debug, PartialEq)]
+pub enum Msg {
+    AppClose,
+    None,
+}
+
+// Let's define the component ids for our application
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
+pub enum Id {
+    Canvas,
+}
 
 struct Model {
-    quit: bool,           // Becomes true when the user presses <ESC>
-    redraw: bool,         // Tells whether to refresh the UI; performance optimization
-    last_redraw: Instant, // Last time the ui has been redrawed
-    view: View,
+    quit: bool,   // Becomes true when the user presses <ESC>
+    redraw: bool, // Tells whether to refresh the UI; performance optimization
+    terminal: TerminalBridge,
+}
+
+impl Default for Model {
+    fn default() -> Self {
+        Self {
+            quit: false,
+            redraw: true,
+            terminal: TerminalBridge::new().expect("Cannot create terminal bridge"),
+        }
+    }
 }
 
 impl Model {
-    fn new(view: View) -> Self {
-        Model {
-            quit: false,
-            redraw: true,
-            last_redraw: Instant::now(),
-            view,
-        }
-    }
-
-    fn quit(&mut self) {
-        self.quit = true;
-    }
-
-    fn redraw(&mut self) {
-        self.redraw = true;
-    }
-
-    fn reset(&mut self) {
-        self.redraw = false;
-        self.last_redraw = Instant::now();
+    fn view(&mut self, app: &mut Application<Id, Msg, NoUserEvent>) {
+        let _ = self.terminal.raw_mut().draw(|f| {
+            // Prepare chunks
+            let chunks = Layout::default()
+                .direction(LayoutDirection::Vertical)
+                .margin(1)
+                .constraints([Constraint::Percentage(100)].as_ref())
+                .split(f.size());
+            app.view(&Id::Canvas, f, chunks[0]);
+        });
     }
 }
 
 fn main() {
-    // let's create a context: the context contains the backend of crossterm and the input handler
-    let mut ctx: Context = Context::new();
-    // Enter alternate screen
-    ctx.enter_alternate_screen();
-    // Clear screen
-    ctx.clear_screen();
-    // let's create a `View`, which will contain the components
-    let mut myview: View = View::init();
-    // Mount the component you need; we'll use a Label and an Input
-    myview.mount(
-        COMPONENT_CANVAS,
-        Box::new(Canvas::new(
-            CanvasPropsBuilder::default()
-                .hidden()
-                .visible()
-                .with_background(Color::Reset)
-                .with_title(String::from("playing risiko"), Alignment::Center)
-                .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
-                .with_x_bounds((-180.0, 180.0))
-                .with_y_bounds((-90.0, 90.0))
-                .with_new_drawing()
-                .with_map(MapResolution::High, Color::Rgb(240, 240, 240))
-                .with_layer()
-                .with_line(0.0, 10.0, 10.0, 10.0, Color::Red)
-                .with_rectangle(60.0, 20.0, 70.0, 22.0, Color::Cyan)
-                .with_points(
-                    vec![
-                        (21.0, 13.0),
-                        (66.0, 77.0),
-                        (34.0, 69.0),
-                        (45.0, 76.0),
-                        (120.0, 55.0),
-                        (-32.0, -50.0),
-                        (-4.0, 2.0),
-                        (-32.0, -48.0),
-                    ],
-                    Color::Green,
-                )
-                .build(),
-        )),
+    let mut model = Model::default();
+    let _ = model.terminal.enable_raw_mode();
+    let _ = model.terminal.enter_alternate_screen();
+    // Setup app
+    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+        EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
     );
-    myview.mount(
-        COMPONENT_EVENT,
-        Box::new(Label::new(
-            LabelPropsBuilder::default()
-                .with_foreground(Color::Cyan)
-                .with_text(String::from("Event will appear here"))
-                .build(),
-        )),
-    );
+    assert!(app
+        .mount(Id::Canvas, Box::new(MyCanvas::default()), vec![])
+        .is_ok());
     // We need to give focus to input then
-    myview.active(COMPONENT_CANVAS);
+    assert!(app.active(&Id::Canvas).is_ok());
     // Now we use the Model struct to keep track of some states
-    let mut model: Model = Model::new(myview);
+
     // let's loop until quit is true
     while !model.quit {
-        // Listen for input events
-        if let Ok(Some(ev)) = ctx.input_hnd.read_event() {
-            // Pass event to view
-            let msg = model.view.on(ev);
-            model.redraw();
-            // Call the elm friend update
-            model.update(msg);
+        // Tick
+        if let Ok(sz) = app.tick(&mut model, PollStrategy::Once) {
+            if sz > 0 {
+                // NOTE: redraw if at least one msg has been processed
+                model.redraw = true;
+            }
         }
-        // If redraw, draw interface
-        if model.redraw || model.last_redraw.elapsed() > Duration::from_millis(50) {
-            // Call the elm friend vie1 function
-            view(&mut ctx, &model.view);
-            model.reset();
+        // Redraw
+        if model.redraw {
+            model.view(&mut app);
+            model.redraw = false;
         }
-        sleep(Duration::from_millis(10));
     }
-    // Let's drop the context finally
-    drop(ctx);
+    // Terminate terminal
+    let _ = model.terminal.leave_alternate_screen();
+    let _ = model.terminal.disable_raw_mode();
+    let _ = model.terminal.clear_screen();
 }
 
-fn view(ctx: &mut Context, view: &View) {
-    let _ = ctx.terminal.draw(|f| {
-        // Prepare chunks
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .margin(1)
-            .constraints([Constraint::Length(1), Constraint::Min(10)].as_ref())
-            .split(f.size());
-        view.render(COMPONENT_EVENT, f, chunks[0]);
-        view.render(COMPONENT_CANVAS, f, chunks[1]);
-    });
+impl Update<Id, Msg, NoUserEvent> for Model {
+    fn update(&mut self, _: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
+        match msg.unwrap_or(Msg::None) {
+            Msg::AppClose => {
+                self.quit = true;
+                None
+            }
+            Msg::None => None,
+        }
+    }
 }
 
-impl Update for Model {
-    fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
-        let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
-        match ref_msg {
-            None => None, // Exit after None
-            Some(msg) => match msg {
-                (_, key) if key == &MSG_KEY_ESC => {
-                    // Quit on esc
-                    self.quit();
-                    None
-                }
-                (component, event) => {
-                    // Update span
-                    let props =
-                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
-                            .with_text(format!("{} => '{:?}'", component, event))
-                            .build();
-                    // Report submit
-                    let _ = self.view.update(COMPONENT_EVENT, props);
-                    None
-                }
-            },
+// -- components
+
+#[derive(MockComponent)]
+struct MyCanvas {
+    component: Canvas,
+}
+
+impl Default for MyCanvas {
+    fn default() -> Self {
+        Self {
+            component: Canvas::default()
+                .background(Color::Reset)
+                .foreground(Color::LightYellow)
+                .title("playing risiko", Alignment::Center)
+                .borders(Borders::default().color(Color::LightBlue))
+                .x_bounds((-180.0, 180.0))
+                .y_bounds((-90.0, 90.0))
+                .data(&[
+                    Shape::Map(Map {
+                        resolution: MapResolution::High,
+                        color: Color::Rgb(240, 240, 240),
+                    }),
+                    Shape::Layer,
+                    Shape::Line(Line {
+                        x1: 0.0,
+                        y1: 10.0,
+                        x2: 10.0,
+                        y2: 10.0,
+                        color: Color::Red,
+                    }),
+                    Shape::Rectangle(Rectangle {
+                        x: 60.0,
+                        y: 20.0,
+                        width: 70.0,
+                        height: 20.0,
+                        color: Color::Cyan,
+                    }),
+                    Shape::Points((
+                        vec![
+                            (21.0 as f64, 13.0 as f64),
+                            (66.0 as f64, 77.0 as f64),
+                            (34.0 as f64, 69.0 as f64),
+                            (45.0 as f64, 76.0 as f64),
+                            (120.0 as f64, 55.0 as f64),
+                            (-32.0 as f64, -50.0 as f64),
+                            (-4.0 as f64, 2.0 as f64),
+                            (-32.0 as f64, -48.0 as f64),
+                        ],
+                        Color::Green,
+                    )),
+                ]),
+        }
+    }
+}
+
+impl Component<Msg, NoUserEvent> for MyCanvas {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        if let Event::Keyboard(KeyEvent { code: Key::Esc, .. }) = ev {
+            Some(Msg::AppClose)
+        } else {
+            None
         }
     }
 }
