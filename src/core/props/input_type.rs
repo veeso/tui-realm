@@ -155,13 +155,10 @@ impl InputType {
     }
 
     fn char_valid_for_color(input: &str, c: char) -> bool {
-        (c.is_alphanumeric() && !input.starts_with('#') && !input.starts_with('r'))
+        (c.is_alphanumeric() && !input.starts_with('#'))
             || (input.starts_with('#') && c.is_digit(16))
             || c == ' '
             || (c == '#' && input.is_empty())
-            || (c == 'r' && input.is_empty())
-            || (c == 'g' && input.len() == 1)
-            || (c == 'b' && input.len() == 2)
             || (c == ',' && input.starts_with("rgb"))
             || (c == '(' && input.starts_with("rgb") && !input.contains('('))
             || (c.is_digit(10) && input.starts_with("rgb"))
