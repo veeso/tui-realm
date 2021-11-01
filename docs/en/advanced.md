@@ -10,6 +10,7 @@
   - [Ports](#ports)
   - [Implementing new components](#implementing-new-components)
   - [Best practice](#best-practice)
+    - [Over states](#over-states)
 
 ---
 
@@ -177,3 +178,7 @@ Using `And` and `Or` you can create even long expression and keep in mind that t
 ---
 
 ## Best practice
+
+### Over states
+
+Stati della comp che agiscono sulla mock

@@ -37,7 +37,7 @@ mod texts;
 mod value;
 
 // -- exports
-pub use crate::tui::layout::Alignment;
+pub use crate::tui::layout::{Alignment, Rect};
 pub use crate::tui::style::{Color, Modifier as TextModifiers, Style};
 pub use borders::{BorderSides, BorderType, Borders};
 pub use dataset::Dataset;
@@ -136,6 +136,8 @@ pub enum Attribute {
     InputLength,
     /// Input type for input fields
     InputType,
+    /// Defines a layout
+    Layout,
     /// A map of colors for complex components
     Palette,
     /// Intended to decide whether to rewind when reaching boundaries on list/tables
@@ -181,6 +183,7 @@ pub enum AttrValue {
     Direction(Direction),
     Flag(bool),
     InputType(InputType),
+    Layout(Layout),
     Length(usize),
     Number(isize),
     Shape(Shape),
@@ -244,6 +247,13 @@ impl AttrValue {
         match self {
             AttrValue::InputType(x) => x,
             _ => panic!("AttrValue is not InputType"),
+        }
+    }
+
+    pub fn unwrap_layout(self) -> Layout {
+        match self {
+            AttrValue::Layout(l) => l,
+            _ => panic!("AttrValue is not a Layout"),
         }
     }
 
@@ -325,6 +335,10 @@ impl AttrValue {
     }
 }
 
+// -- types
+
+pub type Layout = Vec<Rect>;
+
 #[cfg(test)]
 mod test {
 
@@ -356,6 +370,7 @@ mod test {
             AttrValue::InputType(InputType::Number).unwrap_input_type(),
             InputType::Number
         );
+        assert_eq!(AttrValue::Layout(vec![]).unwrap_layout(), vec![]);
         assert_eq!(AttrValue::Length(12).unwrap_length(), 12);
         assert_eq!(AttrValue::Number(-24).unwrap_number(), -24);
         assert_eq!(AttrValue::Shape(Shape::Layer).unwrap_shape(), Shape::Layer);
@@ -430,6 +445,12 @@ mod test {
     #[should_panic]
     fn unwrapping_inputtype_should_panic_if_not_identity() {
         AttrValue::Flag(true).unwrap_input_type();
+    }
+
+    #[test]
+    #[should_panic]
+    fn unwrapping_layout_should_panic_if_not_identity() {
+        AttrValue::Flag(true).unwrap_layout();
     }
 
     #[test]
