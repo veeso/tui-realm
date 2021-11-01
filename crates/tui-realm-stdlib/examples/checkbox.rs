@@ -224,7 +224,7 @@ impl Default for CheckboxBeta {
                 .foreground(Color::LightYellow)
                 .background(Color::Black)
                 .title("Select your toppings 🧁", Alignment::Center)
-                .rewind(true)
+                .rewind(false)
                 .choices(&[
                     "hazelnuts",
                     "chocolate",

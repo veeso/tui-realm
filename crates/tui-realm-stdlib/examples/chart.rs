@@ -25,10 +25,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-extern crate rand;
-
 mod utils;
-use utils::data_gen::DataGen;
+use utils::DataGen;
 
 use std::time::Duration;
 use tui_realm_stdlib::Chart;

@@ -62,3 +62,16 @@ impl DataGen<(f64, f64)> {
         rng.gen_range(min..max) as f64 / 10.0
     }
 }
+
+impl DataGen<u64> {
+    pub fn generate(&mut self) -> Vec<u64> {
+        let num = self.get_rand(self.min, self.max);
+        self.data.push(num);
+        self.data.clone()
+    }
+
+    fn get_rand(&mut self, min: u64, max: u64) -> u64 {
+        let mut rng = thread_rng();
+        rng.gen_range(min..max)
+    }
+}

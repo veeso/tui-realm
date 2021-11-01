@@ -25,405 +25,327 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-mod utils;
+use std::time::Duration;
 
-use utils::context::Context;
-use utils::keymap::*;
-
-use std::thread::sleep;
-use std::time::{Duration, Instant};
-
-use tui_realm_stdlib::{Label, LabelPropsBuilder, List, ListPropsBuilder};
-use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::props::{Alignment, TableBuilder, TextSpan};
-use tuirealm::{Msg, PropsBuilder, Update, View};
+use tui_realm_stdlib::List;
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::props::{Alignment, BorderType, Borders, Color, TableBuilder, TextSpan};
+use tuirealm::terminal::TerminalBridge;
+use tuirealm::{
+    application::PollStrategy,
+    event::{Key, KeyEvent},
+    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update, View,
+};
 // tui
-use tuirealm::tui::layout::{Constraint, Direction, Layout};
-use tuirealm::tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
 
-const COMPONENT_TABLE: &str = "table";
-const COMPONENT_TABLE_2: &str = "table2";
-const COMPONENT_SCROLLTABLE: &str = "scroll_list1";
-const COMPONENT_SCROLLTABLE_2: &str = "scroll_list2";
-const COMPONENT_EVENT: &str = "LABEL";
+#[derive(Debug, PartialEq)]
+pub enum Msg {
+    AppClose,
+    ListAlfaBlur,
+    ListBetaBlur,
+    None,
+}
+
+// Let's define the component ids for our application
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
+pub enum Id {
+    ListAlfa,
+    ListBeta,
+}
 
 struct Model {
-    quit: bool,           // Becomes true when the user presses <ESC>
-    redraw: bool,         // Tells whether to refresh the UI; performance optimization
-    last_redraw: Instant, // Last time the ui has been redrawed
-    view: View,
+    quit: bool,   // Becomes true when the user presses <ESC>
+    redraw: bool, // Tells whether to refresh the UI; performance optimization
+    terminal: TerminalBridge,
+}
+
+impl Default for Model {
+    fn default() -> Self {
+        Self {
+            quit: false,
+            redraw: true,
+            terminal: TerminalBridge::new().expect("Cannot create terminal bridge"),
+        }
+    }
 }
 
 impl Model {
-    fn new(view: View) -> Self {
-        Model {
-            quit: false,
-            redraw: true,
-            last_redraw: Instant::now(),
-            view,
-        }
-    }
-
-    fn quit(&mut self) {
-        self.quit = true;
-    }
-
-    fn redraw(&mut self) {
-        self.redraw = true;
-    }
-
-    fn reset(&mut self) {
-        self.redraw = false;
-        self.last_redraw = Instant::now();
+    fn view(&mut self, app: &mut Application<Id, Msg, NoUserEvent>) {
+        let _ = self.terminal.raw_mut().draw(|f| {
+            // Prepare chunks
+            let chunks = Layout::default()
+                .direction(LayoutDirection::Vertical)
+                .margin(1)
+                .constraints(
+                    [
+                        Constraint::Length(10),
+                        Constraint::Length(6),
+                        Constraint::Length(1),
+                    ]
+                    .as_ref(),
+                )
+                .split(f.size());
+            app.view(&Id::ListAlfa, f, chunks[0]);
+            app.view(&Id::ListBeta, f, chunks[1]);
+        });
     }
 }
 
 fn main() {
-    // let's create a context: the context contains the backend of crossterm and the input handler
-    let mut ctx: Context = Context::new();
-    // Enter alternate screen
-    ctx.enter_alternate_screen();
-    // Clear screen
-    ctx.clear_screen();
-    // let's create a `View`, which will contain the components
-    let mut myview: View = View::init();
-    // Mount the component you need; we'll use a Label and an Input
-    myview.mount(
-        COMPONENT_TABLE,
-        Box::new(List::new(
-            ListPropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_title("My table data", Alignment::Center)
-                .with_rows(
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("0"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("andreas").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("1"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("bohdan").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("2"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("charlie").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("3"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("denis").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("4"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("ector").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("5"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("frank").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("6"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("giulio").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("7"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("hermes").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("8"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("italo").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("9"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("lamar").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("10"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("mark").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("11"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("napalm").fg(Color::Cyan))
-                        .build(),
-                )
-                .build(),
-        )),
+    let mut model = Model::default();
+    let _ = model.terminal.enable_raw_mode();
+    let _ = model.terminal.enter_alternate_screen();
+    // Setup app
+    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+        EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
     );
-    myview.mount(
-        COMPONENT_TABLE_2,
-        Box::new(List::new(
-            ListPropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_title("My table data", Alignment::Center)
-                .with_rows(
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("0"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("andreas").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("1"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("bohdan").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("2"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("charlie").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("3"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("denis").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("4"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("ector").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("5"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("frank").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("6"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("giulio").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("7"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("hermes").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("8"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("italo").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("9"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("lamar").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("10"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("mark").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("11"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("napalm").fg(Color::Cyan))
-                        .build(),
-                )
-                .build(),
-        )),
-    );
-    myview.mount(
-        COMPONENT_SCROLLTABLE,
-        Box::new(List::new(
-            ListPropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_highlighted_str(Some("🚀"))
-                .with_highlighted_color(Color::LightBlue)
-                .scrollable(true)
-                .with_title("My table data", Alignment::Left)
-                .with_rows(
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("0"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("andreas").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("1"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("bohdan").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("2"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("charlie").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("3"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("denis").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("4"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("ector").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("5"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("frank").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("6"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("giulio").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("7"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("hermes").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("8"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("italo").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("9"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("lamar").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("10"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("mark").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("11"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("napalm").fg(Color::Cyan))
-                        .build(),
-                )
-                .build(),
-        )),
-    );
-    myview.mount(
-        COMPONENT_SCROLLTABLE_2,
-        Box::new(List::new(
-            ListPropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_highlighted_str(Some("🚀"))
-                .with_max_scroll_step(4)
-                .scrollable(true)
-                .with_highlighted_color(Color::LightBlue)
-                .with_title("My table data", Alignment::Left)
-                .with_rows(
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("0"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("andreas").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("1"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("bohdan").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("2"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("charlie").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("3"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("denis").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("4"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("ector").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("5"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("frank").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("6"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("giulio").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("7"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("hermes").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("8"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("italo").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("9"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("lamar").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("10"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("mark").fg(Color::Cyan))
-                        .add_row()
-                        .add_col(TextSpan::from("11"))
-                        .add_col(TextSpan::from(" "))
-                        .add_col(TextSpan::new("napalm").fg(Color::Cyan))
-                        .build(),
-                )
-                .build(),
-        )),
-    );
-    myview.mount(
-        COMPONENT_EVENT,
-        Box::new(Label::new(
-            LabelPropsBuilder::default()
-                .with_foreground(Color::Cyan)
-                .build(),
-        )),
-    );
+    assert!(app
+        .mount(Id::ListAlfa, Box::new(ListAlfa::default()), vec![])
+        .is_ok());
+    assert!(app
+        .mount(Id::ListBeta, Box::new(ListBeta::default()), vec![])
+        .is_ok());
     // We need to give focus to input then
-    myview.active(COMPONENT_SCROLLTABLE);
+    assert!(app.active(&Id::ListAlfa).is_ok());
     // Now we use the Model struct to keep track of some states
-    let mut model: Model = Model::new(myview);
+
     // let's loop until quit is true
     while !model.quit {
-        // Listen for input events
-        if let Ok(Some(ev)) = ctx.input_hnd.read_event() {
-            // Pass event to view
-            let msg = model.view.on(ev);
-            model.redraw();
-            // Call the elm friend update
-            model.update(msg);
+        // Tick
+        if let Ok(sz) = app.tick(&mut model, PollStrategy::Once) {
+            if sz > 0 {
+                // NOTE: redraw if at least one msg has been processed
+                model.redraw = true;
+            }
         }
-        // If redraw, draw interface
-        if model.redraw || model.last_redraw.elapsed() > Duration::from_millis(50) {
-            // Call the elm friend vie1 function
-            view(&mut ctx, &model.view);
-            model.reset();
+        // Redraw
+        if model.redraw {
+            model.view(&mut app);
+            model.redraw = false;
         }
-        sleep(Duration::from_millis(10));
     }
-    // Let's drop the context finally
-    drop(ctx);
+    // Terminate terminal
+    let _ = model.terminal.leave_alternate_screen();
+    let _ = model.terminal.disable_raw_mode();
+    let _ = model.terminal.clear_screen();
 }
 
-fn view(ctx: &mut Context, view: &View) {
-    let _ = ctx.terminal.draw(|f| {
-        // Prepare chunks
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .margin(1)
-            .constraints(
-                [
-                    Constraint::Length(10),
-                    Constraint::Length(6),
-                    Constraint::Length(10),
-                    Constraint::Length(6),
-                    Constraint::Length(1),
-                ]
-                .as_ref(),
-            )
-            .split(f.size());
-        view.render(COMPONENT_TABLE, f, chunks[0]);
-        view.render(COMPONENT_TABLE_2, f, chunks[1]);
-        view.render(COMPONENT_SCROLLTABLE, f, chunks[2]);
-        view.render(COMPONENT_SCROLLTABLE_2, f, chunks[3]);
-        view.render(COMPONENT_EVENT, f, chunks[4]);
-    });
-}
-
-impl Update for Model {
-    fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
-        let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
-        match ref_msg {
-            None => None, // Exit after None
-            Some(msg) => match msg {
-                (COMPONENT_SCROLLTABLE, key) if key == &MSG_KEY_TAB => {
-                    self.view.active(COMPONENT_SCROLLTABLE_2);
-                    None
-                }
-                (COMPONENT_SCROLLTABLE_2, key) if key == &MSG_KEY_TAB => {
-                    self.view.active(COMPONENT_SCROLLTABLE);
-                    None
-                }
-                (_, key) if key == &MSG_KEY_ESC => {
-                    // Quit on esc
-                    self.quit();
-                    None
-                }
-                (component, event) => {
-                    // Update span
-                    let props =
-                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
-                            .with_text(format!("{} => '{:?}'", component, event))
-                            .build();
-                    // Report submit
-                    let _ = self.view.update(COMPONENT_EVENT, props);
-                    None
-                }
-            },
+impl Update<Id, Msg, NoUserEvent> for Model {
+    fn update(&mut self, view: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
+        match msg.unwrap_or(Msg::None) {
+            Msg::AppClose => {
+                self.quit = true;
+                None
+            }
+            Msg::ListAlfaBlur => {
+                assert!(view.active(&Id::ListBeta).is_ok());
+                None
+            }
+            Msg::ListBetaBlur => {
+                assert!(view.active(&Id::ListAlfa).is_ok());
+                None
+            }
+            Msg::None => None,
         }
+    }
+}
+
+#[derive(MockComponent)]
+struct ListAlfa {
+    component: List,
+}
+
+impl Default for ListAlfa {
+    fn default() -> Self {
+        Self {
+            component: List::default()
+                .borders(
+                    Borders::default()
+                        .modifiers(BorderType::Rounded)
+                        .color(Color::Yellow),
+                )
+                .foreground(Color::Yellow)
+                .background(Color::Black)
+                .title("Lorem ipsum (scrollable)", Alignment::Center)
+                .scroll(true)
+                .highlighted_color(Color::LightYellow)
+                .highlighted_str("🚀")
+                .rewind(true)
+                .step(4)
+                .rows(
+                    TableBuilder::default()
+                        .add_col(TextSpan::from("01").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Lorem ipsum dolor sit amet, consectetur adipiscing elit"))
+                        .add_row()
+                        .add_col(TextSpan::from("02").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Maecenas tincidunt dui ut gravida fringilla"))
+                        .add_row()
+                        .add_col(TextSpan::from("03").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Duis est neque, fringilla sit amet enim id, congue hendrerit mauris"))
+                        .add_row()
+                        .add_col(TextSpan::from("04").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Nulla facilisi. Vestibulum tincidunt tempor orci, in pellentesque lacus placerat id."))
+                        .add_row()
+                        .add_col(TextSpan::from("05").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Integer at nisl scelerisque, egestas ipsum in, iaculis tellus. Pellentesque tincidunt vestibulum nisi, ut vehicula augue scelerisque at"))
+                        .add_row()
+                        .add_col(TextSpan::from("06").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Quisque quis tincidunt tellus. Nam accumsan leo non nunc finibus feugiat."))
+                        .add_row()
+                        .add_col(TextSpan::from("07").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("non lacus ac orci fermentum aliquam ut feugiat libero. Suspendisse eget nunc in erat molestie egestas eu at massa"))
+                        .add_row()
+                        .add_col(TextSpan::from("08").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Donec feugiat dui quis libero ornare, vel sodales mauris ornare."))
+                        .add_row()
+                        .add_col(TextSpan::from("09").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Aenean tempor porta nisi, at sodales eros semper ut. Vivamus sit amet commodo risus"))
+                        .add_row()
+                        .add_col(TextSpan::from("10").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Etiam urna nisi, ullamcorper at justo et, rhoncus pellentesque dui. Nunc ante velit, ultrices a ornare sit amet, sagittis in ex. Nam pulvinar tellus tortor. Praesent ac accumsan nunc, ac consectetur nisi."))
+                        .add_row()
+                        .add_col(TextSpan::from("11").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Proin non elit fermentum, pretium diam eget, facilisis mi"))
+                        .add_row()
+                        .add_col(TextSpan::from("12").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Duis suscipit nibh lacus, quis porta enim accumsan vel"))
+                        .add_row()
+                        .add_col(TextSpan::from("13").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Etiam volutpat magna tortor, a laoreet ex accumsan sit amet"))
+                        .build()
+                ),
+        }
+    }
+}
+
+impl Component<Msg, NoUserEvent> for ListAlfa {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        let _ = match ev {
+            Event::Keyboard(KeyEvent {
+                code: Key::Down, ..
+            }) => self.perform(Cmd::Move(Direction::Down)),
+            Event::Keyboard(KeyEvent { code: Key::Up, .. }) => {
+                self.perform(Cmd::Move(Direction::Up))
+            }
+            Event::Keyboard(KeyEvent {
+                code: Key::PageDown,
+                ..
+            }) => self.perform(Cmd::Scroll(Direction::Down)),
+            Event::Keyboard(KeyEvent {
+                code: Key::PageUp, ..
+            }) => self.perform(Cmd::Scroll(Direction::Up)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Home, ..
+            }) => self.perform(Cmd::GoTo(Position::Begin)),
+            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
+                self.perform(Cmd::GoTo(Position::End))
+            }
+            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::ListAlfaBlur),
+            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            _ => CmdResult::None,
+        };
+        Some(Msg::None)
+    }
+}
+
+#[derive(MockComponent)]
+struct ListBeta {
+    component: List,
+}
+
+impl Default for ListBeta {
+    fn default() -> Self {
+        Self {
+            component: List::default()
+                .borders(
+                    Borders::default()
+                        .modifiers(BorderType::Rounded)
+                        .color(Color::Green),
+                )
+                .foreground(Color::Green)
+                .background(Color::Black)
+                .title("Lorem ipsum (unscrollable)", Alignment::Center)
+                .scroll(false)
+                .rows(
+                    TableBuilder::default()
+                        .add_col(TextSpan::from("01").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Lorem ipsum dolor sit amet, consectetur adipiscing elit"))
+                        .add_row()
+                        .add_col(TextSpan::from("02").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Maecenas tincidunt dui ut gravida fringilla"))
+                        .add_row()
+                        .add_col(TextSpan::from("03").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Duis est neque, fringilla sit amet enim id, congue hendrerit mauris"))
+                        .add_row()
+                        .add_col(TextSpan::from("04").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Nulla facilisi. Vestibulum tincidunt tempor orci, in pellentesque lacus placerat id."))
+                        .add_row()
+                        .add_col(TextSpan::from("05").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Integer at nisl scelerisque, egestas ipsum in, iaculis tellus. Pellentesque tincidunt vestibulum nisi, ut vehicula augue scelerisque at"))
+                        .add_row()
+                        .add_col(TextSpan::from("06").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Quisque quis tincidunt tellus. Nam accumsan leo non nunc finibus feugiat."))
+                        .add_row()
+                        .add_col(TextSpan::from("07").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("non lacus ac orci fermentum aliquam ut feugiat libero. Suspendisse eget nunc in erat molestie egestas eu at massa"))
+                        .add_row()
+                        .add_col(TextSpan::from("08").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Donec feugiat dui quis libero ornare, vel sodales mauris ornare."))
+                        .add_row()
+                        .add_col(TextSpan::from("09").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Aenean tempor porta nisi, at sodales eros semper ut. Vivamus sit amet commodo risus"))
+                        .add_row()
+                        .add_col(TextSpan::from("10").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Etiam urna nisi, ullamcorper at justo et, rhoncus pellentesque dui. Nunc ante velit, ultrices a ornare sit amet, sagittis in ex. Nam pulvinar tellus tortor. Praesent ac accumsan nunc, ac consectetur nisi."))
+                        .add_row()
+                        .add_col(TextSpan::from("11").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Proin non elit fermentum, pretium diam eget, facilisis mi"))
+                        .add_row()
+                        .add_col(TextSpan::from("12").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Duis suscipit nibh lacus, quis porta enim accumsan vel"))
+                        .add_row()
+                        .add_col(TextSpan::from("13").fg(Color::Cyan).italic())
+                        .add_col(TextSpan::from(" "))
+                        .add_col(TextSpan::from("Etiam volutpat magna tortor, a laoreet ex accumsan sit amet"))
+                        .build()
+                ),
+        }
+    }
+}
+
+impl Component<Msg, NoUserEvent> for ListBeta {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        let _ = match ev {
+            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::ListBetaBlur),
+            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            _ => CmdResult::None,
+        };
+        Some(Msg::None)
     }
 }

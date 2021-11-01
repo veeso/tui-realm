@@ -92,6 +92,14 @@ impl MockComponent for Span {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text
+            let foreground = self
+                .props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
             let spans: Vec<TuiSpan> =
                 match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
                     Some(PropPayload::Vec(spans)) => spans
@@ -116,7 +124,12 @@ impl MockComponent for Span {
                 .props
                 .get_or(Attribute::Alignment, AttrValue::Alignment(Alignment::Left))
                 .unwrap_alignment();
-            render.render_widget(Paragraph::new(text).alignment(alignment), area);
+            render.render_widget(
+                Paragraph::new(text)
+                    .alignment(alignment)
+                    .style(Style::default().bg(background).fg(foreground)),
+                area,
+            );
         }
     }
 

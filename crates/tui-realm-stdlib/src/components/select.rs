@@ -338,7 +338,7 @@ impl Select {
             .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
             .unwrap_borders();
         let block: Block = Block::default()
-            .borders(BorderSides::LEFT | BorderSides::TOP | BorderSides::RIGHT)
+            .borders(BorderSides::ALL)
             .border_style(borders.style())
             .style(style);
         let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
@@ -398,7 +398,11 @@ impl MockComponent for Select {
     }
 
     fn state(&self) -> State {
-        State::One(StateValue::Usize(self.states.selected))
+        if self.states.is_tab_open() {
+            State::None
+        } else {
+            State::One(StateValue::Usize(self.states.selected))
+        }
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {

@@ -207,12 +207,12 @@ impl Textarea {
         self
     }
 
-    pub fn text_rows(mut self, rows: Vec<TextSpan>) -> Self {
+    pub fn text_rows(mut self, rows: &[TextSpan]) -> Self {
         self.states.set_list_len(rows.len());
         self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
-                rows.into_iter().map(PropValue::TextSpan).collect(),
+                rows.into_iter().cloned().map(PropValue::TextSpan).collect(),
             )),
         );
         self
@@ -378,10 +378,7 @@ mod tests {
             .highlighted_str("🚀")
             .step(4)
             .title("textarea", Alignment::Center)
-            .text_rows(vec![
-                TextSpan::from("welcome to "),
-                TextSpan::from("tui-realm"),
-            ]);
+            .text_rows(&[TextSpan::from("welcome to "), TextSpan::from("tui-realm")]);
         // Increment list index
         component.states.list_index += 1;
         assert_eq!(component.states.list_index, 1);

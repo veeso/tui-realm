@@ -346,8 +346,6 @@ A text paragraph. Like in HTML this has to be considered a block element, and su
 - `Background(Color)`: set background color
 - `Borders(Borders)`: set border properties
 - `Foreground(Color)`: set foreground color
-- `HighlightedColor(Color)`: a different color for highlighted entry; `foreground` otherwise
-- `HighlightedStr(String)`: cursor for highlighted entry in selection tab.
 - `Text(Payload(Vec(TextSpan)))`: set paragraph text
 - `TextProps(TextModifiers)`: set text modifiers
 - `TextWrap(Flag)`: select whether to trim rows when wrapping
@@ -416,7 +414,7 @@ This component should have a variable size in the layout to be displayed properl
 | `Move(Up)`   | `Changed` | `None` | Move select up, if tab is open                                 |
 | `Submit`     | `Submit` | `None`  | Open or close the select tab; Returns state if tab gets closed |
 
-**State**: the state returned is `One(Usize)` containing the index of the selected item in the radio group.
+**State**: the state returned is `One(Usize)` containing the index of the selected item in the radio group. This state is returned only when the select is closed; otherwise `None` is returned
 
 **Properties**:
 

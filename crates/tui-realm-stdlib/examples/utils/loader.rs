@@ -1,6 +1,6 @@
-//! ## Utils
+//! ## Loader
 //!
-//! `Utils` provides structures useful to implement gui with tui-rs
+//! provides a loader generator
 
 /**
  * MIT License
@@ -25,8 +25,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-mod data_gen;
-mod loader;
 
-pub use data_gen::DataGen;
-pub use loader::Loader;
+pub struct Loader {
+    progress: f64,
+}
+
+impl Default for Loader {
+    fn default() -> Self {
+        Self { progress: 0.0 }
+    }
+}
+
+impl Loader {
+    pub fn load(&mut self) -> f64 {
+        let new = self.progress + 0.01;
+        if new >= 1.0 {
+            self.progress = 0.0;
+        } else {
+            self.progress = new;
+        }
+        self.progress
+    }
+}

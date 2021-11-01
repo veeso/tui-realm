@@ -25,294 +25,289 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-mod utils;
+use std::time::Duration;
 
-use utils::context::Context;
-use utils::keymap::*;
-
-use std::thread::sleep;
-use std::time::{Duration, Instant};
-
-use tui_realm_stdlib::{Label, LabelPropsBuilder, Table, TablePropsBuilder};
-use tuirealm::props::borders::{BorderType, Borders};
-use tuirealm::props::{Alignment, TableBuilder, TextSpan};
-use tuirealm::{Msg, PropsBuilder, Update, View};
+use tui_realm_stdlib::Table;
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::props::{Alignment, BorderType, Borders, Color, TableBuilder, TextSpan};
+use tuirealm::terminal::TerminalBridge;
+use tuirealm::{
+    application::PollStrategy,
+    event::{Key, KeyEvent},
+    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update, View,
+};
 // tui
-use tuirealm::tui::layout::{Constraint, Direction, Layout};
-use tuirealm::tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
 
-const COMPONENT_TABLE: &str = "table";
-const COMPONENT_SCROLLTABLE: &str = "scroll_list1";
-const COMPONENT_SCROLLTABLE_2: &str = "scroll_list2";
-const COMPONENT_EVENT: &str = "LABEL";
+#[derive(Debug, PartialEq)]
+pub enum Msg {
+    AppClose,
+    TableAlfaBlur,
+    TableBetaBlur,
+    None,
+}
+
+// Let's define the component ids for our application
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
+pub enum Id {
+    TableAlfa,
+    TableBeta,
+}
 
 struct Model {
-    quit: bool,           // Becomes true when the user presses <ESC>
-    redraw: bool,         // Tells whether to refresh the UI; performance optimization
-    last_redraw: Instant, // Last time the ui has been redrawed
-    view: View,
+    quit: bool,   // Becomes true when the user presses <ESC>
+    redraw: bool, // Tells whether to refresh the UI; performance optimization
+    terminal: TerminalBridge,
+}
+
+impl Default for Model {
+    fn default() -> Self {
+        Self {
+            quit: false,
+            redraw: true,
+            terminal: TerminalBridge::new().expect("Cannot create terminal bridge"),
+        }
+    }
 }
 
 impl Model {
-    fn new(view: View) -> Self {
-        Model {
-            quit: false,
-            redraw: true,
-            last_redraw: Instant::now(),
-            view,
-        }
-    }
-
-    fn quit(&mut self) {
-        self.quit = true;
-    }
-
-    fn redraw(&mut self) {
-        self.redraw = true;
-    }
-
-    fn reset(&mut self) {
-        self.redraw = false;
-        self.last_redraw = Instant::now();
+    fn view(&mut self, app: &mut Application<Id, Msg, NoUserEvent>) {
+        let _ = self.terminal.raw_mut().draw(|f| {
+            // Prepare chunks
+            let chunks = Layout::default()
+                .direction(LayoutDirection::Vertical)
+                .margin(1)
+                .constraints(
+                    [
+                        Constraint::Length(10),
+                        Constraint::Length(6),
+                        Constraint::Length(1),
+                    ]
+                    .as_ref(),
+                )
+                .split(f.size());
+            app.view(&Id::TableAlfa, f, chunks[0]);
+            app.view(&Id::TableBeta, f, chunks[1]);
+        });
     }
 }
 
 fn main() {
-    // let's create a context: the context contains the backend of crossterm and the input handler
-    let mut ctx: Context = Context::new();
-    // Enter alternate screen
-    ctx.enter_alternate_screen();
-    // Clear screen
-    ctx.clear_screen();
-    // let's create a `View`, which will contain the components
-    let mut myview: View = View::init();
-    // Mount the component you need; we'll use a Label and an Input
-    myview.mount(
-        COMPONENT_TABLE,
-        Box::new(Table::new(
-            TablePropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_col_spacing(3)
-                .with_header(&["Key", "Msg", "Description"])
-                .with_row_height(1)
-                .with_widths(&[30, 20, 50])
-                .with_title("My data", Alignment::Center)
-                .with_table(
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("KeyCode::Down"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor down"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Up"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor up"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::PageDown"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor down by 8"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::PageUp"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("ove cursor up by 8"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::End"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor to last item"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Home"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor to first item"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Char(_)"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Return pressed key"))
-                        .build(),
-                )
-                .build(),
-        )),
+    let mut model = Model::default();
+    let _ = model.terminal.enable_raw_mode();
+    let _ = model.terminal.enter_alternate_screen();
+    // Setup app
+    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+        EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
     );
-    myview.mount(
-        COMPONENT_SCROLLTABLE,
-        Box::new(Table::new(
-            TablePropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_highlighted_str(Some("🚀"))
-                .with_highlighted_color(Color::LightBlue)
-                .scrollable(true)
-                .with_col_spacing(3)
-                .with_header(&["Key", "Msg", "Description"])
-                .with_row_height(3)
-                .with_widths(&[30, 20, 50])
-                .with_title("Events", Alignment::Center)
-                .with_table(
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("KeyCode::Down"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor down"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Up"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor up"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::PageDown"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor down by 8"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::PageUp"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("ove cursor up by 8"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::End"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor to last item"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Home"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor to first item"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Char(_)"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Return pressed key"))
-                        .build(),
-                )
-                .build(),
-        )),
-    );
-    myview.mount(
-        COMPONENT_SCROLLTABLE_2,
-        Box::new(Table::new(
-            TablePropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Thick, Color::Blue)
-                .with_highlighted_str(Some("🚀"))
-                .with_max_scroll_step(4)
-                .scrollable(true)
-                .with_highlighted_color(Color::LightBlue)
-                .with_col_spacing(3)
-                .with_header(&["Key", "Msg", "Description"])
-                .with_row_height(1)
-                .with_widths(&[30, 20, 50])
-                .with_title("Events", Alignment::Left)
-                .with_table(
-                    TableBuilder::default()
-                        .add_col(TextSpan::from("KeyCode::Down"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor down"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Up"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor up"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::PageDown"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor down by 8"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::PageUp"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("ove cursor up by 8"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::End"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor to last item"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Home"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Move cursor to first item"))
-                        .add_row()
-                        .add_col(TextSpan::from("KeyCode::Char(_)"))
-                        .add_col(TextSpan::from("OnKey"))
-                        .add_col(TextSpan::from("Return pressed key"))
-                        .build(),
-                )
-                .build(),
-        )),
-    );
-    myview.mount(
-        COMPONENT_EVENT,
-        Box::new(Label::new(
-            LabelPropsBuilder::default()
-                .with_foreground(Color::Cyan)
-                .build(),
-        )),
-    );
+    assert!(app
+        .mount(Id::TableAlfa, Box::new(TableAlfa::default()), vec![])
+        .is_ok());
+    assert!(app
+        .mount(Id::TableBeta, Box::new(TableBeta::default()), vec![])
+        .is_ok());
     // We need to give focus to input then
-    myview.active(COMPONENT_SCROLLTABLE);
+    assert!(app.active(&Id::TableAlfa).is_ok());
     // Now we use the Model struct to keep track of some states
-    let mut model: Model = Model::new(myview);
+
     // let's loop until quit is true
     while !model.quit {
-        // Tableen for input events
-        if let Ok(Some(ev)) = ctx.input_hnd.read_event() {
-            // Pass event to view
-            let msg = model.view.on(ev);
-            model.redraw();
-            // Call the elm friend update
-            model.update(msg);
+        // Tick
+        if let Ok(sz) = app.tick(&mut model, PollStrategy::Once) {
+            if sz > 0 {
+                // NOTE: redraw if at least one msg has been processed
+                model.redraw = true;
+            }
         }
-        // If redraw, draw interface
-        if model.redraw || model.last_redraw.elapsed() > Duration::from_millis(50) {
-            // Call the elm friend vie1 function
-            view(&mut ctx, &model.view);
-            model.reset();
+        // Redraw
+        if model.redraw {
+            model.view(&mut app);
+            model.redraw = false;
         }
-        sleep(Duration::from_millis(10));
     }
-    // Let's drop the context finally
-    drop(ctx);
+    // Terminate terminal
+    let _ = model.terminal.leave_alternate_screen();
+    let _ = model.terminal.disable_raw_mode();
+    let _ = model.terminal.clear_screen();
 }
 
-fn view(ctx: &mut Context, view: &View) {
-    let _ = ctx.terminal.draw(|f| {
-        // Prepare chunks
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .margin(1)
-            .constraints(
-                [
-                    Constraint::Length(8),
-                    Constraint::Length(15),
-                    Constraint::Length(6),
-                    Constraint::Length(1),
-                ]
-                .as_ref(),
-            )
-            .split(f.size());
-        view.render(COMPONENT_TABLE, f, chunks[0]);
-        view.render(COMPONENT_SCROLLTABLE, f, chunks[1]);
-        view.render(COMPONENT_SCROLLTABLE_2, f, chunks[2]);
-        view.render(COMPONENT_EVENT, f, chunks[3]);
-    });
-}
-
-impl Update for Model {
-    fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
-        let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
-        match ref_msg {
-            None => None, // Exit after None
-            Some(msg) => match msg {
-                (COMPONENT_SCROLLTABLE, key) if key == &MSG_KEY_TAB => {
-                    self.view.active(COMPONENT_SCROLLTABLE_2);
-                    None
-                }
-                (COMPONENT_SCROLLTABLE_2, key) if key == &MSG_KEY_TAB => {
-                    self.view.active(COMPONENT_SCROLLTABLE);
-                    None
-                }
-                (_, key) if key == &MSG_KEY_ESC => {
-                    // Quit on esc
-                    self.quit();
-                    None
-                }
-                (component, event) => {
-                    // Update span
-                    let props =
-                        LabelPropsBuilder::from(self.view.get_props(COMPONENT_EVENT).unwrap())
-                            .with_text(format!("{} => '{:?}'", component, event))
-                            .build();
-                    // Report submit
-                    let _ = self.view.update(COMPONENT_EVENT, props);
-                    None
-                }
-            },
+impl Update<Id, Msg, NoUserEvent> for Model {
+    fn update(&mut self, view: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
+        match msg.unwrap_or(Msg::None) {
+            Msg::AppClose => {
+                self.quit = true;
+                None
+            }
+            Msg::TableAlfaBlur => {
+                assert!(view.active(&Id::TableBeta).is_ok());
+                None
+            }
+            Msg::TableBetaBlur => {
+                assert!(view.active(&Id::TableAlfa).is_ok());
+                None
+            }
+            Msg::None => None,
         }
+    }
+}
+
+#[derive(MockComponent)]
+struct TableAlfa {
+    component: Table,
+}
+
+impl Default for TableAlfa {
+    fn default() -> Self {
+        Self {
+            component: Table::default()
+                .borders(
+                    Borders::default()
+                        .modifiers(BorderType::Thick)
+                        .color(Color::Yellow),
+                )
+                .foreground(Color::Yellow)
+                .background(Color::Black)
+                .title("Keybindings", Alignment::Center)
+                .scroll(true)
+                .highlighted_color(Color::LightYellow)
+                .highlighted_str("🚀")
+                .rewind(true)
+                .step(4)
+                .row_height(1)
+                .headers(&["Key", "Msg", "Description"])
+                .column_spacing(3)
+                .widths(&[30, 20, 50])
+                .table(
+                    TableBuilder::default()
+                        .add_col(TextSpan::from("KeyCode::Down"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Up"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor up"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::PageDown"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down by 8"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::PageUp"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("ove cursor up by 8"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::End"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to last item"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Home"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to first item"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Char(_)"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Return pressed key"))
+                        .build(),
+                ),
+        }
+    }
+}
+
+impl Component<Msg, NoUserEvent> for TableAlfa {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        let _ = match ev {
+            Event::Keyboard(KeyEvent {
+                code: Key::Down, ..
+            }) => self.perform(Cmd::Move(Direction::Down)),
+            Event::Keyboard(KeyEvent { code: Key::Up, .. }) => {
+                self.perform(Cmd::Move(Direction::Up))
+            }
+            Event::Keyboard(KeyEvent {
+                code: Key::PageDown,
+                ..
+            }) => self.perform(Cmd::Scroll(Direction::Down)),
+            Event::Keyboard(KeyEvent {
+                code: Key::PageUp, ..
+            }) => self.perform(Cmd::Scroll(Direction::Up)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Home, ..
+            }) => self.perform(Cmd::GoTo(Position::Begin)),
+            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
+                self.perform(Cmd::GoTo(Position::End))
+            }
+            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::TableAlfaBlur),
+            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            _ => CmdResult::None,
+        };
+        Some(Msg::None)
+    }
+}
+
+#[derive(MockComponent)]
+struct TableBeta {
+    component: Table,
+}
+
+impl Default for TableBeta {
+    fn default() -> Self {
+        Self {
+            component: Table::default()
+                .borders(
+                    Borders::default()
+                        .modifiers(BorderType::Rounded)
+                        .color(Color::Green),
+                )
+                .foreground(Color::Green)
+                .background(Color::Black)
+                .title("Keybindings (not scrollable)", Alignment::Center)
+                .scroll(false)
+                .highlighted_color(Color::Green)
+                .highlighted_str(">> ")
+                .row_height(1)
+                .headers(&["Key", "Msg", "Description"])
+                .column_spacing(3)
+                .widths(&[30, 20, 50])
+                .table(
+                    TableBuilder::default()
+                        .add_col(TextSpan::from("KeyCode::Down"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Up"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor up"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::PageDown"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor down by 8"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::PageUp"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("ove cursor up by 8"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::End"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to last item"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Home"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Move cursor to first item"))
+                        .add_row()
+                        .add_col(TextSpan::from("KeyCode::Char(_)"))
+                        .add_col(TextSpan::from("OnKey"))
+                        .add_col(TextSpan::from("Return pressed key"))
+                        .build(),
+                ),
+        }
+    }
+}
+
+impl Component<Msg, NoUserEvent> for TableBeta {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        let _ = match ev {
+            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::TableBetaBlur),
+            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            _ => CmdResult::None,
+        };
+        Some(Msg::None)
     }
 }
