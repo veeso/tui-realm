@@ -107,6 +107,8 @@ pub enum CmdResult {
     Invalid(Cmd),
     /// Custom cmd result
     Custom(&'static str),
+    /// An array of Command result
+    Batch(Vec<CmdResult>),
     /// No result to report
     None,
 }
