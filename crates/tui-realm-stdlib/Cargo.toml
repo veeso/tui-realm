@@ -48,6 +48,10 @@ name = "checkbox"
 path = "examples/checkbox.rs"
 
 [[example]]
+name = "container"
+path = "examples/container.rs"
+
+[[example]]
 name = "input"
 path = "examples/input.rs"
 

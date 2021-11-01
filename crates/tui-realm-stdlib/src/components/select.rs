@@ -413,7 +413,7 @@ impl MockComponent for Select {
                 // Return CmdResult On Change or None if tab is closed
                 match self.states.is_tab_open() {
                     false => CmdResult::None,
-                    true => CmdResult::Changed(self.state()),
+                    true => CmdResult::Changed(State::One(StateValue::Usize(self.states.selected))),
                 }
             }
             Cmd::Move(Direction::Up) => {
@@ -422,7 +422,7 @@ impl MockComponent for Select {
                 // Return CmdResult On Change or None if tab is closed
                 match self.states.is_tab_open() {
                     false => CmdResult::None,
-                    true => CmdResult::Changed(self.state()),
+                    true => CmdResult::Changed(State::One(StateValue::Usize(self.states.selected))),
                 }
             }
             Cmd::Submit => {

@@ -24,6 +24,7 @@ Current version: 1.0.0 (FIXME: 03/08/2021)
     - [Canvas](#canvas)
     - [Chart](#chart)
     - [Checkbox](#checkbox)
+    - [Container](#container)
     - [Input](#input)
     - [Label](#label)
     - [Line gauge](#line-gauge)
@@ -50,16 +51,16 @@ Current version: 1.0.0 (FIXME: 03/08/2021)
 
 tui-realm-stdlib is the standard component library for [tui-realm](https://github.com/veeso/tui-realm).
 
+It provides several **Mock Component** for your tui-realm applications. Probably all the components you need are here 😉
+
 ---
 
 ## Get started 🏁
 
-⚠ Warning: tui-realm works only with **crossterm** as backend ⚠  
-
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
-tui-realm-stdlib = "0.6.1"
+tui-realm-stdlib = "1.0.0"
 ```
 
 Since this library requires `crossterm` too, you'll also need to add it to your Cargo.toml
@@ -68,10 +69,10 @@ Since this library requires `crossterm` too, you'll also need to add it to your 
 crossterm = "0.20.0"
 ```
 
-Latest version of tui-realm-stdlib requires **tui-realm 0.6.0**
+Latest version of tui-realm-stdlib requires **tui-realm 1.0.0** or higher
 
 ```toml
-tuirealm = "0.6.0"
+tuirealm = "^1.0.0"
 ```
 
 ## Examples
@@ -107,6 +108,9 @@ You can make a donation with one of these platforms:
 
 ### BarChart
 
+> ✨ Check me out ✨
+> `cargo run --example bar-chart`
+
 A chart with bars. The bar chart can work both in "active" and "disabled" mode.
 
 When in disabled mode, the chart won't be interactive, so you won't be able to move through data using keys.
@@ -141,6 +145,9 @@ While in active mode (default) you can put as many entries as you wish. You can 
 
 ### Canvas
 
+> ✨ Check me out ✨
+> `cargo run --example canvas`
+
 Canvas component can be used to draw shapes on the terminal.
 
 **Commands**: None
@@ -158,6 +165,9 @@ Canvas component can be used to draw shapes on the terminal.
 - `Title(Title)`: title for chart
 
 ### Chart
+
+> ✨ Check me out ✨
+> `cargo run --example chart`
 
 A chart displayed on a cartesian axis system. Can work both in "active" and "disabled" mode.
 
@@ -197,6 +207,9 @@ While in active mode (default) you can put as many entries as you wish. You can 
 
 ### Checkbox
 
+> ✨ Check me out ✨
+> `cargo run --example checkbox`
+
 A checkbox group. Provides the possibility to select between multiple options, when `get_state` is invoked returns a vector of index; each index represents the index of the item selected.
 
 **Commands**:
@@ -223,7 +236,34 @@ A checkbox group. Provides the possibility to select between multiple options, w
 
 ---
 
+### Container
+
+> ✨ Check me out ✨
+> `cargo run --example container`
+
+A container works a div. It is just an empty container which can contain other components.
+You can mount children in it using the `children()` method on the constructor or with the `children` property when implementing the `Component`.
+By default all **Commands** are forwarded to all children and a **Batch** of **Command result** is returned, but you can obviously implement it as you want overriding the `perform()` method in the **Component**.
+While for `attr()` it will apply the properties for all the children by default. You can override this behaviour.
+
+**Commands**: depends on children
+
+**State**: `None`
+
+**Properties**:
+
+- `Background(Color)`: default background color
+- `Borders(Borders)`: set borders properties for container
+- `Foreground(Color)`: default foreground color
+- `Layout(Layout)`: set the layout to use to render children. **Children will be rendered in order by index** (so `constraints[0] => children[0]`, ...)
+- `Title(Title)`: set title for div
+
+---
+
 ### Input
+
+> ✨ Check me out ✨
+> `cargo run --example input`
 
 An input text. Provides the possiblity to input a text with the possibility to set the input length and the input type (number, password, text, ...). It also allows to use arrows to move the cursor inside of the input box. When `state` is invoked, returns the current content of the input as String or as Number based on the current input type.
 
@@ -259,6 +299,9 @@ An input text. Provides the possiblity to input a text with the possibility to s
 
 ### Label
 
+> ✨ Check me out ✨
+> `cargo run --example label`
+
 A text label. Provides the possibility to display a simple text, with the possibility to set modifiers and colors.
 
 **Commands**: None
@@ -276,6 +319,9 @@ A text label. Provides the possibility to display a simple text, with the possib
 ---
 
 ### Line gauge
+
+> ✨ Check me out ✨
+> `cargo run --example line_gauge`
 
 A line indicating progress. The progress bar provides the possibility to show the current progress and to show a label above it.
 
@@ -301,6 +347,9 @@ A line indicating progress. The progress bar provides the possibility to show th
 ---
 
 ### List
+
+> ✨ Check me out ✨
+> `cargo run --example list`
 
 a list of rows with the possibility to scroll text with arrows. In order to scroll, the component must be active.
 
@@ -336,6 +385,9 @@ Events will be reported only when set as `Scrollable`
 
 ### Paragraph
 
+> ✨ Check me out ✨
+> `cargo run --example paragraph`
+
 A text paragraph. Like in HTML this has to be considered a block element, and supports multi-line texts with different styles. The text is automatically wrapped.
 
 **Commands**: None
@@ -370,6 +422,9 @@ This component suits well to work as a subscriber for some global events (such a
 
 ### Progress bar
 
+> ✨ Check me out ✨
+> `cargo run --example progress_bar`
+
 A progress bar or basically a gauge. The progress bar provides the possibility to show the current progress and to show a label above it.
 
 **Commands**: None
@@ -389,6 +444,9 @@ A progress bar or basically a gauge. The progress bar provides the possibility t
 ---
 
 ### Radio
+
+> ✨ Check me out ✨
+> `cargo run --example radio`
 
 A radio button group. Provides the possibility to select a single option in a group of options. When `get_state` is invoked returns the index of the selected option as Unsigned.
 
@@ -416,6 +474,9 @@ A radio button group. Provides the possibility to select a single option in a gr
 ---
 
 ### Select
+
+> ✨ Check me out ✨
+> `cargo run --example select`
 
 A select like in HTML. Provides the possibility to select a single option in a group of options. When `state` is invoked returns the index of the selected option as Unsigned, but only if the selection tab is closed. Returns `State::None` otherwise. The tab can be opened with `Cmd::Submit`; once opened you can move with arrows to select the entry. To close the form, you need to press `Cmd::Submit` again. Once the tab is closed, a `CmdResult::Submit` is raised with the selected index.
 If the component loses focus, the selection tab is automatically closed
@@ -448,6 +509,9 @@ This component should have a variable size in the layout to be displayed properl
 
 ### Span
 
+> ✨ Check me out ✨
+> `cargo run --example span`
+
 A span is an in-line component which supports text with different styles.
 
 **Commands**: None
@@ -465,6 +529,9 @@ A span is an in-line component which supports text with different styles.
 ---
 
 ### Sparkline
+
+> ✨ Check me out ✨
+> `cargo run --example sparkline`
 
 A sparkline chart.
 
@@ -484,6 +551,9 @@ A sparkline chart.
 
 ### Spinner
 
+> ✨ Check me out ✨
+> `cargo run --example spinner`
+
 A spinner is a spinner indicating a loading. It has a sequence of char to iterate over and on each `view()` call the step is increased by one.
 So for example the sequence may be `"⣾⣽⣻⢿⡿⣟⣯⣷"`, so at first view `⣾` will be rendered, on the 2nd step `⣽`, etc.
 
@@ -500,6 +570,9 @@ So for example the sequence may be `"⣾⣽⣻⢿⡿⣟⣯⣷"`, so at first vie
 ---
 
 ### Table
+
+> ✨ Check me out ✨
+> `cargo run --example table`
 
 a table of rows with the possibility to scroll text with arrows. In order to scroll, the component must be active.
 
@@ -540,6 +613,9 @@ Events will be reported only when set as `Scrollable`
 ---
 
 ### Textarea
+
+> ✨ Check me out ✨
+> `cargo run --example textarea`
 
 A textarea is like a paragraph, but has the possibility to scroll the text.
 
