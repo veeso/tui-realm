@@ -32,7 +32,7 @@ with-crossterm = [ "tuirealm/with-crossterm" ]
 with-termion = [ "tuirealm/with-termion" ]
 
 [[example]]
-name = "bar-chart"
+name = "bar_chart"
 path = "examples/bar_chart.rs"
 
 [[example]]

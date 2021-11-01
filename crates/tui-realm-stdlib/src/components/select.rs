@@ -337,9 +337,13 @@ impl Select {
             .props
             .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
             .unwrap_borders();
+        let borders_style = match focus {
+            true => borders.style(),
+            false => inactive_style.unwrap_or_default(),
+        };
         let block: Block = Block::default()
             .borders(BorderSides::ALL)
-            .border_style(borders.style())
+            .border_style(borders_style)
             .style(style);
         let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
         let block = match title {
