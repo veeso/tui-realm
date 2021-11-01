@@ -12,6 +12,12 @@
 
 Released on FIXME:
 
+- New components 🎉
+  - Container
+  - Phantom
+  - Spinner
+- Migrated components to tui-realm 1.0.0
+
 - ...
 
 ## 0.6.1

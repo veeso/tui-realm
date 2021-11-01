@@ -1,14 +1,14 @@
 //! # tui-realm-stdlib
 //!
 //! [tui-realm-stdlib](https://github.com/veeso/tui-realm-stdlib) is the standard library component for [tui-realm](https://github.com/veeso/tui-realm).
-//! This library provides you with all the essential component you'll need to build a tui-realm application.
+//! This library provides you with all the essential components you'll need to build a tui-realm application.
 //!
 //! ## Get Started
 //!
 //! ### Adding `tui-realm-stdlib` as dependency
 //!
 //! ```toml
-//! tui-realm-stdlib = "0.6.1"
+//! tui-realm-stdlib = "^1.0.0"
 //! ```
 //!
 
