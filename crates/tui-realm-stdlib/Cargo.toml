@@ -88,6 +88,10 @@ name = "sparkline"
 path = "examples/sparkline.rs"
 
 [[example]]
+name = "spinner"
+path = "examples/spinner.rs"
+
+[[example]]
 name = "table"
 path = "examples/table.rs"
 

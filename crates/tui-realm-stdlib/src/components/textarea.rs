@@ -212,7 +212,7 @@ impl Textarea {
         self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
-                rows.into_iter().cloned().map(PropValue::TextSpan).collect(),
+                rows.iter().cloned().map(PropValue::TextSpan).collect(),
             )),
         );
         self

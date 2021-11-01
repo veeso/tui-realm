@@ -29,11 +29,13 @@ Current version: 1.0.0 (FIXME: 03/08/2021)
     - [Line gauge](#line-gauge)
     - [List](#list)
     - [Paragraph](#paragraph)
+    - [Phantom](#phantom)
     - [Progress bar](#progress-bar)
     - [Radio](#radio)
     - [Select](#select)
     - [Span](#span)
     - [Sparkline](#sparkline)
+    - [Spinner](#spinner)
     - [Table](#table)
     - [Textarea](#textarea)
     - [Utilities](#utilities)
@@ -353,6 +355,19 @@ A text paragraph. Like in HTML this has to be considered a block element, and su
 
 ---
 
+### Phantom
+
+Phantom is a component which doesn't render and has no property. It is sole purpose is to be a global listener for some kinds of events.
+This component suits well to work as a subscriber for some global events (such as an `ESC` key to terminate).
+
+**Commands**: None
+
+**State**: None
+
+**Properties**: None
+
+---
+
 ### Progress bar
 
 A progress bar or basically a gauge. The progress bar provides the possibility to show the current progress and to show a label above it.
@@ -464,6 +479,23 @@ A sparkline chart.
 - `Foreground(Color)`: foreground color
 - `Title(Title)`: label for sparkline
 - `Width(Length)`: maximum amount of entries to display. If not provided, will be the maximum allowed by the area width.
+
+---
+
+### Spinner
+
+A spinner is a spinner indicating a loading. It has a sequence of char to iterate over and on each `view()` call the step is increased by one.
+So for example the sequence may be `"⣾⣽⣻⢿⡿⣟⣯⣷"`, so at first view `⣾` will be rendered, on the 2nd step `⣽`, etc.
+
+**Commands**: None
+
+**State**: None
+
+**Properties**:
+
+- `Background(Color)`: set background color
+- `Foreground(Color)`: set foreground color
+- `Text(String)` set the spinner sequence. Each char of the string represents a step
 
 ---
 
