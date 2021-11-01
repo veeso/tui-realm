@@ -6,10 +6,10 @@
     - [Handle subscriptions](#handle-subscriptions)
     - [Event clauses in details](#event-clauses-in-details)
     - [Sub clauses in details](#sub-clauses-in-details)
-  - [Event Tick](#event-tick)
+  - [Tick Event](#tick-event)
   - [Ports](#ports)
   - [Implementing new components](#implementing-new-components)
-  - [Best practice](#best-practice)
+  - [Best practices](#best-practices)
     - [Over states](#over-states)
 
 ---
@@ -165,11 +165,83 @@ Using `And` and `Or` you can create even long expression and keep in mind that t
 
 ---
 
-## Event Tick
+## Tick Event
+
+The tick event is a special kind of event, which is raised by the **Application** with a specified interval.
+Whenevever initializing the **Applcation** you can specify the tick interval, as in the following example:
+
+```rust
+let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+    EventListenerCfg::default()
+        .tick_interval(Duration::from_secs(1)),
+);
+```
+
+with the `tick_interval()` method, we specify the tick interval.
+Each time the tick interval elapses, the application runtime will throw a `Event::Tick` which will be forwarded on `tick()` to the
+current active component and to all the components subscribed to the `Tick` event.
+
+The purpose of the tick event is to schedule actions based on a certain interval.
 
 ---
 
 ## Ports
+
+Ports are basically **Event producer** which are handled by the application *Event listener*.
+Usually a tui-realm application will consume only input events, or the tick event, but what if we need *some more* events?
+
+We may for example need a worker which fetches a remote server for data. Ports allow you to create automatized workers which will produce the events and if you set up everything correctly, your model and components will be updated.
+
+Let's see now how to setup a *Port*:
+
+1. First we need to define the `UserEvent` type for our application:
+
+    ```rust
+    #[derive(PartialEq, Clone, PartialOrd)]
+    pub enum UserEvent {
+        GotData(Data)
+        // ... other events if you need
+    }
+
+    impl Eq for UserEvent {}
+    ```
+
+2. Implement the *Port*, that I named `MyHttpClient`
+
+    ```rust
+    pub struct MyHttpClient {
+        // ...
+    }
+    ```
+
+    Now we need to implement the `Poll` trait for the *Port*.
+    The poll trait tells the application event listener how to poll for events on a *port*:
+
+    ```rust
+    impl Poll<UserEvent> for MyHttpClient {
+        fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+            // ... do something ...
+            Ok(Some(Event::User(UserEvent::GotData(data))))
+        }
+    }
+    ```
+
+3. Port setup in application
+
+    ```rust
+    let mut app: Application<Id, Msg, UserEvent> = Application::init(
+        EventListenerCfg::default()
+            .default_input_listener(Duration::from_millis(10))
+            .port(
+                Box::new(MyHttpClient::new(/* ... */)),
+                Duration::from_millis(100),
+            ),
+    );
+    ```
+
+    On the event listener constructor you can define how many ports you want. When you declare a port you need to pass a
+    box containing the type implementing the *Poll* trait and an interval.
+    The interval defines the interval between each poll to the port.
 
 ---
 
@@ -177,7 +249,7 @@ Using `And` and `Or` you can create even long expression and keep in mind that t
 
 ---
 
-## Best practice
+## Best practices
 
 ### Over states
 
