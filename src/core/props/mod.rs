@@ -32,17 +32,19 @@ mod borders;
 mod dataset;
 mod direction;
 mod input_type;
+mod layout;
 mod shape;
 mod texts;
 mod value;
 
 // -- exports
-pub use crate::tui::layout::{Alignment, Rect};
+pub use crate::tui::layout::Alignment;
 pub use crate::tui::style::{Color, Modifier as TextModifiers, Style};
 pub use borders::{BorderSides, BorderType, Borders};
 pub use dataset::Dataset;
 pub use direction::Direction;
 pub use input_type::InputType;
+pub use layout::Layout;
 pub use shape::Shape;
 pub use texts::{Table, TableBuilder, TextSpan};
 pub use value::{PropPayload, PropValue};
@@ -335,10 +337,6 @@ impl AttrValue {
     }
 }
 
-// -- types
-
-pub type Layout = Vec<Rect>;
-
 #[cfg(test)]
 mod test {
 
@@ -370,7 +368,10 @@ mod test {
             AttrValue::InputType(InputType::Number).unwrap_input_type(),
             InputType::Number
         );
-        assert_eq!(AttrValue::Layout(vec![]).unwrap_layout(), vec![]);
+        assert_eq!(
+            AttrValue::Layout(Layout::default()).unwrap_layout(),
+            Layout::default()
+        );
         assert_eq!(AttrValue::Length(12).unwrap_length(), 12);
         assert_eq!(AttrValue::Number(-24).unwrap_number(), -24);
         assert_eq!(AttrValue::Shape(Shape::Layer).unwrap_shape(), Shape::Layer);
