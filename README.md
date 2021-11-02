@@ -141,7 +141,7 @@ Supported features are:
 - `with-crossterm` (*default*): use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
 - `with-termion`: use [termion](https://github.com/redox-os/termion) as backend for tui.
 
-> ⚠️ You can enable only one backend at the time and at least one must be enabled in order to build.
+> ⚠️ You can enable only one backend at the time and at least one must be enabled in order to build.  
 > ❗ You don't need tui as a dependency, since you can access to tui types via `use tuirealm::tui::`
 
 ### Create a tui-realm application 🪂
