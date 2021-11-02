@@ -14,6 +14,7 @@ Current version: 0.6.0 (03/08/2021)
 ---
 
 - [tui-realm](#tui-realm)
+  - [Deprecation notice ⚠️](#deprecation-notice-️)
   - [About tui-realm 👑](#about-tui-realm-)
   - [Get started 🏁](#get-started-)
     - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
@@ -29,6 +30,32 @@ Current version: 0.6.0 (03/08/2021)
   - [Changelog ⏳](#changelog-)
   - [Buy me a coffee ☕](#buy-me-a-coffee-)
   - [License 📃](#license-)
+
+---
+
+## Deprecation notice ⚠️
+
+> ⚠️ **DEPRECATION NOTICE**: the current tui-realm API is going to be deprecated SOON! ⚠️  
+
+If you want to start a new project with tui-realm please refer to the `new-api` branch and start your project including
+
+the newest version with:
+
+```toml
+tuirealm = { git = "https://github.com/veeso/tui-realm", branch = "new-api", default-features = false, features = [ "derive" ] }
+```
+
+The new version will be released by the end of NOVEMBER.
+
+Current workstate of the new-api:
+
+- [x] API implementation
+- [x] stdlib migration
+- [ ] Refinements
+- [ ] Documentation
+- [ ] Crash course video and examples
+
+> ❗ support to tui-realm 0.x will be granted for bug-fixes till **1st June 2022**
 
 ---
 
