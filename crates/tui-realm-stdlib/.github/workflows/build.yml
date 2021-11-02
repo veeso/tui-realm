@@ -1,4 +1,4 @@
-name: Linux
+name: Build
 
 on: [push, pull_request]
 
@@ -25,4 +25,4 @@ jobs:
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
-        run: cargo clippy --all-features -- -Dwarnings
+        run: cargo clippy --lib -- -Dwarnings
