@@ -466,8 +466,6 @@ This component should have a variable size in the layout to be displayed properl
 
 ## Span
 
-![span](/docs/images/components/span.gif)
-
 > ✨ Check me out ✨  
 > `cargo run --example span`
 
