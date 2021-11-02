@@ -91,7 +91,9 @@ You don't need tui as dependency, since you can access to tui via `tuirealm::tui
 
 ### Create a tui-realm application
 
-View how to implement a tui-realm application in the [related guide](docs/get-started.md).
+~~View how to implement a tui-realm application in the [related guide](docs/get-started.md).~~
+
+No please, just don't. Don't start implementing tui-realm applications with this version. Please wait for the release of tui-realm 1.0.0. Things are going to be completely changed, and it's going to be awesome. Just wait for the end of november 😉.
 
 ### Run examples
 
@@ -141,8 +143,11 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 As you've probably already noticed, tuirealm only supports `crossterm` as backend for the terminal, even if `tui` supports `termion` and other libraries. Why this?
 Well the reasons are these two:
 
-1. There's no reason to use the other backends: I use crossterm in termscp, and I don't find any advantage in using termion or other backends. Crossterm is cross platform and works perfectly fine.
-2. Implementing the support for the other backends would force me in creating a mapper for input events from the different backends into a common type. Is it possible? Yes it is, but I'm really not interested in implementing it.
+1. ~~There's no reason to use the other backends: I use crossterm in termscp, and I don't find any advantage in using termion or other backends. Crossterm is cross platform and works perfectly fine.~~
+2. ~~Implementing the support for the other backends would force me in creating a mapper for input events from the different backends into a common type. Is it possible? Yes it is, but I'm really not interested in implementing it.~~
+
+These reasons are perfectly valid and there is also a 3rd reason that is "I'm lazy".
+But since the release of crossterm 0.20 I had to implement the 2nd point anyway, so Termion is now supported in tui-realm 1.x and you can create a PR to implement the other backends that nobody uses (such as rustbox).
 
 ---
 
