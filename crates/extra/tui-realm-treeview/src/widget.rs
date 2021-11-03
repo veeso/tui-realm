@@ -112,6 +112,7 @@ impl<'a> TreeWidget<'a> {
 
 struct Render {
     depth: usize,
+    // TODO: add elements to skip
 }
 
 impl<'a> Widget for TreeWidget<'a> {
@@ -160,6 +161,7 @@ impl<'a> TreeWidget<'a> {
         // Increment depth
         render.depth += 1;
         // Render children
+        // TODO: check whether node is open
         for child in node.iter() {
             if area.height == 0 {
                 break;
@@ -178,6 +180,7 @@ impl<'a> TreeWidget<'a> {
         state: &TreeState,
         render: &mut Render,
     ) -> Rect {
+        // TODO: if should skip, don't render
         let highlight_symbol = match state.is_selected(node) {
             true => Some(self.highlight_symbol.unwrap_or("")),
             false => None,
