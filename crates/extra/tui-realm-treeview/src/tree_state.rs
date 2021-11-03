@@ -33,17 +33,41 @@ use super::Node;
 pub struct TreeState {
     /// Tracks open nodes
     open: Vec<String>,
+    /// Current selected item
+    selected: Option<String>,
 }
 
 impl Default for TreeState {
     fn default() -> Self {
         Self {
             open: Vec::default(),
+            selected: None,
         }
     }
 }
 
 impl TreeState {
+    /// ### is_open
+    ///
+    /// Returns whether `node` is open
+    pub fn is_open(&self, node: &Node) -> bool {
+        self.open.contains(node.id())
+    }
+
+    /// ### selected
+    ///
+    /// Get current selected item
+    pub fn selected(&self) -> Option<&str> {
+        self.selected.map(|x| x.as_str())
+    }
+
+    /// ### is_selected
+    ///
+    /// Returns whether provided node is currently selected
+    pub fn is_selected(&self, node: &Node) -> bool {
+        self.selected.map(|x| &x == node.id()).unwrap_or(false)
+    }
+
     /// ### tree_changed
     ///
     /// The tree has changed, so this method must check whether to keep states or not
@@ -65,11 +89,25 @@ impl TreeState {
         todo!()
     }
 
-    /// ### is_open
+    /// ### move_down
     ///
-    /// Returns whether `node` is open
-    pub fn is_open(&self, node: &Node) -> bool {
+    /// Move cursor down in current tree from current position. Rewind if required
+    pub fn move_down(&mut self, root: &Node, rewind: bool) {
         todo!()
+    }
+
+    /// ### move_up
+    ///
+    /// Move cursor up in current tree from current position. Rewind if required
+    pub fn move_up(&mut self, root: &Node, rewind: bool) {
+        todo!()
+    }
+
+    /// ### select
+    ///
+    /// Set current selected node
+    pub fn select(&mut self, node: &Node) {
+        self.selected = Some(node.id().to_string());
     }
 
     // -- private

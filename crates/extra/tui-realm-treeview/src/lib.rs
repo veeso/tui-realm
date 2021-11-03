@@ -82,21 +82,7 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 pub(crate) type Node = OrangeNode<String, String>;
 pub(crate) type Tree = OrangeTree<String, String>;
 
-// -- states
-
-struct OwnStates {
-    tree_state: TreeState,
-}
-
-impl Default for OwnStates {
-    fn default() -> Self {
-        Self {
-            tree_state: TreeState::default(),
-        }
-    }
-}
-
-impl OwnStates {}
+// -- props
 
 // -- component
 
@@ -105,7 +91,7 @@ impl OwnStates {}
 /// Tree view Mock component for tui-realm
 pub struct TreeView {
     props: Props,
-    states: OwnStates,
+    states: TreeState,
     /// The actual Tree data structure. You can access this from your Component to operate on it
     /// for example after a certain events.
     pub tree: Tree,
@@ -115,7 +101,7 @@ impl Default for TreeView {
     fn default() -> Self {
         Self {
             props: Props::default(),
-            states: OwnStates::default(),
+            states: TreeState::default(),
             tree: Tree::new(Node::new(String::new(), String::new())),
         }
     }
@@ -153,6 +139,8 @@ impl TreeView {
     }
 
     // TODO: custom properties
+
+    // TODO: indent_spaces
 
     pub fn tree(mut self, tree: Tree) -> Self {
         self.tree = tree;
