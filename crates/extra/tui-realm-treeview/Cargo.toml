@@ -1,6 +1,6 @@
 [package]
 name = "tui-realm-treeview"
-version = "0.3.0"
+version = "1.0.0"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]
@@ -14,13 +14,20 @@ readme = "README.md"
 repository = "https://github.com/veeso/tui-realm-treeview"
 
 [dependencies]
-tuirealm = "^0.6.0"
-tui-tree-widget = "^0.7.0"
+orange-trees = "0.1.0"
+#tuirealm = { version = "^1.0.0", default-features = false, features = [ "derive" ]}
+tuirealm = { git = "https://github.com/veeso/tui-realm", branch = "new-api", default-features = false, features = [ "derive" ] } 
 
 [dev-dependencies]
-crossterm = "0.20.0"
+crossterm = "0.20"
 pretty_assertions = "0.7.2"
-tui-realm-stdlib = "0.6.0"
+tui-realm-stdlib = { git = "https://github.com/veeso/tui-realm-stdlib", branch = "1.0.0" } 
+#tui-realm-stdlib = "^1.0.0"
+
+[features]
+default = [ "with-crossterm" ]
+with-crossterm = [ "tuirealm/with-crossterm" ]
+with-termion = [ "tuirealm/with-termion" ]
 
 [[example]]
 name = "demo"

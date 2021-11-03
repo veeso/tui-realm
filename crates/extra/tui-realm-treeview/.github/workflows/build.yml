@@ -1,4 +1,4 @@
-name: Linux
+name: Build
 
 on: [push, pull_request]
 
@@ -21,8 +21,8 @@ jobs:
           command: test
           args: --no-fail-fast
       - name: Examples
-        run: cargo build --all-targets --examples
+        run: cargo build --examples
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
-        run: cargo clippy --all-features -- -Dwarnings
+        run: cargo clippy -- -Dwarnings

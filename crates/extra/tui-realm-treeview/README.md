@@ -1,15 +1,65 @@
 # tui-realm-treeview
 
 <p align="center">
-  <img src="docs/images/tui-realm-treeview.svg" width="256" height="256" />
+  <img src="/docs/images/tui-realm-treeview.svg" width="256" height="256" />
 </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/veeso/tui-realm-treeview.svg)](https://github.com/veeso/tui-realm-treeview) [![Downloads](https://img.shields.io/crates/d/tui-realm-treeview.svg)](https://crates.io/crates/tui-realm-treeview) [![Crates.io](https://img.shields.io/badge/crates.io-v0.3.0-orange.svg)](https://crates.io/crates/tui-realm-treeview) [![Docs](https://docs.rs/tui-realm-treeview/badge.svg)](https://docs.rs/tui-realm-treeview)  
+<p align="center">~ Treeview component for tui-realm ~</p>
+<p align="center">
+  <a href="https://github.com/veeso/orange-trees" target="_blank">orange trees</a>
+  ·
+  <a href="https://github.com/veeso/tui-realm" target="_blank">tui-realm</a>
+  ·
+  <a href="https://docs.rs/tui-realm-treeview" target="_blank">Documentation</a>
+</p>
 
-[![Build](https://github.com/veeso/tui-realm-treeview/workflows/Linux/badge.svg)](https://github.com/veeso/tui-realm-treeview/actions) [![Build](https://github.com/veeso/tui-realm-treeview/workflows/MacOS/badge.svg)](https://github.com/veeso/tui-realm-treeview/actions) [![Build](https://github.com/veeso/tui-realm-treeview/workflows/Windows/badge.svg)](https://github.com/veeso/tui-realm-treeview/actions) [![Coverage Status](https://coveralls.io/repos/github/veeso/tui-realm-treeview/badge.svg?branch=main)](https://coveralls.io/github/veeso/tui-realm-treeview?branch=main)
+<p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
+<p align="center">Current version: 1.0.0 (FIXME:/10/2021)</p>
 
-Developed by Christian Visintin  
-Current version: 0.3.0 (12/08/2021)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"
+    ><img
+      src="https://img.shields.io/badge/License-MIT-teal.svg"
+      alt="License-MIT"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm-treeview/stargazers"
+    ><img
+      src="https://img.shields.io/github/stars/veeso/tui-realm-treeview.svg"
+      alt="Repo stars"
+  /></a>
+  <a href="https://crates.io/crates/tui-realm-treeview"
+    ><img
+      src="https://img.shields.io/crates/d/tui-realm-treeview.svg"
+      alt="Downloads counter"
+  /></a>
+  <a href="https://crates.io/crates/tui-realm-treeview"
+    ><img
+      src="https://img.shields.io/crates/v/tui-realm-treeview.svg"
+      alt="Latest version"
+  /></a>
+  <a href="https://www.buymeacoffee.com/veeso">
+    <img
+      src="https://img.shields.io/badge/Donate-BuyMeACoffee-yellow.svg"
+      alt="Buy me a coffee"
+  /></a>
+</p>
+<p align="center">
+  <a href="https://github.com/veeso/tui-realm-treeview/actions"
+    ><img
+      src="https://github.com/veeso/tui-realm-treeview/workflows/Build/badge.svg"
+      alt="CI"
+  /></a>
+  <a href="https://coveralls.io/github/veeso/tui-realm-treeview"
+    ><img
+      src="https://coveralls.io/repos/github/veeso/tui-realm-treeview/badge.svg"
+      alt="Coveralls"
+  /></a>
+  <a href="https://docs.rs/tui-realm-treeview"
+    ><img
+      src="https://docs.rs/tui-realm-treeview/badge.svg"
+      alt="Docs"
+  /></a>
+</p>
 
 ---
 
@@ -19,18 +69,20 @@ Current version: 0.3.0 (12/08/2021)
     - [Add tui-realm-treeview to your Cargo.toml 🦀](#add-tui-realm-treeview-to-your-cargotoml-)
     - [Use the treeview component](#use-the-treeview-component)
     - [About performance](#about-performance)
-  - [Behaviour](#behaviour)
+  - [Component](#component)
+    - [Updating the tree](#updating-the-tree)
   - [Documentation 📚](#documentation-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
-  - [Buy me a coffee ☕](#buy-me-a-coffee-)
+  - [Support the developer ☕](#support-the-developer-)
   - [License 📃](#license-)
 
 ---
 
 ## About tui-realm-treeview 🌲
 
-tui-realm-treeview is an implementation of a **treeview component** for [tui-realm](https://github.com/veeso/tui-realm), it is implemented wrapping the [tui-tree-widget](https://crates.io/crates/tui-tree-widget)
+tui-realm-treeview is an implementation of a **treeview component** for [tui-realm](https://github.com/veeso/tui-realm).
+It uses the [Orange trees](https://github.com/veeso/orange-trees) engine for implementing trees.
 
 ![Demo](docs/images/demo.gif)
 
@@ -41,7 +93,13 @@ tui-realm-treeview is an implementation of a **treeview component** for [tui-rea
 ### Add tui-realm-treeview to your Cargo.toml 🦀
 
 ```toml
-tui-realm-treeview = "0.3.0"
+tui-realm-treeview = "^1.0.0"
+```
+
+Or if you don't use **Crossterm**, define the backend as you do with tui-realm:
+
+```toml
+tui-realm-treeview = { version = "^1.0.0", default-features = false, features = [ "with-termion" ] }
 ```
 
 ### Use the treeview component
@@ -72,37 +130,41 @@ Best practices:
 
 ---
 
-## Behaviour
+## Component
 
-**Events**:
+**Commands**:
 
-| Event               | Message    | Behaviour                                            |
+| Cmd                 | Result     | Behaviour                                            |
 |---------------------|------------|------------------------------------------------------|
-| `KeyCode::Enter`    | `OnSubmit` | Just returns submit event                            |
-| `KeyCode::Down`     | `OnChange` | Go to next element                                   |
-| `KeyCode::Up`       | `OnChange` | Go to previous element                               |
-| `KeyCode::PageDown` | `OnChange` | Move cursor down by defined max steps or end of node |
-| `KeyCode::PageUp`   | `OnChange` | Move cursor up by defined max steps or begin of node |
-| `KeyCode::Right`    | `OnChange` | Open highlighted node                                |
-| `KeyCode::Left`     | `OnChange` | Close highlighted node                               |
-| `KeyCode::Char(_)`  | `OnKey`    | Return pressed key                                   |
+| `Cmd::Submit`       | `Submit`   | Just returns submit event FIXME: format              |
+| `GoTo(Begin)`       | `OnChange` | Move cursor to the top of the current tree node      |
+| `GoTo(End)`         | `OnChange` | Move cursor to the bottom of the current tree node   |
+| `Move(Down)`        | `OnChange` | Go to next element                                   |
+| `Move(Up)`          | `OnChange` | Go to previous element                               |
+| `Scroll(Down)`      | `OnChange` | Move cursor down by defined max steps or end of node |
+| `Scroll(Up)`        | `OnChange` | Move cursor up by defined max steps or begin of node |
+| `Toggle`            | `OnChange` | Opens/closes highlighted node                        |
 
-**Update**: `Msg::OnChange` if the value changed, `Msg::None` otherwise.
-
-**State**: the state returned is a `One(Str)` containing the id of the selected node. If no node is selected `None` is returned.
+**State**: the state returned is a `One(String)` containing the id of the selected node. If no node is selected `None` is returned.
 
 **Properties**:
 
-- `with_foreground`: foreground color. The foreground will be used as foreground for the selected item, when focus is false, otherwise as background
-- `with_background`: background color. The background color will be used as background for unselected entry, but will be used as foreground for the selected entry when focus is true
-- `with_borders`: set borders properties for component
-- `with_title`: Set box title
-- `with_highlighted_str`: The provided string will be displayed on the left side of the selected entry in the tree
-- `with_tree_and_depth`: Sets the tree and its max depth for Props builder
-- `with_tree`: Sets the tree for Props builder
-- `with_node`: Select initial node in the tree. This option has priority over `keep_state`
-- `keep_state`: If keep is true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree).
-- `with_max_page_steps`: Defines the maximum amount of steps to perform after a PG_DOWN / PG_UP
+- `Background(Color)`: background color. The background color will be used as background for unselected entry, but will be used as foreground for the selected entry when focus is true
+- `Borders(Borders)`: set borders properties for component
+- `Custom($TREE_DEPTH, Length)`: Sets the max tree depth
+- `Custom($TREE_INITIAL_NODE, String)`: Select initial node in the tree. This option has priority over `keep_state`
+- `Custom($TREE_PRESERVE_STATE, Flag)`: If true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree).
+- `FocusStyle(Style)`: inactive style
+- `Foreground(Color)`: foreground color. The foreground will be used as foreground for the selected item, when focus is false, otherwise as background
+- `HighlightedColor(Color)`: The provided color will be used to highlight the selected node. `Foreground` will be used if unset.
+- `HighlightedStr(String)`: The provided string will be displayed on the left side of the selected entry in the tree
+- `Rewind(Flag)`: If true, when going out of boundaries on tree, the index returns to the top or to the bottom based on position.
+- `ScrollStep(Length)`: Defines the maximum amount of rows to scroll
+- `Title(Title)`: Set box title
+
+### Updating the tree
+
+FIXME: to be defined
 
 ---
 
@@ -127,16 +189,19 @@ View tui-realm-treeview's changelog [HERE](CHANGELOG.md)
 
 ---
 
-## Buy me a coffee ☕
+## Support the developer ☕
 
-If you like tui-realm-treeview and you're grateful for the work I've done, please consider a little donation 🥳
+If you like tui-realm and you're grateful for the work I've done, please consider a little donation 🥳
 
-[![Buy-me-a-coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=veeso&button_colour=404040&font_colour=ffffff&font_family=Comic&outline_colour=ffffff&coffee_colour=FFDD00)](https://www.buymeacoffee.com/veeso)
+You can make a donation with one of these platforms:
+
+[![Buy-me-a-coffee](https://img.shields.io/badge/-buy_me_a%C2%A0coffee-gray?style=for-the-badge&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/veeso)
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/chrisintin)
 
 ---
 
 ## License 📃
 
-tui-realm is licensed under the MIT license.
+tui-realm-treeview is licensed under the MIT license.
 
 You can read the entire license [HERE](LICENSE)
