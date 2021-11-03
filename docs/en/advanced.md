@@ -9,8 +9,11 @@
   - [Tick Event](#tick-event)
   - [Ports](#ports)
   - [Implementing new components](#implementing-new-components)
-  - [Best practices](#best-practices)
-    - [Over states](#over-states)
+    - [What the component should look like](#what-the-component-should-look-like)
+    - [Defining the component properties](#defining-the-component-properties)
+    - [Defining the component states](#defining-the-component-states)
+    - [Defining the Cmd API](#defining-the-cmd-api)
+    - [Rendering the component](#rendering-the-component)
 
 ---
 
@@ -26,7 +29,7 @@ What you will learn:
 - How to handle subscriptions, making some components to listen to certain events under certain circumstances.
 - What is the `Event::Tick`
 - How to use custom source for events through `Ports`.
-- tui-realm best practice: how tui-realm is meant to be used (trust me, I designed it 😉)
+- How to implement new components
 
 ---
 
@@ -247,10 +250,242 @@ Let's see now how to setup a *Port*:
 
 ## Implementing new components
 
----
+Implementing new components is actually quite simple in tui-realm, but requires you to have at least little knowledge about **tui-rs widgets**.
 
-## Best practices
+In addition to tui-rs knowledge, you should also have in mind the difference between a *MockComponent* and a *Component*, in order not to implement bad components.
 
-### Over states
+Said that, let's see how to implement a component. For this example I will implement a simplified version of the `Radio` component of the stdlib.
 
-Stati della comp che agiscono sulla mock
+### What the component should look like
+
+The first thing we need to define is what the component should look like.
+In this case the component is a box with a list of options within and you can select one, which is the user choice.
+The user will be able to move through different choices and to submit one.
+
+### Defining the component properties
+
+Once we've defined what the component look like, we can start defining the component properties:
+
+- `Background(Color)`: will define the background color for the component
+- `Borders(Borders)`: will define the borders properties for the component
+- `Foreground(Color)`: will define the foreground color for the component
+- `Content(Payload(Vec(String)))`: will define the possible options for the radio group
+- `Title(Title)`: will define the box title
+- `Value(Payload(One(Usize)))`: will work as a prop, but will update the state too, for the current selected option.
+
+```rust
+pub struct Radio {
+    props: Props,
+    // ...
+}
+
+impl Radio {
+
+    // Constructors...
+
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    // ...
+}
+
+impl MockComponent for Radio {
+
+    // ...
+
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
+    }
+
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        match attr {
+            Attribute::Content => {
+                // Reset choices
+                let choices: Vec<String> = value
+                    .unwrap_payload()
+                    .unwrap_vec()
+                    .iter()
+                    .map(|x| x.clone().unwrap_str())
+                    .collect();
+                self.states.set_choices(&choices);
+            }
+            Attribute::Value => {
+                self.states
+                    .select(value.unwrap_payload().unwrap_one().unwrap_usize());
+            }
+            attr => {
+                self.props.set(attr, value);
+            }
+        }
+    }
+
+    // ...
+
+}
+```
+
+### Defining the component states
+
+Since this component can be interactive and the user must be able to select a certain option, we must implement some states.
+The component states must track the current selected item. For practical reasons, we also use the available choices as a state.
+
+```rust
+struct OwnStates {
+    choice: usize,        // Selected option
+    choices: Vec<String>, // Available choices
+}
+
+impl OwnStates {
+    /// ### next_choice
+    ///
+    /// Move choice index to next choice
+    pub fn next_choice(&mut self) {
+        if self.choice + 1 < self.choices.len() {
+            self.choice += 1;
+        }
+    }
+
+    /// ### prev_choice
+    ///
+    /// Move choice index to previous choice
+    pub fn prev_choice(&mut self) {
+        if self.choice > 0 {
+            self.choice -= 1;
+        }
+    }
+
+    /// ### set_choices
+    ///
+    /// Set OwnStates choices from a vector of text spans
+    /// In addition resets current selection and keep index if possible or set it to the first value
+    /// available
+    pub fn set_choices(&mut self, spans: &[String]) {
+        self.choices = spans.to_vec();
+        // Keep index if possible
+        if self.choice >= self.choices.len() {
+            self.choice = match self.choices.len() {
+                0 => 0,
+                l => l - 1,
+            };
+        }
+    }
+
+    pub fn select(&mut self, i: usize) {
+        if i < self.choices.len() {
+            self.choice = i;
+        }
+    }
+}
+```
+
+Then we can define the `state()` method
+
+```rust
+impl MockComponent for Radio {
+
+    // ...
+
+    fn state(&self) -> State {
+        State::One(StateValue::Usize(self.states.choice))
+    }
+
+    // ...
+
+}
+```
+
+### Defining the Cmd API
+
+Once we've defined the component states, we can start thinking of the Command API. The command api defines how the component
+behaves in front of incoming commands and what kind of result it should return.
+
+For this component we'll handle the following commands:
+
+- When the user moves to the right, the current choice is incremented
+- When the user moves to the left, the current choice is decremented
+- When the user submits, the current choice is returned
+
+```rust
+impl MockComponent for Radio {
+
+    // ...
+
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        match cmd {
+            Cmd::Move(Direction::Right) => {
+                // Increment choice
+                self.states.next_choice();
+                // Return CmdResult On Change
+                CmdResult::Changed(self.state())
+            }
+            Cmd::Move(Direction::Left) => {
+                // Decrement choice
+                self.states.prev_choice();
+                // Return CmdResult On Change
+                CmdResult::Changed(self.state())
+            }
+            Cmd::Submit => {
+                // Return Submit
+                CmdResult::Submit(self.state())
+            }
+            _ => CmdResult::None,
+        }
+    }
+
+    // ...
+
+}
+```
+
+### Rendering the component
+
+Finally, we can implement the component `view()` method which will render the component:
+
+```rust
+impl MockComponent for Radio {
+    fn view(&mut self, render: &mut Frame, area: Rect) {
+        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
+            // Make choices
+            let choices: Vec<Spans> = self
+                .states
+                .choices
+                .iter()
+                .map(|x| Spans::from(x.clone()))
+                .collect();
+            let foreground = self
+                .props
+                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let background = self
+                .props
+                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+            let borders = self
+                .props
+                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+                .unwrap_borders();
+            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+            let focus = self
+                .props
+                .get_or(Attribute::Focus, AttrValue::Flag(false))
+                .unwrap_flag();
+            let div = crate::utils::get_block(borders, title, focus, None);
+            // Make colors
+            let (bg, fg, block_color): (Color, Color, Color) = match focus {
+                true => (foreground, background, foreground),
+                false => (Color::Reset, foreground, Color::Reset),
+            };
+            let radio: Tabs = Tabs::new(choices)
+                .block(div)
+                .select(self.states.choice)
+                .style(Style::default().fg(block_color))
+                .highlight_style(Style::default().fg(fg).bg(bg));
+            render.render_widget(radio, area);
+        }
+    }
+
+    // ...
+}
+```

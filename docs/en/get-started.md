@@ -6,6 +6,7 @@
   - [MockComponent Vs. Component](#mockcomponent-vs-component)
     - [The Mock Component](#the-mock-component)
     - [The Component](#the-component)
+    - [Properties Vs. States](#properties-vs-states)
     - [Events Vs. Commands](#events-vs-commands)
   - [Application, Model and View](#application-model-and-view)
     - [The View](#the-view)
@@ -70,7 +71,7 @@ terminal user interfaces:
 
 Let's see now what are the key concepts of tui-realm. In the introduction you've probably read about some of them in **bold**, but let's see them in details now. Key concepts are really important to understand, luckily they're easy to understand and there aren't many of them:
 
-- **MockComponent**: A Mock component represents a re-usable UI component, which can have some properties for rendering or to handle commands. It can also have its own states, if necessary. In practice it is a trait which exposes some methods to render and to handle properties, states and events. We'll see it in details in the next chapter.
+- **MockComponent**: A Mock component represents a re-usable UI component, which can have some **properties** for rendering or to handle commands. It can also have its own **states**, if necessary. In practice it is a trait which exposes some methods to render and to handle properties, states and events. We'll see it in details in the next chapter.
 - **Component**: A component is a wrapper around a mock component which represents a single component in your application. It directly takes events and generates messages for the application consumer. Underneath it relies on its Mock component for properties/states management and rendering.
 - **State**: The state represents the current state for a component (e.g. the current text in a text input). The state depends on how the user (or other sources) interacts with the component (e.g. the user press 'a', and the char is pushed to the text input).
 - **Attribute**: An attribute describes a single property in a component. The attribute shouldn't depend on the component state, but should only be configured by the user when the component is initialized. Usually a mock component exposes many attributes to be configured, and the component using the mock, sets them based on what the user requires.
@@ -199,6 +200,25 @@ Let's see what these two types are:
     As you can see there is a special variant for `Event` called `User` which takes a special type `UserEvent`, which can be indeed used to use user-defined events.
 
     > ❗If you don't have any `UserEvent` in your application, you can declare events passing `Event<NoUserEvent>`, which is an empty enum
+
+### Properties Vs. States
+
+All components are described by properties and quite often by states as well. But what is the difference between them?
+
+Basically **Properties** describe how the component is rendered and how it should behave.
+
+For example, properties are **styles**, **color** or some properties such as "should this list scroll?".
+Properties are always present in a component.
+
+States, on the other hand, are optional and *usually* are used only by components which the user can interact with.
+The state won't describe styles or how a component behaves, but the current state of a component. The state, also will usually change after the user performs a certain **Command**.
+
+Let's see for example how to distinguish properties from states on a component and let's say this component is a *Checkbox*:
+
+- The checkbox foreground and background are **Properties** (doesn't change on interaction)
+- The checkbox options are **Properties**
+- The current selected options are **States**. (they change on user interaction)
+- The current highlighted item is a **State**.
 
 ### Events Vs. Commands
 
