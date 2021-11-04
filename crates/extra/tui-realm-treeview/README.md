@@ -158,7 +158,6 @@ Best practices:
 - `Foreground(Color)`: foreground color. The foreground will be used as foreground for the selected item, when focus is false, otherwise as background
 - `HighlightedColor(Color)`: The provided color will be used to highlight the selected node. `Foreground` will be used if unset.
 - `HighlightedStr(String)`: The provided string will be displayed on the left side of the selected entry in the tree
-- `Rewind(Flag)`: If true, when going out of boundaries on tree, the index returns to the top or to the bottom based on position.
 - `ScrollStep(Length)`: Defines the maximum amount of rows to scroll
 - `TextProps(TextModifiers)`: set text modifiers
 - `Title(Title)`: Set box title

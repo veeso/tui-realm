@@ -168,6 +168,11 @@ impl TreeView {
         self
     }
 
+    pub fn scroll_step(mut self, step: usize) -> Self {
+        self.attr(Attribute::ScrollStep, AttrValue::Length(step));
+        self
+    }
+
     pub fn with_tree(mut self, tree: Tree) -> Self {
         self.tree = tree;
         self
@@ -207,12 +212,6 @@ impl TreeView {
     }
 
     // -- private
-
-    fn rewindable(&self) -> bool {
-        self.props
-            .get_or(Attribute::Rewind, AttrValue::Flag(false))
-            .unwrap_flag()
-    }
 
     /// ### changed
     ///
@@ -347,22 +346,42 @@ impl MockComponent for TreeView {
         match cmd {
             Cmd::GoTo(Position::Begin) => {
                 let prev = self.states.selected().map(|x| x.to_string());
+                // TODO: impl
                 todo!();
                 self.changed(prev.as_deref())
             }
             Cmd::GoTo(Position::End) => {
                 let prev = self.states.selected().map(|x| x.to_string());
+                // TODO: impl
                 todo!();
                 self.changed(prev.as_deref())
             }
             Cmd::Move(Direction::Down) => {
                 let prev = self.states.selected().map(|x| x.to_string());
-                self.states.move_down(self.tree.root(), self.rewindable());
+                self.states.move_down(self.tree.root());
                 self.changed(prev.as_deref())
             }
             Cmd::Move(Direction::Up) => {
                 let prev = self.states.selected().map(|x| x.to_string());
-                self.states.move_up(self.tree.root(), self.rewindable());
+                self.states.move_up(self.tree.root());
+                self.changed(prev.as_deref())
+            }
+            Cmd::Scroll(Direction::Down) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                let step = self
+                    .props
+                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
+                    .unwrap_length();
+                (0..step).for_each(|_| self.states.move_down(self.tree.root()));
+                self.changed(prev.as_deref())
+            }
+            Cmd::Scroll(Direction::Up) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                let step = self
+                    .props
+                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
+                    .unwrap_length();
+                (0..step).for_each(|_| self.states.move_up(self.tree.root()));
                 self.changed(prev.as_deref())
             }
             Cmd::Submit => CmdResult::Submit(self.state()),

@@ -128,36 +128,57 @@ impl TreeState {
     /// ### move_down
     ///
     /// Move cursor down in current tree from current position. Rewind if required
-    pub fn move_down(&mut self, root: &Node, rewind: bool) {
-        // TODO: is open? then move to first child
-        // TODO: is leaf | close? then move to next sibling
-        todo!()
+    pub fn move_down(&mut self, root: &Node) {
+        if let Some(selected) = self.selected.take() {
+            // Get current node
+            if let Some(node) = root.query(&selected) {
+                // If node is open, then move to its first child
+                if !node.is_leaf() && self.is_open(node) {
+                    // NOTE: unwrap is safe; checked by `is_leaf()`
+                    self.selected = Some(node.children().first().unwrap().id().to_string());
+                } else {
+                    // If has a "next sibling", let's get it
+                    if let Some(sibling) = self.next_sibling(root, node) {
+                        self.selected = Some(sibling.id().to_string());
+                    } else {
+                        // Then the next element becomes the next sibling of the parent
+                        // this thing has to be performed recursively for all parents, until one is found (or root is reached)
+                        let mut current = selected.clone();
+                        loop {
+                            if let Some(parent) = root.parent(&current) {
+                                current = parent.id().to_string();
+                                if let Some(sibling) = self.next_sibling(root, parent) {
+                                    self.selected = Some(sibling.id().to_string());
+                                    break;
+                                }
+                            } else {
+                                // has no parent, keep selectd
+                                self.selected = Some(selected);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /// ### move_up
     ///
     /// Move cursor up in current tree from current position. Rewind if required
-    pub fn move_up(&mut self, root: &Node, rewind: bool) {
+    pub fn move_up(&mut self, root: &Node) {
         if let Some(selected) = self.selected.take() {
             // Get parent
             if let Some(parent) = root.parent(&selected) {
-                // Iter children; track previous node, which will become the new active element
-                // TODO: if rewind this is the last element
-                let mut prev_node = parent;
-                // TODO: make this function more functional
-                for child in parent.children() {
-                    // If current node is found, break
-                    if child.id() == &selected {
-                        break;
-                    } else {
-                        // Else set child as previous node
-                        prev_node = child;
-                    }
-                }
-                // Finally set previous node as new selected node
-                self.selected = Some(prev_node.id().to_string());
+                // Selected becomes previous sibling; or if None, the parent
+                self.selected = Some(
+                    self.previous_sibling(root, root.query(&selected).unwrap())
+                        .unwrap_or(parent)
+                        .id()
+                        .to_string(),
+                );
             } else {
-                // Keep selected
+                // Is root; then keep selected
                 self.selected = Some(selected);
             }
         }
@@ -178,4 +199,56 @@ impl TreeState {
     fn close_children(&mut self, node: &Node) {
         node.iter().for_each(|x| self.close_node(x));
     }
+
+    /// ### previous_sibling
+    ///
+    /// Returns the previous sibling of `node` in `tree`
+    fn previous_sibling<'a>(&mut self, root: &'a Node, node: &'a Node) -> Option<&'a Node> {
+        match root.parent(node.id()) {
+            None => None,
+            Some(parent) => {
+                let mut prev_node = None;
+                for child in parent.children() {
+                    if child.id() == node.id() {
+                        break;
+                    }
+                    prev_node = Some(child);
+                }
+                prev_node
+            }
+        }
+    }
+
+    /// ### next_sibling
+    ///
+    /// Returs next sibling of `node` in `tree`
+    fn next_sibling<'a>(&mut self, root: &'a Node, node: &'a Node) -> Option<&'a Node> {
+        match root.parent(node.id()) {
+            None => None,
+            Some(parent) => {
+                let mut keep_next = false;
+                for child in parent.children() {
+                    if keep_next {
+                        // Return child
+                        return Some(child);
+                    } else if child.id() == node.id() {
+                        // keep next element
+                        keep_next = true;
+                    }
+                }
+                // No next sibling
+                None
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    use pretty_assertions::assert_eq;
+
+    // TODO: impl
 }
