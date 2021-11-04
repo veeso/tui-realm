@@ -134,16 +134,16 @@ Best practices:
 
 **Commands**:
 
-| Cmd                 | Result     | Behaviour                                            |
-|---------------------|------------|------------------------------------------------------|
-| `Cmd::Submit`       | `Submit`   | Just returns submit event FIXME: format              |
-| `GoTo(Begin)`       | `OnChange` | Move cursor to the top of the current tree node      |
-| `GoTo(End)`         | `OnChange` | Move cursor to the bottom of the current tree node   |
-| `Move(Down)`        | `OnChange` | Go to next element                                   |
-| `Move(Up)`          | `OnChange` | Go to previous element                               |
-| `Scroll(Down)`      | `OnChange` | Move cursor down by defined max steps or end of node |
-| `Scroll(Up)`        | `OnChange` | Move cursor up by defined max steps or begin of node |
-| `Toggle`            | `OnChange` | Opens/closes highlighted node                        |
+| Cmd                 | Result           | Behaviour                                            |
+|---------------------|------------------|------------------------------------------------------|
+| `GoTo(Begin)`       | `Changed | None` | Move cursor to the top of the current tree node      |
+| `GoTo(End)`         | `Changed | None` | Move cursor to the bottom of the current tree node   |
+| `Move(Down)`        | `Changed | None` | Go to next element                                   |
+| `Move(Up)`          | `Changed | None` | Go to previous element                               |
+| `Scroll(Down)`      | `Changed | None` | Move cursor down by defined max steps or end of node |
+| `Scroll(Up)`        | `Changed | None` | Move cursor up by defined max steps or begin of node |
+| `Submit`            | `Submit`         | Just returns submit result with current state        |
+| `Toggle`            | `None`           | Opens/closes highlighted node                        |
 
 **State**: the state returned is a `One(String)` containing the id of the selected node. If no node is selected `None` is returned.
 
@@ -151,7 +151,7 @@ Best practices:
 
 - `Background(Color)`: background color. The background color will be used as background for unselected entry, but will be used as foreground for the selected entry when focus is true
 - `Borders(Borders)`: set borders properties for component
-- `Custom($TREE_DEPTH, Length)`: Sets the max tree depth
+- `Custom($TREE_IDENT_SIZE, Size)`: Set space to render for each each depth level
 - `Custom($TREE_INITIAL_NODE, String)`: Select initial node in the tree. This option has priority over `keep_state`
 - `Custom($TREE_PRESERVE_STATE, Flag)`: If true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree).
 - `FocusStyle(Style)`: inactive style
@@ -160,6 +160,7 @@ Best practices:
 - `HighlightedStr(String)`: The provided string will be displayed on the left side of the selected entry in the tree
 - `Rewind(Flag)`: If true, when going out of boundaries on tree, the index returns to the top or to the bottom based on position.
 - `ScrollStep(Length)`: Defines the maximum amount of rows to scroll
+- `TextProps(TextModifiers)`: set text modifiers
 - `Title(Title)`: Set box title
 
 ### Updating the tree

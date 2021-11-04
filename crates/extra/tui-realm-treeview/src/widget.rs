@@ -112,7 +112,7 @@ impl<'a> TreeWidget<'a> {
 
 struct Render {
     depth: usize,
-    // TODO: add elements to skip
+    skip_rows: usize,
 }
 
 impl<'a> Widget for TreeWidget<'a> {
@@ -142,7 +142,10 @@ impl<'a> StatefulWidget for TreeWidget<'a> {
             return;
         }
         // Recurse render
-        let mut render = Render { depth: 0 };
+        let mut render = Render {
+            depth: 0,
+            skip_rows: Self::calc_rows_to_skip(self.tree.root(), state, area.height),
+        };
         self.iter_nodes(self.tree.root(), area, buf, state, &mut render);
     }
 }
@@ -158,18 +161,19 @@ impl<'a> TreeWidget<'a> {
     ) {
         // Render self
         let mut area = self.render_node(node, area, buf, state, render);
-        // Increment depth
-        render.depth += 1;
-        // Render children
-        // TODO: check whether node is open
-        for child in node.iter() {
-            if area.height == 0 {
-                break;
+        // Render children if node is open
+        if state.is_open(node) {
+            // Increment depth
+            render.depth += 1;
+            for child in node.iter() {
+                if area.height == 0 {
+                    break;
+                }
+                area = self.render_node(child, area, buf, state, render);
             }
-            area = self.render_node(child, area, buf, state, render);
+            // Decrement depth
+            render.depth -= 1;
         }
-        // Decrement depth
-        render.depth -= 1;
     }
 
     fn render_node(
@@ -180,7 +184,11 @@ impl<'a> TreeWidget<'a> {
         state: &TreeState,
         render: &mut Render,
     ) -> Rect {
-        // TODO: if should skip, don't render
+        // If row should skip, then skip
+        if render.skip_rows > 0 {
+            render.skip_rows -= 1;
+            return area;
+        }
         let highlight_symbol = match state.is_selected(node) {
             true => Some(self.highlight_symbol.unwrap_or("")),
             false => None,
@@ -251,6 +259,13 @@ impl<'a> TreeWidget<'a> {
             width: area.width,
             height: area.height - 1,
         }
+    }
+
+    /// ### calc_rows_to__skip
+    ///
+    /// Calculate rows to skip before starting rendering the current tree
+    fn calc_rows_to_skip(node: &Node, state: &TreeState, height: u16) -> usize {
+        todo!()
     }
 }
 

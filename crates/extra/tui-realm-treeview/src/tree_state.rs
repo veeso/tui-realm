@@ -54,45 +54,76 @@ impl TreeState {
         self.open.contains(node.id())
     }
 
+    /// ### is_closed
+    ///
+    /// Returns whether `node` is closed
+    pub fn is_closed(&self, node: &Node) -> bool {
+        !self.is_open(node)
+    }
+
     /// ### selected
     ///
     /// Get current selected item
     pub fn selected(&self) -> Option<&str> {
-        self.selected.map(|x| x.as_str())
+        self.selected.as_ref().map(|x| x.as_str())
     }
 
     /// ### is_selected
     ///
     /// Returns whether provided node is currently selected
     pub fn is_selected(&self, node: &Node) -> bool {
-        self.selected.map(|x| &x == node.id()).unwrap_or(false)
+        self.selected
+            .as_ref()
+            .map(|x| x == node.id())
+            .unwrap_or(false)
     }
 
     /// ### tree_changed
     ///
     /// The tree has changed, so this method must check whether to keep states or not
     pub fn tree_changed(&mut self, root: &Node) {
-        todo!()
+        // Check whether selected is still valid
+        self.selected = match self.selected.take() {
+            None => None,
+            Some(selected) => {
+                if root.query(&selected).is_some() {
+                    Some(selected)
+                } else {
+                    None
+                }
+            }
+        };
+        // Check whether open nodes still exist
+        self.open.retain(|x| root.query(x).is_some());
     }
 
     /// ### open_node
     ///
-    /// Open `node`
+    /// Open `node`. Node can be open only if it is closed and it is NOT a leaf
     pub fn open_node(&mut self, node: &Node) {
-        todo!()
+        if !node.is_leaf() && self.is_closed(node) {
+            self.open.push(node.id().to_string());
+        }
     }
 
     /// ### close_node
     ///
     /// Close `node`
     pub fn close_node(&mut self, node: &Node) {
-        todo!()
+        if self.is_open(node) {
+            // Remove from open nodes
+            self.open.retain(|x| x != node.id());
+            // Remove children for node
+            self.close_children(node);
+        }
     }
 
     /// ### move_down
     ///
     /// Move cursor down in current tree from current position. Rewind if required
     pub fn move_down(&mut self, root: &Node, rewind: bool) {
+        // TODO: is open? then move to first child
+        // TODO: is leaf | close? then move to next sibling
         todo!()
     }
 
@@ -100,6 +131,7 @@ impl TreeState {
     ///
     /// Move cursor up in current tree from current position. Rewind if required
     pub fn move_up(&mut self, root: &Node, rewind: bool) {
+        // TODO: move to sibling before
         todo!()
     }
 
@@ -112,17 +144,10 @@ impl TreeState {
 
     // -- private
 
-    /// ### open_children
-    ///
-    /// Open all node children recursively
-    fn open_children(&mut self, node: &Node) {
-        todo!()
-    }
-
     /// ### close_children
     ///
     /// Close all node children recursively
     fn close_children(&mut self, node: &Node) {
-        todo!()
+        node.iter().for_each(|x| self.close_node(x));
     }
 }

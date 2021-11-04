@@ -70,19 +70,23 @@ mod widget;
 use tree_state::TreeState;
 use widget::TreeWidget;
 // deps
-use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
+pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, InputType, Props, Style, TextModifiers,
+    Alignment, AttrValue, Attribute, Borders, Color, Props, Style, TextModifiers,
 };
 use tuirealm::tui::layout::Rect;
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- type override
-pub(crate) type Node = OrangeNode<String, String>;
-pub(crate) type Tree = OrangeTree<String, String>;
+pub type Node = OrangeNode<String, String>;
+pub type Tree = OrangeTree<String, String>;
 
 // -- props
+
+pub const TREE_INDENT_SIZE: &str = "indent-size";
+pub const TREE_INITIAL_NODE: &str = "initial-mode";
+pub const TREE_PRESERVE_STATE: &str = "preserve-state";
 
 // -- component
 
@@ -94,7 +98,7 @@ pub struct TreeView {
     states: TreeState,
     /// The actual Tree data structure. You can access this from your Component to operate on it
     /// for example after a certain events.
-    pub tree: Tree,
+    tree: Tree,
 }
 
 impl Default for TreeView {
@@ -130,6 +134,11 @@ impl TreeView {
         self
     }
 
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self
+    }
+
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
         self.attr(
             Attribute::Title,
@@ -138,12 +147,143 @@ impl TreeView {
         self
     }
 
-    // TODO: custom properties
+    pub fn initial_node<S: AsRef<str>>(mut self, node: S) -> Self {
+        self.attr(
+            Attribute::Custom(TREE_INITIAL_NODE),
+            AttrValue::String(node.as_ref().to_string()),
+        );
+        self
+    }
 
-    // TODO: indent_spaces
+    pub fn preserve_state(mut self, preserve: bool) -> Self {
+        self.attr(
+            Attribute::Custom(TREE_PRESERVE_STATE),
+            AttrValue::Flag(preserve),
+        );
+        self
+    }
 
-    pub fn tree(mut self, tree: Tree) -> Self {
+    pub fn indent_size(mut self, sz: u16) -> Self {
+        self.attr(Attribute::Custom(TREE_INDENT_SIZE), AttrValue::Size(sz));
+        self
+    }
+
+    pub fn with_tree(mut self, tree: Tree) -> Self {
         self.tree = tree;
         self
+    }
+
+    // -- tree methods
+
+    /// ### tree
+    ///
+    /// Get a reference to tree
+    pub fn tree(&self) -> &Tree {
+        &self.tree
+    }
+
+    /// ### tree_mut
+    ///
+    /// Get mutable reference to tree
+    pub fn tree_mut(&mut self) -> &mut Tree {
+        &mut self.tree
+    }
+
+    /// ### set_tree
+    ///
+    /// Set new tree in component
+    pub fn set_tree(&mut self, tree: Tree) {
+        self.tree = tree;
+        // TODO: update states, etc...
+    }
+
+    // -- private
+
+    fn rewindable(&self) -> bool {
+        self.props
+            .get_or(Attribute::Rewind, AttrValue::Flag(false))
+            .unwrap_flag()
+    }
+
+    /// ### changed
+    ///
+    /// Returns whether selectd node has changed
+    fn changed(&self, prev: Option<&str>) -> CmdResult {
+        match self.states.selected() {
+            None => CmdResult::None,
+            id if id != prev => CmdResult::Changed(self.state()),
+            _ => CmdResult::None,
+        }
+    }
+}
+
+// -- mock
+
+impl MockComponent for TreeView {
+    fn view(&mut self, frame: &mut Frame, area: Rect) {
+        todo!()
+    }
+
+    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        self.props.get(attr)
+    }
+
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        // Initial node
+        if matches!(attr, Attribute::Custom(TREE_INITIAL_NODE)) {
+            // Select node if exists
+            if let Some(node) = self.tree.root().query(&value.unwrap_string()) {
+                self.states.select(node);
+            }
+        } else {
+            self.props.set(attr, value);
+        }
+    }
+
+    fn state(&self) -> State {
+        match self.states.selected() {
+            None => State::None,
+            Some(id) => State::One(StateValue::String(id.to_string())),
+        }
+    }
+
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        match cmd {
+            Cmd::GoTo(Position::Begin) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                todo!();
+                self.changed(prev.as_deref())
+            }
+            Cmd::GoTo(Position::End) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                todo!();
+                self.changed(prev.as_deref())
+            }
+            Cmd::Move(Direction::Down) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                self.states.move_down(self.tree.root(), self.rewindable());
+                self.changed(prev.as_deref())
+            }
+            Cmd::Move(Direction::Up) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                self.states.move_up(self.tree.root(), self.rewindable());
+                self.changed(prev.as_deref())
+            }
+            Cmd::Submit => CmdResult::Submit(self.state()),
+            Cmd::Toggle => {
+                // Open/close selected node
+                if let Some(selected) = self.states.selected() {
+                    if let Some(node) = self.tree.root().query(&selected.to_string()) {
+                        if self.states.is_closed(node) {
+                            self.states.open_node(node);
+                        } else {
+                            self.states.close_node(node);
+                        }
+                    }
+                }
+                CmdResult::None
+            }
+            _ => CmdResult::None,
+        }
     }
 }
