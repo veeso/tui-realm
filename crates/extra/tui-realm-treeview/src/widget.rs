@@ -45,7 +45,7 @@ pub struct TreeWidget<'a> {
     /// Highlight style
     highlight_style: Style,
     /// Symbol to display on the side of the current highlighted
-    highlight_symbol: Option<&'a str>,
+    highlight_symbol: Option<String>,
     /// Spaces to use for indentation
     indent_size: usize,
     /// Tree to render
@@ -94,7 +94,7 @@ impl<'a> TreeWidget<'a> {
     /// ### highlight_symbol
     ///
     /// Set symbol to prepend to highlighted entry
-    pub fn highlight_symbol(mut self, s: &'a str) -> Self {
+    pub fn highlight_symbol(mut self, s: String) -> Self {
         self.highlight_symbol = Some(s);
         self
     }
@@ -190,7 +190,7 @@ impl<'a> TreeWidget<'a> {
             return area;
         }
         let highlight_symbol = match state.is_selected(node) {
-            true => Some(self.highlight_symbol.unwrap_or("")),
+            true => Some(self.highlight_symbol.clone().unwrap_or_default()),
             false => None,
         };
         // Get area for current node

@@ -30,6 +30,7 @@ use super::Node;
 /// ## TreeState
 ///
 /// Tree state tracks the current state for the component tree.
+#[derive(Clone)]
 pub struct TreeState {
     /// Tracks open nodes
     open: Vec<String>,
@@ -81,20 +82,26 @@ impl TreeState {
     /// ### tree_changed
     ///
     /// The tree has changed, so this method must check whether to keep states or not
-    pub fn tree_changed(&mut self, root: &Node) {
-        // Check whether selected is still valid
-        self.selected = match self.selected.take() {
-            None => None,
-            Some(selected) => {
-                if root.query(&selected).is_some() {
-                    Some(selected)
-                } else {
-                    None
+    pub fn tree_changed(&mut self, root: &Node, preserve: bool) {
+        if preserve {
+            // Check whether selected is still valid
+            self.selected = match self.selected.take() {
+                None => None,
+                Some(selected) => {
+                    if root.query(&selected).is_some() {
+                        Some(selected)
+                    } else {
+                        None
+                    }
                 }
-            }
-        };
-        // Check whether open nodes still exist
-        self.open.retain(|x| root.query(x).is_some());
+            };
+            // Check whether open nodes still exist
+            self.open.retain(|x| root.query(x).is_some());
+        } else {
+            // Reset state
+            self.open = Vec::new();
+            self.selected = None;
+        }
     }
 
     /// ### open_node
@@ -131,8 +138,29 @@ impl TreeState {
     ///
     /// Move cursor up in current tree from current position. Rewind if required
     pub fn move_up(&mut self, root: &Node, rewind: bool) {
-        // TODO: move to sibling before
-        todo!()
+        if let Some(selected) = self.selected.take() {
+            // Get parent
+            if let Some(parent) = root.parent(&selected) {
+                // Iter children; track previous node, which will become the new active element
+                // TODO: if rewind this is the last element
+                let mut prev_node = parent;
+                // TODO: make this function more functional
+                for child in parent.children() {
+                    // If current node is found, break
+                    if child.id() == &selected {
+                        break;
+                    } else {
+                        // Else set child as previous node
+                        prev_node = child;
+                    }
+                }
+                // Finally set previous node as new selected node
+                self.selected = Some(prev_node.id().to_string());
+            } else {
+                // Keep selected
+                self.selected = Some(selected);
+            }
+        }
     }
 
     /// ### select
