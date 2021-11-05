@@ -49,11 +49,6 @@
       src="https://github.com/veeso/tui-realm-stdlib/workflows/Build/badge.svg"
       alt="CI"
   /></a>
-  <a href="https://coveralls.io/github/veeso/tui-realm-stdlib"
-    ><img
-      src="https://coveralls.io/repos/github/veeso/tui-realm-stdlib/badge.svg"
-      alt="Coveralls"
-  /></a>
   <a href="https://docs.rs/tui-realm-stdlib"
     ><img
       src="https://docs.rs/tui-realm-stdlib/badge.svg"
