@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [0.6.4](#064)
   - [0.6.3](#063)
   - [0.6.2](#062)
   - [0.6.1](#061)
@@ -8,6 +9,13 @@
   - [0.5.0](#050)
 
 ---
+
+## 0.6.4
+
+Released on 05/11/2021
+
+- Bugfix
+  - [Issue 3](https://github.com/veeso/tui-realm-stdlib/issues/4): textarea eliding some characters at the end of area if not ASCII chars.
 
 ## 0.6.3
 

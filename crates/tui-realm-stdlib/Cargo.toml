@@ -1,6 +1,6 @@
 [package]
 name = "tui-realm-stdlib"
-version = "0.6.3"
+version = "0.6.4"
 authors = ["Christian Visintin"]
 edition = "2018"
 categories = ["command-line-utilities"]

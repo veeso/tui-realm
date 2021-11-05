@@ -37,6 +37,7 @@ use tuirealm::tui::{
     widgets::{Block, BorderType, Borders, List, ListItem, ListState},
 };
 use tuirealm::{event::Event, Component, Frame, Msg, Payload};
+use unicode_width::UnicodeWidthStr;
 
 // -- Props
 
@@ -380,6 +381,13 @@ impl Component for Textarea {
         // Make a Span
         if self.props.visible {
             // Make text items
+            let hg_str = self
+                .props
+                .own
+                .get(PROP_HIGHLIGHTED_TXT)
+                .map(|x| x.unwrap_one().unwrap_str());
+            let wrap_width =
+                (area.width as usize) - hg_str.as_ref().map(|x| x.width()).unwrap_or(0) - 2;
             let lines: Vec<ListItem> = match self.props.own.get(PROP_SPANS).as_ref() {
                 Some(PropPayload::Vec(spans)) => spans
                     .iter()
@@ -387,7 +395,7 @@ impl Component for Textarea {
                     .map(|x| {
                         crate::utils::wrap_spans(
                             vec![x.clone()].as_slice(),
-                            area.width as usize,
+                            wrap_width,
                             &self.props,
                         )
                     })
@@ -412,9 +420,7 @@ impl Component for Textarea {
                         .bg(self.props.background),
                 );
             // Highlighted symbol
-            if let Some(PropPayload::One(PropValue::Str(highlight))) =
-                self.props.own.get(PROP_HIGHLIGHTED_TXT)
-            {
+            if let Some(highlight) = hg_str {
                 list = list.highlight_symbol(highlight);
             }
             render.render_stateful_widget(list, area, &mut state);
