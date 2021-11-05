@@ -27,6 +27,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+extern crate unicode_width;
+
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
@@ -37,6 +39,7 @@ use tuirealm::tui::{
     widgets::{List, ListItem, ListState},
 };
 use tuirealm::{Frame, MockComponent, State};
+use unicode_width::UnicodeWidthStr;
 
 // -- States
 
@@ -224,6 +227,14 @@ impl MockComponent for Textarea {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text items
+            // Highlighted symbol
+            self.hg_str = self
+                .props
+                .get(Attribute::HighlightedStr)
+                .map(|x| x.unwrap_string());
+            // NOTE: wrap width is width of area minus 2 (block) minus width of highlighting string
+            let wrap_width =
+                (area.width as usize) - self.hg_str.as_ref().map(|x| x.width()).unwrap_or(0) - 2;
             let lines: Vec<ListItem> =
                 match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
                     Some(PropPayload::Vec(spans)) => spans
@@ -231,11 +242,7 @@ impl MockComponent for Textarea {
                         .cloned()
                         .map(|x| x.unwrap_text_span())
                         .map(|x| {
-                            crate::utils::wrap_spans(
-                                vec![x].as_slice(),
-                                area.width as usize,
-                                &self.props,
-                            )
+                            crate::utils::wrap_spans(vec![x].as_slice(), wrap_width, &self.props)
                         })
                         .map(ListItem::new)
                         .collect(),
@@ -292,11 +299,7 @@ impl MockComponent for Textarea {
                         .bg(background)
                         .add_modifier(modifiers),
                 );
-            // Highlighted symbol
-            self.hg_str = self
-                .props
-                .get(Attribute::HighlightedStr)
-                .map(|x| x.unwrap_string());
+
             if let Some(hg_str) = &self.hg_str {
                 list = list.highlight_symbol(hg_str);
             }

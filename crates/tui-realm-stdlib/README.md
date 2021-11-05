@@ -46,7 +46,7 @@
 <p align="center">
   <a href="https://github.com/veeso/tui-realm-stdlib/actions"
     ><img
-      src="https://github.com/veeso/tui-realm/workflows/Build/badge.svg"
+      src="https://github.com/veeso/tui-realm-stdlib/workflows/Build/badge.svg"
       alt="CI"
   /></a>
   <a href="https://coveralls.io/github/veeso/tui-realm-stdlib"
