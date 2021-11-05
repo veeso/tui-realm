@@ -2,6 +2,9 @@
 
 - [Changelog](#changelog)
   - [1.0.0](#100)
+  - [0.6.4](#064)
+  - [0.6.3](#063)
+  - [0.6.2](#062)
   - [0.6.1](#061)
   - [0.6.0](#060)
   - [0.5.0](#050)
@@ -18,7 +21,25 @@ Released on FIXME:
   - Spinner
 - Migrated components to tui-realm 1.0.0
 
-- ...
+## 0.6.4
+
+Released on 05/11/2021
+
+- Bugfix
+  - [Issue 3](https://github.com/veeso/tui-realm-stdlib/issues/4): textarea eliding some characters at the end of area if not ASCII chars.
+
+## 0.6.3
+
+Released on 04/10/2021
+
+- Input: Escape input if is KEY + (ALT or CTRL), but NOT if is CTRL+ALT+KEY or CTRL+ALT+SHIFT+KEY
+
+## 0.6.2
+
+Released on 31/08/2021
+
+- Bugfix
+  - [Issue 3](https://github.com/veeso/tui-realm-stdlib/issues/3): Table/list lose focus when updating and component is scrollable
 
 ## 0.6.1
 
