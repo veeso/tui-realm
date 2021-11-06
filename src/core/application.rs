@@ -168,15 +168,23 @@ where
     /// ### remount
     ///
     /// Remount provided component.
-    /// Returns Err if failed to mount. It ignores whether the component already exists or not
+    /// Returns Err if failed to mount. It ignores whether the component already exists or not.
+    /// If component had focus, focus is preserved
     pub fn remount(
         &mut self,
         id: K,
         component: WrappedComponent<Msg, UserEvent>,
         subs: Vec<Sub<UserEvent>>,
     ) -> ApplicationResult<()> {
+        let had_focus = self.view.has_focus(&id);
         let _ = self.umount(&id);
-        self.mount(id, component, subs)
+        self.mount(id.clone(), component, subs)?;
+        // Keep focus if necessary
+        if had_focus {
+            self.active(&id)
+        } else {
+            Ok(())
+        }
     }
 
     /// ### mounted
@@ -491,6 +499,7 @@ mod test {
                 vec![]
             )
             .is_err());
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
         // Remount
         assert!(application
             .remount(
@@ -499,6 +508,7 @@ mod test {
                 vec![]
             )
             .is_ok());
+        assert!(application.view.has_focus(&MockComponentId::InputFoo));
         // Mount bar
         assert!(application
             .mount(
