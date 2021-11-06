@@ -173,6 +173,25 @@ impl TreeView {
         self
     }
 
+    /// ### highlight_symbol
+    ///
+    /// Set symbol to prepend to highlighted node
+    pub fn highlight_symbol<S: AsRef<str>>(mut self, symbol: S) -> Self {
+        self.attr(
+            Attribute::HighlightedStr,
+            AttrValue::String(symbol.as_ref().to_string()),
+        );
+        self
+    }
+
+    /// ### highlighted_color
+    ///
+    /// Set color to apply to highlighted item
+    pub fn highlighted_color(mut self, color: Color) -> Self {
+        self.attr(Attribute::HighlightedColor, AttrValue::Color(color));
+        self
+    }
+
     /// ### initial_node
     ///
     /// Set initial node for tree state.
@@ -340,10 +359,11 @@ impl MockComponent for TreeView {
                 .props
                 .get_or(Attribute::HighlightedColor, AttrValue::Color(foreground))
                 .unwrap_color();
-            let (hg_fg, hg_bg): (Color, Color) = match focus {
-                true => (background, hg_color),
-                false => (hg_color, background),
-            };
+            let hg_style = match focus {
+                true => Style::default().bg(hg_color).fg(Color::Black),
+                false => Style::default().fg(hg_color),
+            }
+            .add_modifier(modifiers);
             let hg_str = self
                 .props
                 .get(Attribute::HighlightedStr)
@@ -352,7 +372,7 @@ impl MockComponent for TreeView {
             // Make widget
             let mut tree = TreeWidget::new(self.tree())
                 .block(div)
-                .highlight_style(Style::default().fg(hg_fg).bg(hg_bg).add_modifier(modifiers))
+                .highlight_style(hg_style)
                 .indent_size(indent_size.into())
                 .style(
                     Style::default()

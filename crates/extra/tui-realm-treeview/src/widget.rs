@@ -33,6 +33,7 @@ use tuirealm::tui::{
     style::Style,
     widgets::{Block, StatefulWidget, Widget},
 };
+use unicode_width::UnicodeWidthStr;
 
 /// ## TreeWidget
 ///
@@ -143,8 +144,8 @@ impl<'a> StatefulWidget for TreeWidget<'a> {
         }
         // Recurse render
         let mut render = Render {
-            depth: 0,
-            skip_rows: Self::calc_rows_to_skip(self.tree.root(), state, area.height),
+            depth: 1,
+            skip_rows: self.calc_rows_to_skip(state, area.height),
         };
         self.iter_nodes(self.tree.root(), area, buf, state, &mut render);
     }
@@ -154,13 +155,13 @@ impl<'a> TreeWidget<'a> {
     fn iter_nodes(
         &self,
         node: &Node,
-        area: Rect,
+        mut area: Rect,
         buf: &mut Buffer,
         state: &TreeState,
         render: &mut Render,
-    ) {
+    ) -> Rect {
         // Render self
-        let mut area = self.render_node(node, area, buf, state, render);
+        area = self.render_node(node, area, buf, state, render);
         // Render children if node is open
         if state.is_open(node) {
             // Increment depth
@@ -169,11 +170,12 @@ impl<'a> TreeWidget<'a> {
                 if area.height == 0 {
                     break;
                 }
-                area = self.render_node(child, area, buf, state, render);
+                area = self.iter_nodes(child, area, buf, state, render);
             }
             // Decrement depth
             render.depth -= 1;
         }
+        area
     }
 
     fn render_node(
@@ -200,31 +202,34 @@ impl<'a> TreeWidget<'a> {
             width: area.width,
             height: 1,
         };
-        // Apply style
-        match state.is_selected(node) {
-            false => buf.set_style(node_area, self.style),
-            true => buf.set_style(node_area, self.highlight_style),
+        // Get style to use
+        let style = match state.is_selected(node) {
+            false => self.style,
+            true => self.highlight_style,
         };
+        // Apply style
+        buf.set_style(node_area, style);
         // Calc depth for node (is selected?)
-        let depth = match state.is_selected(node) {
-            true => render.depth - 1,
-            false => render.depth,
-        } * self.indent_size;
+        let indent_size = render.depth * self.indent_size;
+        let indent_size = match state.is_selected(node) {
+            true if highlight_symbol.is_some() => {
+                indent_size.saturating_sub(highlight_symbol.as_deref().unwrap().width() + 1)
+            }
+            _ => indent_size,
+        };
         let width: usize = area.width as usize;
-        // Write depth
-        let (start_x, start_y) =
-            buf.set_stringn(area.x, area.y, " ".repeat(depth), width - depth, self.style);
+        // Write indentation
+        let (start_x, start_y) = buf.set_stringn(
+            area.x,
+            area.y,
+            " ".repeat(indent_size),
+            width - indent_size,
+            style,
+        );
         // Write highlight symbol
         let (start_x, start_y) = highlight_symbol
-            .map(|x| {
-                buf.set_stringn(
-                    start_x,
-                    start_y,
-                    x,
-                    width - start_x as usize,
-                    self.highlight_style,
-                )
-            })
+            .map(|x| buf.set_stringn(start_x, start_y, x, width - start_x as usize, style))
+            .map(|(x, y)| buf.set_stringn(x, y, " ", width - start_x as usize, style))
             .unwrap_or((start_x, start_y));
         // Write node name
         let (start_x, start_y) = buf.set_stringn(
@@ -232,25 +237,25 @@ impl<'a> TreeWidget<'a> {
             start_y,
             node.value(),
             width - start_x as usize,
-            self.style,
+            style,
         );
         // Write arrow based on node
         let write_after = if state.is_open(node) {
             // Is open
-            "\u{25bc}" // Arrow down
+            " \u{25bc}" // Arrow down
         } else if node.is_leaf() {
             // Is leaf (has no children)
-            " "
+            "  "
         } else {
             // Has children, but is closed
-            "\u{25b6}" // Arrow to right
+            " \u{25b6}" // Arrow to right
         };
         let _ = buf.set_stringn(
             start_x,
             start_y,
             write_after,
             width - start_x as usize,
-            self.style,
+            style,
         );
         // Return new area
         Rect {
@@ -264,7 +269,7 @@ impl<'a> TreeWidget<'a> {
     /// ### calc_rows_to__skip
     ///
     /// Calculate rows to skip before starting rendering the current tree
-    fn calc_rows_to_skip(node: &Node, state: &TreeState, height: u16) -> usize {
+    fn calc_rows_to_skip(&self, state: &TreeState, height: u16) -> usize {
         // if no node is selected, return 0
         let selected = match state.selected() {
             Some(s) => s,
@@ -306,9 +311,9 @@ impl<'a> TreeWidget<'a> {
         }
         // Return the result of recursive call;
         // if the result is less than area height, then return 0; otherwise subtract the height to result
-        match calc_rows_to_skip_r(node, state, height, selected, 0).0 {
+        match calc_rows_to_skip_r(self.tree.root(), state, height, selected, 0).0 {
             x if x < (height as usize) => 0,
-            x => x - (height as usize),
+            x => x - (height as usize) + 1,
         }
     }
 }
@@ -359,9 +364,12 @@ mod test {
         // Select aA2
         let aa2 = tree.root().query(&String::from("aA2")).unwrap();
         state.select(tree.root(), aa2);
-        // Get rows to skip
-        assert_eq!(TreeWidget::calc_rows_to_skip(tree.root(), &state, 8), 0); // Before end
-        assert_eq!(TreeWidget::calc_rows_to_skip(tree.root(), &state, 6), 0); // At end
+        // Get rows to skip (no block)
+        let widget = TreeWidget::new(&tree);
+        // Before end
+        assert_eq!(widget.calc_rows_to_skip(&state, 8), 0);
+        // At end
+        assert_eq!(widget.calc_rows_to_skip(&state, 6), 0);
     }
 
     #[test]
@@ -373,7 +381,9 @@ mod test {
         // Select bB2
         let bb2 = tree.root().query(&String::from("bB2")).unwrap();
         state.select(tree.root(), bb2);
-        // Get rows to skip
-        assert_eq!(TreeWidget::calc_rows_to_skip(tree.root(), &state, 8), 12); // 20th element - height (12)
+        // Get rows to skip (no block)
+        let widget = TreeWidget::new(&tree);
+        // 20th element - height (12) + 1
+        assert_eq!(widget.calc_rows_to_skip(&state, 8), 13);
     }
 }

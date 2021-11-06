@@ -21,60 +21,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-mod utils;
-use utils::context::Context;
-use utils::keymap::*;
-
 use std::path::{Path, PathBuf};
-use std::thread::sleep;
 use std::time::Duration;
-use tui_realm_stdlib::{input, label};
-use tuirealm::props::{
-    borders::{BorderType, Borders},
-    Alignment,
+use tui_realm_stdlib::{Input, Phantom};
+use tuirealm::{
+    application::PollStrategy,
+    command::{Cmd, CmdResult, Direction, Position},
+    event::{Event, Key, KeyEvent, KeyModifiers},
+    props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, InputType, Style},
+    terminal::TerminalBridge,
+    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue, Sub,
+    SubClause, SubEventClause, Update, View,
 };
-use tuirealm::{Msg, Payload, PropsBuilder, Update, Value, View};
 // tui
-use tuirealm::tui::layout::{Constraint, Direction, Layout};
-use tuirealm::tui::style::Color;
+use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
 // treeview
-use tui_realm_treeview::{Node, Tree, TreeView, TreeViewPropsBuilder};
-
-const COMPONENT_INPUT: &str = "INPUT";
-const COMPONENT_LABEL: &str = "LABEL";
-const COMPONENT_TREEVIEW: &str = "TREEVIEW";
+use tui_realm_treeview::{Node, Tree, TreeView, TREE_CMD_CLOSE, TREE_CMD_OPEN};
 
 const MAX_DEPTH: usize = 3;
+
+// -- message
+#[derive(Debug, PartialEq)]
+pub enum Msg {
+    AppClose,
+    ExtendDir(String),
+    FsTreeBlur,
+    GoToBlur,
+    GoTo(PathBuf),
+    GoToUpperDir,
+    None,
+}
+
+// Let's define the component ids for our application
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
+pub enum Id {
+    FsTree,
+    GlobalListener,
+    GoTo,
+}
 
 struct Model {
     path: PathBuf,
     tree: Tree,
     quit: bool,   // Becomes true when the user presses <ESC>
     redraw: bool, // Tells whether to refresh the UI; performance optimization
-    view: View,
+    terminal: TerminalBridge,
 }
 
 impl Model {
-    fn new(view: View, p: &Path) -> Self {
+    fn new(p: &Path) -> Self {
         Model {
             quit: false,
             redraw: true,
-            view,
             tree: Tree::new(Self::dir_tree(p, MAX_DEPTH)),
             path: p.to_path_buf(),
+            terminal: TerminalBridge::new().expect("Could not initialize terminal"),
         }
-    }
-
-    fn quit(&mut self) {
-        self.quit = true;
-    }
-
-    fn redraw(&mut self) {
-        self.redraw = true;
-    }
-
-    fn reset(&mut self) {
-        self.redraw = false;
     }
 
     pub fn scan_dir(&mut self, p: &Path) {
@@ -82,12 +84,12 @@ impl Model {
         self.tree = Tree::new(Self::dir_tree(p, MAX_DEPTH));
     }
 
-    pub fn upper_dir(&self) -> Option<&Path> {
-        self.path.parent()
+    pub fn upper_dir(&self) -> Option<PathBuf> {
+        self.path.parent().map(|x| x.to_path_buf())
     }
 
-    pub fn extend_dir(&mut self, id: &str, p: &Path, depth: usize) {
-        if let Some(node) = self.tree.query_mut(id) {
+    pub fn extend_dir(&mut self, id: &String, p: &Path, depth: usize) {
+        if let Some(node) = self.tree.root_mut().query_mut(id) {
             if depth > 0 && p.is_dir() {
                 // Clear node
                 node.clear();
@@ -115,186 +117,320 @@ impl Model {
         }
         node
     }
+
+    fn view(&mut self, app: &mut Application<Id, Msg, NoUserEvent>) {
+        let _ = self.terminal.raw_mut().draw(|f| {
+            // Prepare chunks
+            let chunks = Layout::default()
+                .direction(LayoutDirection::Vertical)
+                .margin(1)
+                .constraints([Constraint::Min(5), Constraint::Length(3)].as_ref())
+                .split(f.size());
+            app.view(&Id::FsTree, f, chunks[0]);
+            app.view(&Id::GoTo, f, chunks[1]);
+        });
+    }
+
+    fn reload_tree(&mut self, view: &mut View<Id, Msg, NoUserEvent>) {
+        let current_node = match view.state(&Id::FsTree).ok().unwrap() {
+            State::One(StateValue::String(id)) => Some(id),
+            _ => None,
+        };
+        // Remount tree
+        assert!(view.umount(&Id::FsTree).is_ok());
+        assert!(view
+            .mount(
+                Id::FsTree,
+                Box::new(FsTree::new(self.tree.clone(), current_node))
+            )
+            .is_ok());
+        assert!(view.active(&Id::FsTree).is_ok());
+    }
 }
 
 fn main() {
-    // let's create a context: the context contains the backend of crossterm and the input handler
-    let mut ctx: Context = Context::new();
-    // Enter alternate screen
-    ctx.enter_alternate_screen();
-    // Clear screen
-    ctx.clear_screen();
     // Make model
-    let mut model: Model = Model::new(
-        View::init(),
-        std::env::current_dir().ok().unwrap().as_path(),
+    let mut model: Model = Model::new(std::env::current_dir().ok().unwrap().as_path());
+    let _ = model.terminal.enable_raw_mode();
+    let _ = model.terminal.enter_alternate_screen();
+    // Setup app
+    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+        EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
     );
-    // Mount the component you need; we'll use a Label and an Input
-    model.view.mount(
-        COMPONENT_LABEL,
-        Box::new(label::Label::new(
-            label::LabelPropsBuilder::default()
-                .with_foreground(Color::Cyan)
-                .with_text(String::from(
-                    "Selected node will appear here after a submit",
-                ))
-                .build(),
-        )),
-    );
-    // Mount input
-    model.view.mount(
-        COMPONENT_INPUT,
-        Box::new(input::Input::new(
-            input::InputPropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Rounded, Color::LightBlue)
-                .with_label("Go to...", Alignment::Left)
-                .with_foreground(Color::LightBlue)
-                .build(),
-        )),
-    );
-    let title: String = model.path.to_string_lossy().to_string();
-    // Moount tree
-    model.view.mount(
-        COMPONENT_TREEVIEW,
-        Box::new(TreeView::new(
-            TreeViewPropsBuilder::default()
-                .with_borders(Borders::ALL, BorderType::Rounded, Color::LightYellow)
-                .with_foreground(Color::LightYellow)
-                .with_background(Color::Black)
-                .with_title(title, Alignment::Left)
-                .with_tree(model.tree.root())
-                .with_highlighted_str("🚀")
-                .keep_state(true)
-                .with_max_page_steps(8)
-                .build(),
-        )),
-    );
+    assert!(app
+        .mount(
+            Id::FsTree,
+            Box::new(FsTree::new(model.tree.clone(), None)),
+            vec![]
+        )
+        .is_ok());
+    assert!(app
+        .mount(Id::GoTo, Box::new(GoTo::default()), vec![])
+        .is_ok());
+    // Mount global listener which will listen for <ESC>
+    assert!(app
+        .mount(
+            Id::GlobalListener,
+            Box::new(GlobalListener::default()),
+            vec![Sub::new(
+                SubEventClause::Keyboard(KeyEvent {
+                    code: Key::Esc,
+                    modifiers: KeyModifiers::NONE,
+                }),
+                SubClause::Always
+            )]
+        )
+        .is_ok());
     // We need to give focus to input then
-    model.view.active(COMPONENT_TREEVIEW);
+    assert!(app.active(&Id::FsTree).is_ok());
     // let's loop until quit is true
     while !model.quit {
-        // Listen for input events
-        if let Ok(Some(ev)) = ctx.input_hnd.read_event() {
-            // Pass event to view
-            let msg = model.view.on(ev);
-            model.redraw();
-            // Call the elm friend update
-            model.update(msg);
+        // Tick
+        if let Ok(sz) = app.tick(&mut model, PollStrategy::Once) {
+            if sz > 0 {
+                // NOTE: redraw if at least one msg has been processed
+                model.redraw = true;
+            }
         }
-        // If redraw, draw interface
+        // Redraw
         if model.redraw {
-            // Call the elm friend vie1 function
-            view(&mut ctx, &model.view);
-            model.reset();
+            model.view(&mut app);
+            model.redraw = false;
         }
-        sleep(Duration::from_millis(10));
     }
-    // Let's drop the context finally
-    drop(ctx);
+    // Terminate terminal
+    let _ = model.terminal.leave_alternate_screen();
+    let _ = model.terminal.disable_raw_mode();
+    let _ = model.terminal.clear_screen();
 }
 
-fn view(ctx: &mut Context, view: &View) {
-    let _ = ctx.terminal.draw(|f| {
-        // Prepare chunks
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .margin(1)
-            .constraints(
-                [
-                    Constraint::Length(1),
-                    Constraint::Min(5),
-                    Constraint::Length(3),
-                ]
-                .as_ref(),
-            )
-            .split(f.size());
-        view.render(COMPONENT_LABEL, f, chunks[0]);
-        view.render(COMPONENT_TREEVIEW, f, chunks[1]);
-        view.render(COMPONENT_INPUT, f, chunks[2]);
-    });
+// -- update
+
+impl Update<Id, Msg, NoUserEvent> for Model {
+    fn update(&mut self, view: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
+        match msg.unwrap_or(Msg::None) {
+            Msg::AppClose => {
+                self.quit = true;
+                None
+            }
+            Msg::ExtendDir(path) => {
+                self.extend_dir(&path, PathBuf::from(path.as_str()).as_path(), MAX_DEPTH);
+                self.reload_tree(view);
+                None
+            }
+            Msg::GoTo(path) => {
+                // Go to and reload tree
+                self.scan_dir(path.as_path());
+                self.reload_tree(view);
+                None
+            }
+            Msg::GoToUpperDir => {
+                if let Some(parent) = self.upper_dir() {
+                    self.scan_dir(parent.as_path());
+                    self.reload_tree(view);
+                }
+                None
+            }
+            Msg::FsTreeBlur => {
+                assert!(view.active(&Id::GoTo).is_ok());
+                None
+            }
+            Msg::GoToBlur => {
+                assert!(view.active(&Id::FsTree).is_ok());
+                None
+            }
+            Msg::None => None,
+        }
+    }
 }
 
-impl Update for Model {
-    fn update(&mut self, msg: Option<(String, Msg)>) -> Option<(String, Msg)> {
-        let ref_msg: Option<(&str, &Msg)> = msg.as_ref().map(|(s, msg)| (s.as_str(), msg));
-        match ref_msg {
-            None => None, // Exit after None
-            Some(msg) => match msg {
-                (COMPONENT_TREEVIEW, Msg::OnChange(Payload::One(Value::Str(node_id)))) => {
-                    // Update span
-                    let props = label::LabelPropsBuilder::from(
-                        self.view.get_props(COMPONENT_LABEL).unwrap(),
-                    )
-                    .with_text(format!("Selected: '{}'", node_id))
-                    .build();
-                    // Report submit
-                    let msg = self.view.update(COMPONENT_LABEL, props);
-                    self.update(msg)
-                }
-                (COMPONENT_TREEVIEW, Msg::OnSubmit(Payload::One(Value::Str(node_id)))) => {
-                    // Update tree
-                    self.extend_dir(
-                        node_id.as_str(),
-                        PathBuf::from(node_id.as_str()).as_path(),
-                        MAX_DEPTH,
-                    );
-                    // Update
-                    let props = TreeViewPropsBuilder::from(
-                        self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
-                    )
-                    .with_tree(self.tree.root())
-                    .with_title(self.path.to_string_lossy(), Alignment::Left)
-                    .build();
-                    let msg = self.view.update(COMPONENT_TREEVIEW, props);
-                    self.update(msg)
-                }
-                (COMPONENT_TREEVIEW, key) if key == &MSG_KEY_BACKSPACE => {
-                    // Update tree
-                    match self.upper_dir() {
-                        None => None,
-                        Some(p) => {
-                            let p: PathBuf = p.to_path_buf();
-                            self.scan_dir(p.as_path());
-                            // Update
-                            let props = TreeViewPropsBuilder::from(
-                                self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
-                            )
-                            .with_tree(self.tree.root())
-                            .with_title(self.path.to_string_lossy(), Alignment::Left)
-                            .build();
-                            let msg = self.view.update(COMPONENT_TREEVIEW, props);
-                            self.update(msg)
-                        }
-                    }
-                }
-                (COMPONENT_INPUT, Msg::OnSubmit(Payload::One(Value::Str(input)))) => {
-                    let p: PathBuf = PathBuf::from(input.as_str());
-                    self.scan_dir(p.as_path());
-                    // Update
-                    let props = TreeViewPropsBuilder::from(
-                        self.view.get_props(COMPONENT_TREEVIEW).unwrap(),
-                    )
-                    .with_tree(self.tree.root())
-                    .with_title(self.path.to_string_lossy(), Alignment::Left)
-                    .build();
-                    let msg = self.view.update(COMPONENT_TREEVIEW, props);
-                    self.update(msg)
-                }
-                (COMPONENT_INPUT, key) if key == &MSG_KEY_TAB => {
-                    self.view.active(COMPONENT_TREEVIEW);
-                    None
-                }
-                (COMPONENT_TREEVIEW, key) if key == &MSG_KEY_TAB => {
-                    self.view.active(COMPONENT_INPUT);
-                    None
-                }
-                (_, key) if key == &MSG_KEY_ESC => {
-                    // Quit on esc
-                    self.quit();
-                    None
-                }
-                _ => None,
-            },
+// -- components
+
+#[derive(MockComponent)]
+pub struct FsTree {
+    component: TreeView,
+}
+
+impl FsTree {
+    pub fn new(tree: Tree, initial_node: Option<String>) -> Self {
+        // Preserve initial node if exists
+        let initial_node = match initial_node {
+            Some(id) if tree.root().query(&id).is_some() => id,
+            _ => tree.root().id().to_string(),
+        };
+        FsTree {
+            component: TreeView::default()
+                .foreground(Color::Reset)
+                .borders(
+                    Borders::default()
+                        .color(Color::LightYellow)
+                        .modifiers(BorderType::Rounded),
+                )
+                .inactive(Style::default().fg(Color::Gray))
+                .indent_size(3)
+                .scroll_step(6)
+                .title(tree.root().id(), Alignment::Left)
+                .highlighted_color(Color::LightYellow)
+                .highlight_symbol("🦄")
+                .with_tree(tree)
+                .initial_node(initial_node),
+        }
+    }
+}
+
+impl Component<Msg, NoUserEvent> for FsTree {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        let result = match ev {
+            Event::Keyboard(KeyEvent {
+                code: Key::Left,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Custom(TREE_CMD_CLOSE)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Right,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Custom(TREE_CMD_OPEN)),
+            Event::Keyboard(KeyEvent {
+                code: Key::PageDown,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Scroll(Direction::Down)),
+            Event::Keyboard(KeyEvent {
+                code: Key::PageUp,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Scroll(Direction::Up)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Down,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Move(Direction::Down)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Up,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Move(Direction::Up)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Home,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::GoTo(Position::Begin)),
+            Event::Keyboard(KeyEvent {
+                code: Key::End,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::GoTo(Position::End)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Enter,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Submit),
+            Event::Keyboard(KeyEvent {
+                code: Key::Backspace,
+                modifiers: KeyModifiers::NONE,
+            }) => return Some(Msg::GoToUpperDir),
+            Event::Keyboard(KeyEvent {
+                code: Key::Tab,
+                modifiers: KeyModifiers::NONE,
+            }) => return Some(Msg::FsTreeBlur),
+            _ => return None,
+        };
+        match result {
+            CmdResult::Submit(State::One(StateValue::String(node))) => Some(Msg::ExtendDir(node)),
+            _ => Some(Msg::None),
+        }
+    }
+}
+
+// -- global listener
+
+#[derive(Default, MockComponent)]
+pub struct GlobalListener {
+    component: Phantom,
+}
+
+impl Component<Msg, NoUserEvent> for GlobalListener {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        match ev {
+            Event::Keyboard(KeyEvent {
+                code: Key::Esc,
+                modifiers: KeyModifiers::NONE,
+            }) => Some(Msg::AppClose),
+            _ => None,
+        }
+    }
+}
+
+// -- goto input
+
+#[derive(MockComponent)]
+pub struct GoTo {
+    component: Input,
+}
+
+impl Default for GoTo {
+    fn default() -> Self {
+        Self {
+            component: Input::default()
+                .foreground(Color::LightBlue)
+                .borders(
+                    Borders::default()
+                        .color(Color::LightBlue)
+                        .modifiers(BorderType::Rounded),
+                )
+                .input_type(InputType::Text)
+                .placeholder(
+                    "/foo/bar/buzz",
+                    Style::default().fg(Color::Rgb(120, 120, 120)),
+                )
+                .title("Go to...", Alignment::Left),
+        }
+    }
+}
+
+impl Component<Msg, NoUserEvent> for GoTo {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        let result = match ev {
+            Event::Keyboard(KeyEvent {
+                code: Key::Enter,
+                modifiers: KeyModifiers::NONE,
+            }) => {
+                let res = self.perform(Cmd::Submit);
+                // Clear value
+                self.attr(Attribute::Value, AttrValue::String(String::new()));
+                res
+            }
+            Event::Keyboard(KeyEvent {
+                code: Key::Char(ch),
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Type(ch)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Left,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Move(Direction::Left)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Right,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Move(Direction::Right)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Home,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::GoTo(Position::Begin)),
+            Event::Keyboard(KeyEvent {
+                code: Key::End,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::GoTo(Position::End)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Delete,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Cancel),
+            Event::Keyboard(KeyEvent {
+                code: Key::Backspace,
+                modifiers: KeyModifiers::NONE,
+            }) => self.perform(Cmd::Delete),
+            Event::Keyboard(KeyEvent {
+                code: Key::Tab,
+                modifiers: KeyModifiers::NONE,
+            }) => return Some(Msg::GoToBlur),
+            _ => return None,
+        };
+        match result {
+            CmdResult::Submit(State::One(StateValue::String(path))) => {
+                Some(Msg::GoTo(PathBuf::from(path.as_str())))
+            }
+            _ => Some(Msg::None),
         }
     }
 }
