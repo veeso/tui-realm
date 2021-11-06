@@ -165,6 +165,20 @@ where
         Ok(())
     }
 
+    /// ### remount
+    ///
+    /// Remount provided component.
+    /// Returns Err if failed to mount. It ignores whether the component already exists or not
+    pub fn remount(
+        &mut self,
+        id: K,
+        component: WrappedComponent<Msg, UserEvent>,
+        subs: Vec<Sub<UserEvent>>,
+    ) -> ApplicationResult<()> {
+        let _ = self.umount(&id);
+        self.mount(id, component, subs)
+    }
+
     /// ### mounted
     ///
     /// Returns whether component `id` is mounted
@@ -469,7 +483,7 @@ mod test {
                 vec![]
             )
             .is_ok());
-        // Remount
+        // Remount with mount
         assert!(application
             .mount(
                 MockComponentId::InputFoo,
@@ -477,6 +491,14 @@ mod test {
                 vec![]
             )
             .is_err());
+        // Remount
+        assert!(application
+            .remount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
+            .is_ok());
         // Mount bar
         assert!(application
             .mount(
