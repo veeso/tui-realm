@@ -230,6 +230,8 @@ An input text. Provides the possiblity to input a text with the possibility to s
 - `Background(Color)`: background color
 - `Borders(Borders)`: set borders properties for component
 - `Custom($INPUT_INVALID_STYLE, Style)`: Set style to apply to component when input is invalid
+- `Custom($INPUT_PLACEHOLDER, String)`: Set a placeholder to display when the input is empty
+- `Custom($INPUT_PLACEHOLDER_STYLE, Style)`: Set style for placeholder text
 - `Display(Flag)`: if False component is hidden
 - `FocusStyle(Style)`: style for when component is not active
 - `Foreground(Color)`: foreground color

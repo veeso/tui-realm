@@ -26,7 +26,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::props::INPUT_INVALID_STYLE;
+use super::props::{INPUT_INVALID_STYLE, INPUT_PLACEHOLDER, INPUT_PLACEHOLDER_STYLE};
 use crate::utils::calc_utf8_cursor_position;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
@@ -205,6 +205,18 @@ impl Input {
         self
     }
 
+    pub fn placeholder<S: AsRef<str>>(mut self, placeholder: S, style: Style) -> Self {
+        self.attr(
+            Attribute::Custom(INPUT_PLACEHOLDER),
+            AttrValue::String(placeholder.as_ref().to_string()),
+        );
+        self.attr(
+            Attribute::Custom(INPUT_PLACEHOLDER_STYLE),
+            AttrValue::Style(style),
+        );
+        self
+    }
+
     fn get_input_len(&self) -> Option<usize> {
         self.props
             .get(Attribute::InputLength)
@@ -289,15 +301,40 @@ impl MockComponent for Input {
                     background = style.bg.unwrap_or(Color::Reset);
                 }
             }
+            let text_to_display = self.states.render_value(self.get_input_type());
+            let show_placeholder = text_to_display.is_empty();
+            // Choose whether to show placeholder; if placeholder is unset, show nothing
+            let text_to_display = match show_placeholder {
+                true => self
+                    .props
+                    .get_or(
+                        Attribute::Custom(INPUT_PLACEHOLDER),
+                        AttrValue::String(String::new()),
+                    )
+                    .unwrap_string(),
+                false => text_to_display,
+            };
+            // Choose paragraph style based on whether is valid or not and if has focus and if should show placeholder
+            let paragraph_style = match focus {
+                true => Style::default()
+                    .fg(foreground)
+                    .bg(background)
+                    .add_modifier(modifiers),
+                false => inactive_style.unwrap_or_default(),
+            };
+            let paragraph_style = match show_placeholder {
+                true => self
+                    .props
+                    .get_or(
+                        Attribute::Custom(INPUT_PLACEHOLDER_STYLE),
+                        AttrValue::Style(paragraph_style),
+                    )
+                    .unwrap_style(),
+                false => paragraph_style,
+            };
             // Create widget
-            let p: Paragraph = Paragraph::new(self.states.render_value(self.get_input_type()))
-                .style(match focus {
-                    true => Style::default()
-                        .fg(foreground)
-                        .bg(background)
-                        .add_modifier(modifiers),
-                    false => inactive_style.unwrap_or_default(),
-                })
+            let p: Paragraph = Paragraph::new(text_to_display)
+                .style(paragraph_style)
                 .block(block);
             render.render_widget(p, area);
             // Set cursor, if focus

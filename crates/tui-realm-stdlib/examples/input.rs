@@ -218,6 +218,7 @@ impl Default for InputText {
                 .foreground(Color::LightYellow)
                 .input_type(InputType::Text)
                 .title("Username", Alignment::Left)
+                .value("veeso")
                 .invalid_style(Style::default().fg(Color::Red)),
         }
     }
@@ -274,6 +275,10 @@ impl Default for InputEmail {
                 .foreground(Color::LightCyan)
                 .input_type(InputType::Email)
                 .title("Email", Alignment::Left)
+                .placeholder(
+                    "test@example.com",
+                    Style::default().fg(Color::Rgb(120, 120, 120)),
+                )
                 .invalid_style(Style::default().fg(Color::Red)),
         }
     }
@@ -442,8 +447,12 @@ impl Default for InputPhone {
                 )
                 .foreground(Color::LightBlue)
                 .input_type(InputType::Telephone)
-                .input_len(10)
+                .input_len(14)
                 .title("Phone number", Alignment::Left)
+                .placeholder(
+                    "+39366123123",
+                    Style::default().fg(Color::Rgb(120, 120, 120)),
+                )
                 .invalid_style(Style::default().fg(Color::Red)),
         }
     }
@@ -495,9 +504,9 @@ impl Default for InputColor {
                 .borders(
                     Borders::default()
                         .modifiers(BorderType::Rounded)
-                        .color(Color::Gray),
+                        .color(Color::White),
                 )
-                .foreground(Color::Gray)
+                .foreground(Color::White)
                 .input_type(InputType::Color)
                 .title("What's your favourite color", Alignment::Left)
                 .invalid_style(Style::default().fg(Color::Red)),
