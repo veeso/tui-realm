@@ -265,10 +265,115 @@ impl<'a> TreeWidget<'a> {
     ///
     /// Calculate rows to skip before starting rendering the current tree
     fn calc_rows_to_skip(node: &Node, state: &TreeState, height: u16) -> usize {
-        // TODO: impl
-        todo!()
+        // if no node is selected, return 0
+        let selected = match state.selected() {
+            Some(s) => s,
+            None => return 0,
+        };
+        /// ### calc_rows_to_skip_r
+        ///
+        /// Inner recursive call to calc rows to skip.
+        /// Returns the rows to skip and whether the item has been found (this last oneshould be ignored)
+        fn calc_rows_to_skip_r(
+            node: &Node,
+            state: &TreeState,
+            height: u16,
+            selected: &str,
+            mut acc: usize,
+        ) -> (usize, bool) {
+            // If node is selected, return `acc`
+            if node.id().as_str() == selected {
+                (acc, true)
+            } else if state.is_closed(node) {
+                // If node is closed, then return acc + 1
+                (acc + 1, false)
+            } else {
+                // is open and is not selected
+                // I increment the accumulator by one
+                acc += 1;
+                // For each child, let's call this function
+                for child in node.iter() {
+                    let (ret, found) = calc_rows_to_skip_r(child, state, height, selected, acc);
+                    // Set acc to ret
+                    acc = ret;
+                    // If found, return
+                    if found {
+                        return (acc, true);
+                    }
+                }
+                (acc, false)
+            }
+        }
+        // Return the result of recursive call;
+        // if the result is less than area height, then return 0; otherwise subtract the height to result
+        match calc_rows_to_skip_r(node, state, height, selected, 0).0 {
+            x if x < (height as usize) => 0,
+            x => x - (height as usize),
+        }
     }
 }
 
 // <https://docs.rs/tui-tree-widget/0.7.0/tui_tree_widget/>
 // <https://docs.rs/tui-tree-widget/0.7.0/src/tui_tree_widget/lib.rs.html#136-146>
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+    use crate::mock::mock_tree;
+
+    use pretty_assertions::assert_eq;
+    use tuirealm::tui::style::Color;
+
+    #[test]
+    fn should_construct_default_widget() {
+        let tree = mock_tree();
+        let widget = TreeWidget::new(&tree);
+        assert_eq!(widget.block, None);
+        assert_eq!(widget.highlight_style, Style::default());
+        assert_eq!(widget.highlight_symbol, None);
+        assert_eq!(widget.indent_size, 4);
+        assert_eq!(widget.style, Style::default());
+    }
+
+    #[test]
+    fn should_construct_widget() {
+        let tree = mock_tree();
+        let widget = TreeWidget::new(&tree)
+            .block(Block::default())
+            .highlight_style(Style::default().fg(Color::Red))
+            .highlight_symbol(String::from(">"))
+            .indent_size(8)
+            .style(Style::default().fg(Color::LightRed));
+        assert!(widget.block.is_some());
+        assert_eq!(widget.highlight_style.fg.unwrap(), Color::Red);
+        assert_eq!(widget.indent_size, 8);
+        assert_eq!(widget.highlight_symbol.as_deref().unwrap(), ">");
+        assert_eq!(widget.style.fg.unwrap(), Color::LightRed);
+    }
+
+    #[test]
+    fn should_have_no_row_to_skip_when_in_first_height_elements() {
+        let tree = mock_tree();
+        let mut state = TreeState::default();
+        // Select aA2
+        let aa2 = tree.root().query(&String::from("aA2")).unwrap();
+        state.select(tree.root(), aa2);
+        // Get rows to skip
+        assert_eq!(TreeWidget::calc_rows_to_skip(tree.root(), &state, 8), 0); // Before end
+        assert_eq!(TreeWidget::calc_rows_to_skip(tree.root(), &state, 6), 0); // At end
+    }
+
+    #[test]
+    fn should_have_rows_to_skip_when_out_of_viewport() {
+        let tree = mock_tree();
+        let mut state = TreeState::default();
+        // Open all previous nodes
+        state.force_open(&["/", "a", "aA", "aB", "aC", "b", "bA", "bB"]);
+        // Select bB2
+        let bb2 = tree.root().query(&String::from("bB2")).unwrap();
+        state.select(tree.root(), bb2);
+        // Get rows to skip
+        assert_eq!(TreeWidget::calc_rows_to_skip(tree.root(), &state, 8), 12); // 20th element - height (12)
+    }
+}

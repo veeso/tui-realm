@@ -134,16 +134,17 @@ Best practices:
 
 **Commands**:
 
-| Cmd                 | Result           | Behaviour                                            |
-|---------------------|------------------|------------------------------------------------------|
-| `GoTo(Begin)`       | `Changed | None` | Move cursor to the top of the current tree node      |
-| `GoTo(End)`         | `Changed | None` | Move cursor to the bottom of the current tree node   |
-| `Move(Down)`        | `Changed | None` | Go to next element                                   |
-| `Move(Up)`          | `Changed | None` | Go to previous element                               |
-| `Scroll(Down)`      | `Changed | None` | Move cursor down by defined max steps or end of node |
-| `Scroll(Up)`        | `Changed | None` | Move cursor up by defined max steps or begin of node |
-| `Submit`            | `Submit`         | Just returns submit result with current state        |
-| `Toggle`            | `None`           | Opens/closes highlighted node                        |
+| Cmd                       | Result           | Behaviour                                            |
+|---------------------------|------------------|------------------------------------------------------|
+| `Custom($TREE_CMD_CLOSE)` | `None`           | Close selected node                                  |
+| `Custom($TREE_CMD_OPEN)`  | `None`           | Open selected node                                   |
+| `GoTo(Begin)`             | `Changed | None` | Move cursor to the top of the current tree node      |
+| `GoTo(End)`               | `Changed | None` | Move cursor to the bottom of the current tree node   |
+| `Move(Down)`              | `Changed | None` | Go to next element                                   |
+| `Move(Up)`                | `Changed | None` | Go to previous element                               |
+| `Scroll(Down)`            | `Changed | None` | Move cursor down by defined max steps or end of node |
+| `Scroll(Up)`              | `Changed | None` | Move cursor up by defined max steps or begin of node |
+| `Submit`                  | `Submit`         | Just returns submit result with current state        |
 
 **State**: the state returned is a `One(String)` containing the id of the selected node. If no node is selected `None` is returned.
 

@@ -63,12 +63,15 @@
 extern crate orange_trees;
 extern crate tuirealm;
 
-// modules
+// -- mock
+#[cfg(test)]
+pub(crate) mod mock;
+// -- modules
 mod tree_state;
 mod widget;
 // internal
-use tree_state::TreeState;
-use widget::TreeWidget;
+pub use tree_state::TreeState;
+pub use widget::TreeWidget;
 // deps
 pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
@@ -87,6 +90,11 @@ pub type Tree = OrangeTree<String, String>;
 pub const TREE_INDENT_SIZE: &str = "indent-size";
 pub const TREE_INITIAL_NODE: &str = "initial-mode";
 pub const TREE_PRESERVE_STATE: &str = "preserve-state";
+
+// -- Cmd
+
+pub const TREE_CMD_OPEN: &str = "o";
+pub const TREE_CMD_CLOSE: &str = "c";
 
 // -- component
 
@@ -114,31 +122,49 @@ impl Default for TreeView {
 impl TreeView {
     // -- constructors
 
+    /// ### foreground
+    ///
+    /// Set widget foreground
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// ### background
+    ///
+    /// Set widget background
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// ### inactive
+    ///
+    /// Set another style from default to use when component is inactive
     pub fn inactive(mut self, s: Style) -> Self {
         self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
+    /// ### borders
+    ///
+    /// Set widget border properties
     pub fn borders(mut self, b: Borders) -> Self {
         self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
+    /// ### modifiers
+    ///
+    /// Set widget text modifiers
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
         self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
+    /// ### title
+    ///
+    /// Set widget title
     pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
         self.attr(
             Attribute::Title,
@@ -147,6 +173,10 @@ impl TreeView {
         self
     }
 
+    /// ### initial_node
+    ///
+    /// Set initial node for tree state.
+    /// NOTE: this must be specified after `with_tree`
     pub fn initial_node<S: AsRef<str>>(mut self, node: S) -> Self {
         self.attr(
             Attribute::Custom(TREE_INITIAL_NODE),
@@ -155,6 +185,9 @@ impl TreeView {
         self
     }
 
+    /// ### preserve_state
+    ///
+    /// Set whether to preserve state on tree change
     pub fn preserve_state(mut self, preserve: bool) -> Self {
         self.attr(
             Attribute::Custom(TREE_PRESERVE_STATE),
@@ -163,16 +196,25 @@ impl TreeView {
         self
     }
 
+    /// ### indent_size
+    ///
+    /// Set indent size for widget for each level of depth
     pub fn indent_size(mut self, sz: u16) -> Self {
         self.attr(Attribute::Custom(TREE_INDENT_SIZE), AttrValue::Size(sz));
         self
     }
 
+    /// ### scroll_step
+    ///
+    /// Set scroll step for scrolling command
     pub fn scroll_step(mut self, step: usize) -> Self {
         self.attr(Attribute::ScrollStep, AttrValue::Length(step));
         self
     }
 
+    /// ### with_tree
+    ///
+    /// Set tree to use as data
     pub fn with_tree(mut self, tree: Tree) -> Self {
         self.tree = tree;
         self
@@ -209,6 +251,13 @@ impl TreeView {
                 )
                 .unwrap_flag(),
         );
+    }
+
+    /// ### tree_state
+    ///
+    /// Get a reference to the current tree state
+    pub fn tree_state(&self) -> &TreeState {
+        &self.states
     }
 
     // -- private
@@ -328,7 +377,7 @@ impl MockComponent for TreeView {
         if matches!(attr, Attribute::Custom(TREE_INITIAL_NODE)) {
             // Select node if exists
             if let Some(node) = self.tree.root().query(&value.unwrap_string()) {
-                self.states.select(node);
+                self.states.select(self.tree.root(), node);
             }
         } else {
             self.props.set(attr, value);
@@ -346,14 +395,18 @@ impl MockComponent for TreeView {
         match cmd {
             Cmd::GoTo(Position::Begin) => {
                 let prev = self.states.selected().map(|x| x.to_string());
-                // TODO: impl
-                todo!();
+                // Get first sibling of current node
+                if let Some(first) = self.states.first_sibling(self.tree.root()) {
+                    self.states.select(self.tree.root(), first);
+                }
                 self.changed(prev.as_deref())
             }
             Cmd::GoTo(Position::End) => {
                 let prev = self.states.selected().map(|x| x.to_string());
-                // TODO: impl
-                todo!();
+                // Get first sibling of current node
+                if let Some(last) = self.states.last_sibling(self.tree.root()) {
+                    self.states.select(self.tree.root(), last);
+                }
                 self.changed(prev.as_deref())
             }
             Cmd::Move(Direction::Down) => {
@@ -385,20 +438,224 @@ impl MockComponent for TreeView {
                 self.changed(prev.as_deref())
             }
             Cmd::Submit => CmdResult::Submit(self.state()),
-            Cmd::Toggle => {
-                // Open/close selected node
-                if let Some(selected) = self.states.selected() {
-                    if let Some(node) = self.tree.root().query(&selected.to_string()) {
-                        if self.states.is_closed(node) {
-                            self.states.open_node(node);
-                        } else {
-                            self.states.close_node(node);
-                        }
-                    }
-                }
+            Cmd::Custom(TREE_CMD_CLOSE) => {
+                // close selected node
+                self.states.close(self.tree.root());
+                CmdResult::None
+            }
+            Cmd::Custom(TREE_CMD_OPEN) => {
+                // close selected node
+                self.states.open(self.tree.root());
                 CmdResult::None
             }
             _ => CmdResult::None,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+    use crate::mock::mock_tree;
+
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn should_initialize_component() {
+        let mut component = TreeView::default()
+            .background(Color::White)
+            .foreground(Color::Cyan)
+            .borders(Borders::default())
+            .inactive(Style::default())
+            .indent_size(4)
+            .modifiers(TextModifiers::all())
+            .preserve_state(true)
+            .scroll_step(4)
+            .title("My tree", Alignment::Center)
+            .with_tree(mock_tree())
+            .initial_node("aB1");
+        // Check tree
+        assert_eq!(component.tree_state().selected().unwrap(), "aB1");
+        assert!(component.tree().root().query(&String::from("aB")).is_some());
+        component
+            .tree_mut()
+            .root_mut()
+            .add_child(Node::new(String::from("d"), String::from("d")));
+    }
+
+    #[test]
+    fn should_return_consistent_state() {
+        let component = TreeView::default().with_tree(mock_tree());
+        assert_eq!(component.state(), State::None);
+        let component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("aA");
+        assert_eq!(
+            component.state(),
+            State::One(StateValue::String(String::from("aA")))
+        );
+    }
+
+    #[test]
+    fn should_perform_go_to_begin() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("bB3");
+        // GoTo begin (changed)
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::Begin)),
+            CmdResult::Changed(State::One(StateValue::String(String::from("bB0"))))
+        );
+        // GoTo begin (unchanged)
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::Begin)),
+            CmdResult::None
+        );
+    }
+
+    #[test]
+    fn should_perform_go_to_end() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("bB1");
+        // GoTo end (changed)
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::End)),
+            CmdResult::Changed(State::One(StateValue::String(String::from("bB5"))))
+        );
+        // GoTo end (unchanged)
+        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+    }
+
+    #[test]
+    fn should_perform_move_down() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("cA1");
+        // Move down (changed)
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Down)),
+            CmdResult::Changed(State::One(StateValue::String(String::from("cA2"))))
+        );
+        // Move down (unchanged)
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Down)),
+            CmdResult::None
+        );
+    }
+
+    #[test]
+    fn should_perform_move_up() {
+        let mut component = TreeView::default().with_tree(mock_tree()).initial_node("a");
+        // Move up (changed)
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Up)),
+            CmdResult::Changed(State::One(StateValue::String(String::from("/"))))
+        );
+        // Move up (unchanged)
+        assert_eq!(component.perform(Cmd::Move(Direction::Up)), CmdResult::None);
+    }
+
+    #[test]
+    fn should_perform_scroll_down() {
+        let mut component = TreeView::default()
+            .scroll_step(2)
+            .with_tree(mock_tree())
+            .initial_node("cA0");
+        // Scroll down (changed)
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Down)),
+            CmdResult::Changed(State::One(StateValue::String(String::from("cA2"))))
+        );
+        // Scroll down (unchanged)
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Down)),
+            CmdResult::None
+        );
+    }
+
+    #[test]
+    fn should_perform_scroll_up() {
+        let mut component = TreeView::default()
+            .scroll_step(4)
+            .with_tree(mock_tree())
+            .initial_node("aA1");
+        // Scroll Up (changed)
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Up)),
+            CmdResult::Changed(State::One(StateValue::String(String::from("/"))))
+        );
+        // Scroll Up (unchanged)
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Up)),
+            CmdResult::None
+        );
+    }
+
+    #[test]
+    fn should_perform_submit() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("aA1");
+        assert_eq!(
+            component.perform(Cmd::Submit),
+            CmdResult::Submit(State::One(StateValue::String(String::from("aA1"))))
+        );
+    }
+
+    #[test]
+    fn should_perform_close() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("aA1");
+        component.states.open(component.tree.root());
+        assert_eq!(
+            component.perform(Cmd::Custom(TREE_CMD_CLOSE)),
+            CmdResult::None
+        );
+        assert!(component
+            .tree_state()
+            .is_closed(component.tree().root().query(&String::from("aA1")).unwrap()));
+    }
+
+    #[test]
+    fn should_perform_open() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("aA");
+        assert_eq!(
+            component.perform(Cmd::Custom(TREE_CMD_OPEN)),
+            CmdResult::None
+        );
+        assert!(component
+            .tree_state()
+            .is_open(component.tree().root().query(&String::from("aA")).unwrap()));
+    }
+
+    #[test]
+    fn should_update_tree() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .preserve_state(true)
+            .initial_node("aA");
+        // open 'bB'
+        component.states.select(
+            component.tree.root(),
+            component.tree.root().query(&String::from("bB")).unwrap(),
+        );
+        component.states.open(component.tree.root());
+        // re-selecte 'aA'
+        component.states.select(
+            component.tree.root(),
+            component.tree.root().query(&String::from("aA")).unwrap(),
+        );
+        // Create new tree
+        let mut new_tree = mock_tree();
+        new_tree.root_mut().remove_child(&String::from("a"));
+        // Set new tree
+        component.set_tree(new_tree);
+        // selected item should be root
+        assert_eq!(component.states.selected().unwrap(), "/");
     }
 }
