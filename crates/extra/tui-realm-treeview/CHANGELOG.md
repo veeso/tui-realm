@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.0.0](#100)
   - [0.3.0](#030)
   - [0.2.1](#021)
   - [0.2.0](#020)
@@ -8,6 +9,13 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.0.0
+
+Released on 14/11/2021
+
+- Migrated component to tui-realm 1.x
+- Total refactoring; using orange-trees as engine
 
 ## 0.3.0
 

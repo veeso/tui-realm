@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.0.0 (FIXME:/10/2021)</p>
+<p align="center">Current version: 1.0.0 (14/11/2021)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -67,10 +67,12 @@
   - [About tui-realm-treeview 🌲](#about-tui-realm-treeview-)
   - [Get started 🏁](#get-started-)
     - [Add tui-realm-treeview to your Cargo.toml 🦀](#add-tui-realm-treeview-to-your-cargotoml-)
-    - [Use the treeview component](#use-the-treeview-component)
+    - [Examples 📋](#examples-)
     - [About performance](#about-performance)
-  - [Component](#component)
+  - [Component API](#component-api)
     - [Updating the tree](#updating-the-tree)
+      - [Remounting the component](#remounting-the-component)
+      - [Updating the tree from the "on" method](#updating-the-tree-from-the-on-method)
   - [Documentation 📚](#documentation-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
@@ -102,7 +104,7 @@ Or if you don't use **Crossterm**, define the backend as you do with tui-realm:
 tui-realm-treeview = { version = "^1.0.0", default-features = false, features = [ "with-termion" ] }
 ```
 
-### Use the treeview component
+### Examples 📋
 
 View how to use the treeview-component following the [example](examples/demo.rs). The example contains a simple file explorer using a tree view, the depth is set to 3.
 
@@ -113,7 +115,7 @@ cargo run --example demo
 - Press `ENTER` to expand the selected directory
 - Press `BACKSPACE` to go to upper directory
 - Move up and down with `UP/DOWN` arrow keys
-- Advance by up to 8 entries with `PGUP/PGDOWN`
+- Advance by up to 6 entries with `PGUP/PGDOWN`
 - Open directories with `RIGHT`
 - Close directories with `LEFT`
 - Change window between input field and treeview with `TAB`
@@ -121,16 +123,16 @@ cargo run --example demo
 
 ### About performance
 
-In this library there is a consistent use of recursion, and since rust is not functional, this might lead to stack overflows when dealing with huge trees. In addition consider that each level of depth added, will slow down the application exponentially.
+❗ If you were a tui-realm-treeview 0.x user, I'm glad to announce that this new version of the library is much more
+faster and reliable than the older version. That's because now I'm using a new engine for trees and I'm no more
+relying on the tui_tree_widget, which required me to convert the tree into another kind of structure which wasn't
+really compatible with the tree data structure. For this new library I've re-implemented everything, including the widget, to be 100% compatible with the orange-trees engine.
 
-Best practices:
-
-- Except when dealing with small trees, always set a depth for the tree
-- For file systems, depth 3 should be fine for each directory, then expand each directory on demand as implemented in the example
+In this library there is a consistent use of recursion, and since rust is not functional, this might lead to stack overflows when dealing with huge trees.
 
 ---
 
-## Component
+## Component API
 
 **Commands**:
 
@@ -165,7 +167,56 @@ Best practices:
 
 ### Updating the tree
 
-FIXME: to be defined
+The tree in this component is not inside the `props`, but is a member of the `TreeView` mock component structure.
+In order to update and work with the tree you've got basically two ways to do this.
+
+#### Remounting the component
+
+In situation where you need to update the tree on the update routine (as happens in the example), the best way to update the tree is to remount the component from scratch.
+If you follow the example, you'll see I've implemented the constructor for my treeview component as follows:
+
+```rust
+impl FsTree {
+    pub fn new(tree: Tree, initial_node: Option<String>) -> Self {
+        // Preserve initial node if exists
+        let initial_node = match initial_node {
+            Some(id) if tree.root().query(&id).is_some() => id,
+            _ => tree.root().id().to_string(),
+        };
+        FsTree {
+            component: TreeView::default()
+                .foreground(Color::Reset)
+                .borders(
+                    Borders::default()
+                        .color(Color::LightYellow)
+                        .modifiers(BorderType::Rounded),
+                )
+                .inactive(Style::default().fg(Color::Gray))
+                .indent_size(3)
+                .scroll_step(6)
+                .title(tree.root().id(), Alignment::Left)
+                .highlighted_color(Color::LightYellow)
+                .highlight_symbol("🦄")
+                .with_tree(tree)
+                .initial_node(initial_node),
+        }
+    }
+}
+```
+
+I always set the initial_node and the tree in the constructor. This implementation allows me to update the tree whenever I want without losing the current state.
+
+#### Updating the tree from the "on" method
+
+This method is probably better than remounting, but it is not always possible to use this.
+When you implement `Component` for your treeview, you have a mutable reference to the component, and so here you can call these methods to operate on the tree:
+
+- `pub fn tree(&self) -> &Tree`: returns a reference to the tree
+- `pub fn tree_mut(&mut self) -> &mut Tree`: returns a mutable reference to the tree; which allows you to operate on it
+- `pub fn set_tree(&mut self, tree: Tree)`: update the current tree with another
+- `pub fn tree_state(&self) -> &TreeState`: get a reference to the current tree state. (See tree state docs)
+
+You can access these methods from the `on()` method as said before. So these methods can be handy when you update the tree after a certain events or maybe even better, you can set the tree if you receive it from a `UserEvent` produced by a **Port**.
 
 ---
 

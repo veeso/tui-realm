@@ -288,7 +288,7 @@ impl<'a> TreeWidget<'a> {
         ) -> (usize, bool) {
             // If node is selected, return `acc`
             if node.id().as_str() == selected {
-                (acc, true)
+                (acc + 1, true)
             } else if state.is_closed(node) {
                 // If node is closed, then return acc + 1
                 (acc + 1, false)
@@ -313,7 +313,7 @@ impl<'a> TreeWidget<'a> {
         // if the result is less than area height, then return 0; otherwise subtract the height to result
         match calc_rows_to_skip_r(self.tree.root(), state, height, selected, 0).0 {
             x if x < (height as usize) => 0,
-            x => x - (height as usize) + 1,
+            x => x - (height as usize),
         }
     }
 }
