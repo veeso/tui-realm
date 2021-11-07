@@ -126,6 +126,21 @@ where
         Ok(())
     }
 
+    /// ### remount
+    ///
+    /// Remount component. The component will be first umounted and then mounted.
+    /// Returns error if could not mount it, while it ignores whether the component was previously mounted.
+    pub fn remount(
+        &mut self,
+        id: K,
+        component: WrappedComponent<Msg, UserEvent>,
+    ) -> ViewResult<()> {
+        if self.mounted(&id) {
+            self.umount(&id)?;
+        }
+        self.mount(id, component)
+    }
+
     /// ### mounted
     ///
     /// Returns whether component `id` is mounted
@@ -346,6 +361,10 @@ mod test {
         assert!(view.component(&MockComponentId::InputFoo).is_some());
         assert!(view.component(&MockComponentId::InputBar).is_none());
         assert_eq!(view.mounted(&MockComponentId::InputBar), false);
+        // Remount
+        assert!(view
+            .remount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
+            .is_ok());
         // Mount bar
         assert!(view
             .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
