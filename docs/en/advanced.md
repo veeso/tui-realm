@@ -6,6 +6,7 @@
     - [Handle subscriptions](#handle-subscriptions)
     - [Event clauses in details](#event-clauses-in-details)
     - [Sub clauses in details](#sub-clauses-in-details)
+    - [Sanitizing the application](#sanitizing-the-application)
   - [Tick Event](#tick-event)
   - [Ports](#ports)
   - [Implementing new components](#implementing-new-components)
@@ -14,6 +15,7 @@
     - [Defining the component states](#defining-the-component-states)
     - [Defining the Cmd API](#defining-the-cmd-api)
     - [Rendering the component](#rendering-the-component)
+  - [What's next](#whats-next)
 
 ---
 
@@ -165,6 +167,21 @@ In addition to these, it is also possible to combine Sub clauses using expressio
 Using `And` and `Or` you can create even long expression and keep in mind that they are evaluated recursively, so for example:
 
 `And(Or(A, And(B, C)), And(D, Or(E, F)))` is evaluated as `(A || (B && C)) && (D && (E || F))`
+
+### Sanitizing the application
+
+First of all let's say one thing:
+
+- The subscriptions are handled by the **Application**, **not** by the **View**.
+- Whenever you *umount* a component from the **Application** all subscriptions associated to it will be removed.
+
+Said so, sanitizing the application means to remove all orphan subscriptions, which means removing all the subscriptions associated to a component which is no longer mounted in the view.
+
+But if application always removes subscriptions when umount, how can this possibly happen? 🤔
+
+Well, there is a way to achieve this. If you umount a component from the **View** in the **Update routine**, subscriptions won't be checked.
+Whenever you umount components that have subscriptions, you should call `application.sanitize()` after the update
+routine is finished.
 
 ---
 
@@ -489,3 +506,13 @@ impl MockComponent for Radio {
     // ...
 }
 ```
+
+---
+
+## What's next
+
+If you come from tui-realm 0.x and you want to migrate to tui-realm 1.x, there is a guide that explains
+[how to migrate from tui-realm 0.x to 1.x](migrating-legacy.md).
+Otherwise, I think you're ready to start implementing you tui-realm application right now 😉.
+
+If you have any question, feel free to open an issue with the `question` label and I will answer you ASAP 🙂.

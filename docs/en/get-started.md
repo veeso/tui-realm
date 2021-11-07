@@ -30,6 +30,12 @@
 TODO: youtube link
 > 👀 If you prefer there's also a crash course of tui-realm on my [Youtube Channel]() where I cover all of these arguments
 
+What you will learn:
+
+- The key concepts of tui-realm
+- How to code a tui-realm application from scratch
+- What makes tui-realm cool
+
 tui-realm is a tui-rs **framework** which provides an easy way to implement stateful application.
 First of all, let's give a look to the main features of tui-realm and why you should opt for this framework when building
 terminal user interfaces:

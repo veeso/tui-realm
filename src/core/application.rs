@@ -285,6 +285,19 @@ where
         Ok(())
     }
 
+    /// ### sanitize
+    ///
+    /// This method will clean up all the orphan subscription of the application, which means that will
+    /// clean up all the subscriptions associated to a component which is no longer mounted.
+    ///
+    /// ⚠️ Warning: all subscriptions are clean up when you umount a component from the **Application**.
+    ///
+    /// The use of this method is to clean up subscriptions when you umount them using the **View** in the
+    /// **Update** routine.
+    pub fn sanitize(&mut self) {
+        self.subs.retain(|x| self.view.mounted(x.target()));
+    }
+
     // -- private
 
     /// ### unsubscribe_component
@@ -628,6 +641,41 @@ mod test {
                 SubEventClause::User(MockEvent::Foo)
             )
             .is_err());
+    }
+
+    #[test]
+    fn should_sanitize_subscriptions() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config());
+        assert!(application
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![
+                    Sub::new(SubEventClause::Tick, SubClause::Always),
+                    Sub::new(
+                        SubEventClause::User(MockEvent::Bar),
+                        SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
+                    )
+                ]
+            )
+            .is_ok());
+        assert!(application
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockFooInput::default()),
+                vec![Sub::new(SubEventClause::Any, SubClause::Always)]
+            )
+            .is_ok());
+        assert_eq!(application.subs.len(), 3);
+        // let's umount InputFoo from view (tricky)
+        assert!(application.view.umount(&MockComponentId::InputFoo).is_ok());
+        // There should still be 3 subs
+        assert_eq!(application.subs.len(), 3);
+        // Sanitize
+        application.sanitize();
+        // All dead subs should be gone
+        assert_eq!(application.subs.len(), 1);
     }
 
     #[test]
