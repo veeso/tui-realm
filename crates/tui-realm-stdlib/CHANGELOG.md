@@ -13,7 +13,7 @@
 
 ## 1.0.0
 
-Released on FIXME:
+Released on 13/11/2021
 
 - New components 🎉
   - Container

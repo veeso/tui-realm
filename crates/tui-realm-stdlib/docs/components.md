@@ -308,14 +308,14 @@ a list of rows with the possibility to scroll text with arrows. In order to scro
 
 Events will be reported only when set as `Scrollable`
 
-| Cmd              | CmdResult | Behaviour               |
-|------------------|---------|---------------------------|
-| `GoTo(Begin)`    | `OnKey` | Move cursor to first item |
-| `GoTo(End)`      | `OnKey` | Move cursor to last item  |
-| `Move(Down)`     | `OnKey` | Move cursor down          |
-| `Move(Up)`       | `OnKey` | Move cursor up            |
-| `Scroll(Down)`   | `OnKey` | Move cursor down by 8     |
-| `Scroll(Up)`     | `OnKey` | Move cursor up by 8       |
+| Cmd              | CmdResult        | Behaviour                 |
+|------------------|------------------|---------------------------|
+| `GoTo(Begin)`    | `Changed | None` | Move cursor to first item |
+| `GoTo(End)`      | `OnKey | None`   | Move cursor to last item  |
+| `Move(Down)`     | `OnKey | None`   | Move cursor down          |
+| `Move(Up)`       | `OnKey | None`   | Move cursor up            |
+| `Scroll(Down)`   | `OnKey | None`   | Move cursor down by 8     |
+| `Scroll(Up)`     | `OnKey | None`   | Move cursor up by 8       |
 
 **State**: If `scrollable`, returns current list index as `State(One(Usize))`, otherwise None
 
