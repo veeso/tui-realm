@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.0.0 (FIXME:/10/2021)</p> TODO: add youtube crash course video link
+<p align="center">Current version: 1.0.0 (13/11/2021)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -158,10 +158,6 @@ Still confused about how tui-realm works? Don't worry, try with the examples:
     cargo run --example demo
     ```
 
-or take some time to watch my [tui-realm Crash Course](FIXME: put link here) on my Youtube channel.
-
-FIXME: youtube badge
-
 ---
 
 ## Standard components library 🎨
@@ -197,6 +193,7 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 
 - [termusic](https://github.com/tramhao/termusic)
 - [termscp](https://github.com/veeso/termscp)
+- [tuifeed](https://github.com/veeso/tuifeed)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
 

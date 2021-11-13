@@ -21,9 +21,6 @@
 
 ## Introduction
 
-TODO: youtube link
-> 👀 If you prefer there's also a crash course of tui-realm on my [Youtube Channel]() where I cover all of these arguments
-
 This guide will introduce you to all the advanced concepts of tui-realm, that haven't been covered in the [get-started guide](get-started.md). Altough tui-realm is quite simple, it can also get quiet powerful, thanks to all these features that we're gonna cover in this document.
 
 What you will learn:
