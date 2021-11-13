@@ -12,7 +12,7 @@
 
 ## 1.0.0
 
-Released on 14/11/2021
+Released on 13/11/2021
 
 - Migrated component to tui-realm 1.x
 - Total refactoring; using orange-trees as engine
