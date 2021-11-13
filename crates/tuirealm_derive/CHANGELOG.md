@@ -7,6 +7,6 @@
 
 ## 0.1.0
 
-FIXME: date
+Released on 13/11/2021
 
 First release
