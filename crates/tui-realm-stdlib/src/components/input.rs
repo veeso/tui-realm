@@ -37,21 +37,21 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- states
 
-struct OwnStates {
+pub struct InputStates {
     input: Vec<char>, // Current input
     cursor: usize,    // Input position
 }
 
-impl Default for OwnStates {
+impl Default for InputStates {
     fn default() -> Self {
-        OwnStates {
+        InputStates {
             input: Vec::new(),
             cursor: 0,
         }
     }
 }
 
-impl OwnStates {
+impl InputStates {
     /// ### append
     ///
     /// Append, if possible according to input type, the character to the input vec
@@ -153,7 +153,7 @@ impl OwnStates {
 #[derive(Default)]
 pub struct Input {
     props: Props,
-    states: OwnStates,
+    pub states: InputStates,
 }
 
 impl Input {
@@ -453,7 +453,7 @@ mod tests {
 
     #[test]
     fn test_components_input_states() {
-        let mut states: OwnStates = OwnStates::default();
+        let mut states: InputStates = InputStates::default();
         states.append('a', &InputType::Text, Some(3));
         assert_eq!(states.input, vec!['a']);
         states.append('b', &InputType::Text, Some(3));

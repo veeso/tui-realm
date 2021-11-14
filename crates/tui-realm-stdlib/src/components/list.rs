@@ -38,12 +38,12 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- States
 
-struct OwnStates {
+pub struct ListStates {
     list_index: usize, // Index of selected item in list
     list_len: usize,   // Lines in text area
 }
 
-impl Default for OwnStates {
+impl Default for ListStates {
     fn default() -> Self {
         Self {
             list_index: 0,
@@ -52,7 +52,7 @@ impl Default for OwnStates {
     }
 }
 
-impl OwnStates {
+impl ListStates {
     /// ### set_list_len
     ///
     /// Set list length
@@ -147,7 +147,7 @@ impl OwnStates {
 /// represents a read-only text component without any container.
 pub struct List {
     props: Props,
-    states: OwnStates,
+    pub states: ListStates,
     hg_str: Option<String>, // CRAP CRAP CRAP. Thanks to the author of tui-realm for using references every f time
 }
 
@@ -155,7 +155,7 @@ impl Default for List {
     fn default() -> Self {
         Self {
             props: Props::default(),
-            states: OwnStates::default(),
+            states: ListStates::default(),
             hg_str: None,
         }
     }
@@ -446,7 +446,7 @@ mod tests {
 
     #[test]
     fn list_states() {
-        let mut states = OwnStates::default();
+        let mut states = ListStates::default();
         assert_eq!(states.list_index, 0);
         assert_eq!(states.list_len, 0);
         states.set_list_len(5);

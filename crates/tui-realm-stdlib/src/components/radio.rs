@@ -34,24 +34,24 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- states
 
-/// ## OwnStates
+/// ## RadioStates
 ///
-/// OwnStates contains states for this component
-struct OwnStates {
+/// RadioStates contains states for this component
+pub struct RadioStates {
     choice: usize,        // Selected option
     choices: Vec<String>, // Available choices
 }
 
-impl Default for OwnStates {
+impl Default for RadioStates {
     fn default() -> Self {
-        OwnStates {
+        RadioStates {
             choice: 0,
             choices: Vec::new(),
         }
     }
 }
 
-impl OwnStates {
+impl RadioStates {
     /// ### next_choice
     ///
     /// Move choice index to next choice
@@ -76,7 +76,7 @@ impl OwnStates {
 
     /// ### set_choices
     ///
-    /// Set OwnStates choices from a vector of text spans
+    /// Set RadioStates choices from a vector of text spans
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
     pub fn set_choices(&mut self, spans: &[String]) {
@@ -104,14 +104,14 @@ impl OwnStates {
 /// Radio component represents a group of tabs to select from
 pub struct Radio {
     props: Props,
-    states: OwnStates,
+    pub states: RadioStates,
 }
 
 impl Default for Radio {
     fn default() -> Self {
         Self {
             props: Props::default(),
-            states: OwnStates::default(),
+            states: RadioStates::default(),
         }
     }
 }
@@ -288,7 +288,7 @@ mod test {
 
     #[test]
     fn test_components_radio_states() {
-        let mut states: OwnStates = OwnStates::default();
+        let mut states: RadioStates = RadioStates::default();
         assert_eq!(states.choice, 0);
         assert_eq!(states.choices.len(), 0);
         let choices: &[String] = &[

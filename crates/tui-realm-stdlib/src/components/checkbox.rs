@@ -38,18 +38,18 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- states
 
-/// ## OwnStates
+/// ## CheckboxStates
 ///
-/// OwnStates contains states for this component
-struct OwnStates {
+/// CheckboxStates contains states for this component
+pub struct CheckboxStates {
     choice: usize,         // Selected option
     choices: Vec<String>,  // Available choices
     selection: Vec<usize>, // Selected options
 }
 
-impl Default for OwnStates {
+impl Default for CheckboxStates {
     fn default() -> Self {
-        OwnStates {
+        CheckboxStates {
             choice: 0,
             choices: Vec::new(),
             selection: Vec::new(),
@@ -57,7 +57,7 @@ impl Default for OwnStates {
     }
 }
 
-impl OwnStates {
+impl CheckboxStates {
     /// ### next_choice
     ///
     /// Move choice index to next choice
@@ -108,7 +108,7 @@ impl OwnStates {
 
     /// ### set_choices
     ///
-    /// Set OwnStates choices from a vector of str
+    /// Set CheckboxStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
     pub fn set_choices(&mut self, choices: &[String]) {
@@ -132,14 +132,14 @@ impl OwnStates {
 /// Checkbox component represents a group of tabs to select from
 pub struct Checkbox {
     props: Props,
-    states: OwnStates,
+    pub states: CheckboxStates,
 }
 
 impl Default for Checkbox {
     fn default() -> Self {
         Self {
             props: Props::default(),
-            states: OwnStates::default(),
+            states: CheckboxStates::default(),
         }
     }
 }
@@ -356,7 +356,7 @@ mod test {
 
     #[test]
     fn test_components_checkbox_states() {
-        let mut states: OwnStates = OwnStates::default();
+        let mut states: CheckboxStates = CheckboxStates::default();
         assert_eq!(states.choice, 0);
         assert_eq!(states.choices.len(), 0);
         assert_eq!(states.selection.len(), 0);

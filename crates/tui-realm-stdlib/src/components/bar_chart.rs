@@ -42,20 +42,20 @@ use super::props::{
 
 // -- states
 
-/// ### OwnStates
+/// ### BarChartStates
 ///
 /// Bar chart states
-struct OwnStates {
+pub struct BarChartStates {
     cursor: usize,
 }
 
-impl Default for OwnStates {
+impl Default for BarChartStates {
     fn default() -> Self {
         Self { cursor: 0 }
     }
 }
 
-impl OwnStates {
+impl BarChartStates {
     /// ### move_cursor_left
     ///
     /// Move cursor to the left
@@ -110,14 +110,14 @@ impl OwnStates {
 /// While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
 pub struct BarChart {
     props: Props,
-    states: OwnStates,
+    pub states: BarChartStates,
 }
 
 impl Default for BarChart {
     fn default() -> Self {
         Self {
             props: Props::default(),
-            states: OwnStates::default(),
+            states: BarChartStates::default(),
         }
     }
 }
@@ -378,7 +378,7 @@ mod test {
 
     #[test]
     fn test_components_bar_chart_states() {
-        let mut states: OwnStates = OwnStates::default();
+        let mut states: BarChartStates = BarChartStates::default();
         assert_eq!(states.cursor, 0);
         // Incr
         states.move_cursor_right(2);

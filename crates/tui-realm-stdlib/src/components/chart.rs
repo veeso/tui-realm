@@ -42,15 +42,15 @@ use super::props::{
     CHART_Y_STYLE, CHART_Y_TITLE,
 };
 
-/// ### OwnStates
+/// ### ChartStates
 ///
 /// chart states
-struct OwnStates {
+pub struct ChartStates {
     cursor: usize,
     data: Vec<Dataset>,
 }
 
-impl Default for OwnStates {
+impl Default for ChartStates {
     fn default() -> Self {
         Self {
             cursor: 0,
@@ -59,7 +59,7 @@ impl Default for OwnStates {
     }
 }
 
-impl OwnStates {
+impl ChartStates {
     /// ### move_cursor_left
     ///
     /// Move cursor to the left
@@ -114,14 +114,14 @@ impl OwnStates {
 /// While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
 pub struct Chart {
     props: Props,
-    states: OwnStates,
+    pub states: ChartStates,
 }
 
 impl Default for Chart {
     fn default() -> Self {
         Self {
             props: Props::default(),
-            states: OwnStates::default(),
+            states: ChartStates::default(),
         }
     }
 }
@@ -478,7 +478,7 @@ mod test {
 
     #[test]
     fn test_components_chart_states() {
-        let mut states: OwnStates = OwnStates::default();
+        let mut states: ChartStates = ChartStates::default();
         assert_eq!(states.cursor, 0);
         // Incr
         states.move_cursor_right(2);

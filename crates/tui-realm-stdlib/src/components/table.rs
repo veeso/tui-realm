@@ -41,12 +41,12 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- States
 
-struct OwnStates {
+pub struct TableStates {
     list_index: usize, // Index of selected item in textarea
     list_len: usize,   // Lines in text area
 }
 
-impl Default for OwnStates {
+impl Default for TableStates {
     fn default() -> Self {
         Self {
             list_index: 0,
@@ -55,7 +55,7 @@ impl Default for OwnStates {
     }
 }
 
-impl OwnStates {
+impl TableStates {
     /// ### set_list_len
     ///
     /// Set list length
@@ -150,7 +150,7 @@ impl OwnStates {
 /// represents a read-only text component without any container.
 pub struct Table {
     props: Props,
-    states: OwnStates,
+    pub states: TableStates,
     hg_str: Option<String>, // CRAP CRAP CRAP
     headers: Vec<String>,   // CRAP CRAP CRAP
 }
@@ -159,7 +159,7 @@ impl Default for Table {
     fn default() -> Self {
         Self {
             props: Props::default(),
-            states: OwnStates::default(),
+            states: TableStates::default(),
             hg_str: None,
             headers: Vec::default(),
         }
@@ -557,7 +557,7 @@ mod tests {
 
     #[test]
     fn table_states() {
-        let mut states = OwnStates::default();
+        let mut states = TableStates::default();
         assert_eq!(states.list_index, 0);
         assert_eq!(states.list_len, 0);
         states.set_list_len(5);

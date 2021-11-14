@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.0.1](#101)
   - [1.0.0](#100)
   - [0.6.4](#064)
   - [0.6.3](#063)
@@ -10,6 +11,12 @@
   - [0.5.0](#050)
 
 ---
+
+## 1.0.1
+
+Released on 14/11/2021
+
+- All `states` for components are now accessible
 
 ## 1.0.0
 

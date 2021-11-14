@@ -40,16 +40,16 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- states
 
-/// ## OwnStates
+/// ## SelectStates
 ///
 /// Component states
-struct OwnStates {
+pub struct SelectStates {
     choices: Vec<String>, // Available choices
     selected: usize,
     tab_open: bool,
 }
 
-impl Default for OwnStates {
+impl Default for SelectStates {
     fn default() -> Self {
         Self {
             choices: Vec::new(),
@@ -59,7 +59,7 @@ impl Default for OwnStates {
     }
 }
 
-impl OwnStates {
+impl SelectStates {
     /// ### next_choice
     ///
     /// Move choice index to next choice
@@ -88,7 +88,7 @@ impl OwnStates {
 
     /// ### set_choices
     ///
-    /// Set OwnStates choices from a vector of str
+    /// Set SelectStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
     pub fn set_choices(&mut self, choices: &[String]) {
@@ -134,7 +134,7 @@ impl OwnStates {
 
 pub struct Select {
     props: Props,
-    states: OwnStates,
+    pub states: SelectStates,
     hg_str: Option<String>, // CRAP CRAP CRAP
 }
 
@@ -142,7 +142,7 @@ impl Default for Select {
     fn default() -> Self {
         Self {
             props: Props::default(),
-            states: OwnStates::default(),
+            states: SelectStates::default(),
             hg_str: None,
         }
     }
@@ -455,7 +455,7 @@ mod test {
 
     #[test]
     fn test_components_select_states() {
-        let mut states: OwnStates = OwnStates::default();
+        let mut states: SelectStates = SelectStates::default();
         assert_eq!(states.selected, 0);
         assert_eq!(states.choices.len(), 0);
         assert_eq!(states.tab_open, false);
