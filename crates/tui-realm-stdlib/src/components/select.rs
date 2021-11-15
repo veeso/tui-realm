@@ -44,9 +44,9 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 ///
 /// Component states
 pub struct SelectStates {
-    choices: Vec<String>, // Available choices
-    selected: usize,
-    tab_open: bool,
+    pub choices: Vec<String>, // Available choices
+    pub selected: usize,
+    pub tab_open: bool,
 }
 
 impl Default for SelectStates {

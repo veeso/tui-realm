@@ -42,9 +42,9 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 ///
 /// CheckboxStates contains states for this component
 pub struct CheckboxStates {
-    choice: usize,         // Selected option
-    choices: Vec<String>,  // Available choices
-    selection: Vec<usize>, // Selected options
+    pub choice: usize,         // Selected option
+    pub choices: Vec<String>,  // Available choices
+    pub selection: Vec<usize>, // Selected options
 }
 
 impl Default for CheckboxStates {

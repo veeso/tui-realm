@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.0.3](#103)
   - [1.0.2](#102)
   - [1.0.1](#101)
   - [1.0.0](#100)
@@ -12,6 +13,12 @@
   - [0.5.0](#050)
 
 ---
+
+## 1.0.3
+
+Released on 15/11/2021
+
+- Made states fields and methods public
 
 ## 1.0.2
 

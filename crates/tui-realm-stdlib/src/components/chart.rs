@@ -46,8 +46,8 @@ use super::props::{
 ///
 /// chart states
 pub struct ChartStates {
-    cursor: usize,
-    data: Vec<Dataset>,
+    pub cursor: usize,
+    pub data: Vec<Dataset>,
 }
 
 impl Default for ChartStates {

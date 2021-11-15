@@ -46,7 +46,7 @@ use super::props::{
 ///
 /// Bar chart states
 pub struct BarChartStates {
-    cursor: usize,
+    pub cursor: usize,
 }
 
 impl Default for BarChartStates {

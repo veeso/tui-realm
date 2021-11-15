@@ -44,8 +44,8 @@ use unicode_width::UnicodeWidthStr;
 // -- States
 
 pub struct TextareaStates {
-    list_index: usize, // Index of selected item in textarea
-    list_len: usize,   // Lines in text area
+    pub list_index: usize, // Index of selected item in textarea
+    pub list_len: usize,   // Lines in text area
 }
 
 impl Default for TextareaStates {

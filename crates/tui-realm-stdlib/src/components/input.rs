@@ -38,8 +38,8 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 // -- states
 
 pub struct InputStates {
-    input: Vec<char>, // Current input
-    cursor: usize,    // Input position
+    pub input: Vec<char>, // Current input
+    pub cursor: usize,    // Input position
 }
 
 impl Default for InputStates {

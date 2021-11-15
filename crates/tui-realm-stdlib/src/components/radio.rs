@@ -38,8 +38,8 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 ///
 /// RadioStates contains states for this component
 pub struct RadioStates {
-    choice: usize,        // Selected option
-    choices: Vec<String>, // Available choices
+    pub choice: usize,        // Selected option
+    pub choices: Vec<String>, // Available choices
 }
 
 impl Default for RadioStates {

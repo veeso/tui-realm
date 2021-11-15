@@ -39,8 +39,8 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 // -- States
 
 pub struct ListStates {
-    list_index: usize, // Index of selected item in list
-    list_len: usize,   // Lines in text area
+    pub list_index: usize, // Index of selected item in list
+    pub list_len: usize,   // Lines in text area
 }
 
 impl Default for ListStates {

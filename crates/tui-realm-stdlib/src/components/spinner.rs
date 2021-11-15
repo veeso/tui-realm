@@ -37,8 +37,8 @@ use tuirealm::{Frame, MockComponent, State};
 // -- states
 
 pub struct SpinnerStates {
-    sequence: Vec<char>,
-    step: usize,
+    pub sequence: Vec<char>,
+    pub step: usize,
 }
 
 impl Default for SpinnerStates {
