@@ -129,8 +129,9 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
 
 /// ### get_block
 ///
-/// Get block
-pub(crate) fn get_block<'a>(
+/// Construct a block for widget using block properties.
+/// If focus is true the border color is applied, otherwise inactive_style
+pub fn get_block<'a>(
     props: Borders,
     title: Option<(String, Alignment)>,
     focus: bool,
