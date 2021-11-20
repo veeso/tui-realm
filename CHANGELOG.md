@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.0.1](#101)
   - [1.0.0](#100)
   - [0.6.0](#060)
   - [0.5.1](#051)
@@ -17,6 +18,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.0.1
+
+Released on 20/11/2021
+
+- Improved performance for crossterm listener
 
 ## 1.0.0
 

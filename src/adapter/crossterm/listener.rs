@@ -42,15 +42,17 @@ where
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     ghost: PhantomData<U>,
+    interval: Duration,
 }
 
-impl<U> Default for CrosstermInputListener<U>
+impl<U> CrosstermInputListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
-    fn default() -> Self {
+    pub fn new(interval: Duration) -> Self {
         Self {
             ghost: PhantomData::default(),
+            interval: interval / 2,
         }
     }
 }
@@ -60,7 +62,7 @@ where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
-        match xterm::poll(Duration::from_millis(5)) {
+        match xterm::poll(self.interval) {
             Ok(true) => xterm::read()
                 .map(|x| Some(Event::from(x)))
                 .map_err(|_| ListenerError::PollFailed),

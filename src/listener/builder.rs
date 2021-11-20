@@ -102,7 +102,7 @@ where
     ///
     /// Add to the event listener the default input event listener for the backend configured.
     pub fn default_input_listener(self, interval: Duration) -> Self {
-        self.port(Box::new(InputEventListener::<U>::default()), interval)
+        self.port(Box::new(InputEventListener::<U>::new(interval)), interval)
     }
 }
 

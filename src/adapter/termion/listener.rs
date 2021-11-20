@@ -30,6 +30,7 @@ use super::Event;
 use crate::listener::{ListenerError, ListenerResult, Poll};
 use std::io::stdin;
 use std::marker::PhantomData;
+use std::time::Duration;
 use termion::input::TermRead;
 
 /// ## TermionInputListener
@@ -44,11 +45,11 @@ where
     ghost: PhantomData<U>,
 }
 
-impl<U> Default for TermionInputListener<U>
+impl<U> TermionInputListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
-    fn default() -> Self {
+    pub fn new(_interval: Duration) -> Self {
         Self {
             ghost: PhantomData::default(),
         }
