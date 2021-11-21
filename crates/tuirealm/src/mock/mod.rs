@@ -4,7 +4,6 @@
 
 use crate::event::{Event, Key, KeyEvent};
 use crate::listener::{ListenerResult, Poll};
-use crate::Update;
 
 use std::marker::PhantomData;
 
@@ -71,30 +70,4 @@ pub enum MockMsg {
     BarInputChanged(String),
     BarSubmit(String),
     BarTick,
-}
-
-#[derive(Debug)]
-/// ## MockModel
-///
-/// Mock implementation of Update trait
-pub struct MockModel {
-    /// This function will call on update.
-    /// Use it to call assertions for test
-    validate: fn(Option<MockMsg>) -> Option<MockMsg>,
-}
-
-impl MockModel {
-    pub fn new(validate: fn(Option<MockMsg>) -> Option<MockMsg>) -> Self {
-        Self { validate }
-    }
-}
-
-impl Update<MockComponentId, MockMsg, MockEvent> for MockModel {
-    fn update(
-        &mut self,
-        _view: &mut crate::View<MockComponentId, MockMsg, MockEvent>,
-        msg: Option<MockMsg>,
-    ) -> Option<MockMsg> {
-        (self.validate)(msg)
-    }
 }
