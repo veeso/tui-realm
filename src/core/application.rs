@@ -28,9 +28,7 @@
 use super::{Subscription, WrappedComponent};
 use crate::listener::{EventListener, EventListenerCfg, ListenerError};
 use crate::tui::layout::Rect;
-use crate::{
-    AttrValue, Attribute, Event, Frame, State, Sub, SubEventClause, Update, View, ViewError,
-};
+use crate::{AttrValue, Attribute, Event, Frame, State, Sub, SubEventClause, View, ViewError};
 
 use std::hash::Hash;
 use std::time::{Duration, Instant};
@@ -100,17 +98,12 @@ where
     /// 1. The event listener is fetched according to the provided `PollStrategy`
     /// 2. All the received events are sent to the current active component
     /// 3. All the received events are forwarded to the subscribed components which satisfy the received events and conditions.
-    /// 4. Call update() on model passing each message
-    /// 5. Returns the amount of processed messages
+    /// 4. Returns messages to process
     ///
     /// As soon as function returns, you should call the `view()` method.
     ///
     /// > You can also call `view` from the `update()` if you need it
-    pub fn tick(
-        &mut self,
-        model: &mut dyn Update<K, Msg, UserEvent>,
-        strategy: PollStrategy,
-    ) -> ApplicationResult<usize> {
+    pub fn tick(&mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Msg>> {
         // Poll event listener
         let events = self.poll(strategy)?;
         // Forward to active element
@@ -121,12 +114,7 @@ where
             .collect();
         // Forward to subscriptions and extend vector
         messages.extend(self.forward_to_subscriptions(events));
-        // Update
-        let msg_len = messages.len();
-        messages.into_iter().for_each(|msg| {
-            assert!(self.recurse_update(model, Some(msg)).is_none());
-        });
-        Ok(msg_len)
+        Ok(messages)
     }
 
     // -- view bridge
@@ -404,23 +392,6 @@ where
         }
         messages
     }
-
-    /// ### update
-    ///
-    /// Calls update on model passing the view as a mutable reference.
-    /// This method will keep calling `update` on model until `None` is returned.
-    /// This function ALWAYS return `None` to the caller.
-    fn recurse_update(
-        &mut self,
-        model: &mut dyn Update<K, Msg, UserEvent>,
-        msg: Option<Msg>,
-    ) -> Option<Msg> {
-        if let Some(msg) = model.update(&mut self.view, msg) {
-            self.recurse_update(model, Some(msg))
-        } else {
-            None
-        }
-    }
 }
 
 /// ## PollStrategy
@@ -469,9 +440,7 @@ mod test {
 
     use super::*;
     use crate::event::{Key, KeyEvent};
-    use crate::mock::{
-        MockBarInput, MockComponentId, MockEvent, MockFooInput, MockModel, MockMsg, MockPoll,
-    };
+    use crate::mock::{MockBarInput, MockComponentId, MockEvent, MockFooInput, MockMsg, MockPoll};
     use crate::{StateValue, SubClause};
 
     use pretty_assertions::assert_eq;
@@ -682,7 +651,6 @@ mod test {
     fn should_do_tick() {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
-        let mut model = MockModel::new(validate_should_do_tick);
         // Mount foo and bar
         assert!(application
             .mount(
@@ -716,10 +684,11 @@ mod test {
          */
         assert_eq!(
             application
-                .tick(&mut model, PollStrategy::UpTo(5))
+                .tick(PollStrategy::UpTo(5))
                 .ok()
-                .unwrap(),
-            2
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
         );
         // Active BAR
         assert!(application.active(&MockComponentId::InputBar).is_ok());
@@ -732,17 +701,19 @@ mod test {
          */
         assert_eq!(
             application
-                .tick(&mut model, PollStrategy::Once)
+                .tick(PollStrategy::Once)
                 .ok()
-                .unwrap(),
-            1
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::BarSubmit(String::from(""))]
         );
         // Let's try TryFor strategy
         assert!(
             application
-                .tick(&mut model, PollStrategy::TryFor(Duration::from_millis(300)))
+                .tick(PollStrategy::TryFor(Duration::from_millis(300)))
                 .ok()
                 .unwrap()
+                .len()
                 >= 3
         );
     }
@@ -756,18 +727,5 @@ mod test {
 
     fn listener_config_with_tick(tick: Duration) -> EventListenerCfg<MockEvent> {
         listener_config().tick_interval(tick)
-    }
-
-    fn validate_should_do_tick(msg: Option<MockMsg>) -> Option<MockMsg> {
-        /*
-        Allowed messages:
-            - FooSubmit
-            - BarTick
-        */
-        assert!(matches!(
-            msg.unwrap(),
-            MockMsg::FooSubmit(_) | MockMsg::BarTick | MockMsg::BarSubmit(_)
-        ));
-        None
     }
 }
