@@ -110,7 +110,7 @@ pub use self::core::command;
 pub use self::core::event::{self, Event, NoUserEvent};
 pub use self::core::props::{self, AttrValue, Attribute, Props};
 pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
-pub use self::core::{Component, MockComponent, State, StateValue, Update, View, ViewError};
+pub use self::core::{Component, MockComponent, State, StateValue, Update, ViewError};
 pub use adapter::{Frame, Terminal};
 pub use listener::{EventListenerCfg, ListenerError};
 
