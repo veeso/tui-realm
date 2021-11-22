@@ -27,18 +27,13 @@
  */
 extern crate tuirealm;
 
-use std::time::{Duration, SystemTime};
 use tuirealm::application::PollStrategy;
-use tuirealm::props::{Alignment, Color, TextModifiers};
-use tuirealm::{
-    event::NoUserEvent, Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause,
-    SubEventClause,
-};
+
+use tuirealm::{AttrValue, Attribute, Update};
 // -- internal
 mod app;
 mod components;
 use app::model::Model;
-use components::{Clock, DigitCounter, Label, LetterCounter};
 
 // Let's define the messages handled by our app. NOTE: it must derive `PartialEq`
 #[derive(Debug, PartialEq)]
@@ -63,63 +58,6 @@ pub enum Id {
 fn main() {
     // Setup model
     let mut model = Model::default();
-    // Setup application
-    // NOTE: NoUserEvent is a shorthand to tell tui-realm we're not going to use any custom user event
-    // NOTE: the event listener is configured to use the default crossterm input listener and to raise a Tick event each second
-    // which we will use to update the clock
-    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-        EventListenerCfg::default()
-            .default_input_listener(Duration::from_millis(20))
-            .poll_timeout(Duration::from_millis(10))
-            .tick_interval(Duration::from_secs(1)),
-    );
-
-    // Mount components
-    assert!(app
-        .mount(
-            Id::Label,
-            Box::new(
-                Label::default()
-                    .text("Waiting for a Msg...")
-                    .alignment(Alignment::Left)
-                    .background(Color::Reset)
-                    .foreground(Color::LightYellow)
-                    .modifiers(TextModifiers::BOLD),
-            ),
-            Vec::default(),
-        )
-        .is_ok());
-    // Mount clock, subscribe to tick
-    assert!(app
-        .mount(
-            Id::Clock,
-            Box::new(
-                Clock::new(SystemTime::now())
-                    .alignment(Alignment::Center)
-                    .background(Color::Reset)
-                    .foreground(Color::Cyan)
-                    .modifiers(TextModifiers::BOLD)
-            ),
-            vec![Sub::new(SubEventClause::Tick, SubClause::Always)]
-        )
-        .is_ok());
-    // Mount counters
-    assert!(app
-        .mount(
-            Id::LetterCounter,
-            Box::new(LetterCounter::new(0)),
-            Vec::new()
-        )
-        .is_ok());
-    assert!(app
-        .mount(
-            Id::DigitCounter,
-            Box::new(DigitCounter::new(5)),
-            Vec::default()
-        )
-        .is_ok());
-    // Active letter counter
-    assert!(app.active(&Id::LetterCounter).is_ok());
     // Enter alternate screen
     let _ = model.terminal.enter_alternate_screen();
     let _ = model.terminal.enable_raw_mode();
@@ -127,9 +65,10 @@ fn main() {
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {
         // Tick
-        match app.tick(&mut model, PollStrategy::Once) {
+        match model.app.tick(PollStrategy::Once) {
             Err(err) => {
-                assert!(app
+                assert!(model
+                    .app
                     .attr(
                         &Id::Label,
                         Attribute::Text,
@@ -137,15 +76,21 @@ fn main() {
                     )
                     .is_ok());
             }
-            Ok(sz) if sz > 0 => {
+            Ok(messages) if messages.len() > 0 => {
                 // NOTE: redraw if at least one msg has been processed
                 model.redraw = true;
+                for msg in messages.into_iter() {
+                    let mut msg = Some(msg);
+                    while msg.is_some() {
+                        msg = model.update(msg);
+                    }
+                }
             }
             _ => {}
         }
         // Redraw
         if model.redraw {
-            model.view(&mut app);
+            model.view();
             model.redraw = false;
         }
     }
