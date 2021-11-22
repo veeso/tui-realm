@@ -146,7 +146,7 @@ Supported features are:
 
 ### Create a tui-realm application 🪂
 
-View how to implement a tui-realm application in the [related guide](/docs/get-started.md).
+View how to implement a tui-realm application in the [related guide](/docs/en/get-started.md).
 
 ### Run examples 🔍
 
