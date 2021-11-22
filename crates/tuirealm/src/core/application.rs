@@ -25,10 +25,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::{Subscription, WrappedComponent};
+use super::{Subscription, View, WrappedComponent};
 use crate::listener::{EventListener, EventListenerCfg, ListenerError};
 use crate::tui::layout::Rect;
-use crate::{AttrValue, Attribute, Event, Frame, State, Sub, SubEventClause, View, ViewError};
+use crate::{AttrValue, Attribute, Event, Frame, State, Sub, SubEventClause, ViewError};
 
 use std::hash::Hash;
 use std::time::{Duration, Instant};
