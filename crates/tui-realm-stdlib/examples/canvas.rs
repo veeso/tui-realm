@@ -29,7 +29,7 @@ use tuirealm::terminal::TerminalBridge;
 use tuirealm::{
     application::PollStrategy,
     event::{Key, KeyEvent},
-    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update, View,
+    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
 };
 // tui
 use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -48,73 +48,75 @@ pub enum Id {
 }
 
 struct Model {
+    app: Application<Id, Msg, NoUserEvent>,
     quit: bool,   // Becomes true when the user presses <ESC>
     redraw: bool, // Tells whether to refresh the UI; performance optimization
-    terminal: TerminalBridge,
 }
 
 impl Default for Model {
     fn default() -> Self {
+        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+            EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
+        );
+        assert!(app
+            .mount(Id::Canvas, Box::new(MyCanvas::default()), vec![])
+            .is_ok());
+        // We need to give focus to input then
+        assert!(app.active(&Id::Canvas).is_ok());
         Self {
+            app,
             quit: false,
             redraw: true,
-            terminal: TerminalBridge::new().expect("Cannot create terminal bridge"),
         }
     }
 }
 
 impl Model {
-    fn view(&mut self, app: &mut Application<Id, Msg, NoUserEvent>) {
-        let _ = self.terminal.raw_mut().draw(|f| {
+    fn view(&mut self, terminal: &mut TerminalBridge) {
+        let _ = terminal.raw_mut().draw(|f| {
             // Prepare chunks
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
                 .margin(1)
                 .constraints([Constraint::Percentage(100)].as_ref())
                 .split(f.size());
-            app.view(&Id::Canvas, f, chunks[0]);
+            self.app.view(&Id::Canvas, f, chunks[0]);
         });
     }
 }
 
 fn main() {
+    let mut terminal = TerminalBridge::new().expect("Cannot create terminal bridge");
     let mut model = Model::default();
-    let _ = model.terminal.enable_raw_mode();
-    let _ = model.terminal.enter_alternate_screen();
-    // Setup app
-    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-        EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
-    );
-    assert!(app
-        .mount(Id::Canvas, Box::new(MyCanvas::default()), vec![])
-        .is_ok());
-    // We need to give focus to input then
-    assert!(app.active(&Id::Canvas).is_ok());
-    // Now we use the Model struct to keep track of some states
-
+    let _ = terminal.enable_raw_mode();
+    let _ = terminal.enter_alternate_screen();
     // let's loop until quit is true
     while !model.quit {
         // Tick
-        if let Ok(sz) = app.tick(&mut model, PollStrategy::Once) {
-            if sz > 0 {
-                // NOTE: redraw if at least one msg has been processed
+        if let Ok(messages) = model.app.tick(PollStrategy::Once) {
+            for msg in messages.into_iter() {
                 model.redraw = true;
+                let mut msg = Some(msg);
+                while msg.is_some() {
+                    msg = model.update(msg);
+                }
             }
         }
         // Redraw
         if model.redraw {
-            model.view(&mut app);
+            model.view(&mut terminal);
             model.redraw = false;
         }
     }
     // Terminate terminal
-    let _ = model.terminal.leave_alternate_screen();
-    let _ = model.terminal.disable_raw_mode();
-    let _ = model.terminal.clear_screen();
+    let _ = terminal.leave_alternate_screen();
+    let _ = terminal.disable_raw_mode();
+    let _ = terminal.clear_screen();
 }
 
-impl Update<Id, Msg, NoUserEvent> for Model {
-    fn update(&mut self, _: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
+impl Update<Msg> for Model {
+    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+        self.redraw = true;
         match msg.unwrap_or(Msg::None) {
             Msg::AppClose => {
                 self.quit = true;

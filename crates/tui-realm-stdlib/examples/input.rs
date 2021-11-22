@@ -38,7 +38,7 @@ use tuirealm::{
     application::PollStrategy,
     event::{Key, KeyEvent},
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue,
-    Update, View,
+    Update,
 };
 // tui
 use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -67,24 +67,48 @@ pub enum Id {
 }
 
 struct Model {
+    app: Application<Id, Msg, NoUserEvent>,
     quit: bool,   // Becomes true when the user presses <ESC>
     redraw: bool, // Tells whether to refresh the UI; performance optimization
-    terminal: TerminalBridge,
 }
 
 impl Default for Model {
     fn default() -> Self {
+        // Setup app
+        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+            EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
+        );
+        assert!(app
+            .mount(Id::Text, Box::new(InputText::default()), vec![])
+            .is_ok());
+        assert!(app
+            .mount(Id::Email, Box::new(InputEmail::default()), vec![])
+            .is_ok());
+        assert!(app
+            .mount(Id::Number, Box::new(InputNumber::default()), vec![])
+            .is_ok());
+        assert!(app
+            .mount(Id::Password, Box::new(InputPassword::default()), vec![])
+            .is_ok());
+        assert!(app
+            .mount(Id::Phone, Box::new(InputPhone::default()), vec![])
+            .is_ok());
+        assert!(app
+            .mount(Id::Color, Box::new(InputColor::default()), vec![])
+            .is_ok());
+        // We need to give focus to input then
+        assert!(app.active(&Id::Text).is_ok());
         Self {
             quit: false,
             redraw: true,
-            terminal: TerminalBridge::new().expect("Cannot create terminal bridge"),
+            app,
         }
     }
 }
 
 impl Model {
-    fn view(&mut self, app: &mut Application<Id, Msg, NoUserEvent>) {
-        let _ = self.terminal.raw_mut().draw(|f| {
+    fn view(&mut self, terminal: &mut TerminalBridge) {
+        let _ = terminal.raw_mut().draw(|f| {
             // Prepare chunks
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
@@ -102,96 +126,76 @@ impl Model {
                     .as_ref(),
                 )
                 .split(f.size());
-            app.view(&Id::Text, f, chunks[0]);
-            app.view(&Id::Email, f, chunks[1]);
-            app.view(&Id::Number, f, chunks[2]);
-            app.view(&Id::Password, f, chunks[3]);
-            app.view(&Id::Phone, f, chunks[4]);
-            app.view(&Id::Color, f, chunks[5]);
+            self.app.view(&Id::Text, f, chunks[0]);
+            self.app.view(&Id::Email, f, chunks[1]);
+            self.app.view(&Id::Number, f, chunks[2]);
+            self.app.view(&Id::Password, f, chunks[3]);
+            self.app.view(&Id::Phone, f, chunks[4]);
+            self.app.view(&Id::Color, f, chunks[5]);
         });
     }
 }
 
 fn main() {
     let mut model = Model::default();
-    let _ = model.terminal.enable_raw_mode();
-    let _ = model.terminal.enter_alternate_screen();
-    // Setup app
-    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-        EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
-    );
-    assert!(app
-        .mount(Id::Text, Box::new(InputText::default()), vec![])
-        .is_ok());
-    assert!(app
-        .mount(Id::Email, Box::new(InputEmail::default()), vec![])
-        .is_ok());
-    assert!(app
-        .mount(Id::Number, Box::new(InputNumber::default()), vec![])
-        .is_ok());
-    assert!(app
-        .mount(Id::Password, Box::new(InputPassword::default()), vec![])
-        .is_ok());
-    assert!(app
-        .mount(Id::Phone, Box::new(InputPhone::default()), vec![])
-        .is_ok());
-    assert!(app
-        .mount(Id::Color, Box::new(InputColor::default()), vec![])
-        .is_ok());
-    // We need to give focus to input then
-    assert!(app.active(&Id::Text).is_ok());
+    let mut terminal = TerminalBridge::new().expect("Cannot create terminal bridge");
+    let _ = terminal.enable_raw_mode();
+    let _ = terminal.enter_alternate_screen();
     // Now we use the Model struct to keep track of some states
 
     // let's loop until quit is true
     while !model.quit {
         // Tick
-        if let Ok(sz) = app.tick(&mut model, PollStrategy::Once) {
-            if sz > 0 {
-                // NOTE: redraw if at least one msg has been processed
-                model.redraw = true;
+        if let Ok(messages) = model.app.tick(PollStrategy::Once) {
+            for msg in messages.into_iter() {
+                let mut msg = Some(msg);
+                while msg.is_some() {
+                    msg = model.update(msg);
+                }
             }
         }
         // Redraw
         if model.redraw {
-            model.view(&mut app);
+            model.view(&mut terminal);
             model.redraw = false;
         }
     }
     // Terminate terminal
-    let _ = model.terminal.leave_alternate_screen();
-    let _ = model.terminal.disable_raw_mode();
-    let _ = model.terminal.clear_screen();
+    let _ = terminal.leave_alternate_screen();
+    let _ = terminal.disable_raw_mode();
+    let _ = terminal.clear_screen();
 }
 
-impl Update<Id, Msg, NoUserEvent> for Model {
-    fn update(&mut self, view: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
+impl Update<Msg> for Model {
+    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+        self.redraw = true;
         match msg.unwrap_or(Msg::None) {
             Msg::AppClose => {
                 self.quit = true;
                 None
             }
             Msg::TextBlur => {
-                assert!(view.active(&Id::Email).is_ok());
+                assert!(self.app.active(&Id::Email).is_ok());
                 None
             }
             Msg::EmailBlur => {
-                assert!(view.active(&Id::Number).is_ok());
+                assert!(self.app.active(&Id::Number).is_ok());
                 None
             }
             Msg::NumberBlur => {
-                assert!(view.active(&Id::Password).is_ok());
+                assert!(self.app.active(&Id::Password).is_ok());
                 None
             }
             Msg::PasswordBlur => {
-                assert!(view.active(&Id::Phone).is_ok());
+                assert!(self.app.active(&Id::Phone).is_ok());
                 None
             }
             Msg::PhoneBlur => {
-                assert!(view.active(&Id::Color).is_ok());
+                assert!(self.app.active(&Id::Color).is_ok());
                 None
             }
             Msg::ColorBlur => {
-                assert!(view.active(&Id::Text).is_ok());
+                assert!(self.app.active(&Id::Text).is_ok());
                 None
             }
             Msg::None => None,
