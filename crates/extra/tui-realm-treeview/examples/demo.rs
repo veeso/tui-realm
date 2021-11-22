@@ -31,7 +31,7 @@ use tuirealm::{
     props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, InputType, Style},
     terminal::TerminalBridge,
     Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue, Sub,
-    SubClause, SubEventClause, Update, View,
+    SubClause, SubEventClause, Update,
 };
 // tui
 use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -61,6 +61,7 @@ pub enum Id {
 }
 
 struct Model {
+    app: Application<Id, Msg, NoUserEvent>,
     path: PathBuf,
     tree: Tree,
     quit: bool,   // Becomes true when the user presses <ESC>
@@ -70,7 +71,38 @@ struct Model {
 
 impl Model {
     fn new(p: &Path) -> Self {
+        // Setup app
+        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+            EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
+        );
+        assert!(app
+            .mount(
+                Id::FsTree,
+                Box::new(FsTree::new(Tree::new(Self::dir_tree(p, MAX_DEPTH)), None)),
+                vec![]
+            )
+            .is_ok());
+        assert!(app
+            .mount(Id::GoTo, Box::new(GoTo::default()), vec![])
+            .is_ok());
+        // Mount global listener which will listen for <ESC>
+        assert!(app
+            .mount(
+                Id::GlobalListener,
+                Box::new(GlobalListener::default()),
+                vec![Sub::new(
+                    SubEventClause::Keyboard(KeyEvent {
+                        code: Key::Esc,
+                        modifiers: KeyModifiers::NONE,
+                    }),
+                    SubClause::Always
+                )]
+            )
+            .is_ok());
+        // We need to give focus to input then
+        assert!(app.active(&Id::FsTree).is_ok());
         Model {
+            app,
             quit: false,
             redraw: true,
             tree: Tree::new(Self::dir_tree(p, MAX_DEPTH)),
@@ -118,7 +150,7 @@ impl Model {
         node
     }
 
-    fn view(&mut self, app: &mut Application<Id, Msg, NoUserEvent>) {
+    fn view(&mut self) {
         let _ = self.terminal.raw_mut().draw(|f| {
             // Prepare chunks
             let chunks = Layout::default()
@@ -126,25 +158,27 @@ impl Model {
                 .margin(1)
                 .constraints([Constraint::Min(5), Constraint::Length(3)].as_ref())
                 .split(f.size());
-            app.view(&Id::FsTree, f, chunks[0]);
-            app.view(&Id::GoTo, f, chunks[1]);
+            self.app.view(&Id::FsTree, f, chunks[0]);
+            self.app.view(&Id::GoTo, f, chunks[1]);
         });
     }
 
-    fn reload_tree(&mut self, view: &mut View<Id, Msg, NoUserEvent>) {
-        let current_node = match view.state(&Id::FsTree).ok().unwrap() {
+    fn reload_tree(&mut self) {
+        let current_node = match self.app.state(&Id::FsTree).ok().unwrap() {
             State::One(StateValue::String(id)) => Some(id),
             _ => None,
         };
         // Remount tree
-        assert!(view.umount(&Id::FsTree).is_ok());
-        assert!(view
+        assert!(self.app.umount(&Id::FsTree).is_ok());
+        assert!(self
+            .app
             .mount(
                 Id::FsTree,
-                Box::new(FsTree::new(self.tree.clone(), current_node))
+                Box::new(FsTree::new(self.tree.clone(), current_node)),
+                vec![]
             )
             .is_ok());
-        assert!(view.active(&Id::FsTree).is_ok());
+        assert!(self.app.active(&Id::FsTree).is_ok());
     }
 }
 
@@ -153,48 +187,20 @@ fn main() {
     let mut model: Model = Model::new(std::env::current_dir().ok().unwrap().as_path());
     let _ = model.terminal.enable_raw_mode();
     let _ = model.terminal.enter_alternate_screen();
-    // Setup app
-    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-        EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
-    );
-    assert!(app
-        .mount(
-            Id::FsTree,
-            Box::new(FsTree::new(model.tree.clone(), None)),
-            vec![]
-        )
-        .is_ok());
-    assert!(app
-        .mount(Id::GoTo, Box::new(GoTo::default()), vec![])
-        .is_ok());
-    // Mount global listener which will listen for <ESC>
-    assert!(app
-        .mount(
-            Id::GlobalListener,
-            Box::new(GlobalListener::default()),
-            vec![Sub::new(
-                SubEventClause::Keyboard(KeyEvent {
-                    code: Key::Esc,
-                    modifiers: KeyModifiers::NONE,
-                }),
-                SubClause::Always
-            )]
-        )
-        .is_ok());
-    // We need to give focus to input then
-    assert!(app.active(&Id::FsTree).is_ok());
     // let's loop until quit is true
     while !model.quit {
         // Tick
-        if let Ok(sz) = app.tick(&mut model, PollStrategy::Once) {
-            if sz > 0 {
-                // NOTE: redraw if at least one msg has been processed
-                model.redraw = true;
+        if let Ok(messages) = model.app.tick(PollStrategy::Once) {
+            for msg in messages.into_iter() {
+                let mut msg = Some(msg);
+                while msg.is_some() {
+                    msg = model.update(msg);
+                }
             }
         }
         // Redraw
         if model.redraw {
-            model.view(&mut app);
+            model.view();
             model.redraw = false;
         }
     }
@@ -206,8 +212,9 @@ fn main() {
 
 // -- update
 
-impl Update<Id, Msg, NoUserEvent> for Model {
-    fn update(&mut self, view: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
+impl Update<Msg> for Model {
+    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+        self.redraw = true;
         match msg.unwrap_or(Msg::None) {
             Msg::AppClose => {
                 self.quit = true;
@@ -215,28 +222,28 @@ impl Update<Id, Msg, NoUserEvent> for Model {
             }
             Msg::ExtendDir(path) => {
                 self.extend_dir(&path, PathBuf::from(path.as_str()).as_path(), MAX_DEPTH);
-                self.reload_tree(view);
+                self.reload_tree();
                 None
             }
             Msg::GoTo(path) => {
                 // Go to and reload tree
                 self.scan_dir(path.as_path());
-                self.reload_tree(view);
+                self.reload_tree();
                 None
             }
             Msg::GoToUpperDir => {
                 if let Some(parent) = self.upper_dir() {
                     self.scan_dir(parent.as_path());
-                    self.reload_tree(view);
+                    self.reload_tree();
                 }
                 None
             }
             Msg::FsTreeBlur => {
-                assert!(view.active(&Id::GoTo).is_ok());
+                assert!(self.app.active(&Id::GoTo).is_ok());
                 None
             }
             Msg::GoToBlur => {
-                assert!(view.active(&Id::FsTree).is_ok());
+                assert!(self.app.active(&Id::FsTree).is_ok());
                 None
             }
             Msg::None => None,
