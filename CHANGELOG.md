@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.1.0](#110)
   - [1.0.1](#101)
   - [1.0.0](#100)
   - [0.6.0](#060)
@@ -18,6 +19,14 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.1.0
+
+Released on 21/11/2021
+
+- `tick()` will now return a `Vec<Msg>`. There's no need to pass an `Update` trait anymore
+  - The reasons behind this is that it was too annoying to handle the model in a separate structure which could not render the Ui.
+- Exposed `PollStrategy` at root level
 
 ## 1.0.1
 

@@ -20,13 +20,13 @@
 //! If you want the default features, just add tuirealm 1.x version:
 //!
 //! ```toml
-//! tuirealm = "^1.0.0"
+//! tuirealm = "^1.1.0"
 //! ```
 //!
 //! otherwise you can specify the features you want to add:
 //!
 //! ```toml
-//! tuirealm = { version = "^1.0.0", default-features = false, features = [ "derive", "with-termion" ] }
+//! tuirealm = { version = "^1.1.0", default-features = false, features = [ "derive", "with-termion" ] }
 //! ```
 //!
 //! Supported features are:
@@ -105,12 +105,12 @@ pub mod terminal;
 pub mod tui;
 pub mod utils;
 // -- export
-pub use self::core::application::{self, Application, ApplicationError};
+pub use self::core::application::{self, Application, ApplicationError, PollStrategy};
 pub use self::core::command;
 pub use self::core::event::{self, Event, NoUserEvent};
 pub use self::core::props::{self, AttrValue, Attribute, Props};
 pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
-pub use self::core::{Component, MockComponent, State, StateValue, Update, View, ViewError};
+pub use self::core::{Component, MockComponent, State, StateValue, Update, ViewError};
 pub use adapter::{Frame, Terminal};
 pub use listener::{EventListenerCfg, ListenerError};
 

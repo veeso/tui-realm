@@ -411,11 +411,7 @@ so the application will be the sandbox for the all the entities a tui-realm app 
 But the coolest thing here, is that all the application can be run, using a single method! This method is called `tick()` and as we'll see in the next chapter it performs all what is necessary to complete a single cycle of the application lifecycle:
 
 ```rust
-pub fn tick(
-    &mut self,
-    model: &mut dyn Update<K, Msg, UserEvent>,
-    strategy: PollStrategy,
-) -> ApplicationResult<usize> {
+pub fn tick(&mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Msg>> {
     // Poll event listener
     let events = self.poll(strategy)?;
     // Forward to active element
@@ -426,12 +422,7 @@ pub fn tick(
         .collect();
     // Forward to subscriptions and extend vector
     messages.extend(self.forward_to_subscriptions(events));
-    // Update
-    let msg_len = messages.len();
-    messages.into_iter().for_each(|msg| {
-        assert!(self.recurse_update(model, Some(msg)).is_none());
-    });
-    Ok(msg_len)
+    Ok(messages)
 }
 ```
 
@@ -443,9 +434,7 @@ As we can quickly see, the tick method has the following workflow:
 
 2. All the incoming events are immediately forwarded to the current *active* component in the *view*, which will may return some *messages*
 3. All the incoming events are sent to all the components subscribed to that event, which satisfied the clauses described in the subscription. They, as usual, will may return some *messages*
-4. For each message returned, the *update routine* is called on the model, passing the *view* and the *message*.
-5. If the *update routine* returns *Some* is it re-called, until it'll return *None*.
-6. The amount of processed *messages* is returned.
+4. The messages are returned
 
 Along to the tick() routine, the application provides many other functionalities, but we'll see later in the example and don't forget to checkout the documentation on rust docs.
 
@@ -467,9 +456,10 @@ So the tui-realm lifecycle consists in:
    2. event is forwarded to active component in the view
    3. subscribptions are queried to know whether the event should be forwarded to other components
    4. incoming messages are collected
-2. the `update()` routine is called on **Model** providing each message from component
-3. The model gets updated thanks to the `update()` method
-4. The `view()` function is called to render the UI
+2. Messages are returned to the caller
+3. the `update()` routine is called on **Model** providing each message from component
+4. The model gets updated thanks to the `update()` method
+5. The `view()` function is called to render the UI
 
 This simple 4 steps cycle is called **Tick**, because it defines the interval between each UI refresh in fact.
 Now that we know how a tui-realm application works, let's see how to implement one.
@@ -774,6 +764,8 @@ Now that we have the components, we're almost done. We can finally implement the
 
 ```rust
 pub struct Model {
+    /// Application
+    pub app: Application<Id, Msg, NoUserEvent>,
     /// Indicates that the application must quit
     pub quit: bool,
     /// Tells whether to redraw interface
@@ -819,33 +811,55 @@ impl Model {
 and finally we can implement the `Update` trait:
 
 ```rust
-impl Update<Id, Msg, NoUserEvent> for Model {
-    fn update(&mut self, view: &mut View<Id, Msg, NoUserEvent>, msg: Option<Msg>) -> Option<Msg> {
-        // Match message
-        match msg.unwrap_or(Msg::None) {
-            Msg::AppClose => {
-                self.quit = true; // Terminate
-                None
+impl Update<Msg> for Model {
+    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+        if let Some(msg) = msg {
+            // Set redraw
+            self.redraw = true;
+            // Match message
+            match msg {
+                Msg::AppClose => {
+                    self.quit = true; // Terminate
+                    None
+                }
+                Msg::Clock => None,
+                Msg::DigitCounterBlur => {
+                    // Give focus to letter counter
+                    assert!(self.app.active(&Id::LetterCounter).is_ok());
+                    None
+                }
+                Msg::DigitCounterChanged(v) => {
+                    // Update label
+                    assert!(self
+                        .app
+                        .attr(
+                            &Id::Label,
+                            Attribute::Text,
+                            AttrValue::String(format!("DigitCounter has now value: {}", v))
+                        )
+                        .is_ok());
+                    None
+                }
+                Msg::LetterCounterBlur => {
+                    // Give focus to digit counter
+                    assert!(self.app.active(&Id::DigitCounter).is_ok());
+                    None
+                }
+                Msg::LetterCounterChanged(v) => {
+                    // Update label
+                    assert!(self
+                        .app
+                        .attr(
+                            &Id::Label,
+                            Attribute::Text,
+                            AttrValue::String(format!("LetterCounter has now value: {}", v))
+                        )
+                        .is_ok());
+                    None
+                }
             }
-            Msg::DigitCounterBlur => {
-                // Give focus to letter counter
-                assert!(view.active(&Id::LetterCounter).is_ok());
-                None
-            }
-            Msg::DigitCounterChanged(v) => {
-                // Do something with value ...
-                None
-            }
-            Msg::LetterCounterBlur => {
-                // Give focus to digit counter
-                assert!(view.active(&Id::DigitCounter).is_ok());
-                None
-            }
-            Msg::LetterCounterChanged(v) => {
-                // Do something with value ...
-                None
-            }
-            Msg::None => None,
+        } else {
+            None
         }
     }
 }
@@ -856,12 +870,18 @@ impl Update<Id, Msg, NoUserEvent> for Model {
 We're almost done, let's just setup the Application in our `main()`:
 
 ```rust
-let mut model = Model::default();
-let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+fn init_app() -> Application<Id, Msg, NoUserEvent> {
+    // Setup application
+    // NOTE: NoUserEvent is a shorthand to tell tui-realm we're not going to use any custom user event
+    // NOTE: the event listener is configured to use the default crossterm input listener and to raise a Tick event each second
+    // which we will use to update the clock
+    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
         EventListenerCfg::default()
-            .default_input_listener(Duration::from_millis(50))
-            .poll_timeout(Duration::from_millis(40))
+            .default_input_listener(Duration::from_millis(20))
+            .poll_timeout(Duration::from_millis(10))
+            .tick_interval(Duration::from_secs(1)),
     );
+}
 ```
 
 The app requires the configuration for the `EventListener` which will poll `Ports`. We're telling the event listener to use the default input listener for our backend. `default_input_listener` will setup the default input listener for termion/crossterm or the backend you chose. Then we also define the `poll_timeout`, which describes the interval between each poll to the listener thread.
@@ -911,9 +931,15 @@ while !model.quit {
         Err(err) => {
             // Handle error...
         }
-        Ok(sz) if sz > 0 => {
+        Ok(messages) if messages.len() > 0 => {
             // NOTE: redraw if at least one msg has been processed
             model.redraw = true;
+            for msg in messages.into_iter() {
+                let mut msg = Some(msg);
+                while msg.is_some() {
+                    msg = model.update(msg);
+                }
+            }
         }
         _ => {}
     }
