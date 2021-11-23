@@ -126,6 +126,15 @@ where
         Ok(())
     }
 
+    /// ### umount_all
+    ///
+    /// Umount all components in the view and clear focus stack and state
+    pub fn umount_all(&mut self) {
+        self.components.clear();
+        self.focus_stack.clear();
+        self.focus = None;
+    }
+
     /// ### mounted
     ///
     /// Returns whether component `id` is mounted
@@ -368,6 +377,39 @@ mod test {
         assert_eq!(view.mounted(&MockComponentId::InputBar), false);
         // Umount twice
         assert!(view.umount(&MockComponentId::InputBar).is_err());
+    }
+
+    #[test]
+    fn view_should_umount_all() {
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
+        // Mount foo
+        assert!(view
+            .mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
+            .is_ok());
+        assert_eq!(view.components.len(), 1);
+        assert!(view.mounted(&MockComponentId::InputFoo));
+        assert!(view.component(&MockComponentId::InputFoo).is_some());
+        assert!(view.component(&MockComponentId::InputBar).is_none());
+        assert_eq!(view.mounted(&MockComponentId::InputBar), false);
+        // Mount bar
+        assert!(view
+            .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
+            .is_ok());
+        assert_eq!(view.components.len(), 2);
+        assert!(view.mounted(&MockComponentId::InputBar));
+        // Mount twice
+        assert!(view
+            .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
+            .is_err());
+        assert_eq!(view.components.len(), 2);
+        // Give focus
+        assert!(view.active(&MockComponentId::InputFoo).is_ok());
+        assert!(view.active(&MockComponentId::InputBar).is_ok());
+        // Umount all
+        view.umount_all();
+        assert!(view.components.is_empty());
+        assert!(view.focus_stack.is_empty());
+        assert!(view.focus.is_none());
     }
 
     #[test]

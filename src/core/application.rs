@@ -175,6 +175,14 @@ where
         }
     }
 
+    /// ### umount_all
+    ///
+    /// Umount all components in the view and removed all associated subscriptions
+    pub fn umount_all(&mut self) {
+        self.view.umount_all();
+        self.subs.clear();
+    }
+
     /// ### mounted
     ///
     /// Returns whether component `id` is mounted
@@ -271,19 +279,6 @@ where
         }
         self.subs.retain(|s| s.target() != id && s.event() != &ev);
         Ok(())
-    }
-
-    /// ### sanitize
-    ///
-    /// This method will clean up all the orphan subscription of the application, which means that will
-    /// clean up all the subscriptions associated to a component which is no longer mounted.
-    ///
-    /// ⚠️ Warning: all subscriptions are clean up when you umount a component from the **Application**.
-    ///
-    /// The use of this method is to clean up subscriptions when you umount them using the **View** in the
-    /// **Update** routine.
-    pub fn sanitize(&mut self) {
-        self.subs.retain(|x| self.view.mounted(x.target()));
     }
 
     // -- private
@@ -613,7 +608,7 @@ mod test {
     }
 
     #[test]
-    fn should_sanitize_subscriptions() {
+    fn should_umount_all() {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config());
         assert!(application
@@ -637,14 +632,11 @@ mod test {
             )
             .is_ok());
         assert_eq!(application.subs.len(), 3);
-        // let's umount InputFoo from view (tricky)
-        assert!(application.view.umount(&MockComponentId::InputFoo).is_ok());
-        // There should still be 3 subs
-        assert_eq!(application.subs.len(), 3);
-        // Sanitize
-        application.sanitize();
-        // All dead subs should be gone
-        assert_eq!(application.subs.len(), 1);
+        // Let's umount all
+        application.umount_all();
+        assert_eq!(application.mounted(&MockComponentId::InputFoo), false);
+        assert_eq!(application.mounted(&MockComponentId::InputBar), false);
+        assert!(application.subs.is_empty());
     }
 
     #[test]
