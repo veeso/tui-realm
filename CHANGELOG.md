@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.1.2](#112)
   - [1.1.0](#110)
   - [1.0.1](#101)
   - [1.0.0](#100)
@@ -19,6 +20,16 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.1.2
+
+Released on 23/11/2021
+
+> ❗ There's no 1.1.1 version. Since I don't like it as a version number, I decided to skip it
+
+- Application API changes:
+  - Removed `sanitize` since `View` is no more accessible
+  - Added `umount_all` method which umounts all components from `View` and active subscriptions
 
 ## 1.1.0
 
