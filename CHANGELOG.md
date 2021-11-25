@@ -32,6 +32,9 @@ Released on 25/11/2021
   - Added `lock_subs()` and `unlock_subs()` methods.
     - Once `lock_subs()` is called, events won't be anymore propagated to subscriptions as long as `unlock_subs()` is not called.
     - by default events **will be propagated** to subs.
+- Sub Clause:
+  - Added `Id` to `HasAttr` and `HasState` sub clauses.
+  - Added new `IsMounted(Id)` sub clause
 
 ## 1.1.2
 
