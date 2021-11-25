@@ -805,6 +805,224 @@ mod test {
         assert_eq!(application.sub_lock, false);
     }
 
+    #[test]
+    fn should_not_propagate_events_if_has_attr_cond_is_not_satisfied() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+        // Mount foo and bar
+        assert!(application
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
+            .is_ok());
+        assert!(application
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockBarInput::default()),
+                vec![Sub::new(
+                    // NOTE: won't be thrown, since requires focus
+                    SubEventClause::Tick,
+                    SubClause::HasAttrValue(
+                        MockComponentId::InputBar,
+                        Attribute::Focus,
+                        AttrValue::Flag(true)
+                    )
+                )]
+            )
+            .is_ok());
+        // Active FOO
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from(""))]
+        );
+    }
+
+    #[test]
+    fn should_propagate_events_if_has_attr_cond_is_satisfied() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+        // Mount foo and bar
+        assert!(application
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
+            .is_ok());
+        assert!(application
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockBarInput::default()),
+                vec![Sub::new(
+                    SubEventClause::Tick,
+                    SubClause::HasAttrValue(
+                        MockComponentId::InputFoo,
+                        Attribute::Focus,
+                        AttrValue::Flag(true)
+                    )
+                )]
+            )
+            .is_ok());
+        // Active FOO
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+        );
+    }
+
+    #[test]
+    fn should_not_propagate_events_if_has_state_cond_is_not_satisfied() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+        // Mount foo and bar
+        assert!(application
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
+            .is_ok());
+        assert!(application
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockBarInput::default()),
+                vec![Sub::new(
+                    SubEventClause::Tick,
+                    SubClause::HasState(MockComponentId::InputFoo, State::None)
+                )]
+            )
+            .is_ok());
+        // Active FOO
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from(""))]
+        );
+    }
+
+    #[test]
+    fn should_propagate_events_if_has_state_cond_is_satisfied() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+        // Mount foo and bar
+        assert!(application
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
+            .is_ok());
+        assert!(application
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockBarInput::default()),
+                vec![Sub::new(
+                    SubEventClause::Tick,
+                    SubClause::HasState(
+                        MockComponentId::InputFoo,
+                        State::One(StateValue::String(String::new()))
+                    )
+                )]
+            )
+            .is_ok());
+        // Active FOO
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        // No event should be generated
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+        );
+    }
+
+    #[test]
+    fn should_not_propagate_events_if_is_mounted_cond_is_not_satisfied() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+        // Mount foo and bar
+        assert!(application
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
+            .is_ok());
+        assert!(application
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockBarInput::default()),
+                vec![Sub::new(
+                    SubEventClause::Tick,
+                    SubClause::IsMounted(MockComponentId::InputOmar)
+                )]
+            )
+            .is_ok());
+        // Active FOO
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from(""))]
+        );
+    }
+
+    #[test]
+    fn should_propagate_events_if_is_mounted_cond_is_not_satisfied() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+        // Mount foo and bar
+        assert!(application
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
+            .is_ok());
+        assert!(application
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockBarInput::default()),
+                vec![Sub::new(
+                    SubEventClause::Tick,
+                    SubClause::IsMounted(MockComponentId::InputFoo)
+                )]
+            )
+            .is_ok());
+        // Active FOO
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        // No event should be generated
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+        );
+    }
+
     fn listener_config() -> EventListenerCfg<MockEvent> {
         EventListenerCfg::default().port(
             Box::new(MockPoll::<MockEvent>::default()),
