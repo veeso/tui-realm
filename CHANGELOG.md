@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.2.0](#120)
   - [1.1.2](#112)
   - [1.1.0](#110)
   - [1.0.1](#101)
@@ -20,6 +21,17 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.2.0
+
+Released on 25/11/2021
+
+> Yet, another update 🙄
+
+- Application API:
+  - Added `lock_subs()` and `unlock_subs()` methods.
+    - Once `lock_subs()` is called, events won't be anymore propagated to subscriptions as long as `unlock_subs()` is not called.
+    - by default events **will be propagated** to subs.
 
 ## 1.1.2
 

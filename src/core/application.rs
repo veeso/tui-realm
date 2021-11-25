@@ -55,6 +55,8 @@ where
 {
     listener: EventListener<UserEvent>,
     subs: Vec<Subscription<ComponentId, UserEvent>>,
+    /// If true, subs won't be processed. (Default: False)
+    sub_lock: bool,
     view: View<ComponentId, Msg, UserEvent>,
 }
 
@@ -72,6 +74,7 @@ where
         Self {
             listener: listener_cfg.start(),
             subs: Vec::new(),
+            sub_lock: false,
             view: View::default(),
         }
     }
@@ -113,7 +116,9 @@ where
             .flatten()
             .collect();
         // Forward to subscriptions and extend vector
-        messages.extend(self.forward_to_subscriptions(events));
+        if !self.sub_lock {
+            messages.extend(self.forward_to_subscriptions(events));
+        }
         Ok(messages)
     }
 
@@ -279,6 +284,21 @@ where
         }
         self.subs.retain(|s| s.target() != id && s.event() != &ev);
         Ok(())
+    }
+
+    /// ### lock_subs
+    ///
+    /// Lock subscriptions. As long as the subscriptions are locked, events won't be propagated to
+    /// subscriptions.
+    pub fn lock_subs(&mut self) {
+        self.sub_lock = true;
+    }
+
+    /// ### unlock_subs
+    ///
+    /// Unlock subscriptions. Application will now resume propagating events to subscriptions.
+    pub fn unlock_subs(&mut self) {
+        self.sub_lock = false;
     }
 
     // -- private
@@ -447,6 +467,7 @@ mod test {
             Application::init(listener_config());
         assert!(application.subs.is_empty());
         assert_eq!(application.view.mounted(&MockComponentId::InputFoo), false);
+        assert_eq!(application.sub_lock, false);
     }
 
     #[test]
@@ -708,6 +729,50 @@ mod test {
                 .len()
                 >= 3
         );
+    }
+
+    #[test]
+    fn should_not_propagate_event_when_subs_are_locked() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+        // Mount foo and bar
+        assert!(application
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
+            .is_ok());
+        assert!(application
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockBarInput::default()),
+                vec![
+                    Sub::new(SubEventClause::Tick, SubClause::Always),
+                    Sub::new(
+                        // NOTE: won't be thrown, since requires focus
+                        SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
+                        SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
+                    )
+                ]
+            )
+            .is_ok());
+        // Active FOO
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        // lock subs
+        application.lock_subs();
+        assert_eq!(application.sub_lock, true);
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from(""))]
+        );
+        // unlock subs
+        application.unlock_subs();
+        assert_eq!(application.sub_lock, false);
     }
 
     fn listener_config() -> EventListenerCfg<MockEvent> {
