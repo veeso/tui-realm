@@ -133,7 +133,7 @@ where
         &mut self,
         id: K,
         component: WrappedComponent<Msg, UserEvent>,
-        subs: Vec<Sub<UserEvent>>,
+        subs: Vec<Sub<K, UserEvent>>,
     ) -> ApplicationResult<()> {
         // Mount
         self.view.mount(id.clone(), component)?;
@@ -167,7 +167,7 @@ where
         &mut self,
         id: K,
         component: WrappedComponent<Msg, UserEvent>,
-        subs: Vec<Sub<UserEvent>>,
+        subs: Vec<Sub<K, UserEvent>>,
     ) -> ApplicationResult<()> {
         let had_focus = self.view.has_focus(&id);
         let _ = self.umount(&id);
@@ -259,7 +259,7 @@ where
     ///
     /// Subscribe component to a certain event.
     /// Returns Error if the component doesn't exist or if the component is already subscribed to this event
-    pub fn subscribe(&mut self, id: &K, sub: Sub<UserEvent>) -> ApplicationResult<()> {
+    pub fn subscribe(&mut self, id: &K, sub: Sub<K, UserEvent>) -> ApplicationResult<()> {
         if !self.view.mounted(id) {
             return Err(ViewError::ComponentNotFound.into());
         }
@@ -395,8 +395,9 @@ where
                 }
                 if !sub.forward(
                     ev,
-                    |q| self.view.component(sub.target()).unwrap().query(q),
-                    || self.view.component(sub.target()).unwrap().state(),
+                    |id, q| self.view.query(id, q).ok().flatten(),
+                    |id| self.view.state(id).ok(),
+                    |id| self.view.mounted(id),
                 ) {
                     continue;
                 }
@@ -571,11 +572,19 @@ mod test {
                     Sub::new(SubEventClause::Tick, SubClause::Always),
                     Sub::new(
                         SubEventClause::Tick,
-                        SubClause::HasAttrValue(Attribute::InputLength, AttrValue::Length(8))
+                        SubClause::HasAttrValue(
+                            MockComponentId::InputFoo,
+                            Attribute::InputLength,
+                            AttrValue::Length(8)
+                        )
                     ), // NOTE: This event will be ignored
                     Sub::new(
                         SubEventClause::User(MockEvent::Bar),
-                        SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
+                        SubClause::HasAttrValue(
+                            MockComponentId::InputFoo,
+                            Attribute::Focus,
+                            AttrValue::Flag(true)
+                        )
                     )
                 ]
             )
@@ -587,7 +596,11 @@ mod test {
                 &MockComponentId::InputFoo,
                 Sub::new(
                     SubEventClause::User(MockEvent::Foo),
-                    SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(false))
+                    SubClause::HasAttrValue(
+                        MockComponentId::InputFoo,
+                        Attribute::Focus,
+                        AttrValue::Flag(false)
+                    )
                 )
             )
             .is_ok());
@@ -598,7 +611,11 @@ mod test {
                 &MockComponentId::InputFoo,
                 Sub::new(
                     SubEventClause::User(MockEvent::Foo),
-                    SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(false))
+                    SubClause::HasAttrValue(
+                        MockComponentId::InputFoo,
+                        Attribute::Focus,
+                        AttrValue::Flag(false)
+                    )
                 )
             )
             .is_err());
@@ -608,7 +625,11 @@ mod test {
                 &MockComponentId::InputBar,
                 Sub::new(
                     SubEventClause::User(MockEvent::Foo),
-                    SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(false))
+                    SubClause::HasAttrValue(
+                        MockComponentId::InputBar,
+                        Attribute::Focus,
+                        AttrValue::Flag(false)
+                    )
                 )
             )
             .is_err());
@@ -640,7 +661,11 @@ mod test {
                     Sub::new(SubEventClause::Tick, SubClause::Always),
                     Sub::new(
                         SubEventClause::User(MockEvent::Bar),
-                        SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
+                        SubClause::HasAttrValue(
+                            MockComponentId::InputFoo,
+                            Attribute::Focus,
+                            AttrValue::Flag(true)
+                        )
                     )
                 ]
             )
@@ -681,7 +706,11 @@ mod test {
                     Sub::new(
                         // NOTE: won't be thrown, since requires focus
                         SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
-                        SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
+                        SubClause::HasAttrValue(
+                            MockComponentId::InputBar,
+                            Attribute::Focus,
+                            AttrValue::Flag(true)
+                        )
                     )
                 ]
             )
@@ -721,14 +750,11 @@ mod test {
             &[MockMsg::BarSubmit(String::from(""))]
         );
         // Let's try TryFor strategy
-        assert!(
-            application
-                .tick(PollStrategy::TryFor(Duration::from_millis(300)))
-                .ok()
-                .unwrap()
-                .len()
-                >= 3
-        );
+        let events = application
+            .tick(PollStrategy::TryFor(Duration::from_millis(300)))
+            .ok()
+            .unwrap();
+        assert!(events.len() >= 2);
     }
 
     #[test]
@@ -752,7 +778,11 @@ mod test {
                     Sub::new(
                         // NOTE: won't be thrown, since requires focus
                         SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
-                        SubClause::HasAttrValue(Attribute::Focus, AttrValue::Flag(true))
+                        SubClause::HasAttrValue(
+                            MockComponentId::InputBar,
+                            Attribute::Focus,
+                            AttrValue::Flag(true)
+                        )
                     )
                 ]
             )

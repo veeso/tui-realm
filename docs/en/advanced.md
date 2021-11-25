@@ -6,7 +6,7 @@
     - [Handle subscriptions](#handle-subscriptions)
     - [Event clauses in details](#event-clauses-in-details)
     - [Sub clauses in details](#sub-clauses-in-details)
-    - [Sanitizing the application](#sanitizing-the-application)
+    - [Subscriptions lock](#subscriptions-lock)
   - [Tick Event](#tick-event)
   - [Ports](#ports)
   - [Implementing new components](#implementing-new-components)
@@ -152,8 +152,9 @@ Sub clauses are verified once the event clause is satisfied, and they define som
 In particular sub clauses are:
 
 - `Always`: the clause is always satisfied
-- `HasAttrValue(Attribute, AttrValue)`: the clause is satisfied if the target component has `Attribute` with `AttrValue` in its `Props`.
-- `HasState(State)`: the clause is satisfied if the target component has `State` equal to provided state.
+- `HasAttrValue(Id, Attribute, AttrValue)`: the clause is satisfied if the target component (defined in `Id`) has `Attribute` with `AttrValue` in its `Props`.
+- `HasState(Id, State)`: the clause is satisfied if the target component (defined in `Id`) has `State` equal to provided state.
+- `IsMounted(Id)`: the clause is satisfied if the target component (defines in `Id`) is mounted in the View.
 
 In addition to these, it is also possible to combine Sub clauses using expressions:
 
@@ -165,20 +166,12 @@ Using `And` and `Or` you can create even long expression and keep in mind that t
 
 `And(Or(A, And(B, C)), And(D, Or(E, F)))` is evaluated as `(A || (B && C)) && (D && (E || F))`
 
-### Sanitizing the application
+### Subscriptions lock
 
-First of all let's say one thing:
+It is possible to temporarily disable the subscriptions propagation.
+To do so, you just need to call `application.lock_subs()`.
 
-- The subscriptions are handled by the **Application**, **not** by the **View**.
-- Whenever you *umount* a component from the **Application** all subscriptions associated to it will be removed.
-
-Said so, sanitizing the application means to remove all orphan subscriptions, which means removing all the subscriptions associated to a component which is no longer mounted in the view.
-
-But if application always removes subscriptions when umount, how can this possibly happen? 🤔
-
-Well, there is a way to achieve this. If you umount a component from the **View** in the **Update routine**, subscriptions won't be checked.
-Whenever you umount components that have subscriptions, you should call `application.sanitize()` after the update
-routine is finished.
+Whenever you want to restore event propagation, just call `application.unlock_subs()`.
 
 ---
 

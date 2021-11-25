@@ -149,13 +149,6 @@ where
         self.focus.as_ref()
     }
 
-    /// ### component
-    ///
-    /// Returns reference to component associated to `id`
-    pub(crate) fn component(&self, id: &K) -> Option<&dyn Component<Msg, UserEvent>> {
-        self.components.get(id).map(|x| x.as_ref())
-    }
-
     /// ### view
     ///
     /// Render component called `id`
@@ -352,8 +345,6 @@ mod test {
             .is_ok());
         assert_eq!(view.components.len(), 1);
         assert!(view.mounted(&MockComponentId::InputFoo));
-        assert!(view.component(&MockComponentId::InputFoo).is_some());
-        assert!(view.component(&MockComponentId::InputBar).is_none());
         assert_eq!(view.mounted(&MockComponentId::InputBar), false);
         // Mount bar
         assert!(view
@@ -388,8 +379,6 @@ mod test {
             .is_ok());
         assert_eq!(view.components.len(), 1);
         assert!(view.mounted(&MockComponentId::InputFoo));
-        assert!(view.component(&MockComponentId::InputFoo).is_some());
-        assert!(view.component(&MockComponentId::InputBar).is_none());
         assert_eq!(view.mounted(&MockComponentId::InputBar), false);
         // Mount bar
         assert!(view
