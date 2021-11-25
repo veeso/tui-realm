@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.1.2 (23/11/2021)</p>
+<p align="center">Current version: 1.2.0 (25/11/2021)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -126,13 +126,13 @@ See tui-realm in action in the [Example](#run-examples) or if you want to read m
 If you want the default features, just add tuirealm 1.x version:
 
 ```toml
-tuirealm = "^1.1.0"
+tuirealm = "^1.2.0"
 ```
 
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "^1.1.0", default-features = false, features = [ "derive", "with-termion" ] }
+tuirealm = { version = "^1.2.0", default-features = false, features = [ "derive", "with-termion" ] }
 ```
 
 Supported features are:
