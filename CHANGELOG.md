@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.2.1](#121)
   - [1.2.0](#120)
   - [1.1.2](#112)
   - [1.1.0](#110)
@@ -21,6 +22,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.2.1
+
+Released on 27/11/2021
+
+- `TextSpan` `From` trait implementation, now accepts `AsRef<str>`
 
 ## 1.2.0
 
