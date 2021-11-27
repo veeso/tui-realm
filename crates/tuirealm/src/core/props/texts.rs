@@ -127,14 +127,11 @@ impl Default for TextSpan {
     }
 }
 
-impl From<&str> for TextSpan {
-    fn from(txt: &str) -> Self {
-        TextSpan::new(txt)
-    }
-}
-
-impl From<String> for TextSpan {
-    fn from(txt: String) -> Self {
+impl<S> From<S> for TextSpan
+where
+    S: AsRef<str>,
+{
+    fn from(txt: S) -> Self {
         TextSpan::new(txt)
     }
 }
