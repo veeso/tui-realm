@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.1.3](#113)
   - [1.1.2](#112)
   - [1.1.0](#110)
   - [1.0.3](#103)
@@ -15,6 +16,12 @@
   - [0.5.0](#050)
 
 ---
+
+## 1.1.3
+
+Released on 28/11/2021
+
+- Fixed a glitch which made list items always highlighted
 
 ## 1.1.2
 

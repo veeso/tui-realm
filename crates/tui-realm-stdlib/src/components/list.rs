@@ -316,6 +316,10 @@ impl MockComponent for List {
                 },
                 Some(color) => color,
             };
+            let modifiers = match focus {
+                true => modifiers | TextModifiers::REVERSED,
+                false => modifiers,
+            };
             // Make list
             let mut list = TuiList::new(list_items)
                 .block(div)
@@ -323,7 +327,7 @@ impl MockComponent for List {
                 .highlight_style(
                     Style::default()
                         .fg(highlighted_color)
-                        .add_modifier(TextModifiers::REVERSED | modifiers),
+                        .add_modifier(modifiers),
                 );
             // Highlighted symbol
             self.hg_str = self

@@ -385,6 +385,10 @@ impl MockComponent for Table {
                 Some(color) => color,
             };
             // Make list
+            let hg_modifiers = match focus {
+                true => modifiers | TextModifiers::REVERSED,
+                false => modifiers,
+            };
             let widths: Vec<Constraint> = self.layout();
             let mut table = TuiTable::new(rows)
                 .block(crate::utils::get_block(
@@ -396,7 +400,7 @@ impl MockComponent for Table {
                 .highlight_style(
                     Style::default()
                         .fg(highlighted_color)
-                        .add_modifier(TextModifiers::REVERSED | modifiers),
+                        .add_modifier(hg_modifiers),
                 )
                 .widths(&widths);
             // Highlighted symbol
