@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.1.2](#112)
   - [1.1.0](#110)
   - [1.0.3](#103)
   - [1.0.2](#102)
@@ -14,6 +15,12 @@
   - [0.5.0](#050)
 
 ---
+
+## 1.1.2
+
+Released on 28/11/2021
+
+- Solved issue for highlighted items: when highlighted text where rendered with default foreground, instead of with terminal background color
 
 ## 1.1.0
 

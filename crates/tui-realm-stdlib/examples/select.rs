@@ -181,7 +181,6 @@ impl Default for SelectAlfa {
                         .color(Color::LightGreen),
                 )
                 .foreground(Color::LightGreen)
-                .background(Color::Black)
                 .title("Select your ice cream flavour 🍦", Alignment::Center)
                 .rewind(true)
                 .highlighted_color(Color::LightGreen)
@@ -235,7 +234,6 @@ impl Default for SelectBeta {
                         .color(Color::LightYellow),
                 )
                 .foreground(Color::LightYellow)
-                .background(Color::Black)
                 .title("Select your topping 🧁", Alignment::Center)
                 .rewind(false)
                 .highlighted_color(Color::LightYellow)

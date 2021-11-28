@@ -29,7 +29,7 @@
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, BorderSides, Borders, Color, PropPayload, PropValue, Props,
-    Style,
+    Style, TextModifiers,
 };
 use tuirealm::tui::{
     layout::{Constraint, Corner, Direction as LayoutDirection, Layout, Rect},
@@ -240,8 +240,6 @@ impl Select {
             .props
             .get_or(Attribute::HighlightedColor, AttrValue::Color(foreground))
             .unwrap_color();
-        // Make colors
-        let (bg, hg): (Color, Color) = (background, hg);
         // Prepare layout
         let chunks = Layout::default()
             .direction(LayoutDirection::Vertical)
@@ -295,7 +293,11 @@ impl Select {
             )
             .start_corner(Corner::TopLeft)
             .style(Style::default().fg(foreground).bg(background))
-            .highlight_style(Style::default().fg(bg).bg(hg));
+            .highlight_style(
+                Style::default()
+                    .fg(hg)
+                    .add_modifier(TextModifiers::REVERSED),
+            );
         // Highlighted symbol
         self.hg_str = self
             .props

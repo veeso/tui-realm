@@ -347,10 +347,6 @@ impl MockComponent for Table {
                 .props
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
-            let active: bool = match self.is_scrollable() {
-                true => focus,
-                false => true,
-            };
             let row_height = self
                 .props
                 .get_or(Attribute::Height, AttrValue::Size(1))
@@ -388,10 +384,6 @@ impl MockComponent for Table {
                 },
                 Some(color) => color,
             };
-            let (fg, bg): (Color, Color) = match active {
-                true => (background, highlighted_color),
-                false => (highlighted_color, background),
-            };
             // Make list
             let widths: Vec<Constraint> = self.layout();
             let mut table = TuiTable::new(rows)
@@ -401,7 +393,11 @@ impl MockComponent for Table {
                     focus,
                     inactive_style,
                 ))
-                .highlight_style(Style::default().fg(fg).bg(bg).add_modifier(modifiers))
+                .highlight_style(
+                    Style::default()
+                        .fg(highlighted_color)
+                        .add_modifier(TextModifiers::REVERSED | modifiers),
+                )
                 .widths(&widths);
             // Highlighted symbol
             self.hg_str = self

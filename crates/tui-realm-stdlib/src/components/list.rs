@@ -316,15 +316,15 @@ impl MockComponent for List {
                 },
                 Some(color) => color,
             };
-            let (fg, bg): (Color, Color) = match active {
-                true => (background, highlighted_color),
-                false => (highlighted_color, background),
-            };
             // Make list
             let mut list = TuiList::new(list_items)
                 .block(div)
                 .start_corner(Corner::TopLeft)
-                .highlight_style(Style::default().fg(fg).bg(bg).add_modifier(modifiers));
+                .highlight_style(
+                    Style::default()
+                        .fg(highlighted_color)
+                        .add_modifier(TextModifiers::REVERSED | modifiers),
+                );
             // Highlighted symbol
             self.hg_str = self
                 .props

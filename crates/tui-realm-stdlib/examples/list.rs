@@ -169,8 +169,6 @@ impl Default for ListAlfa {
                         .modifiers(BorderType::Rounded)
                         .color(Color::Yellow),
                 )
-                .foreground(Color::Yellow)
-                .background(Color::Black)
                 .title("Lorem ipsum (scrollable)", Alignment::Center)
                 .scroll(true)
                 .highlighted_color(Color::LightYellow)
@@ -281,7 +279,6 @@ impl Default for ListBeta {
                         .color(Color::Green),
                 )
                 .foreground(Color::Green)
-                .background(Color::Black)
                 .title("Lorem ipsum (unscrollable)", Alignment::Center)
                 .scroll(false)
                 .rows(

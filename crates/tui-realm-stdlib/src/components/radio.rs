@@ -28,6 +28,7 @@
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+    TextModifiers,
 };
 use tuirealm::tui::{layout::Rect, text::Spans, widgets::Tabs};
 use tuirealm::{Frame, MockComponent, State, StateValue};
@@ -212,15 +213,19 @@ impl MockComponent for Radio {
                 .map(|x| x.unwrap_style());
             let div = crate::utils::get_block(borders, title, focus, inactive_style);
             // Make colors
-            let (bg, fg, block_color): (Color, Color, Color) = match focus {
-                true => (foreground, background, foreground),
-                false => (Color::Reset, foreground, Color::Reset),
+            let (fg, block_color): (Color, Color) = match focus {
+                true => (foreground, foreground),
+                false => (foreground, Color::Reset),
+            };
+            let modifiers = match focus {
+                true => TextModifiers::REVERSED,
+                false => TextModifiers::empty(),
             };
             let radio: Tabs = Tabs::new(choices)
                 .block(div)
                 .select(self.states.choice)
-                .style(Style::default().fg(block_color))
-                .highlight_style(Style::default().fg(fg).bg(bg));
+                .style(Style::default().fg(block_color).bg(background))
+                .highlight_style(Style::default().fg(fg).add_modifier(modifiers));
             render.render_widget(radio, area);
         }
     }

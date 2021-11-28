@@ -169,8 +169,6 @@ impl Default for TableAlfa {
                         .modifiers(BorderType::Thick)
                         .color(Color::Yellow),
                 )
-                .foreground(Color::Yellow)
-                .background(Color::Black)
                 .title("Keybindings", Alignment::Center)
                 .scroll(true)
                 .highlighted_color(Color::LightYellow)
@@ -261,7 +259,6 @@ impl Default for TableBeta {
                         .color(Color::Green),
                 )
                 .foreground(Color::Green)
-                .background(Color::Black)
                 .title("Keybindings (not scrollable)", Alignment::Center)
                 .scroll(false)
                 .highlighted_color(Color::Green)
