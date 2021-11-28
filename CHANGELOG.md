@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.3.0](#130)
   - [1.2.1](#121)
   - [1.2.0](#120)
   - [1.1.2](#112)
@@ -22,6 +23,14 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.3.0
+
+Released on 28/11/2021
+
+- Added `lock_ports()` and `unlock_ports()` to pause event listener.
+  - Once `lock_ports()` is called, **Ports** won't be polled as long as `unlock_ports()` is not called.
+  - by default ports are **Unlocked**
 
 ## 1.2.1
 

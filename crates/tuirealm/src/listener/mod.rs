@@ -91,6 +91,8 @@ where
 {
     /// Max Time to wait when calling `recv()` on thread receiver
     poll_timeout: Duration,
+    /// Indicates whether the worker should paused polling ports
+    paused: Arc<RwLock<bool>>,
     /// Indicates whether the worker should keep running
     running: Arc<RwLock<bool>>,
     /// Msg receiver from worker
@@ -124,12 +126,13 @@ where
             )
         }
         // Prepare channel and running state
-        let (recv, running, thread) = Self::setup_thread(ports, tick_interval);
+        let config = Self::setup_thread(ports, tick_interval);
         Self {
-            running,
+            paused: config.paused,
+            running: config.running,
             poll_timeout,
-            recv,
-            thread: Some(thread),
+            recv: config.rx,
+            thread: Some(config.thread),
         }
     }
 
@@ -153,6 +156,32 @@ where
         }
     }
 
+    /// ### pause
+    ///
+    /// Pause event listener worker
+    pub fn pause(&mut self) -> ListenerResult<()> {
+        // NOTE: keep these brackets to drop running after block
+        let mut paused = match self.paused.write() {
+            Ok(lock) => Ok(lock),
+            Err(_) => Err(ListenerError::CouldNotStop),
+        }?;
+        *paused = true;
+        Ok(())
+    }
+
+    /// ### unpause
+    ///
+    /// Unpause event listener worker
+    pub fn unpause(&mut self) -> ListenerResult<()> {
+        // NOTE: keep these brackets to drop running after block
+        let mut paused = match self.paused.write() {
+            Ok(lock) => Ok(lock),
+            Err(_) => Err(ListenerError::CouldNotStop),
+        }?;
+        *paused = false;
+        Ok(())
+    }
+
     /// ### poll
     ///
     /// Checks whether there are new events available from event
@@ -167,22 +196,17 @@ where
     /// ### setup_thread
     ///
     /// Setup the thread and returns the structs necessary to interact with it
-    fn setup_thread(
-        ports: Vec<Port<U>>,
-        tick_interval: Option<Duration>,
-    ) -> (
-        mpsc::Receiver<ListenerMsg<U>>,
-        Arc<RwLock<bool>>,
-        JoinHandle<()>,
-    ) {
+    fn setup_thread(ports: Vec<Port<U>>, tick_interval: Option<Duration>) -> ThreadConfig<U> {
         let (sender, recv) = mpsc::channel();
+        let paused = Arc::new(RwLock::new(false));
+        let paused_t = Arc::clone(&paused);
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
         // Start thread
         let thread = thread::spawn(move || {
-            EventListenerWorker::new(ports, sender, running_t, tick_interval).run();
+            EventListenerWorker::new(ports, sender, paused_t, running_t, tick_interval).run();
         });
-        (recv, running, thread)
+        ThreadConfig::new(recv, paused, running, thread)
     }
 }
 
@@ -192,6 +216,40 @@ where
 {
     fn drop(&mut self) {
         let _ = self.stop();
+    }
+}
+
+// -- thread config
+
+/// ## ThreadConfig
+///
+/// Config returned by thread setup
+struct ThreadConfig<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+{
+    rx: mpsc::Receiver<ListenerMsg<U>>,
+    paused: Arc<RwLock<bool>>,
+    running: Arc<RwLock<bool>>,
+    thread: JoinHandle<()>,
+}
+
+impl<U> ThreadConfig<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+{
+    pub fn new(
+        rx: mpsc::Receiver<ListenerMsg<U>>,
+        paused: Arc<RwLock<bool>>,
+        running: Arc<RwLock<bool>>,
+        thread: JoinHandle<()>,
+    ) -> Self {
+        Self {
+            rx,
+            paused,
+            running,
+            thread,
+        }
     }
 }
 
@@ -255,6 +313,28 @@ mod test {
         // Wait 3 seconds
         thread::sleep(Duration::from_secs(3));
         // New tick
+        assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
+        // Stop
+        assert!(listener.stop().is_ok());
+    }
+
+    #[test]
+    fn worker_should_be_paused() {
+        let mut listener = EventListener::<MockEvent>::start(
+            vec![],
+            Duration::from_millis(10),
+            Some(Duration::from_millis(750)),
+        );
+        thread::sleep(Duration::from_millis(100));
+        assert!(listener.pause().is_ok());
+        // Should be some
+        assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
+        // Wait tick time
+        thread::sleep(Duration::from_secs(1));
+        assert_eq!(listener.poll().ok().unwrap(), None);
+        // Unpause
+        assert!(listener.unpause().is_ok());
+        thread::sleep(Duration::from_millis(300));
         assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
         // Stop
         assert!(listener.stop().is_ok());

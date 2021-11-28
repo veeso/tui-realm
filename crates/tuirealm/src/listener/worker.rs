@@ -42,6 +42,7 @@ where
 {
     ports: Vec<Port<U>>,
     sender: mpsc::Sender<ListenerMsg<U>>,
+    paused: Arc<RwLock<bool>>,
     running: Arc<RwLock<bool>>,
     next_tick: Instant,
     tick_interval: Option<Duration>,
@@ -54,12 +55,14 @@ where
     pub(super) fn new(
         ports: Vec<Port<U>>,
         sender: mpsc::Sender<ListenerMsg<U>>,
+        paused: Arc<RwLock<bool>>,
         running: Arc<RwLock<bool>>,
         tick_interval: Option<Duration>,
     ) -> Self {
         Self {
             ports,
             sender,
+            paused,
             running,
             next_tick: Instant::now(),
             tick_interval,
@@ -108,6 +111,16 @@ where
             return *lock;
         }
         true
+    }
+
+    /// ### paused
+    ///
+    /// Returns whether worker is paused
+    fn paused(&self) -> bool {
+        if let Ok(lock) = self.paused.read() {
+            return *lock;
+        }
+        false
     }
 
     /// ### should_tick
@@ -184,6 +197,11 @@ where
             if !self.running() {
                 break;
             }
+            // If paused, wait and resume cycle
+            if self.paused() {
+                thread::sleep(Duration::from_millis(25));
+                continue;
+            }
             // Iter ports and Send messages
             if self.poll().is_err() {
                 break;
@@ -213,6 +231,8 @@ mod test {
     #[test]
     fn worker_should_send_poll() {
         let (tx, rx) = mpsc::channel();
+        let paused = Arc::new(RwLock::new(false));
+        let paused_t = Arc::clone(&paused);
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
@@ -221,6 +241,7 @@ mod test {
                 Duration::from_secs(5),
             )],
             tx,
+            paused_t,
             running_t,
             None,
         );
@@ -236,6 +257,8 @@ mod test {
     #[test]
     fn worker_should_send_tick() {
         let (tx, rx) = mpsc::channel();
+        let paused = Arc::new(RwLock::new(false));
+        let paused_t = Arc::clone(&paused);
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
@@ -244,6 +267,7 @@ mod test {
                 Duration::from_secs(5),
             )],
             tx,
+            paused_t,
             running_t,
             Some(Duration::from_secs(1)),
         );
@@ -259,6 +283,8 @@ mod test {
     #[test]
     fn worker_should_calc_times_correctly_with_tick() {
         let (tx, rx) = mpsc::channel();
+        let paused = Arc::new(RwLock::new(false));
+        let paused_t = Arc::clone(&paused);
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
@@ -267,6 +293,7 @@ mod test {
                 Duration::from_secs(5),
             )],
             tx,
+            paused_t,
             running_t,
             Some(Duration::from_secs(1)),
         );
@@ -300,6 +327,8 @@ mod test {
     #[test]
     fn worker_should_calc_times_correctly_without_tick() {
         let (tx, rx) = mpsc::channel();
+        let paused = Arc::new(RwLock::new(false));
+        let paused_t = Arc::clone(&paused);
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
         let worker = EventListenerWorker::<MockEvent>::new(
@@ -308,10 +337,12 @@ mod test {
                 Duration::from_secs(3),
             )],
             tx,
+            paused_t,
             running_t,
             None,
         );
         assert_eq!(worker.running(), true);
+        assert_eq!(worker.paused(), false);
         // Should set next events to now
         assert!(worker.next_event() <= Duration::from_secs(3));
         assert!(worker.next_tick <= Instant::now());
@@ -336,9 +367,12 @@ mod test {
     #[should_panic]
     fn worker_should_panic_when_trying_next_tick_without_it() {
         let (tx, _) = mpsc::channel();
+        let paused = Arc::new(RwLock::new(false));
+        let paused_t = Arc::clone(&paused);
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
-        let mut worker = EventListenerWorker::<MockEvent>::new(vec![], tx, running_t, None);
+        let mut worker =
+            EventListenerWorker::<MockEvent>::new(vec![], tx, paused_t, running_t, None);
         worker.calc_next_tick();
     }
 }
