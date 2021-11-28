@@ -93,6 +93,21 @@ where
         Ok(())
     }
 
+    /// ### lock_ports
+    ///
+    /// Lock ports. As long as Ports are locked, ports won't be polled.
+    /// Locking ports will also prevent Tick events from being generated.
+    pub fn lock_ports(&mut self) -> ApplicationResult<()> {
+        self.listener.pause().map_err(ApplicationError::from)
+    }
+
+    /// ### unlock_ports
+    ///
+    /// Unlock Ports. Once called, the event listener will resume polling Ports.
+    pub fn unlock_ports(&mut self) -> ApplicationResult<()> {
+        self.listener.unpause().map_err(ApplicationError::from)
+    }
+
     /// ### tick
     ///
     /// The tick method makes the application to run once.
@@ -1012,7 +1027,66 @@ mod test {
             .is_ok());
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
-        // No event should be generated
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+        );
+    }
+
+    #[test]
+    fn should_lock_ports() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config_with_tick(Duration::from_millis(500)));
+        // Mount foo and bar
+        assert!(application
+            .mount(
+                MockComponentId::InputFoo,
+                Box::new(MockFooInput::default()),
+                vec![]
+            )
+            .is_ok());
+        assert!(application
+            .mount(
+                MockComponentId::InputBar,
+                Box::new(MockBarInput::default()),
+                vec![Sub::new(
+                    SubEventClause::Tick,
+                    SubClause::IsMounted(MockComponentId::InputFoo)
+                )]
+            )
+            .is_ok());
+        // Active FOO
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+        );
+        // Lock ports
+        assert!(application.lock_ports().is_ok());
+        // Wait 1 sec
+        std::thread::sleep(Duration::from_millis(1000));
+        // Tick ( No tick event )
+        assert_eq!(
+            application
+                .tick(PollStrategy::UpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[]
+        );
+        // Unlock ports
+        assert!(application.unlock_ports().is_ok());
+        // Wait 100 ms
+        std::thread::sleep(Duration::from_millis(50));
+        // Tick
         assert_eq!(
             application
                 .tick(PollStrategy::UpTo(5))
