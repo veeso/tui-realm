@@ -305,17 +305,10 @@ impl MockComponent for List {
                         .collect(), // Make List item from TextSpan
                     _ => Vec::new(),
                 };
-            let highlighted_color: Color = match self
+            let highlighted_color = self
                 .props
                 .get(Attribute::HighlightedColor)
-                .map(|x| x.unwrap_color())
-            {
-                None => match focus {
-                    true => background,
-                    false => foreground,
-                },
-                Some(color) => color,
-            };
+                .map(|x| x.unwrap_color());
             let modifiers = match focus {
                 true => modifiers | TextModifiers::REVERSED,
                 false => modifiers,
@@ -323,12 +316,15 @@ impl MockComponent for List {
             // Make list
             let mut list = TuiList::new(list_items)
                 .block(div)
-                .start_corner(Corner::TopLeft)
-                .highlight_style(
+                .style(Style::default().fg(foreground).bg(background))
+                .start_corner(Corner::TopLeft);
+            if let Some(highlighted_color) = highlighted_color {
+                list = list.highlight_style(
                     Style::default()
                         .fg(highlighted_color)
                         .add_modifier(modifiers),
                 );
+            }
             // Highlighted symbol
             self.hg_str = self
                 .props

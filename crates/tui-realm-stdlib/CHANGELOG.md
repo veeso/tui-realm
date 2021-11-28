@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.1.4](#114)
   - [1.1.3](#113)
   - [1.1.2](#112)
   - [1.1.0](#110)
@@ -17,15 +18,21 @@
 
 ---
 
-## 1.1.3
+## 1.1.4
 
 Released on 28/11/2021
+
+- Fixed highlighted color rendered also when not selected in lists and tables
+
+## 1.1.3
+
+Released on 28/11/2021 **Yanked**
 
 - Fixed a glitch which made list items always highlighted
 
 ## 1.1.2
 
-Released on 28/11/2021
+Released on 28/11/2021 **Yanked**
 
 - Solved issue for highlighted items: when highlighted text where rendered with default foreground, instead of with terminal background color
 

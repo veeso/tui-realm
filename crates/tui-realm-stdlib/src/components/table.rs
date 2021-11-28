@@ -373,22 +373,10 @@ impl MockComponent for Table {
                     .collect(), // Make List item from TextSpan
                 _ => Vec::new(),
             };
-            let highlighted_color: Color = match self
+            let highlighted_color = self
                 .props
                 .get(Attribute::HighlightedColor)
-                .map(|x| x.unwrap_color())
-            {
-                None => match focus {
-                    true => background,
-                    false => foreground,
-                },
-                Some(color) => color,
-            };
-            // Make list
-            let hg_modifiers = match focus {
-                true => modifiers | TextModifiers::REVERSED,
-                false => modifiers,
-            };
+                .map(|x| x.unwrap_color());
             let widths: Vec<Constraint> = self.layout();
             let mut table = TuiTable::new(rows)
                 .block(crate::utils::get_block(
@@ -397,12 +385,15 @@ impl MockComponent for Table {
                     focus,
                     inactive_style,
                 ))
-                .highlight_style(
-                    Style::default()
-                        .fg(highlighted_color)
-                        .add_modifier(hg_modifiers),
-                )
                 .widths(&widths);
+            if let Some(highlighted_color) = highlighted_color {
+                table = table.highlight_style(Style::default().fg(highlighted_color).add_modifier(
+                    match focus {
+                        true => modifiers | TextModifiers::REVERSED,
+                        false => modifiers,
+                    },
+                ));
+            }
             // Highlighted symbol
             self.hg_str = self
                 .props
