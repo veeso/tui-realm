@@ -41,20 +41,11 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 /// ## CheckboxStates
 ///
 /// CheckboxStates contains states for this component
+#[derive(Default)]
 pub struct CheckboxStates {
     pub choice: usize,         // Selected option
     pub choices: Vec<String>,  // Available choices
     pub selection: Vec<usize>, // Selected options
-}
-
-impl Default for CheckboxStates {
-    fn default() -> Self {
-        CheckboxStates {
-            choice: 0,
-            choices: Vec::new(),
-            selection: Vec::new(),
-        }
-    }
 }
 
 impl CheckboxStates {
@@ -130,18 +121,10 @@ impl CheckboxStates {
 /// ## Checkbox
 ///
 /// Checkbox component represents a group of tabs to select from
+#[derive(Default)]
 pub struct Checkbox {
     props: Props,
     pub states: CheckboxStates,
-}
-
-impl Default for Checkbox {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: CheckboxStates::default(),
-        }
-    }
 }
 
 impl Checkbox {

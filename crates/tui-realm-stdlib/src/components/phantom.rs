@@ -40,16 +40,9 @@ use tuirealm::{Frame, MockComponent, State};
 ///
 /// a component which is not rendered. It only purpose is to become a global listener in a tui-realm application
 /// for some kind of events using subscriptions.
+#[derive(Default)]
 pub struct Phantom {
     props: Props,
-}
-
-impl Default for Phantom {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-        }
-    }
 }
 
 impl MockComponent for Phantom {

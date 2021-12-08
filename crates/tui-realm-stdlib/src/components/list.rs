@@ -39,18 +39,10 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- States
 
+#[derive(Default)]
 pub struct ListStates {
     pub list_index: usize, // Index of selected item in list
     pub list_len: usize,   // Lines in text area
-}
-
-impl Default for ListStates {
-    fn default() -> Self {
-        Self {
-            list_index: 0,
-            list_len: 0,
-        }
-    }
 }
 
 impl ListStates {
@@ -146,20 +138,11 @@ impl ListStates {
 /// ## List
 ///
 /// represents a read-only text component without any container.
+#[derive(Default)]
 pub struct List {
     props: Props,
     pub states: ListStates,
     hg_str: Option<String>, // CRAP CRAP CRAP. Thanks to the author of tui-realm for using references every f time
-}
-
-impl Default for List {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: ListStates::default(),
-            hg_str: None,
-        }
-    }
 }
 
 impl List {

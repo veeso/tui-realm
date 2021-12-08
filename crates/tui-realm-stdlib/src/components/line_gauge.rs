@@ -47,16 +47,9 @@ use tuirealm::{Frame, MockComponent, State};
 /// ## LineGauge
 ///
 /// provides a component which shows the progress. It is possible to set the style for the progress bar and the text shown above it.
+#[derive(Default)]
 pub struct LineGauge {
     props: Props,
-}
-
-impl Default for LineGauge {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-        }
-    }
 }
 
 impl LineGauge {

@@ -43,18 +43,10 @@ use unicode_width::UnicodeWidthStr;
 
 // -- States
 
+#[derive(Default)]
 pub struct TextareaStates {
     pub list_index: usize, // Index of selected item in textarea
     pub list_len: usize,   // Lines in text area
-}
-
-impl Default for TextareaStates {
-    fn default() -> Self {
-        Self {
-            list_index: 0,
-            list_len: 0,
-        }
-    }
 }
 
 impl TextareaStates {
@@ -147,20 +139,11 @@ impl TextareaStates {
 /// ## Textarea
 ///
 /// represents a read-only text component without any container.
+#[derive(Default)]
 pub struct Textarea {
     props: Props,
     pub states: TextareaStates,
     hg_str: Option<String>, // CRAP CRAP CRAP
-}
-
-impl Default for Textarea {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: TextareaStates::default(),
-            hg_str: None,
-        }
-    }
 }
 
 impl Textarea {

@@ -37,18 +37,10 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- states
 
+#[derive(Default)]
 pub struct InputStates {
     pub input: Vec<char>, // Current input
     pub cursor: usize,    // Input position
-}
-
-impl Default for InputStates {
-    fn default() -> Self {
-        InputStates {
-            input: Vec::new(),
-            cursor: 0,
-        }
-    }
 }
 
 impl InputStates {

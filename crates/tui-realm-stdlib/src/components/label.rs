@@ -35,16 +35,9 @@ use tuirealm::{Frame, MockComponent, State};
 /// ## Label
 ///
 /// represents a read-only text component without any container.
+#[derive(Default)]
 pub struct Label {
     props: Props,
-}
-
-impl Default for Label {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-        }
-    }
 }
 
 impl Label {

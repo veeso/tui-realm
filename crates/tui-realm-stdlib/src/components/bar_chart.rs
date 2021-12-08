@@ -45,14 +45,9 @@ use super::props::{
 /// ### BarChartStates
 ///
 /// Bar chart states
+#[derive(Default)]
 pub struct BarChartStates {
     pub cursor: usize,
-}
-
-impl Default for BarChartStates {
-    fn default() -> Self {
-        Self { cursor: 0 }
-    }
 }
 
 impl BarChartStates {
@@ -108,18 +103,10 @@ impl BarChartStates {
 /// #### Active mode
 ///
 /// While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
+#[derive(Default)]
 pub struct BarChart {
     props: Props,
     pub states: BarChartStates,
-}
-
-impl Default for BarChart {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: BarChartStates::default(),
-        }
-    }
 }
 
 impl BarChart {

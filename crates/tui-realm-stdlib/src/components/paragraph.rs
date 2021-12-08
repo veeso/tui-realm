@@ -46,16 +46,9 @@ use tuirealm::{Frame, MockComponent, State};
 /// ## Paragraph
 ///
 /// represents a read-only text component without any container.
+#[derive(Default)]
 pub struct Paragraph {
     props: Props,
-}
-
-impl Default for Paragraph {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-        }
-    }
 }
 
 impl Paragraph {

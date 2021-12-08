@@ -45,18 +45,10 @@ use super::props::{
 /// ### ChartStates
 ///
 /// chart states
+#[derive(Default)]
 pub struct ChartStates {
     pub cursor: usize,
     pub data: Vec<Dataset>,
-}
-
-impl Default for ChartStates {
-    fn default() -> Self {
-        Self {
-            cursor: 0,
-            data: Vec::default(),
-        }
-    }
 }
 
 impl ChartStates {
@@ -112,18 +104,10 @@ impl ChartStates {
 /// #### Active mode
 ///
 /// While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
+#[derive(Default)]
 pub struct Chart {
     props: Props,
     pub states: ChartStates,
-}
-
-impl Default for Chart {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: ChartStates::default(),
-        }
-    }
 }
 
 impl Chart {

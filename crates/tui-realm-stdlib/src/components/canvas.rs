@@ -43,16 +43,9 @@ use super::props::{CANVAS_X_BOUNDS, CANVAS_Y_BOUNDS};
 /// ## Canvas
 ///
 /// The Canvas widget may be used to draw more detailed figures using braille patterns (each cell can have a braille character in 8 different positions).
+#[derive(Default)]
 pub struct Canvas {
     props: Props,
-}
-
-impl Default for Canvas {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-        }
-    }
 }
 
 impl Canvas {

@@ -36,18 +36,10 @@ use tuirealm::{Frame, MockComponent, State};
 
 // -- states
 
+#[derive(Default)]
 pub struct SpinnerStates {
     pub sequence: Vec<char>,
     pub step: usize,
-}
-
-impl Default for SpinnerStates {
-    fn default() -> Self {
-        Self {
-            sequence: Vec::default(),
-            step: 0,
-        }
-    }
 }
 
 impl SpinnerStates {
@@ -79,18 +71,10 @@ impl SpinnerStates {
 /// ## Spinner
 ///
 /// A textual spinner which step changes at each `view()` call
+#[derive(Default)]
 pub struct Spinner {
     props: Props,
     pub states: SpinnerStates,
-}
-
-impl Default for Spinner {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: SpinnerStates::default(),
-        }
-    }
 }
 
 impl Spinner {

@@ -39,19 +39,11 @@ use tuirealm::{Frame, MockComponent, State};
 /// ## Container
 ///
 /// represents a read-only text component without any container.
+#[derive(Default)]
 pub struct Container {
     props: Props,
     /// Container children
     pub children: Vec<Box<dyn MockComponent>>,
-}
-
-impl Default for Container {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            children: Vec::new(),
-        }
-    }
 }
 
 impl Container {

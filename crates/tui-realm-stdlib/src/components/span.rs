@@ -43,16 +43,9 @@ use tuirealm::{Frame, MockComponent, State};
 /// ## Span
 ///
 /// represents a read-only text component without any container, but with multy-style text parts
+#[derive(Default)]
 pub struct Span {
     props: Props,
-}
-
-impl Default for Span {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-        }
-    }
 }
 
 impl Span {

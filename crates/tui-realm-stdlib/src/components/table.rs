@@ -41,18 +41,10 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- States
 
+#[derive(Default)]
 pub struct TableStates {
     pub list_index: usize, // Index of selected item in textarea
     pub list_len: usize,   // Lines in text area
-}
-
-impl Default for TableStates {
-    fn default() -> Self {
-        Self {
-            list_index: 0,
-            list_len: 0,
-        }
-    }
 }
 
 impl TableStates {
@@ -148,22 +140,12 @@ impl TableStates {
 /// ## Table
 ///
 /// represents a read-only text component without any container.
+#[derive(Default)]
 pub struct Table {
     props: Props,
     pub states: TableStates,
     hg_str: Option<String>, // CRAP CRAP CRAP
     headers: Vec<String>,   // CRAP CRAP CRAP
-}
-
-impl Default for Table {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: TableStates::default(),
-            hg_str: None,
-            headers: Vec::default(),
-        }
-    }
 }
 
 impl Table {

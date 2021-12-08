@@ -43,20 +43,11 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 /// ## SelectStates
 ///
 /// Component states
+#[derive(Default)]
 pub struct SelectStates {
     pub choices: Vec<String>, // Available choices
     pub selected: usize,
     pub tab_open: bool,
-}
-
-impl Default for SelectStates {
-    fn default() -> Self {
-        Self {
-            choices: Vec::new(),
-            selected: 0,
-            tab_open: false,
-        }
-    }
 }
 
 impl SelectStates {
@@ -132,20 +123,11 @@ impl SelectStates {
 
 // -- component
 
+#[derive(Default)]
 pub struct Select {
     props: Props,
     pub states: SelectStates,
     hg_str: Option<String>, // CRAP CRAP CRAP
-}
-
-impl Default for Select {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: SelectStates::default(),
-            hg_str: None,
-        }
-    }
 }
 
 impl Select {

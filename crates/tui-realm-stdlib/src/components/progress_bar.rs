@@ -38,16 +38,9 @@ use tuirealm::{Frame, MockComponent, State};
 /// ## ProgressBar
 ///
 /// provides a component which shows the progress. It is possible to set the style for the progress bar and the text shown above it.
+#[derive(Default)]
 pub struct ProgressBar {
     props: Props,
-}
-
-impl Default for ProgressBar {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-        }
-    }
 }
 
 impl ProgressBar {

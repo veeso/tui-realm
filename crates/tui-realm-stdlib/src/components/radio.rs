@@ -38,18 +38,10 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 /// ## RadioStates
 ///
 /// RadioStates contains states for this component
+#[derive(Default)]
 pub struct RadioStates {
     pub choice: usize,        // Selected option
     pub choices: Vec<String>, // Available choices
-}
-
-impl Default for RadioStates {
-    fn default() -> Self {
-        RadioStates {
-            choice: 0,
-            choices: Vec::new(),
-        }
-    }
 }
 
 impl RadioStates {
@@ -103,18 +95,10 @@ impl RadioStates {
 /// ## Radio
 ///
 /// Radio component represents a group of tabs to select from
+#[derive(Default)]
 pub struct Radio {
     props: Props,
     pub states: RadioStates,
-}
-
-impl Default for Radio {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: RadioStates::default(),
-        }
-    }
 }
 
 impl Radio {

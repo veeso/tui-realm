@@ -37,16 +37,9 @@ use tuirealm::{Frame, MockComponent, State};
 /// ## Sparkline
 ///
 /// A sparkline over more lines
+#[derive(Default)]
 pub struct Sparkline {
     props: Props,
-}
-
-impl Default for Sparkline {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-        }
-    }
 }
 
 impl Sparkline {
