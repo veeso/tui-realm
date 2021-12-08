@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.1.5](#115)
   - [1.1.4](#114)
   - [1.1.3](#113)
   - [1.1.2](#112)
@@ -17,6 +18,12 @@
   - [0.5.0](#050)
 
 ---
+
+## 1.1.5
+
+Released on 08/12/2021
+
+- Added `Value` property for `Table` and `List` to set current line when component is scrollable
 
 ## 1.1.4
 

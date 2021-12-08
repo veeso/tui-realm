@@ -27,7 +27,8 @@
  */
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, Props, Style, Table, TextModifiers,
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Table,
+    TextModifiers,
 };
 use tuirealm::tui::{
     layout::{Corner, Rect},
@@ -228,6 +229,16 @@ impl List {
         self
     }
 
+    /// Set initial selected line
+    /// This method must be called after `rows` and `scrollable` in order to work
+    pub fn selected_line(mut self, line: usize) -> Self {
+        self.attr(
+            Attribute::Value,
+            AttrValue::Payload(PropPayload::One(PropValue::Usize(line))),
+        );
+        self
+    }
+
     fn scrollable(&self) -> bool {
         self.props
             .get_or(Attribute::Scroll, AttrValue::Flag(false))
@@ -349,14 +360,23 @@ impl MockComponent for List {
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         self.props.set(attr, value);
-        // Update list len and fix index
-        self.states.set_list_len(
-            match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
-                Some(spans) => spans.len(),
-                _ => 0,
-            },
-        );
-        self.states.fix_list_index();
+        if matches!(attr, Attribute::Content) {
+            // Update list len and fix index
+            self.states.set_list_len(
+                match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
+                    Some(spans) => spans.len(),
+                    _ => 0,
+                },
+            );
+            self.states.fix_list_index();
+        } else if matches!(attr, Attribute::Value) && self.scrollable() {
+            self.states.list_index = self
+                .props
+                .get(Attribute::Value)
+                .map(|x| x.unwrap_payload().unwrap_one().unwrap_usize())
+                .unwrap_or(0);
+            self.states.fix_list_index();
+        }
     }
 
     fn state(&self) -> State {
@@ -639,5 +659,57 @@ mod tests {
             );
         // Get value (not scrollable)
         assert_eq!(component.state(), State::None);
+    }
+
+    #[test]
+    fn should_init_list_value() {
+        let mut component = List::default()
+            .foreground(Color::Red)
+            .background(Color::Blue)
+            .highlighted_color(Color::Yellow)
+            .highlighted_str("🚀")
+            .modifiers(TextModifiers::BOLD)
+            .borders(Borders::default())
+            .title("events", Alignment::Center)
+            .rows(
+                TableBuilder::default()
+                    .add_col(TextSpan::from("KeyCode::Down"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor down"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::Up"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor up"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::PageDown"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor down by 8"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::PageUp"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("ove cursor up by 8"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::End"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor to last item"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::Home"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Move cursor to first item"))
+                    .add_row()
+                    .add_col(TextSpan::from("KeyCode::Char(_)"))
+                    .add_col(TextSpan::from("OnKey"))
+                    .add_col(TextSpan::from("Return pressed key"))
+                    .build(),
+            )
+            .scroll(true)
+            .selected_line(2);
+        assert_eq!(component.states.list_index, 2);
+        // Index out of bounds
+        component.attr(
+            Attribute::Value,
+            AttrValue::Payload(PropPayload::One(PropValue::Usize(50))),
+        );
+        assert_eq!(component.states.list_index, 6);
     }
 }

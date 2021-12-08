@@ -229,7 +229,8 @@ impl Default for ListAlfa {
                         .add_col(TextSpan::from(" "))
                         .add_col(TextSpan::from("Etiam volutpat magna tortor, a laoreet ex accumsan sit amet"))
                         .build()
-                ),
+                )
+                .selected_line(2),
         }
     }
 }

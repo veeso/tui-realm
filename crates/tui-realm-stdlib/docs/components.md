@@ -331,6 +331,7 @@ Events will be reported only when set as `Scrollable`
 - `ScrollStep(Length)`: set scroll step
 - `TextProps(TextModifiers)`: set text modifiers
 - `Title(Title)`: set block title
+- `Value(Payload(One(Usize)))`: set selected row in list (works only if `scrollable`)
 
 ---
 
@@ -573,6 +574,7 @@ Events will be reported only when set as `Scrollable`
 - `Text(Payload(Vec(String)))`: set table headers
 - `TextProps(TextModifiers)`: set text modifiers
 - `Title(Title)`: set block title
+- `Value(Payload(One(Usize)))`: set selected row in list (works only if `scrollable`
 - `Width(Payload(Vec(U16)))`: set col widths
 
 ---
