@@ -29,6 +29,10 @@
 
 Released on 24/12/2021
 
+- Added `serialize` feature: once this feature is enabled, the `Serialize` and the `Deserialize` traits will be available for certain entities:
+  - `Key`, `KeyEvent` and `KeyModifiers`: this will give you the possibility to use these entities in a serialized data for configuring keybindings.
+  - `Event`: implemented in order to provide a Port with commands from an external source.
+
 ## 1.3.0
 
 Released on 28/11/2021
