@@ -26,6 +26,8 @@
  * SOFTWARE.
  */
 use bitflags::bitflags;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 // -- event
 
@@ -33,6 +35,7 @@ use bitflags::bitflags;
 ///
 /// An event raised by a user interaction
 #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
+#[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
 pub enum Event<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone + PartialOrd,
@@ -83,6 +86,7 @@ where
 ///
 /// When using event you can use this as type parameter if you don't want to use user events
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd)]
+#[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
 pub enum NoUserEvent {}
 
 // -- keyboard
@@ -91,6 +95,7 @@ pub enum NoUserEvent {}
 ///
 /// A keyboard event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
+#[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
 pub struct KeyEvent {
     pub code: Key,
     pub modifiers: KeyModifiers,
@@ -100,6 +105,7 @@ pub struct KeyEvent {
 ///
 /// A keyboard event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
+#[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
 pub enum Key {
     /// Backspace key.
     Backspace,
@@ -145,6 +151,7 @@ bitflags! {
     /// ## KeyModifiers
     ///
     /// Defines special key states, such as shift, control, alt...
+    #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
     pub struct KeyModifiers: u8 {
         const NONE = 0b0000_0000;
         const SHIFT = 0b0000_0001;

@@ -78,6 +78,7 @@
   - [Features 🎁](#features-)
   - [Get started 🏁](#get-started-)
     - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
+      - [Enabling other backends ⚠️](#enabling-other-backends-️)
     - [Create a tui-realm application 🪂](#create-a-tui-realm-application-)
     - [Run examples 🔍](#run-examples-)
   - [Standard components library 🎨](#standard-components-library-)
@@ -132,18 +133,28 @@ tuirealm = "^1.4.0"
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "^1.4.0", default-features = false, features = [ "derive", "serde", "with-termion" ] }
+tuirealm = { version = "^1.4.0", default-features = false, features = [ "derive", "serialize", "with-termion" ] }
 ```
 
 Supported features are:
 
 - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
-- `serde`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
+- `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
 - `with-crossterm` (*default*): use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
 - `with-termion`: use [termion](https://github.com/redox-os/termion) as backend for tui.
 
 > ⚠️ You can enable only one backend at the time and at least one must be enabled in order to build.  
 > ❗ You don't need tui as a dependency, since you can access to tui types via `use tuirealm::tui::`
+
+#### Enabling other backends ⚠️
+
+When you want to switch to another backend (e.g. from crossterm to termion), remember that you **MUST** disable default features, in order to disable crossterm.
+
+> ❗ You can never have more than one backend enabled at the same time
+
+```toml
+tuirealm = { version = "^1.4.0", default-features = false, features = [ "with-termion" ] }
+```
 
 ### Create a tui-realm application 🪂
 

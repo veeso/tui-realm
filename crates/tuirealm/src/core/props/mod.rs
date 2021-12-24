@@ -54,17 +54,9 @@ pub use value::{PropPayload, PropValue};
 /// The props struct holds all the attributes associated to the component.
 /// Properties have been designed to be versatile for all kind of components, but without introducing
 /// too many attributes at the same time.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Default, PartialEq, Clone)]
 pub struct Props {
     attrs: HashMap<Attribute, AttrValue>,
-}
-
-impl Default for Props {
-    fn default() -> Self {
-        Self {
-            attrs: HashMap::default(),
-        }
-    }
 }
 
 impl Props {
