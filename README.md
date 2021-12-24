@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.3.0 (28/11/2021)</p>
+<p align="center">Current version: 1.4.0 (24/12/2021)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -126,18 +126,19 @@ See tui-realm in action in the [Example](#run-examples) or if you want to read m
 If you want the default features, just add tuirealm 1.x version:
 
 ```toml
-tuirealm = "^1.3.0"
+tuirealm = "^1.4.0"
 ```
 
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "^1.3.0", default-features = false, features = [ "derive", "with-termion" ] }
+tuirealm = { version = "^1.4.0", default-features = false, features = [ "derive", "serde", "with-termion" ] }
 ```
 
 Supported features are:
 
 - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
+- `serde`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
 - `with-crossterm` (*default*): use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
 - `with-termion`: use [termion](https://github.com/redox-os/termion) as backend for tui.
 
