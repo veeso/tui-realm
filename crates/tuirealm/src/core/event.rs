@@ -93,8 +93,11 @@ pub enum NoUserEvent {}
 ///
 /// A keyboard event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
-#[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
-#[serde(tag = "type")]
+#[cfg_attr(
+    feature = "serialize",
+    derive(Deserialize, Serialize),
+    serde(tag = "type")
+)]
 pub struct KeyEvent {
     pub code: Key,
     pub modifiers: KeyModifiers,
@@ -104,8 +107,11 @@ pub struct KeyEvent {
 ///
 /// A keyboard event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
-#[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
-#[serde(tag = "type", content = "args")]
+#[cfg_attr(
+    feature = "serialize",
+    derive(Deserialize, Serialize),
+    serde(tag = "type", content = "args")
+)]
 pub enum Key {
     /// Backspace key.
     Backspace,
@@ -151,8 +157,7 @@ bitflags! {
     /// ## KeyModifiers
     ///
     /// Defines special key states, such as shift, control, alt...
-    #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
-    #[serde(tag = "type")]
+    #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize), serde(tag = "type"))]
     pub struct KeyModifiers: u8 {
         const NONE = 0b0000_0000;
         const SHIFT = 0b0000_0001;
