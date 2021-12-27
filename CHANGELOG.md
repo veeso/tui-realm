@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.4.1](#141)
   - [1.4.0](#140)
   - [1.3.0](#130)
   - [1.2.1](#121)
@@ -24,6 +25,13 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.4.1
+
+Released on 27/12/2021
+
+- Fixed serialization for key events
+- Removed serde for `Event`
 
 ## 1.4.0
 

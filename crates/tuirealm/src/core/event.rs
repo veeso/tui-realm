@@ -35,7 +35,6 @@ use serde::{Deserialize, Serialize};
 ///
 /// An event raised by a user interaction
 #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
-#[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
 pub enum Event<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone + PartialOrd,
@@ -86,7 +85,6 @@ where
 ///
 /// When using event you can use this as type parameter if you don't want to use user events
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd)]
-#[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
 pub enum NoUserEvent {}
 
 // -- keyboard
@@ -96,6 +94,7 @@ pub enum NoUserEvent {}
 /// A keyboard event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
+#[serde(tag = "type")]
 pub struct KeyEvent {
     pub code: Key,
     pub modifiers: KeyModifiers,
@@ -106,6 +105,7 @@ pub struct KeyEvent {
 /// A keyboard event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
+#[serde(tag = "type", content = "args")]
 pub enum Key {
     /// Backspace key.
     Backspace,
@@ -152,6 +152,7 @@ bitflags! {
     ///
     /// Defines special key states, such as shift, control, alt...
     #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
+    #[serde(tag = "type")]
     pub struct KeyModifiers: u8 {
         const NONE = 0b0000_0000;
         const SHIFT = 0b0000_0001;
@@ -209,5 +210,83 @@ mod test {
         assert!(e.is_tick());
         let e: Event<MockEvent> = Event::User(MockEvent::Bar);
         assert_eq!(e.is_user().unwrap(), &MockEvent::Bar);
+    }
+
+    // -- serde
+    #[cfg(feature = "serialize")]
+    use serde::de::DeserializeOwned;
+    #[cfg(feature = "serialize")]
+    use serde::{Deserialize, Serialize};
+    #[cfg(feature = "serialize")]
+    use std::fs::File;
+    #[cfg(feature = "serialize")]
+    use std::io::{Read, Write};
+    #[cfg(feature = "serialize")]
+    use tempfile::NamedTempFile;
+
+    #[cfg(feature = "serde")]
+    fn deserialize<R, S>(mut readable: R) -> S
+    where
+        R: Read,
+        S: DeserializeOwned + Sized + std::fmt::Debug,
+    {
+        // Read file content
+        let mut data: String = String::new();
+        if let Err(err) = readable.read_to_string(&mut data) {
+            panic!("Error: {}", err);
+        }
+        // Deserialize
+        match toml::de::from_str(data.as_str()) {
+            Ok(deserialized) => deserialized,
+            Err(err) => panic!("Error: {}", err),
+        }
+    }
+
+    #[cfg(feature = "serde")]
+    fn serialize<S, W>(serializable: &S, mut writable: W)
+    where
+        S: Serialize + Sized,
+        W: Write,
+    {
+        // Serialize content
+        let data: String = match toml::ser::to_string(serializable) {
+            Ok(dt) => dt,
+            Err(err) => {
+                panic!("Error: {}", err);
+            }
+        };
+        // Write file
+        if let Err(err) = writable.write_all(data.as_bytes()) {
+            panic!("Error: {}", err)
+        }
+    }
+
+    #[cfg(feature = "serde")]
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct KeyBindings {
+        pub quit: KeyEvent,
+        pub open: KeyEvent,
+    }
+
+    #[cfg(feature = "serde")]
+    impl KeyBindings {
+        pub fn new(quit: KeyEvent, open: KeyEvent) -> Self {
+            Self { quit, open }
+        }
+    }
+
+    #[test]
+    #[cfg(feature = "serde")]
+    fn should_serialize_key_bindings() {
+        let temp = NamedTempFile::new().expect("Failed to open tempfile");
+        let keys = KeyBindings::new(
+            KeyEvent::from(Key::Esc),
+            KeyEvent::new(Key::Char('o'), KeyModifiers::CONTROL),
+        );
+        let mut config = File::create(temp.path()).expect("Failed to open file for write");
+        serialize(&keys, &mut config);
+        let mut readable = File::open(temp.path()).expect("Failed to open file for read");
+        let r_keys: KeyBindings = deserialize(&mut readable);
+        assert_eq!(keys, r_keys);
     }
 }
