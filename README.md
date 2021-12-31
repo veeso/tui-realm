@@ -6,7 +6,7 @@
 
 <p align="center">~ A tui-rs framework inspired by Elm and React ~</p>
 <p align="center">
-  <a href="/docs/get-started.md" target="_blank">Get started</a>
+  <a href="docs/en/get-started.md" target="_blank">Get started</a>
   ·
   <a href="https://github.com/veeso/tui-realm-stdlib" target="_blank">Standard Library</a>
   ·
