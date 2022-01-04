@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.4.2](#142)
   - [1.4.1](#141)
   - [1.4.0](#140)
   - [1.3.0](#130)
@@ -25,6 +26,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.4.2
+
+Released on 04/01/2022
+
+- Added `focus()` method to `Application` which returns a reference to id of the current active component in the `View`
 
 ## 1.4.1
 
