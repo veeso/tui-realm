@@ -268,6 +268,11 @@ where
         self.view.blur().map_err(ApplicationError::from)
     }
 
+    /// Get a reference to the id of the current active component in the view
+    pub fn focus(&self) -> Option<&K> {
+        self.view.focus()
+    }
+
     // -- subs bridge
 
     /// ### subscribe
@@ -514,6 +519,7 @@ mod test {
             )
             .is_err());
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+        assert_eq!(application.focus().unwrap(), &MockComponentId::InputFoo);
         // Remount
         assert!(application
             .remount(
