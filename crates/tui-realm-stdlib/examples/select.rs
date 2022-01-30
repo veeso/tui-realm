@@ -211,6 +211,10 @@ impl Component<Msg, NoUserEvent> for SelectAlfa {
             Event::Keyboard(KeyEvent {
                 code: Key::Enter, ..
             }) => self.perform(Cmd::Submit),
+            Event::Keyboard(KeyEvent {
+                code: Key::Delete | Key::Backspace,
+                ..
+            }) => self.perform(Cmd::Cancel),
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::SelectAlfaBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
@@ -261,6 +265,10 @@ impl Component<Msg, NoUserEvent> for SelectBeta {
             Event::Keyboard(KeyEvent {
                 code: Key::Enter, ..
             }) => self.perform(Cmd::Submit),
+            Event::Keyboard(KeyEvent {
+                code: Key::Delete | Key::Backspace,
+                ..
+            }) => self.perform(Cmd::Cancel),
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::SelectBetaBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,

@@ -45,8 +45,12 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 /// Component states
 #[derive(Default)]
 pub struct SelectStates {
-    pub choices: Vec<String>, // Available choices
+    /// Available choices
+    pub choices: Vec<String>,
+    /// Currently selected choice
     pub selected: usize,
+    /// Choice selected before opening the tab
+    pub previously_selected: usize,
     pub tab_open: bool,
 }
 
@@ -110,7 +114,14 @@ impl SelectStates {
     ///
     /// Open tab
     pub fn open_tab(&mut self) {
+        self.previously_selected = self.selected;
         self.tab_open = true;
+    }
+
+    /// Cancel tab open
+    pub fn cancel_tab(&mut self) {
+        self.close_tab();
+        self.selected = self.previously_selected;
     }
 
     /// ### is_tab_open
@@ -379,6 +390,12 @@ impl MockComponent for Select {
                 self.states
                     .select(value.unwrap_payload().unwrap_one().unwrap_usize());
             }
+            Attribute::Focus if self.states.is_tab_open() => {
+                if let AttrValue::Flag(false) = value {
+                    self.states.cancel_tab();
+                }
+                self.props.set(attr, value);
+            }
             attr => {
                 self.props.set(attr, value);
             }
@@ -412,6 +429,10 @@ impl MockComponent for Select {
                     false => CmdResult::None,
                     true => CmdResult::Changed(State::One(StateValue::Usize(self.states.selected))),
                 }
+            }
+            Cmd::Cancel => {
+                self.states.cancel_tab();
+                CmdResult::Submit(self.state())
             }
             Cmd::Submit => {
                 // Open or close tab
@@ -503,6 +524,16 @@ mod test {
         assert_eq!(states.selected, 1);
         states.prev_choice(true);
         assert_eq!(states.selected, 0);
+        // Cancel tab
+        states.close_tab();
+        states.select(2);
+        states.open_tab();
+        states.prev_choice(true);
+        states.prev_choice(true);
+        assert_eq!(states.selected, 0);
+        states.cancel_tab();
+        assert_eq!(states.selected, 2);
+        assert_eq!(states.is_tab_open(), false);
     }
 
     #[test]
