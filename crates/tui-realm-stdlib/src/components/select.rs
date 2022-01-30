@@ -432,7 +432,7 @@ impl MockComponent for Select {
             }
             Cmd::Cancel => {
                 self.states.cancel_tab();
-                CmdResult::Submit(self.state())
+                CmdResult::Changed(self.state())
             }
             Cmd::Submit => {
                 // Open or close tab

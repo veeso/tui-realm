@@ -448,6 +448,7 @@ This component should have a variable size in the layout to be displayed properl
 |--------------|--------------------|----------------------------------------------------------------|
 | `Move(Down)` | `Changed` | `None` | Move select down, if tab is open                               |
 | `Move(Up)`   | `Changed` | `None` | Move select up, if tab is open                                 |
+| `Cancel`     | `Changed`          | The tab is closed and the value set before opening the tab is restored |
 | `Submit`     | `Submit` | `None`  | Open or close the select tab; Returns state if tab gets closed |
 
 **State**: the state returned is `One(Usize)` containing the index of the selected item in the radio group. This state is returned only when the select is closed; otherwise `None` is returned
