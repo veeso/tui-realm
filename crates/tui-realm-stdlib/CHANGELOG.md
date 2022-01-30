@@ -22,7 +22,13 @@
 
 ## 1.1.6
 
-Released on ??
+Released on 30/01/2022
+
+- [Issue 6](https://github.com/veeso/tui-realm-stdlib/issues/6): Implemented `Cmd::Cancel` for `Select` and close tab on tab.
+  - Command `Cancel`, when pressed will:
+    - close the select tab
+    - restore the select value TO THE VALUE SET BEFORE OPENING THE TAB.
+  - When the select component loses the focus, the tab will be always closed and the previous value will be restored.
 
 ## 1.1.5
 
