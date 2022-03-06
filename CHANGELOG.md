@@ -32,6 +32,8 @@
 
 Released on ??
 
+- Updated `tui` to `0.17`
+
 ## 1.4.2
 
 Released on 04/01/2022
