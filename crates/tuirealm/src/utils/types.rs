@@ -39,8 +39,8 @@ pub struct PhoneNumber {
 
 impl PhoneNumber {
     pub fn new<S: AsRef<str>>(prefix: Option<S>, number: S) -> Self {
-        let number = number.as_ref().replace(" ", "");
-        let number = number.replace("-", "");
+        let number = number.as_ref().replace(' ', "");
+        let number = number.replace('-', "");
         Self {
             prefix: prefix.map(|x| x.as_ref().to_string()),
             number,
