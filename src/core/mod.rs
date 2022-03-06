@@ -29,6 +29,7 @@ pub mod application;
 pub mod command;
 mod component;
 pub mod event;
+pub mod injector;
 pub mod props;
 mod state;
 pub mod subscription;

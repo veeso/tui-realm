@@ -4,6 +4,7 @@
 
 use crate::event::{Event, Key, KeyEvent};
 use crate::listener::{ListenerResult, Poll};
+use crate::{AttrValue, Attribute, Injector};
 
 use std::marker::PhantomData;
 
@@ -70,4 +71,21 @@ pub enum MockMsg {
     BarInputChanged(String),
     BarSubmit(String),
     BarTick,
+}
+
+// -- injector
+
+#[derive(Default)]
+pub struct MockInjector;
+
+impl Injector<MockComponentId> for MockInjector {
+    fn inject(&self, id: &MockComponentId) -> Vec<(Attribute, AttrValue)> {
+        match id {
+            &MockComponentId::InputBar => vec![(
+                Attribute::Text,
+                AttrValue::String(String::from("hello, world!")),
+            )],
+            _ => vec![],
+        }
+    }
 }

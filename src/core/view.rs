@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 use crate::tui::layout::Rect;
-use crate::{AttrValue, Attribute, Component, Event, Frame, State};
+use crate::{AttrValue, Attribute, Component, Event, Frame, Injector, State};
 // -- ext
 use std::collections::HashMap;
 use std::hash::Hash;
@@ -73,6 +73,8 @@ where
     focus: Option<ComponentId>,
     /// Focus stack; used to determine which component should hold focus in case the current element is blurred
     focus_stack: Vec<ComponentId>,
+    /// Property injectors
+    injectors: Vec<Box<dyn Injector<ComponentId>>>,
 }
 
 impl<K, Msg, UserEvent> Default for View<K, Msg, UserEvent>
@@ -86,6 +88,7 @@ where
             components: HashMap::new(),
             focus: None,
             focus_stack: Vec::new(),
+            injectors: Vec::new(),
         }
     }
 }
@@ -104,8 +107,10 @@ where
         if self.mounted(&id) {
             Err(ViewError::ComponentAlreadyMounted)
         } else {
-            self.components.insert(id, component);
-            Ok(())
+            // Insert
+            self.components.insert(id.clone(), component);
+            // Inject properties
+            self.inject(&id)
         }
     }
 
@@ -239,6 +244,13 @@ where
         }
     }
 
+    // -- injectors
+
+    /// Add an injector to the view
+    pub fn add_injector(&mut self, injector: Box<dyn Injector<K>>) {
+        self.injectors.push(injector);
+    }
+
     // -- private
 
     /// ### push_to_stack
@@ -314,6 +326,21 @@ where
             Err(ViewError::ComponentNotFound)
         }
     }
+
+    /// Inject properties for `id` using view injectors
+    fn inject(&mut self, id: &K) -> ViewResult<()> {
+        for (attr, value) in self.properties_to_inject(id) {
+            if let Err(err) = self.attr(id, attr, value) {
+                return Err(err);
+            }
+        }
+        Ok(())
+    }
+
+    /// Collect properties to inject for component `K`
+    fn properties_to_inject(&self, id: &K) -> Vec<(Attribute, AttrValue)> {
+        self.injectors.iter().flat_map(|x| x.inject(id)).collect()
+    }
 }
 
 #[cfg(test)]
@@ -322,7 +349,7 @@ mod test {
     use super::*;
     use crate::{
         event::{Key, KeyEvent},
-        mock::{MockBarInput, MockComponentId, MockEvent, MockFooInput, MockMsg},
+        mock::{MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg},
         StateValue,
     };
 
@@ -561,5 +588,22 @@ mod test {
             State::One(StateValue::String(String::from("")))
         );
         assert!(view.state(&MockComponentId::InputBar).is_err());
+    }
+
+    #[test]
+    fn view_should_inject_properties() {
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
+        view.add_injector(Box::new(MockInjector::default()));
+        assert!(view
+            .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
+            .is_ok());
+        // Check if property has been injected
+        assert_eq!(
+            view.query(&MockComponentId::InputBar, Attribute::Text)
+                .ok()
+                .unwrap()
+                .unwrap(),
+            AttrValue::String(String::from("hello, world!"))
+        );
     }
 }

@@ -28,7 +28,7 @@
 use super::{Subscription, View, WrappedComponent};
 use crate::listener::{EventListener, EventListenerCfg, ListenerError};
 use crate::tui::layout::Rect;
-use crate::{AttrValue, Attribute, Event, Frame, State, Sub, SubEventClause, ViewError};
+use crate::{AttrValue, Attribute, Event, Frame, Injector, State, Sub, SubEventClause, ViewError};
 
 use std::hash::Hash;
 use std::time::{Duration, Instant};
@@ -127,8 +127,7 @@ where
         // Forward to active element
         let mut messages: Vec<Msg> = events
             .iter()
-            .map(|x| self.forward_to_active_component(x.clone()))
-            .flatten()
+            .filter_map(|x| self.forward_to_active_component(x.clone()))
             .collect();
         // Forward to subscriptions and extend vector
         if !self.sub_lock {
@@ -138,6 +137,11 @@ where
     }
 
     // -- view bridge
+
+    /// Add an injector to the view
+    pub fn add_injector(&mut self, injector: Box<dyn Injector<K>>) {
+        self.view.add_injector(injector);
+    }
 
     /// ### mount
     ///
@@ -397,8 +401,7 @@ where
         self.view
             .focus()
             .cloned()
-            .map(|x| self.view.forward(&x, ev).ok().unwrap())
-            .flatten()
+            .and_then(|x| self.view.forward(&x, ev).ok().unwrap())
     }
 
     /// ### forward_to_subscriptions
@@ -476,7 +479,9 @@ mod test {
 
     use super::*;
     use crate::event::{Key, KeyEvent};
-    use crate::mock::{MockBarInput, MockComponentId, MockEvent, MockFooInput, MockMsg, MockPoll};
+    use crate::mock::{
+        MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg, MockPoll,
+    };
     use crate::{StateValue, SubClause};
 
     use pretty_assertions::assert_eq;
@@ -1101,6 +1106,13 @@ mod test {
                 .as_slice(),
             &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
         );
+    }
+
+    #[test]
+    fn application_should_add_injectors() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener_config_with_tick(Duration::from_millis(500)));
+        application.add_injector(Box::new(MockInjector::default()));
     }
 
     fn listener_config() -> EventListenerCfg<MockEvent> {

@@ -159,7 +159,7 @@ where
         let msg: Vec<ListenerMsg<U>> = self
             .ports
             .iter_mut()
-            .map(|x| {
+            .filter_map(|x| {
                 if x.should_poll() {
                     let msg = match x.poll() {
                         Ok(Some(ev)) => Some(ListenerMsg::User(ev)),
@@ -173,7 +173,6 @@ where
                     None
                 }
             })
-            .flatten()
             .collect();
         // Send messages
         match msg

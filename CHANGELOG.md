@@ -30,9 +30,12 @@
 
 ## 1.5.0
 
-Released on ??
+Released on 06/03/2022
 
 - Updated `tui` to `0.17`
+- Added **Injectors**
+  - Properties injectors are trait objects, which must implement the `Injector` trait, which can provide some property (defined as a tuple of `Attribute` and `AttrValue`) for components when they're mounted.
+  - Read more in [advanced concepts](/docs/en/advanced.md#properties-injectors)
 
 ## 1.4.2
 

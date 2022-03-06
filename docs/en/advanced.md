@@ -15,6 +15,7 @@
     - [Defining the component states](#defining-the-component-states)
     - [Defining the Cmd API](#defining-the-cmd-api)
     - [Rendering the component](#rendering-the-component)
+  - [Properties Injectors](#properties-injectors)
   - [What's next](#whats-next)
 
 ---
@@ -496,6 +497,26 @@ impl MockComponent for Radio {
     // ...
 }
 ```
+
+---
+
+## Properties Injectors
+
+Properties injectors are trait objects, which must implement the `Injector` trait, which can provide some property (defined as a tuple of `Attribute` and `AttrValue`) for components when they're mounted.
+The Injector trait is defined as follows:
+
+```rs
+pub trait Injector<ComponentId>
+where
+    ComponentId: Eq + PartialEq + Clone + Hash,
+{
+    fn inject(&self, id: &ComponentId) -> Vec<(Attribute, AttrValue)>;
+}
+```
+
+Then you can add an injector to your application with the `add_injector()` method.
+
+Whenever you mount a new component into your view, the `inject()` method is called for each injector defined in your application providing as argument the id of the mounted component.
 
 ---
 
