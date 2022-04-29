@@ -91,7 +91,7 @@ impl Layout {
             .direction(self.direction.clone())
             .horizontal_margin(self.margin.horizontal)
             .vertical_margin(self.margin.vertical)
-            .constraints(self.constraints.as_ref())
+            .constraints::<&[Constraint]>(self.constraints.as_ref())
             .split(area)
     }
 }
