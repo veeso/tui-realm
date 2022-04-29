@@ -35,6 +35,7 @@ Released on 29/04/2022
 
 - Updated `crossterm` to `0.23`
 - Updated `tui` to `0.18`
+- Fixed build issue on nightly toolchain
 
 ## 1.5.0
 
