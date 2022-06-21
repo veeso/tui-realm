@@ -1,0 +1,32 @@
+[package]
+name = "tui-realm-textarea"
+version = "1.0.0"
+authors = ["Christian Visintin"]
+edition = "2021"
+categories = ["command-line-utilities"]
+description = "textarea component for tui-realm"
+documentation = "https://docs.rs/tui-realm-textarea"
+homepage = "https://github.com/veeso/tui-realm-textarea"
+include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+keywords = ["tui", "terminal"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/veeso/tui-realm-textarea"
+
+[dependencies]
+tuirealm = { version = "^1.6.0", default-features = false, features = [ "derive" ]}
+tui-textarea = "^0.1.1"
+unicode-width = "^0.1.9"
+
+[dev-dependencies]
+crossterm = "^0.23"
+pretty_assertions = "^1.0.0"
+
+[features]
+default = [ "with-crossterm" ]
+with-crossterm = [ "tuirealm/with-crossterm" ]
+with-termion = [ "tuirealm/with-termion" ]
+
+[[example]]
+name = "demo"
+path = "examples/demo.rs"
