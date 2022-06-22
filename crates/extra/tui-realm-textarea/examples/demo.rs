@@ -14,7 +14,9 @@ use tuirealm::{
 };
 // tui
 use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
-// treeview
+// label
+use tui_realm_stdlib::Label;
+// textarea
 use tui_realm_textarea::{
     TextArea, TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
     TEXTAREA_CMD_PASTE, TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
@@ -25,6 +27,7 @@ use tui_realm_textarea::{
 pub enum Msg {
     AppClose,
     Submit(Vec<String>),
+    ChangeFocus(Id),
     None,
 }
 
@@ -32,6 +35,7 @@ pub enum Msg {
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub enum Id {
     Editor,
+    Label,
 }
 
 struct Model {
@@ -50,6 +54,9 @@ impl Model {
         assert!(app
             .mount(Id::Editor, Box::new(Editor::default()), vec![])
             .is_ok());
+        assert!(app
+            .mount(Id::Label, Box::new(DummyLabel::default()), vec![])
+            .is_ok());
         assert!(app.active(&Id::Editor).is_ok());
         Model {
             app,
@@ -65,9 +72,10 @@ impl Model {
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
                 .margin(1)
-                .constraints([Constraint::Min(5)].as_ref())
+                .constraints([Constraint::Min(5), Constraint::Length(1)].as_ref())
                 .split(f.size());
             self.app.view(&Id::Editor, f, chunks[0]);
+            self.app.view(&Id::Label, f, chunks[1]);
         });
     }
 }
@@ -116,6 +124,14 @@ impl Update<Msg> for Model {
         match msg.unwrap_or(Msg::None) {
             Msg::AppClose => {
                 self.quit = true;
+                None
+            }
+            Msg::ChangeFocus(Id::Editor) => {
+                let _ = self.app.active(&Id::Editor);
+                None
+            }
+            Msg::ChangeFocus(Id::Label) => {
+                let _ = self.app.active(&Id::Label);
                 None
             }
             Msg::Submit(lines) => {
@@ -335,6 +351,35 @@ impl<'a> Component<Msg, NoUserEvent> for Editor<'a> {
                 self.perform(Cmd::Type(ch));
                 Some(Msg::None)
             }
+            Event::Keyboard(KeyEvent {
+                code: Key::Function(2),
+                ..
+            }) => Some(Msg::ChangeFocus(Id::Label)),
+            _ => None,
+        }
+    }
+}
+
+#[derive(MockComponent)]
+pub struct DummyLabel {
+    component: Label,
+}
+
+impl Default for DummyLabel {
+    fn default() -> Self {
+        Self {
+            component: Label::default().text("text editor demo"),
+        }
+    }
+}
+
+impl Component<Msg, NoUserEvent> for DummyLabel {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        match ev {
+            Event::Keyboard(KeyEvent {
+                code: Key::Function(1),
+                ..
+            }) => Some(Msg::ChangeFocus(Id::Editor)),
             _ => None,
         }
     }

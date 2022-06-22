@@ -139,3 +139,49 @@ impl CallChainBlock {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn should_fmt_column() {
+        let widget = get_widget();
+        let fmt = LineFmt::new("", Style::default());
+        assert_eq!(
+            fmt.fmt_col(&widget, "Row 4", " Col ").as_str(),
+            "Row 4 Col 1"
+        );
+    }
+
+    #[test]
+    fn should_fmt_row() {
+        let widget = get_widget();
+        let fmt = LineFmt::new("", Style::default());
+        assert_eq!(
+            fmt.fmt_row(&widget, "Col 5", " Row ").as_str(),
+            "Col 5 Row 1"
+        );
+    }
+
+    #[test]
+    fn should_fmt_with_keys() {
+        let widget = get_widget();
+        let fmt = LineFmt::new("Row {ROW} Col {COL} | README.md", Style::default());
+        assert_eq!(fmt.fmt(&widget).as_str(), "Row 1 Col 1 | README.md");
+    }
+
+    #[test]
+    fn should_fmt_with_no_key() {
+        let widget = get_widget();
+        let fmt = LineFmt::new("Press <ESC> to quit", Style::default());
+        assert_eq!(fmt.fmt(&widget).as_str(), "Press <ESC> to quit");
+    }
+
+    fn get_widget<'a>() -> TextAreaWidget<'a> {
+        TextAreaWidget::new(vec![String::from("hello"), String::from("world!")])
+    }
+}

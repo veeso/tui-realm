@@ -45,11 +45,6 @@
       src="https://github.com/veeso/tui-realm-textarea/workflows/Build/badge.svg"
       alt="CI"
   /></a>
-  <a href="https://coveralls.io/github/veeso/tui-realm-textarea"
-    ><img
-      src="https://coveralls.io/repos/github/veeso/tui-realm-textarea/badge.svg"
-      alt="Coveralls"
-  /></a>
   <a href="https://docs.rs/tui-realm-textarea"
     ><img
       src="https://docs.rs/tui-realm-textarea/badge.svg"
