@@ -142,8 +142,8 @@ mod test {
 
     use super::*;
 
+    use lazy_regex::{Lazy, Regex};
     use pretty_assertions::assert_eq;
-    use regex::Regex;
 
     #[test]
     fn validate_input_type() {
@@ -301,9 +301,7 @@ mod test {
     }
 
     fn custom_valid(s: &str) -> bool {
-        lazy_static! {
-            static ref TEST_REGEX: Regex = Regex::new(r".*(:?[0-9]\.[0-9]\.[0-9])").unwrap();
-        }
+        static TEST_REGEX: Lazy<Regex> = lazy_regex!(r".*(:?[0-9]\.[0-9]\.[0-9])");
         TEST_REGEX.is_match(s)
     }
 

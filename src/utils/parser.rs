@@ -5,45 +5,45 @@
 use super::{Email, PhoneNumber};
 use crate::tui::style::Color;
 
-use regex::Regex;
+use lazy_regex::{Lazy, Regex};
 use std::str::FromStr;
+/**
+ * Regex matches:
+ * - group 1: Red
+ * - group 2: Green
+ * - group 3: Blue
+ */
+static COLOR_HEX_REGEX: Lazy<Regex> =
+    lazy_regex!(r"#(:?[0-9a-fA-F]{2})(:?[0-9a-fA-F]{2})(:?[0-9a-fA-F]{2})");
+/**
+ * Regex matches:
+ * - group 2: Red
+ * - group 4: Green
+ * - group 6: blue
+ */
+static COLOR_RGB_REGEX: Lazy<Regex> = lazy_regex!(
+    r"^(rgb)?\(?([01]?\d\d?|2[0-4]\d|25[0-5])(\W+)([01]?\d\d?|2[0-4]\d|25[0-5])\W+(([01]?\d\d?|2[0-4]\d|25[0-5])\)?)"
+);
 
-lazy_static! {
-    /**
-     * Regex matches:
-     * - group 1: Red
-     * - group 2: Green
-     * - group 3: Blue
-     */
-    static ref COLOR_HEX_REGEX: Regex = Regex::new(r"#(:?[0-9a-fA-F]{2})(:?[0-9a-fA-F]{2})(:?[0-9a-fA-F]{2})").unwrap();
-    /**
-     * Regex matches:
-     * - group 2: Red
-     * - group 4: Green
-     * - group 6: blue
-     */
-    static ref COLOR_RGB_REGEX: Regex = Regex::new(r"^(rgb)?\(?([01]?\d\d?|2[0-4]\d|25[0-5])(\W+)([01]?\d\d?|2[0-4]\d|25[0-5])\W+(([01]?\d\d?|2[0-4]\d|25[0-5])\)?)").unwrap();
+/**
+ * Regex matches:
+ * - group 1: name
+ * - group 2: mail agent
+ */
+static EMAIL_REGEX: Lazy<Regex> = lazy_regex!(
+    r"^(:?[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+)@(:?[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$)"
+);
 
-    /**
-     * Regex matches:
-     * - group 1: name
-     * - group 2: mail agent
-     */
-    static ref EMAIL_REGEX: Regex = Regex::new(r"^(:?[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+)@(:?[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$)").unwrap();
+/**
+ * Regex matches:
+ * - group 2|3: prefix
+ * - group 4: number
+ */
+static PHONE_NUMBER_REGEX: Lazy<Regex> =
+    lazy_regex!(r"^([+]{1}(:?[0-9]{1,4})|[0]{2}(:?[0-9]{1,4}))?(:?[-\s\./0-9]*$)");
 
-    /**
-     * Regex matches:
-     * - group 2|3: prefix
-     * - group 4: number
-     */
-    static ref PHONE_NUMBER_REGEX: Regex = Regex::new(r"^([+]{1}(:?[0-9]{1,4})|[0]{2}(:?[0-9]{1,4}))?(:?[-\s\./0-9]*$)").unwrap();
-}
-
-/// ### parse_email
-///
 /// If provided string is a valid email address, returns the name and the mail agent
 ///
-
 /// ```rust
 /// use tuirealm::utils::parser::*;
 /// use tuirealm::utils::Email;
@@ -60,11 +60,8 @@ pub fn parse_email(s: &str) -> Option<Email> {
     }
 }
 
-/// ### parse_phone_number
-///
 /// If provided string is a valid phone number address, returns the prefix (if any) and the number
 ///
-
 /// ```rust
 /// use tuirealm::utils::parser::*;
 /// use tuirealm::utils::PhoneNumber;
@@ -85,8 +82,6 @@ pub fn parse_phone_number(s: &str) -> Option<PhoneNumber> {
     }
 }
 
-/// ### parse_color
-///
 /// Parse color from string into a `Color` enum.
 ///
 /// Color may be in different format:
@@ -299,8 +294,6 @@ fn parse_hex_color(color: &str) -> Option<Color> {
     })
 }
 
-/// ### parse_rgb_color
-///
 /// Try to parse a color in rgb format, such as:
 ///
 /// - "rgb(255, 64, 32)"
