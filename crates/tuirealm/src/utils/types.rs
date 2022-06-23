@@ -21,8 +21,6 @@ impl PhoneNumber {
         }
     }
 
-    /// ### phone_number
-    ///
     /// Returns the full number with syntax `+{prefix}{number}`
     pub fn phone_number(&self) -> String {
         match &self.prefix {
@@ -49,8 +47,6 @@ impl Email {
         }
     }
 
-    /// ### address
-    ///
     /// Returns the email address
     pub fn address(&self) -> String {
         format!("{}@{}", self.name, self.agent)

@@ -68,8 +68,6 @@ where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
-    /// ### mount
-    ///
     /// Mount component on View.
     /// Returns error if the component is already mounted
     pub fn mount(&mut self, id: K, component: WrappedComponent<Msg, UserEvent>) -> ViewResult<()> {
@@ -83,8 +81,6 @@ where
         }
     }
 
-    /// ### umount
-    ///
     /// Umount component from View
     pub fn umount(&mut self, id: &K) -> ViewResult<()> {
         if !self.mounted(id) {
@@ -100,8 +96,6 @@ where
         Ok(())
     }
 
-    /// ### umount_all
-    ///
     /// Umount all components in the view and clear focus stack and state
     pub fn umount_all(&mut self) {
         self.components.clear();
@@ -109,22 +103,16 @@ where
         self.focus = None;
     }
 
-    /// ### mounted
-    ///
     /// Returns whether component `id` is mounted
     pub fn mounted(&self, id: &K) -> bool {
         self.components.contains_key(id)
     }
 
-    /// ### focus
-    ///
     /// Returns current active element (if any)
     pub(crate) fn focus(&self) -> Option<&K> {
         self.focus.as_ref()
     }
 
-    /// ### view
-    ///
     /// Render component called `id`
     pub fn view(&mut self, id: &K, f: &mut Frame, area: Rect) {
         if let Some(c) = self.components.get_mut(id) {
@@ -132,8 +120,6 @@ where
         }
     }
 
-    /// ### forward
-    ///
     /// Forward `event` (call `on()`) on component `id` and return a `Msg` if any.
     /// Returns error if the component doesn't exist
     pub(crate) fn forward(&mut self, id: &K, event: Event<UserEvent>) -> ViewResult<Option<Msg>> {
@@ -143,8 +129,6 @@ where
         }
     }
 
-    /// ### query
-    ///
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
@@ -155,8 +139,6 @@ where
         }
     }
 
-    /// ### attr
-    ///
     /// Set attribute for component `id`
     /// Returns error if the component doesn't exist
     pub fn attr(&mut self, id: &K, attr: Attribute, value: AttrValue) -> ViewResult<()> {
@@ -168,8 +150,6 @@ where
         }
     }
 
-    /// ### state
-    ///
     /// Get state for component `id`.
     /// Returns `Err` if component doesn't exist
     pub fn state(&self, id: &K) -> ViewResult<State> {
@@ -181,8 +161,6 @@ where
 
     // -- shorthands
 
-    /// ### active
-    ///
     /// Shorthand for `attr(id, Attribute::Focus(AttrValue::Flag(true)))`.
     /// It also sets the component as the current one having focus.
     /// Previous active component, if any, GETS PUSHED to the STACK
@@ -195,8 +173,6 @@ where
         Ok(())
     }
 
-    /// ### blur
-    ///
     /// Blur selected element AND DON'T PUSH CURRENT ACTIVE ELEMENT INTO THE STACK
     /// Shorthand for `attr(id, Attribute::Focus(AttrValue::Flag(false)))`.
     /// It also unset the current focus and give it to the first element in stack.
@@ -222,8 +198,6 @@ where
 
     // -- private
 
-    /// ### push_to_stack
-    ///
     /// Push component `id` to focus stack
     /// In case it is already in the focus stack,
     /// it will be first removed from it.
@@ -232,15 +206,11 @@ where
         self.focus_stack.push(id);
     }
 
-    /// ### pop_from_stack
-    ///
     /// Pop component `id` from focus stack
     fn pop_from_stack(&mut self, id: &K) {
         self.focus_stack.retain(|x| x != id);
     }
 
-    /// ### has_focus
-    ///
     /// Returns whether `who` has focus
     pub(crate) fn has_focus(&self, who: &K) -> bool {
         match self.focus.as_ref() {
@@ -249,8 +219,6 @@ where
         }
     }
 
-    /// ### move_focus_to_stack
-    ///
     /// If focus is `Some`, move it to the top of the stack and set it to `None`.
     /// Then pop from stack `new_focus` and set it to current `focus`.
     ///
@@ -268,8 +236,6 @@ where
         self.focus = Some(key.clone());
     }
 
-    /// ### focus_to_last
-    ///
     /// Give focus to the last component in the stack
     fn focus_to_last(&mut self) {
         if let Some(focus) = self.take_last_from_stack() {
@@ -277,15 +243,11 @@ where
         }
     }
 
-    /// ### take_last_from_stack
-    ///
     /// Take last element from stack if any
     fn take_last_from_stack(&mut self) -> Option<K> {
         self.focus_stack.pop()
     }
 
-    /// ### set_focus
-    ///
     /// Set focus value for component
     fn set_focus(&mut self, id: &K, value: bool) -> ViewResult<()> {
         if let Some(c) = self.components.get_mut(id) {

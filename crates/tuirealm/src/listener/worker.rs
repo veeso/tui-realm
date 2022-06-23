@@ -44,16 +44,12 @@ where
         }
     }
 
-    /// ### calc_next_tick
-    ///
     /// Calculate next tick time.
     /// If tick is None, panics.
     fn calc_next_tick(&mut self) {
         self.next_tick = Instant::now().add(self.tick_interval.unwrap());
     }
 
-    /// ### next_event
-    ///
     /// Calc the distance in time between now and the first upcoming event
     fn next_event(&self) -> Duration {
         let now = Instant::now();
@@ -78,8 +74,6 @@ where
         }
     }
 
-    /// ### running
-    ///
     /// Returns whether should keep running
     fn running(&self) -> bool {
         if let Ok(lock) = self.running.read() {
@@ -88,8 +82,6 @@ where
         true
     }
 
-    /// ### paused
-    ///
     /// Returns whether worker is paused
     fn paused(&self) -> bool {
         if let Ok(lock) = self.paused.read() {
@@ -98,8 +90,6 @@ where
         false
     }
 
-    /// ### should_tick
-    ///
     /// Returns whether it's time to tick.
     /// If tick_interval is `None` it will never return `true`
     fn should_tick(&self) -> bool {
@@ -109,8 +99,6 @@ where
         }
     }
 
-    /// ### send_tick
-    ///
     /// Send tick to listener and calc next tick
     fn send_tick(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<U>>> {
         // Send tick
@@ -125,8 +113,6 @@ where
         }
     }
 
-    /// ### poll
-    ///
     /// Poll and send poll to listener. Calc next poll.
     /// Returns only the messages, while the None returned by poll are discarded
     #[allow(clippy::needless_collect)]
@@ -162,8 +148,6 @@ where
         }
     }
 
-    /// ### run
-    ///
     /// thread run method
     pub(super) fn run(&mut self) {
         loop {

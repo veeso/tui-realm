@@ -22,30 +22,20 @@ use crate::{
 /// In your application though, you may use a `IpAddressInput` which is the `Component` using the `Input` mock component.
 /// If you want more example, just dive into the `examples/` folder in the project root.
 pub trait MockComponent {
-    /// ### view
-    ///
     /// Based on the current properties and states, renders the component in the provided area frame.
     /// Render can also mutate the component state if this is required
     fn view(&mut self, frame: &mut Frame, area: Rect);
 
-    /// ### query
-    ///
     /// Query attribute of component properties.
     fn query(&self, attr: Attribute) -> Option<AttrValue>;
 
-    /// ### attr
-    ///
     /// Set attribute to properties.
     /// `query` describes the name, while `attr` the value it'll take
     fn attr(&mut self, attr: Attribute, value: AttrValue);
 
-    /// ### state
-    ///
     /// Get current state from component
     fn state(&self) -> State;
 
-    /// ### perform
-    ///
     /// Perform a command on the component.
     /// The command will may change the component state.
     /// The method returns the result of the command applied (what changed if any)
@@ -67,8 +57,6 @@ where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
-    /// ### on
-    ///
     /// Handle input event and update internal states.
     /// Returns a Msg to the view.
     /// If `None` is returned it means there's no message to return for the provided event.

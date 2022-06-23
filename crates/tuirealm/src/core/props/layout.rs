@@ -58,8 +58,6 @@ impl Layout {
 
     // -- chunks
 
-    /// ### chunks
-    ///
     /// Split an `Area` into chunks using the current layout configuration
     pub fn chunks(&self, area: Rect) -> Vec<Rect> {
         TuiLayout::default()

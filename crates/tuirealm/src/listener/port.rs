@@ -23,8 +23,6 @@ impl<U> Port<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// ### new
-    ///
     /// Define a new `Port`
     pub fn new(poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
         Self {
@@ -34,36 +32,26 @@ where
         }
     }
 
-    /// ### interval
-    ///
     /// Returns the interval for the current `Port`
     pub fn interval(&self) -> &Duration {
         &self.interval
     }
 
-    /// ### next_poll
-    ///
     /// Returns the time of the next poll for this listener
     pub fn next_poll(&self) -> Instant {
         self.next_poll
     }
 
-    /// ### should_poll
-    ///
     /// Returns whether next poll is now or in the past
     pub fn should_poll(&self) -> bool {
         self.next_poll <= Instant::now()
     }
 
-    /// ### poll
-    ///
     /// Calls poll on the inner `Poll` trait object.
     pub fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         self.poll.poll()
     }
 
-    /// ### calc_next_poll
-    ///
     /// Calculate the next poll (t_now + interval)
     pub fn calc_next_poll(&mut self) {
         self.next_poll = Instant::now().add(self.interval);

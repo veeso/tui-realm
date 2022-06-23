@@ -9,3 +9,4 @@ ignore:
     - "src/adapter/*"
     - "src/mock/*"
     - src/terminal.rs
+    - src/core/state.rs

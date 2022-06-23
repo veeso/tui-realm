@@ -35,23 +35,17 @@ pub struct Props {
 }
 
 impl Props {
-    /// ### get
-    ///
     /// Get, if any, the attribute associated to the selector
     pub fn get(&self, query: Attribute) -> Option<AttrValue> {
         self.attrs.get(&query).cloned()
     }
 
-    /// ### get_or
-    ///
     /// Get, if any, the attribute associated to the selector
     /// or return the fallback value `default`
     pub fn get_or(&self, query: Attribute, default: AttrValue) -> AttrValue {
         self.get(query).unwrap_or(default)
     }
 
-    /// ### set
-    ///
     /// Set a new attribute into Properties
     pub fn set(&mut self, query: Attribute, value: AttrValue) {
         self.attrs.insert(query, value);

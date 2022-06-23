@@ -44,8 +44,6 @@ pub trait Poll<UserEvent>: Send
 where
     UserEvent: Eq + PartialEq + Clone + PartialOrd + 'static,
 {
-    /// ### poll
-    ///
     /// Poll for an event from user or from another source (e.g. Network).
     /// This function mustn't be blocking, and will be called within the configured interval of the event listener.
     /// It may return Error in case something went wrong.
@@ -76,8 +74,6 @@ impl<U> EventListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// ### start
-    ///
     /// Create a new `EventListener` and start it.
     /// - `poll` is the trait object which polls for input events
     /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
@@ -107,8 +103,6 @@ where
         }
     }
 
-    /// ### stop
-    ///
     /// Stop event listener
     pub fn stop(&mut self) -> ListenerResult<()> {
         {
@@ -127,8 +121,6 @@ where
         }
     }
 
-    /// ### pause
-    ///
     /// Pause event listener worker
     pub fn pause(&mut self) -> ListenerResult<()> {
         // NOTE: keep these brackets to drop running after block
@@ -140,8 +132,6 @@ where
         Ok(())
     }
 
-    /// ### unpause
-    ///
     /// Unpause event listener worker
     pub fn unpause(&mut self) -> ListenerResult<()> {
         // NOTE: keep these brackets to drop running after block
@@ -153,8 +143,6 @@ where
         Ok(())
     }
 
-    /// ### poll
-    ///
     /// Checks whether there are new events available from event
     pub fn poll(&self) -> ListenerResult<Option<Event<U>>> {
         match self.recv.recv_timeout(self.poll_timeout) {
@@ -164,8 +152,6 @@ where
         }
     }
 
-    /// ### setup_thread
-    ///
     /// Setup the thread and returns the structs necessary to interact with it
     fn setup_thread(ports: Vec<Port<U>>, tick_interval: Option<Duration>) -> ThreadConfig<U> {
         let (sender, recv) = mpsc::channel();

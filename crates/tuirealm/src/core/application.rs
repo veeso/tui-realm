@@ -39,8 +39,6 @@ where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// ### init
-    ///
     /// Initialize a new `Application`.
     /// The event listener is immediately created and started.
     pub fn init(listener_cfg: EventListenerCfg<UserEvent>) -> Self {
@@ -52,8 +50,6 @@ where
         }
     }
 
-    /// ### restart_listener
-    ///
     /// Restart listener in case the previous listener has died or if you want to start a new one with a new configuration.
     ///
     /// > The listener has died if you received a `ApplicationError::Listener(ListenerError::ListenerDied))`
@@ -66,23 +62,17 @@ where
         Ok(())
     }
 
-    /// ### lock_ports
-    ///
     /// Lock ports. As long as Ports are locked, ports won't be polled.
     /// Locking ports will also prevent Tick events from being generated.
     pub fn lock_ports(&mut self) -> ApplicationResult<()> {
         self.listener.pause().map_err(ApplicationError::from)
     }
 
-    /// ### unlock_ports
-    ///
     /// Unlock Ports. Once called, the event listener will resume polling Ports.
     pub fn unlock_ports(&mut self) -> ApplicationResult<()> {
         self.listener.unpause().map_err(ApplicationError::from)
     }
 
-    /// ### tick
-    ///
     /// The tick method makes the application to run once.
     /// The workflow of the tick method is the following one:
     ///
@@ -116,8 +106,6 @@ where
         self.view.add_injector(injector);
     }
 
-    /// ### mount
-    ///
     /// Mount component to view and associate subscriptions for it.
     /// Returns error if component is already mounted
     /// NOTE: if subs vector contains duplicated, these will be discarded
@@ -140,8 +128,6 @@ where
         Ok(())
     }
 
-    /// ### umount
-    ///
     /// Umount component associated to `id` and remove ALL its SUBSCRIPTIONS.
     /// Returns Error if the component doesn't exist
     pub fn umount(&mut self, id: &K) -> ApplicationResult<()> {
@@ -150,8 +136,6 @@ where
         Ok(())
     }
 
-    /// ### remount
-    ///
     /// Remount provided component.
     /// Returns Err if failed to mount. It ignores whether the component already exists or not.
     /// If component had focus, focus is preserved
@@ -172,30 +156,22 @@ where
         }
     }
 
-    /// ### umount_all
-    ///
     /// Umount all components in the view and removed all associated subscriptions
     pub fn umount_all(&mut self) {
         self.view.umount_all();
         self.subs.clear();
     }
 
-    /// ### mounted
-    ///
     /// Returns whether component `id` is mounted
     pub fn mounted(&self, id: &K) -> bool {
         self.view.mounted(id)
     }
 
-    /// ### view
-    ///
     /// Render component called `id`
     pub fn view(&mut self, id: &K, f: &mut Frame, area: Rect) {
         self.view.view(id, f, area);
     }
 
-    /// ### query
-    ///
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
@@ -203,8 +179,6 @@ where
         self.view.query(id, query).map_err(ApplicationError::from)
     }
 
-    /// ### attr
-    ///
     /// Set attribute for component `id`
     /// Returns error if the component doesn't exist
     pub fn attr(&mut self, id: &K, attr: Attribute, value: AttrValue) -> ApplicationResult<()> {
@@ -213,16 +187,12 @@ where
             .map_err(ApplicationError::from)
     }
 
-    /// ### state
-    ///
     /// Get state for component `id`.
     /// Returns `Err` if component doesn't exist
     pub fn state(&self, id: &K) -> ApplicationResult<State> {
         self.view.state(id).map_err(ApplicationError::from)
     }
 
-    /// ### active
-    ///
     /// Shorthand for `attr(id, Attribute::Focus(AttrValue::Flag(true)))`.
     /// It also sets the component as the current one having focus.
     /// Previous active component, if any, GETS PUSHED to the STACK
@@ -233,8 +203,6 @@ where
         self.view.active(id).map_err(ApplicationError::from)
     }
 
-    /// ### blur
-    ///
     /// Blur selected element AND DON'T PUSH CURRENT ACTIVE ELEMENT INTO THE STACK
     /// Shorthand for `attr(id, Attribute::Focus(AttrValue::Flag(false)))`.
     /// It also unset the current focus and give it to the first element in stack.
@@ -252,8 +220,6 @@ where
 
     // -- subs bridge
 
-    /// ### subscribe
-    ///
     /// Subscribe component to a certain event.
     /// Returns Error if the component doesn't exist or if the component is already subscribed to this event
     pub fn subscribe(&mut self, id: &K, sub: Sub<K, UserEvent>) -> ApplicationResult<()> {
@@ -268,8 +234,6 @@ where
         Ok(())
     }
 
-    /// ### unsubscribe
-    ///
     /// Unsubscribe a component from a certain event.
     /// Returns error if the component doesn't exist or if the component is not subscribed to this event
     pub fn unsubscribe(&mut self, id: &K, ev: SubEventClause<UserEvent>) -> ApplicationResult<()> {
@@ -283,16 +247,12 @@ where
         Ok(())
     }
 
-    /// ### lock_subs
-    ///
     /// Lock subscriptions. As long as the subscriptions are locked, events won't be propagated to
     /// subscriptions.
     pub fn lock_subs(&mut self) {
         self.sub_lock = true;
     }
 
-    /// ### unlock_subs
-    ///
     /// Unlock subscriptions. Application will now resume propagating events to subscriptions.
     pub fn unlock_subs(&mut self) {
         self.sub_lock = false;
@@ -300,15 +260,11 @@ where
 
     // -- private
 
-    /// ### unsubscribe_component
-    ///
     /// remove all subscriptions for component
     fn unsubscribe_component(&mut self, id: &K) {
         self.subs.retain(|x| x.target() != id)
     }
 
-    /// ### subscribed
-    ///
     /// Returns whether component `id` is subscribed to event described by `clause`
     fn subscribed(&self, id: &K, clause: &SubEventClause<UserEvent>) -> bool {
         self.subs
@@ -316,8 +272,6 @@ where
             .any(|s| s.target() == id && s.event() == clause)
     }
 
-    /// ### poll
-    ///
     /// Poll listener according to provided strategy
     fn poll(&mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Event<UserEvent>>> {
         match strategy {
@@ -329,8 +283,6 @@ where
         }
     }
 
-    /// ### poll_times
-    ///
     /// Poll event listener up to `t` times
     fn poll_times(&mut self, t: usize) -> ApplicationResult<Vec<Event<UserEvent>>> {
         let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(t);
@@ -344,8 +296,6 @@ where
         Ok(evs)
     }
 
-    /// ### poll_with_timeout
-    ///
     /// Poll event listener until `timeout` is elapsed
     fn poll_with_timeout(&mut self, timeout: Duration) -> ApplicationResult<Vec<Event<UserEvent>>> {
         let started = Instant::now();
@@ -360,15 +310,11 @@ where
         Ok(evs)
     }
 
-    /// ### poll_listener
-    ///
     /// Poll event listener once
     fn poll_listener(&mut self) -> ApplicationResult<Option<Event<UserEvent>>> {
         self.listener.poll().map_err(ApplicationError::from)
     }
 
-    /// ### forward_to_active_component
-    ///
     /// Forward event to current active component, if any.
     fn forward_to_active_component(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         self.view
@@ -377,8 +323,6 @@ where
             .and_then(|x| self.view.forward(&x, ev).ok().unwrap())
     }
 
-    /// ### forward_to_subscriptions
-    ///
     /// Forward events to subscriptions listening to the incoming event.
     fn forward_to_subscriptions(&mut self, events: Vec<Event<UserEvent>>) -> Vec<Msg> {
         let mut messages: Vec<Msg> = Vec::new();

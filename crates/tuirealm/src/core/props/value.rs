@@ -51,8 +51,6 @@ pub enum PropValue {
 }
 
 impl PropPayload {
-    /// ### unwrap_one
-    ///
     /// Unwrap a One value from PropPayload
     pub fn unwrap_one(self) -> PropValue {
         match self {
@@ -61,8 +59,6 @@ impl PropPayload {
         }
     }
 
-    /// ### unwrap_tup2
-    ///
     /// Unwrap a Tup2 value from PropPayload
     pub fn unwrap_tup2(self) -> (PropValue, PropValue) {
         match self {
@@ -71,8 +67,6 @@ impl PropPayload {
         }
     }
 
-    /// ### unwrap_tup3
-    ///
     /// Unwrap a Tup3 value from PropPayload
     pub fn unwrap_tup3(self) -> (PropValue, PropValue, PropValue) {
         match self {
@@ -81,8 +75,6 @@ impl PropPayload {
         }
     }
 
-    /// ### unwrap_tup4
-    ///
     /// Unwrap a Tup4 value from PropPayload
     pub fn unwrap_tup4(self) -> (PropValue, PropValue, PropValue, PropValue) {
         match self {
@@ -91,8 +83,6 @@ impl PropPayload {
         }
     }
 
-    /// ### unwrap_vec
-    ///
     /// Unwrap a Vec value from PropPayload
     pub fn unwrap_vec(self) -> Vec<PropValue> {
         match self {
@@ -101,8 +91,6 @@ impl PropPayload {
         }
     }
 
-    /// ### unwrap_map
-    ///
     /// Unwrap a Map value from PropPayload
     pub fn unwrap_map(self) -> HashMap<String, PropValue> {
         match self {
@@ -111,8 +99,6 @@ impl PropPayload {
         }
     }
 
-    /// ### unwrap_linked
-    ///
     /// Unwrap a Linked list from PropPayload
     pub fn unwrap_linked(self) -> LinkedList<PropPayload> {
         match self {
@@ -123,8 +109,6 @@ impl PropPayload {
 }
 
 impl PropValue {
-    /// ### unwrap_bool
-    ///
     /// Unwrap PropValue as Bool.
     /// Panics otherwise
     pub fn unwrap_bool(self) -> bool {
@@ -134,8 +118,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_u8
-    ///
     /// Unwrap PropValue as U8.
     /// Panics otherwise
     pub fn unwrap_u8(self) -> u8 {
@@ -145,8 +127,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_u16
-    ///
     /// Unwrap PropValue as u16.
     /// Panics otherwise
     pub fn unwrap_u16(self) -> u16 {
@@ -156,8 +136,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_u32
-    ///
     /// Unwrap PropValue as Bool.
     /// Panics otherwise
     pub fn unwrap_u32(self) -> u32 {
@@ -167,8 +145,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_u64
-    ///
     /// Unwrap PropValue as u64.
     /// Panics otherwise
     pub fn unwrap_u64(self) -> u64 {
@@ -178,8 +154,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_u128
-    ///
     /// Unwrap PropValue as u128.
     /// Panics otherwise
     pub fn unwrap_u128(self) -> u128 {
@@ -189,8 +163,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_usize
-    ///
     /// Unwrap PropValue as usize.
     /// Panics otherwise
     pub fn unwrap_usize(self) -> usize {
@@ -200,8 +172,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_i8
-    ///
     /// Unwrap PropValue as I8.
     /// Panics otherwise
     pub fn unwrap_i8(self) -> i8 {
@@ -211,8 +181,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_i16
-    ///
     /// Unwrap PropValue as i16.
     /// Panics otherwise
     pub fn unwrap_i16(self) -> i16 {
@@ -222,8 +190,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_i32
-    ///
     /// Unwrap PropValue as i32.
     /// Panics otherwise
     pub fn unwrap_i32(self) -> i32 {
@@ -233,8 +199,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_i64
-    ///
     /// Unwrap PropValue as u64.
     /// Panics otherwise
     pub fn unwrap_i64(self) -> i64 {
@@ -244,8 +208,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_i128
-    ///
     /// Unwrap PropValue as i128.
     /// Panics otherwise
     pub fn unwrap_i128(self) -> i128 {
@@ -255,8 +217,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_isize
-    ///
     /// Unwrap PropValue as isize.
     /// Panics otherwise
     pub fn unwrap_isize(self) -> isize {
@@ -266,8 +226,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_f32
-    ///
     /// Unwrap PropValue as f3.
     /// Panics otherwise
     pub fn unwrap_f32(self) -> f32 {
@@ -277,8 +235,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_f64
-    ///
     /// Unwrap PropValue as F64.
     /// Panics otherwise
     pub fn unwrap_f64(self) -> f64 {
@@ -288,8 +244,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_str
-    ///
     /// Unwrap PropValue as str.
     /// Panics otherwise
     pub fn unwrap_str(self) -> String {
@@ -299,8 +253,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_alignment
-    ///
     /// Unwrap PropValue as alignment.
     /// Panics otherwise
     pub fn unwrap_alignment(self) -> Alignment {
@@ -310,8 +262,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_dataset
-    ///
     /// Unwrap PropValue as Dataset.
     /// Panics otherwise
     pub fn unwrap_dataset(self) -> Dataset {
@@ -321,8 +271,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_input_type
-    ///
     /// Unwrap PropValue as InputType.
     /// Panics otherwise
     pub fn unwrap_input_type(self) -> InputType {
@@ -332,8 +280,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_shape
-    ///
     /// Unwrap PropValue as shape.
     /// Panics otherwise
     pub fn unwrap_shape(self) -> Shape {
@@ -343,8 +289,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_style
-    ///
     /// Unwrap PropValue as Style.
     /// Panics otherwise
     pub fn unwrap_style(self) -> Style {
@@ -354,8 +298,6 @@ impl PropValue {
         }
     }
 
-    /// ### unwrap_bool
-    ///
     /// Unwrap PropValue as Bool.
     /// Panics otherwise
     pub fn unwrap_text_span(self) -> TextSpan {

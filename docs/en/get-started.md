@@ -366,8 +366,7 @@ where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone + PartialOrd,
 {
-    /// ### update
-    ///
+
     /// update the current state handling a message from the view.
     /// This function may return a Message,
     /// so this function has to be intended to be call recursively if necessary
