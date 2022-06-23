@@ -28,8 +28,6 @@ impl Default for Borders {
 }
 
 impl Borders {
-    /// ### sides
-    ///
     /// Set border sides
     pub fn sides(mut self, borders: BorderSides) -> Self {
         self.sides = borders;
@@ -46,8 +44,6 @@ impl Borders {
         self
     }
 
-    /// ### style
-    ///
     /// Get Border style
     pub fn style(&self) -> Style {
         Style::default().fg(self.color)

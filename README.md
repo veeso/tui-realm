@@ -86,7 +86,6 @@
   - [Guides 🎓](#guides-)
   - [Documentation 📚](#documentation-)
   - [Apps using tui-realm 🚀](#apps-using-tui-realm-)
-  - [Legacy API 📜](#legacy-api-)
   - [Support the developer ☕](#support-the-developer-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
@@ -127,13 +126,13 @@ See tui-realm in action in the [Example](#run-examples) or if you want to read m
 If you want the default features, just add tuirealm 1.x version:
 
 ```toml
-tuirealm = "^1.6.0"
+tuirealm = "^1.7.0"
 ```
 
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "^1.6.0", default-features = false, features = [ "derive", "serialize", "with-termion" ] }
+tuirealm = { version = "^1.7.0", default-features = false, features = [ "derive", "serialize", "with-termion" ] }
 ```
 
 Supported features are:
@@ -153,7 +152,7 @@ When you want to switch to another backend (e.g. from crossterm to termion), rem
 > ❗ You can never have more than one backend enabled at the same time
 
 ```toml
-tuirealm = { version = "^1.6.0", default-features = false, features = [ "with-termion" ] }
+tuirealm = { version = "^1.7.0", default-features = false, features = [ "with-termion" ] }
 ```
 
 ### Create a tui-realm application 🪂
@@ -181,6 +180,7 @@ If you want to use it, just add the [tui-realm-stdlib](https://github.com/veeso/
 
 These components are not included in tui-realm, but have been developed by other users. I like advertising other's contents, so here you can find a list of components you may find useful for your next tui-realm project 💜.
 
+- [tui-realm-textarea](https://github.com/veeso/tui-realm-textarea) A textarea/editor component developed by [@veeso](https://github.com/veeso)
 - [tui-realm-treeview](https://github.com/veeso/tui-realm-treeview) A treeview component developed by [@veeso](https://github.com/veeso)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
@@ -191,7 +191,6 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 
 - [Get Started Guide](/docs/en/get-started.md)
 - [Advanced concepts](/docs/en/advanced.md)
-- [Migrating from tui-realm 0.x to 1.x](/docs/en/migrating-legacy.md)
 
 ---
 
@@ -208,10 +207,6 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 - [tuifeed](https://github.com/veeso/tuifeed)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
-
-## Legacy API 📜
-
-Looking for the old ugly tui-realm API? You can find it [here](https://github.com/veeso/tui-realm/tree/legacy)
 
 ---
 

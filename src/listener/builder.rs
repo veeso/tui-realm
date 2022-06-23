@@ -33,15 +33,11 @@ impl<U> EventListenerCfg<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// ### start
-    ///
     /// Create the event listener with the parameters provided and start the workers
     pub(crate) fn start(self) -> EventListener<U> {
         EventListener::start(self.ports, self.poll_timeout, self.tick_interval)
     }
 
-    /// ### poll_timeout
-    ///
     /// Set poll timeout.
     /// Poll timeout is the maximum time to wait when fetching the thread receiver.
     ///
@@ -56,8 +52,6 @@ where
         self
     }
 
-    /// ### tick_interval
-    ///
     /// Defines the tick interval for the event listener.
     /// If an interval is defined, this will also enable the `Tick` event.
     pub fn tick_interval(mut self, interval: Duration) -> Self {
@@ -65,16 +59,12 @@ where
         self
     }
 
-    /// ### port
-    ///
     /// Add a new Port (Poll, Interval) to the the event listener
     pub fn port(mut self, poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
         self.ports.push(Port::new(poll, interval));
         self
     }
 
-    /// ### default_input_listener
-    ///
     /// Add to the event listener the default input event listener for the backend configured.
     pub fn default_input_listener(self, interval: Duration) -> Self {
         self.port(Box::new(InputEventListener::<U>::new(interval)), interval)

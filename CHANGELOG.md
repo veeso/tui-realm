@@ -35,6 +35,7 @@
 Released on 23/06/2022
 
 - Added `unwrap()` methods to `State` and `StaateValue`
+- Added `StateValue::None`
 
 ## 1.6.0
 

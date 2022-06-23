@@ -346,8 +346,7 @@ struct OwnStates {
 }
 
 impl OwnStates {
-    /// ### next_choice
-    ///
+
     /// Move choice index to next choice
     pub fn next_choice(&mut self) {
         if self.choice + 1 < self.choices.len() {
@@ -355,8 +354,7 @@ impl OwnStates {
         }
     }
 
-    /// ### prev_choice
-    ///
+
     /// Move choice index to previous choice
     pub fn prev_choice(&mut self) {
         if self.choice > 0 {
@@ -364,8 +362,7 @@ impl OwnStates {
         }
     }
 
-    /// ### set_choices
-    ///
+
     /// Set OwnStates choices from a vector of text spans
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available

@@ -18,8 +18,6 @@ where
     K: Eq + PartialEq + Clone + Hash,
     U: Eq + PartialEq + Clone + PartialOrd,
 {
-    /// ### new
-    ///
     /// Creates a new `Sub`
     pub fn new(event_clause: EventClause<U>, sub_clause: SubClause<K>) -> Self {
         Self(event_clause, sub_clause)
@@ -57,8 +55,6 @@ where
     K: Eq + PartialEq + Clone + Hash,
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
-    /// ### new
-    ///
     /// Instantiates a new `Subscription`
     pub fn new(target: K, sub: Sub<K, U>) -> Self {
         Self {
@@ -68,22 +64,16 @@ where
         }
     }
 
-    /// ### target
-    ///
     /// Returns sub target
     pub(crate) fn target(&self) -> &K {
         &self.target
     }
 
-    /// ### event
-    ///
     /// Returns reference to subscription event clause
     pub(crate) fn event(&self) -> &EventClause<U> {
         &self.ev
     }
 
-    /// ### forward
-    ///
     /// Returns whether to forward event to component
     pub(crate) fn forward<HasAttrFn, GetStateFn, MountedFn>(
         &self,
@@ -125,8 +115,6 @@ impl<U> EventClause<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd,
 {
-    /// ### forward
-    ///
     /// Check whether to forward based on even type and event clause.
     ///
     /// This is how events are forwarded:
@@ -181,30 +169,22 @@ impl<Id> SubClause<Id>
 where
     Id: Eq + PartialEq + Clone + Hash,
 {
-    /// ### not
-    ///
     /// Shortcut for `SubClause::Not` without specifying `Box::new(...)`
     #[allow(clippy::should_implement_trait)]
     pub fn not(clause: Self) -> Self {
         Self::Not(Box::new(clause))
     }
 
-    /// ### and
-    ///
     /// Shortcut for `SubClause::And` without specifying `Box::new(...)`
     pub fn and(a: Self, b: Self) -> Self {
         Self::And(Box::new(a), Box::new(b))
     }
 
-    /// ### or
-    ///
     /// Shortcut for `SubClause::Or` without specifying `Box::new(...)`
     pub fn or(a: Self, b: Self) -> Self {
         Self::Or(Box::new(a), Box::new(b))
     }
 
-    /// ### forward
-    ///
     /// Returns whether the subscription clause is satisfied
     pub(crate) fn forward<HasAttrFn, GetStateFn, MountedFn>(
         &self,

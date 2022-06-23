@@ -19,8 +19,6 @@ pub struct TextSpan {
 }
 
 impl TextSpan {
-    /// ### new
-    ///
     /// Instantiate a new `TextSpan`
     pub fn new<S: AsRef<str>>(text: S) -> Self {
         Self {
@@ -41,56 +39,42 @@ impl TextSpan {
         self
     }
 
-    /// ### bold
-    ///
     /// Set bold property for text
     pub fn bold(mut self) -> Self {
         self.modifiers |= Modifier::BOLD;
         self
     }
 
-    /// ### italic
-    ///
     /// Set italic property for text
     pub fn italic(mut self) -> Self {
         self.modifiers |= Modifier::ITALIC;
         self
     }
 
-    /// ### underlined
-    ///
     /// Set underlined property for text
     pub fn underlined(mut self) -> Self {
         self.modifiers |= Modifier::UNDERLINED;
         self
     }
 
-    /// ### slow_blink
-    ///
     /// Set slow_blink property for text
     pub fn slow_blink(mut self) -> Self {
         self.modifiers |= Modifier::SLOW_BLINK;
         self
     }
 
-    /// ### rapid_blink
-    ///
     /// Set rapid_blink property for text
     pub fn rapid_blink(mut self) -> Self {
         self.modifiers |= Modifier::RAPID_BLINK;
         self
     }
 
-    /// ### reversed
-    ///
     /// Set reversed property for text
     pub fn reversed(mut self) -> Self {
         self.modifiers |= Modifier::REVERSED;
         self
     }
 
-    /// ### strikethrough
-    ///
     /// Set strikethrough property for text
     pub fn strikethrough(mut self) -> Self {
         self.modifiers |= Modifier::CROSSED_OUT;
@@ -122,8 +106,6 @@ pub struct TableBuilder {
 }
 
 impl TableBuilder {
-    /// ### add_col
-    ///
     /// Add a column to the last row
     pub fn add_col(&mut self, span: TextSpan) -> &mut Self {
         if let Some(table) = self.table.as_mut() {
@@ -134,8 +116,6 @@ impl TableBuilder {
         self
     }
 
-    /// ### add_row
-    ///
     /// Add a new row to the table
     pub fn add_row(&mut self) -> &mut Self {
         if let Some(table) = self.table.as_mut() {
@@ -144,8 +124,6 @@ impl TableBuilder {
         self
     }
 
-    /// ### build
-    ///
     /// Take table out of builder
     /// Don't call this method twice for any reasons!
     pub fn build(&mut self) -> Table {

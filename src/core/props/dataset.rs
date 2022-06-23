@@ -31,62 +31,46 @@ impl Default for Dataset {
 }
 
 impl Dataset {
-    /// ### name
-    ///
     /// Set name for dataset
     pub fn name<S: AsRef<str>>(mut self, s: S) -> Self {
         self.name = s.as_ref().to_string();
         self
     }
 
-    /// ### marker
-    ///
     /// Set marker type for dataset
     pub fn marker(mut self, m: Marker) -> Self {
         self.marker = m;
         self
     }
 
-    /// ### graph_type
-    ///
     /// Set graphtype for dataset
     pub fn graph_type(mut self, g: GraphType) -> Self {
         self.graph_type = g;
         self
     }
 
-    /// ### style
-    ///
     /// Set style for dataset
     pub fn style(mut self, s: Style) -> Self {
         self.style = s;
         self
     }
 
-    /// ### data
-    ///
     /// Set data for dataset; must be a vec of (f64, f64)
     pub fn data(mut self, data: Vec<(f64, f64)>) -> Self {
         self.data = data;
         self
     }
 
-    /// ### push
-    ///
     /// Push a record to the back of dataset
     pub fn push(&mut self, point: (f64, f64)) {
         self.data.push(point);
     }
 
-    /// ### pop
-    ///
     /// Pop last element of dataset
     pub fn pop(&mut self) {
         self.data.pop();
     }
 
-    /// ### pop
-    ///
     /// Pop last element of dataset
     pub fn pop_front(&mut self) {
         if !self.data.is_empty() {
@@ -94,8 +78,6 @@ impl Dataset {
         }
     }
 
-    /// ### get_data
-    ///
     /// Get a reference to data
     pub fn get_data(&self) -> &[(f64, f64)] {
         &self.data

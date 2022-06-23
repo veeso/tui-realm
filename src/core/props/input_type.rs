@@ -75,8 +75,6 @@ impl fmt::Debug for InputType {
 }
 
 impl InputType {
-    /// ### char_valid
-    ///
     /// Returns whether the provided char `c` can be pushed to `input` based on `InputType`
     pub fn char_valid(&self, input: &str, c: char) -> bool {
         match self {
@@ -95,8 +93,6 @@ impl InputType {
         }
     }
 
-    /// ### validate
-    ///
     /// Returns whether the entire input is valid based on current input type
     pub fn validate(&self, s: &str) -> bool {
         match self {
