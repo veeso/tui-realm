@@ -61,7 +61,7 @@
 )]
 
 #[macro_use]
-extern crate lazy_static;
+extern crate lazy_regex;
 extern crate self as tuirealm;
 extern crate tui as tuirs;
 #[cfg(feature = "derive")]
