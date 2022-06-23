@@ -9,8 +9,7 @@ use tuirealm::{
     event::{Event, Key, KeyEvent, KeyModifiers},
     props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers},
     terminal::TerminalBridge,
-    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue,
-    Update,
+    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, Update,
 };
 // tui
 use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -109,13 +108,13 @@ fn main() {
     let _ = model.terminal.disable_raw_mode();
     let _ = model.terminal.clear_screen();
     // print content
-    if let Ok(State::Vec(lines)) = model.app.state(&Id::Editor) {
-        lines.into_iter().for_each(|x| {
-            if let StateValue::String(x) = x {
-                println!("{}", x)
-            }
-        });
-    }
+    model
+        .app
+        .state(&Id::Editor)
+        .unwrap()
+        .unwrap_vec()
+        .into_iter()
+        .for_each(|x| println!("{}", x.unwrap_string()));
 }
 
 // -- update

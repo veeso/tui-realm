@@ -16,7 +16,7 @@ repository = "https://github.com/veeso/tui-realm-textarea"
 [dependencies]
 cli-clipboard = { version = "^0.2.1", optional = true }
 lazy-regex = "^2.3.0"
-tuirealm = { version = "^1.6.0", default-features = false, features = [ "derive" ]}
+tuirealm = { version = "^1.7.0", default-features = false, features = [ "derive" ]}
 tui-textarea = "^0.1.1"
 
 [dev-dependencies]

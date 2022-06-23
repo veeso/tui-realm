@@ -72,7 +72,7 @@
 ## About tui-realm-textarea ✏️
 
 tui-realm-textarea is an implementation of a **textarea component** for [tui-realm](https://github.com/veeso/tui-realm).
-It is based on the [tui-textarea](https://github.com/rhysd/tui-textarea) component.
+It is based on the [tui-textarea](https://github.com/rhysd/tui-textarea) component by [rhysd](https://github.com/rhysd).
 
 ![Demo](docs/images/demo.gif)
 
