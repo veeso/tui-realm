@@ -14,8 +14,6 @@ pub use components::{MockBarInput, MockFooInput, MockInput};
 
 // -- event
 
-/// ## MockEvent
-///
 /// Mock UserEvent type
 #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
 pub enum MockEvent {
@@ -25,8 +23,6 @@ pub enum MockEvent {
     Hello(String),
 }
 
-/// ## MockComponentId
-///
 /// Mock component id type
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub enum MockComponentId {
@@ -38,8 +34,6 @@ pub enum MockComponentId {
 
 // -- poll
 
-/// ## MockPoll
-///
 /// Mock poll implementation
 pub struct MockPoll<U: Eq + PartialEq + Clone + PartialOrd + Send> {
     ghost: PhantomData<U>,
@@ -61,8 +55,6 @@ impl<U: Eq + PartialEq + Clone + PartialOrd + Send + 'static> Poll<U> for MockPo
 
 // -- msg
 
-/// ## MockMsg
-///
 /// Mocked Msg for components and view
 #[derive(Debug, PartialEq)]
 pub enum MockMsg {

@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.7.0](#170)
   - [1.6.0](#160)
   - [1.5.0](#150)
   - [1.4.2](#142)
@@ -28,6 +29,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.7.0
+
+Released on 23/06/2022
+
+- Added `unwrap()` methods to `State` and `StaateValue`
 
 ## 1.6.0
 

@@ -10,8 +10,6 @@ use crate::{
     AttrValue, Attribute, Component, MockComponent, Props, State, StateValue,
 };
 
-/// ## MockInput
-///
 /// Mocked component implementing `MockComponent`
 pub struct MockInput {
     props: Props,

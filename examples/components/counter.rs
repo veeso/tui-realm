@@ -15,8 +15,6 @@ use tuirealm::{
     StateValue,
 };
 
-/// ## Counter
-///
 /// Counter which increments its value on Submit
 struct Counter {
     props: Props,

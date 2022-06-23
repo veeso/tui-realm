@@ -17,14 +17,11 @@ use std::io::Stdout;
 use termion::{input::MouseTerminal, raw::RawTerminal, screen::AlternateScreen};
 
 // -- Frame
-/// ## Frame
-///
+
 /// Frame represents the Frame where the view will be displayed in
 pub type Frame<'a> =
     TuiFrame<'a, TermionBackend<AlternateScreen<MouseTerminal<RawTerminal<Stdout>>>>>;
 
-/// ## Terminal
-///
 /// Terminal must be used to interact with the terminal in tui applications
 pub type Terminal =
     TuiTerminal<TermionBackend<AlternateScreen<MouseTerminal<RawTerminal<Stdout>>>>>;

@@ -9,8 +9,6 @@ use crossterm::event as xterm;
 use std::marker::PhantomData;
 use std::time::Duration;
 
-/// ## CrosstermInputListener
-///
 /// The input listener for crossterm.
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
 /// or you can use it directly in the event listener, calling `default_input_listener()` in the `EventListenerCfg`

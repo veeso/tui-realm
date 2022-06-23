@@ -24,8 +24,6 @@ pub(crate) use view::WrappedComponent;
 
 // -- Update
 
-/// ## Update
-///
 /// The update trait defines the prototype of the function to be used to handle the events coming from the View.
 pub trait Update<Msg>
 where

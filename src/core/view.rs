@@ -9,19 +9,13 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use thiserror::Error;
 
-/// ## WrappedComponent
-///
 /// A boxed component. Shorthand for View components map
 pub(crate) type WrappedComponent<Msg, UserEvent> = Box<dyn Component<Msg, UserEvent>>;
 
-/// ## ViewResult
-///
 /// Result for view methods.
 /// Returns a variable Ok and a ViewError in case of error.
 pub type ViewResult<T> = Result<T, ViewError>;
 
-/// ## ViewError
-///
 /// An error returned by the view
 #[derive(Debug, Error)]
 pub enum ViewError {
@@ -33,8 +27,6 @@ pub enum ViewError {
     NoComponentToBlur,
 }
 
-/// ## View
-///
 /// View is the wrapper and manager for all the components.
 /// A View is a container for all the components in a certain layout.
 /// Each View can have only one focused component at the time. At least one component must be always focused

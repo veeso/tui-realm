@@ -11,15 +11,11 @@ use std::hash::Hash;
 use std::time::{Duration, Instant};
 use thiserror::Error;
 
-/// ## ApplicationResult
-///
 /// Result retuned by `Application`.
 /// Ok depends on method
 /// Err is always `ApplicationError`
 pub type ApplicationResult<T> = Result<T, ApplicationError>;
 
-/// ## Application
-///
 /// The application defines a tui-realm application.
 /// It will handle events, subscriptions and the view too.
 /// It provides functions to interact with the view (mount, umount, query, etc), but also
@@ -410,8 +406,6 @@ where
     }
 }
 
-/// ## PollStrategy
-///
 /// Poll strategy defines how to call `poll` on the event listener.
 pub enum PollStrategy {
     /// The poll() function will be called once
@@ -424,8 +418,6 @@ pub enum PollStrategy {
 
 // -- error
 
-/// ## ApplicationError
-///
 /// Error variants returned by `Application`
 #[derive(Debug, Error)]
 pub enum ApplicationError {

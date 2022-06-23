@@ -13,8 +13,6 @@ use tuirealm::{
     AttrValue, Attribute, Component, Event, Frame, MockComponent, NoUserEvent, State, StateValue,
 };
 
-/// ## Clock
-///
 /// Simple clock component which displays current time
 pub struct Clock {
     component: Label,

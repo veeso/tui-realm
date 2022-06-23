@@ -25,8 +25,6 @@ pub enum TerminalError {
     Unsupported,
 }
 
-/// ## TerminalBridge
-///
 /// An helper around `Terminal` to quickly setup and perform on terminal.
 /// You can opt whether to use or not this structure to interact with the terminal
 /// Anyway this structure is 100% cross-backend compatible and is really easy to use, so I suggest you to use it.

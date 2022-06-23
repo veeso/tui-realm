@@ -8,8 +8,6 @@ use serde::{Deserialize, Serialize};
 
 // -- event
 
-/// ## Event
-///
 /// An event raised by a user interaction
 #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
 pub enum Event<UserEvent>
@@ -58,16 +56,12 @@ where
     }
 }
 
-/// ## NoUserEvent
-///
 /// When using event you can use this as type parameter if you don't want to use user events
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd)]
 pub enum NoUserEvent {}
 
 // -- keyboard
 
-/// ## KeyEvent
-///
 /// A keyboard event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 #[cfg_attr(
@@ -80,8 +74,6 @@ pub struct KeyEvent {
     pub modifiers: KeyModifiers,
 }
 
-/// ## Key
-///
 /// A keyboard event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 #[cfg_attr(
