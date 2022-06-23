@@ -113,13 +113,9 @@ where
     }
 }
 
-/// ## Table
-///
 /// Table represents a list of rows with a list of columns of text spans
 pub type Table = Vec<Vec<TextSpan>>;
 
-/// ## TableBuilder
-///
 /// Table builder is a helper to make it easier to build text tables
 pub struct TableBuilder {
     table: Option<Table>,

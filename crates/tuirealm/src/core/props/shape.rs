@@ -5,8 +5,6 @@
 use super::Color;
 use tui::widgets::canvas::{Line, Map, Rectangle};
 
-/// ## Shape
-///
 /// Describes the shape to draw on the canvas
 #[derive(Clone, Debug)]
 pub enum Shape {

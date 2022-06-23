@@ -26,8 +26,6 @@ pub use shape::Shape;
 pub use texts::{Table, TableBuilder, TextSpan};
 pub use value::{PropPayload, PropValue};
 
-/// ## Props
-///
 /// The props struct holds all the attributes associated to the component.
 /// Properties have been designed to be versatile for all kind of components, but without introducing
 /// too many attributes at the same time.
@@ -60,8 +58,6 @@ impl Props {
     }
 }
 
-/// ## Attribute
-///
 /// Describes a "selector" to query an attribute on props.
 /// The selector must identify uniquely an attribute in the properties.
 /// Check each attribute documentation to see how they're supposed to be used, but remember that
@@ -141,8 +137,6 @@ pub enum Attribute {
 
 // -- AttrValues
 
-/// ## AttrValue
-///
 /// Describes a single attribute in the component properties.
 #[derive(Debug, PartialEq, Clone)]
 #[allow(clippy::large_enum_variant)]

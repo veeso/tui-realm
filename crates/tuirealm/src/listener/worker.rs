@@ -10,8 +10,6 @@ use std::time::{Duration, Instant};
 
 // -- worker
 
-/// ## EventListenerWorker
-///
 /// worker for event listener
 pub(super) struct EventListenerWorker<U>
 where

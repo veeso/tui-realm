@@ -7,8 +7,6 @@ use std::collections::{HashMap, LinkedList};
 
 // -- Prop value
 
-/// ## PropPayload
-///
 /// The payload contains the actual value for user defined properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum PropPayload {
@@ -22,8 +20,6 @@ pub enum PropPayload {
     None,
 }
 
-/// ## PropValue
-///
 /// Value describes the value contained in a `PropPayload`
 #[derive(Debug, PartialEq, Clone)]
 pub enum PropValue {

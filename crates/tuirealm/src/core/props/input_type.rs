@@ -7,8 +7,6 @@ use crate::utils::parser::{parse_color, parse_email, parse_phone_number};
 use std::fmt;
 use std::str::FromStr;
 
-/// ## InputType
-///
 /// Input type for text inputs
 #[derive(Clone)]
 pub enum InputType {

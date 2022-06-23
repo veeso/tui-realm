@@ -22,8 +22,6 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 use thiserror::Error;
 
-/// ## ListenerResult
-///
 /// Result returned by `EventListener`. Ok value depends on the method, while the
 /// Err value is always `ListenerError`.
 pub type ListenerResult<T> = Result<T, ListenerError>;
@@ -40,8 +38,6 @@ pub enum ListenerError {
     PollFailed,
 }
 
-/// ## Poll
-///
 /// The poll trait defines the function `poll`, which will be called by the event listener
 /// dedicated thread to poll for events.
 pub trait Poll<UserEvent>: Send
@@ -59,8 +55,6 @@ where
     fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>>;
 }
 
-/// ## EventListener
-///
 /// The event listener...
 pub(crate) struct EventListener<U>
 where
@@ -198,8 +192,6 @@ where
 
 // -- thread config
 
-/// ## ThreadConfig
-///
 /// Config returned by thread setup
 struct ThreadConfig<U>
 where
@@ -232,8 +224,6 @@ where
 
 // -- listener thread
 
-/// ## ListenerMsg
-///
 /// Listener message is returned by the listener thread
 enum ListenerMsg<U>
 where

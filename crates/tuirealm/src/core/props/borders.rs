@@ -9,8 +9,6 @@ pub use tui::widgets::{BorderType, Borders as BorderSides};
 
 // -- Border
 
-/// ## Borders
-///
 /// Defines the properties of the borders
 #[derive(Clone, Debug, PartialEq)]
 pub struct Borders {

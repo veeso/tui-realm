@@ -7,8 +7,6 @@ use super::State;
 
 // -- Command
 
-/// ## Cmd
-///
 /// A command defines the "abstract" operation to perform in front of an Event.
 /// The command must be passed in the `on` method of the `Component`
 /// when calling `perform` method of the `MockComponent`.
@@ -42,8 +40,6 @@ pub enum Cmd {
     None,
 }
 
-/// ## Direction
-///
 /// Defines the 4 directions in front of a cursor movement.
 /// This may be used after a `Arrow::Up` event or for example if you want something more geeky
 /// when using `WASD`
@@ -55,8 +51,6 @@ pub enum Direction {
     Up,
 }
 
-/// ## Position
-///
 /// Describes position on movement
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 pub enum Position {
@@ -67,8 +61,6 @@ pub enum Position {
 
 // -- Command result
 
-/// ## CmdResult
-///
 /// A command result describes the output of a `Cmd` performed on a Component.
 /// It reports a "logical" change on the `MockComponent`.
 /// The `Component` then, must return a certain user defined `Msg` based on the value of the `CmdResult`.

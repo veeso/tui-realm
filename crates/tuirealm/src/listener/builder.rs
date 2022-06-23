@@ -4,8 +4,6 @@
 
 use super::{Duration, EventListener, InputEventListener, Poll, Port};
 
-/// ## EventListenerCfg
-///
 /// The event listener configurator is used to setup an event listener.
 /// Once you're done with configuration just call `start()` and the event listener will start and the listener
 /// will be returned.

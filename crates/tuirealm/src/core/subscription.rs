@@ -7,8 +7,6 @@ use crate::{AttrValue, Attribute, Event, State};
 
 use std::hash::Hash;
 
-/// ## Sub
-///
 /// Public type to define a subscription.
 pub struct Sub<ComponentId, UserEvent>(EventClause<UserEvent>, SubClause<ComponentId>)
 where
@@ -28,8 +26,6 @@ where
     }
 }
 
-/// ## Subscription
-///
 /// Defines a subscription for a component.
 /// A subscription tells the application to forward an event to the `target` component, when an event of type `ev`
 /// is received by the listener. In order to forward the event, the `where` clause must also be satisfied.
@@ -106,8 +102,7 @@ where
 }
 
 #[derive(Debug, PartialEq)]
-/// ## EventClause
-///
+
 /// An event clause indicates on which kind of event the event must be forwarded to the `target` component.
 pub enum EventClause<UserEvent>
 where
@@ -153,8 +148,6 @@ where
     }
 }
 
-/// ## SubClause
-///
 /// A subclause indicates the condition that must be satisfied in order to forward `ev` to `target`.
 /// Usually clauses are single conditions, but there are also some special condition, to create "ligatures", which are:
 ///

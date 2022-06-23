@@ -6,8 +6,6 @@ use crate::props::Color;
 use crate::utils::{Email, PhoneNumber};
 use std::collections::{HashMap, LinkedList};
 
-/// ## State
-///
 /// State describes a component state
 #[derive(Debug, PartialEq, Clone)]
 pub enum State {
@@ -21,8 +19,6 @@ pub enum State {
     None,
 }
 
-/// ## StateValue
-///
 /// StateValue describes the value contained in a State
 #[derive(Debug, PartialEq, Clone)]
 pub enum StateValue {

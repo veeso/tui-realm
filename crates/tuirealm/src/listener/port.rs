@@ -7,8 +7,6 @@ use super::{Event, ListenerResult, Poll};
 use std::ops::Add;
 use std::time::{Duration, Instant};
 
-/// ## Port
-///
 /// A port is a wrapper around the poll trait object, which also defines an interval, which defines
 /// the amount of time between each poll() call.
 /// Its purpose is to listen for incoming events of a user-defined type

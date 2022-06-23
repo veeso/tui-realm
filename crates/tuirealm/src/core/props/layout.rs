@@ -4,8 +4,6 @@
 
 use crate::tui::layout::{Constraint, Direction, Layout as TuiLayout, Margin, Rect};
 
-/// ## Layout
-///
 /// Defines how a layout has to be rendered
 #[derive(Debug, PartialEq, Clone)]
 pub struct Layout {

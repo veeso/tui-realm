@@ -11,8 +11,6 @@ use tuirealm::{
     AttrValue, Attribute, Component, Event, Frame, MockComponent, NoUserEvent, Props, State,
 };
 
-/// ## Label
-///
 /// Simple label component; just renders a text
 /// NOTE: since I need just one label, I'm not going to use different object; I will directly implement Component for Label.
 /// This is not ideal actually and in a real app you should differentiate Mock Components from Application Components.

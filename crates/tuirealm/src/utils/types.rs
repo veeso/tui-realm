@@ -2,8 +2,6 @@
 //!
 //! This module exposes types used by utilities
 
-/// ## PhoneNumber
-///
 /// Represents a phone number
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub struct PhoneNumber {
@@ -34,8 +32,6 @@ impl PhoneNumber {
     }
 }
 
-/// ## Email
-///
 /// Represents an email address
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub struct Email {

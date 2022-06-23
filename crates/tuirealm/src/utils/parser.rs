@@ -43,8 +43,7 @@ lazy_static! {
 ///
 /// If provided string is a valid email address, returns the name and the mail agent
 ///
-/// ## example
-///
+
 /// ```rust
 /// use tuirealm::utils::parser::*;
 /// use tuirealm::utils::Email;
@@ -65,8 +64,7 @@ pub fn parse_email(s: &str) -> Option<Email> {
 ///
 /// If provided string is a valid phone number address, returns the prefix (if any) and the number
 ///
-/// ## example
-///
+
 /// ```rust
 /// use tuirealm::utils::parser::*;
 /// use tuirealm::utils::PhoneNumber;

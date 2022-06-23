@@ -8,8 +8,6 @@ use crate::tui::{
     widgets::{Dataset as TuiDataset, GraphType},
 };
 
-/// ## Dataset
-///
 /// Dataset describes a set of data for a chart
 #[derive(Clone, Debug)]
 pub struct Dataset {

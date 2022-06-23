@@ -8,8 +8,6 @@ use crate::{
     AttrValue, Attribute, Event, Frame, State,
 };
 
-/// ## MockComponent
-///
 /// A Mock Component represents a component which defines all the properties and states it can handle and represent
 /// and the way it should be rendered. It must also define how to behave in case of a `Cmd` (command).
 /// Despite that, it won't define how to behave after an `Event` and it won't send any `Msg`.
@@ -54,8 +52,6 @@ pub trait MockComponent {
     fn perform(&mut self, cmd: Cmd) -> CmdResult;
 }
 
-/// ## Component
-///
 /// The component describes the application level component, which is a wrapper around the `MockComponent`,
 /// which, in addition to all the methods exposed by the mock, it will handle the event coming from the `View`.
 /// The Event are passed to the `on` method, which will eventually return a `Msg`,
