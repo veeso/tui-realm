@@ -60,12 +60,9 @@
     html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/docs/images/cargo/tui-realm-512.png"
 )]
 
-extern crate bitflags;
 #[macro_use]
 extern crate lazy_static;
-extern crate regex;
 extern crate self as tuirealm;
-extern crate thiserror;
 extern crate tui as tuirs;
 #[cfg(feature = "derive")]
 #[allow(unused_imports)]
