@@ -22,34 +22,109 @@
 //!
 //! **Commands**:
 //!
-//! | Cmd                       | Result           | Behaviour                                            |
-//! |---------------------------|------------------|------------------------------------------------------|
-//! | `Custom($TREE_CMD_CLOSE)` | `None`           | Close selected node                                  |
-//! | `Custom($TREE_CMD_OPEN)`  | `None`           | Open selected node                                   |
-//! | `GoTo(Begin)`             | `Changed | None` | Move cursor to the top of the current tree node      |
-//! | `GoTo(End)`               | `Changed | None` | Move cursor to the bottom of the current tree node   |
-//! | `Move(Down)`              | `Changed | None` | Go to next element                                   |
-//! | `Move(Up)`                | `Changed | None` | Go to previous element                               |
-//! | `Scroll(Down)`            | `Changed | None` | Move cursor down by defined max steps or end of node |
-//! | `Scroll(Up)`              | `Changed | None` | Move cursor up by defined max steps or begin of node |
-//! | `Submit`                  | `Submit`         | Just returns submit result with current state        |
+//! | Cmd                                            | Result         | Behaviour                               |
+//! |------------------------------------------------|----------------|-----------------------------------------|
+//! | `Custom($TEXTAREA_CMD_NEWLINE)`                | `None`         | Insert newline                          |
+//! | `Custom($TEXTAREA_CMD_DEL_LINE_BY_END)`        | `None`         | Delete line by end to current position  |
+//! | `Custom($TEXTAREA_CMD_DEL_LINE_BY_HEAD)`       | `None`         | Delete line by head to current position |
+//! | `Custom($TEXTAREA_CMD_DEL_WORD)`               | `None`         | Delete the current word                 |
+//! | `Custom($TEXTAREA_CMD_DEL_NEXT_WORD)`          | `None`         | Delete the next word                    |
+//! | `Custom($TEXTAREA_CMD_MOVE_WORD_FORWARD)`      | `None`         | Move to the next word                   |
+//! | `Custom($TEXTAREA_CMD_MOVE_WORD_BACK)`         | `None`         | Move to the previous word               |
+//! | `Custom($TEXTAREA_CMD_MOVE_PARAGRAPH_BACK)`    | `None`         | Move to the previous paragraph          |
+//! | `Custom($TEXTAREA_CMD_MOVE_PARAGRAPH_FORWARD)` | `None`         | Move to the next paragraph              |
+//! | `Custom($TEXTAREA_CMD_MOVE_TOP)`               | `None`         | Move to the beginning of the file       |
+//! | `Custom($TEXTAREA_CMD_MOVE_BOTTOM)`            | `None`         | Move to the end of the file             |
+//! | `Custom($TEXTAREA_CMD_UNDO)`                   | `None`         | Undo last change                        |
+//! | `Custom($TEXTAREA_CMD_REDO)`                   | `None`         | Redo last change                        |
+//! | `Custom($TEXTAREA_CMD_PASTE)`                  | `None`         | Paste the current content of the buffer |
+//! | `Cancel`                                       | `None`         | Delete next char                        |
+//! | `Delete`                                       | `None`         | Delete previous char                    |
+//! | `GoTo(Begin)`                                  | `None`         | Go to the head of the line              |
+//! | `GoTo(End)`                                    | `None`         | Go to the end of the line               |
+//! | `Move(Down)`                                   | `None`         | Move to the line below                  |
+//! | `Move(Up)`                                     | `None`         | Move to the line above                  |
+//! | `Move(Left)`                                   | `None`         | Move cursor to the left                 |
+//! | `Move(Right)`                                  | `None`         | Move cursor to the right                |
+//! | `Scroll(Up)`                                   | `None`         | Move by scroll_step lines up            |
+//! | `Scroll(Down)`                                 | `None`         | Move by scroll_step lines down          |
+//! | `Type(ch)`                                     | `None`         | Type a char in the editor               |
+//! | `Submit`                                       | `Submit`       | Get current lines                       |
 //!
-//! **State**: the state returned is a `One(String)` containing the id of the selected node. If no node is selected `None` is returned.
+//! > ❗ Paste command is supported only if the `clipboard` feature is enabled
+//!
+//! **State**: the state returned is a `Vec(String)` containing the lines in the text area.
 //!
 //! **Properties**:
 //!
-//! - `Background(Color)`: background color. The background color will be used as background for unselected entry, but will be used as foreground for the selected entry when focus is true
 //! - `Borders(Borders)`: set borders properties for component
 //! - `Custom($TREE_IDENT_SIZE, Size)`: Set space to render for each each depth level
-//! - `Custom($TREE_INITIAL_NODE, String)`: Select initial node in the tree. This option has priority over `keep_state`
-//! - `Custom($TREE_PRESERVE_STATE, Flag)`: If true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree).
+//! - `Custom($TEXTAREA_MAX_HISTORY, Payload(One(Usize)))`: Set the history steps to record
+//! - `Custom($TEXTAREA_CURSOR_STYLE, Style)`: Set the cursor style
+//! - `Custom($TEXTAREA_CURSOR_LINE_STYLE, Style)`: Set the current line style
+//! - `Custom($TEXTAREA_FOOTER_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the footer bar
+//! - `Custom($TEXTAREA_LINE_NUMBER_STYLE, Style)`: set the style for the line number
+//! - `Custom($TEXTAREA_STATUS_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the status bar
+//! - `Style(Style)`: Set the general style for the textarea
+//! - `Custom($TEXTAREA_TAB_SIZE, Size)`: Set the tab size to display
 //! - `FocusStyle(Style)`: inactive style
-//! - `Foreground(Color)`: foreground color. The foreground will be used as foreground for the selected item, when focus is false, otherwise as background
-//! - `HighlightedColor(Color)`: The provided color will be used to highlight the selected node. `Foreground` will be used if unset.
-//! - `HighlightedStr(String)`: The provided string will be displayed on the left side of the selected entry in the tree
 //! - `ScrollStep(Length)`: Defines the maximum amount of rows to scroll
-//! - `TextProps(TextModifiers)`: set text modifiers
-//! - `Title(Title)`: Set box title∂
+//! - `Title(Title)`: Set box titleù
+//!
+//! ### Footer and status format
+//!
+//! The status and footer bars support a special syntax. The following keys can be inserted into the string:
+//!
+//! - `{ROW}`: current row
+//! - `{COL}`: current column
+//!
+//! ## Example
+//!
+//! ```rust
+//! use std::{fs, io::{self, BufRead}};
+//! use tuirealm::{
+//!     application::PollStrategy,
+//!     command::{Cmd, CmdResult, Direction, Position},
+//!     event::{Event, Key, KeyEvent, KeyModifiers},
+//!     props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers},
+//!     terminal::TerminalBridge,
+//!     Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue,
+//!     Update,
+//! };
+//! use tui_realm_textarea::TextArea;
+//!
+//! let textarea = match fs::File::open("README.md") {
+//!     Ok(reader) => TextArea::new(
+//!         io::BufReader::new(reader)
+//!             .lines()
+//!             .map(|l| l.unwrap())
+//!             .collect::<_>(),
+//!     ),
+//!     Err(_) => TextArea::default(),
+//! };
+//! let component = textarea
+//!     .borders(
+//!         Borders::default()
+//!             .color(Color::LightYellow)
+//!             .modifiers(BorderType::Double),
+//!     )
+//!     .cursor_line_style(Style::default())
+//!     .cursor_style(Style::default().add_modifier(TextModifiers::REVERSED))
+//!     .footer_bar("Press <ESC> to quit", Style::default())
+//!     .line_number_style(
+//!         Style::default()
+//!             .fg(Color::LightBlue)
+//!             .add_modifier(TextModifiers::ITALIC),
+//!     )
+//!     .max_histories(64)
+//!     .scroll_step(4)
+//!     .status_bar(
+//!         "README.md Ln {ROW}, Col {COL}",
+//!         Style::default().add_modifier(TextModifiers::REVERSED),
+//!     )
+//!     .tab_length(4)
+//!     .title("Editing README.md", Alignment::Left);
+//! ```
 //!
 
 #![doc(html_playground_url = "https://play.rust-lang.org")]
@@ -63,10 +138,12 @@ use fmt::LineFmt;
 #[macro_use]
 extern crate lazy_regex;
 
+#[cfg(feature = "clipboard")]
+use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+    Alignment, AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style,
 };
 use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
 use tuirealm::tui::widgets::{Block, Paragraph};
@@ -95,6 +172,7 @@ pub const TEXTAREA_CMD_MOVE_TOP: &str = "9";
 pub const TEXTAREA_CMD_MOVE_BOTTOM: &str = "a";
 pub const TEXTAREA_CMD_UNDO: &str = "b";
 pub const TEXTAREA_CMD_REDO: &str = "c";
+#[cfg(feature = "clipboard")]
 pub const TEXTAREA_CMD_PASTE: &str = "d";
 
 /// textarea tui-realm component
@@ -131,18 +209,6 @@ impl<'a> TextArea<'a> {
             status_fmt: None,
             footer_fmt: None,
         }
-    }
-
-    /// Set widget foreground
-    pub fn foreground(mut self, fg: Color) -> Self {
-        self.attr(Attribute::Foreground, AttrValue::Color(fg));
-        self
-    }
-
-    /// Set widget background
-    pub fn background(mut self, bg: Color) -> Self {
-        self.attr(Attribute::Background, AttrValue::Color(bg));
-        self
     }
 
     /// Set another style from default to use when component is inactive
@@ -274,6 +340,16 @@ impl<'a> TextArea<'a> {
         }
 
         block
+    }
+
+    #[cfg(feature = "clipboard")]
+    fn paste(&mut self) {
+        // get content from context
+        if let Ok(Ok(yank)) = ClipboardContext::new().map(|mut ctx| ctx.get_contents()) {
+            self.widget.set_yank_text(yank);
+            self.widget.paste();
+            self.widget.set_yank_text(String::default());
+        }
     }
 }
 
@@ -420,8 +496,9 @@ impl<'a> MockComponent for TextArea<'a> {
                 self.widget.move_cursor(CursorMove::Top);
                 CmdResult::None
             }
+            #[cfg(feature = "clipboard")]
             Cmd::Custom(TEXTAREA_CMD_PASTE) => {
-                self.widget.paste();
+                self.paste();
                 CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_REDO) => {

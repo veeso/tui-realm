@@ -17,9 +17,11 @@ use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
 // label
 use tui_realm_stdlib::Label;
 // textarea
+#[cfg(feature = "clipboard")]
+use tui_realm_textarea::TEXTAREA_CMD_PASTE;
 use tui_realm_textarea::{
     TextArea, TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
-    TEXTAREA_CMD_PASTE, TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
+    TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
 };
 
 // -- message
@@ -319,6 +321,7 @@ impl<'a> Component<Msg, NoUserEvent> for Editor<'a> {
                 self.perform(Cmd::GoTo(Position::Begin));
                 Some(Msg::None)
             }
+            #[cfg(feature = "clipboard")]
             Event::Keyboard(KeyEvent {
                 code: Key::Char('v'),
                 modifiers: KeyModifiers::CONTROL,

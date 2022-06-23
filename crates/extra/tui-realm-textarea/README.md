@@ -60,6 +60,7 @@
     - [Add tui-realm-textarea to your Cargo.toml 🦀](#add-tui-realm-textarea-to-your-cargotoml-)
     - [Examples 📋](#examples-)
   - [Component API](#component-api)
+    - [Footer and status format](#footer-and-status-format)
   - [Documentation 📚](#documentation-)
   - [Contributing and issues 🤝🏻](#contributing-and-issues-)
   - [Changelog ⏳](#changelog-)
@@ -93,20 +94,13 @@ tui-realm-textarea = { version = "^1.0.0", default-features = false, features = 
 
 ### Examples 📋
 
-View how to use the treeview-component following the [example](examples/demo.rs). The example contains a simple file explorer using a tree view, the depth is set to 3.
+View how to use the textarea component in the [example](examples/demo.rs). The example contains a simple text editor.
 
 ```sh
-cargo run --example demo
+cargo run --example demo --features clipboard
 ```
 
-- Press `ENTER` to expand the selected directory
-- Press `BACKSPACE` to go to upper directory
-- Move up and down with `UP/DOWN` arrow keys
-- Advance by up to 6 entries with `PGUP/PGDOWN`
-- Open directories with `RIGHT`
-- Close directories with `LEFT`
-- Change window between input field and treeview with `TAB`
-- Press `ESC` to quit
+Press `ESC` to quit
 
 ---
 
@@ -114,34 +108,61 @@ cargo run --example demo
 
 **Commands**:
 
-| Cmd                       | Result           | Behaviour                                            |
-|---------------------------|------------------|------------------------------------------------------|
-| `Custom($TREE_CMD_CLOSE)` | `None`           | Close selected node                                  |
-| `Custom($TREE_CMD_OPEN)`  | `None`           | Open selected node                                   |
-| `GoTo(Begin)`             | `Changed | None` | Move cursor to the top of the current tree node      |
-| `GoTo(End)`               | `Changed | None` | Move cursor to the bottom of the current tree node   |
-| `Move(Down)`              | `Changed | None` | Go to next element                                   |
-| `Move(Up)`                | `Changed | None` | Go to previous element                               |
-| `Scroll(Down)`            | `Changed | None` | Move cursor down by defined max steps or end of node |
-| `Scroll(Up)`              | `Changed | None` | Move cursor up by defined max steps or begin of node |
-| `Submit`                  | `Submit`         | Just returns submit result with current state        |
+| Cmd                                            | Result         | Behaviour                               |
+|------------------------------------------------|----------------|-----------------------------------------|
+| `Custom($TEXTAREA_CMD_NEWLINE)`                | `None`         | Insert newline                          |
+| `Custom($TEXTAREA_CMD_DEL_LINE_BY_END)`        | `None`         | Delete line by end to current position  |
+| `Custom($TEXTAREA_CMD_DEL_LINE_BY_HEAD)`       | `None`         | Delete line by head to current position |
+| `Custom($TEXTAREA_CMD_DEL_WORD)`               | `None`         | Delete the current word                 |
+| `Custom($TEXTAREA_CMD_DEL_NEXT_WORD)`          | `None`         | Delete the next word                    |
+| `Custom($TEXTAREA_CMD_MOVE_WORD_FORWARD)`      | `None`         | Move to the next word                   |
+| `Custom($TEXTAREA_CMD_MOVE_WORD_BACK)`         | `None`         | Move to the previous word               |
+| `Custom($TEXTAREA_CMD_MOVE_PARAGRAPH_BACK)`    | `None`         | Move to the previous paragraph          |
+| `Custom($TEXTAREA_CMD_MOVE_PARAGRAPH_FORWARD)` | `None`         | Move to the next paragraph              |
+| `Custom($TEXTAREA_CMD_MOVE_TOP)`               | `None`         | Move to the beginning of the file       |
+| `Custom($TEXTAREA_CMD_MOVE_BOTTOM)`            | `None`         | Move to the end of the file             |
+| `Custom($TEXTAREA_CMD_UNDO)`                   | `None`         | Undo last change                        |
+| `Custom($TEXTAREA_CMD_REDO)`                   | `None`         | Redo last change                        |
+| `Custom($TEXTAREA_CMD_PASTE)`                  | `None`         | Paste the current content of the buffer |
+| `Cancel`                                       | `None`         | Delete next char                        |
+| `Delete`                                       | `None`         | Delete previous char                    |
+| `GoTo(Begin)`                                  | `None`         | Go to the head of the line              |
+| `GoTo(End)`                                    | `None`         | Go to the end of the line               |
+| `Move(Down)`                                   | `None`         | Move to the line below                  |
+| `Move(Up)`                                     | `None`         | Move to the line above                  |
+| `Move(Left)`                                   | `None`         | Move cursor to the left                 |
+| `Move(Right)`                                  | `None`         | Move cursor to the right                |
+| `Scroll(Up)`                                   | `None`         | Move by scroll_step lines up            |
+| `Scroll(Down)`                                 | `None`         | Move by scroll_step lines down          |
+| `Type(ch)`                                     | `None`         | Type a char in the editor               |
+| `Submit`                                       | `Submit`       | Get current lines                       |
 
-**State**: the state returned is a `One(String)` containing the id of the selected node. If no node is selected `None` is returned.
+> ❗ Paste command is supported only if the `clipboard` feature is enabled
+
+**State**: the state returned is a `Vec(String)` containing the lines in the text area.
 
 **Properties**:
 
-- `Background(Color)`: background color. The background color will be used as background for unselected entry, but will be used as foreground for the selected entry when focus is true
 - `Borders(Borders)`: set borders properties for component
 - `Custom($TREE_IDENT_SIZE, Size)`: Set space to render for each each depth level
-- `Custom($TREE_INITIAL_NODE, String)`: Select initial node in the tree. This option has priority over `keep_state`
-- `Custom($TREE_PRESERVE_STATE, Flag)`: If true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree).
+- `Custom($TEXTAREA_MAX_HISTORY, Payload(One(Usize)))`: Set the history steps to record
+- `Custom($TEXTAREA_CURSOR_STYLE, Style)`: Set the cursor style
+- `Custom($TEXTAREA_CURSOR_LINE_STYLE, Style)`: Set the current line style
+- `Custom($TEXTAREA_FOOTER_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the footer bar
+- `Custom($TEXTAREA_LINE_NUMBER_STYLE, Style)`: set the style for the line number
+- `Custom($TEXTAREA_STATUS_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the status bar
+- `Style(Style)`: Set the general style for the textarea
+- `Custom($TEXTAREA_TAB_SIZE, Size)`: Set the tab size to display
 - `FocusStyle(Style)`: inactive style
-- `Foreground(Color)`: foreground color. The foreground will be used as foreground for the selected item, when focus is false, otherwise as background
-- `HighlightedColor(Color)`: The provided color will be used to highlight the selected node. `Foreground` will be used if unset.
-- `HighlightedStr(String)`: The provided string will be displayed on the left side of the selected entry in the tree
 - `ScrollStep(Length)`: Defines the maximum amount of rows to scroll
-- `TextProps(TextModifiers)`: set text modifiers
 - `Title(Title)`: Set box title
+
+### Footer and status format
+
+The status and footer bars support a special syntax. The following keys can be inserted into the string:
+
+- `{ROW}`: current row
+- `{COL}`: current column
 
 ---
 

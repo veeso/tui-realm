@@ -14,6 +14,7 @@ readme = "README.md"
 repository = "https://github.com/veeso/tui-realm-textarea"
 
 [dependencies]
+cli-clipboard = { version = "^0.2.1", optional = true }
 lazy-regex = "^2.3.0"
 tuirealm = { version = "^1.6.0", default-features = false, features = [ "derive" ]}
 tui-textarea = "^0.1.1"
@@ -25,6 +26,7 @@ tui-realm-stdlib = "^1.1.6"
 
 [features]
 default = [ "with-crossterm" ]
+clipboard = [ "cli-clipboard" ]
 with-crossterm = [ "tuirealm/with-crossterm" ]
 with-termion = [ "tuirealm/with-termion" ]
 
