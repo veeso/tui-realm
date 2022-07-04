@@ -282,10 +282,8 @@ impl MockComponent for BarChart {
             let data = self.get_data(self.states.cursor, data_max_len as usize);
             let data_ref: Vec<(&str, u64)> = data.iter().map(|x| (x.0.as_str(), x.1)).collect();
             // Create widget
-            let mut widget: TuiBarChart = TuiBarChart::default()
-                .block(div)
-                .data(data_ref.as_slice())
-                .max(data_max_len);
+            let mut widget: TuiBarChart =
+                TuiBarChart::default().block(div).data(data_ref.as_slice());
             if let Some(gap) = self
                 .props
                 .get(Attribute::Custom(BAR_CHART_BARS_GAP))
