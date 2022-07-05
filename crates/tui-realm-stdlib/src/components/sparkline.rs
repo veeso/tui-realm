@@ -103,8 +103,8 @@ impl Sparkline {
             Some(PropPayload::Vec(list)) => {
                 let mut data: Vec<u64> = Vec::with_capacity(max);
                 list.iter()
-                    .cloned()
                     .take(max)
+                    .cloned()
                     .map(|x| x.unwrap_u64())
                     .for_each(|x| data.push(x));
                 data
