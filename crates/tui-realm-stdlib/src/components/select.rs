@@ -251,6 +251,7 @@ impl Select {
         let block: Block = Block::default()
             .borders(BorderSides::LEFT | BorderSides::TOP | BorderSides::RIGHT)
             .border_style(borders.style())
+            .border_type(borders.modifiers)
             .style(Style::default().bg(background));
         let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
         let block = match title {
@@ -282,6 +283,7 @@ impl Select {
                         true => borders.style(),
                         false => Style::default(),
                     })
+                    .border_type(borders.modifiers)
                     .style(Style::default().bg(background)),
             )
             .start_corner(Corner::TopLeft)
@@ -339,6 +341,7 @@ impl Select {
         let block: Block = Block::default()
             .borders(BorderSides::ALL)
             .border_style(borders_style)
+            .border_type(borders.modifiers)
             .style(style);
         let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
         let block = match title {
