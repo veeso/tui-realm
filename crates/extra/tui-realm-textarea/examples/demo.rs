@@ -3,6 +3,8 @@ use std::{
     io::{self, BufRead},
     time::Duration,
 };
+#[cfg(feature = "search")]
+use tuirealm::StateValue;
 use tuirealm::{
     application::PollStrategy,
     command::{Cmd, CmdResult, Direction, Position},
@@ -14,6 +16,8 @@ use tuirealm::{
 // tui
 use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
 // label
+#[cfg(feature = "search")]
+use tui_realm_stdlib::Input;
 use tui_realm_stdlib::Label;
 // textarea
 #[cfg(feature = "clipboard")]
@@ -22,6 +26,10 @@ use tui_realm_textarea::{
     TextArea, TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
     TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
 };
+#[cfg(feature = "search")]
+use tui_realm_textarea::{
+    TEXTAREA_CMD_SEARCH_BACK, TEXTAREA_CMD_SEARCH_FORWARD, TEXTAREA_SEARCH_PATTERN,
+};
 
 // -- message
 #[derive(Debug, PartialEq)]
@@ -29,6 +37,8 @@ pub enum Msg {
     AppClose,
     Submit(Vec<String>),
     ChangeFocus(Id),
+    #[cfg(feature = "search")]
+    Search(String),
     None,
 }
 
@@ -36,6 +46,8 @@ pub enum Msg {
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub enum Id {
     Editor,
+    #[cfg(feature = "search")]
+    Search,
     Label,
 }
 
@@ -58,6 +70,10 @@ impl Model {
         assert!(app
             .mount(Id::Label, Box::new(DummyLabel::default()), vec![])
             .is_ok());
+        #[cfg(feature = "search")]
+        assert!(app
+            .mount(Id::Search, Box::new(Search::default()), vec![])
+            .is_ok());
         assert!(app.active(&Id::Editor).is_ok());
         Model {
             app,
@@ -73,10 +89,19 @@ impl Model {
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
                 .margin(1)
-                .constraints([Constraint::Min(5), Constraint::Length(1)].as_ref())
+                .constraints(
+                    [
+                        Constraint::Min(5),
+                        Constraint::Length(1),
+                        Constraint::Length(3),
+                    ]
+                    .as_ref(),
+                )
                 .split(f.size());
             self.app.view(&Id::Editor, f, chunks[0]);
             self.app.view(&Id::Label, f, chunks[1]);
+            #[cfg(feature = "search")]
+            self.app.view(&Id::Search, f, chunks[2]);
         });
     }
 }
@@ -135,8 +160,25 @@ impl Update<Msg> for Model {
                 let _ = self.app.active(&Id::Label);
                 None
             }
+            #[cfg(feature = "search")]
+            Msg::ChangeFocus(Id::Search) => {
+                let _ = self.app.active(&Id::Search);
+                None
+            }
             Msg::Submit(lines) => {
                 println!("Got user text: {:?}", lines);
+                None
+            }
+            #[cfg(feature = "search")]
+            Msg::Search(pattern) => {
+                assert!(self
+                    .app
+                    .attr(
+                        &Id::Editor,
+                        Attribute::Custom(TEXTAREA_SEARCH_PATTERN),
+                        AttrValue::String(pattern)
+                    )
+                    .is_ok());
                 None
             }
             Msg::None => None,
@@ -227,10 +269,6 @@ impl<'a> Component<Msg, NoUserEvent> for Editor<'a> {
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Delete, ..
-            })
-            | Event::Keyboard(KeyEvent {
-                code: Key::Char('d'),
-                modifiers: KeyModifiers::CONTROL,
             }) => {
                 self.perform(Cmd::Cancel);
                 Some(Msg::None)
@@ -320,6 +358,22 @@ impl<'a> Component<Msg, NoUserEvent> for Editor<'a> {
                 self.perform(Cmd::GoTo(Position::Begin));
                 Some(Msg::None)
             }
+            #[cfg(feature = "search")]
+            Event::Keyboard(KeyEvent {
+                code: Key::Char('s'),
+                modifiers: KeyModifiers::CONTROL,
+            }) => {
+                self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_BACK));
+                Some(Msg::None)
+            }
+            #[cfg(feature = "search")]
+            Event::Keyboard(KeyEvent {
+                code: Key::Char('d'),
+                modifiers: KeyModifiers::CONTROL,
+            }) => {
+                self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_FORWARD));
+                Some(Msg::None)
+            }
             #[cfg(feature = "clipboard")]
             Event::Keyboard(KeyEvent {
                 code: Key::Char('v'),
@@ -357,6 +411,11 @@ impl<'a> Component<Msg, NoUserEvent> for Editor<'a> {
                 code: Key::Function(2),
                 ..
             }) => Some(Msg::ChangeFocus(Id::Label)),
+            #[cfg(feature = "search")]
+            Event::Keyboard(KeyEvent {
+                code: Key::Function(3),
+                ..
+            }) => Some(Msg::ChangeFocus(Id::Search)),
             _ => None,
         }
     }
@@ -384,5 +443,67 @@ impl Component<Msg, NoUserEvent> for DummyLabel {
             }) => Some(Msg::ChangeFocus(Id::Editor)),
             _ => None,
         }
+    }
+}
+
+#[cfg(feature = "search")]
+#[derive(MockComponent)]
+pub struct Search {
+    component: Input,
+}
+
+#[cfg(feature = "search")]
+impl Default for Search {
+    fn default() -> Self {
+        Self {
+            component: Input::default()
+                .title("Search text", Alignment::Left)
+                .foreground(Color::LightYellow)
+                .invalid_style(Style::default().fg(Color::Red)),
+        }
+    }
+}
+
+#[cfg(feature = "search")]
+impl Component<Msg, NoUserEvent> for Search {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        let _ = match ev {
+            Event::Keyboard(KeyEvent {
+                code: Key::Left, ..
+            }) => self.perform(Cmd::Move(Direction::Left)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Right, ..
+            }) => self.perform(Cmd::Move(Direction::Right)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Home, ..
+            }) => self.perform(Cmd::GoTo(Position::Begin)),
+            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
+                self.perform(Cmd::GoTo(Position::End))
+            }
+            Event::Keyboard(KeyEvent {
+                code: Key::Delete, ..
+            }) => self.perform(Cmd::Cancel),
+            Event::Keyboard(KeyEvent {
+                code: Key::Backspace,
+                ..
+            }) => self.perform(Cmd::Delete),
+            Event::Keyboard(KeyEvent {
+                code: Key::Char(ch),
+                modifiers: KeyModifiers::NONE,
+            }) => {
+                if let CmdResult::Changed(State::One(StateValue::String(pattern))) =
+                    self.perform(Cmd::Type(ch))
+                {
+                    return Some(Msg::Search(pattern));
+                }
+                CmdResult::None
+            }
+            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => {
+                return Some(Msg::ChangeFocus(Id::Editor))
+            }
+            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            _ => CmdResult::None,
+        };
+        Some(Msg::None)
     }
 }

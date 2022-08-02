@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.0.0 (23/06/2022)</p>
+<p align="center">Current version: 1.1.0 (02/08/2022)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -58,6 +58,7 @@
   - [About tui-realm-textarea ✏️](#about-tui-realm-textarea-️)
   - [Get started 🏁](#get-started-)
     - [Add tui-realm-textarea to your Cargo.toml 🦀](#add-tui-realm-textarea-to-your-cargotoml-)
+      - [Features ⚙️](#features-️)
     - [Examples 📋](#examples-)
   - [Component API](#component-api)
     - [Footer and status format](#footer-and-status-format)
@@ -83,21 +84,28 @@ It is based on the [tui-textarea](https://github.com/rhysd/tui-textarea) compone
 ### Add tui-realm-textarea to your Cargo.toml 🦀
 
 ```toml
-tui-realm-textarea = "^1.0.0"
+tui-realm-textarea = "^1.1.0"
 ```
 
 Or if you don't use **Crossterm**, define the backend as you do with tui-realm:
 
 ```toml
-tui-realm-textarea = { version = "^1.0.0", default-features = false, features = [ "with-termion" ] }
+tui-realm-textarea = { version = "^1.1.0", default-features = false, features = [ "with-termion" ] }
 ```
+
+#### Features ⚙️
+
+These features can be enabled in tui-realm-textarea:
+
+- `clipboard` enables system clipboard support
+- `search` enables the string search in the textarea
 
 ### Examples 📋
 
 View how to use the textarea component in the [example](examples/demo.rs). The example contains a simple text editor.
 
 ```sh
-cargo run --example demo --features clipboard
+cargo run --example demo --features clipboard,search
 ```
 
 Press `ESC` to quit
@@ -124,6 +132,8 @@ Press `ESC` to quit
 | `Custom($TEXTAREA_CMD_UNDO)`                   | `None`         | Undo last change                        |
 | `Custom($TEXTAREA_CMD_REDO)`                   | `None`         | Redo last change                        |
 | `Custom($TEXTAREA_CMD_PASTE)`                  | `None`         | Paste the current content of the buffer |
+| `Custom($TEXTAREA_CMD_SEARCH_BACK)`            | `None`         | Go to the previous search match         |
+| `Custom($TEXTAREA_CMD_SEARCH_FORWARD)`         | `None`         | Go to the next search match             |
 | `Cancel`                                       | `None`         | Delete next char                        |
 | `Delete`                                       | `None`         | Delete previous char                    |
 | `GoTo(Begin)`                                  | `None`         | Go to the head of the line              |
@@ -151,6 +161,8 @@ Press `ESC` to quit
 - `Custom($TEXTAREA_FOOTER_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the footer bar
 - `Custom($TEXTAREA_LINE_NUMBER_STYLE, Style)`: set the style for the line number
 - `Custom($TEXTAREA_STATUS_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the status bar
+- `Custom($TEXTAREA_SEARCH_PATTERN, String`: Set search pattern
+- `Custom($TEXTAREA_SEARCH_STYLE, Style`: Set search style
 - `Style(Style)`: Set the general style for the textarea
 - `Custom($TEXTAREA_TAB_SIZE, Size)`: Set the tab size to display
 - `FocusStyle(Style)`: inactive style

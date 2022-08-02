@@ -9,14 +9,21 @@
 //! ### Adding `tui-realm-textarea` as dependency
 //!
 //! ```toml
-//! tui-realm-textarea = "^1.0.0"
+//! tui-realm-textarea = "^1.1.0"
 //! ```
 //!
 //! Or if you don't use **Crossterm**, define the backend as you would do with tui-realm:
 //!
 //! ```toml
-//! tui-realm-textarea = { version = "^1.0.0", default-features = false, features = [ "with-termion" ] }
+//! tui-realm-textarea = { version = "^1.1.0", default-features = false, features = [ "with-termion" ] }
 //! ```
+//!
+//! #### Features ⚙️
+
+//! These features can be enabled in tui-realm-textarea:
+//!
+//! - `clipboard` enables system clipboard support
+//! - `search` enables the string search in the textarea
 //!
 //! ## Component API
 //!
@@ -38,6 +45,8 @@
 //! | `Custom($TEXTAREA_CMD_UNDO)`                   | `None`         | Undo last change                        |
 //! | `Custom($TEXTAREA_CMD_REDO)`                   | `None`         | Redo last change                        |
 //! | `Custom($TEXTAREA_CMD_PASTE)`                  | `None`         | Paste the current content of the buffer |
+//! | `Custom($TEXTAREA_CMD_SEARCH_BACK)`            | `None`         | Go to the previous search match         |
+//! | `Custom($TEXTAREA_CMD_SEARCH_FORWARD)`         | `None`         | Go to the next search match             |
 //! | `Cancel`                                       | `None`         | Delete next char                        |
 //! | `Delete`                                       | `None`         | Delete previous char                    |
 //! | `GoTo(Begin)`                                  | `None`         | Go to the head of the line              |
@@ -65,6 +74,8 @@
 //! - `Custom($TEXTAREA_FOOTER_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the footer bar
 //! - `Custom($TEXTAREA_LINE_NUMBER_STYLE, Style)`: set the style for the line number
 //! - `Custom($TEXTAREA_STATUS_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the status bar
+//! - `Custom($TEXTAREA_SEARCH_PATTERN, String`: Set search pattern
+//! - `Custom($TEXTAREA_SEARCH_STYLE, Style`: Set search style
 //! - `Style(Style)`: Set the general style for the textarea
 //! - `Custom($TEXTAREA_TAB_SIZE, Size)`: Set the tab size to display
 //! - `FocusStyle(Style)`: inactive style
@@ -157,6 +168,11 @@ pub const TEXTAREA_LINE_NUMBER_STYLE: &str = "line-number-style";
 pub const TEXTAREA_MAX_HISTORY: &str = "max-history";
 pub const TEXTAREA_STATUS_FMT: &str = "status-fmt";
 pub const TEXTAREA_TAB_SIZE: &str = "tab-size";
+pub const TEXTAREA_HARD_TAB: &str = "hard-tab";
+#[cfg(feature = "search")]
+pub const TEXTAREA_SEARCH_PATTERN: &str = "search-pattern";
+#[cfg(feature = "search")]
+pub const TEXTAREA_SEARCH_STYLE: &str = "search-style";
 
 // -- cmd
 pub const TEXTAREA_CMD_NEWLINE: &str = "0";
@@ -174,6 +190,10 @@ pub const TEXTAREA_CMD_UNDO: &str = "b";
 pub const TEXTAREA_CMD_REDO: &str = "c";
 #[cfg(feature = "clipboard")]
 pub const TEXTAREA_CMD_PASTE: &str = "d";
+#[cfg(feature = "search")]
+pub const TEXTAREA_CMD_SEARCH_FORWARD: &str = "e";
+#[cfg(feature = "search")]
+pub const TEXTAREA_CMD_SEARCH_BACK: &str = "f";
 
 /// textarea tui-realm component
 pub struct TextArea<'a> {
@@ -315,6 +335,25 @@ impl<'a> TextArea<'a> {
         self
     }
 
+    /// Set another style from default to use when component is inactive
+    pub fn hard_tab(mut self, enabled: bool) -> Self {
+        self.attr(
+            Attribute::Custom(TEXTAREA_HARD_TAB),
+            AttrValue::Flag(enabled),
+        );
+        self
+    }
+
+    #[cfg(feature = "search")]
+    /// Set search style
+    pub fn search_style(mut self, s: Style) -> Self {
+        self.attr(
+            Attribute::Custom(TEXTAREA_SEARCH_STYLE),
+            AttrValue::Style(s),
+        );
+        self
+    }
+
     // -- private
     fn get_block(&self) -> Block<'a> {
         let mut block = Block::default();
@@ -431,6 +470,17 @@ impl<'a> MockComponent for TextArea<'a> {
             (Attribute::Custom(TEXTAREA_TAB_SIZE), AttrValue::Size(size)) => {
                 self.widget.set_tab_length(size as u8);
             }
+            (Attribute::Custom(TEXTAREA_HARD_TAB), AttrValue::Flag(enabled)) => {
+                self.widget.set_hard_tab_indent(enabled);
+            }
+            #[cfg(feature = "search")]
+            (Attribute::Custom(TEXTAREA_SEARCH_PATTERN), AttrValue::String(pattern)) => {
+                let _ = self.widget.set_search_pattern(pattern);
+            }
+            #[cfg(feature = "search")]
+            (Attribute::Custom(TEXTAREA_SEARCH_STYLE), AttrValue::Style(s)) => {
+                self.widget.set_search_style(s);
+            }
             (Attribute::Style, AttrValue::Style(s)) => {
                 self.widget.set_style(s);
             }
@@ -503,6 +553,16 @@ impl<'a> MockComponent for TextArea<'a> {
             }
             Cmd::Custom(TEXTAREA_CMD_REDO) => {
                 self.widget.redo();
+                CmdResult::None
+            }
+            #[cfg(feature = "search")]
+            Cmd::Custom(TEXTAREA_CMD_SEARCH_BACK) => {
+                self.widget.search_back(true);
+                CmdResult::None
+            }
+            #[cfg(feature = "search")]
+            Cmd::Custom(TEXTAREA_CMD_SEARCH_FORWARD) => {
+                self.widget.search_forward(true);
                 CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_UNDO) => {
