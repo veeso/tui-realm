@@ -81,11 +81,13 @@ impl InputType {
             Self::Color => Self::char_valid_for_color(input, c),
             Self::Email => Self::char_valid_for_email(input, c),
             Self::Number => {
-                c.is_digit(10) || (['+', '-'].contains(&c) && input.is_empty()) || c == '.'
+                c.is_ascii_digit() || (['+', '-'].contains(&c) && input.is_empty()) || c == '.'
             }
             Self::Telephone => Self::char_valid_for_phone(input, c),
-            Self::SignedInteger => c.is_digit(10) || (['+', '-'].contains(&c) && input.is_empty()),
-            Self::UnsignedInteger => c.is_digit(10),
+            Self::SignedInteger => {
+                c.is_ascii_digit() || (['+', '-'].contains(&c) && input.is_empty())
+            }
+            Self::UnsignedInteger => c.is_ascii_digit(),
             Self::Password(_) | Self::Text => true,
             Self::Custom(_, char_valid) | Self::CustomPassword(_, _, char_valid) => {
                 char_valid(input, c)
@@ -120,19 +122,19 @@ impl InputType {
 
     fn char_valid_for_phone(input: &str, c: char) -> bool {
         // Must be digit, or + (but at the begin) or space/- but not empty
-        c.is_digit(10)
+        c.is_ascii_digit()
             || (c == '+' && input.is_empty())
             || ([' ', '-'].contains(&c) && !input.is_empty())
     }
 
     fn char_valid_for_color(input: &str, c: char) -> bool {
         (c.is_alphanumeric() && !input.starts_with('#'))
-            || (input.starts_with('#') && c.is_digit(16))
+            || (input.starts_with('#') && c.is_ascii_hexdigit())
             || c == ' '
             || (c == '#' && input.is_empty())
             || (c == ',' && input.starts_with("rgb"))
             || (c == '(' && input.starts_with("rgb") && !input.contains('('))
-            || (c.is_digit(10) && input.starts_with("rgb"))
+            || (c.is_ascii_digit() && input.starts_with("rgb"))
             || (c == ')' && input.len() >= 15 && !input.contains(')')) // rgb(xxx,xxx,xxx)
     }
 }

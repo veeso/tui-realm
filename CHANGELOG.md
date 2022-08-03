@@ -36,6 +36,7 @@
 Released on 03/08/2022
 
 - Fixed [issue 40](https://github.com/veeso/tui-realm/issues/40)
+- Updated `crossterm` to `0.24`
 
 ## 1.7.0
 

@@ -96,6 +96,29 @@ where
         Ok(())
     }
 
+    /// Remount component. This method WON'T change the focus stack
+    pub fn remount(
+        &mut self,
+        id: K,
+        component: WrappedComponent<Msg, UserEvent>,
+    ) -> ViewResult<()> {
+        // Umount, but keep focus
+        let had_focus = self.has_focus(&id);
+        if self.mounted(&id) {
+            self.components.remove(&id);
+        }
+        // remount
+        self.components.insert(id.clone(), component);
+        // Inject properties
+        self.inject(&id)?;
+        // give focus if needed
+        if had_focus {
+            self.active(&id)
+        } else {
+            Ok(())
+        }
+    }
+
     /// Umount all components in the view and clear focus stack and state
     pub fn umount_all(&mut self) {
         self.components.clear();
@@ -326,6 +349,29 @@ mod test {
         assert_eq!(view.mounted(&MockComponentId::InputBar), false);
         // Umount twice
         assert!(view.umount(&MockComponentId::InputBar).is_err());
+    }
+
+    #[test]
+    fn view_should_remount_component_without_losing_focus_stack() {
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
+        // Mount foo
+        assert!(view
+            .mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
+            .is_ok());
+        assert!(view.active(&MockComponentId::InputFoo).is_ok());
+        // mount another component
+        assert!(view
+            .mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
+            .is_ok());
+        assert!(view.active(&MockComponentId::InputBar).is_ok());
+        // Remount foo
+        assert!(view
+            .remount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
+            .is_ok());
+        // Blur bar
+        assert!(view.blur().is_ok());
+        // Foo MUST have focus now
+        assert!(view.has_focus(&MockComponentId::InputFoo));
     }
 
     #[test]
