@@ -118,13 +118,7 @@ where
         // Mount
         self.view.mount(id.clone(), component)?;
         // Subscribe
-        subs.into_iter().for_each(|x| {
-            // Push only if not already subscribed
-            let subscription = Subscription::new(id.clone(), x);
-            if !self.subscribed(&id, subscription.event()) {
-                self.subs.push(subscription);
-            }
-        });
+        self.insert_subscriptions(id, subs);
         Ok(())
     }
 
@@ -145,15 +139,13 @@ where
         component: WrappedComponent<Msg, UserEvent>,
         subs: Vec<Sub<K, UserEvent>>,
     ) -> ApplicationResult<()> {
-        let had_focus = self.view.has_focus(&id);
-        let _ = self.umount(&id);
-        self.mount(id.clone(), component, subs)?;
-        // Keep focus if necessary
-        if had_focus {
-            self.active(&id)
-        } else {
-            Ok(())
-        }
+        // remove subs
+        self.unsubscribe_component(&id);
+        // remount into view
+        self.view.remount(id.clone(), component)?;
+        // re-add subs
+        self.insert_subscriptions(id, subs);
+        Ok(())
     }
 
     /// Umount all components in the view and removed all associated subscriptions
@@ -270,6 +262,17 @@ where
         self.subs
             .iter()
             .any(|s| s.target() == id && s.event() == clause)
+    }
+
+    /// Insert subscriptions
+    fn insert_subscriptions(&mut self, id: K, subs: Vec<Sub<K, UserEvent>>) {
+        subs.into_iter().for_each(|x| {
+            // Push only if not already subscribed
+            let subscription = Subscription::new(id.clone(), x);
+            if !self.subscribed(&id, subscription.event()) {
+                self.subs.push(subscription);
+            }
+        });
     }
 
     /// Poll listener according to provided strategy
