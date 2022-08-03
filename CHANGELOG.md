@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.7.1](#171)
   - [1.7.0](#170)
   - [1.6.0](#160)
   - [1.5.0](#150)
@@ -29,6 +30,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.7.1
+
+Released on 03/08/2022
+
+- Fixed [issue 40](https://github.com/veeso/tui-realm/issues/40)
 
 ## 1.7.0
 
