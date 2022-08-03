@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.1.7](#117)
   - [1.1.6](#116)
   - [1.1.5](#115)
   - [1.1.4](#114)
@@ -19,6 +20,14 @@
   - [0.5.0](#050)
 
 ---
+
+## 1.1.7
+
+Released on 03/08/2022
+
+- Fixed bar chart (Credit [@tpoliaw](https://github.com/tpoliaw))
+- Fixed `Select` border style not applied (Credit [@tramhao](https://github.com/tramhao))
+- Updated `textwrap` to `0.15`
 
 ## 1.1.6
 
