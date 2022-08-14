@@ -2,7 +2,9 @@
 //!
 //! this module contains the event converter for the different backends
 
-use crate::core::event::{Event, Key, KeyEvent, KeyModifiers, MediaKeyCode};
+#[cfg(feature = "with-crossterm")]
+use crate::core::event::MediaKeyCode;
+use crate::core::event::{Event, Key, KeyEvent, KeyModifiers};
 
 // -- crossterm
 #[cfg(feature = "with-crossterm")]
