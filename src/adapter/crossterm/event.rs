@@ -2,11 +2,11 @@
 //!
 //! event adapter for crossterm
 
-use super::{Event, Key, KeyEvent, KeyModifiers};
+use super::{Event, Key, KeyEvent, KeyModifiers, MediaKeyCode};
 
 use crossterm::event::{
     Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
-    KeyModifiers as XtermKeyModifiers,
+    KeyModifiers as XtermKeyModifiers, MediaKeyCode as XtermMediaKeyCode,
 };
 
 impl<U> From<XtermEvent> for Event<U>
@@ -18,6 +18,9 @@ where
             XtermEvent::Key(key) => Self::Keyboard(key.into()),
             XtermEvent::Mouse(_) => Self::None,
             XtermEvent::Resize(w, h) => Self::WindowResize(w, h),
+            XtermEvent::FocusGained => Self::FocusGained,
+            XtermEvent::FocusLost => Self::FocusLost,
+            XtermEvent::Paste(clipboard) => Self::Paste(clipboard),
         }
     }
 }
@@ -46,12 +49,20 @@ impl From<XtermKeyCode> for Key {
             XtermKeyCode::Home => Self::Home,
             XtermKeyCode::Insert => Self::Insert,
             XtermKeyCode::Left => Self::Left,
-            XtermKeyCode::Null => Self::Null,
+            XtermKeyCode::Null | XtermKeyCode::Modifier(_) => Self::Null,
             XtermKeyCode::PageDown => Self::PageDown,
             XtermKeyCode::PageUp => Self::PageUp,
             XtermKeyCode::Right => Self::Right,
             XtermKeyCode::Tab => Self::Tab,
             XtermKeyCode::Up => Self::Up,
+            XtermKeyCode::CapsLock => Self::CapsLock,
+            XtermKeyCode::ScrollLock => Self::ScrollLock,
+            XtermKeyCode::NumLock => Self::NumLock,
+            XtermKeyCode::PrintScreen => Self::PrintScreen,
+            XtermKeyCode::Pause => Self::Pause,
+            XtermKeyCode::Menu => Self::Menu,
+            XtermKeyCode::KeypadBegin => Self::KeypadBegin,
+            XtermKeyCode::Media(m) => Self::Media(m.into()),
         }
     }
 }
@@ -69,6 +80,26 @@ impl From<XtermKeyModifiers> for KeyModifiers {
             km.insert(KeyModifiers::ALT);
         }
         km
+    }
+}
+
+impl From<XtermMediaKeyCode> for MediaKeyCode {
+    fn from(m: XtermMediaKeyCode) -> Self {
+        match m {
+            XtermMediaKeyCode::Play => Self::Play,
+            XtermMediaKeyCode::Pause => Self::Pause,
+            XtermMediaKeyCode::PlayPause => Self::PlayPause,
+            XtermMediaKeyCode::Reverse => Self::Reverse,
+            XtermMediaKeyCode::Stop => Self::Stop,
+            XtermMediaKeyCode::FastForward => Self::FastForward,
+            XtermMediaKeyCode::Rewind => Self::Rewind,
+            XtermMediaKeyCode::TrackNext => Self::TrackNext,
+            XtermMediaKeyCode::TrackPrevious => Self::TrackPrevious,
+            XtermMediaKeyCode::Record => Self::Record,
+            XtermMediaKeyCode::LowerVolume => Self::LowerVolume,
+            XtermMediaKeyCode::RaiseVolume => Self::RaiseVolume,
+            XtermMediaKeyCode::MuteVolume => Self::MuteVolume,
+        }
     }
 }
 
@@ -119,6 +150,62 @@ mod test {
     }
 
     #[test]
+    fn should_adapt_media_key() {
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::Play),
+            MediaKeyCode::Play
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::Pause),
+            MediaKeyCode::Pause
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::PlayPause),
+            MediaKeyCode::PlayPause
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::Reverse),
+            MediaKeyCode::Reverse
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::Stop),
+            MediaKeyCode::Stop
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::FastForward),
+            MediaKeyCode::FastForward
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::Rewind),
+            MediaKeyCode::Rewind
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::TrackNext),
+            MediaKeyCode::TrackNext
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::TrackPrevious),
+            MediaKeyCode::TrackPrevious
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::Record),
+            MediaKeyCode::Record
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::LowerVolume),
+            MediaKeyCode::LowerVolume
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::RaiseVolume),
+            MediaKeyCode::RaiseVolume
+        );
+        assert_eq!(
+            MediaKeyCode::from(XtermMediaKeyCode::MuteVolume),
+            MediaKeyCode::MuteVolume
+        );
+    }
+
+    #[test]
     fn adapt_crossterm_key_event() {
         assert_eq!(
             KeyEvent::from(XtermKeyEvent::new(
@@ -150,6 +237,15 @@ mod test {
                 modifiers: XtermKeyModifiers::empty(),
             })),
             Event::None
+        );
+        assert_eq!(
+            AppEvent::from(XtermEvent::FocusGained),
+            AppEvent::FocusGained
+        );
+        assert_eq!(AppEvent::from(XtermEvent::FocusLost), AppEvent::FocusLost);
+        assert_eq!(
+            AppEvent::from(XtermEvent::Paste(String::from("a"))),
+            AppEvent::Paste(String::from("a"))
         );
     }
 }

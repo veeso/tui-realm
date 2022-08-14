@@ -11,7 +11,7 @@ mod terminal;
 // -- export
 pub use listener::CrosstermInputListener;
 
-use super::{Event, Key, KeyEvent, KeyModifiers};
+use super::{Event, Key, KeyEvent, KeyModifiers, MediaKeyCode};
 use crate::tui::{backend::CrosstermBackend, Frame as TuiFrame, Terminal as TuiTerminal};
 use std::io::Stdout;
 

@@ -18,6 +18,12 @@ where
     Keyboard(KeyEvent),
     /// This event is raised after the terminal window is resized
     WindowResize(u16, u16),
+    /// Window focus gained
+    FocusGained,
+    /// Window focus lost
+    FocusLost,
+    /// Clipboard content pasted
+    Paste(String),
     /// A ui tick event (should be configurable)
     Tick,
     /// Unhandled event; Empty event
@@ -118,6 +124,22 @@ pub enum Key {
     Char(char),
     /// Null.
     Null,
+    /// Caps lock pressed
+    CapsLock,
+    /// Scroll lock pressed
+    ScrollLock,
+    /// Num lock pressed
+    NumLock,
+    /// Print screen key
+    PrintScreen,
+    /// Pause key
+    Pause,
+    /// Menu key
+    Menu,
+    /// keypad begin
+    KeypadBegin,
+    /// Media key
+    Media(MediaKeyCode),
     /// Escape key.
     Esc,
 }
@@ -145,6 +167,42 @@ impl From<Key> for KeyEvent {
     fn from(k: Key) -> Self {
         Self::new(k, KeyModifiers::empty())
     }
+}
+
+#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
+#[cfg_attr(
+    feature = "serialize",
+    derive(Deserialize, Serialize),
+    serde(tag = "type", content = "args")
+)]
+/// Describe a keycode for a media key
+pub enum MediaKeyCode {
+    /// Play media key.
+    Play,
+    /// Pause media key.
+    Pause,
+    /// Play/Pause media key.
+    PlayPause,
+    /// Reverse media key.
+    Reverse,
+    /// Stop media key.
+    Stop,
+    /// Fast-forward media key.
+    FastForward,
+    /// Rewind media key.
+    Rewind,
+    /// Next-track media key.
+    TrackNext,
+    /// Previous-track media key.
+    TrackPrevious,
+    /// Record media key.
+    Record,
+    /// Lower-volume media key.
+    LowerVolume,
+    /// Raise-volume media key.
+    RaiseVolume,
+    /// Mute media key.
+    MuteVolume,
 }
 
 #[cfg(test)]
