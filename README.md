@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.7.1 (03/08/2022)</p>
+<p align="center">Current version: 1.8.0 (14/08/2022)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -126,13 +126,13 @@ See tui-realm in action in the [Example](#run-examples) or if you want to read m
 If you want the default features, just add tuirealm 1.x version:
 
 ```toml
-tuirealm = "^1.7.0"
+tuirealm = "^1.8.0"
 ```
 
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "^1.7.0", default-features = false, features = [ "derive", "serialize", "with-termion" ] }
+tuirealm = { version = "^1.8.0", default-features = false, features = [ "derive", "serialize", "with-termion" ] }
 ```
 
 Supported features are:
@@ -152,7 +152,7 @@ When you want to switch to another backend (e.g. from crossterm to termion), rem
 > ❗ You can never have more than one backend enabled at the same time
 
 ```toml
-tuirealm = { version = "^1.7.0", default-features = false, features = [ "with-termion" ] }
+tuirealm = { version = "^1.8.0", default-features = false, features = [ "with-termion" ] }
 ```
 
 ### Create a tui-realm application 🪂

@@ -10,7 +10,7 @@ use tui::style::{Color, Modifier};
 /// ### TextSpan
 ///
 /// TextSpan is a "cell" of text with its attributes
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TextSpan {
     pub content: String,
     pub fg: Color,

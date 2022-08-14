@@ -91,7 +91,7 @@ where
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 
 /// An event clause indicates on which kind of event the event must be forwarded to the `target` component.
 pub enum EventClause<UserEvent>

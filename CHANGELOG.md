@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.8.0](#180)
   - [1.7.1](#171)
   - [1.7.0](#170)
   - [1.6.0](#160)
@@ -30,6 +31,43 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.8.0
+
+Released on 14/08/2022
+
+- Bump `crossterm` to `0.25`
+- Bump `tui` to `0.19`
+- Added events (supported by crossterm)
+
+    ```rs
+    FocusGained,
+    /// Window focus lost
+    FocusLost,
+    /// Clipboard content pasted
+    Paste(String),
+    ```
+
+- Added new key events (supported by crossterm)
+
+    ```rust
+    /// Caps lock pressed
+    CapsLock,
+    /// Scroll lock pressed
+    ScrollLock,
+    /// Num lock pressed
+    NumLock,
+    /// Print screen key
+    PrintScreen,
+    /// Pause key
+    Pause,
+    /// Menu key
+    Menu,
+    /// keypad begin
+    KeypadBegin,
+    /// Media key
+    Media(MediaKeyCode),
+    ```
 
 ## 1.7.1
 
