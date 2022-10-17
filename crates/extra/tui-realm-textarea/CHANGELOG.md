@@ -1,10 +1,17 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.1.1](#111)
   - [1.1.0](#110)
   - [1.0.0](#100)
 
 ---
+
+## 1.1.1
+
+Released on 17/10/2022
+
+- Updated `tui-textarea` to `^0.1.6`
 
 ## 1.1.0
 
