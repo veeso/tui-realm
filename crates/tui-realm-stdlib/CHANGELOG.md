@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.2.0](#120)
   - [1.1.7](#117)
   - [1.1.6](#116)
   - [1.1.5](#115)
@@ -20,6 +21,13 @@
   - [0.5.0](#050)
 
 ---
+
+## 1.2.0
+
+Released on 17/10/2022
+
+- Added support for shape `Label` in canvas
+- Added `Marker` to canvas props
 
 ## 1.1.7
 
