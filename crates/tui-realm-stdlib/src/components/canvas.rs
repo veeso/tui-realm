@@ -2,29 +2,6 @@
 //!
 //! A canvas where you can draw more complex figures
 
-/**
- * MIT License
- *
- * tui-realm - Copyright (C) 2021 Christian Visintin
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
@@ -82,6 +59,12 @@ impl Canvas {
         self
     }
 
+    /// From <https://github.com/fdehau/tui-rs/issues/286>:
+    ///
+    /// > Those are used to define the viewport of the canvas.
+    /// > Only the points whose coordinates are within the viewport are displayed.
+    /// > When you render the canvas using Frame::render_widget, you give an area to draw the widget to (a Rect) and
+    /// > the crate translates the floating point coordinates to those used by our internal terminal representation.
     pub fn x_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.attr(
             Attribute::Custom(CANVAS_X_BOUNDS),
@@ -93,6 +76,12 @@ impl Canvas {
         self
     }
 
+    /// From <https://github.com/fdehau/tui-rs/issues/286>:
+    ///
+    /// > Those are used to define the viewport of the canvas.
+    /// > Only the points whose coordinates are within the viewport are displayed.
+    /// > When you render the canvas using Frame::render_widget, you give an area to draw the widget to (a Rect) and
+    /// > the crate translates the floating point coordinates to those used by our internal terminal representation.
     pub fn y_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.attr(
             Attribute::Custom(CANVAS_Y_BOUNDS),
@@ -104,8 +93,6 @@ impl Canvas {
         self
     }
 
-    /// ### draw_shape
-    ///
     /// Draw a shape into the canvas `Context`
     fn draw_shape(ctx: &mut Context, shape: &Shape) {
         match shape {
