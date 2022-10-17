@@ -6,14 +6,19 @@ use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
 };
+use tuirealm::tui::symbols::Marker;
 use tuirealm::tui::{
     layout::Rect,
+    text::{Span, Spans},
     widgets::canvas::{Canvas as TuiCanvas, Context, Points},
 };
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Props
-use super::props::{CANVAS_X_BOUNDS, CANVAS_Y_BOUNDS};
+use super::props::{
+    CANVAS_MARKER, CANVAS_MARKER_BLOCK, CANVAS_MARKER_BRAILLE, CANVAS_MARKER_DOT, CANVAS_X_BOUNDS,
+    CANVAS_Y_BOUNDS,
+};
 
 // -- Component
 
@@ -93,10 +98,45 @@ impl Canvas {
         self
     }
 
+    /// Set marker to use to draw on canvas
+    pub fn marker(mut self, marker: Marker) -> Self {
+        self.attr(
+            Attribute::Custom(CANVAS_MARKER),
+            Self::marker_to_prop(marker),
+        );
+        self
+    }
+
+    fn marker_to_prop(marker: Marker) -> AttrValue {
+        AttrValue::Number(match marker {
+            Marker::Block => CANVAS_MARKER_BLOCK,
+            Marker::Braille => CANVAS_MARKER_BRAILLE,
+            Marker::Dot => CANVAS_MARKER_DOT,
+        })
+    }
+
+    fn prop_to_marker(&self) -> Marker {
+        match self
+            .props
+            .get_or(
+                Attribute::Custom(CANVAS_MARKER),
+                AttrValue::Number(CANVAS_MARKER_BRAILLE),
+            )
+            .unwrap_number()
+        {
+            CANVAS_MARKER_BLOCK => Marker::Block,
+            CANVAS_MARKER_DOT => Marker::Dot,
+            _ => Marker::Braille,
+        }
+    }
+
     /// Draw a shape into the canvas `Context`
     fn draw_shape(ctx: &mut Context, shape: &Shape) {
         match shape {
-            Shape::Label(_) => {} /* ctx.print(*x, *y, &s, *c) FIXME: UNSUPPORTED */
+            Shape::Label((x, y, label, color)) => {
+                let span = Span::styled(label.to_string(), Style::default().fg(*color));
+                ctx.print(*x, *y, Spans::from(vec![span]));
+            }
             Shape::Layer => ctx.layer(),
             Shape::Line(line) => ctx.draw(line),
             Shape::Map(map) => ctx.draw(map),
@@ -161,6 +201,7 @@ impl MockComponent for Canvas {
             let canvas = TuiCanvas::default()
                 .background_color(background)
                 .block(block)
+                .marker(self.prop_to_marker())
                 .x_bounds(x_bounds)
                 .y_bounds(y_bounds)
                 .paint(|ctx| shapes.iter().for_each(|x| Self::draw_shape(ctx, x)));
@@ -200,6 +241,7 @@ mod test {
             .background(Color::Black)
             .title("playing risiko", Alignment::Center)
             .borders(Borders::default())
+            .marker(Marker::Dot)
             .x_bounds((-180.0, 180.0))
             .y_bounds((-90.0, 90.0))
             .data(&[

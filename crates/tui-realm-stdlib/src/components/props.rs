@@ -14,6 +14,10 @@ pub const BAR_CHART_VALUES_STYLE: &str = "bar-chart-values-style";
 
 pub const CANVAS_X_BOUNDS: &str = "x-bounds";
 pub const CANVAS_Y_BOUNDS: &str = "y-bounds";
+pub const CANVAS_MARKER: &str = "marker";
+pub const CANVAS_MARKER_BRAILLE: isize = 0;
+pub const CANVAS_MARKER_DOT: isize = 1;
+pub const CANVAS_MARKER_BLOCK: isize = 2;
 
 // -- chart
 
