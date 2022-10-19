@@ -202,6 +202,9 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 
 ## Apps using tui-realm 🚀
 
+- [donmaze](https://github.com/veeso/donmaze)
+- [matrix-rust-sdk](https://github.com/matrix-org/matrix-rust-sdk)
+- [paat](https://github.com/ebakoba/paat)
 - [termusic](https://github.com/tramhao/termusic)
 - [termscp](https://github.com/veeso/termscp)
 - [tuifeed](https://github.com/veeso/tuifeed)
