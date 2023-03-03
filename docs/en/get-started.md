@@ -44,7 +44,7 @@ terminal user interfaces:
 
 - ⚛️ Based on **React** and **Elm**
 
-    tui-realm is based on [React] and [Elm](https://elm-lang.org/). These two are kinda different as approach, but I decided to take the best from each of them to combine them in **Realm**. From React I took the **Component** concept. In realm each component represents a single graphic instance, which could potentially include some children; each component then has a **State** and some **Properties**.
+    tui-realm is based on [React](https://reactjs.org/) and [Elm](https://elm-lang.org/). These two are kinda different as approach, but I decided to take the best from each of them to combine them in **Realm**. From React I took the **Component** concept. In realm each component represents a single graphic instance, which could potentially include some children; each component then has a **State** and some **Properties**.
     From Elm I basically took every other concept implemented in Realm. I really like Elm as a language, in particular the **TEA**.
     Indeed, as in Elm, in realm the lifecycle of the application is `Event -> Msg -> Update -> View -> Event -> ...`
 
