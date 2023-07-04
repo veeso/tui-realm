@@ -154,7 +154,7 @@ use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style,
+    Alignment, AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style, TextModifiers,
 };
 use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
 use tuirealm::tui::widgets::{Block, Paragraph};
@@ -410,6 +410,25 @@ impl<'a> MockComponent for TextArea<'a> {
                     .as_ref(),
                 )
                 .split(area);
+            
+            // Remove cursor if not in focus
+            let focus = self
+                .props
+                .get_or(Attribute::Focus, AttrValue::Flag(false))
+                .unwrap_flag();
+            if !focus {
+                self.widget.set_cursor_style(Style::reset());
+            } else {
+                let style = self
+                    .props
+                    .get_or(
+                        Attribute::Custom(TEXTAREA_CURSOR_STYLE),
+                        AttrValue::Style(Style::default().add_modifier(TextModifiers::REVERSED)),
+                    )
+                    .unwrap_style();
+                self.widget.set_cursor_style(style);
+            }
+
             // render widget
             frame.render_widget(self.widget.widget(), chunks[0]);
             if let Some(fmt) = self.status_fmt.as_ref() {
