@@ -355,7 +355,7 @@ impl<'a> TextArea<'a> {
     }
 
     // -- private
-    fn get_block(&self) -> Block<'a> {
+    fn get_block(&self) -> Option<Block<'a>> {
         let mut block = Block::default();
         if let Some(AttrValue::Title((title, alignment))) = self.query(Attribute::Title) {
             block = block.title(title).title_alignment(alignment);
@@ -369,16 +369,19 @@ impl<'a> TextArea<'a> {
                 .props
                 .get_or(Attribute::Focus, AttrValue::Flag(false))
                 .unwrap_flag();
-            block = block
-                .border_style(match focus {
-                    true => borders.style(),
-                    false => inactive_style,
-                })
-                .border_type(borders.modifiers)
-                .borders(borders.sides);
+
+            return Some(
+                block
+                    .border_style(match focus {
+                        true => borders.style(),
+                        false => inactive_style,
+                    })
+                    .border_type(borders.modifiers)
+                    .borders(borders.sides),
+            );
         }
 
-        block
+        None
     }
 
     #[cfg(feature = "clipboard")]
@@ -396,11 +399,14 @@ impl<'a> MockComponent for TextArea<'a> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // set block
-            self.widget.set_block(self.get_block());
+            if let Some(block) = self.get_block() {
+                self.widget.set_block(block);
+            }
+            let margin = if self.get_block().is_some() { 1 } else { 0 };
             // make chunks
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
-                .margin(1)
+                .margin(margin)
                 .constraints(
                     [
                         Constraint::Min(1),
@@ -485,7 +491,9 @@ impl<'a> MockComponent for TextArea<'a> {
                 self.widget.set_style(s);
             }
             (_, _) => {
-                self.widget.set_block(self.get_block());
+                if let Some(block) = self.get_block() {
+                    self.widget.set_block(block);
+                }
             }
         }
     }
