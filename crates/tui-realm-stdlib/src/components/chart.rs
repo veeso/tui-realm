@@ -260,12 +260,12 @@ impl<'a> Chart {
     fn get_tui_dataset(dataset: &'a Dataset, start: usize, len: usize) -> TuiDataset<'a> {
         // Recalc len
         let points = dataset.get_data();
-        let len: usize = match points.len() > start {
+        let end: usize = match points.len() > start {
             true => std::cmp::min(len, points.len() - start),
             false => 0,
         };
+
         // Prepare data storage
-        let end: usize = points.len() - len;
         TuiDataset::default()
             .name(dataset.name.clone())
             .marker(dataset.marker)
