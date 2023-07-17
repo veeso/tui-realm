@@ -556,6 +556,19 @@ mod test {
         assert_eq!(component.max_dataset_len(), 12);
         assert_eq!(component.is_disabled(), false);
         assert_eq!(component.get_data(2, 4).len(), 2);
+        
+        let mut comp = Chart::default().data(&[
+                Dataset::default()
+                    .name("Maximum")
+                    .graph_type(GraphType::Line)
+                    .marker(Marker::Dot)
+                    .style(Style::default().fg(Color::LightRed))
+                    .data(vec![
+                        (0.0, 7.0),
+                    ]),
+        ]);
+        assert!(comp.get_data(0, 1).len() > 0);
+
         // Update and test empty data
         component.states.cursor_at_end(12);
         component.attr(
