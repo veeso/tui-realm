@@ -17,7 +17,7 @@ repository = "https://github.com/veeso/tui-realm"
 bitflags = "^1.3"
 crossterm = { version = "^0.25", optional = true }
 lazy-regex = "^2.3.0"
-serde = { version = "^1", features = [ "derive" ], optional = true }
+serde = { version = "^1", features = ["derive"], optional = true }
 termion = { version = "^1.5", optional = true }
 thiserror = "^1.0.0"
 tui = { version = "0.19", default-features = false }
@@ -29,12 +29,16 @@ toml = "0.5.9"
 tempfile = "3.2.0"
 
 [features]
-default = [ "derive", "with-crossterm" ]
-derive = [ "tuirealm_derive" ]
-serialize = [ "serde" ]
-with-crossterm = [ "crossterm", "tui/crossterm" ]
-with-termion = [ "termion", "tui/termion" ]
+default = ["derive", "with-crossterm"]
+derive = ["tuirealm_derive"]
+serialize = ["serde"]
+with-crossterm = ["crossterm", "tui/crossterm"]
+with-termion = ["termion", "tui/termion"]
 
 [[example]]
 name = "demo"
-path = "examples/demo.rs"
+path = "examples/demo/demo.rs"
+
+[[example]]
+name = "user-events"
+path = "examples/user_events/user_events.rs"
