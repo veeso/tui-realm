@@ -95,7 +95,7 @@
 
 ## About tui-realm 👑
 
-tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React. But that's not all: the components communicate with the ui engine via a system based on **Messages** and **Events**, providing you with the possibility to implement `update` routines as happens in Elm. In addition, the components are organized inside the **View**, which manages mounting/umounting, focus and event forwarding for you.
+tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) and [ratatui](https://github.com/ratatui-org/ratatui) to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React. But that's not all: the components communicate with the ui engine via a system based on **Messages** and **Events**, providing you with the possibility to implement `update` routines as happens in Elm. In addition, the components are organized inside the **View**, which manages mounting/umounting, focus and event forwarding for you.
 
 And that's also explains the reason of the name: Realm stands for React and Elm.
 
@@ -139,20 +139,32 @@ Supported features are:
 
 - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
 - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
-- `with-crossterm` (*default*): use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
-- `with-termion`: use [termion](https://github.com/redox-os/termion) as backend for tui.
 
 > ⚠️ You can enable only one backend at the time and at least one must be enabled in order to build.  
 > ❗ You don't need tui as a dependency, since you can access to tui types via `use tuirealm::tui::`
 
 #### Enabling other backends ⚠️
-
-When you want to switch to another backend (e.g. from crossterm to termion), remember that you **MUST** disable default features, in order to disable crossterm.
+This library supports two backends: `crossterm` and `termion`, and two high
+level terminal TUI libraries: `tui` and `ratatui`. Whenever you explicitly
+declare any of the TUI library or backend feature sets you should disable the
+crate's default features. 
 
 > ❗ You can never have more than one backend enabled at the same time
 
+- `tui-with-crossterm` (*default*): use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
+- `tui-with-termion`: use [termion](https://github.com/redox-os/termion) as backend for tui.
+- `ruatatui`: alias for `ratatui-with-crossterm`
+- `ratatui-with-crossterm`: use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
+- `ratatui-with-termion`: use [termion](https://github.com/redox-os/termion) as backend for tui.
+
+Example using the termion backend:
 ```toml
-tuirealm = { version = "^1.8.0", default-features = false, features = [ "with-termion" ] }
+tuirealm = { version = "^1.8.0", default-features = false, features = [ "tui-with-termion" ] }
+```
+
+Example entry for ratatui:
+```toml
+tuirealm = { version = "^1.8.0", default-features = false, features = ["derive", "serialize", "ratatui-with-crossterm"]}
 ```
 
 ### Create a tui-realm application 🪂

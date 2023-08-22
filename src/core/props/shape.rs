@@ -3,7 +3,7 @@
 //! This module exposes the shape attribute type
 
 use super::Color;
-use ratatui::widgets::canvas::{Line, Map, Rectangle};
+use crate::tui::widgets::canvas::{Line, Map, Rectangle};
 
 /// Describes the shape to draw on the canvas
 #[derive(Clone, Debug)]
