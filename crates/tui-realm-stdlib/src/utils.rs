@@ -10,7 +10,11 @@ use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, TextModifiers, T
 use tuirealm::Props;
 // ext
 use tuirealm::tui::style::{Color, Modifier, Style};
-use tuirealm::tui::text::{Span, Spans};
+#[cfg(feature = "ratatui")]
+use tuirealm::tui::text::Line as Spans;
+use tuirealm::tui::text::Span;
+#[cfg(feature = "tui")]
+use tuirealm::tui::text::Spans;
 use tuirealm::tui::widgets::Block;
 use unicode_width::UnicodeWidthStr;
 

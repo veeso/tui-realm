@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.2.0 (17/10/2022)</p>
+<p align="center">Current version: 1.3.0 (22/08/2023)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -85,19 +85,19 @@ It provides several **Mock Components** for your tui-realm applications. Probabl
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
-tui-realm-stdlib = "^1.2.0"
+tui-realm-stdlib = "^1.3.0"
 ```
 
 or if you're not using the default **crossterm backend**, specify another backend in the cargo entry:
 
 ```toml
-tui-realm-stdlib = { version = "^1.2.0", default-features = false, features = [ "with-crossterm" ] }
+tui-realm-stdlib = { version = "^1.3.0", default-features = false, features = [ "ratatui", "termion" ] }
 ```
 
-Latest version of tui-realm-stdlib requires **tui-realm 1.8.0** or higher
+Latest version of tui-realm-stdlib requires **tui-realm 1.9.0** or higher
 
 ```toml
-tuirealm = "^1.8.0"
+tuirealm = "^1.9.0"
 ```
 
 ---

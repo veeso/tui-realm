@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.3.0](#130)
   - [1.2.0](#120)
   - [1.1.7](#117)
   - [1.1.6](#116)
@@ -21,6 +22,15 @@
   - [0.5.0](#050)
 
 ---
+
+## 1.3.0
+
+Released on 22/08/2023
+
+- Added support for `ratatui`
+  - to enable `ratatui` set feature `ratatui` (enabled by default)
+  - to enable `tui` set feature `tui`.
+- Deprecated features `with-crossterm`, `with-termion`
 
 ## 1.2.0
 

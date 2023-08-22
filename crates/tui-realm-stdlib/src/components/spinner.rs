@@ -4,9 +4,13 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{Alignment, AttrValue, Attribute, Color, Props, Style};
+#[cfg(feature = "ratatui")]
+use tuirealm::tui::text::Line as Spans;
+#[cfg(feature = "tui")]
+use tuirealm::tui::text::Spans;
 use tuirealm::tui::{
     layout::Rect,
-    text::{Span as TuiSpan, Spans, Text},
+    text::{Span as TuiSpan, Text},
     widgets::Paragraph,
 };
 use tuirealm::{Frame, MockComponent, State};

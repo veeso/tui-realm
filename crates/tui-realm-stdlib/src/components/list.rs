@@ -7,9 +7,13 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Table,
     TextModifiers,
 };
+#[cfg(feature = "ratatui")]
+use tuirealm::tui::text::Line as Spans;
+#[cfg(feature = "tui")]
+use tuirealm::tui::text::Spans;
 use tuirealm::tui::{
     layout::{Corner, Rect},
-    text::{Span, Spans},
+    text::Span,
     widgets::{List as TuiList, ListItem, ListState},
 };
 use tuirealm::{Frame, MockComponent, State, StateValue};

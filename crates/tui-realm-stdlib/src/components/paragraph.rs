@@ -11,9 +11,13 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
     TextModifiers, TextSpan,
 };
+#[cfg(feature = "ratatui")]
+use tuirealm::tui::text::Line as Spans;
+#[cfg(feature = "tui")]
+use tuirealm::tui::text::Spans;
 use tuirealm::tui::{
     layout::Rect,
-    text::{Span, Spans},
+    text::Span,
     widgets::{Paragraph as TuiParagraph, Wrap},
 };
 use tuirealm::{Frame, MockComponent, State};

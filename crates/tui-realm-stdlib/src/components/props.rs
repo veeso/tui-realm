@@ -18,6 +18,8 @@ pub const CANVAS_MARKER: &str = "marker";
 pub const CANVAS_MARKER_BRAILLE: isize = 0;
 pub const CANVAS_MARKER_DOT: isize = 1;
 pub const CANVAS_MARKER_BLOCK: isize = 2;
+#[cfg(feature = "ratatui")]
+pub const CANVAS_MARKER_BAR: isize = 3;
 
 // -- chart
 

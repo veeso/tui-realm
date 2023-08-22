@@ -7,17 +7,21 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
 };
 use tuirealm::tui::symbols::Marker;
+#[cfg(feature = "ratatui")]
+use tuirealm::tui::text::Line as Spans;
+#[cfg(feature = "tui")]
+use tuirealm::tui::text::Spans;
 use tuirealm::tui::{
     layout::Rect,
-    text::{Span, Spans},
+    text::Span,
     widgets::canvas::{Canvas as TuiCanvas, Context, Points},
 };
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Props
 use super::props::{
-    CANVAS_MARKER, CANVAS_MARKER_BLOCK, CANVAS_MARKER_BRAILLE, CANVAS_MARKER_DOT, CANVAS_X_BOUNDS,
-    CANVAS_Y_BOUNDS,
+    CANVAS_MARKER, CANVAS_MARKER_BAR, CANVAS_MARKER_BLOCK, CANVAS_MARKER_BRAILLE,
+    CANVAS_MARKER_DOT, CANVAS_X_BOUNDS, CANVAS_Y_BOUNDS,
 };
 
 // -- Component
@@ -109,6 +113,8 @@ impl Canvas {
 
     fn marker_to_prop(marker: Marker) -> AttrValue {
         AttrValue::Number(match marker {
+            #[cfg(feature = "ratatui")]
+            Marker::Bar => CANVAS_MARKER_BAR,
             Marker::Block => CANVAS_MARKER_BLOCK,
             Marker::Braille => CANVAS_MARKER_BRAILLE,
             Marker::Dot => CANVAS_MARKER_DOT,

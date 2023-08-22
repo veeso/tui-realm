@@ -8,9 +8,12 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, BorderSides, Borders, Color, PropPayload, PropValue, Props,
     Style, TextModifiers,
 };
+#[cfg(feature = "ratatui")]
+use tuirealm::tui::text::Line as Spans;
+#[cfg(feature = "tui")]
+use tuirealm::tui::text::Spans;
 use tuirealm::tui::{
     layout::{Constraint, Corner, Direction as LayoutDirection, Layout, Rect},
-    text::Spans,
     widgets::{Block, List, ListItem, ListState, Paragraph},
 };
 use tuirealm::{Frame, MockComponent, State, StateValue};
