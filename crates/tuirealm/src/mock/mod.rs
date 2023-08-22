@@ -41,9 +41,7 @@ pub struct MockPoll<U: Eq + PartialEq + Clone + PartialOrd + Send> {
 
 impl<U: Eq + PartialEq + Clone + PartialOrd + Send> Default for MockPoll<U> {
     fn default() -> Self {
-        Self {
-            ghost: PhantomData::default(),
-        }
+        Self { ghost: PhantomData }
     }
 }
 

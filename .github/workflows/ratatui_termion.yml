@@ -1,4 +1,4 @@
-name: Termion
+name: Ratatui-Termion
 
 on: [push, pull_request]
 
@@ -19,10 +19,10 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --no-fail-fast --no-default-features --features derive,serialize,with-termion
+          args: --no-fail-fast --no-default-features --features derive,serialize,ratatui,termion
       - name: Examples
-        run: cargo build --all-targets --no-default-features --features derive,serialize,with-termion --examples
+        run: cargo build --all-targets --no-default-features --features derive,serialize,ratatui,termion --examples
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
-        run: cargo clippy --lib --no-default-features --features derive,serialize,with-termion -- -Dwarnings
+        run: cargo clippy --lib --no-default-features --features derive,serialize,ratatui,termion -- -Dwarnings

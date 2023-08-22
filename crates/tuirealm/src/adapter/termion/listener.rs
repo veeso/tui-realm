@@ -25,9 +25,7 @@ where
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     pub fn new(_interval: Duration) -> Self {
-        Self {
-            ghost: PhantomData::default(),
-        }
+        Self { ghost: PhantomData }
     }
 }
 

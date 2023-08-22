@@ -20,13 +20,13 @@
 //! If you want the default features, just add tuirealm 1.x version:
 //!
 //! ```toml
-//! tuirealm = "^1.8.0"
+//! tuirealm = "^1.9.0"
 //! ```
 //!
 //! otherwise you can specify the features you want to add:
 //!
 //! ```toml
-//! tuirealm = { version = "^1.8.0", default-features = false, features = [ "derive", "with-termion" ] }
+//! tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "with-termion" ] }
 //! ```
 //!
 //! Supported features are:
@@ -63,7 +63,6 @@
 #[macro_use]
 extern crate lazy_regex;
 extern crate self as tuirealm;
-extern crate tui as tuirs;
 #[cfg(feature = "derive")]
 #[allow(unused_imports)]
 #[macro_use]

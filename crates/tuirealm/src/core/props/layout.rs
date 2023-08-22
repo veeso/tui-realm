@@ -66,6 +66,7 @@ impl Layout {
             .vertical_margin(self.margin.vertical)
             .constraints::<&[Constraint]>(self.constraints.as_ref())
             .split(area)
+            .to_vec()
     }
 }
 

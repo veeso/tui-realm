@@ -3,7 +3,7 @@
 //! `Texts` is the module which defines the texts properties for components.
 //! It also provides some helpers and builders to facilitate the use of builders.
 
-use tui::style::{Color, Modifier};
+use crate::tui::style::{Color, Modifier};
 
 // -- Text parts
 

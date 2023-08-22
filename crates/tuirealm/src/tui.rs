@@ -1,5 +1,8 @@
 //! ## tui
 //!
-//! `tui` just exposes the tui modules, in order to include the entire library inside realm
+//! `tui` just exposes the ratatui modules, in order to include the entire library inside realm
 
-pub use tuirs::*;
+#[cfg(feature = "ratatui")]
+pub use ratatui::*;
+#[cfg(feature = "tui")]
+pub use tui::*;
