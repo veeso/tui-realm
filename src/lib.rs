@@ -63,7 +63,6 @@
 #[macro_use]
 extern crate lazy_regex;
 extern crate self as tuirealm;
-extern crate tui as tuirs;
 #[cfg(feature = "derive")]
 #[allow(unused_imports)]
 #[macro_use]

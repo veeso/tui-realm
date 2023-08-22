@@ -20,7 +20,7 @@ lazy-regex = "^2.3.0"
 serde = { version = "^1", features = ["derive"], optional = true }
 termion = { version = "^1.5", optional = true }
 thiserror = "^1.0.0"
-tui = { version = "0.19", default-features = false }
+ratatui = { version = "0.22", default-features = false }
 tuirealm_derive = { version = "^1.0.0", optional = true }
 
 [dev-dependencies]
@@ -32,8 +32,8 @@ tempfile = "3.2.0"
 default = ["derive", "with-crossterm"]
 derive = ["tuirealm_derive"]
 serialize = ["serde"]
-with-crossterm = ["crossterm", "tui/crossterm"]
-with-termion = ["termion", "tui/termion"]
+with-crossterm = ["crossterm", "ratatui/crossterm"]
+with-termion = ["termion", "ratatui/termion"]
 
 [[example]]
 name = "demo"
