@@ -284,9 +284,7 @@ where
     /// Inject properties for `id` using view injectors
     fn inject(&mut self, id: &K) -> ViewResult<()> {
         for (attr, value) in self.properties_to_inject(id) {
-            if let Err(err) = self.attr(id, attr, value) {
-                return Err(err);
-            }
+            self.attr(id, attr, value)?
         }
         Ok(())
     }

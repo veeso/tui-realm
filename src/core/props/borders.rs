@@ -5,7 +5,7 @@
 use super::{Color, Style};
 
 // Exports
-pub use tui::widgets::{BorderType, Borders as BorderSides};
+pub use crate::tui::widgets::{BorderType, Borders as BorderSides};
 
 // -- Border
 
