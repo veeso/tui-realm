@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.8.0 (14/08/2022)</p>
+<p align="center">Current version: 1.9.0 (14/08/2022)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -44,20 +44,30 @@
   /></a>
 </p>
 <p align="center">
+<a href="https://github.com/veeso/tui-realm/actions"
+    ><img
+      src="https://github.com/veeso/tui-realm/workflows/Ratatui-Crossterm/badge.svg"
+      alt="Crossterm CI"
+  /></a>
   <a href="https://github.com/veeso/tui-realm/actions"
     ><img
-      src="https://github.com/veeso/tui-realm/workflows/Crossterm/badge.svg"
+      src="https://github.com/veeso/tui-realm/workflows/Ratatui-Termion/badge.svg"
+      alt="Termion CI"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm/actions"
+    ><img
+      src="https://github.com/veeso/tui-realm/workflows/Tui-Crossterm/badge.svg"
       alt="Crossterm CI"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm/actions"
+    ><img
+      src="https://github.com/veeso/tui-realm/workflows/Tui-Termion/badge.svg"
+      alt="Termion CI"
   /></a>
   <a href="https://github.com/veeso/tui-realm/actions"
     ><img
       src="https://github.com/veeso/tui-realm/workflows/Crossterm%20%28Windows%29/badge.svg"
       alt="Crossterm CI (Windows)"
-  /></a>
-  <a href="https://github.com/veeso/tui-realm/actions"
-    ><img
-      src="https://github.com/veeso/tui-realm/workflows/Termion/badge.svg"
-      alt="Termion CI"
   /></a>
   <a href="https://coveralls.io/github/veeso/tui-realm"
     ><img
@@ -103,7 +113,7 @@ tui-realm also comes with a standard library of components, which can be added t
 
 ![Demo](/docs/images/demo.gif)
 
-See tui-realm in action in the [Example](#run-examples) or if you want to read more about tui-realm start reading the official guide [HERE](docs/en/get-started.md).
+See tui-realm in action in the [Example](#run-examples-) or if you want to read more about tui-realm start reading the official guide [HERE](docs/en/get-started.md).
 
 ## Features 🎁
 
@@ -126,13 +136,13 @@ See tui-realm in action in the [Example](#run-examples) or if you want to read m
 If you want the default features, just add tuirealm 1.x version:
 
 ```toml
-tuirealm = "^1.8.0"
+tuirealm = "^1.9.0"
 ```
 
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "^1.8.0", default-features = false, features = [ "derive", "serialize", "with-termion" ] }
+tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "serialize", "with-termion" ] }
 ```
 
 Supported features are:
@@ -145,6 +155,7 @@ Supported features are:
 - `termion`: use the [termion](https://github.com/redox-os/termion) terminal backend
 
 Deprecated feature flags:
+
 - `with-crossterm`
 - `with-termion`
 
@@ -152,21 +163,24 @@ Deprecated feature flags:
 > ❗ You don't need tui as a dependency, since you can access to tui types via `use tuirealm::tui::`
 
 #### Enabling other backends ⚠️
+
 This library supports two backends: `crossterm` and `termion`, and two high
 level terminal TUI libraries: `tui` and `ratatui`. Whenever you explicitly
 declare any of the TUI library or backend feature sets you should disable the
-crate's default features. 
+crate's default features.
 
 > ❗ You can never have more than one backend and one UI library enabled at the same time
 
 Example using the termion backend:
+
 ```toml
-tuirealm = { version = "^1.8.0", default-features = false, features = [ "termion", "derive", "tui" ] }
+tuirealm = { version = "^1.9.0", default-features = false, features = [ "termion", "derive", "tui" ] }
 ```
 
 Example using the ratatui UI library:
+
 ```toml
-tuirealm = { version = "^1.8.0", default-features = false, features = [ "ratatui", "derive", "crossterm" ]}
+tuirealm = { version = "^1.9.0", default-features = false, features = [ "ratatui", "derive", "crossterm" ]}
 ```
 
 ### Create a tui-realm application 🪂
