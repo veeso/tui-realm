@@ -26,7 +26,7 @@ where
 {
     pub fn new(interval: Duration) -> Self {
         Self {
-            ghost: PhantomData::default(),
+            ghost: PhantomData,
             interval: interval / 2,
         }
     }
