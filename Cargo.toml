@@ -37,7 +37,7 @@ tui = ["dep:tui"]
 crossterm = ["dep:crossterm", "tui?/crossterm", "ratatui?/crossterm"]
 termion = ["dep:termion", "tui?/termion", "ratatui?/termion"]
 ratatui = ["dep:ratatui"]
-# deprecated aliases for broken out backend features
+# deprecated aliases for broken out backend and UI library features
 with-crossterm = ["tui", "crossterm"]
 with-termion = ["tui", "termion"]
 

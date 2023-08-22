@@ -139,6 +139,14 @@ Supported features are:
 
 - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
 - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
+- `tui`: use the [tui-rs](https://github.com/fdehau/tui-rs) terminal UI library
+- `ratatui`: use the [ratatui](https://github.com/ratatui-org/ratatui) terminal UI library
+- `crossterm`: use the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend
+- `termion`: use the [termion](https://github.com/redox-os/termion) terminal backend
+
+Deprecated feature flags:
+- `with-crossterm`
+- `with-termion`
 
 > ⚠️ You can enable only one backend at the time and at least one must be enabled in order to build.  
 > ❗ You don't need tui as a dependency, since you can access to tui types via `use tuirealm::tui::`
@@ -149,22 +157,16 @@ level terminal TUI libraries: `tui` and `ratatui`. Whenever you explicitly
 declare any of the TUI library or backend feature sets you should disable the
 crate's default features. 
 
-> ❗ You can never have more than one backend enabled at the same time
-
-- `tui-with-crossterm` (*default*): use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
-- `tui-with-termion`: use [termion](https://github.com/redox-os/termion) as backend for tui.
-- `ruatatui`: alias for `ratatui-with-crossterm`
-- `ratatui-with-crossterm`: use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
-- `ratatui-with-termion`: use [termion](https://github.com/redox-os/termion) as backend for tui.
+> ❗ You can never have more than one backend and one UI library enabled at the same time
 
 Example using the termion backend:
 ```toml
-tuirealm = { version = "^1.8.0", default-features = false, features = [ "tui-with-termion" ] }
+tuirealm = { version = "^1.8.0", default-features = false, features = [ "termion", "derive", "tui" ] }
 ```
 
-Example entry for ratatui:
+Example using the ratatui UI library:
 ```toml
-tuirealm = { version = "^1.8.0", default-features = false, features = ["derive", "serialize", "ratatui-with-crossterm"]}
+tuirealm = { version = "^1.8.0", default-features = false, features = [ "ratatui", "derive", "crossterm" ]}
 ```
 
 ### Create a tui-realm application 🪂
