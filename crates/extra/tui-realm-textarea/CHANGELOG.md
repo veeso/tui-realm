@@ -15,6 +15,8 @@ Released on 29/08/2023
 Thanks to @erak
 
 - Added support for multiline paste command. #5
+- Added optional border. #4
+- Don't show cursor if not active. #3
 
 ## 1.1.1
 
