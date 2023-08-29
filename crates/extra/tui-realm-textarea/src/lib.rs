@@ -385,9 +385,14 @@ impl<'a> TextArea<'a> {
     fn paste(&mut self) {
         // get content from context
         if let Ok(Ok(yank)) = ClipboardContext::new().map(|mut ctx| ctx.get_contents()) {
-            self.widget.set_yank_text(yank);
-            self.widget.paste();
-            self.widget.set_yank_text(String::default());
+            // TODO: It's desired to set and paste yanked text, but pasting new lines as part of the yanked
+            // text is currently not supported by the textarea widget. Therefor, each line is inserted
+            // separately. The disadvantage of this workaround is, that each newly inserted line is a
+            // separate entry in the history and therefor a separate undo step.
+            for line in yank.lines() {
+                self.widget.insert_str(line);
+                self.widget.insert_newline();
+            }
         }
     }
 }
