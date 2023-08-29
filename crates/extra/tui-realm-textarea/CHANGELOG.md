@@ -12,11 +12,11 @@
 
 Released on 29/08/2023
 
-Thanks to @erak
+Thanks to [@erak](https://github.com/erak)
 
-- Added support for multiline paste command. #5
-- Added optional border. #4
-- Don't show cursor if not active. #3
+- Added support for multiline paste command. [#5](https://github.com/veeso/tui-realm-textarea/pull/5)
+- Added optional border. [#4](https://github.com/veeso/tui-realm-textarea/pull/4)
+- Don't show cursor if not active. [#3](https://github.com/veeso/tui-realm-textarea/pull/3)
 
 ## 1.1.1
 
