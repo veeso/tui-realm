@@ -3,6 +3,7 @@
 //! `Table` represents a read-only textual table component which can be scrollable through arrows or inactive
 
 use super::props::TABLE_COLUMN_SPACING;
+use std::cmp::max;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
@@ -266,11 +267,11 @@ impl Table {
                 // Get amount of columns (maximum len of row elements)
                 let columns: usize =
                     match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
-                        Some(rows) => rows.iter().map(|col| col.len()).max().unwrap_or(0),
-                        _ => 0,
+                        Some(rows) => rows.iter().map(|col| col.len()).max().unwrap_or(1),
+                        _ => 1,
                     };
-                // Calc width in equal way
-                let width: u16 = (100 / columns) as u16;
+                // Calc width in equal way, make sure not to divide by zero (this can happen when rows is [[]])
+                let width: u16 = (100 / max(columns, 1)) as u16;
                 (0..columns)
                     .map(|_| Constraint::Percentage(width))
                     .collect()
@@ -680,6 +681,17 @@ mod tests {
         assert_eq!(component.states.list_index, 0);
         // Get value
         assert_eq!(component.state(), State::One(StateValue::Usize(0)));
+    }
+
+    #[test]
+    fn test_component_table_with_empty_rows_and_no_width_set() {
+        // Make component
+        let mut component = Table::default().table(TableBuilder::default().build());
+
+        assert_eq!(component.states.list_len, 1);
+        assert_eq!(component.states.list_index, 0);
+        // calculating layout would fail if no widths and using "empty" TableBuilder
+        assert_eq!(component.layout().len(), 0);
     }
 
     #[test]
