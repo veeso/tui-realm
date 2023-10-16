@@ -149,6 +149,7 @@ bitflags! {
     ///
     /// Defines special key states, such as shift, control, alt...
     #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize), serde(tag = "type"))]
+    #[derive(Clone, Copy, Hash, Eq, PartialEq, Debug, PartialOrd, Ord)]
     pub struct KeyModifiers: u8 {
         const NONE = 0b0000_0000;
         const SHIFT = 0b0000_0001;
@@ -165,7 +166,7 @@ impl KeyEvent {
 
 impl From<Key> for KeyEvent {
     fn from(k: Key) -> Self {
-        Self::new(k, KeyModifiers::empty())
+        Self::new(k, KeyModifiers::NONE)
     }
 }
 
@@ -224,7 +225,7 @@ mod test {
     fn key_event_from_key() {
         let k = KeyEvent::from(Key::Up);
         assert_eq!(k.code, Key::Up);
-        assert_eq!(k.modifiers, KeyModifiers::empty());
+        assert_eq!(k.modifiers, KeyModifiers::NONE);
     }
 
     #[test]
