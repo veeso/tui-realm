@@ -167,7 +167,7 @@ Quite simple uh? Yep, it was my intention to make them the lighter as possible, 
 
 ```rust
 pub struct UsernameInput {
-    component: Input, // Wehere input implements `MockComponent`
+    component: Input, // Where input implements `MockComponent`
 }
 
 impl Component for UsernameInput { ... }
