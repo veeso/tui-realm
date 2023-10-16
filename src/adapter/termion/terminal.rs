@@ -6,8 +6,7 @@ use std::io::stdout;
 
 use termion::input::MouseTerminal;
 use termion::raw::IntoRawMode;
-#[cfg(target_family = "unix")]
-use termion::screen::AlternateScreen;
+use termion::screen::IntoAlternateScreen;
 
 use crate::terminal::{TerminalBridge, TerminalError, TerminalResult};
 use crate::tui::backend::TermionBackend;
@@ -15,12 +14,13 @@ use crate::Terminal;
 
 impl TerminalBridge {
     pub(crate) fn adapt_new_terminal() -> TerminalResult<Terminal> {
-        let screen = stdout()
+        let stdout = stdout()
             .into_raw_mode()
-            .map_err(|_| TerminalError::CannotConnectStdout)
-            .map(MouseTerminal::from)
-            .map(AlternateScreen::from)?;
-        Terminal::new(TermionBackend::new(screen)).map_err(|_| TerminalError::CannotConnectStdout)
+            .map_err(|_| TerminalError::CannotConnectStdout)?
+            .into_alternate_screen()
+            .map_err(|_| TerminalError::CannotConnectStdout)?;
+        let stdout = MouseTerminal::from(stdout);
+        Terminal::new(TermionBackend::new(stdout)).map_err(|_| TerminalError::CannotConnectStdout)
     }
 
     pub(crate) fn adapt_enter_alternate_screen(&mut self) -> TerminalResult<()> {
