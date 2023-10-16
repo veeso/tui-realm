@@ -144,13 +144,13 @@ pub enum Key {
     Esc,
 }
 
+/// Defines special key states, such as shift, control, alt...
+#[derive(Clone, Copy, Hash, Eq, PartialEq, Debug, PartialOrd, Ord)]
+#[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
+pub struct KeyModifiers(u8);
+
 bitflags! {
-    /// ## KeyModifiers
-    ///
-    /// Defines special key states, such as shift, control, alt...
-    #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize), serde(tag = "type"))]
-    #[derive(Clone, Copy, Hash, Eq, PartialEq, Debug, PartialOrd, Ord)]
-    pub struct KeyModifiers: u8 {
+    impl KeyModifiers: u8 {
         const NONE = 0b0000_0000;
         const SHIFT = 0b0000_0001;
         const CONTROL = 0b0000_0010;
@@ -258,7 +258,7 @@ mod test {
     #[cfg(feature = "serialize")]
     use tempfile::NamedTempFile;
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serialize")]
     fn deserialize<R, S>(mut readable: R) -> S
     where
         R: Read,
@@ -276,7 +276,7 @@ mod test {
         }
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serialize")]
     fn serialize<S, W>(serializable: &S, mut writable: W)
     where
         S: Serialize + Sized,
@@ -295,14 +295,14 @@ mod test {
         }
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serialize")]
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
     struct KeyBindings {
         pub quit: KeyEvent,
         pub open: KeyEvent,
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serialize")]
     impl KeyBindings {
         pub fn new(quit: KeyEvent, open: KeyEvent) -> Self {
             Self { quit, open }
@@ -310,7 +310,7 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serialize")]
     fn should_serialize_key_bindings() {
         let temp = NamedTempFile::new().expect("Failed to open tempfile");
         let keys = KeyBindings::new(
