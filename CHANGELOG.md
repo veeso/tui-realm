@@ -38,7 +38,10 @@
 
 Relesed on 19/10/2023
 
-- Fixed duplicated events on Windows
+- Fixed duplicated key events on Windows
+- Update dependencies:
+  - bitflags 2
+  - termion 2
 
 ## 1.9.0
 
