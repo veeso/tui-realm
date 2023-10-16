@@ -167,13 +167,13 @@ Quite simple uh? Yep, it was my intention to make them the lighter as possible, 
 
 ```rust
 pub struct UsernameInput {
-    component: Input, // Wehere input implements `MockComponent`
+    component: Input, // Where input implements `MockComponent`
 }
 
 impl Component for UsernameInput { ... }
 ```
 
-Another thing you'll have may noticed and that may frighten some of you are the two generic types that Component takes.
+Another thing you may have noticed and that may frighten some of you are the two generic types that Component takes.
 Let's see what these two types are:
 
 - `Msg`: defines the type of the **message** your application will handle in the **Update routine**. Indeed, in tui-realm the message are not defined in the library, but are defined by the user. We'll see this in details later in "the making of the first application". The only requirements for Message, is that it must implement `PartialEq`, since you must be able to match it in the **Update**.
@@ -318,7 +318,7 @@ The view is basically a box for all the components. All the components which are
 Each component in the view, **Must** be identified uniquely by an *identifier*, where the identifier is a type you must define (you can use an enum, you can use a String, we'll see that later).
 Once a component is mounted, it won't be directly usable anymore. The view will store it as a generic `Component` and will expose a bridge to operate on all the components in the view, querying them with their identifier.
 
-The component will be part of the view, until you will umount the component. Once the component is umounted, it won't be usable anymore and it'll be destroyed.
+The component will be part of the view, until you umount the component. Once the component is umounted, it won't be usable anymore and it'll be destroyed.
 
 The view is not just a list of components though, it also plays a fundamental role in the UI development, indeed, it will handle focus. Let's talk about it in the next chapter
 
@@ -355,7 +355,7 @@ Follow the following table to understand how focus works:
 ### Model
 
 The model is a struct which is totally defined by the developer implementing a tui-realm application. Its purpose is basically to update its states, perform some actions or update the view, after the components return messages.
-This is done thankfully to the **Update routine**, which is defined in the **Update** trait. We'll soon see this in details, when we'll talk about the *application*, but for now, what we need to know, is what the update routine does:
+This is done through the **Update routine**, which is defined in the **Update** trait. We'll soon see this in details, when we'll talk about the *application*, but for now, what we need to know, is what the update routine does:
 
 first of all your *model* must implement the **Update** trait:
 
@@ -431,7 +431,7 @@ As we can quickly see, the tick method has the following workflow:
 
     > ❗The poll strategy tells how to poll the event listener. You can fetch One event for cycle, or up to `n` or for a maximum amount of time
 
-2. All the incoming events are immediately forwarded to the current *active* component in the *view*, which will may return some *messages*
+2. All the incoming events are immediately forwarded to the current *active* component in the *view*, which may return some *messages*
 3. All the incoming events are sent to all the components subscribed to that event, which satisfied the clauses described in the subscription. They, as usual, will may return some *messages*
 4. The messages are returned
 
