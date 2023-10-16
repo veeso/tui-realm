@@ -71,7 +71,7 @@ impl From<XtermKeyCode> for Key {
 
 impl From<XtermKeyModifiers> for KeyModifiers {
     fn from(k: XtermKeyModifiers) -> Self {
-        let mut km = KeyModifiers::empty();
+        let mut km = KeyModifiers::NONE;
         if k.intersects(XtermKeyModifiers::SHIFT) {
             km.insert(KeyModifiers::SHIFT);
         }
@@ -235,7 +235,7 @@ mod test {
                 kind: XtermMouseEventKind::Moved,
                 column: 0,
                 row: 0,
-                modifiers: XtermKeyModifiers::empty(),
+                modifiers: XtermKeyModifiers::NONE,
             })),
             Event::None
         );
