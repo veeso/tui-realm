@@ -8,7 +8,7 @@ use crate::Terminal;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 #[cfg(target_family = "unix")]
 use crossterm::{
-    event::DisableMouseCapture,
+    event::{DisableMouseCapture, EnableMouseCapture},
     execute,
     terminal::{EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -20,22 +20,15 @@ impl TerminalBridge {
             .map_err(|_| TerminalError::CannotConnectStdout)
     }
 
-    #[cfg(target_family = "unix")]
     pub(crate) fn adapt_enter_alternate_screen(&mut self) -> TerminalResult<()> {
         execute!(
             self.raw_mut().backend_mut(),
             EnterAlternateScreen,
-            DisableMouseCapture
+            EnableMouseCapture
         )
         .map_err(|_| TerminalError::CannotEnterAlternateMode)
     }
 
-    #[cfg(target_family = "windows")]
-    pub(crate) fn adapt_enter_alternate_screen(&mut self) -> TerminalResult<()> {
-        Ok(())
-    }
-
-    #[cfg(target_family = "unix")]
     pub(crate) fn adapt_leave_alternate_screen(&mut self) -> TerminalResult<()> {
         execute!(
             self.raw_mut().backend_mut(),
@@ -43,11 +36,6 @@ impl TerminalBridge {
             DisableMouseCapture
         )
         .map_err(|_| TerminalError::CannotLeaveAlternateMode)
-    }
-
-    #[cfg(target_family = "windows")]
-    pub(crate) fn adapt_leave_alternate_screen(&mut self) -> TerminalResult<()> {
-        Ok(())
     }
 
     pub(crate) fn adapt_clear_screen(&mut self) -> TerminalResult<()> {

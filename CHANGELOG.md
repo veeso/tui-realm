@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.9.1](#191)
   - [1.9.0](#190)
   - [1.8.0](#180)
   - [1.7.1](#171)
@@ -32,6 +33,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 1.9.1
+
+Relesed on 19/10/2023
+
+- Fixed duplicated events on Windows
 
 ## 1.9.0
 

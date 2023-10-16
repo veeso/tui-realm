@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm"
-version = "1.9.0"
+version = "1.9.1"
 authors = ["Christian Visintin"]
 edition = "2021"
 categories = ["command-line-utilities"]
@@ -21,7 +21,7 @@ serde = { version = "^1", features = ["derive"], optional = true }
 termion = { version = "^1.5", optional = true }
 thiserror = "^1.0.0"
 tui = { version = "0.19", default-features = false, optional = true }
-ratatui = { version = "0.22", default-features = false, optional = true }
+ratatui = { version = "0.23", default-features = false, optional = true }
 tuirealm_derive = { version = "^1.0.0", optional = true }
 
 [dev-dependencies]

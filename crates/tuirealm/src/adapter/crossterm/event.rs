@@ -6,7 +6,8 @@ use super::{Event, Key, KeyEvent, KeyModifiers, MediaKeyCode};
 
 use crossterm::event::{
     Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
-    KeyModifiers as XtermKeyModifiers, MediaKeyCode as XtermMediaKeyCode,
+    KeyEventKind as XtermEventKind, KeyModifiers as XtermKeyModifiers,
+    MediaKeyCode as XtermMediaKeyCode,
 };
 
 impl<U> From<XtermEvent> for Event<U>
@@ -15,7 +16,8 @@ where
 {
     fn from(e: XtermEvent) -> Self {
         match e {
-            XtermEvent::Key(key) => Self::Keyboard(key.into()),
+            XtermEvent::Key(key) if key.kind == XtermEventKind::Press => Self::Keyboard(key.into()),
+            XtermEvent::Key(_) => Self::None,
             XtermEvent::Mouse(_) => Self::None,
             XtermEvent::Resize(w, h) => Self::WindowResize(w, h),
             XtermEvent::FocusGained => Self::FocusGained,
