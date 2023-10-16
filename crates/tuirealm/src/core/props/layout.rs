@@ -60,13 +60,26 @@ impl Layout {
 
     /// Split an `Area` into chunks using the current layout configuration
     pub fn chunks(&self, area: Rect) -> Vec<Rect> {
-        TuiLayout::default()
-            .direction(self.direction)
-            .horizontal_margin(self.margin.horizontal)
-            .vertical_margin(self.margin.vertical)
-            .constraints::<&[Constraint]>(self.constraints.as_ref())
-            .split(area)
-            .to_vec()
+        #[cfg(feature = "tui")]
+        {
+            TuiLayout::default()
+                .direction(self.direction.clone())
+                .horizontal_margin(self.margin.horizontal)
+                .vertical_margin(self.margin.vertical)
+                .constraints::<&[Constraint]>(self.constraints.as_ref())
+                .split(area)
+                .to_vec()
+        }
+        #[cfg(feature = "ratatui")]
+        {
+            TuiLayout::default()
+                .direction(self.direction)
+                .horizontal_margin(self.margin.horizontal)
+                .vertical_margin(self.margin.vertical)
+                .constraints::<&[Constraint]>(self.constraints.as_ref())
+                .split(area)
+                .to_vec()
+        }
     }
 }
 
