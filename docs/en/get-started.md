@@ -173,7 +173,7 @@ pub struct UsernameInput {
 impl Component for UsernameInput { ... }
 ```
 
-Another thing you'll have may noticed and that may frighten some of you are the two generic types that Component takes.
+Another thing you may have noticed and that may frighten some of you are the two generic types that Component takes.
 Let's see what these two types are:
 
 - `Msg`: defines the type of the **message** your application will handle in the **Update routine**. Indeed, in tui-realm the message are not defined in the library, but are defined by the user. We'll see this in details later in "the making of the first application". The only requirements for Message, is that it must implement `PartialEq`, since you must be able to match it in the **Update**.
