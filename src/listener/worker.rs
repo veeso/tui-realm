@@ -2,11 +2,12 @@
 //!
 //! This module implements the worker thread for the event listener
 
-use super::{ListenerMsg, Port};
 use std::ops::{Add, Sub};
 use std::sync::{mpsc, Arc, RwLock};
 use std::thread;
 use std::time::{Duration, Instant};
+
+use super::{ListenerMsg, Port};
 
 // -- worker
 
@@ -177,14 +178,13 @@ where
 #[cfg(test)]
 mod test {
 
+    use pretty_assertions::assert_eq;
+
     use super::super::{ListenerError, ListenerResult};
     use super::*;
     use crate::core::event::{Key, KeyEvent};
-    use crate::mock::MockEvent;
-    use crate::mock::MockPoll;
+    use crate::mock::{MockEvent, MockPoll};
     use crate::Event;
-
-    use pretty_assertions::assert_eq;
 
     #[test]
     fn worker_should_send_poll() {

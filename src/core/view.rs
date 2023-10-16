@@ -2,12 +2,14 @@
 //!
 //! This module exposes the View structure, which is the wrapper for all the components in an application.
 
-use crate::tui::layout::Rect;
-use crate::{AttrValue, Attribute, Component, Event, Frame, Injector, State};
 // -- ext
 use std::collections::HashMap;
 use std::hash::Hash;
+
 use thiserror::Error;
+
+use crate::tui::layout::Rect;
+use crate::{AttrValue, Attribute, Component, Event, Frame, Injector, State};
 
 /// A boxed component. Shorthand for View components map
 pub(crate) type WrappedComponent<Msg, UserEvent> = Box<dyn Component<Msg, UserEvent>>;
@@ -298,14 +300,14 @@ where
 #[cfg(test)]
 mod test {
 
-    use super::*;
-    use crate::{
-        event::{Key, KeyEvent},
-        mock::{MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg},
-        StateValue,
-    };
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
+    use crate::event::{Key, KeyEvent};
+    use crate::mock::{
+        MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg,
+    };
+    use crate::StateValue;
 
     #[test]
     fn default_view_should_be_empty() {

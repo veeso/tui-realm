@@ -15,8 +15,6 @@ mod texts;
 mod value;
 
 // -- exports
-pub use crate::tui::layout::Alignment;
-pub use crate::tui::style::{Color, Modifier as TextModifiers, Style};
 pub use borders::{BorderSides, BorderType, Borders};
 pub use dataset::Dataset;
 pub use direction::Direction;
@@ -25,6 +23,9 @@ pub use layout::Layout;
 pub use shape::Shape;
 pub use texts::{Table, TableBuilder, TextSpan};
 pub use value::{PropPayload, PropValue};
+
+pub use crate::tui::layout::Alignment;
+pub use crate::tui::style::{Color, Modifier as TextModifiers, Style};
 
 /// The props struct holds all the attributes associated to the component.
 /// Properties have been designed to be versatile for all kind of components, but without introducing
@@ -297,9 +298,9 @@ impl AttrValue {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn unwrapping_should_unwrap() {

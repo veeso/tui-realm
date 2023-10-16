@@ -9,11 +9,13 @@ mod listener;
 mod terminal;
 
 // -- export
+use std::io::Stdout;
+
 pub use listener::CrosstermInputListener;
 
 use super::{Event, Key, KeyEvent, KeyModifiers, MediaKeyCode};
-use crate::tui::{backend::CrosstermBackend, Frame as TuiFrame, Terminal as TuiTerminal};
-use std::io::Stdout;
+use crate::tui::backend::CrosstermBackend;
+use crate::tui::{Frame as TuiFrame, Terminal as TuiTerminal};
 
 // -- Frame
 

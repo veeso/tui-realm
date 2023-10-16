@@ -2,13 +2,16 @@
 //!
 //! terminal bridge adapter for termion
 
+use std::io::stdout;
+
+use termion::input::MouseTerminal;
+use termion::raw::IntoRawMode;
+#[cfg(target_family = "unix")]
+use termion::screen::AlternateScreen;
+
 use crate::terminal::{TerminalBridge, TerminalError, TerminalResult};
 use crate::tui::backend::TermionBackend;
 use crate::Terminal;
-use std::io::stdout;
-#[cfg(target_family = "unix")]
-use termion::screen::AlternateScreen;
-use termion::{input::MouseTerminal, raw::IntoRawMode};
 
 impl TerminalBridge {
     pub(crate) fn adapt_new_terminal() -> TerminalResult<Terminal> {

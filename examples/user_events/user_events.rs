@@ -3,12 +3,11 @@ mod model;
 
 use std::time::{Duration, SystemTime};
 
+use components::Label;
+use tuirealm::listener::{ListenerResult, Poll};
 use tuirealm::{
-    listener::{ListenerResult, Poll},
     Application, Event, EventListenerCfg, PollStrategy, Sub, SubClause, SubEventClause, Update,
 };
-
-use components::Label;
 
 use crate::model::Model;
 

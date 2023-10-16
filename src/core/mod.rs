@@ -16,11 +16,10 @@ mod view;
 pub use command::Cmd;
 pub use component::{Component, MockComponent};
 pub use state::{State, StateValue};
-pub use view::{View, ViewError};
-
 // -- internal
 pub(crate) use subscription::Subscription;
 pub(crate) use view::WrappedComponent;
+pub use view::{View, ViewError};
 
 // -- Update
 

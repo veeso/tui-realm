@@ -2,8 +2,9 @@
 //!
 //! This module exposes the prop values
 
-use super::{Alignment, Color, Dataset, InputType, Shape, Style, Table, TextSpan};
 use std::collections::{HashMap, LinkedList};
+
+use super::{Alignment, Color, Dataset, InputType, Shape, Style, Table, TextSpan};
 
 // -- Prop value
 
@@ -311,10 +312,10 @@ impl PropValue {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-
-    use crate::tui::widgets::canvas::Map;
     use std::collections::HashMap;
+
+    use super::*;
+    use crate::tui::widgets::canvas::Map;
 
     #[test]
     fn prop_values() {

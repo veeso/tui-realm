@@ -2,16 +2,17 @@
 //!
 //! terminal bridge adapter for crossterm
 
+use std::io::stdout;
+
+use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
+use crossterm::execute;
+use crossterm::terminal::{
+    disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
+};
+
 use crate::terminal::{TerminalBridge, TerminalError, TerminalResult};
 use crate::tui::backend::CrosstermBackend;
 use crate::Terminal;
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use crossterm::{
-    event::{DisableMouseCapture, EnableMouseCapture},
-    execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen},
-};
-use std::io::stdout;
 
 impl TerminalBridge {
     pub(crate) fn adapt_new_terminal() -> TerminalResult<Terminal> {

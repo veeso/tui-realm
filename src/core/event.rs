@@ -208,10 +208,10 @@ pub enum MediaKeyCode {
 #[cfg(test)]
 mod test {
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::mock::MockEvent;
-
-    use pretty_assertions::assert_eq;
 
     #[test]
     fn new_key_event() {
@@ -246,13 +246,14 @@ mod test {
 
     // -- serde
     #[cfg(feature = "serialize")]
-    use serde::de::DeserializeOwned;
-    #[cfg(feature = "serialize")]
-    use serde::{Deserialize, Serialize};
-    #[cfg(feature = "serialize")]
     use std::fs::File;
     #[cfg(feature = "serialize")]
     use std::io::{Read, Write};
+
+    #[cfg(feature = "serialize")]
+    use serde::de::DeserializeOwned;
+    #[cfg(feature = "serialize")]
+    use serde::{Deserialize, Serialize};
     #[cfg(feature = "serialize")]
     use tempfile::NamedTempFile;
 

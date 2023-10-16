@@ -4,13 +4,14 @@
 
 use std::time::UNIX_EPOCH;
 
-use super::{Msg, UserEvent};
-
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::event::{Key, KeyEvent};
 use tuirealm::props::{Alignment, Color, Style, TextModifiers};
-use tuirealm::tui::{layout::Rect, widgets::Paragraph};
+use tuirealm::tui::layout::Rect;
+use tuirealm::tui::widgets::Paragraph;
 use tuirealm::{AttrValue, Attribute, Component, Event, Frame, MockComponent, Props, State};
+
+use super::{Msg, UserEvent};
 
 /// Simple label component; just renders a text
 /// NOTE: since I need just one label, I'm not going to use different object; I will directly implement Component for Label.

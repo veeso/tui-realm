@@ -5,7 +5,6 @@
 extern crate tuirealm;
 
 use tuirealm::application::PollStrategy;
-
 use tuirealm::{AttrValue, Attribute, Update};
 // -- internal
 mod app;

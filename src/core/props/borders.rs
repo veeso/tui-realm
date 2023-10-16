@@ -3,7 +3,6 @@
 //! `Borders` is the module which defines the border properties
 
 use super::{Color, Style};
-
 // Exports
 pub use crate::tui::widgets::{BorderType, Borders as BorderSides};
 
@@ -53,9 +52,9 @@ impl Borders {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn borders() {

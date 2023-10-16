@@ -2,13 +2,14 @@
 //!
 //! input listener adapter for termion
 
-use super::Event;
-
-use crate::listener::{ListenerError, ListenerResult, Poll};
 use std::io::stdin;
 use std::marker::PhantomData;
 use std::time::Duration;
+
 use termion::input::TermRead;
+
+use super::Event;
+use crate::listener::{ListenerError, ListenerResult, Poll};
 
 /// The input listener for termion.
 /// If termion is enabled, this will already be exported as `InputEventListener` in the `adapter` module

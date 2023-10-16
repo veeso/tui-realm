@@ -2,9 +2,9 @@
 //!
 //! Cross platform Terminal helper
 
-use crate::Terminal;
-
 use thiserror::Error;
+
+use crate::Terminal;
 
 // -- types
 pub type TerminalResult<T> = Result<T, TerminalError>;

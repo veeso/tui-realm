@@ -2,6 +2,8 @@
 //!
 //! properties injector
 
+use std::hash::Hash;
+
 /**
  * MIT License
  *
@@ -27,8 +29,6 @@
  */
 use super::props::{AttrValue, Attribute};
 
-use std::hash::Hash;
-
 /// An injector is a trait object which can provide properties to inject to a certain component.
 /// The injector is called each time a component is mounted, providing the id of the mounted
 /// component and may return a list of (`Attribute`, `AttrValue`) to inject.
@@ -42,10 +42,10 @@ where
 #[cfg(test)]
 mod test {
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::mock::{MockComponentId, MockInjector};
-
-    use pretty_assertions::assert_eq;
 
     #[test]
     fn should_create_a_trait_object_injector() {

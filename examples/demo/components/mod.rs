@@ -2,11 +2,10 @@
 //!
 //! demo example components
 
-use super::Msg;
-
 use tuirealm::props::{Alignment, Borders, Color, Style};
-
 use tuirealm::tui::widgets::Block;
+
+use super::Msg;
 
 // -- modules
 mod clock;

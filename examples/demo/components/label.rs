@@ -2,14 +2,15 @@
 //!
 //! label component
 
-use super::Msg;
-
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{Alignment, Color, Style, TextModifiers};
-use tuirealm::tui::{layout::Rect, widgets::Paragraph};
+use tuirealm::tui::layout::Rect;
+use tuirealm::tui::widgets::Paragraph;
 use tuirealm::{
     AttrValue, Attribute, Component, Event, Frame, MockComponent, NoUserEvent, Props, State,
 };
+
+use super::Msg;
 
 /// Simple label component; just renders a text
 /// NOTE: since I need just one label, I'm not going to use different object; I will directly implement Component for Label.
