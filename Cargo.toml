@@ -18,7 +18,7 @@ bitflags = "2.4"
 crossterm = { version = "0.27", optional = true }
 lazy-regex = "3"
 serde = { version = "^1", features = ["derive"], optional = true }
-termion = { version = "^1.5", optional = true }
+termion = { version = "^2", optional = true }
 thiserror = "^1.0.0"
 tui = { version = "0.19", default-features = false, optional = true }
 ratatui = { version = "0.23", default-features = false, optional = true }
@@ -26,7 +26,7 @@ tuirealm_derive = { version = "^1.0.0", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "^1"
-toml = "^0.7"
+toml = "^0.8"
 tempfile = "^3"
 
 [features]

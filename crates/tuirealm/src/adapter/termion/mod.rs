@@ -24,8 +24,8 @@ use crate::tui::{Frame as TuiFrame, Terminal as TuiTerminal};
 
 /// Frame represents the Frame where the view will be displayed in
 pub type Frame<'a> =
-    TuiFrame<'a, TermionBackend<AlternateScreen<MouseTerminal<RawTerminal<Stdout>>>>>;
+    TuiFrame<'a, TermionBackend<MouseTerminal<AlternateScreen<RawTerminal<Stdout>>>>>;
 
 /// Terminal must be used to interact with the terminal in tui applications
 pub type Terminal =
-    TuiTerminal<TermionBackend<AlternateScreen<MouseTerminal<RawTerminal<Stdout>>>>>;
+    TuiTerminal<TermionBackend<MouseTerminal<AlternateScreen<RawTerminal<Stdout>>>>>;
