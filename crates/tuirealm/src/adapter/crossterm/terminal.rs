@@ -6,7 +6,6 @@ use crate::terminal::{TerminalBridge, TerminalError, TerminalResult};
 use crate::tui::backend::CrosstermBackend;
 use crate::Terminal;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-#[cfg(target_family = "unix")]
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
     execute,
