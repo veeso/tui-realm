@@ -44,29 +44,29 @@
   /></a>
 </p>
 <p align="center">
-<a href="https://github.com/veeso/tui-realm/actions"
+<a href="https://github.com/veeso/tui-realm/actions/workflows/ratatui_crossterm.yml"
     ><img
-      src="https://github.com/veeso/tui-realm/workflows/Ratatui-Crossterm/badge.svg"
-      alt="Crossterm CI"
+      src="https://github.com/veeso/tui-realm/actions/workflows/ratatui_crossterm.yml/badge.svg"
+      alt="Ratatui-Crossterm CI"
   /></a>
-  <a href="https://github.com/veeso/tui-realm/actions"
+  <a href="https://github.com/veeso/tui-realm/actions/workflows/ratatui_termion.yml"
     ><img
-      src="https://github.com/veeso/tui-realm/workflows/Ratatui-Termion/badge.svg"
+      src="https://github.com/veeso/tui-realm/actions/workflows/ratatui_termion.yml/badge.svg"
+      alt="Ratatui-Termion CI"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm/actions/workflows/tui_crossterm.yml"
+    ><img
+      src="https://github.com/veeso/tui-realm/actions/workflows/tui_crossterm.yml/badge.svg"
+      alt="Tui-Crossterm CI"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm/actions/workflows/tui_termion.yml"
+    ><img
+      src="https://github.com/veeso/tui-realm/actions/workflows/tui_termion.yml/badge.svg"
       alt="Termion CI"
   /></a>
-  <a href="https://github.com/veeso/tui-realm/actions"
+  <a href="https://github.com/veeso/tui-realm/actions/workflows/crossterm-windows.yml"
     ><img
-      src="https://github.com/veeso/tui-realm/workflows/Tui-Crossterm/badge.svg"
-      alt="Crossterm CI"
-  /></a>
-  <a href="https://github.com/veeso/tui-realm/actions"
-    ><img
-      src="https://github.com/veeso/tui-realm/workflows/Tui-Termion/badge.svg"
-      alt="Termion CI"
-  /></a>
-  <a href="https://github.com/veeso/tui-realm/actions"
-    ><img
-      src="https://github.com/veeso/tui-realm/workflows/Crossterm%20%28Windows%29/badge.svg"
+      src="https://github.com/veeso/tui-realm/actions/workflows/crossterm-windows.yml/badge.svg"
       alt="Crossterm CI (Windows)"
   /></a>
   <a href="https://coveralls.io/github/veeso/tui-realm"
