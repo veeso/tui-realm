@@ -431,7 +431,7 @@ As we can quickly see, the tick method has the following workflow:
 
     > ❗The poll strategy tells how to poll the event listener. You can fetch One event for cycle, or up to `n` or for a maximum amount of time
 
-2. All the incoming events are immediately forwarded to the current *active* component in the *view*, which will may return some *messages*
+2. All the incoming events are immediately forwarded to the current *active* component in the *view*, which may return some *messages*
 3. All the incoming events are sent to all the components subscribed to that event, which satisfied the clauses described in the subscription. They, as usual, will may return some *messages*
 4. The messages are returned
 
