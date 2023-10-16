@@ -2,14 +2,15 @@
 //!
 //! This module exposes the Application, which is the core struct of tui-realm.
 
+use std::hash::Hash;
+use std::time::{Duration, Instant};
+
+use thiserror::Error;
+
 use super::{Subscription, View, WrappedComponent};
 use crate::listener::{EventListener, EventListenerCfg, ListenerError};
 use crate::tui::layout::Rect;
 use crate::{AttrValue, Attribute, Event, Frame, Injector, State, Sub, SubEventClause, ViewError};
-
-use std::hash::Hash;
-use std::time::{Duration, Instant};
-use thiserror::Error;
 
 /// Result retuned by `Application`.
 /// Ok depends on method
@@ -393,15 +394,16 @@ impl From<ViewError> for ApplicationError {
 #[cfg(test)]
 mod test {
 
+    use std::time::Duration;
+
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::event::{Key, KeyEvent};
     use crate::mock::{
         MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg, MockPoll,
     };
     use crate::{StateValue, SubClause};
-
-    use pretty_assertions::assert_eq;
-    use std::time::Duration;
 
     #[test]
     fn should_initialize_application() {

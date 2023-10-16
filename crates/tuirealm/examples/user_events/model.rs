@@ -2,11 +2,11 @@
 //!
 //! app model
 
-use super::{Id, Msg, UserEvent};
-
 use tuirealm::terminal::TerminalBridge;
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
 use tuirealm::{Application, Update};
+
+use super::{Id, Msg, UserEvent};
 
 pub struct Model {
     /// Application

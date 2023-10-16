@@ -2,17 +2,18 @@
 //!
 //! app model
 
-use super::components::{Clock, DigitCounter, Label, LetterCounter};
-use super::{Id, Msg};
-
 use std::time::{Duration, SystemTime};
+
+use tuirealm::event::NoUserEvent;
 use tuirealm::props::{Alignment, Color, TextModifiers};
 use tuirealm::terminal::TerminalBridge;
 use tuirealm::tui::layout::{Constraint, Direction, Layout};
 use tuirealm::{
-    event::NoUserEvent, Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause,
-    SubEventClause, Update,
+    Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause, Update,
 };
+
+use super::components::{Clock, DigitCounter, Label, LetterCounter};
+use super::{Id, Msg};
 
 pub struct Model {
     /// Application

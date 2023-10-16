@@ -3,12 +3,9 @@
 //! mock components
 
 use super::{MockEvent, MockMsg};
-use crate::command::Direction;
+use crate::command::{Cmd, CmdResult, Direction};
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
-use crate::{
-    command::{Cmd, CmdResult},
-    AttrValue, Attribute, Component, MockComponent, Props, State, StateValue,
-};
+use crate::{AttrValue, Attribute, Component, MockComponent, Props, State, StateValue};
 
 /// Mocked component implementing `MockComponent`
 pub struct MockInput {

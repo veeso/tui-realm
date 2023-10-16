@@ -2,10 +2,10 @@
 //!
 //! This module exposes the poll wrapper to include in the worker
 
-use super::{Event, ListenerResult, Poll};
-
 use std::ops::Add;
 use std::time::{Duration, Instant};
+
+use super::{Event, ListenerResult, Poll};
 
 /// A port is a wrapper around the poll trait object, which also defines an interval, which defines
 /// the amount of time between each poll() call.
@@ -61,11 +61,10 @@ where
 #[cfg(test)]
 mod test {
 
-    use super::*;
-    use crate::mock::MockEvent;
-    use crate::mock::MockPoll;
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
+    use crate::mock::{MockEvent, MockPoll};
 
     #[test]
     fn test_single_listener() {

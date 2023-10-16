@@ -74,11 +74,10 @@ where
 #[cfg(test)]
 mod test {
 
-    use super::*;
-    use crate::mock::MockEvent;
-    use crate::mock::MockPoll;
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
+    use crate::mock::{MockEvent, MockPoll};
 
     #[test]
     fn should_configure_and_start_event_listener() {

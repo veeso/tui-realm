@@ -2,9 +2,9 @@
 //!
 //! event adapter for termion
 
-use super::{Event, Key, KeyEvent, KeyModifiers};
-
 use termion::event::{Event as TonEvent, Key as TonKey};
+
+use super::{Event, Key, KeyEvent, KeyModifiers};
 
 impl<U> From<TonEvent> for Event<U>
 where
@@ -57,12 +57,11 @@ impl From<TonKey> for KeyEvent {
 #[cfg(test)]
 mod test {
 
+    use pretty_assertions::assert_eq;
+    use termion::event::MouseEvent;
+
     use super::*;
     use crate::mock::MockEvent;
-
-    use pretty_assertions::assert_eq;
-
-    use termion::event::MouseEvent;
 
     #[test]
     fn adapt_termion_key_event() {

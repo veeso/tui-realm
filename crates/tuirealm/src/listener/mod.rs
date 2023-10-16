@@ -9,18 +9,18 @@ mod port;
 mod worker;
 
 // -- export
-pub use crate::adapter::InputEventListener;
-pub use builder::EventListenerCfg;
-
-// -- internal
-use super::Event;
-pub use port::Port;
-use worker::EventListenerWorker;
-
 use std::sync::{mpsc, Arc, RwLock};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
+
+pub use builder::EventListenerCfg;
+pub use port::Port;
 use thiserror::Error;
+use worker::EventListenerWorker;
+
+// -- internal
+use super::Event;
+pub use crate::adapter::InputEventListener;
 
 /// Result returned by `EventListener`. Ok value depends on the method, while the
 /// Err value is always `ListenerError`.
@@ -236,11 +236,11 @@ where
 #[cfg(test)]
 mod test {
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::core::event::{Key, KeyEvent};
     use crate::mock::{MockEvent, MockPoll};
-
-    use pretty_assertions::assert_eq;
 
     #[test]
     fn worker_should_run_thread() {

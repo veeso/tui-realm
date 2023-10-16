@@ -2,11 +2,8 @@
 //!
 //! label component
 
-use super::{get_block, Msg};
-
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::event::Key;
-use tuirealm::event::{KeyEvent, KeyModifiers};
+use tuirealm::event::{Key, KeyEvent, KeyModifiers};
 use tuirealm::props::{Alignment, Borders, Color, Style, TextModifiers};
 use tuirealm::tui::layout::Rect;
 use tuirealm::tui::widgets::{BorderType, Paragraph};
@@ -14,6 +11,8 @@ use tuirealm::{
     AttrValue, Attribute, Component, Event, Frame, MockComponent, NoUserEvent, Props, State,
     StateValue,
 };
+
+use super::{get_block, Msg};
 
 /// Counter which increments its value on Submit
 struct Counter {

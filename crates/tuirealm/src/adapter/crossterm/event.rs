@@ -2,13 +2,13 @@
 //!
 //! event adapter for crossterm
 
-use super::{Event, Key, KeyEvent, KeyModifiers, MediaKeyCode};
-
 use crossterm::event::{
     Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
     KeyEventKind as XtermEventKind, KeyModifiers as XtermKeyModifiers,
     MediaKeyCode as XtermMediaKeyCode,
 };
+
+use super::{Event, Key, KeyEvent, KeyModifiers, MediaKeyCode};
 
 impl<U> From<XtermEvent> for Event<U>
 where
@@ -108,12 +108,11 @@ impl From<XtermMediaKeyCode> for MediaKeyCode {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-    use crate::mock::MockEvent;
-
+    use crossterm::event::{MouseEvent as XtermMouseEvent, MouseEventKind as XtermMouseEventKind};
     use pretty_assertions::assert_eq;
 
-    use crossterm::event::{MouseEvent as XtermMouseEvent, MouseEventKind as XtermMouseEventKind};
+    use super::*;
+    use crate::mock::MockEvent;
 
     #[test]
     fn adapt_crossterm_keycode() {

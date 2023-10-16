@@ -2,10 +2,10 @@
 //!
 //! This module defines the model for the Subscriptions
 
+use std::hash::Hash;
+
 use crate::event::KeyEvent;
 use crate::{AttrValue, Attribute, Event, State};
-
-use std::hash::Hash;
 
 /// Public type to define a subscription.
 pub struct Sub<ComponentId, UserEvent>(EventClause<UserEvent>, SubClause<ComponentId>)
@@ -292,12 +292,13 @@ where
 #[cfg(test)]
 mod test {
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
+    use crate::command::Cmd;
     use crate::event::Key;
     use crate::mock::{MockComponentId, MockEvent, MockFooInput};
-    use crate::{command::Cmd, MockComponent, StateValue};
-
-    use pretty_assertions::assert_eq;
+    use crate::{MockComponent, StateValue};
 
     #[test]
     fn subscription_should_forward() {

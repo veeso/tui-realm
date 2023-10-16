@@ -2,11 +2,12 @@
 //!
 //! This module exposes parsing utilities
 
-use super::{Email, PhoneNumber};
-use crate::tui::style::Color;
+use std::str::FromStr;
 
 use lazy_regex::{Lazy, Regex};
-use std::str::FromStr;
+
+use super::{Email, PhoneNumber};
+use crate::tui::style::Color;
 /**
  * Regex matches:
  * - group 1: Red
@@ -312,9 +313,9 @@ fn parse_rgb_color(color: &str) -> Option<Color> {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn utils_parse_email() {

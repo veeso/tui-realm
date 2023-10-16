@@ -2,12 +2,13 @@
 //!
 //! input listener adapter for crossterm
 
-use super::Event;
-
-use crate::listener::{ListenerError, ListenerResult, Poll};
-use crossterm::event as xterm;
 use std::marker::PhantomData;
 use std::time::Duration;
+
+use crossterm::event as xterm;
+
+use super::Event;
+use crate::listener::{ListenerError, ListenerResult, Poll};
 
 /// The input listener for crossterm.
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module

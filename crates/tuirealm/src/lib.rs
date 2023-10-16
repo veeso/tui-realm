@@ -78,17 +78,16 @@ pub mod terminal;
 pub mod tui;
 pub mod utils;
 // -- export
-pub use self::core::application::{self, Application, ApplicationError, PollStrategy};
-pub use self::core::command;
-pub use self::core::event::{self, Event, NoUserEvent};
-pub use self::core::injector::Injector;
-pub use self::core::props::{self, AttrValue, Attribute, Props};
-pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
-pub use self::core::{Component, MockComponent, State, StateValue, Update, ViewError};
 pub use adapter::{Frame, Terminal};
 pub use listener::{EventListenerCfg, ListenerError};
-
 // -- derive
 #[cfg(feature = "derive")]
 #[doc(hidden)]
 pub use tuirealm_derive::*;
+
+pub use self::core::application::{self, Application, ApplicationError, PollStrategy};
+pub use self::core::event::{self, Event, NoUserEvent};
+pub use self::core::injector::Injector;
+pub use self::core::props::{self, AttrValue, Attribute, Props};
+pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
+pub use self::core::{command, Component, MockComponent, State, StateValue, Update, ViewError};

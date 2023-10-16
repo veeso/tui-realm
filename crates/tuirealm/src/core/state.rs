@@ -2,9 +2,10 @@
 //!
 //! This module exposes the state type and values
 
+use std::collections::{HashMap, LinkedList};
+
 use crate::props::Color;
 use crate::utils::{Email, PhoneNumber};
-use std::collections::{HashMap, LinkedList};
 
 /// State describes a component state
 #[derive(Debug, PartialEq, Clone)]

@@ -9,12 +9,16 @@ mod listener;
 mod terminal;
 
 // -- export
+use std::io::Stdout;
+
 pub use listener::TermionInputListener;
+use termion::input::MouseTerminal;
+use termion::raw::RawTerminal;
+use termion::screen::AlternateScreen;
 
 use super::{Event, Key, KeyEvent, KeyModifiers};
-use crate::tui::{backend::TermionBackend, Frame as TuiFrame, Terminal as TuiTerminal};
-use std::io::Stdout;
-use termion::{input::MouseTerminal, raw::RawTerminal, screen::AlternateScreen};
+use crate::tui::backend::TermionBackend;
+use crate::tui::{Frame as TuiFrame, Terminal as TuiTerminal};
 
 // -- Frame
 

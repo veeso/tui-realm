@@ -2,11 +2,11 @@
 //!
 //! This module contains data type for unit tests only
 
+use std::marker::PhantomData;
+
 use crate::event::{Event, Key, KeyEvent};
 use crate::listener::{ListenerResult, Poll};
 use crate::{AttrValue, Attribute, Injector};
-
-use std::marker::PhantomData;
 
 // -- modules
 mod components;

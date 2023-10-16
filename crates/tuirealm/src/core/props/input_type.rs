@@ -2,10 +2,10 @@
 //!
 //! This module exposes the input type
 
-use crate::utils::parser::{parse_color, parse_email, parse_phone_number};
-
 use std::fmt;
 use std::str::FromStr;
+
+use crate::utils::parser::{parse_color, parse_email, parse_phone_number};
 
 /// Input type for text inputs
 #[derive(Clone)]
@@ -142,10 +142,10 @@ impl InputType {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use lazy_regex::{Lazy, Regex};
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn validate_input_type() {

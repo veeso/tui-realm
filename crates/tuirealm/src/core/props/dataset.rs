@@ -3,10 +3,8 @@
 //! `Dataset` is a wrapper for tui dataset
 
 use super::Style;
-use crate::tui::{
-    symbols::Marker,
-    widgets::{Dataset as TuiDataset, GraphType},
-};
+use crate::tui::symbols::Marker;
+use crate::tui::widgets::{Dataset as TuiDataset, GraphType};
 
 /// Dataset describes a set of data for a chart
 #[derive(Clone, Debug)]
@@ -104,10 +102,10 @@ impl<'a> From<&'a Dataset> for TuiDataset<'a> {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
-    use crate::tui::style::Color;
     use pretty_assertions::assert_eq;
+
+    use super::*;
+    use crate::tui::style::Color;
 
     #[test]
     fn dataset() {
