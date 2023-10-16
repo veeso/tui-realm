@@ -355,7 +355,7 @@ Follow the following table to understand how focus works:
 ### Model
 
 The model is a struct which is totally defined by the developer implementing a tui-realm application. Its purpose is basically to update its states, perform some actions or update the view, after the components return messages.
-This is done thankfully to the **Update routine**, which is defined in the **Update** trait. We'll soon see this in details, when we'll talk about the *application*, but for now, what we need to know, is what the update routine does:
+This is done through the **Update routine**, which is defined in the **Update** trait. We'll soon see this in details, when we'll talk about the *application*, but for now, what we need to know, is what the update routine does:
 
 first of all your *model* must implement the **Update** trait:
 
