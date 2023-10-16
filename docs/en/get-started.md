@@ -318,7 +318,7 @@ The view is basically a box for all the components. All the components which are
 Each component in the view, **Must** be identified uniquely by an *identifier*, where the identifier is a type you must define (you can use an enum, you can use a String, we'll see that later).
 Once a component is mounted, it won't be directly usable anymore. The view will store it as a generic `Component` and will expose a bridge to operate on all the components in the view, querying them with their identifier.
 
-The component will be part of the view, until you will umount the component. Once the component is umounted, it won't be usable anymore and it'll be destroyed.
+The component will be part of the view, until you umount the component. Once the component is umounted, it won't be usable anymore and it'll be destroyed.
 
 The view is not just a list of components though, it also plays a fundamental role in the UI development, indeed, it will handle focus. Let's talk about it in the next chapter
 
