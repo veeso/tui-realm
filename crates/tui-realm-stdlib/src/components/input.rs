@@ -302,17 +302,17 @@ impl MockComponent for Input {
                 false => paragraph_style,
             };
             // Create widget
+            let block_inner_area = block.inner(area);
             let p: Paragraph = Paragraph::new(text_to_display)
                 .style(paragraph_style)
                 .block(block);
             render.render_widget(p, area);
             // Set cursor, if focus
             if focus {
-                let x: u16 = area.x
+                let x: u16 = block_inner_area.x
                     + calc_utf8_cursor_position(
                         &self.states.render_value_chars(itype)[0..self.states.cursor],
-                    )
-                    + 1;
+                    );
                 render.set_cursor(x, area.y + 1);
             }
         }
