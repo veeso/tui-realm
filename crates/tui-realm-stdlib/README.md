@@ -1,7 +1,7 @@
 # tui-realm-stdlib
 
 <p align="center">
-  <img src="/docs/images/tui-realm.svg" width="256" height="256" />
+  <img src="/docs/images/tui-realm.svg" width="256" alt="logo" height="256" />
 </p>
 
 <p align="center">~ A tui-rs framework inspired by Elm and React ~</p>
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.3.0 (22/08/2023)</p>
+<p align="center">Current version: 1.3.1 (06/01/2024)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"

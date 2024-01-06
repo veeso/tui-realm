@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.3.1](#131)
   - [1.3.0](#130)
   - [1.2.0](#120)
   - [1.1.7](#117)
@@ -22,6 +23,14 @@
   - [0.5.0](#050)
 
 ---
+
+
+## 1.3.1
+
+Released on 06/01/2024
+
+- [Issue 20](https://github.com/veeso/tui-realm-stdlib/pull/20)
+- [Issue 18](https://github.com/veeso/tui-realm-stdlib/pull/18)
 
 ## 1.3.0
 
