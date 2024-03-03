@@ -21,7 +21,7 @@ serde = { version = "^1", features = ["derive"], optional = true }
 termion = { version = "^2", optional = true }
 thiserror = "^1.0.0"
 tui = { version = "0.19", default-features = false, optional = true }
-ratatui = { version = "0.23", default-features = false, optional = true }
+ratatui = { version = "0.26", default-features = false, optional = true }
 tuirealm_derive = { version = "^1.0.0", optional = true }
 
 [dev-dependencies]

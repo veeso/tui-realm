@@ -20,7 +20,7 @@ use crate::tui::{Frame as TuiFrame, Terminal as TuiTerminal};
 // -- Frame
 
 /// Frame represents the Frame where the view will be displayed in
-pub type Frame<'a> = TuiFrame<'a, CrosstermBackend<Stdout>>;
+pub type Frame<'a> = TuiFrame<'a>;
 
 /// Terminal must be used to interact with the terminal in tui applications
 pub type Terminal = TuiTerminal<CrosstermBackend<Stdout>>;
