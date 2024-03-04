@@ -4,7 +4,7 @@
   <img src="docs/images/tui-realm.svg" width="256" height="256" />
 </p>
 
-<p align="center">~ A tui-rs framework inspired by Elm and React ~</p>
+<p align="center">~ A ratatui framework inspired by Elm and React ~</p>
 <p align="center">
   <a href="docs/en/get-started.md" target="_blank">Get started</a>
   ·
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.9.1 (16/10/2022)</p>
+<p align="center">Current version: 1.9.2 (04/03/2024)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -24,7 +24,7 @@
   /></a>
   <a href="https://github.com/veeso/tui-realm/stargazers"
     ><img
-      src="https://img.shields.io/github/stars/veeso/tui-realm.svg"
+      src="https://img.shields.io/github/stars/veeso/tui-realm.svg?style=plain"
       alt="Repo stars"
   /></a>
   <a href="https://crates.io/crates/tuirealm"
