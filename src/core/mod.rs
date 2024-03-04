@@ -13,7 +13,6 @@ pub mod subscription;
 mod view;
 
 // -- export
-pub use command::Cmd;
 pub use component::{Component, MockComponent};
 pub use state::{State, StateValue};
 // -- internal
