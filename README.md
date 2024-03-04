@@ -142,7 +142,7 @@ tuirealm = "^1.9.0"
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "serialize", "with-termion" ] }
+tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "serialize", "termion" ] }
 ```
 
 Supported features are:
