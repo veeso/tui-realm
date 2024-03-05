@@ -20,6 +20,8 @@ pub const CANVAS_MARKER_DOT: isize = 1;
 pub const CANVAS_MARKER_BLOCK: isize = 2;
 #[cfg(feature = "ratatui")]
 pub const CANVAS_MARKER_BAR: isize = 3;
+#[cfg(feature = "ratatui")]
+pub const CANVAS_MARKER_HALF_BLOCK: isize = 4;
 
 // -- chart
 

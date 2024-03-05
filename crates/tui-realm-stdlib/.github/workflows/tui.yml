@@ -1,4 +1,4 @@
-name: Build
+name: tui
 
 on: [push, pull_request]
 
@@ -19,13 +19,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --no-fail-fast
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
           args: --no-fail-fast --no-default-features --features tui,crossterm
-      - name: Examples
-        run: cargo build --all-targets --examples
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy

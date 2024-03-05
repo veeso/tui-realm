@@ -46,8 +46,13 @@
 <p align="center">
   <a href="https://github.com/veeso/tui-realm-stdlib/actions"
     ><img
-      src="https://github.com/veeso/tui-realm-stdlib/workflows/Build/badge.svg"
-      alt="CI"
+      src="https://github.com/veeso/tui-realm-stdlib/workflows/tui/badge.svg"
+      alt="tui ci"
+  /></a>
+  <a href="https://github.com/veeso/tui-realm-stdlib/actions"
+    ><img
+      src="https://github.com/veeso/tui-realm-stdlib/workflows/ratatui/badge.svg"
+      alt="ratatui ci"
   /></a>
   <a href="https://docs.rs/tui-realm-stdlib"
     ><img

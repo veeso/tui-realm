@@ -20,8 +20,8 @@ use tuirealm::{Frame, MockComponent, State};
 
 // -- Props
 use super::props::{
-    CANVAS_MARKER, CANVAS_MARKER_BAR, CANVAS_MARKER_BLOCK, CANVAS_MARKER_BRAILLE,
-    CANVAS_MARKER_DOT, CANVAS_X_BOUNDS, CANVAS_Y_BOUNDS,
+    CANVAS_MARKER, CANVAS_MARKER_BLOCK, CANVAS_MARKER_BRAILLE, CANVAS_MARKER_DOT, CANVAS_X_BOUNDS,
+    CANVAS_Y_BOUNDS,
 };
 
 // -- Component
@@ -114,7 +114,9 @@ impl Canvas {
     fn marker_to_prop(marker: Marker) -> AttrValue {
         AttrValue::Number(match marker {
             #[cfg(feature = "ratatui")]
-            Marker::Bar => CANVAS_MARKER_BAR,
+            Marker::HalfBlock => crate::props::CANVAS_MARKER_HALF_BLOCK,
+            #[cfg(feature = "ratatui")]
+            Marker::Bar => crate::props::CANVAS_MARKER_BAR,
             Marker::Block => CANVAS_MARKER_BLOCK,
             Marker::Braille => CANVAS_MARKER_BRAILLE,
             Marker::Dot => CANVAS_MARKER_DOT,

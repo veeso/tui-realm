@@ -348,6 +348,7 @@ impl MockComponent for Table {
                 .get(Attribute::HighlightedColor)
                 .map(|x| x.unwrap_color());
             let widths: Vec<Constraint> = self.layout();
+            #[cfg(feature = "tui")]
             let mut table = TuiTable::new(rows)
                 .block(crate::utils::get_block(
                     borders,
@@ -356,6 +357,13 @@ impl MockComponent for Table {
                     inactive_style,
                 ))
                 .widths(&widths);
+            #[cfg(feature = "ratatui")]
+            let mut table = TuiTable::new(rows, &widths).block(crate::utils::get_block(
+                borders,
+                Some(title),
+                focus,
+                inactive_style,
+            ));
             if let Some(highlighted_color) = highlighted_color {
                 table = table.highlight_style(Style::default().fg(highlighted_color).add_modifier(
                     match focus {
@@ -370,7 +378,7 @@ impl MockComponent for Table {
                 .get(Attribute::HighlightedStr)
                 .map(|x| x.unwrap_string());
             if let Some(hg_str) = &self.hg_str {
-                table = table.highlight_symbol(hg_str);
+                table = table.highlight_symbol(hg_str.as_str());
             }
             // Col spacing
             if let Some(spacing) = self
@@ -686,7 +694,7 @@ mod tests {
     #[test]
     fn test_component_table_with_empty_rows_and_no_width_set() {
         // Make component
-        let mut component = Table::default().table(TableBuilder::default().build());
+        let component = Table::default().table(TableBuilder::default().build());
 
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
