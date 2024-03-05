@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [1.3.2](#132)
   - [1.3.1](#131)
   - [1.3.0](#130)
   - [1.2.0](#120)
@@ -24,6 +25,12 @@
 
 ---
 
+## 1.3.2
+
+Released on 05/03/2024
+
+- fix: compatibility with tui-realm 1.9.2 (ratatui 0.26)
+- fix: build with tui feature
 
 ## 1.3.1
 
