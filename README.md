@@ -107,7 +107,7 @@
 
 tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) and [ratatui](https://github.com/ratatui-org/ratatui) to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React. But that's not all: the components communicate with the ui engine via a system based on **Messages** and **Events**, providing you with the possibility to implement `update` routines as happens in Elm. In addition, the components are organized inside the **View**, which manages mounting/umounting, focus and event forwarding for you.
 
-And that's also explains the reason of the name: Realm stands for React and Elm.
+And that also explains the reason of the name: Realm stands for React and Elm.
 
 tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
 
