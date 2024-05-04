@@ -17,18 +17,18 @@ rust-version = "1.71"
 [dependencies]
 bitflags = "2.4"
 crossterm = { version = "0.27", optional = true }
-lazy-regex = "3"
+lazy-regex = "3.1"
 ratatui = { version = "0.26", default-features = false, optional = true }
-serde = { version = "^1", features = ["derive"], optional = true }
-termion = { version = "^2", optional = true }
+serde = { version = "^1.0", features = ["derive"], optional = true }
+termion = { version = "^2.0", optional = true }
 thiserror = "^1.0.0"
 tui = { version = "0.19", default-features = false, optional = true }
 tuirealm_derive = { version = "^1.0.0", optional = true }
 
 [dev-dependencies]
-pretty_assertions = "^1"
+pretty_assertions = "^1.4"
 toml = "^0.8"
-tempfile = "^3"
+tempfile = "^3.10"
 
 [features]
 default = ["derive", "ratatui", "crossterm"]
