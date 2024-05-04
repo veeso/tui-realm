@@ -62,10 +62,8 @@ where
     poll_timeout: Duration,
     /// Indicates whether the worker should paused polling ports
     paused: Arc<RwLock<bool>>,
-    /// Indicates whether the worker should keep running
-    running: Arc<RwLock<bool>>,
     /// Msg receiver from worker
-    recv: mpsc::Receiver<ListenerMsg<U>>,
+    recv: Option<mpsc::Receiver<ListenerMsg<U>>>,
     /// Join handle for worker
     thread: Option<JoinHandle<()>>,
 }
@@ -96,23 +94,15 @@ where
         let config = Self::setup_thread(ports, tick_interval);
         Self {
             paused: config.paused,
-            running: config.running,
             poll_timeout,
-            recv: config.rx,
+            recv: Some(config.rx),
             thread: Some(config.thread),
         }
     }
 
     /// Stop event listener
     pub fn stop(&mut self) -> ListenerResult<()> {
-        {
-            // NOTE: keep these brackets to drop running after block
-            let mut running = match self.running.write() {
-                Ok(lock) => Ok(lock),
-                Err(_) => Err(ListenerError::CouldNotStop),
-            }?;
-            *running = false;
-        }
+        let _ = self.recv.take();
         // Join thread
         match self.thread.take().map(|x| x.join()) {
             Some(Ok(_)) => Ok(()),
@@ -145,7 +135,11 @@ where
 
     /// Checks whether there are new events available from event
     pub fn poll(&self) -> ListenerResult<Option<Event<U>>> {
-        match self.recv.recv_timeout(self.poll_timeout) {
+        let Some(ref recv) = self.recv else {
+            return Err(ListenerError::PollFailed);
+        };
+
+        match recv.recv_timeout(self.poll_timeout) {
             Ok(msg) => ListenerResult::from(msg),
             Err(mpsc::RecvTimeoutError::Timeout) => Ok(None),
             Err(_) => Err(ListenerError::PollFailed),
@@ -157,13 +151,11 @@ where
         let (sender, recv) = mpsc::channel();
         let paused = Arc::new(RwLock::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
-        let running_t = Arc::clone(&running);
         // Start thread
         let thread = thread::spawn(move || {
-            EventListenerWorker::new(ports, sender, paused_t, running_t, tick_interval).run();
+            EventListenerWorker::new(ports, sender, paused_t, tick_interval).run();
         });
-        ThreadConfig::new(recv, paused, running, thread)
+        ThreadConfig::new(recv, paused, thread)
     }
 }
 
@@ -185,7 +177,6 @@ where
 {
     rx: mpsc::Receiver<ListenerMsg<U>>,
     paused: Arc<RwLock<bool>>,
-    running: Arc<RwLock<bool>>,
     thread: JoinHandle<()>,
 }
 
@@ -196,15 +187,9 @@ where
     pub fn new(
         rx: mpsc::Receiver<ListenerMsg<U>>,
         paused: Arc<RwLock<bool>>,
-        running: Arc<RwLock<bool>>,
         thread: JoinHandle<()>,
     ) -> Self {
-        Self {
-            rx,
-            paused,
-            running,
-            thread,
-        }
+        Self { rx, paused, thread }
     }
 }
 
