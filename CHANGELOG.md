@@ -35,6 +35,14 @@
 
 ---
 
+## unreleased
+
+Unreleased
+
+- Explicitly mention the MSRV
+- Slightly more specific dependency version ranges
+- Remove implicit features `serde` and `tuirealm_derive`
+
 ## 1.9.2
 
 Released on 04/03/2023
