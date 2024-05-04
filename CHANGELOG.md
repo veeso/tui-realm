@@ -35,6 +35,12 @@
 
 ---
 
+## unreleased
+
+Unreleased
+
+- Add `Port::set_max_poll` to set the amount a `Port` is polled in a single `Port::should_poll` (Default: `1` time)
+
 ## 1.9.2
 
 Released on 04/03/2023
