@@ -32,8 +32,8 @@ tempfile = "^3.10"
 
 [features]
 default = ["derive", "ratatui", "crossterm"]
-derive = ["tuirealm_derive"]
-serialize = ["serde", "bitflags/serde"]
+derive = ["dep:tuirealm_derive"]
+serialize = ["dep:serde", "bitflags/serde"]
 tui = ["dep:tui"]
 crossterm = ["dep:crossterm", "tui?/crossterm", "ratatui?/crossterm"]
 termion = ["dep:termion", "tui?/termion", "ratatui?/termion"]
