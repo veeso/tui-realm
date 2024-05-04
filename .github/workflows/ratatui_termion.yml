@@ -8,12 +8,16 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [stable, nightly, "1.71"]
 
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
+          toolchain: ${{ matrix.toolchain }}
           components: rustfmt, clippy
       - name: Tests
         run: cargo test --no-fail-fast --no-default-features --features derive,serialize,ratatui,termion

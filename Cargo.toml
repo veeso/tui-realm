@@ -12,6 +12,7 @@ keywords = ["tui", "terminal"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/veeso/tui-realm"
+rust-version = "1.71"
 
 [dependencies]
 bitflags = "2.4"
