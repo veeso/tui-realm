@@ -12,6 +12,7 @@ keywords = ["tui", "terminal"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/veeso/tuirealm_derive"
+rust-version = "1.56"
 
 [lib]
 doctest = false
