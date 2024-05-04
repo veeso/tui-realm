@@ -11,15 +11,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          override: true
           components: rustfmt, clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-fail-fast --no-default-features --features derive,serialize,ratatui,termion
+      - name: Tests
+        run: cargo test --no-fail-fast --no-default-features --features derive,serialize,ratatui,termion
+        env:
+          RUST_BACKTRACE: full
       - name: Examples
         run: cargo build --all-targets --no-default-features --features derive,serialize,ratatui,termion --examples
       - name: Format

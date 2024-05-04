@@ -12,17 +12,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Setup rust toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
-          override: true
       - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-fail-fast --lib --no-default-features --features derive,serialize,with-crossterm
+        run: cargo test --no-fail-fast --features derive,serialize,ratatui,crossterm --no-default-features
         env:
+          RUST_BACKTRACE: full
           CARGO_INCREMENTAL: "0"
           RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests"
           RUSTDOCFLAGS: "-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests"

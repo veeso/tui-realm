@@ -3,26 +3,25 @@ name: Ratatui-Crossterm
 on: [push, pull_request]
 
 env:
-    CARGO_TERM_COLOR: always
+  CARGO_TERM_COLOR: always
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions-rs/toolchain@v1
-              with:
-                  toolchain: stable
-                  override: true
-                  components: rustfmt, clippy
-            - uses: actions-rs/cargo@v1
-              with:
-                  command: test
-                  args: --no-fail-fast --features derive,serialize,ratatui,crossterm --no-default-features
-            - name: Examples
-              run: cargo build --all-targets --examples
-            - name: Format
-              run: cargo fmt --all -- --check
-            - name: Clippy
-              run: cargo clippy --lib --features derive,serialize,ratatui,crossterm --no-default-features -- -Dwarnings
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - name: Tests
+        run: cargo test --no-fail-fast --features derive,serialize,ratatui,crossterm --no-default-features
+        env:
+          RUST_BACKTRACE: full
+      - name: Examples
+        run: cargo build --all-targets --examples
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --lib --features derive,serialize,ratatui,crossterm --no-default-features -- -Dwarnings
