@@ -60,8 +60,15 @@ where
     }
 
     /// Add a new Port (Poll, Interval) to the the event listener
-    pub fn port(mut self, poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
-        self.ports.push(Port::new(poll, interval));
+    pub fn port(self, poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
+        self.port_1(Port::new(poll, interval))
+    }
+
+    /// Add a new Port to the the event listener
+    ///
+    /// The [`Port`] needs to be manually constructed, unlike [`Self::port`]
+    pub fn port_1(mut self, port: Port<U>) -> Self {
+        self.ports.push(port);
         self
     }
 
@@ -103,5 +110,16 @@ mod test {
         EventListenerCfg::<MockEvent>::default()
             .poll_timeout(Duration::from_secs(0))
             .start();
+    }
+
+    #[test]
+    fn should_add_port_via_port_1() {
+        let builder = EventListenerCfg::<MockEvent>::default();
+        assert!(builder.ports.is_empty());
+        let builder = builder.port_1(Port::new(
+            Box::new(MockPoll::default()),
+            Duration::from_millis(1),
+        ));
+        assert_eq!(builder.ports.len(), 1);
     }
 }

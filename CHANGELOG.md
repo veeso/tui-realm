@@ -40,6 +40,7 @@
 Unreleased
 
 - Add `Port::set_max_poll` to set the amount a `Port` is polled in a single `Port::should_poll` (Default: `1` time)
+- Add `EventListenerCfg::port_1` to add a manually constructed `Port`
 
 ## 1.9.2
 
