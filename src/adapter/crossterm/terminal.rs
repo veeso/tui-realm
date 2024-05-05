@@ -4,7 +4,7 @@
 
 use std::io::stdout;
 
-use crossterm::event::DisableMouseCapture;
+use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
 use crossterm::execute;
 use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
@@ -46,5 +46,15 @@ impl TerminalBridge {
 
     pub(crate) fn adapt_disable_raw_mode(&mut self) -> TerminalResult<()> {
         disable_raw_mode().map_err(|_| TerminalError::CannotToggleRawMode)
+    }
+
+    pub(crate) fn adapt_enable_mouse_capture(&mut self) -> TerminalResult<()> {
+        execute!(self.raw_mut().backend_mut(), EnableMouseCapture)
+            .map_err(|_| TerminalError::CannotToggleMouseCapture)
+    }
+
+    pub(crate) fn adapt_disable_mouse_capture(&mut self) -> TerminalResult<()> {
+        execute!(self.raw_mut().backend_mut(), DisableMouseCapture)
+            .map_err(|_| TerminalError::CannotToggleMouseCapture)
     }
 }

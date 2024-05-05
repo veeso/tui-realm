@@ -40,6 +40,7 @@
 Unreleased
 
 - Dont enable `MouseCapture` by default
+- Add function `enable_mouse_capture` and `disable_mouse_capture` to `TerminalBridge`
 
 ## 1.9.2
 
