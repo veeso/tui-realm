@@ -35,6 +35,12 @@
 
 ---
 
+## unreleased
+
+Unreleased
+
+- Dont enable `MouseCapture` by default
+
 ## 1.9.2
 
 Released on 04/03/2023
