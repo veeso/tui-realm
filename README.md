@@ -1,7 +1,7 @@
 # tui-realm
 
 <p align="center">
-  <img src="docs/images/tui-realm.svg" width="256" height="256" />
+  <img src="docs/images/tui-realm.svg" alt="logo" width="256" height="256" />
 </p>
 
 <p align="center">~ A ratatui framework inspired by Elm and React ~</p>
