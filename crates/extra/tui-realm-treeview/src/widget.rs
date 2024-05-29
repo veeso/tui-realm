@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::{Node, Tree, TreeState};
+use super::{Node, NodeValue, Tree, TreeState};
 
 use tuirealm::tui::{
     buffer::Buffer,
@@ -38,7 +38,7 @@ use unicode_width::UnicodeWidthStr;
 /// ## TreeWidget
 ///
 /// tui-rs widget implementation of a tree view
-pub struct TreeWidget<'a> {
+pub struct TreeWidget<'a, V: NodeValue> {
     /// Block properties
     block: Option<Block<'a>>,
     /// Style for tree
@@ -50,14 +50,14 @@ pub struct TreeWidget<'a> {
     /// Spaces to use for indentation
     indent_size: usize,
     /// Tree to render
-    tree: &'a Tree,
+    tree: &'a Tree<V>,
 }
 
-impl<'a> TreeWidget<'a> {
+impl<'a, V: NodeValue> TreeWidget<'a, V> {
     /// ### new
     ///
     /// Setup a new `TreeWidget`
-    pub fn new(tree: &'a Tree) -> Self {
+    pub fn new(tree: &'a Tree<V>) -> Self {
         Self {
             block: None,
             style: Style::default(),
@@ -116,14 +116,14 @@ struct Render {
     skip_rows: usize,
 }
 
-impl<'a> Widget for TreeWidget<'a> {
+impl<'a, V: NodeValue> Widget for TreeWidget<'a, V> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let mut state = TreeState::default();
         StatefulWidget::render(self, area, buf, &mut state);
     }
 }
 
-impl<'a> StatefulWidget for TreeWidget<'a> {
+impl<'a, V: NodeValue> StatefulWidget for TreeWidget<'a, V> {
     type State = TreeState;
 
     fn render(mut self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
@@ -151,10 +151,10 @@ impl<'a> StatefulWidget for TreeWidget<'a> {
     }
 }
 
-impl<'a> TreeWidget<'a> {
+impl<'a, V: NodeValue> TreeWidget<'a, V> {
     fn iter_nodes(
         &self,
-        node: &Node,
+        node: &Node<V>,
         mut area: Rect,
         buf: &mut Buffer,
         state: &TreeState,
@@ -180,7 +180,7 @@ impl<'a> TreeWidget<'a> {
 
     fn render_node(
         &self,
-        node: &Node,
+        node: &Node<V>,
         area: Rect,
         buf: &mut Buffer,
         state: &TreeState,
@@ -231,14 +231,20 @@ impl<'a> TreeWidget<'a> {
             .map(|x| buf.set_stringn(start_x, start_y, x, width - start_x as usize, style))
             .map(|(x, y)| buf.set_stringn(x, y, " ", width - start_x as usize, style))
             .unwrap_or((start_x, start_y));
-        // Write node name
-        let (start_x, start_y) = buf.set_stringn(
-            start_x,
-            start_y,
-            node.value(),
-            width - start_x as usize,
-            style,
-        );
+
+        let mut start_x = start_x;
+        let mut start_y = start_y;
+        for (text, part_style) in node.value().render_parts_iter() {
+            let part_style = part_style.unwrap_or(style);
+            // Write node name
+            (start_x, start_y) = buf.set_stringn(
+                start_x,
+                start_y,
+                text,
+                width - start_x as usize,
+                part_style,
+            );
+        }
         // Write arrow based on node
         let write_after = if state.is_open(node) {
             // Is open
@@ -279,8 +285,8 @@ impl<'a> TreeWidget<'a> {
         ///
         /// Inner recursive call to calc rows to skip.
         /// Returns the rows to skip and whether the item has been found (this last oneshould be ignored)
-        fn calc_rows_to_skip_r(
-            node: &Node,
+        fn calc_rows_to_skip_r<V: NodeValue>(
+            node: &Node<V>,
             state: &TreeState,
             height: u16,
             selected: &str,
