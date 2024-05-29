@@ -44,4 +44,12 @@ impl TerminalBridge {
     pub(crate) fn adapt_disable_raw_mode(&mut self) -> TerminalResult<()> {
         Err(TerminalError::Unsupported)
     }
+
+    pub(crate) fn adapt_enable_mouse_capture(&mut self) -> TerminalResult<()> {
+        Err(TerminalError::Unsupported)
+    }
+
+    pub(crate) fn adapt_disable_mouse_capture(&mut self) -> TerminalResult<()> {
+        Err(TerminalError::Unsupported)
+    }
 }

@@ -21,12 +21,8 @@ impl TerminalBridge {
     }
 
     pub(crate) fn adapt_enter_alternate_screen(&mut self) -> TerminalResult<()> {
-        execute!(
-            self.raw_mut().backend_mut(),
-            EnterAlternateScreen,
-            EnableMouseCapture
-        )
-        .map_err(|_| TerminalError::CannotEnterAlternateMode)
+        execute!(self.raw_mut().backend_mut(), EnterAlternateScreen)
+            .map_err(|_| TerminalError::CannotEnterAlternateMode)
     }
 
     pub(crate) fn adapt_leave_alternate_screen(&mut self) -> TerminalResult<()> {
@@ -50,5 +46,15 @@ impl TerminalBridge {
 
     pub(crate) fn adapt_disable_raw_mode(&mut self) -> TerminalResult<()> {
         disable_raw_mode().map_err(|_| TerminalError::CannotToggleRawMode)
+    }
+
+    pub(crate) fn adapt_enable_mouse_capture(&mut self) -> TerminalResult<()> {
+        execute!(self.raw_mut().backend_mut(), EnableMouseCapture)
+            .map_err(|_| TerminalError::CannotToggleMouseCapture)
+    }
+
+    pub(crate) fn adapt_disable_mouse_capture(&mut self) -> TerminalResult<()> {
+        execute!(self.raw_mut().backend_mut(), DisableMouseCapture)
+            .map_err(|_| TerminalError::CannotToggleMouseCapture)
     }
 }
