@@ -19,9 +19,11 @@ where
     ports: Vec<Port<U>>,
     sender: mpsc::Sender<ListenerMsg<U>>,
     paused: Arc<RwLock<bool>>,
-    running: Arc<RwLock<bool>>,
     next_tick: Instant,
     tick_interval: Option<Duration>,
+    /// indicate if the thread is alive in the loop for testing
+    #[cfg(test)]
+    is_running: Arc<RwLock<bool>>,
 }
 
 impl<U> EventListenerWorker<U>
@@ -32,16 +34,16 @@ where
         ports: Vec<Port<U>>,
         sender: mpsc::Sender<ListenerMsg<U>>,
         paused: Arc<RwLock<bool>>,
-        running: Arc<RwLock<bool>>,
         tick_interval: Option<Duration>,
     ) -> Self {
         Self {
             ports,
             sender,
             paused,
-            running,
             next_tick: Instant::now(),
             tick_interval,
+            #[cfg(test)]
+            is_running: Arc::new(RwLock::new(false)),
         }
     }
 
@@ -73,14 +75,6 @@ where
         } else {
             Duration::ZERO
         }
-    }
-
-    /// Returns whether should keep running
-    fn running(&self) -> bool {
-        if let Ok(lock) = self.running.read() {
-            return *lock;
-        }
-        true
     }
 
     /// Returns whether worker is paused
@@ -150,12 +144,14 @@ where
     }
 
     /// thread run method
+    ///
+    /// Exits if the Channel is closed
     pub(super) fn run(&mut self) {
+        #[cfg(test)]
+        {
+            *self.is_running.write().unwrap() = true;
+        }
         loop {
-            // Check if running or send_error has occurred
-            if !self.running() {
-                break;
-            }
             // If paused, wait and resume cycle
             if self.paused() {
                 thread::sleep(Duration::from_millis(25));
@@ -172,6 +168,10 @@ where
             // Sleep till next event
             thread::sleep(self.next_event());
         }
+        #[cfg(test)]
+        {
+            *self.is_running.write().unwrap() = false;
+        }
     }
 }
 
@@ -180,19 +180,54 @@ mod test {
 
     use pretty_assertions::assert_eq;
 
-    use super::super::{ListenerError, ListenerResult};
+    use super::super::ListenerResult;
     use super::*;
     use crate::core::event::{Key, KeyEvent};
     use crate::mock::{MockEvent, MockPoll};
     use crate::Event;
 
     #[test]
+    fn should_work_and_get_events() {
+        let (tx, rx) = mpsc::channel();
+        let paused_t = Arc::new(RwLock::new(false));
+        let mut worker = EventListenerWorker::<MockEvent>::new(
+            vec![Port::new(
+                Box::new(MockPoll::default()),
+                Duration::from_secs(1),
+            )],
+            tx,
+            paused_t,
+            None,
+        );
+        let is_running = worker.is_running.clone();
+        assert_eq!(*is_running.read().unwrap(), false);
+
+        let handle = std::thread::spawn(move || worker.run());
+
+        // Wait 1 second because threads are independent
+        thread::sleep(Duration::from_secs(1));
+        assert_eq!(*is_running.read().unwrap(), true);
+
+        assert_eq!(
+            ListenerResult::from(rx.recv().unwrap()).unwrap().unwrap(),
+            Event::Keyboard(KeyEvent::from(Key::Enter))
+        );
+
+        drop(rx);
+
+        // Wait 2 second because the port poll timeout is 1 second and the thread may be in a sleep
+        thread::sleep(Duration::from_secs(2));
+
+        assert_eq!(*is_running.read().unwrap(), false);
+
+        let _ = handle.join();
+    }
+
+    #[test]
     fn worker_should_send_poll() {
         let (tx, rx) = mpsc::channel();
         let paused = Arc::new(RwLock::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
-        let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
             vec![Port::new(
                 Box::new(MockPoll::default()),
@@ -200,7 +235,6 @@ mod test {
             )],
             tx,
             paused_t,
-            running_t,
             None,
         );
         assert!(worker.poll().is_ok());
@@ -217,8 +251,6 @@ mod test {
         let (tx, rx) = mpsc::channel();
         let paused = Arc::new(RwLock::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
-        let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
             vec![Port::new(
                 Box::new(MockPoll::default()),
@@ -226,7 +258,6 @@ mod test {
             )],
             tx,
             paused_t,
-            running_t,
             Some(Duration::from_secs(1)),
         );
         assert!(worker.send_tick().is_ok());
@@ -243,8 +274,6 @@ mod test {
         let (tx, rx) = mpsc::channel();
         let paused = Arc::new(RwLock::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
-        let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
             vec![Port::new(
                 Box::new(MockPoll::default()),
@@ -252,10 +281,8 @@ mod test {
             )],
             tx,
             paused_t,
-            running_t,
             Some(Duration::from_secs(1)),
         );
-        assert_eq!(worker.running(), true);
         // Should set next events to now
         assert!(worker.next_event() <= Duration::from_secs(1));
         assert!(worker.next_tick <= Instant::now());
@@ -268,17 +295,6 @@ mod test {
         assert!(worker.next_event() <= Duration::from_secs(1));
         // Now should no more tick and poll
         assert_eq!(worker.should_tick(), false);
-        // Stop
-        {
-            let mut running_flag = match running.write() {
-                Ok(lock) => Ok(lock),
-                Err(_) => Err(ListenerError::CouldNotStop),
-            }
-            .ok()
-            .unwrap();
-            *running_flag = false;
-        }
-        assert_eq!(worker.running(), false);
         drop(rx);
     }
 
@@ -287,8 +303,6 @@ mod test {
         let (tx, rx) = mpsc::channel();
         let paused = Arc::new(RwLock::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
-        let running_t = Arc::clone(&running);
         let worker = EventListenerWorker::<MockEvent>::new(
             vec![Port::new(
                 Box::new(MockPoll::default()),
@@ -296,10 +310,8 @@ mod test {
             )],
             tx,
             paused_t,
-            running_t,
             None,
         );
-        assert_eq!(worker.running(), true);
         assert_eq!(worker.paused(), false);
         // Should set next events to now
         assert!(worker.next_event() <= Duration::from_secs(3));
@@ -307,17 +319,6 @@ mod test {
         assert_eq!(worker.should_tick(), false);
         // Next event should be in 3 second (poll)
         assert!(worker.next_event() <= Duration::from_secs(3));
-        // Stop
-        {
-            let mut running_flag = match running.write() {
-                Ok(lock) => Ok(lock),
-                Err(_) => Err(ListenerError::CouldNotStop),
-            }
-            .ok()
-            .unwrap();
-            *running_flag = false;
-        }
-        assert_eq!(worker.running(), false);
         drop(rx);
     }
 
@@ -327,10 +328,7 @@ mod test {
         let (tx, _) = mpsc::channel();
         let paused = Arc::new(RwLock::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
-        let running_t = Arc::clone(&running);
-        let mut worker =
-            EventListenerWorker::<MockEvent>::new(vec![], tx, paused_t, running_t, None);
+        let mut worker = EventListenerWorker::<MockEvent>::new(vec![], tx, paused_t, None);
         worker.calc_next_tick();
     }
 }
