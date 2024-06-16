@@ -7,6 +7,9 @@ use std::time::{Duration, Instant};
 
 use super::{Event, ListenerResult, Poll};
 
+/// The Default number of how often a [`Port`] gets polled in a single [`Port::should_poll`]
+pub const DEFAULT_MAX_POLL: usize = 1;
+
 /// A port is a wrapper around the poll trait object, which also defines an interval, which defines
 /// the amount of time between each poll() call.
 /// Its purpose is to listen for incoming events of a user-defined type
@@ -17,6 +20,7 @@ where
     poll: Box<dyn Poll<U>>,
     interval: Duration,
     next_poll: Instant,
+    max_poll: usize,
 }
 
 impl<U> Port<U>
@@ -29,7 +33,18 @@ where
             poll,
             interval,
             next_poll: Instant::now(),
+            max_poll: DEFAULT_MAX_POLL,
         }
+    }
+
+    /// Set how often a port should get polled in a single poll
+    pub fn set_max_poll(&mut self, max_poll: usize) {
+        self.max_poll = max_poll;
+    }
+
+    /// Get how often a port should get polled in a single poll
+    pub fn max_poll(&self) -> usize {
+        self.max_poll
     }
 
     /// Returns the interval for the current `Port`
