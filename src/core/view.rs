@@ -8,7 +8,7 @@ use std::hash::Hash;
 
 use thiserror::Error;
 
-use crate::tui::layout::Rect;
+use crate::ratatui::layout::Rect;
 use crate::{AttrValue, Attribute, Component, Event, Frame, Injector, State};
 
 /// A boxed component. Shorthand for View components map

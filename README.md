@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.9.2 (04/03/2024)</p>
+<p align="center">Current version: 2.0.0 (12/10/2024)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -53,16 +53,6 @@
     ><img
       src="https://github.com/veeso/tui-realm/actions/workflows/ratatui_termion.yml/badge.svg"
       alt="Ratatui-Termion CI"
-  /></a>
-  <a href="https://github.com/veeso/tui-realm/actions/workflows/tui_crossterm.yml"
-    ><img
-      src="https://github.com/veeso/tui-realm/actions/workflows/tui_crossterm.yml/badge.svg"
-      alt="Tui-Crossterm CI"
-  /></a>
-  <a href="https://github.com/veeso/tui-realm/actions/workflows/tui_termion.yml"
-    ><img
-      src="https://github.com/veeso/tui-realm/actions/workflows/tui_termion.yml/badge.svg"
-      alt="Termion CI"
   /></a>
   <a href="https://github.com/veeso/tui-realm/actions/workflows/crossterm-windows.yml"
     ><img
@@ -105,9 +95,9 @@
 
 ## About tui-realm 👑
 
-tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) and [ratatui](https://github.com/ratatui-org/ratatui) to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React. But that's not all: the components communicate with the ui engine via a system based on **Messages** and **Events**, providing you with the possibility to implement `update` routines as happens in Elm. In addition, the components are organized inside the **View**, which manages mounting/umounting, focus and event forwarding for you.
+tui-realm is a **framework** for **[ratatui](https://github.com/ratatui-org/ratatui)** to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React. But that's not all: the components communicate with the ui engine via a system based on **Messages** and **Events**, providing you with the possibility to implement `update` routines as happens in Elm. In addition, the components are organized inside the **View**, which manages mounting/umounting, focus and event forwarding for you.
 
-And that also explains the reason of the name: Realm stands for React and Elm.
+And that also explains the reason of the name: **Realm stands for React and Elm**.
 
 tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
 
@@ -136,31 +126,21 @@ See tui-realm in action in the [Example](#run-examples-) or if you want to read 
 If you want the default features, just add tuirealm 1.x version:
 
 ```toml
-tuirealm = "^1.9.0"
+tuirealm = "2"
 ```
 
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "serialize", "termion" ] }
+tuirealm = { version = "2", default-features = false, features = [ "derive", "serialize", "termion" ] }
 ```
 
 Supported features are:
 
 - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
 - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
-- `tui`: use the [tui-rs](https://github.com/fdehau/tui-rs) terminal UI library
-- `ratatui`: use the [ratatui](https://github.com/ratatui-org/ratatui) terminal UI library
 - `crossterm`: use the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend
 - `termion`: use the [termion](https://github.com/redox-os/termion) terminal backend
-
-Deprecated feature flags:
-
-- `with-crossterm`
-- `with-termion`
-
-> ⚠️ You can enable only one backend at the time and at least one must be enabled in order to build.  
-> ❗ You don't need tui as a dependency, since you can access to tui types via `use tuirealm::tui::`
 
 #### Enabling other backends ⚠️
 
@@ -174,13 +154,13 @@ crate's default features.
 Example using the termion backend:
 
 ```toml
-tuirealm = { version = "^1.9.0", default-features = false, features = [ "termion", "derive", "tui" ] }
+tuirealm = { version = "^1.9.0", default-features = false, features = [ "termion", "derive" ] }
 ```
 
-Example using the ratatui UI library:
+Example using crossterm:
 
 ```toml
-tuirealm = { version = "^1.9.0", default-features = false, features = [ "ratatui", "derive", "crossterm" ]}
+tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "crossterm" ]}
 ```
 
 ### Create a tui-realm application 🪂

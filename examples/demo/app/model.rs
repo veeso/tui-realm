@@ -6,8 +6,8 @@ use std::time::{Duration, SystemTime};
 
 use tuirealm::event::NoUserEvent;
 use tuirealm::props::{Alignment, Color, TextModifiers};
+use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::TerminalBridge;
-use tuirealm::tui::layout::{Constraint, Direction, Layout};
 use tuirealm::{
     Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause, Update,
 };
@@ -55,7 +55,7 @@ impl Model {
                         ]
                         .as_ref(),
                     )
-                    .split(f.size());
+                    .split(f.area());
                 self.app.view(&Id::Clock, f, chunks[0]);
                 self.app.view(&Id::LetterCounter, f, chunks[1]);
                 self.app.view(&Id::DigitCounter, f, chunks[2]);

@@ -24,8 +24,8 @@ pub use shape::Shape;
 pub use texts::{Table, TableBuilder, TextSpan};
 pub use value::{PropPayload, PropValue};
 
-pub use crate::tui::layout::Alignment;
-pub use crate::tui::style::{Color, Modifier as TextModifiers, Style};
+pub use crate::ratatui::layout::Alignment;
+pub use crate::ratatui::style::{Color, Modifier as TextModifiers, Style};
 
 /// The props struct holds all the attributes associated to the component.
 /// Properties have been designed to be versatile for all kind of components, but without introducing
