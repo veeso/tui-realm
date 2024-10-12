@@ -2,8 +2,8 @@
 //!
 //! app model
 
+use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::TerminalBridge;
-use tuirealm::tui::layout::{Constraint, Direction, Layout};
 use tuirealm::{Application, Update};
 
 use super::{Id, Msg, UserEvent};
@@ -44,7 +44,7 @@ impl Model {
                         ]
                         .as_ref(),
                     )
-                    .split(f.size());
+                    .split(f.area());
                 self.app.view(&Id::Label, f, chunks[0]);
                 self.app.view(&Id::Other, f, chunks[1]);
             })

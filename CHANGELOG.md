@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [2.0.0](#200)
   - [1.9.2](#192)
   - [1.9.1](#191)
   - [1.9.0](#190)
@@ -34,6 +35,20 @@
   - [0.1.0](#010)
 
 ---
+
+## 2.0.0
+
+Released on ??/10/2024
+
+- Dropped support for `tui-rs`. Tui-rs was deprecated a long time ago, so it doesn't really makes sense to keep supporting it.
+- Added new methods for `TerminalBridge`
+  - `init`: Initialize a terminal with reasonable defaults for most applications.
+    - Raw mode is enabled
+    - Alternate screen buffer enabled
+    - A panic hook is installed that restores the terminal before panicking. Ensure that this method is called after any other panic hooks that may be installed to ensure that the terminal is.
+  - `restore`: Restore the terminal to its original state
+  - `set_panic_hook`: Sets a panic hook that restores the terminal before panicking.
+- Bump `ratatui` version to `0.28`
 
 ## 1.9.2
 

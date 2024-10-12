@@ -74,8 +74,8 @@ mod core;
 pub mod listener;
 #[cfg(test)]
 pub mod mock;
+pub mod ratatui;
 pub mod terminal;
-pub mod tui;
 pub mod utils;
 // -- export
 pub use adapter::{Frame, Terminal};

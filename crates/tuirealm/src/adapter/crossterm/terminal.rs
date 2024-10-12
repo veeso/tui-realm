@@ -10,8 +10,8 @@ use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
 };
 
+use crate::ratatui::backend::CrosstermBackend;
 use crate::terminal::{TerminalBridge, TerminalError, TerminalResult};
-use crate::tui::backend::CrosstermBackend;
 use crate::Terminal;
 
 impl TerminalBridge {

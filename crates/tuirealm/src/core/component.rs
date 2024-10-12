@@ -3,7 +3,7 @@
 //! This module exposes the component traits
 
 use crate::command::{Cmd, CmdResult};
-use crate::tui::layout::Rect;
+use crate::ratatui::layout::Rect;
 use crate::{AttrValue, Attribute, Event, Frame, State};
 
 /// A Mock Component represents a component which defines all the properties and states it can handle and represent

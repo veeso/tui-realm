@@ -23,7 +23,7 @@ impl Default for MockInput {
 }
 
 impl MockComponent for MockInput {
-    fn view(&mut self, _: &mut crate::Frame, _: crate::tui::layout::Rect) {}
+    fn view(&mut self, _: &mut crate::Frame, _: crate::ratatui::layout::Rect) {}
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
         self.props.get(attr)

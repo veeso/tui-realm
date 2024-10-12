@@ -9,7 +9,7 @@ use thiserror::Error;
 
 use super::{Subscription, View, WrappedComponent};
 use crate::listener::{EventListener, EventListenerCfg, ListenerError};
-use crate::tui::layout::Rect;
+use crate::ratatui::layout::Rect;
 use crate::{AttrValue, Attribute, Event, Frame, Injector, State, Sub, SubEventClause, ViewError};
 
 /// Result retuned by `Application`.
