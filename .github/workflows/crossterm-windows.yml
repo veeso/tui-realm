@@ -23,4 +23,4 @@ jobs:
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
-        run: cargo clippy --lib --no-default-features --features derive,serialize,ratatui,crossterm -- -Dwarnings
+        run: cargo clippy --lib --no-default-features --features derive,serialize,crossterm -- -Dwarnings
