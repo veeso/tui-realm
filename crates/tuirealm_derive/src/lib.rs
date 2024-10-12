@@ -63,14 +63,14 @@
 //!
 //! ```toml
 //! [dependencies]
-//! tuirealm = "^1.0.0"
+//! tuirealm = "^2.0.0"
 //! ```
 //!
 //! If you're not using the default features, be sure to enable the **derive** feature:
 //!
 //! ```toml
 //! [dependencies]
-//! tuirealm = { version = "^1.0.0", default-features = false, features = ["derive", "with-termion"] }
+//! tuirealm = { version = "^2.0.0", default-features = false, features = ["derive", "crossterm"] }
 //! ```
 //!
 //! Then you need to include tuirealm in your project using the `macro use` directive:
@@ -104,29 +104,6 @@
     html_logo_url = "https://rawcdn.githack.com/veeso/tui-realm/39c38c3bd905f724403481514adb2cf2b4e69a7b/docs/images/cargo/tui-realm-512.png"
 )]
 
-/**
- * MIT License
- *
- * tui-realm - Copyright (C) 2021 Christian Visintin
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 use proc_macro::{self, TokenStream};
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput, FieldsNamed};
@@ -152,7 +129,7 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
         let output = quote! {
             const _: () = {
                 use ::tuirealm::command::{Cmd, CmdResult};
-                use ::tuirealm::tui::layout::Rect;
+                use ::tuirealm::ratatui::layout::Rect;
                 use ::tuirealm::{Attribute, AttrValue, Frame, MockComponent, State};
                 impl MockComponent for #ident {
                     fn view(&mut self, frame: &mut Frame, area: Rect) {

@@ -1,7 +1,7 @@
 # tuirealm_derive
 
 <p align="center">
-  <img src="https://rawcdn.githack.com/veeso/tui-realm/39c38c3bd905f724403481514adb2cf2b4e69a7b/docs/images/tui-realm.svg" width="256" height="256" />
+  <img src="https://rawcdn.githack.com/veeso/tui-realm/39c38c3bd905f724403481514adb2cf2b4e69a7b/docs/images/tui-realm.svg" width="256" height="256" alt="logo" />
 </p>
 
 <p align="center">~ Automatically implements MockComponent ~</p>
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.0.0 (13/11/2021)</p>
+<p align="center">Current version: 2.0.0 (12/10/2024)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -24,7 +24,7 @@
   /></a>
   <a href="https://github.com/veeso/tui-realm/stargazers"
     ><img
-      src="https://img.shields.io/github/stars/veeso/tuirealm_derive.svg"
+      src="https://img.shields.io/github/stars/veeso/tuirealm_derive.svg?style=badge"
       alt="Repo stars"
   /></a>
   <a href="https://crates.io/crates/tuirealm_derive"
@@ -58,8 +58,8 @@
 
 ---
 
-- [tuirealm_derive](#tuirealm_derive)
-  - [About tuirealm_derive 👑](#about-tuirealm_derive-)
+- [tuirealm\_derive](#tuirealm_derive)
+  - [About tuirealm\_derive 👑](#about-tuirealm_derive-)
   - [Get started 🏁](#get-started-)
   - [Support the developer ☕](#support-the-developer-)
   - [Changelog ⏳](#changelog-)
@@ -162,17 +162,17 @@ If you're using the default features:
 
 ```toml
 [dependencies]
-tuirealm = "^1.0.0"
+tuirealm = "^2"
 ```
 
 If you're not using the default features, be sure to enable the **derive** feature:
 
 ```toml
 [dependencies]
-tuirealm = { version = "^1.0.0", default-features = false, features = ["derive", "with-termion"] }
+tuirealm = { version = "^2", default-features = false, features = ["derive", "crossterm"] }
 ```
 
->⚠️ tuirealm_derive requires tui-realm >= 1.0.0; the old API is not supported
+>⚠️ tuirealm_derive requires tui-realm >= 2.0.0; the old API is not supported
 
 Then you need to include tuirealm in your project using the `macro use` directive:
 
