@@ -37,9 +37,9 @@ macro_rules! subclause_and {
         SubClause::IsMounted($id)
     };
     ($id:expr, $($rest:expr),+) => {
-        SubClause::And(
-            Box::new(SubClause::IsMounted($id)),
-            Box::new(subclause_and!($($rest),+))
+        SubClause::and(
+            SubClause::IsMounted($id),
+            subclause_and!($($rest),+)
         )
     };
 }
@@ -67,12 +67,12 @@ macro_rules! subclause_and {
 ///
 /// assert_eq!(
 ///     sub_clause,
-///     SubClause::Or(
-///         Box::new(SubClause::IsMounted(Id::InputBar)),
-///         Box::new(SubClause::Or(
-///             Box::new(SubClause::IsMounted(Id::InputFoo)),
-///             Box::new(SubClause::IsMounted(Id::InputOmar))
-///         ))
+///     SubClause::or(
+///         SubClause::IsMounted(Id::InputBar),
+///         SubClause::or(
+///             SubClause::IsMounted(Id::InputFoo),
+///             SubClause::IsMounted(Id::InputOmar)
+///         )
 ///     )
 ///  );
 /// ```
@@ -83,9 +83,9 @@ macro_rules! subclause_or {
         SubClause::IsMounted($id)
     };
     ($id:expr, $($rest:expr),+) => {
-        SubClause::Or(
-            Box::new(SubClause::IsMounted($id)),
-            Box::new(subclause_or!($($rest),+))
+        SubClause::or(
+            SubClause::IsMounted($id),
+            subclause_or!($($rest),+)
         )
     };
 }
