@@ -61,9 +61,9 @@ pub enum Position {
 
 // -- Command result
 
-/// A command result describes the output of a `Cmd` performed on a Component.
+/// A command result describes the output of a [`Cmd`] performed on a Component.
 /// It reports a "logical" change on the `MockComponent`.
-/// The `Component` then, must return a certain user defined `Msg` based on the value of the `CmdResult`.
+/// The `Component` then, must return a certain user defined `Msg` based on the value of the [`CmdResult`].
 #[derive(Debug, PartialEq, Clone)]
 #[allow(clippy::large_enum_variant)]
 pub enum CmdResult {
