@@ -8,8 +8,9 @@ mod builder;
 mod port;
 mod worker;
 
+use std::sync::atomic::AtomicBool;
 // -- export
-use std::sync::{mpsc, Arc, RwLock};
+use std::sync::{mpsc, Arc};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
@@ -60,9 +61,9 @@ where
     /// Max Time to wait when calling `recv()` on thread receiver
     poll_timeout: Duration,
     /// Indicates whether the worker should paused polling ports
-    paused: Arc<RwLock<bool>>,
+    paused: Arc<AtomicBool>,
     /// Indicates whether the worker should keep running
-    running: Arc<RwLock<bool>>,
+    running: Arc<AtomicBool>,
     /// Msg receiver from worker
     recv: mpsc::Receiver<ListenerMsg<U>>,
     /// Join handle for worker
@@ -104,14 +105,9 @@ where
 
     /// Stop event listener
     pub fn stop(&mut self) -> ListenerResult<()> {
-        {
-            // NOTE: keep these brackets to drop running after block
-            let mut running = match self.running.write() {
-                Ok(lock) => Ok(lock),
-                Err(_) => Err(ListenerError::CouldNotStop),
-            }?;
-            *running = false;
-        }
+        self.running
+            .store(false, std::sync::atomic::Ordering::Relaxed);
+
         // Join thread
         match self.thread.take().map(|x| x.join()) {
             Some(Ok(_)) => Ok(()),
@@ -122,23 +118,15 @@ where
 
     /// Pause event listener worker
     pub fn pause(&mut self) -> ListenerResult<()> {
-        // NOTE: keep these brackets to drop running after block
-        let mut paused = match self.paused.write() {
-            Ok(lock) => Ok(lock),
-            Err(_) => Err(ListenerError::CouldNotStop),
-        }?;
-        *paused = true;
+        self.paused
+            .store(true, std::sync::atomic::Ordering::Relaxed);
         Ok(())
     }
 
     /// Unpause event listener worker
     pub fn unpause(&mut self) -> ListenerResult<()> {
-        // NOTE: keep these brackets to drop running after block
-        let mut paused = match self.paused.write() {
-            Ok(lock) => Ok(lock),
-            Err(_) => Err(ListenerError::CouldNotStop),
-        }?;
-        *paused = false;
+        self.paused
+            .store(false, std::sync::atomic::Ordering::Relaxed);
         Ok(())
     }
 
@@ -154,9 +142,9 @@ where
     /// Setup the thread and returns the structs necessary to interact with it
     fn setup_thread(ports: Vec<Port<U>>, tick_interval: Option<Duration>) -> ThreadConfig<U> {
         let (sender, recv) = mpsc::channel();
-        let paused = Arc::new(RwLock::new(false));
+        let paused = Arc::new(AtomicBool::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
+        let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         // Start thread
         let thread = thread::spawn(move || {
@@ -183,8 +171,8 @@ where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     rx: mpsc::Receiver<ListenerMsg<U>>,
-    paused: Arc<RwLock<bool>>,
-    running: Arc<RwLock<bool>>,
+    paused: Arc<AtomicBool>,
+    running: Arc<AtomicBool>,
     thread: JoinHandle<()>,
 }
 
@@ -194,8 +182,8 @@ where
 {
     pub fn new(
         rx: mpsc::Receiver<ListenerMsg<U>>,
-        paused: Arc<RwLock<bool>>,
-        running: Arc<RwLock<bool>>,
+        paused: Arc<AtomicBool>,
+        running: Arc<AtomicBool>,
         thread: JoinHandle<()>,
     ) -> Self {
         Self {
