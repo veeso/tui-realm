@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [2.0.1](#201)
   - [2.0.0](#200)
   - [1.3.2](#132)
   - [1.3.1](#131)
@@ -25,6 +26,12 @@
   - [0.5.0](#050)
 
 ---
+
+## 2.0.1
+
+Released on 13/10/2024
+
+- [Avoid some string clones if not necessary](https://github.com/veeso/tui-realm-stdlib/pull/22)
 
 ## 2.0.0
 
