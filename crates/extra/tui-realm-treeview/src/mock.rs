@@ -27,7 +27,7 @@
  */
 use crate::{Node, Tree};
 
-pub fn mock_tree() -> Tree {
+pub fn mock_tree() -> Tree<String> {
     Tree::new(
         Node::new("/".to_string(), "/".to_string())
             .with_child(

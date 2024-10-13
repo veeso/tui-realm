@@ -53,14 +53,14 @@ impl TreeState {
     /// ### is_open
     ///
     /// Returns whether `node` is open
-    pub fn is_open(&self, node: &Node) -> bool {
+    pub fn is_open<V>(&self, node: &Node<V>) -> bool {
         self.open.contains(node.id())
     }
 
     /// ### is_closed
     ///
     /// Returns whether `node` is closed
-    pub fn is_closed(&self, node: &Node) -> bool {
+    pub fn is_closed<V>(&self, node: &Node<V>) -> bool {
         !self.is_open(node)
     }
 
@@ -74,7 +74,7 @@ impl TreeState {
     /// ### is_selected
     ///
     /// Returns whether provided node is currently selected
-    pub fn is_selected(&self, node: &Node) -> bool {
+    pub fn is_selected<V>(&self, node: &Node<V>) -> bool {
         self.selected
             .as_ref()
             .map(|x| x == node.id())
@@ -84,7 +84,7 @@ impl TreeState {
     /// ### first_sibling
     ///
     /// Get first sibling in children of current selected node's parent
-    pub fn first_sibling<'a>(&self, tree: &'a Node) -> Option<&'a Node> {
+    pub fn first_sibling<'a, V>(&self, tree: &'a Node<V>) -> Option<&'a Node<V>> {
         let selected = self.selected.as_ref()?;
         let parent = tree.parent(selected)?;
         parent.iter().next()
@@ -93,7 +93,7 @@ impl TreeState {
     /// ### last_sibling
     ///
     /// Get last sibling in children of current selected node's parent
-    pub fn last_sibling<'a>(&self, tree: &'a Node) -> Option<&'a Node> {
+    pub fn last_sibling<'a, V>(&self, tree: &'a Node<V>) -> Option<&'a Node<V>> {
         let selected = self.selected.as_ref()?;
         let parent = tree.parent(selected)?;
         parent.iter().last()
@@ -104,7 +104,7 @@ impl TreeState {
     /// ### tree_changed
     ///
     /// The tree has changed, so this method must check whether to keep states or not
-    pub fn tree_changed(&mut self, root: &Node, preserve: bool) {
+    pub fn tree_changed<V>(&mut self, root: &Node<V>, preserve: bool) {
         if preserve {
             // Check whether selected is still valid; if doesn't exist, use root
             self.selected = self
@@ -123,7 +123,7 @@ impl TreeState {
     /// ### open
     ///
     /// Open currently selected `node`. Node can be open only if it is closed and it is NOT a leaf
-    pub fn open(&mut self, root: &Node) {
+    pub fn open<V>(&mut self, root: &Node<V>) {
         if let Some(selected) = self.selected.as_ref() {
             if let Some(node) = root.query(selected) {
                 self.open_node(root, node);
@@ -135,7 +135,7 @@ impl TreeState {
     ///
     /// Close currently selected `node`.
     /// If node has children, then all children are closed recursively
-    pub fn close(&mut self, root: &Node) {
+    pub fn close<V>(&mut self, root: &Node<V>) {
         if let Some(selected) = self.selected.as_ref() {
             if let Some(node) = root.query(selected) {
                 if self.is_open(node) {
@@ -148,7 +148,7 @@ impl TreeState {
     /// ### move_down
     ///
     /// Move cursor down in current tree from current position. Rewind if required
-    pub fn move_down(&mut self, root: &Node) {
+    pub fn move_down<V>(&mut self, root: &Node<V>) {
         if let Some(selected) = self.selected.take() {
             // Get current node
             if let Some(node) = root.query(&selected) {
@@ -186,7 +186,7 @@ impl TreeState {
     /// ### move_up
     ///
     /// Move cursor up in current tree from current position. Rewind if required
-    pub fn move_up(&mut self, root: &Node) {
+    pub fn move_up<V>(&mut self, root: &Node<V>) {
         if let Some(selected) = self.selected.take() {
             // Get parent
             if let Some(parent) = root.parent(&selected) {
@@ -209,7 +209,7 @@ impl TreeState {
     ///
     /// Set current selected node.
     /// When selecting a node, all its ancestors will be opened
-    pub fn select(&mut self, root: &Node, node: &Node) {
+    pub fn select<V>(&mut self, root: &Node<V>, node: &Node<V>) {
         self.open_ancestors(root, node);
         self.selected = Some(node.id().to_string());
     }
@@ -219,7 +219,7 @@ impl TreeState {
     /// ### close_node
     ///
     /// Close `node`
-    fn close_node(&mut self, node: &Node) {
+    fn close_node<V>(&mut self, node: &Node<V>) {
         // Remove from open nodes
         self.open.retain(|x| x != node.id());
         // Close children for node
@@ -231,7 +231,7 @@ impl TreeState {
     /// Open provided node
     /// Node is opened only if is NOT a leaf and it is closed.
     /// It will also open all the ancestors for `node`
-    fn open_node(&mut self, root: &Node, node: &Node) {
+    fn open_node<V>(&mut self, root: &Node<V>, node: &Node<V>) {
         if !node.is_leaf() && self.is_closed(node) {
             self.open.push(node.id().to_string());
         }
@@ -241,14 +241,14 @@ impl TreeState {
     /// ### close_children
     ///
     /// Close all node children recursively
-    fn close_children(&mut self, node: &Node) {
+    fn close_children<V>(&mut self, node: &Node<V>) {
         node.iter().for_each(|x| self.close_node(x));
     }
 
     /// ### open_ancestors
     ///
     /// Open all ancestors for `node` in the current `tree`
-    fn open_ancestors(&mut self, root: &Node, node: &Node) {
+    fn open_ancestors<V>(&mut self, root: &Node<V>, node: &Node<V>) {
         if let Some(parent) = root.parent(node.id()) {
             self.open_node(root, parent);
         }
@@ -257,7 +257,7 @@ impl TreeState {
     /// ### previous_sibling
     ///
     /// Returns the previous sibling of `node` in `root`
-    fn previous_sibling<'a>(&mut self, root: &'a Node, node: &'a Node) -> Option<&'a Node> {
+    fn previous_sibling<'a, V>(&mut self, root: &'a Node<V>, node: &'a Node<V>) -> Option<&'a Node<V>> {
         let parent = root.parent(node.id())?;
         let mut prev_node = None;
         for child in parent.iter() {
@@ -272,7 +272,7 @@ impl TreeState {
     /// ### next_sibling
     ///
     /// Returs next sibling of `node` in `tree`
-    fn next_sibling<'a>(&mut self, root: &'a Node, node: &'a Node) -> Option<&'a Node> {
+    fn next_sibling<'a, V>(&mut self, root: &'a Node<V>, node: &'a Node<V>) -> Option<&'a Node<V>> {
         let parent = root.parent(node.id())?;
         let mut keep_next = false;
         for child in parent.iter() {
@@ -291,7 +291,7 @@ impl TreeState {
     /// ### get_last_open_heir
     ///
     /// Get last open heir for node
-    fn get_last_open_heir<'a>(&self, node: &'a Node) -> &'a Node {
+    fn get_last_open_heir<'a, V>(&self, node: &'a Node<V>) -> &'a Node<V> {
         if self.is_open(node) {
             // If node is open, get its last child and call this function recursively
             self.get_last_open_heir(node.iter().last().unwrap())

@@ -63,7 +63,7 @@ pub enum Id {
 struct Model {
     app: Application<Id, Msg, NoUserEvent>,
     path: PathBuf,
-    tree: Tree,
+    tree: Tree<String>, // You can choose a Tree<Vec<TextSpan>> for more flexible rendering
     quit: bool,   // Becomes true when the user presses <ESC>
     redraw: bool, // Tells whether to refresh the UI; performance optimization
     terminal: TerminalBridge,
@@ -135,12 +135,12 @@ impl Model {
         }
     }
 
-    fn dir_tree(p: &Path, depth: usize) -> Node {
+    fn dir_tree(p: &Path, depth: usize) -> Node<String> {
         let name: String = match p.file_name() {
             None => "/".to_string(),
             Some(n) => n.to_string_lossy().into_owned().to_string(),
         };
-        let mut node: Node = Node::new(p.to_string_lossy().into_owned(), name);
+        let mut node: Node<String> = Node::new(p.to_string_lossy().into_owned(), name);
         if depth > 0 && p.is_dir() {
             if let Ok(e) = std::fs::read_dir(p) {
                 e.flatten()
@@ -255,11 +255,11 @@ impl Update<Msg> for Model {
 
 #[derive(MockComponent)]
 pub struct FsTree {
-    component: TreeView,
+    component: TreeView<String>,
 }
 
 impl FsTree {
-    pub fn new(tree: Tree, initial_node: Option<String>) -> Self {
+    pub fn new(tree: Tree<String>, initial_node: Option<String>) -> Self {
         // Preserve initial node if exists
         let initial_node = match initial_node {
             Some(id) if tree.root().query(&id).is_some() => id,
