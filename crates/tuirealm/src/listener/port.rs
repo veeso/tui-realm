@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 use super::{Event, ListenerResult, Poll};
 
 /// A port is a wrapper around the poll trait object, which also defines an interval, which defines
-/// the amount of time between each poll() call.
+/// the amount of time between each [`Poll::poll`] call.
 /// Its purpose is to listen for incoming events of a user-defined type
 pub struct Port<U>
 where
@@ -32,7 +32,7 @@ where
         }
     }
 
-    /// Returns the interval for the current `Port`
+    /// Returns the interval for the current [`Port`]
     pub fn interval(&self) -> &Duration {
         &self.interval
     }
@@ -47,7 +47,7 @@ where
         self.next_poll <= Instant::now()
     }
 
-    /// Calls poll on the inner `Poll` trait object.
+    /// Calls [`Poll::poll`] on the inner [`Poll`] trait object.
     pub fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         self.poll.poll()
     }
