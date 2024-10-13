@@ -44,3 +44,7 @@ required-features = ["crossterm"]
 name = "user-events"
 path = "examples/user_events/user_events.rs"
 required-features = ["crossterm"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

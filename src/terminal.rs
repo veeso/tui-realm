@@ -9,13 +9,17 @@ use ratatui::{CompletedFrame, Frame};
 use thiserror::Error;
 
 #[cfg(feature = "crossterm")]
+#[cfg_attr(docsrs, doc(cfg(feature = "crossterm")))]
 pub use self::adapter::CrosstermTerminalAdapter;
 pub use self::adapter::TerminalAdapter;
 #[cfg(feature = "termion")]
+#[cfg_attr(docsrs, doc(cfg(feature = "termion")))]
 pub use self::adapter::TermionTerminalAdapter;
 #[cfg(feature = "crossterm")]
+#[cfg_attr(docsrs, doc(cfg(feature = "crossterm")))]
 pub use self::event_listener::CrosstermInputListener;
 #[cfg(feature = "termion")]
+#[cfg_attr(docsrs, doc(cfg(feature = "termion")))]
 pub use self::event_listener::TermionInputListener;
 
 /// TerminalResult is a type alias for a Result that uses [`TerminalError`] as the error type.
