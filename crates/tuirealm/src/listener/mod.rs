@@ -22,7 +22,7 @@ use worker::EventListenerWorker;
 // -- internal
 use super::Event;
 
-/// Result returned by [`EventListener`]. Ok value depends on the method, while the
+/// Result returned by `EventListener`. [`Ok`] value depends on the method, while the
 /// Err value is always [`ListenerError`].
 pub type ListenerResult<T> = Result<T, ListenerError>;
 
@@ -48,7 +48,7 @@ where
     /// This function mustn't be blocking, and will be called within the configured interval of the event listener.
     /// It may return Error in case something went wrong.
     /// If it was possible to poll for event, `Ok` must be returned.
-    /// If an event was read, then `Some()` must be returned., otherwise `None`.
+    /// If an event was read, then [`Some`] must be returned, otherwise [`None`].
     /// The event must be converted to `Event` using the `adapters`.
     fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>>;
 }

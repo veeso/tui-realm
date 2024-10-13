@@ -355,13 +355,13 @@ where
     }
 }
 
-/// Poll strategy defines how to call [`Application::poll`] on the event listener.
+/// Poll strategy defines how to call `Application::poll` on the event listener.
 pub enum PollStrategy {
-    /// [`Application::poll`] function will be called once
+    /// `Application::poll` function will be called once
     Once,
     /// The application will keep waiting for events for the provided duration
     TryFor(Duration),
-    /// [`Application::poll`] function will be called up to `n` times, until it will return [`Option::None`].
+    /// `Application::poll` function will be called up to `n` times, until it will return [`Option::None`].
     UpTo(usize),
 }
 

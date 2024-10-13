@@ -5,7 +5,7 @@
 use super::{Duration, EventListener, Poll, Port};
 
 /// The event listener configurator is used to setup an event listener.
-/// Once you're done with configuration just call [`EventListenerCfg::start`] and the event listener will start and the listener
+/// Once you're done with configuration just call `EventListenerCfg::start` and the event listener will start and the listener
 /// will be returned.
 pub struct EventListenerCfg<U>
 where

@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 //! # tui-realm
 //!
 //! tui-realm is a **framework** for **[ratatui](https://github.com/ratatui-org/ratatui)**
