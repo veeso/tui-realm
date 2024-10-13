@@ -3,7 +3,7 @@
 //! `events` exposes the event raised by a user interaction or by the runtime
 
 use bitflags::bitflags;
-#[cfg(feature = "serde")]
+#[cfg(feature = "serialize")]
 use serde::{Deserialize, Serialize};
 
 // -- event
