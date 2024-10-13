@@ -55,7 +55,7 @@ where
     K: Eq + PartialEq + Clone + Hash,
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
-    /// Instantiates a new `Subscription`
+    /// Instantiates a new [`Subscription`]
     pub fn new(target: K, sub: Sub<K, U>) -> Self {
         Self {
             target,
@@ -107,7 +107,7 @@ where
     /// The event will be forwarded on a tick
     Tick,
     /// Event will be forwarded on this specific user event.
-    /// The way user event is matched, depends on its partialEq implementation
+    /// The way user event is matched, depends on its [`PartialEq`] implementation
     User(UserEvent),
 }
 
@@ -124,7 +124,7 @@ where
     /// - WindowResize: matches only event type, not sizes
     /// - Tick: matches tick event
     /// - None: matches None event
-    /// - UserEvent: depends on UserEvent PartialEq
+    /// - UserEvent: depends on UserEvent [`PartialEq`]
     fn forward(&self, ev: &Event<U>) -> bool {
         match self {
             EventClause::Any => true,
@@ -139,9 +139,9 @@ where
 /// A subclause indicates the condition that must be satisfied in order to forward `ev` to `target`.
 /// Usually clauses are single conditions, but there are also some special condition, to create "ligatures", which are:
 ///
-/// - `Not(SubClause)`: Negates inner condition
-/// - `And(SubClause, SubClause)`: the AND of the two clauses must be `true`
-/// - `Or(SubClause, SubClause)`: the OR of the two clauses must be `true`
+/// - [`SubClause::Not`]: Negates inner condition
+/// - [`SubClause::And`]: the AND of the two clauses must be `true`
+/// - [`SubClause::Or`]: the OR of the two clauses must be `true`
 #[derive(Debug, PartialEq)]
 #[allow(clippy::large_enum_variant)]
 pub enum SubClause<Id>
@@ -169,18 +169,18 @@ impl<Id> SubClause<Id>
 where
     Id: Eq + PartialEq + Clone + Hash,
 {
-    /// Shortcut for `SubClause::Not` without specifying `Box::new(...)`
+    /// Shortcut for [`SubClause::Not`] without specifying `Box::new(...)`
     #[allow(clippy::should_implement_trait)]
     pub fn not(clause: Self) -> Self {
         Self::Not(Box::new(clause))
     }
 
-    /// Shortcut for `SubClause::And` without specifying `Box::new(...)`
+    /// Shortcut for [`SubClause::And`] without specifying `Box::new(...)`
     pub fn and(a: Self, b: Self) -> Self {
         Self::And(Box::new(a), Box::new(b))
     }
 
-    /// Shortcut for `SubClause::Or` without specifying `Box::new(...)`
+    /// Shortcut for [`SubClause::Or`] without specifying `Box::new(...)`
     pub fn or(a: Self, b: Self) -> Self {
         Self::Or(Box::new(a), Box::new(b))
     }
