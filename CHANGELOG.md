@@ -52,9 +52,13 @@ Released on 13/10/2024
 - `CmdResult::Custom(&'static str)` changed to `CmdResult::Custom(&'static str, State)`
 - Added new `subclause_and!(Id::Foo, Id::Bar, Id::Baz)` and `subclause_or!(Id::Foo, Id::Bar, Id::Baz)` macros.
 - Removed `InputListener`. Now use `CrosstermInputListener` or `TermionInputListener`.
+- Added Event handling for Mouse Events
+  - Added `Mouse` in `SubEventClause`.
 - Bump `ratatui` version to `0.28`
 - Dont enable `MouseCapture` by default
 - Add function `enable_mouse_capture` and `disable_mouse_capture` to `TerminalBridge`
+
+Huge thanks to [hasezoey](https://github.com/hasezoey) for the contributions.
 
 ## 1.9.2
 
