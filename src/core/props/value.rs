@@ -315,7 +315,7 @@ mod tests {
     use std::collections::HashMap;
 
     use super::*;
-    use crate::tui::widgets::canvas::Map;
+    use crate::ratatui::widgets::canvas::Map;
 
     #[test]
     fn prop_values() {

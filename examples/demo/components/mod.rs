@@ -3,7 +3,7 @@
 //! demo example components
 
 use tuirealm::props::{Alignment, Borders, Color, Style};
-use tuirealm::tui::widgets::Block;
+use tuirealm::ratatui::widgets::Block;
 
 use super::Msg;
 

@@ -191,8 +191,7 @@ mod test {
         let running = Arc::new(RwLock::new(true));
         let running_t = Arc::clone(&running);
 
-        let mut mock_port = Port::new(Box::new(MockPoll::default()), Duration::from_secs(5));
-        mock_port.set_max_poll(10);
+        let mock_port = Port::new(Box::new(MockPoll::default()), Duration::from_secs(5), 10);
 
         let mut worker =
             EventListenerWorker::<MockEvent>::new(vec![mock_port], tx, paused_t, running_t, None);
@@ -218,6 +217,7 @@ mod test {
             vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5),
+                1,
             )],
             tx,
             paused_t,
@@ -244,6 +244,7 @@ mod test {
             vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5),
+                1,
             )],
             tx,
             paused_t,
@@ -270,6 +271,7 @@ mod test {
             vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(5),
+                1,
             )],
             tx,
             paused_t,
@@ -314,6 +316,7 @@ mod test {
             vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(3),
+                1,
             )],
             tx,
             paused_t,

@@ -1,14 +1,58 @@
-//! ## Event
-//!
-//! event adapter for crossterm
+use std::marker::PhantomData;
+use std::time::Duration;
 
 use crossterm::event::{
-    Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
+    self as xterm, Event as XtermEvent, KeyCode as XtermKeyCode, KeyEvent as XtermKeyEvent,
     KeyEventKind as XtermEventKind, KeyModifiers as XtermKeyModifiers,
-    MediaKeyCode as XtermMediaKeyCode,
+    MediaKeyCode as XtermMediaKeyCode, MouseButton as XtermMouseButton,
+    MouseEvent as XtermMouseEvent, MouseEventKind as XtermMouseEventKind,
 };
 
-use super::{Event, Key, KeyEvent, KeyModifiers, MediaKeyCode};
+use super::Event;
+use crate::event::{
+    Key, KeyEvent, KeyModifiers, MediaKeyCode, MouseButton, MouseEvent, MouseEventKind,
+};
+use crate::listener::{ListenerResult, Poll};
+use crate::ListenerError;
+
+/// The input listener for crossterm.
+/// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
+/// or you can use it directly in the event listener, calling `default_input_listener()` in the `EventListenerCfg`
+#[doc(alias = "InputEventListener")]
+pub struct CrosstermInputListener<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
+{
+    ghost: PhantomData<U>,
+    interval: Duration,
+}
+
+impl<U> CrosstermInputListener<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
+{
+    pub fn new(interval: Duration) -> Self {
+        Self {
+            ghost: PhantomData,
+            interval: interval / 2,
+        }
+    }
+}
+
+impl<U> Poll<U> for CrosstermInputListener<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+{
+    fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+        match xterm::poll(self.interval) {
+            Ok(true) => xterm::read()
+                .map(|x| Some(Event::from(x)))
+                .map_err(|_| ListenerError::PollFailed),
+            Ok(false) => Ok(None),
+            Err(_) => Err(ListenerError::PollFailed),
+        }
+    }
+}
 
 impl<U> From<XtermEvent> for Event<U>
 where
@@ -18,7 +62,7 @@ where
         match e {
             XtermEvent::Key(key) if key.kind == XtermEventKind::Press => Self::Keyboard(key.into()),
             XtermEvent::Key(_) => Self::None,
-            XtermEvent::Mouse(_) => Self::None,
+            XtermEvent::Mouse(ev) => Self::Mouse(ev.into()),
             XtermEvent::Resize(w, h) => Self::WindowResize(w, h),
             XtermEvent::FocusGained => Self::FocusGained,
             XtermEvent::FocusLost => Self::FocusLost,
@@ -105,6 +149,42 @@ impl From<XtermMediaKeyCode> for MediaKeyCode {
     }
 }
 
+impl From<XtermMouseEvent> for MouseEvent {
+    fn from(value: XtermMouseEvent) -> Self {
+        Self {
+            kind: value.kind.into(),
+            modifiers: value.modifiers.into(),
+            column: value.column,
+            row: value.row,
+        }
+    }
+}
+
+impl From<XtermMouseEventKind> for MouseEventKind {
+    fn from(value: XtermMouseEventKind) -> Self {
+        match value {
+            XtermMouseEventKind::Down(b) => Self::Down(b.into()),
+            XtermMouseEventKind::Up(b) => Self::Up(b.into()),
+            XtermMouseEventKind::Drag(b) => Self::Drag(b.into()),
+            XtermMouseEventKind::Moved => Self::Moved,
+            XtermMouseEventKind::ScrollDown => Self::ScrollDown,
+            XtermMouseEventKind::ScrollUp => Self::ScrollUp,
+            XtermMouseEventKind::ScrollLeft => Self::ScrollLeft,
+            XtermMouseEventKind::ScrollRight => Self::ScrollRight,
+        }
+    }
+}
+
+impl From<XtermMouseButton> for MouseButton {
+    fn from(value: XtermMouseButton) -> Self {
+        match value {
+            XtermMouseButton::Left => Self::Left,
+            XtermMouseButton::Right => Self::Right,
+            XtermMouseButton::Middle => Self::Middle,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
 
@@ -112,6 +192,7 @@ mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
+    use crate::event::{Key, MediaKeyCode};
     use crate::mock::MockEvent;
 
     #[test]
@@ -207,6 +288,122 @@ mod test {
     }
 
     #[test]
+    fn should_adapt_mouse_event() {
+        assert_eq!(
+            MouseEvent::from(XtermMouseEvent {
+                kind: XtermMouseEventKind::Moved,
+                column: 1,
+                row: 1,
+                modifiers: XtermKeyModifiers::NONE
+            }),
+            MouseEvent {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(XtermMouseEvent {
+                kind: XtermMouseEventKind::Down(XtermMouseButton::Left),
+                column: 1,
+                row: 1,
+                modifiers: XtermKeyModifiers::NONE
+            }),
+            MouseEvent {
+                kind: MouseEventKind::Down(MouseButton::Left),
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(XtermMouseEvent {
+                kind: XtermMouseEventKind::Up(XtermMouseButton::Right),
+                column: 1,
+                row: 1,
+                modifiers: XtermKeyModifiers::NONE
+            }),
+            MouseEvent {
+                kind: MouseEventKind::Up(MouseButton::Right),
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(XtermMouseEvent {
+                kind: XtermMouseEventKind::Drag(XtermMouseButton::Middle),
+                column: 1,
+                row: 1,
+                modifiers: XtermKeyModifiers::NONE
+            }),
+            MouseEvent {
+                kind: MouseEventKind::Drag(MouseButton::Middle),
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(XtermMouseEvent {
+                kind: XtermMouseEventKind::ScrollUp,
+                column: 1,
+                row: 1,
+                modifiers: XtermKeyModifiers::NONE
+            }),
+            MouseEvent {
+                kind: MouseEventKind::ScrollUp,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(XtermMouseEvent {
+                kind: XtermMouseEventKind::ScrollDown,
+                column: 1,
+                row: 1,
+                modifiers: XtermKeyModifiers::NONE
+            }),
+            MouseEvent {
+                kind: MouseEventKind::ScrollDown,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(XtermMouseEvent {
+                kind: XtermMouseEventKind::ScrollLeft,
+                column: 1,
+                row: 1,
+                modifiers: XtermKeyModifiers::NONE
+            }),
+            MouseEvent {
+                kind: MouseEventKind::ScrollLeft,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(XtermMouseEvent {
+                kind: XtermMouseEventKind::ScrollRight,
+                column: 1,
+                row: 1,
+                modifiers: XtermKeyModifiers::NONE
+            }),
+            MouseEvent {
+                kind: MouseEventKind::ScrollRight,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+    }
+
+    #[test]
     fn adapt_crossterm_key_event() {
         assert_eq!(
             KeyEvent::from(XtermKeyEvent::new(
@@ -237,7 +434,12 @@ mod test {
                 row: 0,
                 modifiers: XtermKeyModifiers::NONE,
             })),
-            Event::None
+            Event::Mouse(MouseEvent {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: 0,
+                row: 0
+            })
         );
         assert_eq!(
             AppEvent::from(XtermEvent::FocusGained),

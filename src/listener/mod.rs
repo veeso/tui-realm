@@ -20,10 +20,9 @@ use worker::EventListenerWorker;
 
 // -- internal
 use super::Event;
-pub use crate::adapter::InputEventListener;
 
-/// Result returned by `EventListener`. Ok value depends on the method, while the
-/// Err value is always `ListenerError`.
+/// Result returned by [`EventListener`]. Ok value depends on the method, while the
+/// Err value is always [`ListenerError`].
 pub type ListenerResult<T> = Result<T, ListenerError>;
 
 #[derive(Debug, Error)]
@@ -38,7 +37,7 @@ pub enum ListenerError {
     PollFailed,
 }
 
-/// The poll trait defines the function `poll`, which will be called by the event listener
+/// The poll trait defines the function [`Poll::poll`], which will be called by the event listener
 /// dedicated thread to poll for events.
 pub trait Poll<UserEvent>: Send
 where
@@ -74,7 +73,7 @@ impl<U> EventListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// Create a new `EventListener` and start it.
+    /// Create a new [`EventListener`] and start it.
     /// - `poll` is the trait object which polls for input events
     /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
     /// - `tick_interval` is the interval used to send the `Tick` event. If `None`, no tick will be sent.
@@ -248,6 +247,7 @@ mod test {
             vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(10),
+                1,
             )],
             Duration::from_millis(10),
             Some(Duration::from_secs(3)),

@@ -3,8 +3,9 @@
 //! This module defines the model for the Subscriptions
 
 use std::hash::Hash;
+use std::ops::Range;
 
-use crate::event::KeyEvent;
+use crate::event::{KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
 use crate::{AttrValue, Attribute, Event, State};
 
 /// Public type to define a subscription.
@@ -55,7 +56,7 @@ where
     K: Eq + PartialEq + Clone + Hash,
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
-    /// Instantiates a new `Subscription`
+    /// Instantiates a new [`Subscription`]
     pub fn new(target: K, sub: Sub<K, U>) -> Self {
         Self {
             target,
@@ -91,6 +92,25 @@ where
     }
 }
 
+/// A event clause for [`MouseEvent`]s
+#[derive(Debug, PartialEq, Eq)]
+pub struct MouseEventClause {
+    /// The kind of mouse event that was caused
+    pub kind: MouseEventKind,
+    /// The key modifiers active when the event occurred
+    pub modifiers: KeyModifiers,
+    /// The column that the event occurred on
+    pub column: Range<u16>,
+    /// The row that the event occurred on
+    pub row: Range<u16>,
+}
+
+impl MouseEventClause {
+    fn is_in_range(&self, ev: &MouseEvent) -> bool {
+        self.column.contains(&ev.column) && self.row.contains(&ev.row)
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 
 /// An event clause indicates on which kind of event the event must be forwarded to the `target` component.
@@ -102,12 +122,14 @@ where
     Any,
     /// Check whether a certain key has been pressed
     Keyboard(KeyEvent),
+    /// Check whether a certain key has been pressed
+    Mouse(MouseEventClause),
     /// Check whether window has been resized
     WindowResize,
     /// The event will be forwarded on a tick
     Tick,
     /// Event will be forwarded on this specific user event.
-    /// The way user event is matched, depends on its partialEq implementation
+    /// The way user event is matched, depends on its [`PartialEq`] implementation
     User(UserEvent),
 }
 
@@ -121,14 +143,16 @@ where
     ///
     /// - Any: Forward, no matter what kind of event
     /// - Keyboard: everything must match
+    /// - Mouse: everything must match, column and row need to be within range
     /// - WindowResize: matches only event type, not sizes
     /// - Tick: matches tick event
     /// - None: matches None event
-    /// - UserEvent: depends on UserEvent PartialEq
+    /// - UserEvent: depends on UserEvent [`PartialEq`]
     fn forward(&self, ev: &Event<U>) -> bool {
         match self {
             EventClause::Any => true,
             EventClause::Keyboard(k) => Some(k) == ev.is_keyboard(),
+            EventClause::Mouse(m) => ev.is_mouse().map(|ev| m.is_in_range(ev)).unwrap_or(false),
             EventClause::WindowResize => ev.is_window_resize(),
             EventClause::Tick => ev.is_tick(),
             EventClause::User(u) => Some(u) == ev.is_user(),
@@ -139,9 +163,9 @@ where
 /// A subclause indicates the condition that must be satisfied in order to forward `ev` to `target`.
 /// Usually clauses are single conditions, but there are also some special condition, to create "ligatures", which are:
 ///
-/// - `Not(SubClause)`: Negates inner condition
-/// - `And(SubClause, SubClause)`: the AND of the two clauses must be `true`
-/// - `Or(SubClause, SubClause)`: the OR of the two clauses must be `true`
+/// - [`SubClause::Not`]: Negates inner condition
+/// - [`SubClause::And`]: the AND of the two clauses must be `true`
+/// - [`SubClause::Or`]: the OR of the two clauses must be `true`
 #[derive(Debug, PartialEq)]
 #[allow(clippy::large_enum_variant)]
 pub enum SubClause<Id>
@@ -169,18 +193,18 @@ impl<Id> SubClause<Id>
 where
     Id: Eq + PartialEq + Clone + Hash,
 {
-    /// Shortcut for `SubClause::Not` without specifying `Box::new(...)`
+    /// Shortcut for [`SubClause::Not`] without specifying `Box::new(...)`
     #[allow(clippy::should_implement_trait)]
     pub fn not(clause: Self) -> Self {
         Self::Not(Box::new(clause))
     }
 
-    /// Shortcut for `SubClause::And` without specifying `Box::new(...)`
+    /// Shortcut for [`SubClause::And`] without specifying `Box::new(...)`
     pub fn and(a: Self, b: Self) -> Self {
         Self::And(Box::new(a), Box::new(b))
     }
 
-    /// Shortcut for `SubClause::Or` without specifying `Box::new(...)`
+    /// Shortcut for [`SubClause::Or`] without specifying `Box::new(...)`
     pub fn or(a: Self, b: Self) -> Self {
         Self::Or(Box::new(a), Box::new(b))
     }
@@ -296,7 +320,7 @@ mod test {
 
     use super::*;
     use crate::command::Cmd;
-    use crate::event::Key;
+    use crate::event::{Key, KeyModifiers, MouseEventKind};
     use crate::mock::{MockComponentId, MockEvent, MockFooInput};
     use crate::{MockComponent, StateValue};
 
@@ -387,6 +411,71 @@ mod test {
         );
         assert_eq!(
             EventClause::<MockEvent>::Keyboard(KeyEvent::from(Key::Enter)).forward(&Event::Tick),
+            false
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::Keyboard(KeyEvent::from(Key::Enter)).forward(&Event::Mouse(
+                MouseEvent {
+                    kind: MouseEventKind::Moved,
+                    modifiers: KeyModifiers::NONE,
+                    column: 0,
+                    row: 0
+                }
+            )),
+            false
+        );
+    }
+
+    #[test]
+    fn event_clause_mouse_should_forward() {
+        assert_eq!(
+            EventClause::<MockEvent>::Mouse(MouseEventClause {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: 0..10,
+                row: 0..10
+            })
+            .forward(&Event::Mouse(MouseEvent {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: 0,
+                row: 0
+            })),
+            true
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::Mouse(MouseEventClause {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: 0..10,
+                row: 0..10
+            })
+            .forward(&Event::Mouse(MouseEvent {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: 20,
+                row: 20
+            })),
+            false
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::Mouse(MouseEventClause {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: 0..10,
+                row: 0..10
+            })
+            .forward(&Event::Keyboard(KeyEvent::from(Key::Backspace))),
+            false
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::Mouse(MouseEventClause {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: 0..10,
+                row: 0..10
+            })
+            .forward(&Event::Tick),
             false
         );
     }
