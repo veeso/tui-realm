@@ -74,4 +74,12 @@ impl TerminalAdapter for TermionTerminalAdapter {
     fn leave_alternate_screen(&mut self) -> TerminalResult<()> {
         Err(TerminalError::Unsupported)
     }
+
+    fn disable_mouse_capture(&mut self) -> TerminalResult<()> {
+        Err(TerminalError::Unsupported)
+    }
+
+    fn enable_mouse_capture(&mut self) -> TerminalResult<()> {
+        Err(TerminalError::Unsupported)
+    }
 }

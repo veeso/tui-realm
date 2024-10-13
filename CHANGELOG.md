@@ -53,6 +53,8 @@ Released on 13/10/2024
 - Added new `subclause_and!(Id::Foo, Id::Bar, Id::Baz)` and `subclause_or!(Id::Foo, Id::Bar, Id::Baz)` macros.
 - Removed `InputListener`. Now use `CrosstermInputListener` or `TermionInputListener`.
 - Bump `ratatui` version to `0.28`
+- Dont enable `MouseCapture` by default
+- Add function `enable_mouse_capture` and `disable_mouse_capture` to `TerminalBridge`
 
 ## 1.9.2
 

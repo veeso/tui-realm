@@ -75,4 +75,14 @@ impl TerminalAdapter for CrosstermTerminalAdapter {
         )
         .map_err(|_| TerminalError::CannotLeaveAlternateMode)
     }
+
+    fn enable_mouse_capture(&mut self) -> TerminalResult<()> {
+        execute!(self.raw_mut().backend_mut(), EnableMouseCapture)
+            .map_err(|_| TerminalError::CannotToggleMouseCapture)
+    }
+
+    fn disable_mouse_capture(&mut self) -> TerminalResult<()> {
+        execute!(self.raw_mut().backend_mut(), DisableMouseCapture)
+            .map_err(|_| TerminalError::CannotToggleMouseCapture)
+    }
 }

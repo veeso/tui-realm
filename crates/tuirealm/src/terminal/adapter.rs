@@ -54,4 +54,10 @@ pub trait TerminalAdapter {
 
     /// Leave the alternate screen using the terminal adapter
     fn leave_alternate_screen(&mut self) -> TerminalResult<()>;
+
+    /// Enable mouse capture using the terminal adapter
+    fn enable_mouse_capture(&mut self) -> TerminalResult<()>;
+
+    /// Disable mouse capture using the terminal adapter
+    fn disable_mouse_capture(&mut self) -> TerminalResult<()>;
 }
