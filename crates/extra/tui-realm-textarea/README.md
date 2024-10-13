@@ -20,7 +20,7 @@
   /></a>
   <a href="https://github.com/veeso/tui-realm-textarea/stargazers"
     ><img
-      src="https://img.shields.io/github/stars/veeso/tui-realm-textarea.svg"
+      src="https://img.shields.io/github/stars/veeso/tui-realm-textarea.svg?style=badge"
       alt="Repo stars"
   /></a>
   <a href="https://crates.io/crates/tui-realm-textarea"
