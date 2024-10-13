@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.1.2 (29/08/2023)</p>
+<p align="center">Current version: 2.0.0 (13/10/2024)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -84,13 +84,13 @@ It is based on the [tui-textarea](https://github.com/rhysd/tui-textarea) compone
 ### Add tui-realm-textarea to your Cargo.toml 🦀
 
 ```toml
-tui-realm-textarea = "^1.1.0"
+tui-realm-textarea = "2"
 ```
 
 Or if you don't use **Crossterm**, define the backend as you do with tui-realm:
 
 ```toml
-tui-realm-textarea = { version = "^1.1.0", default-features = false, features = [ "with-termion" ] }
+tui-realm-textarea = { version = "2", default-features = false, features = [ "termion" ] }
 ```
 
 #### Features ⚙️

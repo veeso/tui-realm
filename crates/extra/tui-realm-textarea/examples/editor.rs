@@ -10,11 +10,11 @@ use tuirealm::{
     command::{Cmd, CmdResult, Direction, Position},
     event::{Event, Key, KeyEvent, KeyModifiers},
     props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers},
-    terminal::TerminalBridge,
+    terminal::{CrosstermTerminalAdapter, TerminalBridge},
     Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, Update,
 };
 // tui
-use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 // label
 #[cfg(feature = "search")]
 use tui_realm_stdlib::Input;
@@ -55,14 +55,14 @@ struct Model {
     app: Application<Id, Msg, NoUserEvent>,
     quit: bool,   // Becomes true when the user presses <ESC>
     redraw: bool, // Tells whether to refresh the UI; performance optimization
-    terminal: TerminalBridge,
+    terminal: TerminalBridge<CrosstermTerminalAdapter>,
 }
 
 impl Model {
     fn new() -> Self {
         // Setup app
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-            EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
+            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
         assert!(app
             .mount(Id::Editor, Box::new(Editor::default()), vec![])
@@ -79,7 +79,7 @@ impl Model {
             app,
             quit: false,
             redraw: true,
-            terminal: TerminalBridge::new().expect("Could not initialize terminal"),
+            terminal: TerminalBridge::init_crossterm().expect("Could not initialize terminal"),
         }
     }
 
@@ -97,7 +97,7 @@ impl Model {
                     ]
                     .as_ref(),
                 )
-                .split(f.size());
+                .split(f.area());
             self.app.view(&Id::Editor, f, chunks[0]);
             self.app.view(&Id::Label, f, chunks[1]);
             #[cfg(feature = "search")]
@@ -193,7 +193,7 @@ pub struct Editor<'a> {
 }
 
 impl<'a> MockComponent for Editor<'a> {
-    fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::tui::layout::Rect) {
+    fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::ratatui::layout::Rect) {
         self.component.view(frame, area);
     }
 

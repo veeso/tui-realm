@@ -1,6 +1,6 @@
 [package]
 name = "tui-realm-textarea"
-version = "1.1.2"
+version = "2.0.0"
 authors = ["Christian Visintin"]
 edition = "2021"
 categories = ["command-line-utilities"]
@@ -16,23 +16,27 @@ repository = "https://github.com/veeso/tui-realm-textarea"
 [dependencies]
 cli-clipboard = { version = "^0.4", optional = true }
 lazy-regex = "^3"
-tuirealm = { version = "^1.8.0", default-features = false, features = [
-  "derive",
-] }
-tui-textarea = "^0.2"
+tuirealm = { version = "2", default-features = false, features = ["derive"] }
+tui-textarea = "^0.6"
 
 [dev-dependencies]
-crossterm = "^0.25"
-pretty_assertions = "^1.0.0"
-tui-realm-stdlib = "^1.1.6"
+crossterm = "^0.28"
+pretty_assertions = "1"
+tui-realm-stdlib = "2"
 
 [features]
-default = ["with-crossterm"]
+default = ["crossterm"]
 clipboard = ["cli-clipboard"]
 search = ["tui-textarea/search"]
-with-crossterm = ["tuirealm/with-crossterm"]
-with-termion = ["tuirealm/with-termion"]
+crossterm = ["tuirealm/crossterm"]
+termion = ["tuirealm/termion"]
 
 [[example]]
-name = "demo"
-path = "examples/demo.rs"
+name = "editor"
+path = "examples/editor.rs"
+required-features = ["crossterm"]
+
+[[example]]
+name = "single-line"
+path = "examples/single_line.rs"
+required-features = ["crossterm"]

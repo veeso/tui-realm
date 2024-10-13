@@ -9,13 +9,13 @@
 //! ### Adding `tui-realm-textarea` as dependency
 //!
 //! ```toml
-//! tui-realm-textarea = "^1.1.0"
+//! tui-realm-textarea = "2"
 //! ```
 //!
 //! Or if you don't use **Crossterm**, define the backend as you would do with tui-realm:
 //!
 //! ```toml
-//! tui-realm-textarea = { version = "^1.1.0", default-features = false, features = [ "with-termion" ] }
+//! tui-realm-textarea = { version = "2", default-features = false, features = [ "termion" ] }
 //! ```
 //!
 //! #### Features ⚙️
@@ -157,8 +157,8 @@ use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style, TextModifiers,
 };
-use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
-use tuirealm::tui::widgets::{Block, Paragraph};
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
+use tuirealm::ratatui::widgets::{Block, Paragraph};
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- props
@@ -459,7 +459,7 @@ impl<'a> MockComponent for TextArea<'a> {
             }
 
             // render widget
-            frame.render_widget(self.widget.widget(), chunks[0]);
+            frame.render_widget(&self.widget, chunks[0]);
             if let Some(fmt) = self.status_fmt.as_ref() {
                 frame.render_widget(
                     Paragraph::new(fmt.fmt(&self.widget)).style(fmt.style()),
