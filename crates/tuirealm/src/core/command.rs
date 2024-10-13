@@ -75,7 +75,7 @@ pub enum CmdResult {
     /// The command could not be applied. Useful to report errors
     Invalid(Cmd),
     /// Custom cmd result
-    Custom(&'static str),
+    Custom(&'static str, State),
     /// An array of Command result
     Batch(Vec<CmdResult>),
     /// No result to report
