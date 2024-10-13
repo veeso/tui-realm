@@ -20,23 +20,8 @@
 //! If you want the default features, just add tuirealm 1.x version:
 //!
 //! ```toml
-//! tuirealm = "^1.9.0"
+//! tuirealm = "^2"
 //! ```
-//!
-//! otherwise you can specify the features you want to add:
-//!
-//! ```toml
-//! tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "with-termion" ] }
-//! ```
-//!
-//! Supported features are:
-//!
-//! - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
-//! - `with-crossterm` (*default*): use [crossterm](https://github.com/crossterm-rs/crossterm) as backend for tui.
-//! - `with-termion` (*default*): use [termion](https://github.com/redox-os/termion) as backend for tui.
-//!
-//! > ⚠️ You can enable only one backend at the time and at least one must be enabled in order to build.
-//! > ❗ You don't need tui as a dependency, since you can access to tui types via `use tuirealm::tui::`
 //!
 //! ### Create a tui-realm application 🪂
 //!
@@ -68,17 +53,14 @@ extern crate self as tuirealm;
 #[macro_use]
 extern crate tuirealm_derive;
 
-// -- modules
-pub mod adapter;
 mod core;
 pub mod listener;
+pub mod macros;
 #[cfg(test)]
 pub mod mock;
+pub mod ratatui;
 pub mod terminal;
-pub mod tui;
 pub mod utils;
-// -- export
-pub use adapter::{Frame, Terminal};
 pub use listener::{EventListenerCfg, ListenerError};
 // -- derive
 #[cfg(feature = "derive")]
@@ -91,3 +73,4 @@ pub use self::core::injector::Injector;
 pub use self::core::props::{self, AttrValue, Attribute, Props};
 pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
 pub use self::core::{command, Component, MockComponent, State, StateValue, Update, ViewError};
+pub use self::ratatui::Frame;

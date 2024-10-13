@@ -1,10 +1,44 @@
-//! ## Event
-//!
-//! event adapter for termion
+use std::marker::PhantomData;
+use std::time::Duration;
 
 use termion::event::{Event as TonEvent, Key as TonKey};
+use termion::input::TermRead as _;
 
-use super::{Event, Key, KeyEvent, KeyModifiers};
+use super::Event;
+use crate::event::{Key, KeyEvent, KeyModifiers};
+use crate::listener::{ListenerResult, Poll};
+use crate::ListenerError;
+
+/// The input listener for [`termion`].
+#[doc(alias = "InputEventListener")]
+pub struct TermionInputListener<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
+{
+    ghost: PhantomData<U>,
+}
+
+impl<U> TermionInputListener<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send,
+{
+    pub fn new(_interval: Duration) -> Self {
+        Self { ghost: PhantomData }
+    }
+}
+
+impl<U> Poll<U> for TermionInputListener<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+{
+    fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+        match std::io::stdin().events().next() {
+            Some(Ok(ev)) => Ok(Some(Event::from(ev))),
+            Some(Err(_)) => Err(ListenerError::PollFailed),
+            None => Ok(None),
+        }
+    }
+}
 
 impl<U> From<TonEvent> for Event<U>
 where
@@ -49,6 +83,20 @@ impl From<TonKey> for KeyEvent {
             TonKey::Null => Key::Null,
             TonKey::Esc => Key::Esc,
             TonKey::__IsNotComplete => Key::Null,
+            TonKey::ShiftLeft => Key::ShiftLeft,
+            TonKey::AltLeft => Key::AltLeft,
+            TonKey::CtrlLeft => Key::CtrlLeft,
+            TonKey::ShiftRight => Key::ShiftRight,
+            TonKey::AltRight => Key::AltRight,
+            TonKey::CtrlRight => Key::CtrlRight,
+            TonKey::ShiftUp => Key::ShiftUp,
+            TonKey::AltUp => Key::AltUp,
+            TonKey::CtrlUp => Key::CtrlUp,
+            TonKey::ShiftDown => Key::ShiftDown,
+            TonKey::AltDown => Key::AltDown,
+            TonKey::CtrlDown => Key::CtrlDown,
+            TonKey::CtrlHome => Key::CtrlHome,
+            TonKey::CtrlEnd => Key::CtrlEnd,
         };
         Self { code, modifiers }
     }
