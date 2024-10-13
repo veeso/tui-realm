@@ -1,12 +1,20 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [2.0.0](#200)
   - [1.1.2](#112)
   - [1.1.1](#111)
   - [1.1.0](#110)
   - [1.0.0](#100)
 
 ---
+
+## 2.0.0
+
+Released on 13/10/2024
+
+- [Single line mode](https://github.com/veeso/tui-realm-textarea/pull/6)
+- tuirealm 2.0
 
 ## 1.1.2
 
