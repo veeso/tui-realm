@@ -6,10 +6,11 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
+use ratatui::Frame;
 use thiserror::Error;
 
-use crate::tui::layout::Rect;
-use crate::{AttrValue, Attribute, Component, Event, Frame, Injector, State};
+use crate::ratatui::layout::Rect;
+use crate::{AttrValue, Attribute, Component, Event, Injector, State};
 
 /// A boxed component. Shorthand for View components map
 pub(crate) type WrappedComponent<Msg, UserEvent> = Box<dyn Component<Msg, UserEvent>>;

@@ -2,13 +2,16 @@
 //!
 //! app model
 
-use tuirealm::terminal::TerminalBridge;
-use tuirealm::tui::layout::{Constraint, Direction, Layout};
+use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
+use tuirealm::terminal::{TerminalAdapter, TerminalBridge};
 use tuirealm::{Application, Update};
 
 use super::{Id, Msg, UserEvent};
 
-pub struct Model {
+pub struct Model<T>
+where
+    T: TerminalAdapter,
+{
     /// Application
     pub app: Application<Id, Msg, UserEvent>,
     /// Indicates that the application must quit
@@ -16,23 +19,25 @@ pub struct Model {
     /// Tells whether to redraw interface
     pub redraw: bool,
     /// Used to draw to terminal
-    pub terminal: TerminalBridge,
+    pub terminal: TerminalBridge<T>,
 }
 
-impl Model {
-    pub fn new(app: Application<Id, Msg, UserEvent>) -> Self {
+impl<T> Model<T>
+where
+    T: TerminalAdapter,
+{
+    pub fn new(app: Application<Id, Msg, UserEvent>, adapter: T) -> Self {
         Self {
             app,
             quit: false,
             redraw: true,
-            terminal: TerminalBridge::new().expect("Cannot initialize terminal"),
+            terminal: TerminalBridge::init(adapter).expect("Cannot initialize terminal"),
         }
     }
 
     pub fn view(&mut self) {
         assert!(self
             .terminal
-            .raw_mut()
             .draw(|f| {
                 let chunks = Layout::default()
                     .direction(Direction::Vertical)
@@ -44,7 +49,7 @@ impl Model {
                         ]
                         .as_ref(),
                     )
-                    .split(f.size());
+                    .split(f.area());
                 self.app.view(&Id::Label, f, chunks[0]);
                 self.app.view(&Id::Other, f, chunks[1]);
             })
@@ -54,7 +59,10 @@ impl Model {
 
 // Let's implement Update for model
 
-impl Update<Msg> for Model {
+impl<T> Update<Msg> for Model<T>
+where
+    T: TerminalAdapter,
+{
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         if let Some(msg) = msg {
             // Set redraw

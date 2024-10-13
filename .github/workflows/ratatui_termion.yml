@@ -11,18 +11,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          override: true
           components: rustfmt, clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-fail-fast --no-default-features --features derive,serialize,ratatui,termion
+      - name: Test
+        run: cargo test --no-fail-fast --lib --no-default-features --features derive,serialize,termion
       - name: Examples
-        run: cargo build --all-targets --no-default-features --features derive,serialize,ratatui,termion --examples
+        run: cargo build --all-targets --no-default-features --features derive,serialize,termion --examples
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
-        run: cargo clippy --lib --no-default-features --features derive,serialize,ratatui,termion -- -Dwarnings
+        run: cargo clippy --lib --no-default-features --features derive,serialize,termion -- -Dwarnings

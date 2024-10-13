@@ -5,22 +5,23 @@
 use std::hash::Hash;
 use std::time::{Duration, Instant};
 
+use ratatui::Frame;
 use thiserror::Error;
 
 use super::{Subscription, View, WrappedComponent};
 use crate::listener::{EventListener, EventListenerCfg, ListenerError};
-use crate::tui::layout::Rect;
-use crate::{AttrValue, Attribute, Event, Frame, Injector, State, Sub, SubEventClause, ViewError};
+use crate::ratatui::layout::Rect;
+use crate::{AttrValue, Attribute, Event, Injector, State, Sub, SubEventClause, ViewError};
 
-/// Result retuned by `Application`.
+/// Result retuned by [`Application`].
 /// Ok depends on method
-/// Err is always `ApplicationError`
+/// Err is always [`ApplicationError`]
 pub type ApplicationResult<T> = Result<T, ApplicationError>;
 
 /// The application defines a tui-realm application.
 /// It will handle events, subscriptions and the view too.
 /// It provides functions to interact with the view (mount, umount, query, etc), but also
-/// the main function: `tick()`. See [tick](#tick)
+/// the main function: [`Application::tick`].
 pub struct Application<ComponentId, Msg, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
@@ -40,7 +41,7 @@ where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// Initialize a new `Application`.
+    /// Initialize a new [`Application`].
     /// The event listener is immediately created and started.
     pub fn init(listener_cfg: EventListenerCfg<UserEvent>) -> Self {
         Self {
@@ -53,7 +54,7 @@ where
 
     /// Restart listener in case the previous listener has died or if you want to start a new one with a new configuration.
     ///
-    /// > The listener has died if you received a `ApplicationError::Listener(ListenerError::ListenerDied))`
+    /// > The listener has died if you received a [`ApplicationError::Listener(ListenerError::ListenerDied))`]
     pub fn restart_listener(
         &mut self,
         listener_cfg: EventListenerCfg<UserEvent>,
@@ -77,14 +78,14 @@ where
     /// The tick method makes the application to run once.
     /// The workflow of the tick method is the following one:
     ///
-    /// 1. The event listener is fetched according to the provided `PollStrategy`
+    /// 1. The event listener is fetched according to the provided [`PollStrategy`]
     /// 2. All the received events are sent to the current active component
     /// 3. All the received events are forwarded to the subscribed components which satisfy the received events and conditions.
     /// 4. Returns messages to process
     ///
-    /// As soon as function returns, you should call the `view()` method.
+    /// As soon as function returns, you should call the [`Application::view`] method.
     ///
-    /// > You can also call `view` from the `update()` if you need it
+    /// > You can also call [`Application::view`] from the [`crate::Update`] if you need it
     pub fn tick(&mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Msg>> {
         // Poll event listener
         let events = self.poll(strategy)?;
@@ -354,19 +355,19 @@ where
     }
 }
 
-/// Poll strategy defines how to call `poll` on the event listener.
+/// Poll strategy defines how to call [`Application::poll`] on the event listener.
 pub enum PollStrategy {
-    /// The poll() function will be called once
+    /// [`Application::poll`] function will be called once
     Once,
     /// The application will keep waiting for events for the provided duration
     TryFor(Duration),
-    /// The poll() function will be called up to `n` times, until it will return `None`.
+    /// [`Application::poll`] function will be called up to `n` times, until it will return [`Option::None`].
     UpTo(usize),
 }
 
 // -- error
 
-/// Error variants returned by `Application`
+/// Error variants returned by [`Application`]
 #[derive(Debug, Error)]
 pub enum ApplicationError {
     #[error("already subscribed")]
@@ -1034,9 +1035,10 @@ mod test {
     }
 
     fn listener_config() -> EventListenerCfg<MockEvent> {
-        EventListenerCfg::default().port(
+        EventListenerCfg::default().add_port(
             Box::new(MockPoll::<MockEvent>::default()),
             Duration::from_millis(100),
+            1,
         )
     }
 
