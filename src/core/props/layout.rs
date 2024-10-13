@@ -2,7 +2,7 @@
 //!
 //! This module exposes the layout type
 
-use crate::tui::layout::{Constraint, Direction, Layout as TuiLayout, Margin, Rect};
+use crate::ratatui::layout::{Constraint, Direction, Layout as TuiLayout, Margin, Rect};
 
 /// Defines how a layout has to be rendered
 #[derive(Debug, PartialEq, Clone, Eq)]
@@ -60,26 +60,13 @@ impl Layout {
 
     /// Split an `Area` into chunks using the current layout configuration
     pub fn chunks(&self, area: Rect) -> Vec<Rect> {
-        #[cfg(feature = "tui")]
-        {
-            TuiLayout::default()
-                .direction(self.direction.clone())
-                .horizontal_margin(self.margin.horizontal)
-                .vertical_margin(self.margin.vertical)
-                .constraints::<&[Constraint]>(self.constraints.as_ref())
-                .split(area)
-                .to_vec()
-        }
-        #[cfg(feature = "ratatui")]
-        {
-            TuiLayout::default()
-                .direction(self.direction)
-                .horizontal_margin(self.margin.horizontal)
-                .vertical_margin(self.margin.vertical)
-                .constraints::<&[Constraint]>(self.constraints.as_ref())
-                .split(area)
-                .to_vec()
-        }
+        TuiLayout::default()
+            .direction(self.direction)
+            .horizontal_margin(self.margin.horizontal)
+            .vertical_margin(self.margin.vertical)
+            .constraints::<&[Constraint]>(self.constraints.as_ref())
+            .split(area)
+            .to_vec()
     }
 }
 

@@ -152,6 +152,34 @@ pub enum Key {
     Media(MediaKeyCode),
     /// Escape key.
     Esc,
+    /// Shift left
+    ShiftLeft,
+    /// Alt left; warning: it is supported only on termion
+    AltLeft,
+    /// warning: it is supported only on termion
+    CtrlLeft,
+    /// warning: it is supported only on termion
+    ShiftRight,
+    /// warning: it is supported only on termion
+    AltRight,
+    /// warning: it is supported only on termion
+    CtrlRight,
+    /// warning: it is supported only on termion
+    ShiftUp,
+    /// warning: it is supported only on termion
+    AltUp,
+    /// warning: it is supported only on termion
+    CtrlUp,
+    /// warning: it is supported only on termion
+    ShiftDown,
+    /// warning: it is supported only on termion
+    AltDown,
+    /// warning: it is supported only on termion
+    CtrlDown,
+    /// warning: it is supported only on termion
+    CtrlHome,
+    /// warning: it is supported only on termion
+    CtrlEnd,
 }
 
 /// Defines special key states, such as shift, control, alt...
