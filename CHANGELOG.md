@@ -49,6 +49,7 @@ Released on ??/10/2024
   - `restore`: Restore the terminal to its original state
   - `set_panic_hook`: Sets a panic hook that restores the terminal before panicking.
   - Added `draw` to `TerminalBridge`
+- `CmdResult::Custom(&'static str)` changed to `CmdResult::Custom(&'static str, State)`
 - Removed `InputListener`. Now use `CrosstermInputListener` or `TermionInputListener`.
 - Bump `ratatui` version to `0.28`
 
