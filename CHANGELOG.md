@@ -50,6 +50,7 @@ Released on ??/10/2024
   - `set_panic_hook`: Sets a panic hook that restores the terminal before panicking.
   - Added `draw` to `TerminalBridge`
 - `CmdResult::Custom(&'static str)` changed to `CmdResult::Custom(&'static str, State)`
+- Added new `subclause_and!(Id::Foo, Id::Bar, Id::Baz)` and `subclause_or!(Id::Foo, Id::Bar, Id::Baz)` macros.
 - Removed `InputListener`. Now use `CrosstermInputListener` or `TermionInputListener`.
 - Bump `ratatui` version to `0.28`
 
