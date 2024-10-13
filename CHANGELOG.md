@@ -57,6 +57,10 @@ Released on 13/10/2024
 - Bump `ratatui` version to `0.28`
 - Dont enable `MouseCapture` by default
 - Add function `enable_mouse_capture` and `disable_mouse_capture` to `TerminalBridge`
+- **Max poll for ports**:
+  - Add `Port::set_max_poll` to set the amount a `Port` is polled in a single `Port::should_poll`.
+  - Add `EventListenerCfg::port` to add a manually constructed `Port`
+  - Previous `EventListenerCfg::port` has been renamed to `EventListenerCfg::add_port`
 
 Huge thanks to [hasezoey](https://github.com/hasezoey) for the contributions.
 

@@ -1035,9 +1035,10 @@ mod test {
     }
 
     fn listener_config() -> EventListenerCfg<MockEvent> {
-        EventListenerCfg::default().port(
+        EventListenerCfg::default().add_port(
             Box::new(MockPoll::<MockEvent>::default()),
             Duration::from_millis(100),
+            1,
         )
     }
 

@@ -51,10 +51,11 @@ impl Poll<UserEvent> for UserDataPort {
 
 fn main() {
     let event_listener = EventListenerCfg::default()
-        .crossterm_input_listener(Duration::from_millis(10))
-        .port(
+        .crossterm_input_listener(Duration::from_millis(10), 3)
+        .add_port(
             Box::new(UserDataPort::default()),
             Duration::from_millis(1000),
+            1,
         );
 
     let mut app: Application<Id, Msg, UserEvent> = Application::init(event_listener);
