@@ -1,13 +1,13 @@
 [package]
 name = "tui-realm-treeview"
-version = "1.2.0"
+version = "2.0.0"
 authors = ["Christian Visintin"]
 edition = "2021"
 categories = ["command-line-utilities"]
 description = "Treeview component for tui-realm"
 documentation = "https://docs.rs/tui-realm-treeview"
 homepage = "https://github.com/veeso/tui-realm-treeview"
-include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 keywords = ["tui", "terminal"]
 license = "MIT"
 readme = "README.md"
@@ -15,23 +15,20 @@ repository = "https://github.com/veeso/tui-realm-treeview"
 
 [dependencies]
 orange-trees = "0.1.0"
-tuirealm = { version = "^1.9.0", default-features = false, features = [
-  "derive",
-] }
-unicode-width = "0.1.8"
+tuirealm = { version = "2", default-features = false, features = ["derive"] }
+unicode-width = "0.2"
 
 [dev-dependencies]
-crossterm = "0.27"
-pretty_assertions = "1.4"
-tui-realm-stdlib = "^1.1.0"
+crossterm = "0.28"
+pretty_assertions = "1"
+tui-realm-stdlib = "2"
 
 [features]
-default = ["crossterm", "ratatui"]
+default = ["crossterm"]
 crossterm = ["tuirealm/crossterm"]
-ratatui = ["tuirealm/ratatui"]
 termion = ["tuirealm/termion"]
-tui = ["tuirealm/tui"]
 
 [[example]]
 name = "demo"
 path = "examples/demo.rs"
+required-features = ["crossterm"]

@@ -1,29 +1,7 @@
-/**
- * MIT License
- *
- * tui-realm-treeview - Copyright (C) 2021 Christian Visintin
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use tui_realm_stdlib::{Input, Phantom};
+use tuirealm::terminal::CrosstermTerminalAdapter;
 use tuirealm::{
     application::PollStrategy,
     command::{Cmd, CmdResult, Direction, Position},
@@ -34,7 +12,7 @@ use tuirealm::{
     SubClause, SubEventClause, Update,
 };
 // tui
-use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 // treeview
 use tui_realm_treeview::{Node, Tree, TreeView, TREE_CMD_CLOSE, TREE_CMD_OPEN};
 
@@ -64,16 +42,16 @@ struct Model {
     app: Application<Id, Msg, NoUserEvent>,
     path: PathBuf,
     tree: Tree<String>, // You can choose a Tree<Vec<TextSpan>> for more flexible rendering
-    quit: bool,   // Becomes true when the user presses <ESC>
-    redraw: bool, // Tells whether to refresh the UI; performance optimization
-    terminal: TerminalBridge,
+    quit: bool,         // Becomes true when the user presses <ESC>
+    redraw: bool,       // Tells whether to refresh the UI; performance optimization
+    terminal: TerminalBridge<CrosstermTerminalAdapter>,
 }
 
 impl Model {
     fn new(p: &Path) -> Self {
         // Setup app
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-            EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
+            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
         assert!(app
             .mount(
@@ -107,7 +85,7 @@ impl Model {
             redraw: true,
             tree: Tree::new(Self::dir_tree(p, MAX_DEPTH)),
             path: p.to_path_buf(),
-            terminal: TerminalBridge::new().expect("Could not initialize terminal"),
+            terminal: TerminalBridge::init_crossterm().expect("Could not initialize terminal"),
         }
     }
 
@@ -157,7 +135,7 @@ impl Model {
                 .direction(LayoutDirection::Vertical)
                 .margin(1)
                 .constraints([Constraint::Min(5), Constraint::Length(3)].as_ref())
-                .split(f.size());
+                .split(f.area());
             self.app.view(&Id::FsTree, f, chunks[0]);
             self.app.view(&Id::GoTo, f, chunks[1]);
         });
@@ -205,9 +183,7 @@ fn main() {
         }
     }
     // Terminate terminal
-    let _ = model.terminal.leave_alternate_screen();
-    let _ = model.terminal.disable_raw_mode();
-    let _ = model.terminal.clear_screen();
+    let _ = model.terminal.restore();
 }
 
 // -- update

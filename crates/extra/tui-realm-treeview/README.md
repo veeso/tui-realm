@@ -1,7 +1,7 @@
 # tui-realm-treeview
 
 <p align="center">
-  <img src="/docs/images/tui-realm-treeview.svg" width="256" height="256" />
+  <img src="/docs/images/tui-realm-treeview.svg" width="256" height="256" alt="logo" />
 </p>
 
 <p align="center">~ Treeview component for tui-realm ~</p>
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.1.0 (22/11/2021)</p>
+<p align="center">Current version: 2.0.0 (13/10/2024)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -95,13 +95,13 @@ It uses the [Orange trees](https://github.com/veeso/orange-trees) engine for imp
 ### Add tui-realm-treeview to your Cargo.toml 🦀
 
 ```toml
-tui-realm-treeview = "^1.1.0"
+tui-realm-treeview = "2"
 ```
 
 Or if you don't use **Crossterm**, define the backend as you do with tui-realm:
 
 ```toml
-tui-realm-treeview = { version = "^1.1.0", default-features = false, features = [ "with-termion" ] }
+tui-realm-treeview = { version = "2", default-features = false, features = [ "termion" ] }
 ```
 
 ### Examples 📋
@@ -136,17 +136,17 @@ In this library there is a consistent use of recursion, and since rust is not fu
 
 **Commands**:
 
-| Cmd                       | Result           | Behaviour                                            |
-|---------------------------|------------------|------------------------------------------------------|
-| `Custom($TREE_CMD_CLOSE)` | `None`           | Close selected node                                  |
-| `Custom($TREE_CMD_OPEN)`  | `None`           | Open selected node                                   |
-| `GoTo(Begin)`             | `Changed | None` | Move cursor to the top of the current tree node      |
-| `GoTo(End)`               | `Changed | None` | Move cursor to the bottom of the current tree node   |
-| `Move(Down)`              | `Changed | None` | Go to next element                                   |
-| `Move(Up)`                | `Changed | None` | Go to previous element                               |
-| `Scroll(Down)`            | `Changed | None` | Move cursor down by defined max steps or end of node |
-| `Scroll(Up)`              | `Changed | None` | Move cursor up by defined max steps or begin of node |
-| `Submit`                  | `Submit`         | Just returns submit result with current state        |
+| Cmd                       | Result            | Behaviour                                            |
+|---------------------------|-------------------|------------------------------------------------------|
+| `Custom($TREE_CMD_CLOSE)` | `None`            | Close selected node                                  |
+| `Custom($TREE_CMD_OPEN)`  | `None`            | Open selected node                                   |
+| `GoTo(Begin)`             | `Changed \| None` | Move cursor to the top of the current tree node      |
+| `GoTo(End)`               | `Changed \| None` | Move cursor to the bottom of the current tree node   |
+| `Move(Down)`              | `Changed \| None` | Go to next element                                   |
+| `Move(Up)`                | `Changed \| None` | Go to previous element                               |
+| `Scroll(Down)`            | `Changed \| None` | Move cursor down by defined max steps or end of node |
+| `Scroll(Up)`              | `Changed \| None` | Move cursor up by defined max steps or begin of node |
+| `Submit`                  | `Submit`          | Just returns submit result with current state        |
 
 **State**: the state returned is a `One(String)` containing the id of the selected node. If no node is selected `None` is returned.
 

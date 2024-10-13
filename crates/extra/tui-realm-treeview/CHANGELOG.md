@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [2.0.0](#200)
   - [1.2.0](#120)
   - [1.1.0](#110)
   - [1.0.0](#100)
@@ -11,6 +12,13 @@
   - [0.1.0](#010)
 
 ---
+
+## 2.0.0
+
+Released on 13/10/2024
+
+- [now node value can be any type that implement NodeValue trait](https://github.com/veeso/tui-realm-treeview/pull/9)
+- tuirealm >= 2
 
 ## 1.2.0
 

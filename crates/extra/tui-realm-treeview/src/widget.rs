@@ -2,32 +2,9 @@
 //!
 //! This module implements the tui widget for rendering a treeview
 
-/**
- * MIT License
- *
- * tui-realm-treeview - Copyright (C) 2021 Christian Visintin
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 use super::{Node, NodeValue, Tree, TreeState};
 
-use tuirealm::tui::{
+use tuirealm::ratatui::{
     buffer::Buffer,
     layout::Rect,
     style::Style,
@@ -237,13 +214,8 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
         for (text, part_style) in node.value().render_parts_iter() {
             let part_style = part_style.unwrap_or(style);
             // Write node name
-            (start_x, start_y) = buf.set_stringn(
-                start_x,
-                start_y,
-                text,
-                width - start_x as usize,
-                part_style,
-            );
+            (start_x, start_y) =
+                buf.set_stringn(start_x, start_y, text, width - start_x as usize, part_style);
         }
         // Write arrow based on node
         let write_after = if state.is_open(node) {
@@ -288,7 +260,6 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
         fn calc_rows_to_skip_r<V: NodeValue>(
             node: &Node<V>,
             state: &TreeState,
-            height: u16,
             selected: &str,
             mut acc: usize,
         ) -> (usize, bool) {
@@ -304,7 +275,7 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
                 acc += 1;
                 // For each child, let's call this function
                 for child in node.iter() {
-                    let (ret, found) = calc_rows_to_skip_r(child, state, height, selected, acc);
+                    let (ret, found) = calc_rows_to_skip_r(child, state, selected, acc);
                     // Set acc to ret
                     acc = ret;
                     // If found, return
@@ -317,15 +288,12 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
         }
         // Return the result of recursive call;
         // if the result is less than area height, then return 0; otherwise subtract the height to result
-        match calc_rows_to_skip_r(self.tree.root(), state, height, selected, 0).0 {
+        match calc_rows_to_skip_r(self.tree.root(), state, selected, 0).0 {
             x if x < (height as usize) => 0,
             x => x - (height as usize),
         }
     }
 }
-
-// <https://docs.rs/tui-tree-widget/0.7.0/tui_tree_widget/>
-// <https://docs.rs/tui-tree-widget/0.7.0/src/tui_tree_widget/lib.rs.html#136-146>
 
 #[cfg(test)]
 mod test {
@@ -334,7 +302,7 @@ mod test {
     use crate::mock::mock_tree;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::tui::style::Color;
+    use tuirealm::ratatui::style::Color;
 
     #[test]
     fn should_construct_default_widget() {

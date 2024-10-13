@@ -9,13 +9,13 @@
 //! ### Adding `tui-realm-treeview` as dependency
 //!
 //! ```toml
-//! tui-realm-treeview = "^1.0.0"
+//! tui-realm-treeview = "2"
 //! ```
 //!
 //! Or if you don't use **Crossterm**, define the backend as you would do with tui-realm:
 //!
 //! ```toml
-//! tui-realm-treeview = { version = "^1.0.0", default-features = false, features = [ "with-termion" ] }
+//! tui-realm-treeview = { version = "2", default-features = false, features = [ "termion" ] }
 //! ```
 //!
 //! ## Component API
@@ -201,32 +201,6 @@
     html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm-treeview/main/docs/images/cargo/tui-realm-treeview-512.png"
 )]
 
-/**
- * MIT License
- *
- * tui-realm-treeview - Copyright (C) 2021 Christian Visintin
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-extern crate orange_trees;
-extern crate tuirealm;
-
 // -- mock
 #[cfg(test)]
 pub(crate) mod mock;
@@ -241,34 +215,40 @@ pub use widget::TreeWidget;
 // deps
 pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, Color, Props, Style, TextModifiers, TextSpan};
-use tuirealm::tui::{layout::Rect, widgets::Block};
+use tuirealm::props::{
+    Alignment, AttrValue, Attribute, Borders, Color, Props, Style, TextModifiers, TextSpan,
+};
+use tuirealm::ratatui::{layout::Rect, widgets::Block};
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
 /// Tree node value.
 pub trait NodeValue: Default {
     /// Return iterator over render parts - text with it style.
     /// If style is `None`, then it will be inherited from widget style.
-    fn render_parts_iter(&self) -> impl Iterator<Item=(&str, Option<Style>)>;
+    fn render_parts_iter(&self) -> impl Iterator<Item = (&str, Option<Style>)>;
 }
 
 impl NodeValue for String {
-    fn render_parts_iter(&self) -> impl Iterator<Item=(&str, Option<Style>)> {
+    fn render_parts_iter(&self) -> impl Iterator<Item = (&str, Option<Style>)> {
         iter::once((self.as_str(), None))
     }
 }
 
 impl NodeValue for Vec<TextSpan> {
-    fn render_parts_iter(&self) -> impl Iterator<Item=(&str, Option<Style>)> {
+    fn render_parts_iter(&self) -> impl Iterator<Item = (&str, Option<Style>)> {
         self.iter().map(|span| {
             (
                 span.content.as_str(),
-                Some(Style::new().fg(span.fg).bg(span.bg).add_modifier(span.modifiers)),
+                Some(
+                    Style::new()
+                        .fg(span.fg)
+                        .bg(span.bg)
+                        .add_modifier(span.modifiers),
+                ),
             )
         })
     }
 }
-
 
 // -- type override
 pub type Node<V> = OrangeNode<String, V>;
