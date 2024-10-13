@@ -149,18 +149,18 @@ level terminal TUI libraries: `tui` and `ratatui`. Whenever you explicitly
 declare any of the TUI library or backend feature sets you should disable the
 crate's default features.
 
-> ❗ You can never have more than one backend and one UI library enabled at the same time
-
-Example using the termion backend:
-
-```toml
-tuirealm = { version = "^1.9.0", default-features = false, features = [ "termion", "derive" ] }
-```
+> ❗ The two features can co-exist, even if it doesn't make too much sense.
 
 Example using crossterm:
 
 ```toml
 tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "crossterm" ]}
+```
+
+Example using the termion backend:
+
+```toml
+tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "termion" ] }
 ```
 
 ### Create a tui-realm application 🪂

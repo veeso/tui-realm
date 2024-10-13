@@ -5,7 +5,7 @@
 mod adapter;
 mod event_listener;
 
-use ratatui::{CompletedFrame, Frame, Terminal};
+use ratatui::{CompletedFrame, Frame};
 use thiserror::Error;
 
 #[cfg(feature = "crossterm")]
@@ -187,14 +187,17 @@ impl TerminalBridge<adapter::CrosstermTerminalAdapter> {
     }
 
     /// Returns a reference to the underlying [`Terminal`]
-    pub fn raw(&self) -> &Terminal<crate::ratatui::backend::CrosstermBackend<std::io::Stdout>> {
+    pub fn raw(
+        &self,
+    ) -> &crate::ratatui::Terminal<crate::ratatui::backend::CrosstermBackend<std::io::Stdout>> {
         self.terminal.raw()
     }
 
     /// Returns a mutable reference the underlying [`Terminal`]
     pub fn raw_mut(
         &mut self,
-    ) -> &mut Terminal<crate::ratatui::backend::CrosstermBackend<std::io::Stdout>> {
+    ) -> &mut crate::ratatui::Terminal<crate::ratatui::backend::CrosstermBackend<std::io::Stdout>>
+    {
         self.terminal.raw_mut()
     }
 }
