@@ -17,19 +17,32 @@ where
     poll: Box<dyn Poll<U>>,
     interval: Duration,
     next_poll: Instant,
+    max_poll: usize,
 }
 
 impl<U> Port<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// Define a new `Port`
-    pub fn new(poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
+    /// Define a new [`Port`]
+    ///
+    /// # Parameters
+    ///
+    /// * `poll` - The poll trait object
+    /// * `interval` - The interval between each poll
+    /// * `max_poll` - The maximum amount of times the port should be polled in a single poll
+    pub fn new(poll: Box<dyn Poll<U>>, interval: Duration, max_poll: usize) -> Self {
         Self {
             poll,
             interval,
             next_poll: Instant::now(),
+            max_poll,
         }
+    }
+
+    /// Get how often a port should get polled in a single poll
+    pub fn max_poll(&self) -> usize {
+        self.max_poll
     }
 
     /// Returns the interval for the current [`Port`]
@@ -69,7 +82,7 @@ mod test {
     #[test]
     fn test_single_listener() {
         let mut listener =
-            Port::<MockEvent>::new(Box::new(MockPoll::default()), Duration::from_secs(5));
+            Port::<MockEvent>::new(Box::new(MockPoll::default()), Duration::from_secs(5), 1);
         assert!(listener.next_poll() <= Instant::now());
         assert_eq!(listener.should_poll(), true);
         assert!(listener.poll().ok().unwrap().is_some());
