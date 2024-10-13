@@ -1,6 +1,6 @@
 [package]
 name = "tui-realm-stdlib"
-version = "1.3.2"
+version = "2.0.0"
 authors = ["Christian Visintin"]
 edition = "2021"
 categories = ["command-line-utilities"]
@@ -15,92 +15,106 @@ repository = "https://github.com/veeso/tui-realm-stdlib"
 
 [dependencies]
 textwrap = "^0.16"
-tuirealm = { version = "^1.9.0", default-features = false, features = [
-  "derive",
-] }
-unicode-width = "^0.1.10"
+tuirealm = { version = "2", default-features = false, features = ["derive"] }
+unicode-width = "^0.2"
 
 [dev-dependencies]
-crossterm = "^0.27"
-pretty_assertions = "1.2.1"
+crossterm = "^0.28"
+pretty_assertions = "1"
 rand = "0.8.5"
-tuirealm = { version = "^1.9.0", default-features = false }
+tuirealm = { version = "2", default-features = false }
 
 [features]
-default = ["crossterm", "ratatui"]
+default = ["crossterm"]
 crossterm = ["tuirealm/crossterm"]
-ratatui = ["tuirealm/ratatui"]
 termion = ["tuirealm/termion"]
-tui = ["tuirealm/tui"]
 
 [[example]]
 name = "bar_chart"
 path = "examples/bar_chart.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "canvas"
 path = "examples/canvas.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "chart"
 path = "examples/chart.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "checkbox"
 path = "examples/checkbox.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "container"
 path = "examples/container.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "input"
 path = "examples/input.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "label"
 path = "examples/label.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "line_gauge"
 path = "examples/line_gauge.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "list"
 path = "examples/list.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "paragraph"
 path = "examples/paragraph.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "progress_bar"
 path = "examples/progress_bar.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "radio"
 path = "examples/radio.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "select"
 path = "examples/select.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "span"
 path = "examples/span.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "sparkline"
 path = "examples/sparkline.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "spinner"
 path = "examples/spinner.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "table"
 path = "examples/table.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "textarea"
 path = "examples/textarea.rs"
+required-features = ["crossterm"]

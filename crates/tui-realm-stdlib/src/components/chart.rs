@@ -6,7 +6,8 @@ use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, Dataset, PropPayload, PropValue, Props, Style,
 };
-use tuirealm::tui::{
+use tuirealm::ratatui::text::Line;
+use tuirealm::ratatui::{
     layout::Rect,
     text::Span,
     widgets::{Axis, Chart as TuiChart, Dataset as TuiDataset},
@@ -320,13 +321,7 @@ impl MockComponent for Chart {
                 .get(Attribute::Custom(CHART_X_LABELS))
                 .map(|x| x.unwrap_payload())
             {
-                x_axis = x_axis.labels(
-                    labels
-                        .iter()
-                        .cloned()
-                        .map(|x| Span::from(x.unwrap_str()))
-                        .collect(),
-                );
+                x_axis = x_axis.labels(labels.iter().cloned().map(|x| Line::from(x.unwrap_str())));
             }
             if let Some(s) = self
                 .props
@@ -360,13 +355,7 @@ impl MockComponent for Chart {
                 .get(Attribute::Custom(CHART_Y_LABELS))
                 .map(|x| x.unwrap_payload())
             {
-                y_axis = y_axis.labels(
-                    labels
-                        .iter()
-                        .cloned()
-                        .map(|x| Span::from(x.unwrap_str()))
-                        .collect(),
-                );
+                y_axis = y_axis.labels(labels.iter().cloned().map(|x| Line::from(x.unwrap_str())));
             }
             if let Some(s) = self
                 .props
@@ -435,7 +424,7 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::tui::{symbols::Marker, widgets::GraphType};
+    use tuirealm::ratatui::{symbols::Marker, widgets::GraphType};
 
     #[test]
     fn test_components_chart_states() {

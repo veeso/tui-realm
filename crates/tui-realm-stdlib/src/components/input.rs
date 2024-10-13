@@ -9,7 +9,7 @@ use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, InputType, Props, Style, TextModifiers,
 };
-use tuirealm::tui::{layout::Rect, widgets::Paragraph};
+use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- states
@@ -313,7 +313,8 @@ impl MockComponent for Input {
                     + calc_utf8_cursor_position(
                         &self.states.render_value_chars(itype)[0..self.states.cursor],
                     );
-                render.set_cursor(x, area.y + 1);
+                render
+                    .set_cursor_position(tuirealm::ratatui::prelude::Position { x, y: area.y + 1 });
             }
         }
     }

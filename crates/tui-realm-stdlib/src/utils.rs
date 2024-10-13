@@ -9,13 +9,10 @@ extern crate unicode_width;
 use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, TextModifiers, TextSpan};
 use tuirealm::Props;
 // ext
-use tuirealm::tui::style::{Color, Modifier, Style};
-#[cfg(feature = "ratatui")]
-use tuirealm::tui::text::Line as Spans;
-use tuirealm::tui::text::Span;
-#[cfg(feature = "tui")]
-use tuirealm::tui::text::Spans;
-use tuirealm::tui::widgets::Block;
+use tuirealm::ratatui::style::{Color, Modifier, Style};
+use tuirealm::ratatui::text::Line as Spans;
+use tuirealm::ratatui::text::Span;
+use tuirealm::ratatui::widgets::Block;
 use unicode_width::UnicodeWidthStr;
 
 /// ### wrap_spans

@@ -7,7 +7,7 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
     TextModifiers,
 };
-use tuirealm::tui::{layout::Rect, widgets::Gauge};
+use tuirealm::ratatui::{layout::Rect, widgets::Gauge};
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Component

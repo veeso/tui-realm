@@ -7,7 +7,7 @@ use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
 };
-use tuirealm::tui::{layout::Rect, widgets::BarChart as TuiBarChart};
+use tuirealm::ratatui::{layout::Rect, widgets::BarChart as TuiBarChart};
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Props

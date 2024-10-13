@@ -7,7 +7,7 @@ use std::time::Duration;
 use tui_realm_stdlib::Select;
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{Alignment, BorderType, Borders, Color};
-use tuirealm::terminal::TerminalBridge;
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::State;
 use tuirealm::{
     application::PollStrategy,
@@ -15,7 +15,7 @@ use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
 };
 // tui
-use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -42,7 +42,7 @@ impl Default for Model {
     fn default() -> Self {
         // Setup app
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-            EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
+            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
         assert!(app
             .mount(Id::SelectAlfa, Box::new(SelectAlfa::default()), vec![])
@@ -61,7 +61,7 @@ impl Default for Model {
 }
 
 impl Model {
-    fn view(&mut self, terminal: &mut TerminalBridge) {
+    fn view(&mut self, terminal: &mut TerminalBridge<CrosstermTerminalAdapter>) {
         // Calc len
         let select_alfa_len = match self.app.state(&Id::SelectAlfa) {
             Ok(State::One(_)) => 3,
@@ -84,7 +84,7 @@ impl Model {
                     ]
                     .as_ref(),
                 )
-                .split(f.size());
+                .split(f.area());
             self.app.view(&Id::SelectAlfa, f, chunks[0]);
             self.app.view(&Id::SelectBeta, f, chunks[1]);
         });
@@ -93,7 +93,7 @@ impl Model {
 
 fn main() {
     let mut model = Model::default();
-    let mut terminal = TerminalBridge::new().expect("Cannot create terminal bridge");
+    let mut terminal = TerminalBridge::init_crossterm().expect("Cannot create terminal bridge");
     let _ = terminal.enable_raw_mode();
     let _ = terminal.enter_alternate_screen();
 

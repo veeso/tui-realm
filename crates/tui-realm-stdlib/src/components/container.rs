@@ -8,7 +8,7 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, Color, Layout, Props};
-use tuirealm::tui::layout::Rect;
+use tuirealm::ratatui::layout::Rect;
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Component

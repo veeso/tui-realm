@@ -7,11 +7,8 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Table,
     TextModifiers,
 };
-#[cfg(feature = "ratatui")]
-use tuirealm::tui::text::Line as Spans;
-#[cfg(feature = "tui")]
-use tuirealm::tui::text::Spans;
-use tuirealm::tui::{
+use tuirealm::ratatui::text::Line as Spans;
+use tuirealm::ratatui::{
     layout::Rect,
     text::Span,
     widgets::{List as TuiList, ListItem, ListState},
@@ -289,16 +286,11 @@ impl MockComponent for List {
                 false => modifiers,
             };
             // Make list
-            #[cfg(feature = "tui")]
+
             let mut list = TuiList::new(list_items)
                 .block(div)
                 .style(Style::default().fg(foreground).bg(background))
-                .start_corner(tuirealm::tui::layout::Corner::TopLeft);
-            #[cfg(feature = "ratatui")]
-            let mut list = TuiList::new(list_items)
-                .block(div)
-                .style(Style::default().fg(foreground).bg(background))
-                .direction(tuirealm::tui::widgets::ListDirection::TopToBottom);
+                .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom);
             if let Some(highlighted_color) = highlighted_color {
                 list = list.highlight_style(
                     Style::default()

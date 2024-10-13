@@ -8,11 +8,8 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, BorderSides, Borders, Color, PropPayload, PropValue, Props,
     Style, TextModifiers,
 };
-#[cfg(feature = "ratatui")]
-use tuirealm::tui::text::Line as Spans;
-#[cfg(feature = "tui")]
-use tuirealm::tui::text::Spans;
-use tuirealm::tui::{
+use tuirealm::ratatui::text::Line as Spans;
+use tuirealm::ratatui::{
     layout::{Constraint, Direction as LayoutDirection, Layout, Rect},
     widgets::{Block, List, ListItem, ListState, Paragraph},
 };
@@ -255,7 +252,6 @@ impl Select {
         render.render_widget(p, chunks[0]);
         // Render the list of elements in chunks [1]
         // Make list
-        #[cfg(feature = "tui")]
         let mut list = List::new(choices)
             .block(
                 Block::default()
@@ -267,26 +263,7 @@ impl Select {
                     .border_type(borders.modifiers)
                     .style(Style::default().bg(background)),
             )
-            .start_corner(tuirealm::tui::layout::Corner::TopLeft)
-            .style(Style::default().fg(foreground).bg(background))
-            .highlight_style(
-                Style::default()
-                    .fg(hg)
-                    .add_modifier(TextModifiers::REVERSED),
-            );
-        #[cfg(feature = "ratatui")]
-        let mut list = List::new(choices)
-            .block(
-                Block::default()
-                    .borders(BorderSides::LEFT | BorderSides::BOTTOM | BorderSides::RIGHT)
-                    .border_style(match focus {
-                        true => borders.style(),
-                        false => Style::default(),
-                    })
-                    .border_type(borders.modifiers)
-                    .style(Style::default().bg(background)),
-            )
-            .direction(tuirealm::tui::widgets::ListDirection::TopToBottom)
+            .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
             .style(Style::default().fg(foreground).bg(background))
             .highlight_style(
                 Style::default()

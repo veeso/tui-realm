@@ -11,7 +11,7 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
     TextModifiers, TextSpan,
 };
-use tuirealm::tui::{
+use tuirealm::ratatui::{
     layout::Rect,
     widgets::{List, ListItem, ListState},
 };
@@ -245,7 +245,7 @@ impl MockComponent for Textarea {
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
             // Make component
-            #[cfg(feature = "tui")]
+
             let mut list = List::new(lines)
                 .block(crate::utils::get_block(
                     borders,
@@ -253,22 +253,7 @@ impl MockComponent for Textarea {
                     focus,
                     inactive_style,
                 ))
-                .start_corner(tuirealm::tui::layout::Corner::TopLeft)
-                .style(
-                    Style::default()
-                        .fg(foreground)
-                        .bg(background)
-                        .add_modifier(modifiers),
-                );
-            #[cfg(feature = "ratatui")]
-            let mut list = List::new(lines)
-                .block(crate::utils::get_block(
-                    borders,
-                    Some(title),
-                    focus,
-                    inactive_style,
-                ))
-                .direction(tuirealm::tui::widgets::ListDirection::TopToBottom)
+                .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
                 .style(
                     Style::default()
                         .fg(foreground)

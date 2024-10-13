@@ -8,9 +8,9 @@ use utils::DataGen;
 use std::time::Duration;
 use tui_realm_stdlib::Chart;
 // tui
-use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
-use tuirealm::tui::symbols::Marker;
-use tuirealm::tui::widgets::GraphType;
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::ratatui::symbols::Marker;
+use tuirealm::ratatui::widgets::GraphType;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::listener::{ListenerResult, Poll};
@@ -18,7 +18,7 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, BorderType, Borders, Color, Dataset, PropPayload, PropValue,
     Style,
 };
-use tuirealm::terminal::TerminalBridge;
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
     application::PollStrategy,
     event::{Key, KeyEvent},
@@ -55,10 +55,11 @@ impl Default for Model {
         // Setup app
         let mut app: Application<Id, Msg, UserEvent> = Application::init(
             EventListenerCfg::default()
-                .default_input_listener(Duration::from_millis(10))
-                .port(
+                .crossterm_input_listener(Duration::from_millis(10), 10)
+                .add_port(
                     Box::new(DataGen::new((0.0, 0.0), (50.0, 35.0))),
                     Duration::from_millis(100),
+                    1,
                 ),
         );
         assert!(app
@@ -75,14 +76,14 @@ impl Default for Model {
 }
 
 impl Model {
-    fn view(&mut self, terminal: &mut TerminalBridge) {
+    fn view(&mut self, terminal: &mut TerminalBridge<CrosstermTerminalAdapter>) {
         let _ = terminal.raw_mut().draw(|f| {
             // Prepare chunks
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
                 .margin(1)
                 .constraints([Constraint::Percentage(100)].as_ref())
-                .split(f.size());
+                .split(f.area());
             self.app.view(&Id::ChartAlfa, f, chunks[0]);
         });
     }
@@ -90,7 +91,7 @@ impl Model {
 
 fn main() {
     let mut model = Model::default();
-    let mut terminal = TerminalBridge::new().expect("Cannot create terminal bridge");
+    let mut terminal = TerminalBridge::init_crossterm().expect("Cannot create terminal bridge");
     let _ = terminal.enable_raw_mode();
     let _ = terminal.enter_alternate_screen();
     // Now we use the Model struct to keep track of some states

@@ -6,7 +6,7 @@ use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
 };
-use tuirealm::tui::{layout::Rect, widgets::Sparkline as TuiSparkline};
+use tuirealm::ratatui::{layout::Rect, widgets::Sparkline as TuiSparkline};
 use tuirealm::{Frame, MockComponent, State};
 
 // -- component

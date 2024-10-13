@@ -4,7 +4,7 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{Alignment, AttrValue, Attribute, Color, Props, Style, TextModifiers};
-use tuirealm::tui::{layout::Rect, widgets::Paragraph};
+use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Component

@@ -12,7 +12,7 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
     TextModifiers,
 };
-use tuirealm::tui::{
+use tuirealm::ratatui::{
     layout::Rect,
     symbols::line::{Set, DOUBLE, NORMAL, ROUNDED, THICK},
     widgets::LineGauge as TuiLineGauge,
@@ -162,7 +162,7 @@ impl MockComponent for LineGauge {
             render.render_widget(
                 TuiLineGauge::default()
                     .block(div)
-                    .gauge_style(
+                    .filled_style(
                         Style::default()
                             .fg(foreground)
                             .bg(background)

@@ -8,11 +8,8 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     TextSpan,
 };
-#[cfg(feature = "ratatui")]
-use tuirealm::tui::text::Line as Spans;
-#[cfg(feature = "tui")]
-use tuirealm::tui::text::Spans;
-use tuirealm::tui::{
+use tuirealm::ratatui::text::Line as Spans;
+use tuirealm::ratatui::{
     layout::Rect,
     text::{Span as TuiSpan, Text},
     widgets::Paragraph,

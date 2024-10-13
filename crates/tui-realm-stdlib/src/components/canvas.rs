@@ -6,12 +6,9 @@ use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
 };
-use tuirealm::tui::symbols::Marker;
-#[cfg(feature = "ratatui")]
-use tuirealm::tui::text::Line as Spans;
-#[cfg(feature = "tui")]
-use tuirealm::tui::text::Spans;
-use tuirealm::tui::{
+use tuirealm::ratatui::symbols::Marker;
+use tuirealm::ratatui::text::Line as Spans;
+use tuirealm::ratatui::{
     layout::Rect,
     text::Span,
     widgets::canvas::{Canvas as TuiCanvas, Context, Points},
@@ -113,9 +110,7 @@ impl Canvas {
 
     fn marker_to_prop(marker: Marker) -> AttrValue {
         AttrValue::Number(match marker {
-            #[cfg(feature = "ratatui")]
             Marker::HalfBlock => crate::props::CANVAS_MARKER_HALF_BLOCK,
-            #[cfg(feature = "ratatui")]
             Marker::Bar => crate::props::CANVAS_MARKER_BAR,
             Marker::Block => CANVAS_MARKER_BLOCK,
             Marker::Braille => CANVAS_MARKER_BRAILLE,
@@ -241,7 +236,7 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::tui::widgets::canvas::{Line, Map, MapResolution, Rectangle};
+    use tuirealm::ratatui::widgets::canvas::{Line, Map, MapResolution, Rectangle};
 
     #[test]
     fn test_component_canvas_with_shapes() {

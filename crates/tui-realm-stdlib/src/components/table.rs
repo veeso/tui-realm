@@ -10,7 +10,7 @@ use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
     Table as PropTable, TextModifiers,
 };
-use tuirealm::tui::{
+use tuirealm::ratatui::{
     layout::{Constraint, Rect},
     text::Span,
     widgets::{Cell, Row, Table as TuiTable, TableState},
@@ -348,16 +348,7 @@ impl MockComponent for Table {
                 .get(Attribute::HighlightedColor)
                 .map(|x| x.unwrap_color());
             let widths: Vec<Constraint> = self.layout();
-            #[cfg(feature = "tui")]
-            let mut table = TuiTable::new(rows)
-                .block(crate::utils::get_block(
-                    borders,
-                    Some(title),
-                    focus,
-                    inactive_style,
-                ))
-                .widths(&widths);
-            #[cfg(feature = "ratatui")]
+
             let mut table = TuiTable::new(rows, &widths).block(crate::utils::get_block(
                 borders,
                 Some(title),

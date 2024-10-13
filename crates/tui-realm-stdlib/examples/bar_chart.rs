@@ -3,14 +3,14 @@ use std::time::Duration;
 use tui_realm_stdlib::BarChart;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{Alignment, BorderType, Borders, Color, Style};
-use tuirealm::terminal::TerminalBridge;
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
     application::PollStrategy,
     event::{Key, KeyEvent},
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
 };
 // tui
-use tuirealm::tui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -36,7 +36,7 @@ struct Model {
 impl Default for Model {
     fn default() -> Self {
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-            EventListenerCfg::default().default_input_listener(Duration::from_millis(10)),
+            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
         assert!(app
             .mount(Id::ChartAlfa, Box::new(ChartAlfa::default()), vec![])
@@ -55,7 +55,7 @@ impl Default for Model {
 }
 
 impl Model {
-    fn view(&mut self, terminal: &mut TerminalBridge) {
+    fn view(&mut self, terminal: &mut TerminalBridge<CrosstermTerminalAdapter>) {
         let _ = terminal.raw_mut().draw(|f| {
             // Prepare chunks
             let chunks = Layout::default()
@@ -69,7 +69,7 @@ impl Model {
                     ]
                     .as_ref(),
                 )
-                .split(f.size());
+                .split(f.area());
             self.app.view(&Id::ChartAlfa, f, chunks[0]);
             self.app.view(&Id::ChartBeta, f, chunks[1]);
         });
@@ -77,7 +77,7 @@ impl Model {
 }
 
 fn main() {
-    let mut terminal = TerminalBridge::new().expect("Cannot create terminal bridge");
+    let mut terminal = TerminalBridge::init_crossterm().expect("Cannot create terminal bridge");
     let mut model = Model::default();
     let _ = terminal.enable_raw_mode();
     let _ = terminal.enter_alternate_screen();

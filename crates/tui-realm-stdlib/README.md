@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 1.3.2 (05/03/2024)</p>
+<p align="center">Current version: 2.0.0 (13/10/2024)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -44,11 +44,6 @@
   /></a>
 </p>
 <p align="center">
-  <a href="https://github.com/veeso/tui-realm-stdlib/actions"
-    ><img
-      src="https://github.com/veeso/tui-realm-stdlib/workflows/tui/badge.svg"
-      alt="tui ci"
-  /></a>
   <a href="https://github.com/veeso/tui-realm-stdlib/actions"
     ><img
       src="https://github.com/veeso/tui-realm-stdlib/workflows/ratatui/badge.svg"
@@ -90,19 +85,19 @@ It provides several **Mock Components** for your tui-realm applications. Probabl
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
-tui-realm-stdlib = "^1.3.0"
+tui-realm-stdlib = "2"
 ```
 
 or if you're not using the default **crossterm backend**, specify another backend in the cargo entry:
 
 ```toml
-tui-realm-stdlib = { version = "^1.3.0", default-features = false, features = [ "ratatui", "termion" ] }
+tui-realm-stdlib = { version = "2", default-features = false, features = [ "termion" ] }
 ```
 
-Latest version of tui-realm-stdlib requires **tui-realm 1.9.0** or higher
+Latest version of tui-realm-stdlib requires **tui-realm >= 2.0** or higher
 
 ```toml
-tuirealm = "^1.9.0"
+tuirealm = "2"
 ```
 
 ---
