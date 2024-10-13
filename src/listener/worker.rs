@@ -3,7 +3,8 @@
 //! This module implements the worker thread for the event listener
 
 use std::ops::{Add, Sub};
-use std::sync::{mpsc, Arc, RwLock};
+use std::sync::atomic::AtomicBool;
+use std::sync::{mpsc, Arc};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -18,8 +19,8 @@ where
 {
     ports: Vec<Port<U>>,
     sender: mpsc::Sender<ListenerMsg<U>>,
-    paused: Arc<RwLock<bool>>,
-    running: Arc<RwLock<bool>>,
+    paused: Arc<AtomicBool>,
+    running: Arc<AtomicBool>,
     next_tick: Instant,
     tick_interval: Option<Duration>,
 }
@@ -31,8 +32,8 @@ where
     pub(super) fn new(
         ports: Vec<Port<U>>,
         sender: mpsc::Sender<ListenerMsg<U>>,
-        paused: Arc<RwLock<bool>>,
-        running: Arc<RwLock<bool>>,
+        paused: Arc<AtomicBool>,
+        running: Arc<AtomicBool>,
         tick_interval: Option<Duration>,
     ) -> Self {
         Self {
@@ -77,18 +78,12 @@ where
 
     /// Returns whether should keep running
     fn running(&self) -> bool {
-        if let Ok(lock) = self.running.read() {
-            return *lock;
-        }
-        true
+        self.running.load(std::sync::atomic::Ordering::Relaxed)
     }
 
     /// Returns whether worker is paused
     fn paused(&self) -> bool {
-        if let Ok(lock) = self.paused.read() {
-            return *lock;
-        }
-        false
+        self.paused.load(std::sync::atomic::Ordering::Relaxed)
     }
 
     /// Returns whether it's time to tick.
@@ -177,7 +172,7 @@ mod test {
 
     use pretty_assertions::assert_eq;
 
-    use super::super::{ListenerError, ListenerResult};
+    use super::super::ListenerResult;
     use super::*;
     use crate::core::event::{Key, KeyEvent};
     use crate::mock::{MockEvent, MockPoll};
@@ -186,9 +181,9 @@ mod test {
     #[test]
     fn worker_should_poll_multiple_times() {
         let (tx, rx) = mpsc::channel();
-        let paused = Arc::new(RwLock::new(false));
+        let paused = Arc::new(AtomicBool::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
+        let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
 
         let mock_port = Port::new(Box::new(MockPoll::default()), Duration::from_secs(5), 10);
@@ -209,9 +204,9 @@ mod test {
     #[test]
     fn worker_should_send_poll() {
         let (tx, rx) = mpsc::channel();
-        let paused = Arc::new(RwLock::new(false));
+        let paused = Arc::new(AtomicBool::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
+        let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
             vec![Port::new(
@@ -236,9 +231,9 @@ mod test {
     #[test]
     fn worker_should_send_tick() {
         let (tx, rx) = mpsc::channel();
-        let paused = Arc::new(RwLock::new(false));
+        let paused = Arc::new(AtomicBool::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
+        let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
             vec![Port::new(
@@ -263,9 +258,9 @@ mod test {
     #[test]
     fn worker_should_calc_times_correctly_with_tick() {
         let (tx, rx) = mpsc::channel();
-        let paused = Arc::new(RwLock::new(false));
+        let paused = Arc::new(AtomicBool::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
+        let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
             vec![Port::new(
@@ -292,15 +287,7 @@ mod test {
         // Now should no more tick and poll
         assert_eq!(worker.should_tick(), false);
         // Stop
-        {
-            let mut running_flag = match running.write() {
-                Ok(lock) => Ok(lock),
-                Err(_) => Err(ListenerError::CouldNotStop),
-            }
-            .ok()
-            .unwrap();
-            *running_flag = false;
-        }
+        running.store(false, std::sync::atomic::Ordering::Relaxed);
         assert_eq!(worker.running(), false);
         drop(rx);
     }
@@ -308,9 +295,9 @@ mod test {
     #[test]
     fn worker_should_calc_times_correctly_without_tick() {
         let (tx, rx) = mpsc::channel();
-        let paused = Arc::new(RwLock::new(false));
+        let paused = Arc::new(AtomicBool::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
+        let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         let worker = EventListenerWorker::<MockEvent>::new(
             vec![Port::new(
@@ -332,15 +319,8 @@ mod test {
         // Next event should be in 3 second (poll)
         assert!(worker.next_event() <= Duration::from_secs(3));
         // Stop
-        {
-            let mut running_flag = match running.write() {
-                Ok(lock) => Ok(lock),
-                Err(_) => Err(ListenerError::CouldNotStop),
-            }
-            .ok()
-            .unwrap();
-            *running_flag = false;
-        }
+        running.store(false, std::sync::atomic::Ordering::Relaxed);
+
         assert_eq!(worker.running(), false);
         drop(rx);
     }
@@ -349,9 +329,9 @@ mod test {
     #[should_panic]
     fn worker_should_panic_when_trying_next_tick_without_it() {
         let (tx, _) = mpsc::channel();
-        let paused = Arc::new(RwLock::new(false));
+        let paused = Arc::new(AtomicBool::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
+        let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         let mut worker =
             EventListenerWorker::<MockEvent>::new(vec![], tx, paused_t, running_t, None);
