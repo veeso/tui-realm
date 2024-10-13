@@ -21,7 +21,7 @@ use worker::EventListenerWorker;
 // -- internal
 use super::Event;
 
-/// Result returned by `EventListener`. Ok value depends on the method, while the
+/// Result returned by [`EventListener`]. Ok value depends on the method, while the
 /// Err value is always [`ListenerError`].
 pub type ListenerResult<T> = Result<T, ListenerError>;
 
@@ -37,7 +37,7 @@ pub enum ListenerError {
     PollFailed,
 }
 
-/// The poll trait defines the function [`poll`], which will be called by the event listener
+/// The poll trait defines the function [`Poll::poll`], which will be called by the event listener
 /// dedicated thread to poll for events.
 pub trait Poll<UserEvent>: Send
 where
