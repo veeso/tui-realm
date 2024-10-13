@@ -45,7 +45,7 @@ pub enum TerminalError {
     CannotToggleMouseCapture,
 }
 
-/// An helper around [`Terminal`] to quickly setup and perform on terminal.
+/// An helper around [`crate::ratatui::Terminal`] to quickly setup and perform on terminal.
 /// You can opt whether to use or not this structure to interact with the terminal
 /// Anyway this structure is 100% cross-backend compatible and is really easy to use, so I suggest you to use it.
 /// If you need more advance terminal command, you can get a reference to it using the `raw()` and `raw_mut()` methods.
@@ -202,14 +202,14 @@ impl TerminalBridge<adapter::CrosstermTerminalAdapter> {
         Self::init(adapter::CrosstermTerminalAdapter::new()?)
     }
 
-    /// Returns a reference to the underlying [`Terminal`]
+    /// Returns a reference to the underlying [`crate::ratatui::Terminal`]
     pub fn raw(
         &self,
     ) -> &crate::ratatui::Terminal<crate::ratatui::backend::CrosstermBackend<std::io::Stdout>> {
         self.terminal.raw()
     }
 
-    /// Returns a mutable reference the underlying [`Terminal`]
+    /// Returns a mutable reference the underlying [`crate::ratatui::Terminal`]
     pub fn raw_mut(
         &mut self,
     ) -> &mut crate::ratatui::Terminal<crate::ratatui::backend::CrosstermBackend<std::io::Stdout>>
