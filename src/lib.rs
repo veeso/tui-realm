@@ -1,10 +1,11 @@
 //! # tui-realm
 //!
-//! tui-realm is a **framework** for [tui](https://github.com/fdehau/tui-rs) to simplify the implementation of terminal
-//! user interfaces adding the possibility to work with re-usable components with properties and states,
-//! as you'd do in React.
-//! But that's not all: the components communicate with the ui engine via a system based on **Messages** and **Events**,
+//! tui-realm is a **framework** for **[ratatui](https://github.com/ratatui-org/ratatui)**
+//! to simplify the implementation of terminal user interfaces adding the possibility to work
+//! with re-usable components with properties and states, as you'd do in React. But that's not all:
+//! the components communicate with the ui engine via a system based on **Messages** and **Events**,
 //! providing you with the possibility to implement `update` routines as happens in Elm.
+//!
 //! In addition, the components are organized inside the **View**, which manages mounting/umounting,
 //! focus and event forwarding for you.
 //!
@@ -20,17 +21,31 @@
 //! If you want the default features, just add tuirealm 1.x version:
 //!
 //! ```toml
-//! tuirealm = "^2"
+//! tuirealm = "2"
 //! ```
+//!
+//! otherwise you can specify the features you want to add:
+//!
+//! ```toml
+//! tuirealm = { version = "2", default-features = false, features = [ "derive", "serialize", "termion" ] }
+//! ```
+//!
+//! Supported features are:
+//!
+//! - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
+//! - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
+//! - `crossterm`: use the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend
+//! - `termion`: use the [termion](https://github.com/redox-os/termion) terminal backend
 //!
 //! ### Create a tui-realm application 🪂
 //!
 //! You can read the guide to get started with tui-realm on [Github](https://github.com/veeso/tui-realm/blob/main/docs/en/get-started.md)
 //!
 //! ### Run examples 🔍
-//!Still confused about how tui-realm works? Don't worry, try with the examples:
 //!
-//!- [demo](https://github.com/veeso/tui-realm/blob/main/examples/demo.rs): a simple application which shows how tui-realm works
+//! Still confused about how tui-realm works? Don't worry, try with the examples:
+//!
+//! - [demo](https://github.com/veeso/tui-realm/blob/main/examples/demo.rs): a simple application which shows how tui-realm works
 //!
 //!    ```sh
 //!    cargo run --example demo

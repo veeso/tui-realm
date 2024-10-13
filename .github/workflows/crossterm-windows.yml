@@ -17,7 +17,7 @@ jobs:
           override: true
           components: rustfmt, clippy
       - name: Test
-        run: cargo test --no-fail-fast --no-default-features --features derive,serialize,crossterm
+        run: cargo test --no-fail-fast --lib --no-default-features --features derive,serialize,crossterm
       - name: Examples
         run: cargo build --all-targets --examples
       - name: Format

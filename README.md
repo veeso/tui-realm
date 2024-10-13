@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 2.0.0 (12/10/2024)</p>
+<p align="center">Current version: 2.0.0 (13/10/2024)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -149,18 +149,18 @@ level terminal TUI libraries: `tui` and `ratatui`. Whenever you explicitly
 declare any of the TUI library or backend feature sets you should disable the
 crate's default features.
 
-> ❗ You can never have more than one backend and one UI library enabled at the same time
-
-Example using the termion backend:
-
-```toml
-tuirealm = { version = "^1.9.0", default-features = false, features = [ "termion", "derive" ] }
-```
+> ❗ The two features can co-exist, even if it doesn't make too much sense.
 
 Example using crossterm:
 
 ```toml
-tuirealm = { version = "^1.9.0", default-features = false, features = [ "derive", "crossterm" ]}
+tuirealm = { version = "2", default-features = false, features = [ "derive", "crossterm" ]}
+```
+
+Example using the termion backend:
+
+```toml
+tuirealm = { version = "2", default-features = false, features = [ "derive", "termion" ] }
 ```
 
 ### Create a tui-realm application 🪂
@@ -171,7 +171,7 @@ View how to implement a tui-realm application in the [related guide](/docs/en/ge
 
 Still confused about how tui-realm works? Don't worry, try with the examples:
 
-- [demo](/examples/demo.rs): a simple application which shows how tui-realm works
+- [demo](/examples/demo/demo.rs): a simple application which shows how tui-realm works
 
     ```sh
     cargo run --example demo

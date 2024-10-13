@@ -38,7 +38,7 @@
 
 ## 2.0.0
 
-Released on ??/10/2024
+Released on 13/10/2024
 
 - Dropped support for `tui-rs`. Tui-rs was deprecated a long time ago, so it doesn't really makes sense to keep supporting it.
 - Added new methods for `TerminalBridge`
