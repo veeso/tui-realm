@@ -24,7 +24,7 @@
   /></a>
   <a href="https://github.com/veeso/tui-realm-stdlib/stargazers"
     ><img
-      src="https://img.shields.io/github/stars/veeso/tui-realm-stdlib.svg"
+      src="https://img.shields.io/github/stars/veeso/tui-realm-stdlib.svg?style=badge"
       alt="Repo stars"
   /></a>
   <a href="https://crates.io/crates/tui-realm-stdlib"
