@@ -76,11 +76,12 @@
 //! - `Custom($TEXTAREA_STATUS_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the status bar
 //! - `Custom($TEXTAREA_SEARCH_PATTERN, String`: Set search pattern
 //! - `Custom($TEXTAREA_SEARCH_STYLE, Style`: Set search style
+//! - `Custom($TEXTAREA_SINGLE_LINE, Style`: Act as single-line input
 //! - `Style(Style)`: Set the general style for the textarea
 //! - `Custom($TEXTAREA_TAB_SIZE, Size)`: Set the tab size to display
 //! - `FocusStyle(Style)`: inactive style
 //! - `ScrollStep(Length)`: Defines the maximum amount of rows to scroll
-//! - `Title(Title)`: Set box titleù
+//! - `Title(Title)`: Set box title
 //!
 //! ### Footer and status format
 //!
@@ -169,6 +170,7 @@ pub const TEXTAREA_MAX_HISTORY: &str = "max-history";
 pub const TEXTAREA_STATUS_FMT: &str = "status-fmt";
 pub const TEXTAREA_TAB_SIZE: &str = "tab-size";
 pub const TEXTAREA_HARD_TAB: &str = "hard-tab";
+pub const TEXTAREA_SINGLE_LINE: &str = "single-line";
 #[cfg(feature = "search")]
 pub const TEXTAREA_SEARCH_PATTERN: &str = "search-pattern";
 #[cfg(feature = "search")]
@@ -203,6 +205,8 @@ pub struct TextArea<'a> {
     status_fmt: Option<LineFmt>,
     /// footer fmt
     footer_fmt: Option<LineFmt>,
+    /// Act as single-line input
+    single_line: bool,
 }
 
 impl<'a, I> From<I> for TextArea<'a>
@@ -228,6 +232,7 @@ impl<'a> TextArea<'a> {
             widget: TextAreaWidget::new(lines),
             status_fmt: None,
             footer_fmt: None,
+            single_line: false,
         }
     }
 
@@ -344,6 +349,15 @@ impl<'a> TextArea<'a> {
         self
     }
 
+    /// Set single-line behavior
+    pub fn single_line(mut self, single_line: bool) -> Self {
+        self.attr(
+            Attribute::Custom(TEXTAREA_SINGLE_LINE),
+            AttrValue::Flag(single_line),
+        );
+        self
+    }
+
     #[cfg(feature = "search")]
     /// Set search style
     pub fn search_style(mut self, s: Style) -> Self {
@@ -392,9 +406,13 @@ impl<'a> TextArea<'a> {
             // text is currently not supported by the textarea widget. Therefor, each line is inserted
             // separately. The disadvantage of this workaround is, that each newly inserted line is a
             // separate entry in the history and therefor a separate undo step.
-            for line in yank.lines() {
-                self.widget.insert_str(line);
-                self.widget.insert_newline();
+            if self.single_line {
+                self.widget.insert_str(yank);
+            } else {
+                for line in yank.lines() {
+                    self.widget.insert_str(line);
+                    self.widget.insert_newline();
+                }
             }
         }
     }
@@ -421,7 +439,7 @@ impl<'a> MockComponent for TextArea<'a> {
                     .as_ref(),
                 )
                 .split(area);
-            
+
             // Remove cursor if not in focus
             let focus = self
                 .props
@@ -503,6 +521,9 @@ impl<'a> MockComponent for TextArea<'a> {
             (Attribute::Custom(TEXTAREA_HARD_TAB), AttrValue::Flag(enabled)) => {
                 self.widget.set_hard_tab_indent(enabled);
             }
+            (Attribute::Custom(TEXTAREA_SINGLE_LINE), AttrValue::Flag(single_line)) => {
+                self.single_line = single_line;
+            }
             #[cfg(feature = "search")]
             (Attribute::Custom(TEXTAREA_SEARCH_PATTERN), AttrValue::String(pattern)) => {
                 let _ = self.widget.set_search_pattern(pattern);
@@ -571,11 +592,15 @@ impl<'a> MockComponent for TextArea<'a> {
                 CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_BOTTOM) => {
-                self.widget.move_cursor(CursorMove::Bottom);
+                if !self.single_line {
+                    self.widget.move_cursor(CursorMove::Bottom);
+                }
                 CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_TOP) => {
-                self.widget.move_cursor(CursorMove::Top);
+                if !self.single_line {
+                    self.widget.move_cursor(CursorMove::Top);
+                }
                 CmdResult::None
             }
             #[cfg(feature = "clipboard")]
@@ -614,7 +639,9 @@ impl<'a> MockComponent for TextArea<'a> {
                 CmdResult::None
             }
             Cmd::Move(Direction::Down) => {
-                self.widget.move_cursor(CursorMove::Down);
+                if !self.single_line {
+                    self.widget.move_cursor(CursorMove::Down);
+                }
                 CmdResult::None
             }
             Cmd::Move(Direction::Left) => {
@@ -626,23 +653,29 @@ impl<'a> MockComponent for TextArea<'a> {
                 CmdResult::None
             }
             Cmd::Move(Direction::Up) => {
-                self.widget.move_cursor(CursorMove::Up);
+                if !self.single_line {
+                    self.widget.move_cursor(CursorMove::Up);
+                }
                 CmdResult::None
             }
             Cmd::Scroll(Direction::Down) => {
-                let step = self
-                    .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
-                (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Down));
+                if !self.single_line {
+                    let step = self
+                        .props
+                        .get_or(Attribute::ScrollStep, AttrValue::Length(8))
+                        .unwrap_length();
+                    (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Down));
+                }
                 CmdResult::None
             }
             Cmd::Scroll(Direction::Up) => {
-                let step = self
-                    .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
-                (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Up));
+                if !self.single_line {
+                    let step = self
+                        .props
+                        .get_or(Attribute::ScrollStep, AttrValue::Length(8))
+                        .unwrap_length();
+                    (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Up));
+                }
                 CmdResult::None
             }
             Cmd::Type('\t') => {
@@ -650,7 +683,9 @@ impl<'a> MockComponent for TextArea<'a> {
                 CmdResult::None
             }
             Cmd::Type('\n') | Cmd::Custom(TEXTAREA_CMD_NEWLINE) => {
-                self.widget.insert_newline();
+                if !self.single_line {
+                    self.widget.insert_newline();
+                }
                 CmdResult::None
             }
             Cmd::Type(ch) => {
