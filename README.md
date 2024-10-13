@@ -210,13 +210,17 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 
 ## Apps using tui-realm 🚀
 
+- [BugStalker](https://github.com/godzie44/BugStalker)
+- [cliflux](https://github.com/spencerwi/cliflux)
 - [donmaze](https://github.com/veeso/donmaze)
 - [matrix-rust-sdk](https://github.com/matrix-org/matrix-rust-sdk)
 - [paat](https://github.com/ebakoba/paat)
 - [termusic](https://github.com/tramhao/termusic)
 - [termscp](https://github.com/veeso/termscp)
+- [tisq](https://crates.io/crates/tisq)
 - [todotui](https://github.com/newfla/todotui)
 - [tuifeed](https://github.com/veeso/tuifeed)
+- [turdle](https://crates.io/crates/turdle)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
 
