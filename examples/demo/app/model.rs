@@ -7,7 +7,7 @@ use std::time::{Duration, SystemTime};
 use tuirealm::event::NoUserEvent;
 use tuirealm::props::{Alignment, Color, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
-use tuirealm::terminal::TerminalBridge;
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalBridge};
 use tuirealm::{
     Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause, Update,
 };
@@ -15,7 +15,10 @@ use tuirealm::{
 use super::components::{Clock, DigitCounter, Label, LetterCounter};
 use super::{Id, Msg};
 
-pub struct Model {
+pub struct Model<T>
+where
+    T: TerminalAdapter,
+{
     /// Application
     pub app: Application<Id, Msg, NoUserEvent>,
     /// Indicates that the application must quit
@@ -23,25 +26,27 @@ pub struct Model {
     /// Tells whether to redraw interface
     pub redraw: bool,
     /// Used to draw to terminal
-    pub terminal: TerminalBridge,
+    pub terminal: TerminalBridge<T>,
 }
 
-impl Default for Model {
+impl Default for Model<CrosstermTerminalAdapter> {
     fn default() -> Self {
         Self {
             app: Self::init_app(),
             quit: false,
             redraw: true,
-            terminal: TerminalBridge::new().expect("Cannot initialize terminal"),
+            terminal: TerminalBridge::init_crossterm().expect("Cannot initialize terminal"),
         }
     }
 }
 
-impl Model {
+impl<T> Model<T>
+where
+    T: TerminalAdapter,
+{
     pub fn view(&mut self) {
         assert!(self
             .terminal
-            .raw_mut()
             .draw(|f| {
                 let chunks = Layout::default()
                     .direction(Direction::Vertical)
@@ -72,7 +77,7 @@ impl Model {
 
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default()
-                .default_input_listener(Duration::from_millis(20))
+                .crossterm_input_listener(Duration::from_millis(20))
                 .poll_timeout(Duration::from_millis(10))
                 .tick_interval(Duration::from_secs(1)),
         );
@@ -128,7 +133,10 @@ impl Model {
 
 // Let's implement Update for model
 
-impl Update<Msg> for Model {
+impl<T> Update<Msg> for Model<T>
+where
+    T: TerminalAdapter,
+{
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         if let Some(msg) = msg {
             // Set redraw

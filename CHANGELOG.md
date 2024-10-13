@@ -48,6 +48,8 @@ Released on ??/10/2024
     - A panic hook is installed that restores the terminal before panicking. Ensure that this method is called after any other panic hooks that may be installed to ensure that the terminal is.
   - `restore`: Restore the terminal to its original state
   - `set_panic_hook`: Sets a panic hook that restores the terminal before panicking.
+  - Added `draw` to `TerminalBridge`
+- Removed `InputListener`. Now use `CrosstermInputListener` or `TermionInputListener`.
 - Bump `ratatui` version to `0.28`
 
 ## 1.9.2

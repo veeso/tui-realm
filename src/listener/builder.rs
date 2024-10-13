@@ -2,7 +2,7 @@
 //!
 //! This module exposes the EventListenerCfg which is used to build the event listener
 
-use super::{Duration, EventListener, InputEventListener, Poll, Port};
+use super::{Duration, EventListener, Poll, Port};
 
 /// The event listener configurator is used to setup an event listener.
 /// Once you're done with configuration just call `start()` and the event listener will start and the listener
@@ -65,9 +65,22 @@ where
         self
     }
 
-    /// Add to the event listener the default input event listener for the backend configured.
-    pub fn default_input_listener(self, interval: Duration) -> Self {
-        self.port(Box::new(InputEventListener::<U>::new(interval)), interval)
+    #[cfg(feature = "crossterm")]
+    /// Add to the event listener the default crossterm input listener [`crate::terminal::CrosstermInputListener`]
+    pub fn crossterm_input_listener(self, interval: Duration) -> Self {
+        self.port(
+            Box::new(crate::terminal::CrosstermInputListener::<U>::new(interval)),
+            interval,
+        )
+    }
+
+    #[cfg(feature = "termion")]
+    /// Add to the event listener the default termion input listener [`crate::terminal::TermionInputListener`]
+    pub fn termion_input_listener(self, interval: Duration) -> Self {
+        self.port(
+            Box::new(crate::terminal::TermionInputListener::<U>::new(interval)),
+            interval,
+        )
     }
 }
 
@@ -80,7 +93,8 @@ mod test {
     use crate::mock::{MockEvent, MockPoll};
 
     #[test]
-    fn should_configure_and_start_event_listener() {
+    #[cfg(feature = "crossterm")]
+    fn should_configure_and_start_event_listener_crossterm() {
         let builder = EventListenerCfg::<MockEvent>::default();
         assert!(builder.ports.is_empty());
         assert!(builder.tick_interval.is_none());
@@ -90,7 +104,26 @@ mod test {
         let builder = builder.poll_timeout(Duration::from_millis(50));
         assert_eq!(builder.poll_timeout, Duration::from_millis(50));
         let builder = builder
-            .default_input_listener(Duration::from_millis(200))
+            .crossterm_input_listener(Duration::from_millis(200))
+            .port(Box::new(MockPoll::default()), Duration::from_secs(300));
+        assert_eq!(builder.ports.len(), 2);
+        let mut listener = builder.start();
+        assert!(listener.stop().is_ok());
+    }
+
+    #[test]
+    #[cfg(feature = "termion")]
+    fn should_configure_and_start_event_listener_termion() {
+        let builder = EventListenerCfg::<MockEvent>::default();
+        assert!(builder.ports.is_empty());
+        assert!(builder.tick_interval.is_none());
+        assert_eq!(builder.poll_timeout, Duration::from_millis(10));
+        let builder = builder.tick_interval(Duration::from_secs(10));
+        assert_eq!(builder.tick_interval.unwrap(), Duration::from_secs(10));
+        let builder = builder.poll_timeout(Duration::from_millis(50));
+        assert_eq!(builder.poll_timeout, Duration::from_millis(50));
+        let builder = builder
+            .termion_input_listener(Duration::from_millis(200))
             .port(Box::new(MockPoll::default()), Duration::from_secs(300));
         assert_eq!(builder.ports.len(), 2);
         let mut listener = builder.start();
