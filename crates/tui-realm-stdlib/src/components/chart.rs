@@ -104,11 +104,9 @@ impl Chart {
         self
     }
 
-    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.props.set(
-            Attribute::Title,
-            AttrValue::Title((t.as_ref().to_string(), a)),
-        );
+    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
+        self.props
+            .set(Attribute::Title, AttrValue::Title((t.into(), a)));
         self
     }
 
@@ -190,18 +188,18 @@ impl Chart {
         self
     }
 
-    pub fn x_title<S: AsRef<str>>(mut self, t: S) -> Self {
+    pub fn x_title<S: Into<String>>(mut self, t: S) -> Self {
         self.props.set(
             Attribute::Custom(CHART_X_TITLE),
-            AttrValue::String(t.as_ref().to_string()),
+            AttrValue::String(t.into()),
         );
         self
     }
 
-    pub fn y_title<S: AsRef<str>>(mut self, t: S) -> Self {
+    pub fn y_title<S: Into<String>>(mut self, t: S) -> Self {
         self.props.set(
             Attribute::Custom(CHART_Y_TITLE),
-            AttrValue::String(t.as_ref().to_string()),
+            AttrValue::String(t.into()),
         );
         self
     }

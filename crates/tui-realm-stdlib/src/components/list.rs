@@ -144,11 +144,8 @@ impl List {
         self
     }
 
-    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(
-            Attribute::Title,
-            AttrValue::Title((t.as_ref().to_string(), a)),
-        );
+    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
         self
     }
 
@@ -172,11 +169,8 @@ impl List {
         self
     }
 
-    pub fn highlighted_str<S: AsRef<str>>(mut self, s: S) -> Self {
-        self.attr(
-            Attribute::HighlightedStr,
-            AttrValue::String(s.as_ref().to_string()),
-        );
+    pub fn highlighted_str<S: Into<String>>(mut self, s: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::String(s.into()));
         self
     }
 

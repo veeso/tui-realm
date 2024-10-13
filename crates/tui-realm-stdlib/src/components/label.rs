@@ -33,8 +33,8 @@ impl Label {
         self
     }
 
-    pub fn text<S: AsRef<str>>(mut self, t: S) -> Self {
-        self.attr(Attribute::Text, AttrValue::String(t.as_ref().to_string()));
+    pub fn text<S: Into<String>>(mut self, t: S) -> Self {
+        self.attr(Attribute::Text, AttrValue::String(t.into()));
         self
     }
 
@@ -120,5 +120,14 @@ mod tests {
             .text("foobar");
 
         assert_eq!(component.state(), State::None);
+    }
+
+    #[test]
+    fn test_various_text_inputs() {
+        let _ = Label::default().text("str");
+        let _ = Label::default().text(*&"*&str");
+        let _ = Label::default().text(String::from("String"));
+        let _ = Label::default().text(&String::from("&String"));
+        let _ = Label::default().text(format!("Format"));
     }
 }

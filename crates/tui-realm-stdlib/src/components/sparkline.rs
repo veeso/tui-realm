@@ -35,11 +35,8 @@ impl Sparkline {
         self
     }
 
-    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(
-            Attribute::Title,
-            AttrValue::Title((t.as_ref().to_string(), a)),
-        );
+    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
         self
     }
 

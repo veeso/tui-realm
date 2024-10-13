@@ -66,8 +66,8 @@ impl Spinner {
         self
     }
 
-    pub fn sequence<S: AsRef<str>>(mut self, s: S) -> Self {
-        self.attr(Attribute::Text, AttrValue::String(s.as_ref().to_string()));
+    pub fn sequence<S: Into<String>>(mut self, s: S) -> Self {
+        self.attr(Attribute::Text, AttrValue::String(s.into()));
         self
     }
 }

@@ -146,11 +146,8 @@ impl Input {
         self
     }
 
-    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(
-            Attribute::Title,
-            AttrValue::Title((t.as_ref().to_string(), a)),
-        );
+    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
         self
     }
 
@@ -164,8 +161,8 @@ impl Input {
         self
     }
 
-    pub fn value<S: AsRef<str>>(mut self, s: S) -> Self {
-        self.attr(Attribute::Value, AttrValue::String(s.as_ref().to_string()));
+    pub fn value<S: Into<String>>(mut self, s: S) -> Self {
+        self.attr(Attribute::Value, AttrValue::String(s.into()));
         self
     }
 
@@ -174,10 +171,10 @@ impl Input {
         self
     }
 
-    pub fn placeholder<S: AsRef<str>>(mut self, placeholder: S, style: Style) -> Self {
+    pub fn placeholder<S: Into<String>>(mut self, placeholder: S, style: Style) -> Self {
         self.attr(
             Attribute::Custom(INPUT_PLACEHOLDER),
-            AttrValue::String(placeholder.as_ref().to_string()),
+            AttrValue::String(placeholder.into()),
         );
         self.attr(
             Attribute::Custom(INPUT_PLACEHOLDER_STYLE),
