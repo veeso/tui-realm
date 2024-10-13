@@ -59,27 +59,45 @@ where
         self
     }
 
-    /// Add a new Port (Poll, Interval) to the the event listener
-    pub fn port(mut self, poll: Box<dyn Poll<U>>, interval: Duration) -> Self {
-        self.ports.push(Port::new(poll, interval));
+    /// Add a new [`Port`] (Poll, Interval) to the the event listener.
+    ///
+    /// The interval is the amount of time between each [`Poll::poll`] call.
+    /// The max_poll is the maximum amount of times the port should be polled in a single poll.
+    pub fn add_port(self, poll: Box<dyn Poll<U>>, interval: Duration, max_poll: usize) -> Self {
+        self.port(Port::new(poll, interval, max_poll))
+    }
+
+    /// Add a new [`Port`] to the the event listener
+    ///
+    /// The [`Port`] needs to be manually constructed, unlike [`Self::add_port`]
+    pub fn port(mut self, port: Port<U>) -> Self {
+        self.ports.push(port);
         self
     }
 
     #[cfg(feature = "crossterm")]
     /// Add to the event listener the default crossterm input listener [`crate::terminal::CrosstermInputListener`]
-    pub fn crossterm_input_listener(self, interval: Duration) -> Self {
-        self.port(
+    ///
+    /// The interval is the amount of time between each [`Poll::poll`] call.
+    /// The max_poll is the maximum amount of times the port should be polled in a single poll.
+    pub fn crossterm_input_listener(self, interval: Duration, max_poll: usize) -> Self {
+        self.add_port(
             Box::new(crate::terminal::CrosstermInputListener::<U>::new(interval)),
             interval,
+            max_poll,
         )
     }
 
     #[cfg(feature = "termion")]
     /// Add to the event listener the default termion input listener [`crate::terminal::TermionInputListener`]
-    pub fn termion_input_listener(self, interval: Duration) -> Self {
-        self.port(
+    ///
+    /// The interval is the amount of time between each [`Poll::poll`] call.
+    /// The max_poll is the maximum amount of times the port should be polled in a single poll.
+    pub fn termion_input_listener(self, interval: Duration, max_poll: usize) -> Self {
+        self.add_port(
             Box::new(crate::terminal::TermionInputListener::<U>::new(interval)),
             interval,
+            max_poll,
         )
     }
 }
@@ -104,8 +122,8 @@ mod test {
         let builder = builder.poll_timeout(Duration::from_millis(50));
         assert_eq!(builder.poll_timeout, Duration::from_millis(50));
         let builder = builder
-            .crossterm_input_listener(Duration::from_millis(200))
-            .port(Box::new(MockPoll::default()), Duration::from_secs(300));
+            .crossterm_input_listener(Duration::from_millis(200), 1)
+            .add_port(Box::new(MockPoll::default()), Duration::from_secs(300), 1);
         assert_eq!(builder.ports.len(), 2);
         let mut listener = builder.start();
         assert!(listener.stop().is_ok());
@@ -123,8 +141,8 @@ mod test {
         let builder = builder.poll_timeout(Duration::from_millis(50));
         assert_eq!(builder.poll_timeout, Duration::from_millis(50));
         let builder = builder
-            .termion_input_listener(Duration::from_millis(200))
-            .port(Box::new(MockPoll::default()), Duration::from_secs(300));
+            .termion_input_listener(Duration::from_millis(200), 1)
+            .add_port(Box::new(MockPoll::default()), Duration::from_secs(300), 1);
         assert_eq!(builder.ports.len(), 2);
         let mut listener = builder.start();
         assert!(listener.stop().is_ok());
@@ -136,5 +154,17 @@ mod test {
         EventListenerCfg::<MockEvent>::default()
             .poll_timeout(Duration::from_secs(0))
             .start();
+    }
+
+    #[test]
+    fn should_add_port_via_port_1() {
+        let builder = EventListenerCfg::<MockEvent>::default();
+        assert!(builder.ports.is_empty());
+        let builder = builder.port(Port::new(
+            Box::new(MockPoll::default()),
+            Duration::from_millis(1),
+            1,
+        ));
+        assert_eq!(builder.ports.len(), 1);
     }
 }

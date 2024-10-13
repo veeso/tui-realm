@@ -247,6 +247,7 @@ mod test {
             vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(10),
+                1,
             )],
             Duration::from_millis(10),
             Some(Duration::from_secs(3)),
