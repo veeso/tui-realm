@@ -7,7 +7,7 @@ use std::str::FromStr;
 use lazy_regex::{Lazy, Regex};
 
 use super::{Email, PhoneNumber};
-use crate::tui::style::Color;
+use crate::ratatui::style::Color;
 /**
  * Regex matches:
  * - group 1: Red

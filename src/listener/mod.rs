@@ -8,8 +8,9 @@ mod builder;
 mod port;
 mod worker;
 
+use std::sync::atomic::AtomicBool;
 // -- export
-use std::sync::{mpsc, Arc, RwLock};
+use std::sync::{mpsc, Arc};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
@@ -20,10 +21,9 @@ use worker::EventListenerWorker;
 
 // -- internal
 use super::Event;
-pub use crate::adapter::InputEventListener;
 
-/// Result returned by `EventListener`. Ok value depends on the method, while the
-/// Err value is always `ListenerError`.
+/// Result returned by [`EventListener`]. Ok value depends on the method, while the
+/// Err value is always [`ListenerError`].
 pub type ListenerResult<T> = Result<T, ListenerError>;
 
 #[derive(Debug, Error)]
@@ -38,7 +38,7 @@ pub enum ListenerError {
     PollFailed,
 }
 
-/// The poll trait defines the function `poll`, which will be called by the event listener
+/// The poll trait defines the function [`Poll::poll`], which will be called by the event listener
 /// dedicated thread to poll for events.
 pub trait Poll<UserEvent>: Send
 where
@@ -61,9 +61,9 @@ where
     /// Max Time to wait when calling `recv()` on thread receiver
     poll_timeout: Duration,
     /// Indicates whether the worker should paused polling ports
-    paused: Arc<RwLock<bool>>,
+    paused: Arc<AtomicBool>,
     /// Indicates whether the worker should keep running
-    running: Arc<RwLock<bool>>,
+    running: Arc<AtomicBool>,
     /// Msg receiver from worker
     recv: mpsc::Receiver<ListenerMsg<U>>,
     /// Join handle for worker
@@ -74,7 +74,7 @@ impl<U> EventListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// Create a new `EventListener` and start it.
+    /// Create a new [`EventListener`] and start it.
     /// - `poll` is the trait object which polls for input events
     /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
     /// - `tick_interval` is the interval used to send the `Tick` event. If `None`, no tick will be sent.
@@ -105,14 +105,9 @@ where
 
     /// Stop event listener
     pub fn stop(&mut self) -> ListenerResult<()> {
-        {
-            // NOTE: keep these brackets to drop running after block
-            let mut running = match self.running.write() {
-                Ok(lock) => Ok(lock),
-                Err(_) => Err(ListenerError::CouldNotStop),
-            }?;
-            *running = false;
-        }
+        self.running
+            .store(false, std::sync::atomic::Ordering::Relaxed);
+
         // Join thread
         match self.thread.take().map(|x| x.join()) {
             Some(Ok(_)) => Ok(()),
@@ -123,23 +118,15 @@ where
 
     /// Pause event listener worker
     pub fn pause(&mut self) -> ListenerResult<()> {
-        // NOTE: keep these brackets to drop running after block
-        let mut paused = match self.paused.write() {
-            Ok(lock) => Ok(lock),
-            Err(_) => Err(ListenerError::CouldNotStop),
-        }?;
-        *paused = true;
+        self.paused
+            .store(true, std::sync::atomic::Ordering::Relaxed);
         Ok(())
     }
 
     /// Unpause event listener worker
     pub fn unpause(&mut self) -> ListenerResult<()> {
-        // NOTE: keep these brackets to drop running after block
-        let mut paused = match self.paused.write() {
-            Ok(lock) => Ok(lock),
-            Err(_) => Err(ListenerError::CouldNotStop),
-        }?;
-        *paused = false;
+        self.paused
+            .store(false, std::sync::atomic::Ordering::Relaxed);
         Ok(())
     }
 
@@ -155,9 +142,9 @@ where
     /// Setup the thread and returns the structs necessary to interact with it
     fn setup_thread(ports: Vec<Port<U>>, tick_interval: Option<Duration>) -> ThreadConfig<U> {
         let (sender, recv) = mpsc::channel();
-        let paused = Arc::new(RwLock::new(false));
+        let paused = Arc::new(AtomicBool::new(false));
         let paused_t = Arc::clone(&paused);
-        let running = Arc::new(RwLock::new(true));
+        let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         // Start thread
         let thread = thread::spawn(move || {
@@ -184,8 +171,8 @@ where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     rx: mpsc::Receiver<ListenerMsg<U>>,
-    paused: Arc<RwLock<bool>>,
-    running: Arc<RwLock<bool>>,
+    paused: Arc<AtomicBool>,
+    running: Arc<AtomicBool>,
     thread: JoinHandle<()>,
 }
 
@@ -195,8 +182,8 @@ where
 {
     pub fn new(
         rx: mpsc::Receiver<ListenerMsg<U>>,
-        paused: Arc<RwLock<bool>>,
-        running: Arc<RwLock<bool>>,
+        paused: Arc<AtomicBool>,
+        running: Arc<AtomicBool>,
         thread: JoinHandle<()>,
     ) -> Self {
         Self {
@@ -248,6 +235,7 @@ mod test {
             vec![Port::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(10),
+                1,
             )],
             Duration::from_millis(10),
             Some(Duration::from_secs(3)),

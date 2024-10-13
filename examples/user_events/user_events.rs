@@ -5,6 +5,7 @@ use std::time::{Duration, SystemTime};
 
 use components::Label;
 use tuirealm::listener::{ListenerResult, Poll};
+use tuirealm::terminal::CrosstermTerminalAdapter;
 use tuirealm::{
     Application, Event, EventListenerCfg, PollStrategy, Sub, SubClause, SubEventClause, Update,
 };
@@ -49,14 +50,15 @@ impl Poll<UserEvent> for UserDataPort {
 }
 
 fn main() {
-    let mut app: Application<Id, Msg, UserEvent> = Application::init(
-        EventListenerCfg::default()
-            .default_input_listener(Duration::from_millis(10))
-            .port(
-                Box::new(UserDataPort::default()),
-                Duration::from_millis(1000),
-            ),
-    );
+    let event_listener = EventListenerCfg::default()
+        .crossterm_input_listener(Duration::from_millis(10), 3)
+        .add_port(
+            Box::new(UserDataPort::default()),
+            Duration::from_millis(1000),
+            1,
+        );
+
+    let mut app: Application<Id, Msg, UserEvent> = Application::init(event_listener);
 
     // subscribe component to clause
     app.mount(
@@ -80,9 +82,10 @@ fn main() {
 
     app.active(&Id::Label).expect("failed to active");
 
-    let mut model = Model::new(app);
-    let _ = model.terminal.enter_alternate_screen();
-    let _ = model.terminal.enable_raw_mode();
+    let mut model = Model::new(
+        app,
+        CrosstermTerminalAdapter::new().expect("failed to create terminal"),
+    );
     // Main loop
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {
@@ -109,8 +112,9 @@ fn main() {
             model.redraw = false;
         }
     }
-    // Terminate terminal
-    let _ = model.terminal.leave_alternate_screen();
-    let _ = model.terminal.disable_raw_mode();
-    let _ = model.terminal.clear_screen();
+
+    model
+        .terminal
+        .restore()
+        .expect("failed to restore terminal");
 }

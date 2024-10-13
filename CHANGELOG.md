@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [2.0.0](#200)
   - [1.9.2](#192)
   - [1.9.1](#191)
   - [1.9.0](#190)
@@ -34,6 +35,34 @@
   - [0.1.0](#010)
 
 ---
+
+## 2.0.0
+
+Released on 13/10/2024
+
+- Dropped support for `tui-rs`. Tui-rs was deprecated a long time ago, so it doesn't really makes sense to keep supporting it.
+- Added new methods for `TerminalBridge`
+  - `init`: Initialize a terminal with reasonable defaults for most applications.
+    - Raw mode is enabled
+    - Alternate screen buffer enabled
+    - A panic hook is installed that restores the terminal before panicking. Ensure that this method is called after any other panic hooks that may be installed to ensure that the terminal is.
+  - `restore`: Restore the terminal to its original state
+  - `set_panic_hook`: Sets a panic hook that restores the terminal before panicking.
+  - Added `draw` to `TerminalBridge`
+- `CmdResult::Custom(&'static str)` changed to `CmdResult::Custom(&'static str, State)`
+- Added new `subclause_and!(Id::Foo, Id::Bar, Id::Baz)` and `subclause_or!(Id::Foo, Id::Bar, Id::Baz)` macros.
+- Removed `InputListener`. Now use `CrosstermInputListener` or `TermionInputListener`.
+- Added Event handling for Mouse Events
+  - Added `Mouse` in `SubEventClause`.
+- Bump `ratatui` version to `0.28`
+- Dont enable `MouseCapture` by default
+- Add function `enable_mouse_capture` and `disable_mouse_capture` to `TerminalBridge`
+- **Max poll for ports**:
+  - Add `Port::set_max_poll` to set the amount a `Port` is polled in a single `Port::should_poll`.
+  - Add `EventListenerCfg::port` to add a manually constructed `Port`
+  - Previous `EventListenerCfg::port` has been renamed to `EventListenerCfg::add_port`
+
+Huge thanks to [hasezoey](https://github.com/hasezoey) for the contributions.
 
 ## 1.9.2
 
