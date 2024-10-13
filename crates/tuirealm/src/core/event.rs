@@ -16,6 +16,8 @@ where
 {
     /// A keyboard event
     Keyboard(KeyEvent),
+    /// A Mouse event
+    Mouse(MouseEvent),
     /// This event is raised after the terminal window is resized
     WindowResize(u16, u16),
     /// Window focus gained
@@ -40,6 +42,14 @@ where
     pub(crate) fn is_keyboard(&self) -> Option<&KeyEvent> {
         if let Event::Keyboard(k) = self {
             Some(k)
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn is_mouse(&self) -> Option<&MouseEvent> {
+        if let Event::Mouse(m) = self {
+            Some(m)
         } else {
             None
         }
@@ -234,6 +244,66 @@ pub enum MediaKeyCode {
     MuteVolume,
 }
 
+/// A keyboard event
+#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
+#[cfg_attr(
+    feature = "serialize",
+    derive(Deserialize, Serialize),
+    serde(tag = "type")
+)]
+pub struct MouseEvent {
+    /// The kind of mouse event that was caused
+    pub kind: MouseEventKind,
+    /// The key modifiers active when the event occurred
+    pub modifiers: KeyModifiers,
+    /// The column that the event occurred on
+    pub column: u16,
+    /// The row that the event occurred on
+    pub row: u16,
+}
+
+/// A Mouse event
+#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
+#[cfg_attr(
+    feature = "serialize",
+    derive(Deserialize, Serialize),
+    serde(tag = "type", content = "args")
+)]
+pub enum MouseEventKind {
+    /// Pressed mouse button. Contains the button that was pressed
+    Down(MouseButton),
+    /// Released mouse button. Contains the button that was released
+    Up(MouseButton),
+    /// Moved the mouse cursor while pressing the contained mouse button
+    Drag(MouseButton),
+    /// Moved / Hover changed without pressing any buttons
+    Moved,
+    /// Scrolled mouse wheel downwards
+    ScrollDown,
+    /// Scrolled mouse wheel upwards
+    ScrollUp,
+    /// Scrolled mouse wheel left
+    ScrollLeft,
+    /// Scrolled mouse wheel right
+    ScrollRight,
+}
+
+/// A keyboard event
+#[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
+#[cfg_attr(
+    feature = "serialize",
+    derive(Deserialize, Serialize),
+    serde(tag = "type", content = "args")
+)]
+pub enum MouseButton {
+    /// Left mouse button.
+    Left,
+    /// Right mouse button.
+    Right,
+    /// Middle mouse button.
+    Middle,
+}
+
 #[cfg(test)]
 mod test {
 
@@ -262,7 +332,7 @@ mod test {
         assert!(e.is_keyboard().is_some());
         assert_eq!(e.is_window_resize(), false);
         assert_eq!(e.is_tick(), false);
-        assert_eq!(e.is_tick(), false);
+        assert_eq!(e.is_mouse().is_some(), false);
         assert!(e.is_user().is_none());
         let e: Event<MockEvent> = Event::WindowResize(0, 24);
         assert!(e.is_window_resize());
@@ -271,6 +341,17 @@ mod test {
         assert!(e.is_tick());
         let e: Event<MockEvent> = Event::User(MockEvent::Bar);
         assert_eq!(e.is_user().unwrap(), &MockEvent::Bar);
+
+        let e: Event<MockEvent> = Event::Mouse(MouseEvent {
+            kind: MouseEventKind::Moved,
+            modifiers: KeyModifiers::NONE,
+            column: 0,
+            row: 0,
+        });
+        assert!(e.is_mouse().is_some());
+        assert_eq!(e.is_keyboard().is_some(), false);
+        assert_eq!(e.is_tick(), false);
+        assert_eq!(e.is_window_resize(), false);
     }
 
     // -- serde
