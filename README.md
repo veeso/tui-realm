@@ -171,7 +171,7 @@ View how to implement a tui-realm application in the [related guide](/docs/en/ge
 
 Still confused about how tui-realm works? Don't worry, try with the examples:
 
-- [demo](/examples/demo.rs): a simple application which shows how tui-realm works
+- [demo](/examples/demo/demo.rs): a simple application which shows how tui-realm works
 
     ```sh
     cargo run --example demo
