@@ -38,7 +38,9 @@ termion = ["dep:termion", "ratatui/termion"]
 [[example]]
 name = "demo"
 path = "examples/demo/demo.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "user-events"
 path = "examples/user_events/user_events.rs"
+required-features = ["crossterm"]

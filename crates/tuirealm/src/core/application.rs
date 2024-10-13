@@ -5,12 +5,13 @@
 use std::hash::Hash;
 use std::time::{Duration, Instant};
 
+use ratatui::Frame;
 use thiserror::Error;
 
 use super::{Subscription, View, WrappedComponent};
 use crate::listener::{EventListener, EventListenerCfg, ListenerError};
 use crate::ratatui::layout::Rect;
-use crate::{AttrValue, Attribute, Event, Frame, Injector, State, Sub, SubEventClause, ViewError};
+use crate::{AttrValue, Attribute, Event, Injector, State, Sub, SubEventClause, ViewError};
 
 /// Result retuned by `Application`.
 /// Ok depends on method

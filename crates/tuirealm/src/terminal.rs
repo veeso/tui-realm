@@ -2,15 +2,29 @@
 //!
 //! Cross platform Terminal helper
 
+mod adapter;
+mod event_listener;
+
+use ratatui::{CompletedFrame, Frame, Terminal};
 use thiserror::Error;
 
-use crate::Terminal;
+#[cfg(feature = "crossterm")]
+pub use self::adapter::CrosstermTerminalAdapter;
+pub use self::adapter::TerminalAdapter;
+#[cfg(feature = "termion")]
+pub use self::adapter::TermionTerminalAdapter;
+#[cfg(feature = "crossterm")]
+pub use self::event_listener::CrosstermInputListener;
+#[cfg(feature = "termion")]
+pub use self::event_listener::TermionInputListener;
 
-// -- types
+/// TerminalResult is a type alias for a Result that uses [`TerminalError`] as the error type.
 pub type TerminalResult<T> = Result<T, TerminalError>;
 
 #[derive(Debug, Error)]
 pub enum TerminalError {
+    #[error("cannot draw frame")]
+    CannotDrawFrame,
     #[error("cannot connect to stdout")]
     CannotConnectStdout,
     #[error("cannot enter alternate mode")]
@@ -29,16 +43,31 @@ pub enum TerminalError {
 /// You can opt whether to use or not this structure to interact with the terminal
 /// Anyway this structure is 100% cross-backend compatible and is really easy to use, so I suggest you to use it.
 /// If you need more advance terminal command, you can get a reference to it using the `raw()` and `raw_mut()` methods.
-pub struct TerminalBridge {
-    terminal: Terminal,
+///
+/// To quickly setup a terminal with default settings, you can use the [`TerminalBridge::init()`] method.
+///
+/// ```rust
+/// use tuirealm::terminal::TerminalBridge;
+///
+/// #[cfg(feature = "crossterm")]
+/// let mut terminal = TerminalBridge::init_crossterm().unwrap();
+/// #[cfg(feature = "termion")]
+/// let mut terminal = TerminalBridge::init_termion().unwrap();
+/// ```
+pub struct TerminalBridge<T>
+where
+    T: TerminalAdapter,
+{
+    terminal: T,
 }
 
-impl TerminalBridge {
-    /// Instantiates a new Terminal bridge
-    pub fn new() -> TerminalResult<Self> {
-        Ok(Self {
-            terminal: Self::adapt_new_terminal()?,
-        })
+impl<T> TerminalBridge<T>
+where
+    T: TerminalAdapter,
+{
+    /// Instantiates a new Terminal bridge from a [`TerminalAdapter`]
+    pub fn new(terminal: T) -> Self {
+        Self { terminal }
     }
 
     /// Initialize a terminal with reasonable defaults for most applications.
@@ -52,8 +81,8 @@ impl TerminalBridge {
     ///   restored before those hooks are called.
     ///
     /// For more control over the terminal initialization, use [`TerminalBridge::new`].
-    pub fn init() -> TerminalResult<Self> {
-        let mut terminal = Self::new()?;
+    pub fn init(terminal: T) -> TerminalResult<Self> {
+        let mut terminal = Self::new(terminal);
         terminal.enable_raw_mode()?;
         terminal.enter_alternate_screen()?;
         Self::set_panic_hook();
@@ -92,36 +121,105 @@ impl TerminalBridge {
 
     /// Enter in alternate screen using the terminal adapter
     pub fn enter_alternate_screen(&mut self) -> TerminalResult<()> {
-        self.adapt_enter_alternate_screen()
+        self.terminal.enter_alternate_screen()
     }
 
     /// Leave the alternate screen using the terminal adapter
     pub fn leave_alternate_screen(&mut self) -> TerminalResult<()> {
-        self.adapt_leave_alternate_screen()
+        self.terminal.leave_alternate_screen()
     }
 
     /// Clear the screen
     pub fn clear_screen(&mut self) -> TerminalResult<()> {
-        self.adapt_clear_screen()
+        self.terminal.clear_screen()
     }
 
     /// Enable terminal raw mode
     pub fn enable_raw_mode(&mut self) -> TerminalResult<()> {
-        self.adapt_enable_raw_mode()
+        self.terminal.enable_raw_mode()
     }
 
     /// Disable terminal raw mode
     pub fn disable_raw_mode(&mut self) -> TerminalResult<()> {
-        self.adapt_disable_raw_mode()
+        self.terminal.disable_raw_mode()
     }
 
-    /// Returna an immutable reference to the raw `Terminal` structure
-    pub fn raw(&self) -> &Terminal {
-        &self.terminal
+    /// Draws a single frame to the terminal.
+    ///
+    /// Returns a [`CompletedFrame`] if successful, otherwise a [`TerminalError`].
+    ///
+    /// This method will:
+    ///
+    /// - autoresize the terminal if necessary
+    /// - call the render callback, passing it a [`Frame`] reference to render to
+    /// - flush the current internal state by copying the current buffer to the backend
+    /// - move the cursor to the last known position if it was set during the rendering closure
+    /// - return a [`CompletedFrame`] with the current buffer and the area of the terminal
+    ///
+    /// The [`CompletedFrame`] returned by this method can be useful for debugging or testing
+    /// purposes, but it is often not used in regular applicationss.
+    ///
+    /// The render callback should fully render the entire frame when called, including areas that
+    /// are unchanged from the previous frame. This is because each frame is compared to the
+    /// previous frame to determine what has changed, and only the changes are written to the
+    /// terminal. If the render callback does not fully render the frame, the terminal will not be
+    /// in a consistent state.
+    pub fn draw<F>(&mut self, render_callback: F) -> TerminalResult<CompletedFrame>
+    where
+        F: FnOnce(&mut Frame<'_>),
+    {
+        self.terminal.draw(render_callback)
+    }
+}
+
+#[cfg(feature = "crossterm")]
+impl TerminalBridge<adapter::CrosstermTerminalAdapter> {
+    /// Create a new instance of the [`TerminalBridge`] using [`crossterm`] as backend
+    pub fn new_crossterm() -> TerminalResult<Self> {
+        Ok(Self::new(adapter::CrosstermTerminalAdapter::new()?))
     }
 
-    /// Return a mutable reference to the raw `Terminal` structure
-    pub fn raw_mut(&mut self) -> &mut Terminal {
-        &mut self.terminal
+    /// Initialize a terminal with reasonable defaults for most applications using [`crossterm`] as backend.
+    ///
+    /// See [`TerminalBridge::init`] for more information.
+    pub fn init_crossterm() -> TerminalResult<Self> {
+        Self::init(adapter::CrosstermTerminalAdapter::new()?)
+    }
+
+    /// Returns a reference to the underlying [`Terminal`]
+    pub fn raw(&self) -> &Terminal<crate::ratatui::backend::CrosstermBackend<std::io::Stdout>> {
+        self.terminal.raw()
+    }
+
+    /// Returns a mutable reference the underlying [`Terminal`]
+    pub fn raw_mut(
+        &mut self,
+    ) -> &mut Terminal<crate::ratatui::backend::CrosstermBackend<std::io::Stdout>> {
+        self.terminal.raw_mut()
+    }
+}
+
+#[cfg(feature = "termion")]
+impl TerminalBridge<adapter::TermionTerminalAdapter> {
+    /// Create a new instance of the [`TerminalBridge`] using [`termion`] as backend
+    pub fn new_termion() -> Self {
+        Self::new(adapter::TermionTerminalAdapter::new().unwrap())
+    }
+
+    /// Initialize a terminal with reasonable defaults for most applications using [`termion`] as backend.
+    ///
+    /// See [`TerminalBridge::init`] for more information.
+    pub fn init_termion() -> TerminalResult<Self> {
+        Self::init(adapter::TermionTerminalAdapter::new().unwrap())
+    }
+
+    /// Returns a reference to the underlying [`Terminal`]
+    pub fn raw(&self) -> &adapter::TermionBackend {
+        self.terminal.raw()
+    }
+
+    /// Returns a mutable reference to the underlying [`Terminal`]
+    pub fn raw_mut(&mut self) -> &mut adapter::TermionBackend {
+        self.terminal.raw_mut()
     }
 }

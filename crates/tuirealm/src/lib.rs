@@ -53,8 +53,6 @@ extern crate self as tuirealm;
 #[macro_use]
 extern crate tuirealm_derive;
 
-// -- modules
-pub mod adapter;
 mod core;
 pub mod listener;
 #[cfg(test)]
@@ -62,8 +60,6 @@ pub mod mock;
 pub mod ratatui;
 pub mod terminal;
 pub mod utils;
-// -- export
-pub use adapter::{Frame, Terminal};
 pub use listener::{EventListenerCfg, ListenerError};
 // -- derive
 #[cfg(feature = "derive")]
@@ -76,3 +72,4 @@ pub use self::core::injector::Injector;
 pub use self::core::props::{self, AttrValue, Attribute, Props};
 pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
 pub use self::core::{command, Component, MockComponent, State, StateValue, Update, ViewError};
+pub use self::ratatui::Frame;
