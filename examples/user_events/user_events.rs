@@ -60,6 +60,10 @@ fn main() {
 
     let mut app: Application<Id, Msg, UserEvent> = Application::init(event_listener);
 
+    let _clause = tuirealm::subclause_and!(Id::Label, Id::Other);
+    let _clause = tuirealm::subclause_or!(Id::Label, Id::Other);
+    let _clause = tuirealm::subclause_and_not!(Id::Label, Id::Other, Id::Label);
+
     // subscribe component to clause
     app.mount(
         Id::Label,

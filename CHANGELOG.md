@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [2.0.3](#203)
   - [2.0.2](#202)
   - [2.0.1](#201)
   - [2.0.0](#200)
@@ -37,6 +38,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 2.0.3
+
+Released on 14/10/2024
+
+- Fixed: macros were not usable from external crates since the `tuirealm::` namespace of the recursive macro was not specified
 
 ## 2.0.2
 

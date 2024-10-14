@@ -39,7 +39,7 @@ macro_rules! subclause_and {
     ($id:expr, $($rest:expr),+) => {
         SubClause::and(
             SubClause::IsMounted($id),
-            subclause_and!($($rest),+)
+            tuirealm::subclause_and!($($rest),+)
         )
     };
 }
@@ -91,7 +91,7 @@ macro_rules! subclause_and_not {
     ($id:expr, $($rest:expr),+) => {
         SubClause::and(
             SubClause::not(SubClause::IsMounted($id)),
-            subclause_and_not!($($rest),+)
+            tuirealm::subclause_and_not!($($rest),+)
         )
     };
 }
@@ -137,7 +137,7 @@ macro_rules! subclause_or {
     ($id:expr, $($rest:expr),+) => {
         SubClause::or(
             SubClause::IsMounted($id),
-            subclause_or!($($rest),+)
+            tuirealm::subclause_or!($($rest),+)
         )
     };
 }
