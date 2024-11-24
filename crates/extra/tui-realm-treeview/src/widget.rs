@@ -253,45 +253,39 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
             Some(s) => s,
             None => return 0,
         };
-        /// ### calc_rows_to_skip_r
+
+        /// ### visit_nodes
         ///
-        /// Inner recursive call to calc rows to skip.
-        /// Returns the rows to skip and whether the item has been found (this last oneshould be ignored)
-        fn calc_rows_to_skip_r<V: NodeValue>(
+        /// Recursive visit each node (excluding closed ones) and calculate full size and index of selected node
+        fn visit_nodes<V: NodeValue>(
             node: &Node<V>,
             state: &TreeState,
             selected: &str,
-            mut acc: usize,
-        ) -> (usize, bool) {
-            // If node is selected, return `acc`
+            selected_idx: &mut usize,
+            size: &mut usize,
+        ) {
+            *size += 1;
             if node.id().as_str() == selected {
-                (acc + 1, true)
-            } else if state.is_closed(node) {
-                // If node is closed, then return acc + 1
-                (acc + 1, false)
-            } else {
-                // is open and is not selected
-                // I increment the accumulator by one
-                acc += 1;
-                // For each child, let's call this function
+                *selected_idx = *size;
+            }
+
+            if !state.is_closed(node) {
                 for child in node.iter() {
-                    let (ret, found) = calc_rows_to_skip_r(child, state, selected, acc);
-                    // Set acc to ret
-                    acc = ret;
-                    // If found, return
-                    if found {
-                        return (acc, true);
-                    }
+                    visit_nodes(child, state, selected, selected_idx, size);
                 }
-                (acc, false)
             }
         }
-        // Return the result of recursive call;
-        // if the result is less than area height, then return 0; otherwise subtract the height to result
-        match calc_rows_to_skip_r(self.tree.root(), state, selected, 0).0 {
-            x if x < (height as usize) => 0,
-            x => x - (height as usize),
-        }
+
+        let selected_idx: &mut usize = &mut 0;
+        let size = &mut 0;
+        visit_nodes(self.tree.root(), state, selected, selected_idx, size);
+
+        let render_area_h = height as usize;
+        let num_lines_to_show_at_top = render_area_h / 2;
+        let offset_max = (*size).saturating_sub(render_area_h);
+        (*selected_idx)
+            .saturating_sub(num_lines_to_show_at_top)
+            .min(offset_max)
     }
 }
 
@@ -341,9 +335,9 @@ mod test {
         // Get rows to skip (no block)
         let widget = TreeWidget::new(&tree);
         // Before end
-        assert_eq!(widget.calc_rows_to_skip(&state, 8), 0);
+        assert_eq!(widget.calc_rows_to_skip(&state, 8), 2);
         // At end
-        assert_eq!(widget.calc_rows_to_skip(&state, 6), 0);
+        assert_eq!(widget.calc_rows_to_skip(&state, 6), 3);
     }
 
     #[test]
@@ -358,6 +352,6 @@ mod test {
         // Get rows to skip (no block)
         let widget = TreeWidget::new(&tree);
         // 20th element - height (12) + 1
-        assert_eq!(widget.calc_rows_to_skip(&state, 8), 13);
+        assert_eq!(widget.calc_rows_to_skip(&state, 8), 17);
     }
 }
