@@ -212,6 +212,7 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 
 - [BugStalker](https://github.com/godzie44/BugStalker)
 - [cliflux](https://github.com/spencerwi/cliflux)
+- [csvs](https://github.com/koma-private/csvs)
 - [donmaze](https://github.com/veeso/donmaze)
 - [matrix-rust-sdk](https://github.com/matrix-org/matrix-rust-sdk)
 - [paat](https://github.com/ebakoba/paat)
