@@ -33,7 +33,7 @@ What you will learn:
 - How to code a tui-realm application from scratch
 - What makes tui-realm cool
 
-tui-realm is a tui-rs **framework** which provides an easy way to implement stateful application.
+tui-realm is a ratatui **framework** which provides an easy way to implement stateful application.
 First of all, let's give a look to the main features of tui-realm and why you should opt for this framework when building
 terminal user interfaces:
 
@@ -131,7 +131,7 @@ pub trait MockComponent {
 
 the trait requires you to implement:
 
-- *view*: a method which renders the component in the provided area. You must use `tui-rs` widgets to render your component based on its properties and states.
+- *view*: a method which renders the component in the provided area. You must use `ratatui` widgets to render your component based on its properties and states.
 - *query*: returns the value for a certain attribute in the component properties.
 - *attr*: assign a certain attribute to the component properties.
 - *state*: get the current component state. If has no state will return `State::None`.
@@ -774,7 +774,7 @@ pub struct Model {
 }
 ```
 
-> ❗ the terminal bridge is a helper struct implemented in tui-realm to interface with tui-rs terminal with some helper functions.
+> ❗ the terminal bridge is a helper struct implemented in tui-realm to interface with ratatui terminal with some helper functions.
 > It also is totally backend-independent, so you won't have to know how to setup the terminal for your backend.
 
 Now, we'll implement the `view()` method, which will render the GUI after updating the model:
@@ -805,7 +805,7 @@ impl Model {
 }
 ```
 
-> ❗ If you're not familiar with the `draw()` function, please read the tui-rs documentation.
+> ❗ If you're not familiar with the `draw()` function, please read the [ratatui](https://ratatui.rs/) documentation.
 
 and finally we can implement the `Update` trait:
 
