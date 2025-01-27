@@ -119,7 +119,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as U8.
+    /// Unwrap PropValue as u8.
     /// Panics otherwise
     pub fn unwrap_u8(self) -> u8 {
         match self {
@@ -173,7 +173,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as I8.
+    /// Unwrap PropValue as i8.
     /// Panics otherwise
     pub fn unwrap_i8(self) -> i8 {
         match self {
@@ -200,7 +200,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as u64.
+    /// Unwrap PropValue as i64.
     /// Panics otherwise
     pub fn unwrap_i64(self) -> i64 {
         match self {
@@ -227,7 +227,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as f3.
+    /// Unwrap PropValue as f32.
     /// Panics otherwise
     pub fn unwrap_f32(self) -> f32 {
         match self {
@@ -236,7 +236,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as F64.
+    /// Unwrap PropValue as f64.
     /// Panics otherwise
     pub fn unwrap_f64(self) -> f64 {
         match self {
@@ -245,7 +245,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as str.
+    /// Unwrap PropValue as String.
     /// Panics otherwise
     pub fn unwrap_str(self) -> String {
         match self {
@@ -254,7 +254,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as alignment.
+    /// Unwrap PropValue as Alignment.
     /// Panics otherwise
     pub fn unwrap_alignment(self) -> Alignment {
         match self {
@@ -281,7 +281,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as shape.
+    /// Unwrap PropValue as Shape.
     /// Panics otherwise
     pub fn unwrap_shape(self) -> Shape {
         match self {
@@ -299,7 +299,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as Bool.
+    /// Unwrap PropValue as TextSpan.
     /// Panics otherwise
     pub fn unwrap_text_span(self) -> TextSpan {
         match self {
