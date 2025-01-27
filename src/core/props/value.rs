@@ -107,6 +107,62 @@ impl PropPayload {
             _ => panic!("Called `unwrap_linked` on a bad value"),
         }
     }
+
+    /// Get a One value from PropPayload, or None
+    pub fn as_one(&self) -> Option<&PropValue> {
+        match self {
+            PropPayload::One(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup2 value from PropPayload, or None
+    pub fn as_tup2(&self) -> Option<&(PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup2(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup3 value from PropPayload, or None
+    pub fn as_tup3(&self) -> Option<&(PropValue, PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup3(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup4 value from PropPayload, or None
+    pub fn as_tup4(&self) -> Option<&(PropValue, PropValue, PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup4(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vec value from PropPa&Vec<PropValue>None
+    pub fn as_vec(&self) -> Option<&Vec<PropValue>> {
+        match self {
+            PropPayload::Vec(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Map value from PropPayload, or None
+    pub fn as_map(&self) -> Option<&HashMap<String, PropValue>> {
+        match self {
+            PropPayload::Map(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Linked value from PropPayload, or None
+    pub fn as_linked(&self) -> Option<&LinkedList<PropPayload>> {
+        match self {
+            PropPayload::Linked(v) => Some(v),
+            _ => None,
+        }
+    }
 }
 
 impl PropValue {
@@ -307,6 +363,198 @@ impl PropValue {
             _ => panic!("Called `unwrap_text_span` on a bad value"),
         }
     }
+
+    /// Get a Bool value from PropValue, or None
+    pub fn as_bool(&self) -> Option<bool> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::Bool(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u8 value from PropValue, or None
+    pub fn as_u8(&self) -> Option<u8> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U8(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u16 value from PropValue, or None
+    pub fn as_u16(&self) -> Option<u16> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U16(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u32 value from PropValue, or None
+    pub fn as_u32(&self) -> Option<u32> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u64 value from PropValue, or None
+    pub fn as_u64(&self) -> Option<u64> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u128 value from PropValue, or None
+    pub fn as_u128(&self) -> Option<u128> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U128(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a usize value from PropValue, or None
+    pub fn as_usize(&self) -> Option<usize> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::Usize(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i8 value from PropValue, or None
+    pub fn as_i8(&self) -> Option<i8> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I8(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i16 value from PropValue, or None
+    pub fn as_i16(&self) -> Option<i16> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I16(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i32 value from PropValue, or None
+    pub fn as_i32(&self) -> Option<i32> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i64 value from PropValue, or None
+    pub fn as_i64(&self) -> Option<i64> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i128 value from PropValue, or None
+    pub fn as_i128(&self) -> Option<i128> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I128(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a isize value from PropValue, or None
+    pub fn as_isize(&self) -> Option<isize> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::Isize(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a f32 value from PropValue, or None
+    pub fn as_f32(&self) -> Option<f32> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::F32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a f64 value from PropValue, or None
+    pub fn as_f64(&self) -> Option<f64> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::F64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a String value from PropValue, or None
+    pub fn as_str(&self) -> Option<&String> {
+        match self {
+            PropValue::Str(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Alignment value from PropValue, or None
+    pub fn as_alignment(&self) -> Option<Alignment> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::Alignment(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Dataset value from PropValue, or None
+    pub fn as_dataset(&self) -> Option<&Dataset> {
+        match self {
+            PropValue::Dataset(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a InputType value from PropValue, or None
+    pub fn as_input_type(&self) -> Option<&InputType> {
+        match self {
+            PropValue::InputType(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Shape value from PropValue, or None
+    pub fn as_shape(&self) -> Option<&Shape> {
+        match self {
+            PropValue::Shape(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Style value from PropValue, or None
+    pub fn as_style(&self) -> Option<&Style> {
+        match self {
+            PropValue::Style(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a TextSpan value from PropValue, or None
+    pub fn as_text_span(&self) -> Option<&TextSpan> {
+        match self {
+            PropValue::TextSpan(v) => Some(v),
+            _ => None,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -457,6 +705,96 @@ mod tests {
     }
 
     #[test]
+    fn as_prop_value() {
+        assert_eq!(PropValue::Bool(true).as_bool(), Some(true));
+        assert_eq!(PropValue::U8(0).as_bool(), None);
+
+        assert_eq!(PropValue::U8(1).as_u8(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u8(), None);
+
+        assert_eq!(PropValue::U16(1).as_u16(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u16(), None);
+
+        assert_eq!(PropValue::U32(1).as_u32(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u32(), None);
+
+        assert_eq!(PropValue::U64(1).as_u64(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u64(), None);
+
+        assert_eq!(PropValue::U128(1).as_u128(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u128(), None);
+
+        assert_eq!(PropValue::Usize(1).as_usize(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_usize(), None);
+
+        assert_eq!(PropValue::I8(-1).as_i8(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i8(), None);
+
+        assert_eq!(PropValue::I16(-1).as_i16(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i16(), None);
+
+        assert_eq!(PropValue::I32(-1).as_i32(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i32(), None);
+
+        assert_eq!(PropValue::I64(-1).as_i64(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i64(), None);
+
+        assert_eq!(PropValue::I128(-1).as_i128(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i128(), None);
+
+        assert_eq!(PropValue::Isize(-1).as_isize(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_isize(), None);
+
+        assert_eq!(PropValue::F32(1.1).as_f32(), Some(1.1));
+        assert_eq!(PropValue::Bool(true).as_f32(), None);
+
+        assert_eq!(PropValue::F64(1.1).as_f64(), Some(1.1));
+        assert_eq!(PropValue::Bool(true).as_f64(), None);
+
+        assert_eq!(
+            PropValue::Str("hello".to_string()).as_str(),
+            Some(&"hello".to_string())
+        );
+        assert_eq!(PropValue::Bool(true).as_str(), None);
+
+        assert_eq!(
+            PropValue::Alignment(Alignment::Center).as_alignment(),
+            Some(Alignment::Center)
+        );
+        assert_eq!(PropValue::Bool(true).as_alignment(), None);
+
+        assert_eq!(
+            PropValue::Dataset(Dataset::default()).as_dataset(),
+            Some(&Dataset::default())
+        );
+        assert_eq!(PropValue::Bool(true).as_dataset(), None);
+
+        assert_eq!(
+            PropValue::InputType(InputType::Color).as_input_type(),
+            Some(&InputType::Color)
+        );
+        assert_eq!(PropValue::Bool(true).as_input_type(), None);
+
+        assert_eq!(
+            PropValue::Shape(Shape::Layer).as_shape(),
+            Some(&Shape::Layer)
+        );
+        assert_eq!(PropValue::Bool(true).as_shape(), None);
+
+        assert_eq!(
+            PropValue::Style(Style::new()).as_style(),
+            Some(&Style::new())
+        );
+        assert_eq!(PropValue::Bool(true).as_style(), None);
+
+        assert_eq!(
+            PropValue::TextSpan(TextSpan::new("hello")).as_text_span(),
+            Some(&TextSpan::new("hello"))
+        );
+        assert_eq!(PropValue::Bool(true).as_text_span(), None);
+    }
+
+    #[test]
     fn unwrap_prop_payloads() {
         assert_eq!(
             PropPayload::One(PropValue::Bool(false))
@@ -500,5 +838,77 @@ mod tests {
             PropPayload::Vec(vec![PropValue::Bool(false), PropValue::Bool(false)]).unwrap_vec(),
             &[PropValue::Bool(false), PropValue::Bool(false)]
         );
+    }
+
+    #[test]
+    fn as_prop_payloads() {
+        assert_eq!(
+            PropPayload::One(PropValue::Bool(true)).as_one(),
+            Some(&PropValue::Bool(true))
+        );
+        assert_eq!(PropPayload::None.as_one(), None);
+
+        assert_eq!(
+            PropPayload::Tup2((PropValue::Bool(true), PropValue::Bool(true))).as_tup2(),
+            Some(&(PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert_eq!(PropPayload::None.as_tup2(), None);
+
+        assert_eq!(
+            PropPayload::Tup3((
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+            .as_tup3(),
+            Some(&(
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+        );
+        assert_eq!(PropPayload::None.as_tup3(), None);
+
+        assert_eq!(
+            PropPayload::Tup4((
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+            .as_tup4(),
+            Some(&(
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+        );
+        assert_eq!(PropPayload::None.as_tup4(), None);
+
+        assert_eq!(
+            PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec(),
+            Some(&vec![PropValue::Bool(true)])
+        );
+        assert_eq!(PropPayload::None.as_vec(), None);
+
+        assert_eq!(
+            PropPayload::Map(HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+            .as_map(),
+            Some(&HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+        );
+        assert_eq!(PropPayload::None.as_map(), None);
+
+        assert_eq!(
+            PropPayload::Linked(LinkedList::new()).as_linked(),
+            Some(&LinkedList::new())
+        );
+        assert_eq!(PropPayload::None.as_linked(), None);
     }
 }
