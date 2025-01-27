@@ -107,6 +107,62 @@ impl PropPayload {
             _ => panic!("Called `unwrap_linked` on a bad value"),
         }
     }
+
+    /// Get a One value from PropPayload, or None
+    pub fn as_one(&self) -> Option<&PropValue> {
+        match self {
+            PropPayload::One(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup2 value from PropPayload, or None
+    pub fn as_tup2(&self) -> Option<&(PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup2(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup3 value from PropPayload, or None
+    pub fn as_tup3(&self) -> Option<&(PropValue, PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup3(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup4 value from PropPayload, or None
+    pub fn as_tup4(&self) -> Option<&(PropValue, PropValue, PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup4(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vec value from PropPa&Vec<PropValue>None
+    pub fn as_vec(&self) -> Option<&Vec<PropValue>> {
+        match self {
+            PropPayload::Vec(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Map value from PropPayload, or None
+    pub fn as_map(&self) -> Option<&HashMap<String, PropValue>> {
+        match self {
+            PropPayload::Map(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Linked value from PropPayload, or None
+    pub fn as_linked(&self) -> Option<&LinkedList<PropPayload>> {
+        match self {
+            PropPayload::Linked(v) => Some(v),
+            _ => None,
+        }
+    }
 }
 
 impl PropValue {
@@ -500,5 +556,77 @@ mod tests {
             PropPayload::Vec(vec![PropValue::Bool(false), PropValue::Bool(false)]).unwrap_vec(),
             &[PropValue::Bool(false), PropValue::Bool(false)]
         );
+    }
+
+    #[test]
+    fn as_prop_payloads() {
+        assert_eq!(
+            PropPayload::One(PropValue::Bool(true)).as_one(),
+            Some(&PropValue::Bool(true))
+        );
+        assert_eq!(PropPayload::None.as_one(), None);
+
+        assert_eq!(
+            PropPayload::Tup2((PropValue::Bool(true), PropValue::Bool(true))).as_tup2(),
+            Some(&(PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert_eq!(PropPayload::None.as_tup2(), None);
+
+        assert_eq!(
+            PropPayload::Tup3((
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+            .as_tup3(),
+            Some(&(
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+        );
+        assert_eq!(PropPayload::None.as_tup3(), None);
+
+        assert_eq!(
+            PropPayload::Tup4((
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+            .as_tup4(),
+            Some(&(
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+        );
+        assert_eq!(PropPayload::None.as_tup4(), None);
+
+        assert_eq!(
+            PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec(),
+            Some(&vec![PropValue::Bool(true)])
+        );
+        assert_eq!(PropPayload::None.as_vec(), None);
+
+        assert_eq!(
+            PropPayload::Map(HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+            .as_map(),
+            Some(&HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+        );
+        assert_eq!(PropPayload::None.as_map(), None);
+
+        assert_eq!(
+            PropPayload::Linked(LinkedList::new()).as_linked(),
+            Some(&LinkedList::new())
+        );
+        assert_eq!(PropPayload::None.as_linked(), None);
     }
 }
