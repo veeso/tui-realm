@@ -16,8 +16,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-      - name: Install cargo-llvm-cov
-        run: cargo install cargo-llvm-cov
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov
       - name: Run tests
         run: cargo llvm-cov --no-default-features --features derive,serialize --workspace --lcov --output-path lcov.info
       - name: Coveralls
