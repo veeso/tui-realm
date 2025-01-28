@@ -293,6 +293,167 @@ impl AttrValue {
             _ => panic!("AttrValue is not Payload"),
         }
     }
+
+    /// Get a Alignment value from AttrValue, or None
+    pub fn as_alignment(&self) -> Option<Alignment> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::Alignment(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Borders value from AttrValue, or None
+    pub fn as_borders(&self) -> Option<&Borders> {
+        match self {
+            AttrValue::Borders(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Color value from AttrValue, or None
+    pub fn as_color(&self) -> Option<Color> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::Color(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Dataset value from AttrValue, or None
+    pub fn as_dataset(&self) -> Option<&Dataset> {
+        match self {
+            AttrValue::Dataset(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Direction value from AttrValue, or None
+    pub fn as_direction(&self) -> Option<Direction> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::Direction(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Flag value from AttrValue, or None
+    pub fn as_flag(&self) -> Option<bool> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::Flag(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a InputType value from AttrValue, or None
+    pub fn as_input_type(&self) -> Option<&InputType> {
+        match self {
+            AttrValue::InputType(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Layout value from AttrValue, or None
+    pub fn as_layout(&self) -> Option<&Layout> {
+        match self {
+            AttrValue::Layout(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Length value from AttrValue, or None
+    pub fn as_length(&self) -> Option<usize> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::Length(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Number value from AttrValue, or None
+    pub fn as_number(&self) -> Option<isize> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::Number(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Shape value from AttrValue, or None
+    pub fn as_shape(&self) -> Option<&Shape> {
+        match self {
+            AttrValue::Shape(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Size value from AttrValue, or None
+    pub fn as_size(&self) -> Option<u16> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::Size(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a String value from AttrValue, or None
+    pub fn as_string(&self) -> Option<&String> {
+        match self {
+            AttrValue::String(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Style value from AttrValue, or None
+    pub fn as_style(&self) -> Option<Style> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::Style(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Table value from AttrValue, or None
+    pub fn as_table(&self) -> Option<&Table> {
+        match self {
+            AttrValue::Table(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Text value from AttrValue, or None
+    pub fn as_text(&self) -> Option<&TextSpan> {
+        match self {
+            AttrValue::Text(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a TextModifiers value from AttrValue, or None
+    pub fn as_text_modifiers(&self) -> Option<TextModifiers> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::TextModifiers(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Title value from AttrValue, or None
+    pub fn as_title(&self) -> Option<&(String, Alignment)> {
+        match self {
+            AttrValue::Title(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Payload value from AttrValue, or None
+    pub fn as_payload(&self) -> Option<&PropPayload> {
+        match self {
+            AttrValue::Payload(v) => Some(v),
+            _ => None,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -362,6 +523,114 @@ mod test {
             AttrValue::Payload(PropPayload::None).unwrap_payload(),
             PropPayload::None
         );
+    }
+
+    #[test]
+    fn as_attrvalue() {
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_alignment(),
+            Some(Alignment::Center)
+        );
+        assert_eq!(AttrValue::Color(Color::Black).as_alignment(), None);
+
+        assert_eq!(
+            AttrValue::Borders(Borders::default()).as_borders(),
+            Some(&Borders::default())
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_borders(), None);
+
+        assert_eq!(
+            AttrValue::Color(Color::Black).as_color(),
+            Some(Color::Black)
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_color(), None);
+
+        assert_eq!(
+            AttrValue::Dataset(Dataset::default()).as_dataset(),
+            Some(&Dataset::default())
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_dataset(), None);
+
+        assert_eq!(
+            AttrValue::Direction(Direction::Down).as_direction(),
+            Some(Direction::Down)
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_direction(), None);
+
+        assert_eq!(AttrValue::Flag(true).as_flag(), Some(true));
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_flag(), None);
+
+        assert_eq!(
+            AttrValue::InputType(InputType::Color).as_input_type(),
+            Some(&InputType::Color)
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_input_type(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Layout(Layout::default()).as_layout(),
+            Some(&Layout::default())
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_layout(), None);
+
+        assert_eq!(AttrValue::Length(1).as_length(), Some(1));
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_length(), None);
+
+        assert_eq!(AttrValue::Number(-1).as_number(), Some(-1));
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_number(), None);
+
+        assert_eq!(
+            AttrValue::Shape(Shape::Layer).as_shape(),
+            Some(&Shape::Layer)
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_shape(), None);
+
+        assert_eq!(AttrValue::Size(1).as_size(), Some(1));
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_size(), None);
+
+        assert_eq!(
+            AttrValue::String("hello".into()).as_string(),
+            Some(&"hello".to_string())
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_string(), None);
+
+        assert_eq!(
+            AttrValue::Style(Style::default()).as_style(),
+            Some(Style::default())
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_style(), None);
+
+        assert_eq!(AttrValue::Table(Vec::new()).as_table(), Some(&Vec::new()));
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_table(), None);
+
+        assert_eq!(
+            AttrValue::Text(TextSpan::default()).as_text(),
+            Some(&TextSpan::default())
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_text(), None);
+
+        assert_eq!(
+            AttrValue::TextModifiers(TextModifiers::all()).as_text_modifiers(),
+            Some(TextModifiers::all())
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_text_modifiers(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Title(("hello".into(), Alignment::Center)).as_title(),
+            Some(&("hello".into(), Alignment::Center))
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_title(), None);
+
+        assert_eq!(
+            AttrValue::Payload(PropPayload::None).as_payload(),
+            Some(&PropPayload::None)
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_payload(), None);
     }
 
     #[test]
