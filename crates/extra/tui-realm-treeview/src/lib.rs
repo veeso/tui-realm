@@ -549,8 +549,8 @@ impl<V: NodeValue> MockComponent for TreeView<V> {
                         .bg(background)
                         .add_modifier(modifiers),
                 );
-            if let Some(hg_str) = hg_str {
-                tree = tree.highlight_symbol(hg_str);
+            if let Some(hg_str) = &hg_str {
+                tree = tree.highlight_symbol(hg_str.as_str());
             }
             let mut state = self.states.clone();
             frame.render_stateful_widget(tree, area, &mut state);
