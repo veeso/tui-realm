@@ -276,7 +276,7 @@ impl TreeState {
     ///
     /// Force open nodes
     pub fn force_open(&mut self, open: &[&str]) {
-        self.open = open.into_iter().map(|x| x.to_string()).collect();
+        self.open = open.iter().map(|x| x.to_string()).collect();
     }
 }
 

@@ -93,14 +93,14 @@ struct Render {
     skip_rows: usize,
 }
 
-impl<'a, V: NodeValue> Widget for TreeWidget<'a, V> {
+impl<V: NodeValue> Widget for TreeWidget<'_, V> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let mut state = TreeState::default();
         StatefulWidget::render(self, area, buf, &mut state);
     }
 }
 
-impl<'a, V: NodeValue> StatefulWidget for TreeWidget<'a, V> {
+impl<V: NodeValue> StatefulWidget for TreeWidget<'_, V> {
     type State = TreeState;
 
     fn render(mut self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
@@ -128,7 +128,7 @@ impl<'a, V: NodeValue> StatefulWidget for TreeWidget<'a, V> {
     }
 }
 
-impl<'a, V: NodeValue> TreeWidget<'a, V> {
+impl<V: NodeValue> TreeWidget<'_, V> {
     fn iter_nodes(
         &self,
         node: &Node<V>,
