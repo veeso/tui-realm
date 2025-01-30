@@ -334,22 +334,16 @@ impl<V: NodeValue> TreeView<V> {
     /// ### title
     ///
     /// Set widget title
-    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(
-            Attribute::Title,
-            AttrValue::Title((t.as_ref().to_string(), a)),
-        );
+    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
         self
     }
 
     /// ### highlight_symbol
     ///
     /// Set symbol to prepend to highlighted node
-    pub fn highlight_symbol<S: AsRef<str>>(mut self, symbol: S) -> Self {
-        self.attr(
-            Attribute::HighlightedStr,
-            AttrValue::String(symbol.as_ref().to_string()),
-        );
+    pub fn highlight_symbol<S: Into<String>>(mut self, symbol: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::String(symbol.into()));
         self
     }
 
@@ -365,10 +359,10 @@ impl<V: NodeValue> TreeView<V> {
     ///
     /// Set initial node for tree state.
     /// NOTE: this must be specified after `with_tree`
-    pub fn initial_node<S: AsRef<str>>(mut self, node: S) -> Self {
+    pub fn initial_node<S: Into<String>>(mut self, node: S) -> Self {
         self.attr(
             Attribute::Custom(TREE_INITIAL_NODE),
-            AttrValue::String(node.as_ref().to_string()),
+            AttrValue::String(node.into()),
         );
         self
     }
