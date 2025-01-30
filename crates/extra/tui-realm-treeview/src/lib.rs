@@ -527,8 +527,8 @@ impl<V: NodeValue> MockComponent for TreeView<V> {
             .add_modifier(modifiers);
             let hg_str = self
                 .props
-                .get(Attribute::HighlightedStr)
-                .map(|x| x.unwrap_string());
+                .get_ref(Attribute::HighlightedStr)
+                .and_then(|x| x.as_string());
             let div = Self::get_block(borders, title, focus, inactive_style);
             // Make widget
             let mut tree = TreeWidget::new(self.tree())
@@ -541,7 +541,7 @@ impl<V: NodeValue> MockComponent for TreeView<V> {
                         .bg(background)
                         .add_modifier(modifiers),
                 );
-            if let Some(hg_str) = &hg_str {
+            if let Some(hg_str) = hg_str {
                 tree = tree.highlight_symbol(hg_str.as_str());
             }
             let mut state = self.states.clone();
