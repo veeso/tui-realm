@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [2.1.0](#210)
   - [2.0.3](#203)
   - [2.0.2](#202)
   - [2.0.1](#201)
@@ -38,6 +39,16 @@
   - [0.1.0](#010)
 
 ---
+
+## 2.1.0
+
+Released on 12/02/2025
+
+- [feat(core::props::AttrValue): add "as_*" function](https://github.com/veeso/tui-realm/pull/91)
+- [feat(core::props::Props): add function "get_ref"](https://github.com/veeso/tui-realm/pull/89)
+- [Add as_ functions for PropPayload and PropValue](https://github.com/veeso/tui-realm/pull/88)
+- [style(core::props::value::PropValue): consistent docs](https://github.com/veeso/tui-realm/pull/87)
+- ratatui 0.29
 
 ## 2.0.3
 
