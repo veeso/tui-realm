@@ -14,7 +14,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          override: true
           components: rustfmt, clippy
       - uses: actions-rs/cargo@v1
         with:
