@@ -15,19 +15,16 @@ jobs:
       - name: Setup rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: nightly
-          override: true
+          toolchain: stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov
       - name: Run tests
-        run: cargo test --no-fail-fast --lib --no-default-features --features derive,serialize
-        env:
-          CARGO_INCREMENTAL: "0"
-          RUSTFLAGS: "-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests"
-          RUSTDOCFLAGS: "-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests"
-      - name: Coverage with grcov
-        id: coverage
-        uses: actions-rs/grcov@v0.1
+        run: cargo llvm-cov --no-fail-fast --no-default-features --features derive,serialize,crossterm --workspace --lcov --output-path lcov.info
       - name: Coveralls
-        uses: coverallsapp/github-action@v1.1.1
+        uses: coverallsapp/github-action@v2.3.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ${{ steps.coverage.outputs.report }}
+          file: lcov.info
+          # currently we only run one coverage report per build
+          parallel: false
