@@ -180,7 +180,7 @@ impl MockComponent for Canvas {
                 .unwrap_or([0.0, 0.0]);
             let y_bounds: [f64; 2] = self
                 .props
-                .get(Attribute::Custom(CANVAS_X_BOUNDS))
+                .get(Attribute::Custom(CANVAS_Y_BOUNDS))
                 .map(|x| x.unwrap_payload().unwrap_tup2())
                 .map(|(a, b)| [a.unwrap_f64(), b.unwrap_f64()])
                 .unwrap_or([0.0, 0.0]);
