@@ -122,8 +122,6 @@ impl TableStates {
 pub struct Table {
     props: Props,
     pub states: TableStates,
-    hg_str: Option<String>, // CRAP CRAP CRAP
-    headers: Vec<String>,   // CRAP CRAP CRAP
 }
 
 impl Table {
@@ -316,7 +314,10 @@ impl MockComponent for Table {
                 .get_or(Attribute::Height, AttrValue::Size(1))
                 .unwrap_size();
             // Make rows
-            let rows: Vec<Row> = match self.props.get(Attribute::Content).map(|x| x.unwrap_table())
+            let rows: Vec<Row> = match self
+                .props
+                .get_ref(Attribute::Content)
+                .and_then(|x| x.as_table())
             {
                 Some(table) => table
                     .iter()
@@ -327,7 +328,7 @@ impl MockComponent for Table {
                                 let (fg, bg, modifiers) =
                                     crate::utils::use_or_default_styles(&self.props, col);
                                 Cell::from(Span::styled(
-                                    col.content.clone(),
+                                    &col.content,
                                     Style::default().add_modifier(modifiers).fg(fg).bg(bg),
                                 ))
                             })
@@ -350,19 +351,20 @@ impl MockComponent for Table {
                 inactive_style,
             ));
             if let Some(highlighted_color) = highlighted_color {
-                table = table.highlight_style(Style::default().fg(highlighted_color).add_modifier(
-                    match focus {
-                        true => modifiers | TextModifiers::REVERSED,
-                        false => modifiers,
-                    },
-                ));
+                table =
+                    table.row_highlight_style(Style::default().fg(highlighted_color).add_modifier(
+                        match focus {
+                            true => modifiers | TextModifiers::REVERSED,
+                            false => modifiers,
+                        },
+                    ));
             }
             // Highlighted symbol
-            self.hg_str = self
+            let hg_str = self
                 .props
-                .get(Attribute::HighlightedStr)
-                .map(|x| x.unwrap_string());
-            if let Some(hg_str) = &self.hg_str {
+                .get_ref(Attribute::HighlightedStr)
+                .and_then(|x| x.as_string());
+            if let Some(hg_str) = hg_str {
                 table = table.highlight_symbol(hg_str.as_str());
             }
             // Col spacing
@@ -374,19 +376,18 @@ impl MockComponent for Table {
                 table = table.column_spacing(spacing);
             }
             // Header
-            self.headers = self
+            let headers: Vec<&str> = self
                 .props
-                .get(Attribute::Text)
-                .map(|x| {
-                    x.unwrap_payload()
-                        .unwrap_vec()
-                        .into_iter()
-                        .map(|x| x.unwrap_str())
+                .get_ref(Attribute::Text)
+                .and_then(|v| v.as_payload())
+                .and_then(|v| v.as_vec())
+                .map(|v| {
+                    v.iter()
+                        .flat_map(|v| v.as_str().map(|v| v.as_str()))
                         .collect()
                 })
                 .unwrap_or_default();
-            if !self.headers.is_empty() {
-                let headers: Vec<&str> = self.headers.iter().map(|x| x.as_str()).collect();
+            if !headers.is_empty() {
                 table = table.header(
                     Row::new(headers)
                         .style(

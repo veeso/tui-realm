@@ -51,8 +51,10 @@ impl MockComponent for Label {
             // Make text
             let text = self
                 .props
-                .get_or(Attribute::Text, AttrValue::String(String::default()))
-                .unwrap_string();
+                .get_ref(Attribute::Text)
+                .and_then(|v| v.as_string())
+                .map(|v| v.as_str())
+                .unwrap_or("");
             let foreground = self
                 .props
                 .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))

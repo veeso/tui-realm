@@ -170,7 +170,7 @@ impl MockComponent for Radio {
                 .states
                 .choices
                 .iter()
-                .map(|x| Spans::from(x.clone()))
+                .map(|x| Spans::from(x.as_str()))
                 .collect();
             let foreground = self
                 .props

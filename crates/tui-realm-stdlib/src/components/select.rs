@@ -190,7 +190,7 @@ impl Select {
             .states
             .choices
             .iter()
-            .map(|x| ListItem::new(Spans::from(x.clone())))
+            .map(|x| ListItem::new(Spans::from(x.as_str())))
             .collect();
         let foreground = self
             .props

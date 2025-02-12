@@ -15,14 +15,14 @@ repository = "https://github.com/veeso/tui-realm-stdlib"
 
 [dependencies]
 textwrap = "^0.16"
-tuirealm = { version = "2", default-features = false, features = ["derive"] }
+tuirealm = { version = "2.1.0", default-features = false, features = ["derive"] }
 unicode-width = "^0.2"
 
 [dev-dependencies]
 crossterm = "^0.28"
 pretty_assertions = "1"
 rand = "0.8.5"
-tuirealm = { version = "2", default-features = false }
+tuirealm = { version = "2.1.0", default-features = false }
 
 [features]
 default = ["crossterm"]

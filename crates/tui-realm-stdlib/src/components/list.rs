@@ -250,27 +250,30 @@ impl MockComponent for List {
             };
             let div = crate::utils::get_block(borders, Some(title), active, inactive_style);
             // Make list entries
-            let list_items: Vec<ListItem> =
-                match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
-                    Some(table) => table
-                        .iter()
-                        .map(|row| {
-                            let columns: Vec<Span> = row
-                                .iter()
-                                .map(|col| {
-                                    let (fg, bg, modifiers) =
-                                        crate::utils::use_or_default_styles(&self.props, col);
-                                    Span::styled(
-                                        col.content.clone(),
-                                        Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                                    )
-                                })
-                                .collect();
-                            ListItem::new(Spans::from(columns))
-                        })
-                        .collect(), // Make List item from TextSpan
-                    _ => Vec::new(),
-                };
+            let list_items: Vec<ListItem> = match self
+                .props
+                .get_ref(Attribute::Content)
+                .and_then(|x| x.as_table())
+            {
+                Some(table) => table
+                    .iter()
+                    .map(|row| {
+                        let columns: Vec<Span> = row
+                            .iter()
+                            .map(|col| {
+                                let (fg, bg, modifiers) =
+                                    crate::utils::use_or_default_styles(&self.props, col);
+                                Span::styled(
+                                    &col.content,
+                                    Style::default().add_modifier(modifiers).fg(fg).bg(bg),
+                                )
+                            })
+                            .collect();
+                        ListItem::new(Spans::from(columns))
+                    })
+                    .collect(), // Make List item from TextSpan
+                _ => Vec::new(),
+            };
             let highlighted_color = self
                 .props
                 .get(Attribute::HighlightedColor)

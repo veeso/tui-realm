@@ -81,17 +81,20 @@ impl MockComponent for Paragraph {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text items
-            let text: Vec<Spans> = match self.props.get(Attribute::Text).map(|x| x.unwrap_payload())
-            {
+            let payload = self
+                .props
+                .get_ref(Attribute::Text)
+                .and_then(|x| x.as_payload());
+            let text: Vec<Spans> = match payload {
                 Some(PropPayload::Vec(spans)) => spans
                     .iter()
-                    .cloned()
-                    .map(|x| x.unwrap_text_span())
+                    // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
+                    .flat_map(|x| x.as_text_span())
                     .map(|x| {
                         let (fg, bg, modifiers) =
-                            crate::utils::use_or_default_styles(&self.props, &x);
+                            crate::utils::use_or_default_styles(&self.props, x);
                         Spans::from(vec![Span::styled(
-                            x.content,
+                            &x.content,
                             Style::default().add_modifier(modifiers).fg(fg).bg(bg),
                         )])
                     })

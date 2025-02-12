@@ -72,17 +72,15 @@ impl MockComponent for Span {
                 .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
                 .unwrap_color();
             // binding required as "spans" is a reference and otherwise would not live long enough
-            let payload = self.props.get(Attribute::Text).map(|x| x.unwrap_payload());
+            let payload = self
+                .props
+                .get_ref(Attribute::Text)
+                .and_then(|x| x.as_payload());
             let spans: Vec<TuiSpan> = match payload {
                 Some(PropPayload::Vec(ref spans)) => spans
                     .iter()
-                    .map(|x| {
-                        // TODO: should this maybe be a new function on `PropValue` similar to the `unwrap` case but for references?
-                        match x {
-                            PropValue::TextSpan(b) => b,
-                            _ => panic!("Called `unwrap_text_span` on a bad value"),
-                        }
-                    })
+                    // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
+                    .flat_map(|x| x.as_text_span())
                     .map(|x| {
                         // Keep colors and modifiers, or use default
                         let (fg, bg, modifiers) =
