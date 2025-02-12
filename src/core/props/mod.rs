@@ -36,7 +36,9 @@ pub struct Props {
 }
 
 impl Props {
-    /// Get, if any, the attribute associated to the selector
+    /// Get, if any, the attribute associated to the selector.
+    ///
+    /// This function clones the returned value.
     pub fn get(&self, query: Attribute) -> Option<AttrValue> {
         self.attrs.get(&query).cloned()
     }
@@ -45,6 +47,11 @@ impl Props {
     /// or return the fallback value `default`
     pub fn get_or(&self, query: Attribute, default: AttrValue) -> AttrValue {
         self.get(query).unwrap_or(default)
+    }
+
+    /// Get, if any, the attribute associated to the selector by reference.
+    pub fn get_ref(&self, query: Attribute) -> Option<&AttrValue> {
+        self.attrs.get(&query)
     }
 
     /// Set a new attribute into Properties
@@ -301,6 +308,37 @@ mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
+
+    #[test]
+    fn should_set_get_props() {
+        let mut props = Props::default();
+        assert_eq!(props.get(Attribute::Alignment), None);
+        assert_eq!(
+            props.get_or(
+                Attribute::Alignment,
+                AttrValue::Alignment(Alignment::Center)
+            ),
+            AttrValue::Alignment(Alignment::Center)
+        );
+        assert_eq!(props.get_ref(Attribute::Alignment), None);
+
+        props.set(Attribute::Alignment, AttrValue::Alignment(Alignment::Left));
+        assert_eq!(
+            props.get(Attribute::Alignment),
+            Some(AttrValue::Alignment(Alignment::Left))
+        );
+        assert_eq!(
+            props.get_or(
+                Attribute::Alignment,
+                AttrValue::Alignment(Alignment::Center)
+            ),
+            AttrValue::Alignment(Alignment::Left)
+        );
+        assert_eq!(
+            props.get_ref(Attribute::Alignment),
+            Some(&AttrValue::Alignment(Alignment::Left))
+        );
+    }
 
     #[test]
     fn unwrapping_should_unwrap() {
