@@ -230,8 +230,8 @@ impl Chart {
 
     /// ### data
     ///
-    /// Get data to be displayed, starting from provided index at `start` with a max length of `len`
-    fn get_data(&mut self, start: usize, len: usize) -> Vec<TuiDataset> {
+    /// Get data to be displayed, starting from provided index at `start`
+    fn get_data(&mut self, start: usize) -> Vec<TuiDataset> {
         self.states.data = self
             .props
             .get(Attribute::Dataset)
@@ -246,7 +246,7 @@ impl Chart {
         self.states
             .data
             .iter()
-            .map(|x| Self::get_tui_dataset(x, start, len))
+            .map(|x| Self::get_tui_dataset(x, start))
             .collect()
     }
 }
@@ -255,14 +255,9 @@ impl<'a> Chart {
     /// ### get_tui_dataset
     ///
     /// Create tui_dataset from dataset
-    /// Only elements from `start` to `len` are preserved from dataset
-    fn get_tui_dataset(dataset: &'a Dataset, start: usize, len: usize) -> TuiDataset<'a> {
-        // Recalc len
+    /// Only elements from `start` to the end
+    fn get_tui_dataset(dataset: &'a Dataset, start: usize) -> TuiDataset<'a> {
         let points = dataset.get_data();
-        let end: usize = match points.len() > start {
-            true => std::cmp::min(len, points.len() - start),
-            false => 0,
-        };
 
         // Prepare data storage
         TuiDataset::default()
@@ -270,7 +265,7 @@ impl<'a> Chart {
             .marker(dataset.marker)
             .graph_type(dataset.graph_type)
             .style(dataset.style)
-            .data(&points[start..end])
+            .data(&points[start..])
     }
 }
 
@@ -373,7 +368,7 @@ impl MockComponent for Chart {
                 ));
             }
             // Get data
-            let data: Vec<TuiDataset> = self.get_data(self.states.cursor, area.width as usize);
+            let data: Vec<TuiDataset> = self.get_data(self.states.cursor);
             // Build widget
             let widget: TuiChart = TuiChart::new(data).block(div).x_axis(x_axis).y_axis(y_axis);
             // Render
@@ -542,7 +537,7 @@ mod test {
         // component funcs
         assert_eq!(component.max_dataset_len(), 12);
         assert_eq!(component.is_disabled(), false);
-        assert_eq!(component.get_data(2, 4).len(), 2);
+        assert_eq!(component.get_data(2).len(), 2);
 
         let mut comp = Chart::default().data(&[Dataset::default()
             .name("Maximum")
@@ -550,7 +545,7 @@ mod test {
             .marker(Marker::Dot)
             .style(Style::default().fg(Color::LightRed))
             .data(vec![(0.0, 7.0)])]);
-        assert!(comp.get_data(0, 1).len() > 0);
+        assert!(!comp.get_data(0).is_empty());
 
         // Update and test empty data
         component.states.cursor_at_end(12);
