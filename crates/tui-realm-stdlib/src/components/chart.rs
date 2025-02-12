@@ -284,7 +284,12 @@ impl MockComponent for Chart {
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
                 .unwrap_borders();
-            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+            let title = self
+                .props
+                .get_ref(Attribute::Title)
+                .and_then(|x| x.as_title())
+                // this needs to be cloned as "self" is later mutably borrowed, while this immutably borrows "self"
+                .cloned();
             let focus = self
                 .props
                 .get_or(Attribute::Focus, AttrValue::Flag(false))
@@ -297,7 +302,7 @@ impl MockComponent for Chart {
                 true => true,
                 false => focus,
             };
-            let div = crate::utils::get_block(borders, title, active, inactive_style);
+            let div = crate::utils::get_block(borders, title.as_ref(), active, inactive_style);
             // Create widget
             // -- x axis
             let mut x_axis: Axis = Axis::default();

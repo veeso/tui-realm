@@ -64,7 +64,10 @@ impl MockComponent for Container {
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
                 .unwrap_borders();
-            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+            let title = self
+                .props
+                .get_ref(Attribute::Title)
+                .and_then(|x| x.as_title());
             let div = crate::utils::get_block(borders, title, true, None);
             // Render block
             render.render_widget(div, area);

@@ -143,7 +143,10 @@ impl MockComponent for LineGauge {
                     AttrValue::TextModifiers(TextModifiers::empty()),
                 )
                 .unwrap_text_modifiers();
-            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+            let title = self
+                .props
+                .get_ref(Attribute::Title)
+                .and_then(|x| x.as_title());
             // Get percentage
             let percentage = self
                 .props

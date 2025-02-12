@@ -130,7 +130,10 @@ impl MockComponent for Paragraph {
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
                 .unwrap_borders();
-            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+            let title = self
+                .props
+                .get_ref(Attribute::Title)
+                .and_then(|x| x.as_title());
             let div = crate::utils::get_block(borders, title, true, None);
             render.render_widget(
                 TuiParagraph::new(text)

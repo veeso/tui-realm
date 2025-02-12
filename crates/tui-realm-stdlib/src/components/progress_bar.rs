@@ -95,7 +95,10 @@ impl MockComponent for ProgressBar {
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
                 .unwrap_borders();
-            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+            let title = self
+                .props
+                .get_ref(Attribute::Title)
+                .and_then(|x| x.as_title());
             // Get percentage
             let percentage = self
                 .props

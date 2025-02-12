@@ -197,7 +197,7 @@ impl MockComponent for Textarea {
                     .iter()
                     // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
                     .flat_map(|x| x.as_text_span())
-                    .map(|x| crate::utils::wrap_spans(&[x.clone()], wrap_width, &self.props))
+                    .map(|x| crate::utils::wrap_spans(&[x], wrap_width, &self.props))
                     .map(ListItem::new)
                     .collect(),
                 _ => Vec::new(),
@@ -217,13 +217,7 @@ impl MockComponent for Textarea {
                     AttrValue::TextModifiers(TextModifiers::empty()),
                 )
                 .unwrap_text_modifiers();
-            let title = self
-                .props
-                .get_or(
-                    Attribute::Title,
-                    AttrValue::Title((String::default(), Alignment::Center)),
-                )
-                .unwrap_title();
+            let title = crate::utils::get_title_or_center(&self.props);
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -243,7 +237,7 @@ impl MockComponent for Textarea {
             let mut list = List::new(lines)
                 .block(crate::utils::get_block(
                     borders,
-                    Some(title),
+                    Some(&title),
                     focus,
                     inactive_style,
                 ))

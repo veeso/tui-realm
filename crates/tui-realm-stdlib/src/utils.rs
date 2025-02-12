@@ -19,7 +19,7 @@ use unicode_width::UnicodeWidthStr;
 ///
 /// Given a vector of `TextSpans`, it creates a list of `Spans` which mustn't exceed the provided width parameter.
 /// Each `Spans` in the returned `Vec` is a line in the text.
-pub fn wrap_spans<'a>(spans: &[TextSpan], width: usize, props: &Props) -> Vec<Spans<'a>> {
+pub fn wrap_spans<'a>(spans: &[&TextSpan], width: usize, props: &Props) -> Vec<Spans<'a>> {
     // Prepare result (capacity will be at least spans.len)
     let mut res: Vec<Spans> = Vec::with_capacity(spans.len());
     // Prepare environment
@@ -109,13 +109,15 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
 ///
 /// Construct a block for widget using block properties.
 /// If focus is true the border color is applied, otherwise inactive_style
-pub fn get_block<'a>(
+pub fn get_block<T: AsRef<str>>(
     props: Borders,
-    title: Option<(String, Alignment)>,
+    title: Option<&(T, Alignment)>,
     focus: bool,
     inactive_style: Option<Style>,
-) -> Block<'a> {
-    let title = title.unwrap_or((String::default(), Alignment::Left));
+) -> Block {
+    let title = title
+        .map(|v| (v.0.as_ref(), v.1))
+        .unwrap_or(("", Alignment::Left));
     Block::default()
         .borders(props.sides)
         .border_style(match focus {
@@ -127,6 +129,15 @@ pub fn get_block<'a>(
         .border_type(props.modifiers)
         .title(title.0)
         .title_alignment(title.1)
+}
+
+/// Get the [`Attribute::Title`] or a Centered default
+pub fn get_title_or_center(props: &Props) -> (&str, Alignment) {
+    props
+        .get_ref(Attribute::Title)
+        .and_then(|v| v.as_title())
+        .map(|v| (v.0.as_str(), v.1))
+        .unwrap_or(("", Alignment::Center))
 }
 
 /// ### calc_utf8_cursor_position
@@ -156,17 +167,20 @@ mod test {
         props.set(Attribute::Background, AttrValue::Color(Color::White));
         // Prepare spans; let's start with two simple spans, which fits the line
         let spans: Vec<TextSpan> = vec![TextSpan::from("hello, "), TextSpan::from("world!")];
+        let spans: Vec<&TextSpan> = spans.iter().collect();
         assert_eq!(wrap_spans(&spans, 64, &props).len(), 1);
         // Let's make a sentence, which would require two lines
         let spans: Vec<TextSpan> = vec![
             TextSpan::from("Hello, everybody, I'm Uncle Camel!"),
             TextSpan::from("How's it going today?"),
         ];
+        let spans: Vec<&TextSpan> = spans.iter().collect();
         assert_eq!(wrap_spans(&spans, 32, &props).len(), 2);
         // Let's make a sentence, which requires 3 lines, but with only one span
         let spans: Vec<TextSpan> = vec![TextSpan::from(
             "Hello everybody! My name is Uncle Camel. How's it going today?",
         )];
+        let spans: Vec<&TextSpan> = spans.iter().collect();
         // makes Hello everybody, my name is uncle, camel. how's it, goind today
         assert_eq!(wrap_spans(&spans, 16, &props).len(), 4);
         // Combine
@@ -176,6 +190,7 @@ mod test {
             TextSpan::from("In posuere sollicitudin vulputate"),
             TextSpan::from("Sed vitae rutrum quam."),
         ];
+        let spans: Vec<&TextSpan> = spans.iter().collect();
         // "Lorem ipsum dolor sit amet,", "consectetur adipiscing elit. Canem!", "In posuere sollicitudin vulputate", "Sed vitae rutrum quam."
         assert_eq!(wrap_spans(&spans, 36, &props).len(), 4);
     }
@@ -214,11 +229,11 @@ mod test {
             .modifiers(BorderType::Rounded);
         get_block(
             props.clone(),
-            Some(("title".to_string(), Alignment::Center)),
+            Some(&("title", Alignment::Center)),
             true,
             None,
         );
-        get_block(props, None, false, None);
+        get_block::<&str>(props, None, false, None);
     }
 
     #[test]
