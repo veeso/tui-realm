@@ -1,6 +1,6 @@
 [package]
 name = "tui-realm-textarea"
-version = "2.0.0"
+version = "2.1.0"
 authors = ["Christian Visintin"]
 edition = "2021"
 categories = ["command-line-utilities"]
@@ -17,7 +17,7 @@ repository = "https://github.com/veeso/tui-realm-textarea"
 cli-clipboard = { version = "^0.4", optional = true }
 lazy-regex = "^3"
 tuirealm = { version = "2", default-features = false, features = ["derive"] }
-tui-textarea = "^0.6"
+tui-textarea = "^0.7"
 
 [dev-dependencies]
 crossterm = "^0.28"
