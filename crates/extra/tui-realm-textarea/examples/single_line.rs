@@ -1,20 +1,23 @@
 use std::time::Duration;
-use tuirealm::{
-    application::PollStrategy,
-    command::{Cmd, CmdResult, Direction, Position},
-    event::{Event, Key, KeyEvent, KeyModifiers},
-    props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers},
-    terminal::{CrosstermTerminalAdapter, TerminalBridge},
-    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, Update,
-};
-// tui
-use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+
 // textarea
 #[cfg(feature = "clipboard")]
 use tui_realm_textarea::TEXTAREA_CMD_PASTE;
 use tui_realm_textarea::{
     TextArea, TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
     TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
+};
+use tuirealm::application::PollStrategy;
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
+use tuirealm::props::{
+    Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers,
+};
+// tui
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
+use tuirealm::{
+    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, Update,
 };
 
 // -- message

@@ -2,10 +2,10 @@
 //!
 //! Module which provides the Editor fmt, which is used to format the status lines of the textarea
 
-use super::TextAreaWidget;
-
 use lazy_regex::{Lazy, Regex};
 use tuirealm::props::Style;
+
+use super::TextAreaWidget;
 
 /// FmtCallback: LineFmt, widget, wrkstr, prepend
 type FmtCallback = fn(&LineFmt, &TextAreaWidget, &str, &str) -> String;
@@ -143,9 +143,9 @@ impl CallChainBlock {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn should_fmt_column() {

@@ -1,20 +1,7 @@
-use std::{
-    fs,
-    io::{self, BufRead},
-    time::Duration,
-};
-#[cfg(feature = "search")]
-use tuirealm::StateValue;
-use tuirealm::{
-    application::PollStrategy,
-    command::{Cmd, CmdResult, Direction, Position},
-    event::{Event, Key, KeyEvent, KeyModifiers},
-    props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers},
-    terminal::{CrosstermTerminalAdapter, TerminalBridge},
-    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, Update,
-};
-// tui
-use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use std::fs;
+use std::io::{self, BufRead};
+use std::time::Duration;
+
 // label
 #[cfg(feature = "search")]
 use tui_realm_stdlib::Input;
@@ -29,6 +16,20 @@ use tui_realm_textarea::{
 #[cfg(feature = "search")]
 use tui_realm_textarea::{
     TEXTAREA_CMD_SEARCH_BACK, TEXTAREA_CMD_SEARCH_FORWARD, TEXTAREA_SEARCH_PATTERN,
+};
+use tuirealm::application::PollStrategy;
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
+use tuirealm::props::{
+    Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers,
+};
+// tui
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
+#[cfg(feature = "search")]
+use tuirealm::StateValue;
+use tuirealm::{
+    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, Update,
 };
 
 // -- message

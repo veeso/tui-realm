@@ -435,9 +435,18 @@ impl<'a> MockComponent for TextArea<'a> {
             if let Some(block) = self.get_block() {
                 self.widget.set_block(block);
             }
-            let margin_prop = self.props.get_or(Attribute::Custom(TEXTAREA_LAYOUT_MARGIN), AttrValue::Size(1))
+            let margin_prop = self
+                .props
+                .get_or(
+                    Attribute::Custom(TEXTAREA_LAYOUT_MARGIN),
+                    AttrValue::Size(1),
+                )
                 .unwrap_size();
-            let margin = if self.get_block().is_some() { margin_prop } else { 0 };
+            let margin = if self.get_block().is_some() {
+                margin_prop
+            } else {
+                0
+            };
             // make chunks
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
