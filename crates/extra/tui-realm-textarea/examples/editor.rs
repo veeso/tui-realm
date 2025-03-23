@@ -193,7 +193,7 @@ pub struct Editor<'a> {
     component: TextArea<'a>,
 }
 
-impl<'a> MockComponent for Editor<'a> {
+impl MockComponent for Editor<'_> {
     fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::ratatui::layout::Rect) {
         self.component.view(frame, area);
     }
@@ -215,7 +215,7 @@ impl<'a> MockComponent for Editor<'a> {
     }
 }
 
-impl<'a> Default for Editor<'a> {
+impl Default for Editor<'_> {
     fn default() -> Self {
         let textarea = match fs::File::open("README.md") {
             Ok(reader) => TextArea::new(
@@ -253,7 +253,7 @@ impl<'a> Default for Editor<'a> {
     }
 }
 
-impl<'a> Component<Msg, NoUserEvent> for Editor<'a> {
+impl Component<Msg, NoUserEvent> for Editor<'_> {
     fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => Some(Msg::AppClose),

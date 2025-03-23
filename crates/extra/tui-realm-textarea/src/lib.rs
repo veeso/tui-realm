@@ -210,7 +210,7 @@ pub struct TextArea<'a> {
     single_line: bool,
 }
 
-impl<'a, I> From<I> for TextArea<'a>
+impl<I> From<I> for TextArea<'_>
 where
     I: IntoIterator,
     I::Item: Into<String>,
@@ -220,7 +220,7 @@ where
     }
 }
 
-impl<'a> Default for TextArea<'a> {
+impl Default for TextArea<'_> {
     fn default() -> Self {
         Self::new(Vec::default())
     }
@@ -428,7 +428,7 @@ impl<'a> TextArea<'a> {
     }
 }
 
-impl<'a> MockComponent for TextArea<'a> {
+impl MockComponent for TextArea<'_> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // set block

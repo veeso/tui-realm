@@ -132,7 +132,7 @@ pub struct Input<'a> {
     component: TextArea<'a>,
 }
 
-impl<'a> MockComponent for Input<'a> {
+impl MockComponent for Input<'_> {
     fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::ratatui::layout::Rect) {
         self.component.view(frame, area);
     }
@@ -154,7 +154,7 @@ impl<'a> MockComponent for Input<'a> {
     }
 }
 
-impl<'a> Default for Input<'a> {
+impl Default for Input<'_> {
     fn default() -> Self {
         let textarea = TextArea::default().single_line(true);
         Self {
@@ -174,7 +174,7 @@ impl<'a> Default for Input<'a> {
     }
 }
 
-impl<'a> Component<Msg, NoUserEvent> for Input<'a> {
+impl Component<Msg, NoUserEvent> for Input<'_> {
     fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => Some(Msg::AppClose),
