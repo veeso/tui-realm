@@ -175,6 +175,7 @@ pub const TEXTAREA_SINGLE_LINE: &str = "single-line";
 pub const TEXTAREA_SEARCH_PATTERN: &str = "search-pattern";
 #[cfg(feature = "search")]
 pub const TEXTAREA_SEARCH_STYLE: &str = "search-style";
+pub const TEXTAREA_LAYOUT_MARGIN: &str = "layout-margin";
 
 // -- cmd
 pub const TEXTAREA_CMD_NEWLINE: &str = "0";
@@ -368,6 +369,15 @@ impl<'a> TextArea<'a> {
         self
     }
 
+    /// Set margin of layout
+    pub fn layout_margin(mut self, margin: u16) -> Self {
+        self.attr(
+            Attribute::Custom(TEXTAREA_LAYOUT_MARGIN),
+            AttrValue::Size(margin),
+        );
+        self
+    }
+
     // -- private
     fn get_block(&self) -> Option<Block<'a>> {
         let mut block = Block::default();
@@ -425,7 +435,9 @@ impl<'a> MockComponent for TextArea<'a> {
             if let Some(block) = self.get_block() {
                 self.widget.set_block(block);
             }
-            let margin = if self.get_block().is_some() { 1 } else { 0 };
+            let margin_prop = self.props.get_or(Attribute::Custom(TEXTAREA_LAYOUT_MARGIN), AttrValue::Size(1))
+                .unwrap_size();
+            let margin = if self.get_block().is_some() { margin_prop } else { 0 };
             // make chunks
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
