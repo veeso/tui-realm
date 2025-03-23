@@ -168,6 +168,7 @@ Press `ESC` to quit
 - `FocusStyle(Style)`: inactive style
 - `ScrollStep(Length)`: Defines the maximum amount of rows to scroll
 - `Title(Title)`: Set box title
+- `Custom($TEXTAREA_LAYOUT_MARGIN, Size)`: Set margin of layout
 
 ### Footer and status format
 
