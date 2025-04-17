@@ -216,6 +216,7 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 - [donmaze](https://github.com/veeso/donmaze)
 - [matrix-rust-sdk](https://github.com/matrix-org/matrix-rust-sdk)
 - [paat](https://github.com/ebakoba/paat)
+- [systemd-manager-tui](https://github.com/matheus-git/systemd-manager-tui)
 - [termusic](https://github.com/tramhao/termusic)
 - [termscp](https://github.com/veeso/termscp)
 - [tisq](https://crates.io/crates/tisq)
