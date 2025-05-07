@@ -107,7 +107,7 @@ impl Component<Msg, UserEvent> for IpAddressInput {
 }
 ```
 
-Since `Component` **MUST** implement `MockComponent`, we need to implement the mock component trait too, which in most of the case it will just call the MockComponet methods on the inner `component` field. This is obviously kinda annoying to do for each component. That's why I implemented this procedural macro, which will automatically implement this logic on your component.
+Since `Component` **MUST** implement `MockComponent`, we need to implement the mock component trait too, which in most of the case it will just call the MockComponent methods on the inner `component` field. This is obviously kinda annoying to do for each component. That's why I implemented this procedural macro, which will automatically implement this logic on your component.
 
 So basically instead of implementing `MockComponent` for your components, you can just do as follows:
 
