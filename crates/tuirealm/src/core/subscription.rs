@@ -112,7 +112,6 @@ impl MouseEventClause {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-
 /// An event clause indicates on which kind of event the event must be forwarded to the `target` component.
 pub enum EventClause<UserEvent>
 where
@@ -131,6 +130,9 @@ where
     /// Event will be forwarded on this specific user event.
     /// The way user event is matched, depends on its [`PartialEq`] implementation
     User(UserEvent),
+    /// Event will be forwarded on this specific user event if the discriminant is the same.
+    /// The event is matched by its discriminant only. See [`std::mem::discriminant`]
+    Discriminant(UserEvent),
 }
 
 impl<U> EventClause<U>
@@ -141,21 +143,24 @@ where
     ///
     /// This is how events are forwarded:
     ///
-    /// - Any: Forward, no matter what kind of event
-    /// - Keyboard: everything must match
-    /// - Mouse: everything must match, column and row need to be within range
-    /// - WindowResize: matches only event type, not sizes
-    /// - Tick: matches tick event
-    /// - None: matches None event
-    /// - UserEvent: depends on UserEvent [`PartialEq`]
+    /// - [`EventClause::Any`]: Forward, no matter what kind of event
+    /// - [`EventClause::Keyboard`]: everything must match
+    /// - [`EventClause::Mouse`]: everything must match, column and row need to be within range
+    /// - [`EventClause::WindowResize`]: matches only event type, not sizes
+    /// - [`EventClause::Tick`]: matches tick event
+    /// - [`EventClause::User`]: depends on UserEvent [`PartialEq`]
+    /// - [`EventClause::Discriminant`]: matches only event type, not values
     fn forward(&self, ev: &Event<U>) -> bool {
         match self {
             EventClause::Any => true,
-            EventClause::Keyboard(k) => Some(k) == ev.is_keyboard(),
-            EventClause::Mouse(m) => ev.is_mouse().map(|ev| m.is_in_range(ev)).unwrap_or(false),
-            EventClause::WindowResize => ev.is_window_resize(),
-            EventClause::Tick => ev.is_tick(),
-            EventClause::User(u) => Some(u) == ev.is_user(),
+            EventClause::Keyboard(k) => Some(k) == ev.as_keyboard(),
+            EventClause::Mouse(m) => ev.as_mouse().map(|ev| m.is_in_range(ev)).unwrap_or(false),
+            EventClause::WindowResize => ev.as_window_resize(),
+            EventClause::Tick => ev.as_tick(),
+            EventClause::User(u) => Some(u) == ev.as_user(),
+            EventClause::Discriminant(u) => {
+                Some(std::mem::discriminant(u)) == ev.as_user().map(|u| std::mem::discriminant(u))
+            }
         }
     }
 }
@@ -505,6 +510,24 @@ mod test {
     fn event_clause_user_should_forward() {
         assert_eq!(
             EventClause::<MockEvent>::User(MockEvent::Foo).forward(&Event::User(MockEvent::Foo)),
+            true
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::User(MockEvent::Foo).forward(&Event::Tick),
+            false
+        );
+    }
+
+    #[test]
+    fn event_clause_discriminant_should_forward() {
+        assert_eq!(
+            EventClause::<MockEvent>::Discriminant(MockEvent::Foo)
+                .forward(&Event::User(MockEvent::Foo)),
+            true
+        );
+        assert_eq!(
+            EventClause::<MockEvent>::Discriminant(MockEvent::Hello("foo".to_string()))
+                .forward(&Event::User(MockEvent::Hello("bar".to_string()))),
             true
         );
         assert_eq!(
