@@ -9,11 +9,11 @@ use crossterm::event::{
 };
 
 use super::Event;
+use crate::ListenerError;
 use crate::event::{
     Key, KeyEvent, KeyModifiers, MediaKeyCode, MouseButton, MouseEvent, MouseEventKind,
 };
 use crate::listener::{ListenerResult, Poll};
-use crate::ListenerError;
 
 /// The input listener for crossterm.
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module

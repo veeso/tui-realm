@@ -1,8 +1,9 @@
 [package]
 name = "tuirealm"
-version = "2.1.0"
+version = "2.2.0"
 authors = ["Christian Visintin"]
-edition = "2021"
+edition = "2024"
+rust-version = "1.85.1"
 categories = ["command-line-utilities"]
 description = "A tui-rs framework to build tui interfaces, inspired by React and Elm."
 documentation = "https://docs.rs/tuirealm"
@@ -15,7 +16,7 @@ repository = "https://github.com/veeso/tui-realm"
 
 [dependencies]
 bitflags = "2"
-crossterm = { version = "0.28", optional = true }
+crossterm = { version = "0.29", optional = true }
 lazy-regex = "3"
 ratatui = { version = "0.29", default-features = false }
 serde = { version = "1", features = ["derive"], optional = true }
@@ -29,7 +30,7 @@ toml = "^0.8"
 tempfile = "^3"
 
 [features]
-default = ["derive", "crossterm"]
+default = ["derive", "dep:crossterm"]
 derive = ["dep:tuirealm_derive"]
 serialize = ["dep:serde", "bitflags/serde"]
 crossterm = ["dep:crossterm", "ratatui/crossterm"]

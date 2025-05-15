@@ -1,7 +1,7 @@
 use std::io::Stdout;
 
-use ratatui::prelude::TermionBackend as TermionLibBackend;
 use ratatui::Terminal;
+use ratatui::prelude::TermionBackend as TermionLibBackend;
 use termion::input::MouseTerminal;
 use termion::raw::{IntoRawMode as _, RawTerminal};
 use termion::screen::{AlternateScreen, IntoAlternateScreen as _};

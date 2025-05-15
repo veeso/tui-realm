@@ -427,57 +427,69 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config());
         // Mount
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
         // Remount with mount
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_err());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_err()
+        );
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(application.focus().unwrap(), &MockComponentId::InputFoo);
         // Remount
-        assert!(application
-            .remount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
+        assert!(
+            application
+                .remount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
         assert!(application.view.has_focus(&MockComponentId::InputFoo));
         // Mount bar
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![]
-            )
-            .is_ok());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
         // Mounted
         assert!(application.mounted(&MockComponentId::InputFoo));
         assert!(application.mounted(&MockComponentId::InputBar));
         assert_eq!(application.mounted(&MockComponentId::InputOmar), false);
         // Attribute and Query
-        assert!(application
-            .query(&MockComponentId::InputFoo, Attribute::InputLength)
-            .ok()
-            .unwrap()
-            .is_none());
-        assert!(application
-            .attr(
-                &MockComponentId::InputFoo,
-                Attribute::InputLength,
-                AttrValue::Length(8)
-            )
-            .is_ok());
+        assert!(
+            application
+                .query(&MockComponentId::InputFoo, Attribute::InputLength)
+                .ok()
+                .unwrap()
+                .is_none()
+        );
+        assert!(
+            application
+                .attr(
+                    &MockComponentId::InputFoo,
+                    Attribute::InputLength,
+                    AttrValue::Length(8)
+                )
+                .is_ok()
+        );
         assert_eq!(
             application
                 .query(&MockComponentId::InputFoo, Attribute::InputLength)
@@ -509,119 +521,135 @@ mod test {
     fn should_subscribe_components() {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config());
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![
-                    Sub::new(SubEventClause::Tick, SubClause::Always),
-                    Sub::new(
-                        SubEventClause::Tick,
-                        SubClause::HasAttrValue(
-                            MockComponentId::InputFoo,
-                            Attribute::InputLength,
-                            AttrValue::Length(8)
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![
+                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(
+                            SubEventClause::Tick,
+                            SubClause::HasAttrValue(
+                                MockComponentId::InputFoo,
+                                Attribute::InputLength,
+                                AttrValue::Length(8)
+                            )
+                        ), // NOTE: This event will be ignored
+                        Sub::new(
+                            SubEventClause::User(MockEvent::Bar),
+                            SubClause::HasAttrValue(
+                                MockComponentId::InputFoo,
+                                Attribute::Focus,
+                                AttrValue::Flag(true)
+                            )
                         )
-                    ), // NOTE: This event will be ignored
+                    ]
+                )
+                .is_ok()
+        );
+        assert_eq!(application.subs.len(), 2);
+        // Subscribe for another event
+        assert!(
+            application
+                .subscribe(
+                    &MockComponentId::InputFoo,
                     Sub::new(
-                        SubEventClause::User(MockEvent::Bar),
+                        SubEventClause::User(MockEvent::Foo),
                         SubClause::HasAttrValue(
                             MockComponentId::InputFoo,
                             Attribute::Focus,
-                            AttrValue::Flag(true)
+                            AttrValue::Flag(false)
                         )
                     )
-                ]
-            )
-            .is_ok());
-        assert_eq!(application.subs.len(), 2);
-        // Subscribe for another event
-        assert!(application
-            .subscribe(
-                &MockComponentId::InputFoo,
-                Sub::new(
-                    SubEventClause::User(MockEvent::Foo),
-                    SubClause::HasAttrValue(
-                        MockComponentId::InputFoo,
-                        Attribute::Focus,
-                        AttrValue::Flag(false)
-                    )
                 )
-            )
-            .is_ok());
+                .is_ok()
+        );
         assert_eq!(application.subs.len(), 3);
         // Try to re-subscribe
-        assert!(application
-            .subscribe(
-                &MockComponentId::InputFoo,
-                Sub::new(
-                    SubEventClause::User(MockEvent::Foo),
-                    SubClause::HasAttrValue(
-                        MockComponentId::InputFoo,
-                        Attribute::Focus,
-                        AttrValue::Flag(false)
+        assert!(
+            application
+                .subscribe(
+                    &MockComponentId::InputFoo,
+                    Sub::new(
+                        SubEventClause::User(MockEvent::Foo),
+                        SubClause::HasAttrValue(
+                            MockComponentId::InputFoo,
+                            Attribute::Focus,
+                            AttrValue::Flag(false)
+                        )
                     )
                 )
-            )
-            .is_err());
+                .is_err()
+        );
         // Subscribe for unexisting component
-        assert!(application
-            .subscribe(
-                &MockComponentId::InputBar,
-                Sub::new(
-                    SubEventClause::User(MockEvent::Foo),
-                    SubClause::HasAttrValue(
-                        MockComponentId::InputBar,
-                        Attribute::Focus,
-                        AttrValue::Flag(false)
+        assert!(
+            application
+                .subscribe(
+                    &MockComponentId::InputBar,
+                    Sub::new(
+                        SubEventClause::User(MockEvent::Foo),
+                        SubClause::HasAttrValue(
+                            MockComponentId::InputBar,
+                            Attribute::Focus,
+                            AttrValue::Flag(false)
+                        )
                     )
                 )
-            )
-            .is_err());
+                .is_err()
+        );
         // Unsubscribe element
-        assert!(application
-            .unsubscribe(
-                &MockComponentId::InputFoo,
-                SubEventClause::User(MockEvent::Foo)
-            )
-            .is_ok());
+        assert!(
+            application
+                .unsubscribe(
+                    &MockComponentId::InputFoo,
+                    SubEventClause::User(MockEvent::Foo)
+                )
+                .is_ok()
+        );
         // Unsubcribe twice
-        assert!(application
-            .unsubscribe(
-                &MockComponentId::InputFoo,
-                SubEventClause::User(MockEvent::Foo)
-            )
-            .is_err());
+        assert!(
+            application
+                .unsubscribe(
+                    &MockComponentId::InputFoo,
+                    SubEventClause::User(MockEvent::Foo)
+                )
+                .is_err()
+        );
     }
 
     #[test]
     fn should_umount_all() {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config());
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![
-                    Sub::new(SubEventClause::Tick, SubClause::Always),
-                    Sub::new(
-                        SubEventClause::User(MockEvent::Bar),
-                        SubClause::HasAttrValue(
-                            MockComponentId::InputFoo,
-                            Attribute::Focus,
-                            AttrValue::Flag(true)
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![
+                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(
+                            SubEventClause::User(MockEvent::Bar),
+                            SubClause::HasAttrValue(
+                                MockComponentId::InputFoo,
+                                Attribute::Focus,
+                                AttrValue::Flag(true)
+                            )
                         )
-                    )
-                ]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockFooInput::default()),
-                vec![Sub::new(SubEventClause::Any, SubClause::Always)]
-            )
-            .is_ok());
+                    ]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockFooInput::default()),
+                    vec![Sub::new(SubEventClause::Any, SubClause::Always)]
+                )
+                .is_ok()
+        );
         assert_eq!(application.subs.len(), 3);
         // Let's umount all
         application.umount_all();
@@ -635,31 +663,35 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
         // Mount foo and bar
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![
-                    Sub::new(SubEventClause::Tick, SubClause::Always),
-                    Sub::new(
-                        // NOTE: won't be thrown, since requires focus
-                        SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
-                        SubClause::HasAttrValue(
-                            MockComponentId::InputBar,
-                            Attribute::Focus,
-                            AttrValue::Flag(true)
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![
+                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(
+                            // NOTE: won't be thrown, since requires focus
+                            SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
+                            SubClause::HasAttrValue(
+                                MockComponentId::InputBar,
+                                Attribute::Focus,
+                                AttrValue::Flag(true)
+                            )
                         )
-                    )
-                ]
-            )
-            .is_ok());
+                    ]
+                )
+                .is_ok()
+        );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         /*
@@ -707,31 +739,35 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
         // Mount foo and bar
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![
-                    Sub::new(SubEventClause::Tick, SubClause::Always),
-                    Sub::new(
-                        // NOTE: won't be thrown, since requires focus
-                        SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
-                        SubClause::HasAttrValue(
-                            MockComponentId::InputBar,
-                            Attribute::Focus,
-                            AttrValue::Flag(true)
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![
+                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(
+                            // NOTE: won't be thrown, since requires focus
+                            SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
+                            SubClause::HasAttrValue(
+                                MockComponentId::InputBar,
+                                Attribute::Focus,
+                                AttrValue::Flag(true)
+                            )
                         )
-                    )
-                ]
-            )
-            .is_ok());
+                    ]
+                )
+                .is_ok()
+        );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         // lock subs
@@ -755,28 +791,32 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
         // Mount foo and bar
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![Sub::new(
-                    // NOTE: won't be thrown, since requires focus
-                    SubEventClause::Tick,
-                    SubClause::HasAttrValue(
-                        MockComponentId::InputBar,
-                        Attribute::Focus,
-                        AttrValue::Flag(true)
-                    )
-                )]
-            )
-            .is_ok());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![Sub::new(
+                        // NOTE: won't be thrown, since requires focus
+                        SubEventClause::Tick,
+                        SubClause::HasAttrValue(
+                            MockComponentId::InputBar,
+                            Attribute::Focus,
+                            AttrValue::Flag(true)
+                        )
+                    )]
+                )
+                .is_ok()
+        );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
@@ -794,27 +834,31 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
         // Mount foo and bar
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![Sub::new(
-                    SubEventClause::Tick,
-                    SubClause::HasAttrValue(
-                        MockComponentId::InputFoo,
-                        Attribute::Focus,
-                        AttrValue::Flag(true)
-                    )
-                )]
-            )
-            .is_ok());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![Sub::new(
+                        SubEventClause::Tick,
+                        SubClause::HasAttrValue(
+                            MockComponentId::InputFoo,
+                            Attribute::Focus,
+                            AttrValue::Flag(true)
+                        )
+                    )]
+                )
+                .is_ok()
+        );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
@@ -832,23 +876,27 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
         // Mount foo and bar
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![Sub::new(
-                    SubEventClause::Tick,
-                    SubClause::HasState(MockComponentId::InputFoo, State::None)
-                )]
-            )
-            .is_ok());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![Sub::new(
+                        SubEventClause::Tick,
+                        SubClause::HasState(MockComponentId::InputFoo, State::None)
+                    )]
+                )
+                .is_ok()
+        );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
@@ -866,26 +914,30 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
         // Mount foo and bar
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![Sub::new(
-                    SubEventClause::Tick,
-                    SubClause::HasState(
-                        MockComponentId::InputFoo,
-                        State::One(StateValue::String(String::new()))
-                    )
-                )]
-            )
-            .is_ok());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![Sub::new(
+                        SubEventClause::Tick,
+                        SubClause::HasState(
+                            MockComponentId::InputFoo,
+                            State::One(StateValue::String(String::new()))
+                        )
+                    )]
+                )
+                .is_ok()
+        );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         // No event should be generated
@@ -904,23 +956,27 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
         // Mount foo and bar
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![Sub::new(
-                    SubEventClause::Tick,
-                    SubClause::IsMounted(MockComponentId::InputOmar)
-                )]
-            )
-            .is_ok());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![Sub::new(
+                        SubEventClause::Tick,
+                        SubClause::IsMounted(MockComponentId::InputOmar)
+                    )]
+                )
+                .is_ok()
+        );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
@@ -938,23 +994,27 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_secs(60)));
         // Mount foo and bar
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![Sub::new(
-                    SubEventClause::Tick,
-                    SubClause::IsMounted(MockComponentId::InputFoo)
-                )]
-            )
-            .is_ok());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![Sub::new(
+                        SubEventClause::Tick,
+                        SubClause::IsMounted(MockComponentId::InputFoo)
+                    )]
+                )
+                .is_ok()
+        );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
@@ -972,23 +1032,27 @@ mod test {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_millis(500)));
         // Mount foo and bar
-        assert!(application
-            .mount(
-                MockComponentId::InputFoo,
-                Box::new(MockFooInput::default()),
-                vec![]
-            )
-            .is_ok());
-        assert!(application
-            .mount(
-                MockComponentId::InputBar,
-                Box::new(MockBarInput::default()),
-                vec![Sub::new(
-                    SubEventClause::Tick,
-                    SubClause::IsMounted(MockComponentId::InputFoo)
-                )]
-            )
-            .is_ok());
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![Sub::new(
+                        SubEventClause::Tick,
+                        SubClause::IsMounted(MockComponentId::InputFoo)
+                    )]
+                )
+                .is_ok()
+        );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
