@@ -45,28 +45,29 @@ where
     T: TerminalAdapter,
 {
     pub fn view(&mut self) {
-        assert!(self
-            .terminal
-            .draw(|f| {
-                let chunks = Layout::default()
-                    .direction(Direction::Vertical)
-                    .margin(1)
-                    .constraints(
-                        [
-                            Constraint::Length(3), // Clock
-                            Constraint::Length(3), // Letter Counter
-                            Constraint::Length(3), // Digit Counter
-                            Constraint::Length(1), // Label
-                        ]
-                        .as_ref(),
-                    )
-                    .split(f.area());
-                self.app.view(&Id::Clock, f, chunks[0]);
-                self.app.view(&Id::LetterCounter, f, chunks[1]);
-                self.app.view(&Id::DigitCounter, f, chunks[2]);
-                self.app.view(&Id::Label, f, chunks[3]);
-            })
-            .is_ok());
+        assert!(
+            self.terminal
+                .draw(|f| {
+                    let chunks = Layout::default()
+                        .direction(Direction::Vertical)
+                        .margin(1)
+                        .constraints(
+                            [
+                                Constraint::Length(3), // Clock
+                                Constraint::Length(3), // Letter Counter
+                                Constraint::Length(3), // Digit Counter
+                                Constraint::Length(1), // Label
+                            ]
+                            .as_ref(),
+                        )
+                        .split(f.area());
+                    self.app.view(&Id::Clock, f, chunks[0]);
+                    self.app.view(&Id::LetterCounter, f, chunks[1]);
+                    self.app.view(&Id::DigitCounter, f, chunks[2]);
+                    self.app.view(&Id::Label, f, chunks[3]);
+                })
+                .is_ok()
+        );
     }
 
     fn init_app() -> Application<Id, Msg, NoUserEvent> {
@@ -82,8 +83,8 @@ where
                 .tick_interval(Duration::from_secs(1)),
         );
         // Mount components
-        assert!(app
-            .mount(
+        assert!(
+            app.mount(
                 Id::Label,
                 Box::new(
                     Label::default()
@@ -95,10 +96,11 @@ where
                 ),
                 Vec::default(),
             )
-            .is_ok());
+            .is_ok()
+        );
         // Mount clock, subscribe to tick
-        assert!(app
-            .mount(
+        assert!(
+            app.mount(
                 Id::Clock,
                 Box::new(
                     Clock::new(SystemTime::now())
@@ -109,22 +111,25 @@ where
                 ),
                 vec![Sub::new(SubEventClause::Tick, SubClause::Always)]
             )
-            .is_ok());
+            .is_ok()
+        );
         // Mount counters
-        assert!(app
-            .mount(
+        assert!(
+            app.mount(
                 Id::LetterCounter,
                 Box::new(LetterCounter::new(0)),
                 Vec::new()
             )
-            .is_ok());
-        assert!(app
-            .mount(
+            .is_ok()
+        );
+        assert!(
+            app.mount(
                 Id::DigitCounter,
                 Box::new(DigitCounter::new(5)),
                 Vec::default()
             )
-            .is_ok());
+            .is_ok()
+        );
         // Active letter counter
         assert!(app.active(&Id::LetterCounter).is_ok());
         app
@@ -155,14 +160,15 @@ where
                 }
                 Msg::DigitCounterChanged(v) => {
                     // Update label
-                    assert!(self
-                        .app
-                        .attr(
-                            &Id::Label,
-                            Attribute::Text,
-                            AttrValue::String(format!("DigitCounter has now value: {}", v))
-                        )
-                        .is_ok());
+                    assert!(
+                        self.app
+                            .attr(
+                                &Id::Label,
+                                Attribute::Text,
+                                AttrValue::String(format!("DigitCounter has now value: {}", v))
+                            )
+                            .is_ok()
+                    );
                     None
                 }
                 Msg::LetterCounterBlur => {
@@ -172,14 +178,15 @@ where
                 }
                 Msg::LetterCounterChanged(v) => {
                     // Update label
-                    assert!(self
-                        .app
-                        .attr(
-                            &Id::Label,
-                            Attribute::Text,
-                            AttrValue::String(format!("LetterCounter has now value: {}", v))
-                        )
-                        .is_ok());
+                    assert!(
+                        self.app
+                            .attr(
+                                &Id::Label,
+                                Attribute::Text,
+                                AttrValue::String(format!("LetterCounter has now value: {}", v))
+                            )
+                            .is_ok()
+                    );
                     None
                 }
             }

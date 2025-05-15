@@ -36,24 +36,25 @@ where
     }
 
     pub fn view(&mut self) {
-        assert!(self
-            .terminal
-            .draw(|f| {
-                let chunks = Layout::default()
-                    .direction(Direction::Vertical)
-                    .margin(1)
-                    .constraints(
-                        [
-                            Constraint::Length(3), // Label
-                            Constraint::Length(3), // Other
-                        ]
-                        .as_ref(),
-                    )
-                    .split(f.area());
-                self.app.view(&Id::Label, f, chunks[0]);
-                self.app.view(&Id::Other, f, chunks[1]);
-            })
-            .is_ok());
+        assert!(
+            self.terminal
+                .draw(|f| {
+                    let chunks = Layout::default()
+                        .direction(Direction::Vertical)
+                        .margin(1)
+                        .constraints(
+                            [
+                                Constraint::Length(3), // Label
+                                Constraint::Length(3), // Other
+                            ]
+                            .as_ref(),
+                        )
+                        .split(f.area());
+                    self.app.view(&Id::Label, f, chunks[0]);
+                    self.app.view(&Id::Other, f, chunks[1]);
+                })
+                .is_ok()
+        );
     }
 }
 

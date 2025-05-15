@@ -10,7 +10,7 @@ mod worker;
 
 use std::sync::atomic::AtomicBool;
 // -- export
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
@@ -78,8 +78,9 @@ where
     /// - `poll` is the trait object which polls for input events
     /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
     /// - `tick_interval` is the interval used to send the `Tick` event. If `None`, no tick will be sent.
-    ///     Tick should be used only when you need to handle the tick in the interface through the Subscriptions.
-    ///     The tick should have in this case, the same value (or less) of the refresh rate of the TUI.
+    ///
+    /// Tick should be used only when you need to handle the tick in the interface through the Subscriptions.
+    /// The tick should have in this case, the same value (or less) of the refresh rate of the TUI.
     ///
     /// > Panics if `poll_timeout` is 0
     pub(self) fn start(

@@ -5,9 +5,9 @@ use termion::event::{Event as TonEvent, Key as TonKey};
 use termion::input::TermRead as _;
 
 use super::Event;
+use crate::ListenerError;
 use crate::event::{Key, KeyEvent, KeyModifiers};
 use crate::listener::{ListenerResult, Poll};
-use crate::ListenerError;
 
 /// The input listener for [`termion`].
 #[doc(alias = "InputEventListener")]

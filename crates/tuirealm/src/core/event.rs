@@ -39,7 +39,7 @@ impl<U> Event<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd,
 {
-    pub(crate) fn is_keyboard(&self) -> Option<&KeyEvent> {
+    pub(crate) fn as_keyboard(&self) -> Option<&KeyEvent> {
         if let Event::Keyboard(k) = self {
             Some(k)
         } else {
@@ -47,7 +47,7 @@ where
         }
     }
 
-    pub(crate) fn is_mouse(&self) -> Option<&MouseEvent> {
+    pub(crate) fn as_mouse(&self) -> Option<&MouseEvent> {
         if let Event::Mouse(m) = self {
             Some(m)
         } else {
@@ -55,15 +55,15 @@ where
         }
     }
 
-    pub(crate) fn is_window_resize(&self) -> bool {
+    pub(crate) fn as_window_resize(&self) -> bool {
         matches!(self, Self::WindowResize(_, _))
     }
 
-    pub(crate) fn is_tick(&self) -> bool {
+    pub(crate) fn as_tick(&self) -> bool {
         matches!(self, Self::Tick)
     }
 
-    pub(crate) fn is_user(&self) -> Option<&U> {
+    pub(crate) fn as_user(&self) -> Option<&U> {
         if let Event::User(u) = self {
             Some(u)
         } else {
@@ -329,18 +329,18 @@ mod test {
     #[test]
     fn check_events() {
         let e: Event<MockEvent> = Event::Keyboard(KeyEvent::new(Key::Down, KeyModifiers::CONTROL));
-        assert!(e.is_keyboard().is_some());
-        assert_eq!(e.is_window_resize(), false);
-        assert_eq!(e.is_tick(), false);
-        assert_eq!(e.is_mouse().is_some(), false);
-        assert!(e.is_user().is_none());
+        assert!(e.as_keyboard().is_some());
+        assert_eq!(e.as_window_resize(), false);
+        assert_eq!(e.as_tick(), false);
+        assert_eq!(e.as_mouse().is_some(), false);
+        assert!(e.as_user().is_none());
         let e: Event<MockEvent> = Event::WindowResize(0, 24);
-        assert!(e.is_window_resize());
-        assert!(e.is_keyboard().is_none());
+        assert!(e.as_window_resize());
+        assert!(e.as_keyboard().is_none());
         let e: Event<MockEvent> = Event::Tick;
-        assert!(e.is_tick());
+        assert!(e.as_tick());
         let e: Event<MockEvent> = Event::User(MockEvent::Bar);
-        assert_eq!(e.is_user().unwrap(), &MockEvent::Bar);
+        assert_eq!(e.as_user().unwrap(), &MockEvent::Bar);
 
         let e: Event<MockEvent> = Event::Mouse(MouseEvent {
             kind: MouseEventKind::Moved,
@@ -348,10 +348,10 @@ mod test {
             column: 0,
             row: 0,
         });
-        assert!(e.is_mouse().is_some());
-        assert_eq!(e.is_keyboard().is_some(), false);
-        assert_eq!(e.is_tick(), false);
-        assert_eq!(e.is_window_resize(), false);
+        assert!(e.as_mouse().is_some());
+        assert_eq!(e.as_keyboard().is_some(), false);
+        assert_eq!(e.as_tick(), false);
+        assert_eq!(e.as_window_resize(), false);
     }
 
     // -- serde

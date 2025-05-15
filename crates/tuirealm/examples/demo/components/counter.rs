@@ -12,7 +12,7 @@ use tuirealm::{
     StateValue,
 };
 
-use super::{get_block, Msg};
+use super::{Msg, get_block};
 
 /// Counter which increments its value on Submit
 struct Counter {

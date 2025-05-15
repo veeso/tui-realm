@@ -4,7 +4,7 @@
 
 use std::ops::{Add, Sub};
 use std::sync::atomic::AtomicBool;
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -174,9 +174,9 @@ mod test {
 
     use super::super::ListenerResult;
     use super::*;
+    use crate::Event;
     use crate::core::event::{Key, KeyEvent};
     use crate::mock::{MockEvent, MockPoll};
-    use crate::Event;
 
     #[test]
     fn worker_should_poll_multiple_times() {

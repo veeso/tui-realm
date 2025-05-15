@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [2.2.0](#220)
   - [2.1.0](#210)
   - [2.0.3](#203)
   - [2.0.2](#202)
@@ -39,6 +40,13 @@
   - [0.1.0](#010)
 
 ---
+
+## 2.2.0
+
+Released on 15/05/2025
+
+- Added new `SubEventClause::Discriminant`, which works as `SubEventClause::User`, but only checks the discriminant of the enum, instead of the whole enum. (e.g. `Foo::Bar(2)` has the same discriminant as `Foo::Bar(20)`, while when using `SubEventClause::User`, it would be different)
+- Rust edition `2024`
 
 ## 2.1.0
 
