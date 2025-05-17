@@ -16,10 +16,10 @@ jobs:
           toolchain: stable
           components: rustfmt, clippy
       - name: Test
-        run: cargo test --no-fail-fast --lib --no-default-features --features derive,serialize,termion
+        run: cargo test --no-fail-fast --lib --no-default-features --features derive,serialize,termion,async-ports
       - name: Examples
         run: cargo build --all-targets --no-default-features --features derive,serialize,termion --examples
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy
-        run: cargo clippy --lib --no-default-features --features derive,serialize,termion -- -Dwarnings
+        run: cargo clippy --lib --no-default-features --features derive,serialize,termion,async-ports -- -Dwarnings
