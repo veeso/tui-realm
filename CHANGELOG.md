@@ -46,7 +46,7 @@
 
 Released on 17/05/2025
 
-- [Issue 94](https://github.com/veeso/tui-realm/issues/94): Added support for **Async Ports**. It is now possible to create async ports by implementing the `PollAsync` trait and then by passing the `tokio::rt::Handl` to the `EventListenerCfg::port` method.
+- [Issue 94](https://github.com/veeso/tui-realm/issues/94): Added support for **Async Ports**. It is now possible to create async ports by implementing the `PollAsync` trait and then by passing the `tokio::rt::Handle` to the `EventListenerCfg::port` method.
 
     ```rust
     let handle = Arc::new(tokio::rt::Handle::current());
