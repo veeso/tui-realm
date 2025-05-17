@@ -176,6 +176,7 @@ mod test {
     use super::*;
     use crate::Event;
     use crate::core::event::{Key, KeyEvent};
+    use crate::listener::SyncPort;
     use crate::mock::{MockEvent, MockPoll};
 
     #[test]
@@ -186,7 +187,8 @@ mod test {
         let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
 
-        let mock_port = Port::new(Box::new(MockPoll::default()), Duration::from_secs(5), 10);
+        let mock_port =
+            SyncPort::new(Box::new(MockPoll::default()), Duration::from_secs(5), 10).into();
 
         let mut worker =
             EventListenerWorker::<MockEvent>::new(vec![mock_port], tx, paused_t, running_t, None);
@@ -209,11 +211,7 @@ mod test {
         let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
-            vec![Port::new(
-                Box::new(MockPoll::default()),
-                Duration::from_secs(5),
-                1,
-            )],
+            vec![SyncPort::new(Box::new(MockPoll::default()), Duration::from_secs(5), 1).into()],
             tx,
             paused_t,
             running_t,
@@ -236,11 +234,7 @@ mod test {
         let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
-            vec![Port::new(
-                Box::new(MockPoll::default()),
-                Duration::from_secs(5),
-                1,
-            )],
+            vec![SyncPort::new(Box::new(MockPoll::default()), Duration::from_secs(5), 1).into()],
             tx,
             paused_t,
             running_t,
@@ -263,11 +257,7 @@ mod test {
         let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         let mut worker = EventListenerWorker::<MockEvent>::new(
-            vec![Port::new(
-                Box::new(MockPoll::default()),
-                Duration::from_secs(5),
-                1,
-            )],
+            vec![SyncPort::new(Box::new(MockPoll::default()), Duration::from_secs(5), 1).into()],
             tx,
             paused_t,
             running_t,
@@ -300,11 +290,7 @@ mod test {
         let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
         let worker = EventListenerWorker::<MockEvent>::new(
-            vec![Port::new(
-                Box::new(MockPoll::default()),
-                Duration::from_secs(3),
-                1,
-            )],
+            vec![SyncPort::new(Box::new(MockPoll::default()), Duration::from_secs(3), 1).into()],
             tx,
             paused_t,
             running_t,

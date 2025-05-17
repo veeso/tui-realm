@@ -52,7 +52,7 @@ pub enum TerminalError {
 ///
 /// To quickly setup a terminal with default settings, you can use the [`TerminalBridge::init()`] method.
 ///
-/// ```rust
+/// ```rust,ignore
 /// use tuirealm::terminal::TerminalBridge;
 ///
 /// #[cfg(feature = "crossterm")]

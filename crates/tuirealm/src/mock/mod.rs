@@ -51,6 +51,31 @@ impl<U: Eq + PartialEq + Clone + PartialOrd + Send + 'static> Poll<U> for MockPo
     }
 }
 
+#[cfg(feature = "async-ports")]
+pub struct MockPollAsync<U: Eq + PartialEq + Clone + PartialOrd + Send> {
+    ghost: PhantomData<U>,
+}
+
+#[cfg(feature = "async-ports")]
+impl<U: Eq + PartialEq + Clone + PartialOrd + Send> Default for MockPollAsync<U> {
+    fn default() -> Self {
+        Self { ghost: PhantomData }
+    }
+}
+
+#[cfg(feature = "async-ports")]
+#[async_trait::async_trait]
+impl<U: Eq + PartialEq + Clone + PartialOrd + Send + Sync + 'static> crate::listener::PollAsync<U>
+    for MockPollAsync<U>
+{
+    async fn poll(&self) -> ListenerResult<Option<Event<U>>> {
+        let tempfile = tempfile::NamedTempFile::new().expect("tempfile");
+        let _file = tokio::fs::File::open(tempfile.path()).await.expect("file");
+
+        Ok(Some(Event::Keyboard(KeyEvent::from(Key::Enter))))
+    }
+}
+
 // -- msg
 
 /// Mocked Msg for components and view

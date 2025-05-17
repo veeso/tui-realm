@@ -2,7 +2,7 @@
 //!
 //! This module exposes the EventListenerCfg which is used to build the event listener
 
-use super::{Duration, EventListener, Poll, Port};
+use super::{Duration, EventListener, Poll, Port, SyncPort};
 
 /// The event listener configurator is used to setup an event listener.
 /// Once you're done with configuration just call `EventListenerCfg::start` and the event listener will start and the listener
@@ -64,7 +64,7 @@ where
     /// The interval is the amount of time between each [`Poll::poll`] call.
     /// The max_poll is the maximum amount of times the port should be polled in a single poll.
     pub fn add_port(self, poll: Box<dyn Poll<U>>, interval: Duration, max_poll: usize) -> Self {
-        self.port(Port::new(poll, interval, max_poll))
+        self.port(SyncPort::new(poll, interval, max_poll).into())
     }
 
     /// Add a new [`Port`] to the the event listener
@@ -99,6 +99,27 @@ where
             interval,
             max_poll,
         )
+    }
+}
+
+impl<U> EventListenerCfg<U>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send + Sync + 'static,
+{
+    /// Add a new [`Port`] (Poll, Interval) to the the event listener.
+    ///
+    /// The interval is the amount of time between each [`super::PollAsync::poll`] call.
+    /// The max_poll is the maximum amount of times the port should be polled in a single poll.
+    #[cfg(feature = "async-ports")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
+    pub fn add_async_port(
+        self,
+        poll: Box<dyn super::PollAsync<U> + Send + Sync>,
+        interval: Duration,
+        max_poll: usize,
+        rt: &std::sync::Arc<tokio::runtime::Handle>,
+    ) -> Self {
+        self.port(super::AsyncPort::new(poll, interval, max_poll, rt).into())
     }
 }
 
@@ -160,11 +181,8 @@ mod test {
     fn should_add_port_via_port_1() {
         let builder = EventListenerCfg::<MockEvent>::default();
         assert!(builder.ports.is_empty());
-        let builder = builder.port(Port::new(
-            Box::new(MockPoll::default()),
-            Duration::from_millis(1),
-            1,
-        ));
+        let builder = builder
+            .port(SyncPort::new(Box::new(MockPoll::default()), Duration::from_millis(1), 1).into());
         assert_eq!(builder.ports.len(), 1);
     }
 }

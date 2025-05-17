@@ -14,11 +14,14 @@ use std::sync::{Arc, mpsc};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
-pub use builder::EventListenerCfg;
-pub use port::Port;
 use thiserror::Error;
-use worker::EventListenerWorker;
 
+pub use self::builder::EventListenerCfg;
+#[cfg(feature = "async-ports")]
+#[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
+pub use self::port::AsyncPort;
+pub use self::port::{Port, SyncPort};
+use self::worker::EventListenerWorker;
 // -- internal
 use super::Event;
 
@@ -39,7 +42,7 @@ pub enum ListenerError {
 }
 
 /// The poll trait defines the function [`Poll::poll`], which will be called by the event listener
-/// dedicated thread to poll for events.
+/// dedicated thread to poll for events if you use a [`SyncPort`].
 pub trait Poll<UserEvent>: Send
 where
     UserEvent: Eq + PartialEq + Clone + PartialOrd + 'static,
@@ -53,7 +56,27 @@ where
     fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>>;
 }
 
-/// The event listener...
+/// The poll trait defines the function [`PollAsync::poll`], which will be called by the event listener
+/// dedicated thread to poll for events if you use a [`AsyncPort`].
+#[cfg(feature = "async-ports")]
+#[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
+#[async_trait::async_trait]
+pub trait PollAsync<UserEvent>: Send + Sync
+where
+    UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+{
+    /// Poll for an with the possibility to do it asynchronously, from user or from another source (e.g. Network).
+    /// This function mustn't be blocking, and will be called within the configured interval of the event listener.
+    /// It may return Error in case something went wrong.
+    /// If it was possible to poll for event, `Ok` must be returned.
+    /// If an event was read, then [`Some`] must be returned, otherwise [`None`].
+    /// The event must be converted to `Event` using the `adapters`.
+    async fn poll(&self) -> ListenerResult<Option<Event<UserEvent>>>;
+}
+
+/// The event listener is a worker that runs in a separate thread and polls for events
+/// from the [`Port`]s. It is responsible for sending events to the main thread and handling
+/// internal events like `Tick`.
 pub(crate) struct EventListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
@@ -233,11 +256,7 @@ mod test {
     #[test]
     fn worker_should_run_thread() {
         let mut listener = EventListener::<MockEvent>::start(
-            vec![Port::new(
-                Box::new(MockPoll::default()),
-                Duration::from_secs(10),
-                1,
-            )],
+            vec![SyncPort::new(Box::new(MockPoll::default()), Duration::from_secs(10), 1).into()],
             Duration::from_millis(10),
             Some(Duration::from_secs(3)),
         );
