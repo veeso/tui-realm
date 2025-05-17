@@ -1,7 +1,7 @@
 [package]
 name = "tuirealm"
-version = "2.2.0"
-authors = ["Christian Visintin"]
+version = "2.3.0"
+authors = ["Christian Visintin <christian.visintin@veeso.dev>"]
 edition = "2024"
 rust-version = "1.85.1"
 categories = ["command-line-utilities"]
@@ -15,6 +15,7 @@ readme = "README.md"
 repository = "https://github.com/veeso/tui-realm"
 
 [dependencies]
+async-trait = { version = "0.1", optional = true }
 bitflags = "2"
 crossterm = { version = "0.29", optional = true }
 lazy-regex = "3"
@@ -22,19 +23,29 @@ ratatui = { version = "0.29", default-features = false }
 serde = { version = "1", features = ["derive"], optional = true }
 termion = { version = "^4", optional = true }
 thiserror = "2"
+tokio = { version = "1", features = [
+  "rt",
+], default-features = false, optional = true }
 tuirealm_derive = { version = "2", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "^1"
 toml = "^0.8"
 tempfile = "^3"
+tokio = { version = "1", features = ["full"] }
 
 [features]
 default = ["derive", "dep:crossterm"]
+async-ports = ["dep:async-trait", "dep:tokio"]
 derive = ["dep:tuirealm_derive"]
 serialize = ["dep:serde", "bitflags/serde"]
 crossterm = ["dep:crossterm", "ratatui/crossterm"]
 termion = ["dep:termion", "ratatui/termion"]
+
+[[example]]
+name = "async-ports"
+path = "examples/async_ports.rs"
+required-features = ["async-ports", "crossterm"]
 
 [[example]]
 name = "demo"
