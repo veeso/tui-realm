@@ -587,7 +587,7 @@ mod test {
     #[test]
     fn view_should_inject_properties() {
         let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
-        view.add_injector(Box::new(MockInjector::default()));
+        view.add_injector(Box::new(MockInjector));
         assert!(
             view.mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
                 .is_ok()

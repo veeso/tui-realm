@@ -52,7 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Err(err) => {
                 panic!("application error {err}");
             }
-            Ok(messages) if messages.len() > 0 => {
+            Ok(messages) if !messages.is_empty() => {
                 // NOTE: redraw if at least one msg has been processed
                 model.redraw = true;
                 for msg in messages.into_iter() {
@@ -277,10 +277,7 @@ impl Component<Msg, UserEvent> for Label {
                 // set text
                 self.attr(
                     Attribute::Text,
-                    AttrValue::String(format!(
-                        "file wrote in {} nanos",
-                        duration.as_nanos().to_string()
-                    )),
+                    AttrValue::String(format!("file wrote in {} nanos", duration.as_nanos())),
                 );
 
                 Some(Msg::None)

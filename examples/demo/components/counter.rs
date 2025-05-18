@@ -238,7 +238,7 @@ impl Component<Msg, NoUserEvent> for DigitCounter {
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) if ch.is_digit(10) => Cmd::Submit,
+            }) if ch.is_ascii_digit() => Cmd::Submit,
             Event::Keyboard(KeyEvent {
                 code: Key::Tab,
                 modifiers: KeyModifiers::NONE,
