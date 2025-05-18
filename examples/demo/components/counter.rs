@@ -15,18 +15,10 @@ use tuirealm::{
 use super::{Msg, get_block};
 
 /// Counter which increments its value on Submit
+#[derive(Default)]
 struct Counter {
     props: Props,
     states: OwnStates,
-}
-
-impl Default for Counter {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: OwnStates::default(),
-        }
-    }
 }
 
 impl Counter {
@@ -150,14 +142,9 @@ impl MockComponent for Counter {
     }
 }
 
+#[derive(Default)]
 struct OwnStates {
     counter: isize,
-}
-
-impl Default for OwnStates {
-    fn default() -> Self {
-        Self { counter: 0 }
-    }
 }
 
 impl OwnStates {
