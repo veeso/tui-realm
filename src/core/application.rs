@@ -44,8 +44,13 @@ where
     /// Initialize a new [`Application`].
     /// The event listener is immediately created and started.
     pub fn init(listener_cfg: EventListenerCfg<UserEvent>) -> Self {
+        // TODO: maybe consider bubbling this up?
+        let listener = listener_cfg
+            .start()
+            .expect("EventListenerCfg to be configured correctly");
+
         Self {
-            listener: listener_cfg.start(),
+            listener,
             subs: Vec::new(),
             sub_lock: false,
             view: View::default(),
@@ -60,7 +65,7 @@ where
         listener_cfg: EventListenerCfg<UserEvent>,
     ) -> ApplicationResult<()> {
         self.listener.stop()?;
-        self.listener = listener_cfg.start();
+        self.listener = listener_cfg.start()?;
         Ok(())
     }
 
