@@ -53,6 +53,7 @@ Unreleased
 - Dont start the Sync-Port worker if there are no sync ports (note that `async_tick(false)`(the default) also counts as a sync port).
 - Fix accidental always inclusion of `crossterm` dependency, even if `crossterm` feature was disabled. (since [2.2.0](#220))
 - Change `PollAsync::poll` to take `&mut self` instead of `&self`.
+- Add async `crossterm` input listener `CrosstermAsyncStream` as a alternative to the sync `CrosstermInputListener`.
 
 ## 2.4.0
 

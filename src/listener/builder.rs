@@ -132,10 +132,25 @@ where
     /// Add to the event listener the default crossterm input listener [`crate::terminal::CrosstermInputListener`]
     ///
     /// The interval is the amount of time between each [`Poll::poll`] call.
-    /// The max_poll is the maximum amount of times the port should be polled in a single poll.
+    /// The max_poll is the maximum amount of times the port should be polled in a `interval`.
     pub fn crossterm_input_listener(self, interval: Duration, max_poll: usize) -> Self {
         self.add_port(
             Box::new(crate::terminal::CrosstermInputListener::<U>::new(interval)),
+            interval,
+            max_poll,
+        )
+    }
+
+    #[cfg(all(feature = "crossterm", feature = "async-ports"))]
+    /// Add to the async event listener the default crossterm input listener [`crate::terminal::CrosstermAsyncStream`]
+    ///
+    /// The `interval` is the amount of time between each [`PollAsync::poll`](super::PollAsync) call.
+    /// The `max_poll` is the maximum amount of times the port should be polled in a single `interval`.
+    ///
+    /// It is recommended to set `interval` to `0` to have immediate events.
+    pub fn async_crossterm_input_listener(self, interval: Duration, max_poll: usize) -> Self {
+        self.add_async_port(
+            Box::new(crate::terminal::CrosstermAsyncStream::new()),
             interval,
             max_poll,
         )
@@ -145,7 +160,7 @@ where
     /// Add to the event listener the default termion input listener [`crate::terminal::TermionInputListener`]
     ///
     /// The interval is the amount of time between each [`Poll::poll`] call.
-    /// The max_poll is the maximum amount of times the port should be polled in a single poll.
+    /// The max_poll is the maximum amount of times the port should be polled in a `interval`.
     pub fn termion_input_listener(self, interval: Duration, max_poll: usize) -> Self {
         self.add_port(
             Box::new(crate::terminal::TermionInputListener::<U>::new(interval)),
