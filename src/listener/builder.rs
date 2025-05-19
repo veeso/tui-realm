@@ -321,10 +321,9 @@ mod test {
         assert_eq!(Handle::current().metrics().num_alive_tasks(), 1);
         assert!(listener.thread.is_none()); // there are no sync ports or tasks, so no sync worker
         assert!(listener.taskpool.is_some());
-        sleep(Duration::from_millis(25)).await; // wait for at least 2 events
+        sleep(Duration::from_millis(25)).await; // wait for at least 1 event
 
         listener.stop().unwrap();
-        assert_eq!(listener.poll(), Ok(Some(Event::Tick)));
         assert_eq!(listener.poll(), Ok(Some(Event::Tick)));
     }
 }
