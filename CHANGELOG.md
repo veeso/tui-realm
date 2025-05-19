@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [2.4.0](#240)
   - [2.3.0](#230)
   - [2.2.0](#220)
   - [2.1.0](#210)
@@ -42,9 +43,9 @@
 
 ---
 
-## next
+## 2.4.0
 
-Unreleased
+Released on 19/05/2025
 
 - [Issue 94](https://github.com/veeso/tui-realm/issues/94) / [PR 94](https://github.com/veeso/tui-realm/issues/97): improve **Async Ports** to make full use of it being async by running all async ports on the runtime instead of blocking on them like a Sync-port.
 
