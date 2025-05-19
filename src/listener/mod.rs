@@ -4,6 +4,8 @@
 //! internal events in a tui-realm application.
 
 // -- modules
+#[cfg(feature = "async-ports")]
+mod async_ticker;
 mod builder;
 mod port;
 #[cfg(feature = "async-ports")]
@@ -182,12 +184,23 @@ where
     #[cfg(feature = "async-ports")]
     pub(self) fn start_async(
         mut self,
-        ports: Vec<AsyncPort<U>>,
+        mut ports: Vec<AsyncPort<U>>,
         handle: tokio::runtime::Handle,
+        tick_interval: Option<Duration>,
     ) -> Self {
+        use async_ticker::AsyncTicker;
+
         let taskpool = TaskPool::new(handle);
         // unwrap is safe the first time as it is always assigned in "start"
         let tx = self.tx.take().unwrap();
+
+        if let Some(tick_interval) = tick_interval {
+            ports.push(AsyncPort::new(
+                Box::new(AsyncTicker::new()),
+                tick_interval,
+                1,
+            ));
+        }
 
         for port in ports {
             let tx = tx.clone();
@@ -335,7 +348,6 @@ where
 
 #[cfg(test)]
 mod test {
-
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -409,30 +421,25 @@ mod test {
         );
         assert_eq!(Handle::current().metrics().num_alive_tasks(), 0);
 
-        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10))
-            .start(vec![], Some(Duration::from_secs(3)), true)
-            .start_async(vec![port], Handle::current());
+        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start_async(
+            vec![port],
+            Handle::current(),
+            Some(Duration::from_secs(3)),
+        );
         sleep(Duration::from_millis(5)).await; // ensure the tasks are spawned and have a chance to generate already
-        assert_eq!(Handle::current().metrics().num_alive_tasks(), 1);
+        assert_eq!(Handle::current().metrics().num_alive_tasks(), 2);
 
         let mut events = Vec::with_capacity(3);
 
-        // collect events due to how sync and async work at the same time, so there may or may not be a "Tick" event before the wanted event
+        // due to how execution on the runtime works, events may arrive in any order
         while let Some(event) = listener.poll().ok().flatten() {
             events.push(event);
         }
 
         // Poll (event)
-        assert!(events.contains(&Event::Keyboard(KeyEvent::from(Key::Enter))),);
-        // the following is untested as ticks are still sync and are tested by other tests already
-        // // Poll (tick)
-        // assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
-        // // Poll (None)
-        // assert!(listener.poll().ok().unwrap().is_none());
-        // // Wait 3 seconds
-        // thread::sleep(Duration::from_secs(3));
-        // // New tick
-        // assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
+        assert!(events.contains(&Event::Keyboard(KeyEvent::from(Key::Enter))));
+        // Poll (tick)
+        assert!(events.contains(&Event::Tick));
         // Stop
         assert!(listener.stop().is_ok());
         sleep(Duration::from_millis(5)).await; // ensure the tasks have a chance to execute again to cancel themself

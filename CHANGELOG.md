@@ -49,6 +49,8 @@ Unreleased
 
 - Remove `+ Sync` bound on `PollAsync` trait and `U`(Event) bound and all related functions.
 - Fix bug that `EventListener::stop` did not actually stop any async tasks.
+- Add function `EventListenerCfg::async_tick` to switch the ticker from Sync-Port to Async-Ports. Note that `EventListenerCfg::tick_interval` is still necessary to enable any ticker.
+- Dont start the Sync-Port worker if there are no sync ports (note that `async_tick(false)`(the default) also counts as a sync port).
 
 ## 2.4.0
 
