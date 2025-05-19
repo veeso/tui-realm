@@ -43,6 +43,12 @@
 
 ---
 
+## next
+
+Unreleased
+
+- Remove `+ Sync` bound on `PollAsync` trait and `U`(Event) bound and all related functions.
+
 ## 2.4.0
 
 Released on 19/05/2025

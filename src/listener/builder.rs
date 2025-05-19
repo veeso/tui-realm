@@ -140,9 +140,10 @@ where
     }
 }
 
+/// Implementations for feature `async-ports`
 impl<U> EventListenerCfg<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + Sync + 'static,
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     /// Add a new [`Port`] (Poll, Interval) to the the event listener.
     ///
@@ -152,7 +153,7 @@ where
     #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
     pub fn add_async_port(
         self,
-        poll: Box<dyn super::PollAsync<U> + Send + Sync>,
+        poll: Box<dyn super::PollAsync<U>>,
         interval: Duration,
         max_poll: usize,
     ) -> Self {

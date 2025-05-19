@@ -67,7 +67,7 @@ where
 #[cfg(feature = "async-ports")]
 #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
 #[async_trait::async_trait]
-pub trait PollAsync<UserEvent>: Send + Sync
+pub trait PollAsync<UserEvent>: Send
 where
     UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
