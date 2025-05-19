@@ -4,6 +4,8 @@
 //! internal events in a tui-realm application.
 
 // -- modules
+#[cfg(feature = "async-ports")]
+mod async_ticker;
 mod builder;
 mod port;
 #[cfg(feature = "async-ports")]
@@ -67,7 +69,7 @@ where
 #[cfg(feature = "async-ports")]
 #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
 #[async_trait::async_trait]
-pub trait PollAsync<UserEvent>: Send + Sync
+pub trait PollAsync<UserEvent>: Send
 where
     UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
@@ -77,7 +79,7 @@ where
     /// If it was possible to poll for event, `Ok` must be returned.
     /// If an event was read, then [`Some`] must be returned, otherwise [`None`].
     /// The event must be converted to `Event` using the `adapters`.
-    async fn poll(&self) -> ListenerResult<Option<Event<UserEvent>>>;
+    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>>;
 }
 
 /// The event listener is a worker that runs in a separate thread and polls for events
@@ -101,8 +103,9 @@ where
     /// The taskpool to track all async ports and cancel them
     #[cfg(feature = "async-ports")]
     taskpool: Option<TaskPool>,
-    /// The event transmitter to allow async ports from a different function
-    #[cfg(feature = "async-ports")]
+    /// The event emitter associated with `recv`, until `start` and `start_async` are called.
+    ///
+    /// This needs to be [`None`] after either [`start`](Self::start) or [`start_async`](Self::start_async) is called, otherwise the channel will never close.
     tx: Option<mpsc::Sender<ListenerMsg<U>>>,
 }
 
@@ -110,9 +113,37 @@ impl<U> EventListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// Create a new [`EventListener`] and start it.
-    /// - `poll` is the trait object which polls for input events
+    /// Create a new [`EventListener`].
     /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
+    ///
+    /// # Panics
+    ///
+    /// - if `poll_timeout` is 0
+    pub(self) fn new(poll_timeout: Duration) -> Self {
+        if poll_timeout == Duration::ZERO {
+            panic!(
+                "poll timeout cannot be 0 (see <https://github.com/rust-lang/rust/issues/39364>)"
+            )
+        }
+
+        let (sender, recv) = mpsc::channel();
+        let paused = Arc::new(AtomicBool::new(false));
+        let running = Arc::new(AtomicBool::new(false));
+
+        Self {
+            poll_timeout,
+            paused,
+            running,
+            recv,
+            thread: None,
+            #[cfg(feature = "async-ports")]
+            taskpool: None,
+            tx: Some(sender),
+        }
+    }
+
+    /// Start a worker for Sync-Ports.
+    /// - `ports` are the sync-ports to start on the worker.
     /// - `tick_interval` is the interval used to send the `Tick` event. If `None`, no tick will be sent.
     /// - `store_tx` is used to determine if the Transmitter should be stored for [`start_async`](Self::start_async). Has not effect if `async-ports` is not enabled.
     ///
@@ -121,42 +152,31 @@ where
     ///
     /// NOTE: if `store_tx` is set to `true` but [`start_async`](Self::start_async) is never called, [`poll`](Self::poll) will always timeout instead of returning `Disconnected`
     /// after [`stop`](Self::stop) due a still open channel.
-    ///
-    /// # Panics
-    ///
-    /// - if `poll_timeout` is 0
     #[allow(unused_variables)] // "store_tx" is necessary when "async-ports" is active
     pub(self) fn start(
+        self,
         ports: Vec<SyncPort<U>>,
-        poll_timeout: Duration,
         tick_interval: Option<Duration>,
         store_tx: bool,
     ) -> Self {
-        if poll_timeout == Duration::ZERO {
-            panic!(
-                "poll timeout cannot be 0 (see <https://github.com/rust-lang/rust/issues/39364>)"
-            )
-        }
+        #[cfg(feature = "async-ports")]
+        let tx = if store_tx { self.tx.clone() } else { None };
+
         // Prepare channel and running state
-        let config = Self::setup_thread(ports, tick_interval);
+        #[allow(unused_mut)] // mutability is necessary when "async-ports" is active
+        let mut res = self.setup_sync_worker(ports, tick_interval);
 
         #[cfg(feature = "async-ports")]
-        let tx = if store_tx { Some(config.tx) } else { None };
-
-        Self {
-            paused: config.paused,
-            running: config.running,
-            poll_timeout,
-            recv: config.rx,
-            thread: Some(config.thread),
-            #[cfg(feature = "async-ports")]
-            taskpool: None,
-            #[cfg(feature = "async-ports")]
-            tx,
+        {
+            res.tx = tx;
         }
+
+        res
     }
 
     /// Start the given async `ports` on a taskpool.
+    /// - `ports` are the async-ports to start on the given runtime.
+    /// - `tick_interval` is the interval used to send the `Tick` event. If `None`, no tick will be sent.
     ///
     /// # Panics
     ///
@@ -164,12 +184,23 @@ where
     #[cfg(feature = "async-ports")]
     pub(self) fn start_async(
         mut self,
-        ports: Vec<AsyncPort<U>>,
+        mut ports: Vec<AsyncPort<U>>,
         handle: tokio::runtime::Handle,
+        tick_interval: Option<Duration>,
     ) -> Self {
+        use async_ticker::AsyncTicker;
+
         let taskpool = TaskPool::new(handle);
         // unwrap is safe the first time as it is always assigned in "start"
         let tx = self.tx.take().unwrap();
+
+        if let Some(tick_interval) = tick_interval {
+            ports.push(AsyncPort::new(
+                Box::new(AsyncTicker::new()),
+                tick_interval,
+                1,
+            ));
+        }
 
         for port in ports {
             let tx = tx.clone();
@@ -178,6 +209,8 @@ where
                 let _ = poll_task(port, tx, paused).await;
             });
         }
+
+        self.taskpool = Some(taskpool);
 
         self
     }
@@ -224,18 +257,21 @@ where
     }
 
     /// Setup the thread and returns the structs necessary to interact with it
-    fn setup_thread(ports: Vec<SyncPort<U>>, tick_interval: Option<Duration>) -> ThreadConfig<U> {
-        let (sender, recv) = mpsc::channel();
-        let paused = Arc::new(AtomicBool::new(false));
-        let paused_t = Arc::clone(&paused);
-        let running = Arc::new(AtomicBool::new(true));
-        let running_t = Arc::clone(&running);
-        let sender_t = sender.clone();
+    fn setup_sync_worker(
+        mut self,
+        ports: Vec<SyncPort<U>>,
+        tick_interval: Option<Duration>,
+    ) -> Self {
+        self.running.store(true, Ordering::Relaxed);
+        let paused_t = self.paused.clone();
+        let running_t = self.running.clone();
+        let sender_t = self.tx.take().unwrap().clone();
         // Start thread
         let thread = thread::spawn(move || {
             EventListenerWorker::new(ports, sender_t, paused_t, running_t, tick_interval).run();
         });
-        ThreadConfig::new(recv, sender, paused, running, thread)
+        self.thread = Some(thread);
+        self
     }
 }
 
@@ -285,42 +321,6 @@ where
     }
 }
 
-// -- thread config
-
-/// Config returned by thread setup
-struct ThreadConfig<U>
-where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
-{
-    rx: mpsc::Receiver<ListenerMsg<U>>,
-    #[allow(dead_code)] // used when "async-ports" is active, but always assigned
-    tx: mpsc::Sender<ListenerMsg<U>>,
-    paused: Arc<AtomicBool>,
-    running: Arc<AtomicBool>,
-    thread: JoinHandle<()>,
-}
-
-impl<U> ThreadConfig<U>
-where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
-{
-    pub fn new(
-        rx: mpsc::Receiver<ListenerMsg<U>>,
-        tx: mpsc::Sender<ListenerMsg<U>>,
-        paused: Arc<AtomicBool>,
-        running: Arc<AtomicBool>,
-        thread: JoinHandle<()>,
-    ) -> Self {
-        Self {
-            rx,
-            tx,
-            paused,
-            running,
-            thread,
-        }
-    }
-}
-
 // -- listener thread
 
 /// Listener message is returned by the listener thread
@@ -348,7 +348,6 @@ where
 
 #[cfg(test)]
 mod test {
-
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -357,13 +356,12 @@ mod test {
 
     #[test]
     fn worker_should_run_thread() {
-        let mut listener = EventListener::<MockEvent>::start(
+        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start(
             vec![SyncPort::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(10),
                 1,
             )],
-            Duration::from_millis(10),
             Some(Duration::from_secs(3)),
             false,
         );
@@ -388,9 +386,8 @@ mod test {
 
     #[test]
     fn worker_should_be_paused() {
-        let mut listener = EventListener::<MockEvent>::start(
+        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start(
             vec![],
-            Duration::from_millis(10),
             Some(Duration::from_millis(750)),
             false,
         );
@@ -409,14 +406,49 @@ mod test {
         assert!(listener.stop().is_ok());
     }
 
-    #[test]
-    #[should_panic]
-    fn event_listener_with_poll_timeout_zero_should_panic() {
-        EventListener::<MockEvent>::start(
-            vec![],
-            Duration::from_millis(0),
-            Some(Duration::from_secs(3)),
-            false,
+    #[tokio::test]
+    #[cfg(feature = "async-ports")]
+    async fn async_ports_should_work() {
+        use tokio::runtime::Handle;
+        use tokio::time::sleep;
+
+        use crate::mock::MockPollAsync;
+
+        let port = AsyncPort::new(
+            Box::new(MockPollAsync::default()),
+            Duration::from_secs(1),
+            1,
         );
+        assert_eq!(Handle::current().metrics().num_alive_tasks(), 0);
+
+        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start_async(
+            vec![port],
+            Handle::current(),
+            Some(Duration::from_secs(3)),
+        );
+        sleep(Duration::from_millis(5)).await; // ensure the tasks are spawned and have a chance to generate already
+        assert_eq!(Handle::current().metrics().num_alive_tasks(), 2);
+
+        let mut events = Vec::with_capacity(3);
+
+        // due to how execution on the runtime works, events may arrive in any order
+        while let Some(event) = listener.poll().ok().flatten() {
+            events.push(event);
+        }
+
+        // Poll (event)
+        assert!(events.contains(&Event::Keyboard(KeyEvent::from(Key::Enter))));
+        // Poll (tick)
+        assert!(events.contains(&Event::Tick));
+        // Stop
+        assert!(listener.stop().is_ok());
+        sleep(Duration::from_millis(5)).await; // ensure the tasks have a chance to execute again to cancel themself
+        assert_eq!(Handle::current().metrics().num_alive_tasks(), 0);
+    }
+
+    #[test]
+    #[should_panic = "poll timeout cannot be 0"]
+    fn event_listener_with_poll_timeout_zero_should_panic() {
+        EventListener::<MockEvent>::new(Duration::from_millis(0));
     }
 }

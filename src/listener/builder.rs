@@ -22,6 +22,8 @@ where
     #[cfg(feature = "async-ports")]
     handle: Option<Handle>,
     tick_interval: Option<Duration>,
+    #[cfg(feature = "async-ports")]
+    async_tick: bool,
     poll_timeout: Duration,
 }
 
@@ -38,6 +40,8 @@ where
             handle: None,
             poll_timeout: Duration::from_millis(10),
             tick_interval: None,
+            #[cfg(feature = "async-ports")]
+            async_tick: false,
         }
     }
 }
@@ -51,26 +55,37 @@ where
     /// # Errors
     ///
     /// - if there are async ports defined, but no handle is set.
-    pub(crate) fn start(self) -> Result<EventListener<U>, ListenerError> {
+    #[allow(unused_mut)] // mutability is necessary when "async-ports" is active
+    pub(crate) fn start(mut self) -> Result<EventListener<U>, ListenerError> {
+        #[cfg(feature = "async-ports")]
+        let start_async =
+            !self.async_ports.is_empty() || (self.async_tick && self.tick_interval.is_some());
         #[cfg(not(feature = "async-ports"))]
         let store_tx = false;
         #[cfg(feature = "async-ports")]
-        let store_tx = !self.async_ports.is_empty();
-        #[allow(unused_mut)] // mutability is necessary when "async-ports" is active
-        let mut res = EventListener::start(
-            self.sync_ports,
-            self.poll_timeout,
-            self.tick_interval,
-            store_tx,
-        );
+        let store_tx = start_async;
+        #[cfg(not(feature = "async-ports"))]
+        let sync_tick_interval = self.tick_interval;
+        #[cfg(feature = "async-ports")]
+        let sync_tick_interval = self.tick_interval.take_if(|_| !self.async_tick);
+        let mut res = EventListener::new(self.poll_timeout);
+
+        // dont start a sync worker if there are no sync tasks
+        if !self.sync_ports.is_empty() || sync_tick_interval.is_some() {
+            res = res.start(self.sync_ports, sync_tick_interval, store_tx);
+        }
 
         // dont start a taskpool without any actual tasks
         #[cfg(feature = "async-ports")]
-        if !self.async_ports.is_empty() {
+        if start_async {
             let Some(handle) = self.handle else {
                 return Err(ListenerError::NoHandle);
             };
-            res = res.start_async(self.async_ports, handle);
+            res = res.start_async(
+                self.async_ports,
+                handle,
+                self.tick_interval.take_if(|_| self.async_tick),
+            );
         }
 
         Ok(res)
@@ -117,10 +132,25 @@ where
     /// Add to the event listener the default crossterm input listener [`crate::terminal::CrosstermInputListener`]
     ///
     /// The interval is the amount of time between each [`Poll::poll`] call.
-    /// The max_poll is the maximum amount of times the port should be polled in a single poll.
+    /// The max_poll is the maximum amount of times the port should be polled in a `interval`.
     pub fn crossterm_input_listener(self, interval: Duration, max_poll: usize) -> Self {
         self.add_port(
             Box::new(crate::terminal::CrosstermInputListener::<U>::new(interval)),
+            interval,
+            max_poll,
+        )
+    }
+
+    #[cfg(all(feature = "crossterm", feature = "async-ports"))]
+    /// Add to the async event listener the default crossterm input listener [`crate::terminal::CrosstermAsyncStream`]
+    ///
+    /// The `interval` is the amount of time between each [`PollAsync::poll`](super::PollAsync) call.
+    /// The `max_poll` is the maximum amount of times the port should be polled in a single `interval`.
+    ///
+    /// It is recommended to set `interval` to `0` to have immediate events.
+    pub fn async_crossterm_input_listener(self, interval: Duration, max_poll: usize) -> Self {
+        self.add_async_port(
+            Box::new(crate::terminal::CrosstermAsyncStream::new()),
             interval,
             max_poll,
         )
@@ -130,7 +160,7 @@ where
     /// Add to the event listener the default termion input listener [`crate::terminal::TermionInputListener`]
     ///
     /// The interval is the amount of time between each [`Poll::poll`] call.
-    /// The max_poll is the maximum amount of times the port should be polled in a single poll.
+    /// The max_poll is the maximum amount of times the port should be polled in a `interval`.
     pub fn termion_input_listener(self, interval: Duration, max_poll: usize) -> Self {
         self.add_port(
             Box::new(crate::terminal::TermionInputListener::<U>::new(interval)),
@@ -140,9 +170,10 @@ where
     }
 }
 
+/// Implementations for feature `async-ports`
 impl<U> EventListenerCfg<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + Sync + 'static,
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     /// Add a new [`Port`] (Poll, Interval) to the the event listener.
     ///
@@ -152,7 +183,7 @@ where
     #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
     pub fn add_async_port(
         self,
-        poll: Box<dyn super::PollAsync<U> + Send + Sync>,
+        poll: Box<dyn super::PollAsync<U>>,
         interval: Duration,
         max_poll: usize,
     ) -> Self {
@@ -176,6 +207,14 @@ where
     #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
     pub fn with_handle(mut self, handle: tokio::runtime::Handle) -> Self {
         self.handle = Some(handle);
+        self
+    }
+
+    /// Change the way [`Event::Tick`](crate::Event::Tick) is emitted from being on a [`SyncPort`] to be a [`AsyncPort`].
+    #[cfg(feature = "async-ports")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
+    pub fn async_tick(mut self, value: bool) -> Self {
+        self.async_tick = value;
         self
     }
 }
@@ -262,5 +301,29 @@ mod test {
         let builder = builder.async_port(port);
 
         assert_eq!(builder.start().unwrap_err(), ListenerError::NoHandle);
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "async-ports")]
+    async fn should_spawn_async_ticker() {
+        use tokio::time::sleep;
+
+        use crate::Event;
+
+        let builder = EventListenerCfg::<MockEvent>::default()
+            .with_handle(Handle::current())
+            .async_tick(true)
+            .tick_interval(Duration::from_millis(10));
+        assert!(builder.async_ports.is_empty());
+        assert_eq!(Handle::current().metrics().num_alive_tasks(), 0);
+
+        let mut listener = builder.start().unwrap();
+        assert_eq!(Handle::current().metrics().num_alive_tasks(), 1);
+        assert!(listener.thread.is_none()); // there are no sync ports or tasks, so no sync worker
+        assert!(listener.taskpool.is_some());
+        sleep(Duration::from_millis(25)).await; // wait for at least 1 event
+
+        listener.stop().unwrap();
+        assert_eq!(listener.poll(), Ok(Some(Event::Tick)));
     }
 }

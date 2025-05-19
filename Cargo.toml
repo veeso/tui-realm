@@ -31,6 +31,7 @@ tokio = { version = "1", features = [
 tokio-util = { version = "0.7", features = [
   "rt",
 ], default-features = false, optional = true }
+futures-util = { version = "0.3", default-features = false, optional = true }
 tuirealm_derive = { version = "2", optional = true }
 
 [dev-dependencies]
@@ -40,8 +41,8 @@ tempfile = "^3"
 tokio = { version = "1", features = ["full"] }
 
 [features]
-default = ["derive", "dep:crossterm"]
-async-ports = ["dep:async-trait", "dep:tokio", "dep:tokio-util"]
+default = ["derive", "crossterm"]
+async-ports = ["dep:async-trait", "dep:tokio", "dep:tokio-util", "crossterm?/event-stream", "dep:futures-util"]
 derive = ["dep:tuirealm_derive"]
 serialize = ["dep:serde", "bitflags/serde"]
 crossterm = ["dep:crossterm", "ratatui/crossterm"]
