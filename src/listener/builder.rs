@@ -57,9 +57,8 @@ where
         #[cfg(feature = "async-ports")]
         let store_tx = !self.async_ports.is_empty();
         #[allow(unused_mut)] // mutability is necessary when "async-ports" is active
-        let mut res = EventListener::start(
+        let mut res = EventListener::new(self.poll_timeout).start(
             self.sync_ports,
-            self.poll_timeout,
             self.tick_interval,
             store_tx,
         );
