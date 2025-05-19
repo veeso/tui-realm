@@ -101,7 +101,7 @@ where
             .collect();
         // Forward to subscriptions and extend vector
         if !self.sub_lock {
-            messages.extend(self.forward_to_subscriptions(events));
+            self.forward_to_subscriptions(events, &mut messages);
         }
         Ok(messages)
     }
@@ -334,8 +334,7 @@ where
     }
 
     /// Forward events to subscriptions listening to the incoming event.
-    fn forward_to_subscriptions(&mut self, events: Vec<Event<UserEvent>>) -> Vec<Msg> {
-        let mut messages: Vec<Msg> = Vec::new();
+    fn forward_to_subscriptions(&mut self, events: Vec<Event<UserEvent>>, messages: &mut Vec<Msg>) {
         // NOTE: don't touch this code again and don't try to use iterators, cause it's not gonna work :)
         for ev in events.iter() {
             for sub in self.subs.iter() {
@@ -356,7 +355,6 @@ where
                 }
             }
         }
-        messages
     }
 }
 
