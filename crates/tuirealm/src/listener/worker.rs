@@ -29,6 +29,10 @@ impl<U> EventListenerWorker<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
+    /// Create a new Worker.
+    ///
+    /// If `tick_interval` is [`None`], no [`Event::Tick`](crate::Event::Tick) will be sent and a fallback interval time will be used.
+    /// If `tick_interval` is [`Some`], [`Event::Tick`](crate::Event::Tick) will be sent and be used as the interval time.
     pub(super) fn new(
         ports: Vec<SyncPort<U>>,
         sender: mpsc::Sender<ListenerMsg<U>>,
@@ -55,6 +59,7 @@ where
     /// Calc the distance in time between now and the first upcoming event
     fn next_event(&self) -> Duration {
         let now = Instant::now();
+        // TODO: this time should likely be lowered
         let fallback_time = now.add(Duration::from_secs(60));
         // Get first upcoming event from ports
         let min_listener_event = self

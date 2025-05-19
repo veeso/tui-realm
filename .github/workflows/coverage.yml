@@ -20,7 +20,7 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Run tests
-        run: cargo llvm-cov --no-fail-fast --no-default-features --features derive,serialize,crossterm --workspace --lcov --output-path lcov.info
+        run: cargo llvm-cov --no-fail-fast --no-default-features --features derive,serialize,crossterm,async-ports --workspace --lcov --output-path lcov.info
       - name: Coveralls
         uses: coverallsapp/github-action@v2.3.6
         with:

@@ -1,5 +1,4 @@
 use std::ops::Add as _;
-use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use crate::Event;
@@ -14,7 +13,7 @@ pub struct AsyncPort<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
-    poll: Arc<Box<dyn PollAsync<U> + Send + Sync>>,
+    poll: Box<dyn PollAsync<U>>,
     interval: Duration,
     next_poll: Instant,
     max_poll: usize,
@@ -32,13 +31,9 @@ where
     /// * `interval` - The interval between each poll
     /// * `max_poll` - The maximum amount of times the port should be polled in a single poll
     /// * `runtime` - The tokio runtime to use for async polling
-    pub fn new(
-        poll: Box<dyn PollAsync<U> + Send + Sync>,
-        interval: Duration,
-        max_poll: usize,
-    ) -> Self {
+    pub fn new(poll: Box<dyn PollAsync<U>>, interval: Duration, max_poll: usize) -> Self {
         Self {
-            poll: Arc::new(poll),
+            poll,
             interval,
             next_poll: Instant::now(),
             max_poll,

@@ -17,7 +17,7 @@ use crate::listener::{ListenerResult, Poll};
 
 /// The input listener for crossterm.
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
-/// or you can use it directly in the event listener, calling `default_input_listener()` in the `EventListenerCfg`
+/// or you can use it directly in the event listener, calling [`EventListenerCfg::crossterm_input_listener()`](crate::EventListenerCfg::crossterm_input_listener)
 #[doc(alias = "InputEventListener")]
 pub struct CrosstermInputListener<U>
 where

@@ -15,6 +15,9 @@ pub use self::adapter::TerminalAdapter;
 #[cfg(feature = "termion")]
 #[cfg_attr(docsrs, doc(cfg(feature = "termion")))]
 pub use self::adapter::TermionTerminalAdapter;
+#[cfg(all(feature = "crossterm", feature = "async-ports"))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "crossterm", feature = "async-ports"))))]
+pub use self::event_listener::CrosstermAsyncStream;
 #[cfg(feature = "crossterm")]
 #[cfg_attr(docsrs, doc(cfg(feature = "crossterm")))]
 pub use self::event_listener::CrosstermInputListener;

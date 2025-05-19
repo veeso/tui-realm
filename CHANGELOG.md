@@ -43,6 +43,18 @@
 
 ---
 
+## next
+
+Unreleased
+
+- Remove `+ Sync` bound on `PollAsync` trait and `U`(Event) bound and all related functions.
+- Fix bug that `EventListener::stop` did not actually stop any async tasks.
+- Add function `EventListenerCfg::async_tick` to switch the ticker from Sync-Port to Async-Ports. Note that `EventListenerCfg::tick_interval` is still necessary to enable any ticker.
+- Dont start the Sync-Port worker if there are no sync ports (note that `async_tick(false)`(the default) also counts as a sync port).
+- Fix accidental always inclusion of `crossterm` dependency, even if `crossterm` feature was disabled. (since [2.2.0](#220))
+- Change `PollAsync::poll` to take `&mut self` instead of `&self`.
+- Add async `crossterm` input listener `CrosstermAsyncStream` as a alternative to the sync `CrosstermInputListener`.
+
 ## 2.4.0
 
 Released on 19/05/2025
