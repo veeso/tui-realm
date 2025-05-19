@@ -20,6 +20,7 @@ where
     U: Eq + PartialEq + Clone + PartialOrd,
 {
     /// Creates a new `Sub`
+    #[must_use]
     pub fn new(event_clause: EventClause<U>, sub_clause: SubClause<K>) -> Self {
         Self(event_clause, sub_clause)
     }
@@ -57,6 +58,7 @@ where
     U: Eq + PartialEq + Clone + PartialOrd + Send,
 {
     /// Instantiates a new [`Subscription`]
+    #[must_use]
     pub fn new(target: K, sub: Sub<K, U>) -> Self {
         Self {
             target,
@@ -66,16 +68,19 @@ where
     }
 
     /// Returns sub target
+    #[must_use]
     pub(crate) fn target(&self) -> &K {
         &self.target
     }
 
     /// Returns reference to subscription event clause
+    #[must_use]
     pub(crate) fn event(&self) -> &EventClause<U> {
         &self.ev
     }
 
     /// Returns whether to forward event to component
+    #[must_use]
     pub(crate) fn forward<HasAttrFn, GetStateFn, MountedFn>(
         &self,
         ev: &Event<U>,
@@ -212,21 +217,25 @@ where
 {
     /// Shortcut for [`SubClause::Not`] without specifying `Box::new(...)`
     #[allow(clippy::should_implement_trait)]
+    #[must_use]
     pub fn not(clause: Self) -> Self {
         Self::Not(Box::new(clause))
     }
 
     /// Shortcut for [`SubClause::And`] without specifying `Box::new(...)`
+    #[must_use]
     pub fn and(a: Self, b: Self) -> Self {
         Self::And(Box::new(a), Box::new(b))
     }
 
     /// Shortcut for [`SubClause::Or`] without specifying `Box::new(...)`
+    #[must_use]
     pub fn or(a: Self, b: Self) -> Self {
         Self::Or(Box::new(a), Box::new(b))
     }
 
     /// Returns whether the subscription clause is satisfied
+    #[must_use]
     pub(crate) fn forward<HasAttrFn, GetStateFn, MountedFn>(
         &self,
         has_attr_fn: HasAttrFn,
@@ -243,6 +252,7 @@ where
     }
 
     /// Function to recursively check forwarding.
+    #[must_use]
     fn check_forwarding<HasAttrFn, GetStateFn, MountedFn>(
         &self,
         has_attr_fn: HasAttrFn,
@@ -325,6 +335,7 @@ where
 
     // -- privates
 
+    #[must_use]
     fn has_attribute<HasAttrFn>(
         id: &Id,
         query: &Attribute,
@@ -343,6 +354,7 @@ where
         )
     }
 
+    #[must_use]
     fn has_state<GetStateFn>(id: &Id, state: &State, get_state_fn: GetStateFn) -> (bool, GetStateFn)
     where
         GetStateFn: Fn(&Id) -> Option<State>,
@@ -356,6 +368,7 @@ where
         )
     }
 
+    #[must_use]
     fn is_mounted<MountedFn>(id: &Id, mounted_fn: MountedFn) -> (bool, MountedFn)
     where
         MountedFn: Fn(&Id) -> bool,
