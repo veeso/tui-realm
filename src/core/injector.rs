@@ -26,7 +26,7 @@ mod test {
 
     #[test]
     fn should_create_a_trait_object_injector() {
-        let injector = MockInjector::default();
+        let injector = MockInjector;
         assert_eq!(
             injector.inject(&MockComponentId::InputBar),
             vec![(

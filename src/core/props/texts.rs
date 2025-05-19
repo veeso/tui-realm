@@ -163,10 +163,10 @@ mod test {
             .build();
         // Verify table
         assert_eq!(table.len(), 5); // 5 spans
-        assert_eq!(table.get(0).unwrap().len(), 2); // 2 cols
+        assert_eq!(table.first().unwrap().len(), 2); // 2 cols
         assert_eq!(table.get(1).unwrap().len(), 2); // 2 cols
         assert_eq!(
-            table.get(1).unwrap().get(0).unwrap().content.as_str(),
+            table.get(1).unwrap().first().unwrap().content.as_str(),
             "christian"
         ); // check content
         assert_eq!(table.get(2).unwrap().len(), 2); // 2 cols
