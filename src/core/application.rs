@@ -710,7 +710,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
         // Active BAR
         assert!(application.active(&MockComponentId::InputBar).is_ok());
@@ -727,7 +727,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::BarSubmit(String::from(""))]
+            &[MockMsg::BarSubmit(String::new())]
         );
         // Let's try TryFor strategy
         let events = application
@@ -782,7 +782,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from(""))]
+            &[MockMsg::FooSubmit(String::new())]
         );
         // unlock subs
         application.unlock_subs();
@@ -828,7 +828,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from(""))]
+            &[MockMsg::FooSubmit(String::new())]
         );
     }
 
@@ -870,7 +870,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
     }
 
@@ -908,7 +908,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from(""))]
+            &[MockMsg::FooSubmit(String::new())]
         );
     }
 
@@ -950,7 +950,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
     }
 
@@ -988,7 +988,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from(""))]
+            &[MockMsg::FooSubmit(String::new())]
         );
     }
 
@@ -1026,7 +1026,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
     }
 
@@ -1064,7 +1064,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
         // Lock ports
         assert!(application.lock_ports().is_ok());
@@ -1090,7 +1090,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
     }
 

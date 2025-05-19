@@ -579,7 +579,7 @@ mod test {
         );
         assert_eq!(
             view.state(&MockComponentId::InputFoo).unwrap(),
-            State::One(StateValue::String(String::from("")))
+            State::One(StateValue::String(String::new()))
         );
         assert!(view.state(&MockComponentId::InputBar).is_err());
     }
