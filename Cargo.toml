@@ -40,7 +40,7 @@ tempfile = "^3"
 tokio = { version = "1", features = ["full"] }
 
 [features]
-default = ["derive", "dep:crossterm"]
+default = ["derive", "crossterm"]
 async-ports = ["dep:async-trait", "dep:tokio", "dep:tokio-util"]
 derive = ["dep:tuirealm_derive"]
 serialize = ["dep:serde", "bitflags/serde"]
