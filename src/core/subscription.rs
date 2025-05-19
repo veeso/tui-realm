@@ -190,8 +190,20 @@ where
     Not(Box<SubClause<Id>>),
     /// Forward event if both the inner clauses are `true`
     And(Box<SubClause<Id>>, Box<SubClause<Id>>),
+    /// Forward event if all the inner clauses are `true`.
+    ///
+    /// Short-circuits on first `false`.
+    ///
+    /// If empty will always return `false`.
+    AndMany(Vec<SubClause<Id>>),
     /// Forward event if at least one of the inner clauses is `true`
     Or(Box<SubClause<Id>>, Box<SubClause<Id>>),
+    /// Forward event if at least one of the inner clauses is `true`.
+    ///
+    /// Short-circuits on first `true`.
+    ///
+    /// If empty will always return `false`.
+    OrMany(Vec<SubClause<Id>>),
 }
 
 impl<Id> SubClause<Id>
@@ -230,6 +242,7 @@ where
             .0
     }
 
+    /// Function to recursively check forwarding.
     fn check_forwarding<HasAttrFn, GetStateFn, MountedFn>(
         &self,
         has_attr_fn: HasAttrFn,
@@ -267,12 +280,45 @@ where
                     b.check_forwarding(has_attr_fn, get_state_fn, mounted_fn);
                 (fwd_a && fwd_b, has_attr_fn, get_state_fn, mounted_fn)
             }
+            Self::AndMany(clauses) => {
+                let mut has_attr_fn = has_attr_fn;
+                let mut get_state_fn = get_state_fn;
+                let mut mounted_fn = mounted_fn;
+                for clause in clauses {
+                    let res = clause.check_forwarding(has_attr_fn, get_state_fn, mounted_fn);
+                    has_attr_fn = res.1;
+                    get_state_fn = res.2;
+                    mounted_fn = res.3;
+                    // short-circuit on any "false" value, which would correspond to "false && true && true" -> "false"
+                    if !res.0 {
+                        return (false, has_attr_fn, get_state_fn, mounted_fn);
+                    }
+                }
+                // return "false" on empty as anything else would not make sense to always forward if the condition is empty
+                (!clauses.is_empty(), has_attr_fn, get_state_fn, mounted_fn)
+            }
             Self::Or(a, b) => {
                 let (fwd_a, has_attr_fn, get_state_fn, mounted_fn) =
                     a.check_forwarding(has_attr_fn, get_state_fn, mounted_fn);
                 let (fwd_b, has_attr_fn, get_state_fn, mounted_fn) =
                     b.check_forwarding(has_attr_fn, get_state_fn, mounted_fn);
                 (fwd_a || fwd_b, has_attr_fn, get_state_fn, mounted_fn)
+            }
+            Self::OrMany(clauses) => {
+                let mut has_attr_fn = has_attr_fn;
+                let mut get_state_fn = get_state_fn;
+                let mut mounted_fn = mounted_fn;
+                for clause in clauses {
+                    let res = clause.check_forwarding(has_attr_fn, get_state_fn, mounted_fn);
+                    has_attr_fn = res.1;
+                    get_state_fn = res.2;
+                    mounted_fn = res.3;
+                    // short-circuit on any "true" value, which would correspond to "false || true || true" -> "true"
+                    if res.0 {
+                        return (true, has_attr_fn, get_state_fn, mounted_fn);
+                    }
+                }
+                (false, has_attr_fn, get_state_fn, mounted_fn)
             }
         }
     }
@@ -320,7 +366,6 @@ where
 
 #[cfg(test)]
 mod test {
-
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -389,6 +434,208 @@ mod test {
         assert_eq!(
             sub.forward(
                 &Event::WindowResize(0, 0),
+                |_: &MockComponentId, q| component.query(q),
+                |_: &MockComponentId| Some(component.state()),
+                |_: &MockComponentId| true
+            ),
+            false
+        );
+    }
+
+    #[test]
+    fn forward_many() {
+        let ev: Event<MockEvent> = Event::Keyboard(Key::Char('q').into());
+        let mut component = MockFooInput::default();
+        component.attr(Attribute::Focus, AttrValue::Flag(true));
+
+        // AndMany all "true", returns "true"
+        let sub = Subscription::new(
+            MockComponentId::InputFoo,
+            Sub(
+                EventClause::Keyboard(Key::Char('q').into()),
+                SubClause::AndMany(vec![
+                    SubClause::IsMounted(MockComponentId::InputFoo),
+                    SubClause::IsMounted(MockComponentId::InputBar),
+                    SubClause::IsMounted(MockComponentId::InputOmar),
+                ]),
+            ),
+        );
+        assert_eq!(sub.target(), &MockComponentId::InputFoo);
+        assert_eq!(
+            sub.event(),
+            &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
+        );
+        assert_eq!(
+            sub.when,
+            SubClause::AndMany(vec![
+                SubClause::IsMounted(MockComponentId::InputFoo),
+                SubClause::IsMounted(MockComponentId::InputBar),
+                SubClause::IsMounted(MockComponentId::InputOmar),
+            ])
+        );
+        assert_eq!(
+            sub.forward(
+                &ev,
+                |_: &MockComponentId, q| component.query(q),
+                |_: &MockComponentId| Some(component.state()),
+                |_: &MockComponentId| true
+            ),
+            true
+        );
+
+        // AndMany one "false", returns "false"
+        let sub = Subscription::new(
+            MockComponentId::InputFoo,
+            Sub(
+                EventClause::Keyboard(Key::Char('q').into()),
+                SubClause::AndMany(vec![
+                    SubClause::IsMounted(MockComponentId::InputFoo),
+                    SubClause::IsMounted(MockComponentId::InputBar),
+                    SubClause::not(SubClause::IsMounted(MockComponentId::InputOmar)),
+                ]),
+            ),
+        );
+        assert_eq!(sub.target(), &MockComponentId::InputFoo);
+        assert_eq!(
+            sub.event(),
+            &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
+        );
+        assert_eq!(
+            sub.when,
+            SubClause::AndMany(vec![
+                SubClause::IsMounted(MockComponentId::InputFoo),
+                SubClause::IsMounted(MockComponentId::InputBar),
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputOmar)),
+            ])
+        );
+        assert_eq!(
+            sub.forward(
+                &ev,
+                |_: &MockComponentId, q| component.query(q),
+                |_: &MockComponentId| Some(component.state()),
+                |_: &MockComponentId| true
+            ),
+            false
+        );
+
+        // OrMany one "false", returns "true"
+        let sub = Subscription::new(
+            MockComponentId::InputFoo,
+            Sub(
+                EventClause::Keyboard(Key::Char('q').into()),
+                SubClause::OrMany(vec![
+                    SubClause::IsMounted(MockComponentId::InputFoo),
+                    SubClause::IsMounted(MockComponentId::InputBar),
+                    SubClause::not(SubClause::IsMounted(MockComponentId::InputOmar)),
+                ]),
+            ),
+        );
+        assert_eq!(sub.target(), &MockComponentId::InputFoo);
+        assert_eq!(
+            sub.event(),
+            &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
+        );
+        assert_eq!(
+            sub.when,
+            SubClause::OrMany(vec![
+                SubClause::IsMounted(MockComponentId::InputFoo),
+                SubClause::IsMounted(MockComponentId::InputBar),
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputOmar)),
+            ])
+        );
+        assert_eq!(
+            sub.forward(
+                &ev,
+                |_: &MockComponentId, q| component.query(q),
+                |_: &MockComponentId| Some(component.state()),
+                |_: &MockComponentId| true
+            ),
+            true
+        );
+
+        // OrMany all "false", returns "false"
+        let sub = Subscription::new(
+            MockComponentId::InputFoo,
+            Sub(
+                EventClause::Keyboard(Key::Char('q').into()),
+                SubClause::OrMany(vec![
+                    SubClause::not(SubClause::IsMounted(MockComponentId::InputFoo)),
+                    SubClause::not(SubClause::IsMounted(MockComponentId::InputBar)),
+                    SubClause::not(SubClause::IsMounted(MockComponentId::InputOmar)),
+                ]),
+            ),
+        );
+        assert_eq!(sub.target(), &MockComponentId::InputFoo);
+        assert_eq!(
+            sub.event(),
+            &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
+        );
+        assert_eq!(
+            sub.when,
+            SubClause::OrMany(vec![
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputFoo)),
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputBar)),
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputOmar)),
+            ])
+        );
+        assert_eq!(
+            sub.forward(
+                &ev,
+                |_: &MockComponentId, q| component.query(q),
+                |_: &MockComponentId| Some(component.state()),
+                |_: &MockComponentId| true
+            ),
+            false
+        );
+    }
+
+    #[test]
+    fn forward_many_zero_elements() {
+        let ev: Event<MockEvent> = Event::Keyboard(Key::Char('q').into());
+        let mut component = MockFooInput::default();
+        component.attr(Attribute::Focus, AttrValue::Flag(true));
+
+        // AndMany returns "true"
+        let sub = Subscription::new(
+            MockComponentId::InputFoo,
+            Sub(
+                EventClause::Keyboard(Key::Char('q').into()),
+                SubClause::AndMany(vec![]),
+            ),
+        );
+        assert_eq!(sub.target(), &MockComponentId::InputFoo);
+        assert_eq!(
+            sub.event(),
+            &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
+        );
+        assert_eq!(sub.when, SubClause::AndMany(vec![]));
+        assert_eq!(
+            sub.forward(
+                &ev,
+                |_: &MockComponentId, q| component.query(q),
+                |_: &MockComponentId| Some(component.state()),
+                |_: &MockComponentId| true
+            ),
+            false
+        );
+
+        // OrMany returns "true"
+        let sub = Subscription::new(
+            MockComponentId::InputFoo,
+            Sub(
+                EventClause::Keyboard(Key::Char('q').into()),
+                SubClause::OrMany(vec![]),
+            ),
+        );
+        assert_eq!(sub.target(), &MockComponentId::InputFoo);
+        assert_eq!(
+            sub.event(),
+            &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
+        );
+        assert_eq!(sub.when, SubClause::OrMany(vec![]));
+        assert_eq!(
+            sub.forward(
+                &ev,
                 |_: &MockComponentId, q| component.query(q),
                 |_: &MockComponentId| Some(component.state()),
                 |_: &MockComponentId| true
