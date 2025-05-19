@@ -127,24 +127,24 @@ mod test {
         );
         assert_eq!(
             KeyEvent::from(TonKey::Ctrl('b')),
-            KeyEvent::from(KeyEvent {
+            KeyEvent {
                 code: Key::Char('b'),
                 modifiers: KeyModifiers::CONTROL,
-            })
+            }
         );
         assert_eq!(
             KeyEvent::from(TonKey::Alt('b')),
-            KeyEvent::from(KeyEvent {
+            KeyEvent {
                 code: Key::Char('b'),
                 modifiers: KeyModifiers::ALT
-            })
+            }
         );
         assert_eq!(
             KeyEvent::from(TonKey::Char('B')),
-            KeyEvent::from(KeyEvent {
+            KeyEvent {
                 code: Key::Char('b'),
                 modifiers: KeyModifiers::SHIFT,
-            })
+            }
         );
         assert_eq!(KeyEvent::from(TonKey::Delete), KeyEvent::from(Key::Delete));
         assert_eq!(KeyEvent::from(TonKey::Down), KeyEvent::from(Key::Down));

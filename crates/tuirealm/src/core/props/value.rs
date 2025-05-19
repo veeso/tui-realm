@@ -567,20 +567,21 @@ mod tests {
 
     #[test]
     fn prop_values() {
-        PropPayload::One(PropValue::Usize(2));
-        PropPayload::Tup2((PropValue::Bool(true), PropValue::Usize(128)));
-        PropPayload::Tup3((
+        // test that values can be created without compile errors
+        let _ = PropPayload::One(PropValue::Usize(2));
+        let _ = PropPayload::Tup2((PropValue::Bool(true), PropValue::Usize(128)));
+        let _ = PropPayload::Tup3((
             PropValue::Bool(true),
             PropValue::Usize(128),
             PropValue::Str(String::from("omar")),
         ));
-        PropPayload::Tup4((
+        let _ = PropPayload::Tup4((
             PropValue::Bool(true),
             PropValue::U8(128),
             PropValue::Str(String::from("pippo")),
             PropValue::Isize(-2),
         ));
-        PropPayload::Vec(vec![
+        let _ = PropPayload::Vec(vec![
             PropValue::U16(1),
             PropValue::U32(2),
             PropValue::U64(3),
@@ -650,14 +651,14 @@ mod tests {
             *map.get("u").unwrap(),
             PropValue::Alignment(Alignment::Center)
         );
-        PropPayload::Map(map);
+        let _ = PropPayload::Map(map);
         let mut link: LinkedList<PropPayload> = LinkedList::new();
         link.push_back(PropPayload::One(PropValue::Usize(1)));
         link.push_back(PropPayload::Tup2((
             PropValue::Usize(2),
             PropValue::Usize(4),
         )));
-        PropPayload::Linked(link);
+        let _ = PropPayload::Linked(link);
     }
 
     #[test]
@@ -666,7 +667,7 @@ mod tests {
             PropValue::Alignment(Alignment::Center).unwrap_alignment(),
             Alignment::Center
         );
-        assert_eq!(PropValue::Bool(true).unwrap_bool(), true);
+        assert!(PropValue::Bool(true).unwrap_bool());
         assert_eq!(
             PropValue::Dataset(Dataset::default()).unwrap_dataset(),
             Dataset::default()
@@ -796,11 +797,10 @@ mod tests {
 
     #[test]
     fn unwrap_prop_payloads() {
-        assert_eq!(
-            PropPayload::One(PropValue::Bool(false))
+        assert!(
+            !PropPayload::One(PropValue::Bool(false))
                 .unwrap_one()
                 .unwrap_bool(),
-            false
         );
         assert_eq!(
             PropPayload::Tup2((PropValue::Bool(false), PropValue::Bool(false))).unwrap_tup2(),

@@ -92,17 +92,9 @@ impl MockInputStates {
 
 // -- component impl
 
-#[derive(MockComponent)]
+#[derive(MockComponent, Default)]
 pub struct MockFooInput {
     component: MockInput,
-}
-
-impl Default for MockFooInput {
-    fn default() -> Self {
-        Self {
-            component: MockInput::default(),
-        }
-    }
 }
 
 impl Component<MockMsg, MockEvent> for MockFooInput {
@@ -135,17 +127,9 @@ impl Component<MockMsg, MockEvent> for MockFooInput {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(MockComponent, Default)]
 pub struct MockBarInput {
     component: MockInput,
-}
-
-impl Default for MockBarInput {
-    fn default() -> Self {
-        Self {
-            component: MockInput::default(),
-        }
-    }
 }
 
 impl Component<MockMsg, MockEvent> for MockBarInput {

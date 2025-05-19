@@ -1095,7 +1095,7 @@ mod test {
     fn application_should_add_injectors() {
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener_config_with_tick(Duration::from_millis(500)));
-        application.add_injector(Box::new(MockInjector::default()));
+        application.add_injector(Box::new(MockInjector));
     }
 
     fn listener_config() -> EventListenerCfg<MockEvent> {

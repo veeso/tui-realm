@@ -33,10 +33,10 @@ pub enum UserEvent {
 
 impl PartialEq for UserEvent {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (UserEvent::GotData(_), UserEvent::GotData(_)) => true,
-            _ => false,
-        }
+        matches!(
+            (self, other),
+            (UserEvent::GotData(_), UserEvent::GotData(_))
+        )
     }
 }
 
@@ -52,11 +52,7 @@ impl Poll<UserEvent> for UserDataPort {
 fn main() {
     let event_listener = EventListenerCfg::default()
         .crossterm_input_listener(Duration::from_millis(10), 3)
-        .add_port(
-            Box::new(UserDataPort::default()),
-            Duration::from_millis(1000),
-            1,
-        );
+        .add_port(Box::new(UserDataPort), Duration::from_millis(1000), 1);
 
     let mut app: Application<Id, Msg, UserEvent> = Application::init(event_listener);
 
@@ -98,7 +94,7 @@ fn main() {
             Err(err) => {
                 panic!("application error {err}");
             }
-            Ok(messages) if messages.len() > 0 => {
+            Ok(messages) if !messages.is_empty() => {
                 // NOTE: redraw if at least one msg has been processed
                 model.redraw = true;
                 for msg in messages.into_iter() {

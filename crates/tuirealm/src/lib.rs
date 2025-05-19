@@ -78,6 +78,10 @@ pub mod mock;
 pub mod ratatui;
 pub mod terminal;
 pub mod utils;
+// export async trait for async-ports
+#[cfg(feature = "async-ports")]
+#[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
+pub use async_trait::async_trait;
 pub use listener::{EventListenerCfg, ListenerError};
 // -- derive
 #[cfg(feature = "derive")]
@@ -91,8 +95,3 @@ pub use self::core::props::{self, AttrValue, Attribute, Props};
 pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
 pub use self::core::{Component, MockComponent, State, StateValue, Update, ViewError, command};
 pub use self::ratatui::Frame;
-
-// export async trait for async-ports
-#[cfg(feature = "async-ports")]
-#[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
-pub use async_trait::async_trait;

@@ -111,7 +111,6 @@ where
 
     /// Poll and send poll to listener. Calc next poll.
     /// Returns only the messages, while the None returned by poll are discarded
-    #[allow(clippy::needless_collect)]
     fn poll(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<U>>> {
         let port_iter = self.ports.iter_mut().filter(|port| port.should_poll());
 
