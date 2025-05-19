@@ -48,6 +48,7 @@
 Unreleased
 
 - Remove `+ Sync` bound on `PollAsync` trait and `U`(Event) bound and all related functions.
+- Fix bug that `EventListener::stop` did not actually stop any async tasks.
 
 ## 2.4.0
 

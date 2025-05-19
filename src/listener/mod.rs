@@ -179,6 +179,8 @@ where
             });
         }
 
+        self.taskpool = Some(taskpool);
+
         self
     }
 
@@ -407,6 +409,55 @@ mod test {
         assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
         // Stop
         assert!(listener.stop().is_ok());
+    }
+
+    #[tokio::test]
+    #[cfg(feature = "async-ports")]
+    async fn async_ports_should_work() {
+        use tokio::runtime::Handle;
+        use tokio::time::sleep;
+
+        use crate::mock::MockPollAsync;
+
+        let port = AsyncPort::new(
+            Box::new(MockPollAsync::default()),
+            Duration::from_secs(1),
+            1,
+        );
+        assert_eq!(Handle::current().metrics().num_alive_tasks(), 0);
+
+        let mut listener = EventListener::<MockEvent>::start(
+            vec![],
+            Duration::from_millis(10),
+            Some(Duration::from_secs(3)),
+            true,
+        )
+        .start_async(vec![port], Handle::current());
+        sleep(Duration::from_millis(5)).await; // ensure the tasks are spawned and have a chance to generate already
+        assert_eq!(Handle::current().metrics().num_alive_tasks(), 1);
+
+        let mut events = Vec::with_capacity(3);
+
+        // collect events due to how sync and async work at the same time, so there may or may not be a "Tick" event before the wanted event
+        while let Some(event) = listener.poll().ok().flatten() {
+            events.push(event);
+        }
+
+        // Poll (event)
+        assert!(events.contains(&Event::Keyboard(KeyEvent::from(Key::Enter))),);
+        // the following is untested as ticks are still sync and are tested by other tests already
+        // // Poll (tick)
+        // assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
+        // // Poll (None)
+        // assert!(listener.poll().ok().unwrap().is_none());
+        // // Wait 3 seconds
+        // thread::sleep(Duration::from_secs(3));
+        // // New tick
+        // assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
+        // Stop
+        assert!(listener.stop().is_ok());
+        sleep(Duration::from_millis(5)).await; // ensure the tasks have a chance to execute again to cancel themself
+        assert_eq!(Handle::current().metrics().num_alive_tasks(), 0);
     }
 
     #[test]
