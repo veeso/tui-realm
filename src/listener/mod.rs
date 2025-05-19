@@ -229,7 +229,7 @@ where
 
         // Join thread
         match self.thread.take().map(|x| x.join()) {
-            Some(Ok(_)) => Ok(()),
+            Some(Ok(())) => Ok(()),
             Some(Err(_)) => Err(ListenerError::CouldNotStop),
             None => Ok(()), // Never happens, unless someone calls stop twice
         }
