@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm"
-version = "2.4.0"
+version = "2.4.1"
 authors = ["Christian Visintin <christian.visintin@veeso.dev>"]
 edition = "2024"
 rust-version = "1.85.1"
@@ -42,7 +42,13 @@ tokio = { version = "1", features = ["full"] }
 
 [features]
 default = ["derive", "crossterm"]
-async-ports = ["dep:async-trait", "dep:tokio", "dep:tokio-util", "crossterm?/event-stream", "dep:futures-util"]
+async-ports = [
+  "dep:async-trait",
+  "dep:tokio",
+  "dep:tokio-util",
+  "crossterm?/event-stream",
+  "dep:futures-util",
+]
 derive = ["dep:tuirealm_derive"]
 serialize = ["dep:serde", "bitflags/serde"]
 crossterm = ["dep:crossterm", "ratatui/crossterm"]
