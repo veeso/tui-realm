@@ -42,6 +42,23 @@
 
 ---
 
+## next
+
+Unreleased
+
+- [Issue 94](https://github.com/veeso/tui-realm/issues/94) / [PR 94](https://github.com/veeso/tui-realm/issues/97): improve **Async Ports** to make full use of it being async by running all async ports on the runtime instead of blocking on them like a Sync-port.
+
+  ```rust
+  let event_listener = EventListenerCfg::default()
+        .crossterm_input_listener(Duration::from_millis(10), 3)
+        .with_handle(tokio::runtime::Handle::current())
+        .add_async_port(
+            Box::new(AsyncPort::new()),
+            Duration::from_millis(1000),
+            1,
+        );
+  ```
+
 ## 2.3.0
 
 Released on 17/05/2025

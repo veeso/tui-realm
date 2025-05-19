@@ -2,10 +2,8 @@ use std::ops::Add as _;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use tokio::runtime::Handle as TokioRuntime;
-
+use crate::Event;
 use crate::listener::{ListenerResult, PollAsync};
-use crate::{Event, ListenerError};
 
 /// An async port is a wrapper around the [`PollAsync`] trait object, which also defines an interval, which defines
 /// the amount of time between each [`PollAsync::poll`] call.
@@ -20,7 +18,6 @@ where
     interval: Duration,
     next_poll: Instant,
     max_poll: usize,
-    runtime: Arc<TokioRuntime>,
 }
 
 impl<U> AsyncPort<U>
@@ -39,14 +36,12 @@ where
         poll: Box<dyn PollAsync<U> + Send + Sync>,
         interval: Duration,
         max_poll: usize,
-        runtime: &Arc<TokioRuntime>,
     ) -> Self {
         Self {
             poll: Arc::new(poll),
             interval,
             next_poll: Instant::now(),
             max_poll,
-            runtime: runtime.clone(),
         }
     }
 
@@ -71,13 +66,8 @@ where
     }
 
     /// Calls [`PollAsync::poll`] on the inner [`PollAsync`] trait object.
-    pub fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
-        let rt = self.runtime.clone();
-        let poll_impl = self.poll.clone();
-
-        std::thread::spawn(move || rt.block_on(poll_impl.poll()))
-            .join()
-            .map_err(|_| ListenerError::PollFailed)?
+    pub async fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+        self.poll.poll().await
     }
 
     /// Calculate the next poll (t_now + interval)

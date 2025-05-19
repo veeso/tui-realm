@@ -6,9 +6,11 @@
 // -- modules
 mod builder;
 mod port;
+#[cfg(feature = "async-ports")]
+mod task_pool;
 mod worker;
 
-use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicBool, Ordering};
 // -- export
 use std::sync::{Arc, mpsc};
 use std::thread::{self, JoinHandle};
@@ -20,16 +22,18 @@ pub use self::builder::EventListenerCfg;
 #[cfg(feature = "async-ports")]
 #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
 pub use self::port::AsyncPort;
-pub use self::port::{Port, SyncPort};
-use self::worker::EventListenerWorker;
+pub use self::port::SyncPort;
 // -- internal
+#[cfg(feature = "async-ports")]
+use self::task_pool::TaskPool;
+use self::worker::EventListenerWorker;
 use super::Event;
 
 /// Result returned by `EventListener`. [`Ok`] value depends on the method, while the
 /// Err value is always [`ListenerError`].
 pub type ListenerResult<T> = Result<T, ListenerError>;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum ListenerError {
     #[error("failed to start event listener")]
     CouldNotStart,
@@ -39,6 +43,8 @@ pub enum ListenerError {
     ListenerDied,
     #[error("poll() call returned error")]
     PollFailed,
+    #[error("failed to start async listener because of missing runtime handle")]
+    NoHandle,
 }
 
 /// The poll trait defines the function [`Poll::poll`], which will be called by the event listener
@@ -77,6 +83,7 @@ where
 /// The event listener is a worker that runs in a separate thread and polls for events
 /// from the [`Port`]s. It is responsible for sending events to the main thread and handling
 /// internal events like `Tick`.
+#[derive(Debug)]
 pub(crate) struct EventListener<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
@@ -91,6 +98,12 @@ where
     recv: mpsc::Receiver<ListenerMsg<U>>,
     /// Join handle for worker
     thread: Option<JoinHandle<()>>,
+    /// The taskpool to track all async ports and cancel them
+    #[cfg(feature = "async-ports")]
+    taskpool: Option<TaskPool>,
+    /// The event transmitter to allow async ports from a different function
+    #[cfg(feature = "async-ports")]
+    tx: Option<mpsc::Sender<ListenerMsg<U>>>,
 }
 
 impl<U> EventListener<U>
@@ -101,15 +114,23 @@ where
     /// - `poll` is the trait object which polls for input events
     /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
     /// - `tick_interval` is the interval used to send the `Tick` event. If `None`, no tick will be sent.
+    /// - `store_tx` is used to determine if the Transmitter should be stored for [`start_async`](Self::start_async). Has not effect if `async-ports` is not enabled.
     ///
     /// Tick should be used only when you need to handle the tick in the interface through the Subscriptions.
     /// The tick should have in this case, the same value (or less) of the refresh rate of the TUI.
     ///
-    /// > Panics if `poll_timeout` is 0
+    /// NOTE: if `store_tx` is set to `true` but [`start_async`](Self::start_async) is never called, [`poll`](Self::poll) will always timeout instead of returning `Disconnected`
+    /// after [`stop`](Self::stop) due a still open channel.
+    ///
+    /// # Panics
+    ///
+    /// - if `poll_timeout` is 0
+    #[allow(unused_variables)] // "store_tx" is necessary when "async-ports" is active
     pub(self) fn start(
-        ports: Vec<Port<U>>,
+        ports: Vec<SyncPort<U>>,
         poll_timeout: Duration,
         tick_interval: Option<Duration>,
+        store_tx: bool,
     ) -> Self {
         if poll_timeout == Duration::ZERO {
             panic!(
@@ -118,19 +139,60 @@ where
         }
         // Prepare channel and running state
         let config = Self::setup_thread(ports, tick_interval);
+
+        #[cfg(feature = "async-ports")]
+        let tx = if store_tx { Some(config.tx) } else { None };
+
         Self {
             paused: config.paused,
             running: config.running,
             poll_timeout,
             recv: config.rx,
             thread: Some(config.thread),
+            #[cfg(feature = "async-ports")]
+            taskpool: None,
+            #[cfg(feature = "async-ports")]
+            tx,
         }
     }
 
-    /// Stop event listener
+    /// Start the given async `ports` on a taskpool.
+    ///
+    /// # Panics
+    ///
+    /// If this function is called more than once per [`EventListener`].
+    #[cfg(feature = "async-ports")]
+    pub(self) fn start_async(
+        mut self,
+        ports: Vec<AsyncPort<U>>,
+        handle: tokio::runtime::Handle,
+    ) -> Self {
+        let taskpool = TaskPool::new(handle);
+        // unwrap is safe the first time as it is always assigned in "start"
+        let tx = self.tx.take().unwrap();
+
+        for port in ports {
+            let tx = tx.clone();
+            let paused = self.paused.clone();
+            taskpool.spawn(async move {
+                let _ = poll_task(port, tx, paused).await;
+            });
+        }
+
+        self
+    }
+
+    /// Stop event listener(s)
     pub fn stop(&mut self) -> ListenerResult<()> {
-        self.running
-            .store(false, std::sync::atomic::Ordering::Relaxed);
+        self.running.store(false, Ordering::Relaxed);
+
+        #[cfg(feature = "async-ports")]
+        if let Some(taskpool) = self.taskpool.as_ref() {
+            taskpool.close();
+            taskpool.cancel_all();
+            // not waiting until all tasks are closed due to this function not being async
+            // and "stop" potentially being called on a async context, which would then panic.
+        }
 
         // Join thread
         match self.thread.take().map(|x| x.join()) {
@@ -142,15 +204,13 @@ where
 
     /// Pause event listener worker
     pub fn pause(&mut self) -> ListenerResult<()> {
-        self.paused
-            .store(true, std::sync::atomic::Ordering::Relaxed);
+        self.paused.store(true, Ordering::Relaxed);
         Ok(())
     }
 
     /// Unpause event listener worker
     pub fn unpause(&mut self) -> ListenerResult<()> {
-        self.paused
-            .store(false, std::sync::atomic::Ordering::Relaxed);
+        self.paused.store(false, Ordering::Relaxed);
         Ok(())
     }
 
@@ -164,18 +224,56 @@ where
     }
 
     /// Setup the thread and returns the structs necessary to interact with it
-    fn setup_thread(ports: Vec<Port<U>>, tick_interval: Option<Duration>) -> ThreadConfig<U> {
+    fn setup_thread(ports: Vec<SyncPort<U>>, tick_interval: Option<Duration>) -> ThreadConfig<U> {
         let (sender, recv) = mpsc::channel();
         let paused = Arc::new(AtomicBool::new(false));
         let paused_t = Arc::clone(&paused);
         let running = Arc::new(AtomicBool::new(true));
         let running_t = Arc::clone(&running);
+        let sender_t = sender.clone();
         // Start thread
         let thread = thread::spawn(move || {
-            EventListenerWorker::new(ports, sender, paused_t, running_t, tick_interval).run();
+            EventListenerWorker::new(ports, sender_t, paused_t, running_t, tick_interval).run();
         });
-        ThreadConfig::new(recv, paused, running, thread)
+        ThreadConfig::new(recv, sender, paused, running, thread)
     }
+}
+
+/// Continuesly drive a given port in a async fashion.
+#[cfg(feature = "async-ports")]
+async fn poll_task<U>(
+    mut port: AsyncPort<U>,
+    tx: mpsc::Sender<ListenerMsg<U>>,
+    paused: Arc<AtomicBool>,
+) -> Result<(), mpsc::SendError<ListenerMsg<U>>>
+where
+    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+{
+    let mut times_remaining = port.max_poll();
+    loop {
+        if paused.load(Ordering::Relaxed) {
+            tokio::time::sleep(Duration::from_millis(25)).await;
+            continue;
+        }
+
+        let msg = match port.poll().await {
+            Ok(Some(ev)) => ListenerMsg::User(ev),
+            Ok(None) => break,
+            Err(err) => ListenerMsg::Error(err),
+        };
+
+        tx.send(msg)?;
+
+        // do this at the end to at least call it once
+        times_remaining = times_remaining.saturating_sub(1);
+
+        if times_remaining == 0 {
+            tokio::time::sleep(*port.interval()).await;
+            times_remaining = port.max_poll();
+        }
+    }
+
+    Ok(())
 }
 
 impl<U> Drop for EventListener<U>
@@ -195,6 +293,8 @@ where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
     rx: mpsc::Receiver<ListenerMsg<U>>,
+    #[allow(dead_code)] // used when "async-ports" is active, but always assigned
+    tx: mpsc::Sender<ListenerMsg<U>>,
     paused: Arc<AtomicBool>,
     running: Arc<AtomicBool>,
     thread: JoinHandle<()>,
@@ -206,12 +306,14 @@ where
 {
     pub fn new(
         rx: mpsc::Receiver<ListenerMsg<U>>,
+        tx: mpsc::Sender<ListenerMsg<U>>,
         paused: Arc<AtomicBool>,
         running: Arc<AtomicBool>,
         thread: JoinHandle<()>,
     ) -> Self {
         Self {
             rx,
+            tx,
             paused,
             running,
             thread,
@@ -256,9 +358,14 @@ mod test {
     #[test]
     fn worker_should_run_thread() {
         let mut listener = EventListener::<MockEvent>::start(
-            vec![SyncPort::new(Box::new(MockPoll::default()), Duration::from_secs(10), 1).into()],
+            vec![SyncPort::new(
+                Box::new(MockPoll::default()),
+                Duration::from_secs(10),
+                1,
+            )],
             Duration::from_millis(10),
             Some(Duration::from_secs(3)),
+            false,
         );
         // Wait 1 second
         thread::sleep(Duration::from_secs(1));
@@ -285,6 +392,7 @@ mod test {
             vec![],
             Duration::from_millis(10),
             Some(Duration::from_millis(750)),
+            false,
         );
         thread::sleep(Duration::from_millis(100));
         assert!(listener.pause().is_ok());
@@ -308,6 +416,7 @@ mod test {
             vec![],
             Duration::from_millis(0),
             Some(Duration::from_secs(3)),
+            false,
         );
     }
 }

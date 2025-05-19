@@ -25,7 +25,10 @@ termion = { version = "^4", optional = true }
 thiserror = "2"
 tokio = { version = "1", features = [
   "rt",
+  "macros",
+  "time"
 ], default-features = false, optional = true }
+tokio-util = { version = "0.7", features = ["rt"], default-features = false, optional = true }
 tuirealm_derive = { version = "2", optional = true }
 
 [dev-dependencies]
@@ -36,7 +39,7 @@ tokio = { version = "1", features = ["full"] }
 
 [features]
 default = ["derive", "dep:crossterm"]
-async-ports = ["dep:async-trait", "dep:tokio"]
+async-ports = ["dep:async-trait", "dep:tokio", "dep:tokio-util"]
 derive = ["dep:tuirealm_derive"]
 serialize = ["dep:serde", "bitflags/serde"]
 crossterm = ["dep:crossterm", "ratatui/crossterm"]
