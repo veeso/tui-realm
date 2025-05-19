@@ -60,7 +60,7 @@ pub struct MockPollAsync();
 impl<U: Eq + PartialEq + Clone + PartialOrd + Send + 'static> crate::listener::PollAsync<U>
     for MockPollAsync
 {
-    async fn poll(&self) -> ListenerResult<Option<Event<U>>> {
+    async fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         let tempfile = tempfile::NamedTempFile::new().expect("tempfile");
         let _file = tokio::fs::File::open(tempfile.path()).await.expect("file");
 

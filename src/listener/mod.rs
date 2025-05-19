@@ -79,7 +79,7 @@ where
     /// If it was possible to poll for event, `Ok` must be returned.
     /// If an event was read, then [`Some`] must be returned, otherwise [`None`].
     /// The event must be converted to `Event` using the `adapters`.
-    async fn poll(&self) -> ListenerResult<Option<Event<UserEvent>>>;
+    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>>;
 }
 
 /// The event listener is a worker that runs in a separate thread and polls for events

@@ -190,7 +190,7 @@ impl AsyncPort {
 
 #[tuirealm::async_trait]
 impl PollAsync<UserEvent> for AsyncPort {
-    async fn poll(&self) -> ListenerResult<Option<Event<UserEvent>>> {
+    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
         let result = self.write_file().await;
 
         Ok(Some(Event::User(UserEvent::WroteFile(result))))

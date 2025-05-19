@@ -18,7 +18,7 @@ impl<U> PollAsync<U> for AsyncTicker
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    async fn poll(&self) -> ListenerResult<Option<Event<U>>> {
+    async fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         Ok(Some(Event::Tick))
     }
 }
@@ -31,7 +31,7 @@ mod tests {
 
     #[tokio::test]
     async fn should_emit_tick_on_every_poll() {
-        let ticker = AsyncTicker::new();
+        let mut ticker = AsyncTicker::new();
         assert_eq!(ticker.poll().await, Ok(Some(Event::<NoUserEvent>::Tick)));
         assert_eq!(ticker.poll().await, Ok(Some(Event::<NoUserEvent>::Tick)));
         assert_eq!(ticker.poll().await, Ok(Some(Event::<NoUserEvent>::Tick)));
