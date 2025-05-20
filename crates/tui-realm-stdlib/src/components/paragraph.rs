@@ -61,11 +61,13 @@ impl Paragraph {
         self
     }
 
-    pub fn text(mut self, s: &[TextSpan]) -> Self {
+    /// Set the text of the [`Paragraph`].
+    // This method takes a `IntoIterator` so that it is up to the user when a clone is necessary
+    pub fn text(mut self, s: impl IntoIterator<Item = TextSpan>) -> Self {
         self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
-                s.iter().cloned().map(PropValue::TextSpan).collect(),
+                s.into_iter().map(PropValue::TextSpan).collect(),
             )),
         );
         self
@@ -183,7 +185,7 @@ mod tests {
             .foreground(Color::Red)
             .modifiers(TextModifiers::BOLD)
             .alignment(Alignment::Center)
-            .text(&[
+            .text([
                 TextSpan::from("Press "),
                 TextSpan::from("<ESC>").fg(Color::Cyan).bold(),
                 TextSpan::from(" to quit"),
@@ -192,5 +194,17 @@ mod tests {
             .title("title", Alignment::Center);
         // Get value
         assert_eq!(component.state(), State::None);
+    }
+
+    #[test]
+    fn various_text_types() {
+        // Vec
+        let _ = Paragraph::default().text(vec![TextSpan::new("hello")]);
+        // static array
+        let _ = Paragraph::default().text([TextSpan::new("hello")]);
+        // boxed array
+        let _ = Paragraph::default().text(vec![TextSpan::new("hello")].into_boxed_slice());
+        // already a iterator
+        let _ = Paragraph::default().text(["Hello"].map(TextSpan::new));
     }
 }

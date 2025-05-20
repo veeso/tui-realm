@@ -147,7 +147,7 @@ struct SpanAlfa {
 impl Default for SpanAlfa {
     fn default() -> Self {
         Self {
-            component: Span::default().foreground(Color::Yellow).spans(&[
+            component: Span::default().foreground(Color::Yellow).spans([
                 TextSpan::new("Downloading tui-realm... ")
                     .underlined()
                     .fg(Color::Green),
@@ -180,7 +180,7 @@ impl Default for SpanBeta {
                 .background(Color::White)
                 .alignment(Alignment::Right)
                 .modifiers(TextModifiers::BOLD)
-                .spans(&[
+                .spans([
                     TextSpan::new("Downloading tui-realm-stdlib... ")
                         .underlined()
                         .fg(Color::Green),

@@ -48,11 +48,11 @@ impl Span {
         self
     }
 
-    pub fn spans(mut self, s: &[TextSpan]) -> Self {
+    pub fn spans(mut self, s: impl IntoIterator<Item = TextSpan>) -> Self {
         self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
-                s.iter().cloned().map(PropValue::TextSpan).collect(),
+                s.into_iter().map(PropValue::TextSpan).collect(),
             )),
         );
         self
@@ -140,12 +140,24 @@ mod tests {
             .foreground(Color::Red)
             .modifiers(TextModifiers::BOLD)
             .alignment(Alignment::Center)
-            .spans(&[
+            .spans([
                 TextSpan::from("Press "),
                 TextSpan::from("<ESC>").fg(Color::Cyan).bold(),
                 TextSpan::from(" to quit"),
             ]);
         // Get value
         assert_eq!(component.state(), State::None);
+    }
+
+    #[test]
+    fn various_spans_types() {
+        // Vec
+        let _ = Span::default().spans(vec![TextSpan::new("hello")]);
+        // static array
+        let _ = Span::default().spans([TextSpan::new("hello")]);
+        // boxed array
+        let _ = Span::default().spans(vec![TextSpan::new("hello")].into_boxed_slice());
+        // already a iterator
+        let _ = Span::default().spans(["Hello"].map(TextSpan::new));
     }
 }

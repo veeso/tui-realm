@@ -123,7 +123,7 @@ impl Default for MyCanvas {
                 .marker(Marker::Dot)
                 .x_bounds((-180.0, 180.0))
                 .y_bounds((-90.0, 90.0))
-                .data(&[
+                .data([
                     Shape::Label((24.0, 34.0, String::from("Hello!"), Color::Cyan)),
                     Shape::Layer,
                     Shape::Map(Map {

@@ -149,7 +149,7 @@ impl Default for RadioAlfa {
                 .foreground(Color::LightGreen)
                 .title("Select your ice cream flavour 🍦", Alignment::Center)
                 .rewind(true)
-                .choices(&[
+                .choices([
                     "vanilla",
                     "chocolate",
                     "coconut",
@@ -200,7 +200,7 @@ impl Default for RadioBeta {
                 .foreground(Color::LightYellow)
                 .title("Select your topping 🧁", Alignment::Center)
                 .rewind(false)
-                .choices(&[
+                .choices([
                     "hazelnuts",
                     "chocolate",
                     "maple cyrup",

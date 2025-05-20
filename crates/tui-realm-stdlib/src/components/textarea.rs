@@ -164,14 +164,10 @@ impl Textarea {
         self
     }
 
-    pub fn text_rows(mut self, rows: &[TextSpan]) -> Self {
+    pub fn text_rows(mut self, s: impl IntoIterator<Item = TextSpan>) -> Self {
+        let rows: Vec<PropValue> = s.into_iter().map(PropValue::TextSpan).collect();
         self.states.set_list_len(rows.len());
-        self.attr(
-            Attribute::Text,
-            AttrValue::Payload(PropPayload::Vec(
-                rows.iter().cloned().map(PropValue::TextSpan).collect(),
-            )),
-        );
+        self.attr(Attribute::Text, AttrValue::Payload(PropPayload::Vec(rows)));
         self
     }
 }
@@ -330,7 +326,7 @@ mod tests {
             .highlighted_str("🚀")
             .step(4)
             .title("textarea", Alignment::Center)
-            .text_rows(&[TextSpan::from("welcome to "), TextSpan::from("tui-realm")]);
+            .text_rows([TextSpan::from("welcome to "), TextSpan::from("tui-realm")]);
         // Increment list index
         component.states.list_index += 1;
         assert_eq!(component.states.list_index, 1);
@@ -385,5 +381,17 @@ mod tests {
         assert_eq!(component.states.list_index, 0);
         // On key
         assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
+    }
+
+    #[test]
+    fn various_textrows_types() {
+        // Vec
+        let _ = Textarea::default().text_rows(vec![TextSpan::new("hello")]);
+        // static array
+        let _ = Textarea::default().text_rows([TextSpan::new("hello")]);
+        // boxed array
+        let _ = Textarea::default().text_rows(vec![TextSpan::new("hello")].into_boxed_slice());
+        // already a iterator
+        let _ = Textarea::default().text_rows(["Hello"].map(TextSpan::new));
     }
 }

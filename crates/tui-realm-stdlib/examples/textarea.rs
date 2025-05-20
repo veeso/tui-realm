@@ -150,7 +150,7 @@ impl Default for TextareaAlfa {
                 .title("Night Moves (Bob Seger)", Alignment::Center)
                 .step(4)
                 .highlighted_str("🎵")
-                .text_rows(&[
+                .text_rows([
                     TextSpan::new("I was a little too tall, could've used a few pounds,")
                         .underlined()
                         .fg(Color::Green),
@@ -219,7 +219,7 @@ impl Default for TextareaBeta {
                 .title("Roxanne (The Police)", Alignment::Center)
                 .step(4)
                 .highlighted_str("🎵")
-                .text_rows(&[
+                .text_rows([
                     TextSpan::new("Roxanne").underlined().fg(Color::Red),
                     TextSpan::from("You don't have to put on the red light"),
                     TextSpan::from("Those days are over"),

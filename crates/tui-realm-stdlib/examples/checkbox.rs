@@ -150,7 +150,7 @@ impl Default for CheckboxAlfa {
                 .background(Color::Black)
                 .title("Select your ice cream flavours 🍦", Alignment::Center)
                 .rewind(true)
-                .choices(&[
+                .choices([
                     "vanilla",
                     "chocolate",
                     "coconut",
@@ -206,7 +206,7 @@ impl Default for CheckboxBeta {
                 .background(Color::Black)
                 .title("Select your toppings 🧁", Alignment::Center)
                 .rewind(false)
-                .choices(&[
+                .choices([
                     "hazelnuts",
                     "chocolate",
                     "maple cyrup",

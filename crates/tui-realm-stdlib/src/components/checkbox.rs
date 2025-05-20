@@ -100,8 +100,8 @@ impl CheckboxStates {
     /// Set CheckboxStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
-    pub fn set_choices(&mut self, choices: &[String]) {
-        self.choices = choices.to_vec();
+    pub fn set_choices(&mut self, choices: impl Into<Vec<String>>) {
+        self.choices = choices.into();
         // Clear selection
         self.selection.clear();
         // Keep index if possible
@@ -157,13 +157,13 @@ impl Checkbox {
         self
     }
 
-    pub fn choices<S: AsRef<str>>(mut self, choices: &[S]) -> Self {
+    pub fn choices<S: Into<String>>(mut self, choices: impl IntoIterator<Item = S>) -> Self {
         self.attr(
             Attribute::Content,
             AttrValue::Payload(PropPayload::Vec(
                 choices
-                    .iter()
-                    .map(|x| PropValue::Str(x.as_ref().to_string()))
+                    .into_iter()
+                    .map(|v| PropValue::Str(v.into()))
                     .collect(),
             )),
         );
@@ -269,7 +269,7 @@ impl MockComponent for Checkbox {
                     .cloned()
                     .map(|x| x.unwrap_str())
                     .collect();
-                self.states.set_choices(&choices);
+                self.states.set_choices(choices);
                 // Preserve selection if possible
                 for c in current_selection {
                     self.states.select(c);
@@ -412,7 +412,7 @@ mod test {
             .foreground(Color::Red)
             .borders(Borders::default())
             .title("Which food do you prefer?", Alignment::Center)
-            .choices(&["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta"])
+            .choices(["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta"])
             .values(&[1, 4])
             .rewind(false);
         // Verify states
@@ -502,5 +502,31 @@ mod test {
             component.perform(Cmd::Submit),
             CmdResult::Submit(State::Vec(vec![StateValue::Usize(0)])),
         );
+    }
+
+    #[test]
+    fn various_set_choice_types() {
+        // static array of strings
+        CheckboxStates::default().set_choices(&["hello".to_string()]);
+        // vector of strings
+        CheckboxStates::default().set_choices(vec!["hello".to_string()]);
+        // boxed array of strings
+        CheckboxStates::default().set_choices(vec!["hello".to_string()].into_boxed_slice());
+    }
+
+    #[test]
+    fn various_choice_types() {
+        // static array of static strings
+        let _ = Checkbox::default().choices(["hello"]);
+        // static array of strings
+        let _ = Checkbox::default().choices(["hello".to_string()]);
+        // vec of static strings
+        let _ = Checkbox::default().choices(vec!["hello"]);
+        // vec of strings
+        let _ = Checkbox::default().choices(vec!["hello".to_string()]);
+        // boxed array of static strings
+        let _ = Checkbox::default().choices(vec!["hello"].into_boxed_slice());
+        // boxed array of strings
+        let _ = Checkbox::default().choices(vec!["hello".to_string()].into_boxed_slice());
     }
 }

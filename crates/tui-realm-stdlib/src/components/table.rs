@@ -198,13 +198,13 @@ impl Table {
         self
     }
 
-    pub fn headers<S: AsRef<str>>(mut self, headers: &[S]) -> Self {
+    pub fn headers<S: Into<String>>(mut self, headers: impl IntoIterator<Item = S>) -> Self {
         self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
                 headers
-                    .iter()
-                    .map(|x| PropValue::Str(x.as_ref().to_string()))
+                    .into_iter()
+                    .map(|v| PropValue::Str(v.into()))
                     .collect(),
             )),
         );
@@ -574,7 +574,7 @@ mod tests {
             .column_spacing(4)
             .widths(&[25, 25, 25, 25])
             .row_height(3)
-            .headers(&["Event", "Message", "Behaviour", "???"])
+            .headers(["Event", "Message", "Behaviour", "???"])
             .table(
                 TableBuilder::default()
                     .add_col(TextSpan::from("KeyCode::Down"))
@@ -707,7 +707,7 @@ mod tests {
             .column_spacing(4)
             .widths(&[33, 33, 33])
             .row_height(3)
-            .headers(&["Event", "Message", "Behaviour"])
+            .headers(["Event", "Message", "Behaviour"])
             .table(
                 TableBuilder::default()
                     .add_col(TextSpan::from("KeyCode::Down"))
@@ -793,5 +793,21 @@ mod tests {
             AttrValue::Payload(PropPayload::One(PropValue::Usize(50))),
         );
         assert_eq!(component.states.list_index, 6);
+    }
+
+    #[test]
+    fn various_header_types() {
+        // static array of static strings
+        let _ = Table::default().headers(["hello"]);
+        // static array of strings
+        let _ = Table::default().headers(["hello".to_string()]);
+        // vec of static strings
+        let _ = Table::default().headers(vec!["hello"]);
+        // vec of strings
+        let _ = Table::default().headers(vec!["hello".to_string()]);
+        // boxed array of static strings
+        let _ = Table::default().headers(vec!["hello"].into_boxed_slice());
+        // boxed array of strings
+        let _ = Table::default().headers(vec!["hello".to_string()].into_boxed_slice());
     }
 }

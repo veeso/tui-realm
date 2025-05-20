@@ -53,11 +53,11 @@ impl Canvas {
         self
     }
 
-    pub fn data(mut self, data: &[Shape]) -> Self {
+    pub fn data(mut self, data: impl IntoIterator<Item = Shape>) -> Self {
         self.attr(
             Attribute::Shape,
             AttrValue::Payload(PropPayload::Vec(
-                data.iter().map(|x| PropValue::Shape(x.clone())).collect(),
+                data.into_iter().map(PropValue::Shape).collect(),
             )),
         );
         self
@@ -246,7 +246,7 @@ mod test {
             .marker(Marker::Dot)
             .x_bounds((-180.0, 180.0))
             .y_bounds((-90.0, 90.0))
-            .data(&[
+            .data([
                 Shape::Map(Map {
                     resolution: MapResolution::High,
                     color: Color::Rgb(240, 240, 240),

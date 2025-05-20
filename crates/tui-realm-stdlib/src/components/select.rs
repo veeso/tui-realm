@@ -63,8 +63,8 @@ impl SelectStates {
     /// Set SelectStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
-    pub fn set_choices(&mut self, choices: &[String]) {
-        self.choices = choices.to_vec();
+    pub fn set_choices(&mut self, choices: impl Into<Vec<String>>) {
+        self.choices = choices.into();
         // Keep index if possible
         if self.selected >= self.choices.len() {
             self.selected = match self.choices.len() {
@@ -161,13 +161,13 @@ impl Select {
         self
     }
 
-    pub fn choices<S: AsRef<str>>(mut self, choices: &[S]) -> Self {
+    pub fn choices<S: Into<String>>(mut self, choices: impl IntoIterator<Item = S>) -> Self {
         self.attr(
             Attribute::Content,
             AttrValue::Payload(PropPayload::Vec(
                 choices
-                    .iter()
-                    .map(|x| PropValue::Str(x.as_ref().to_string()))
+                    .into_iter()
+                    .map(|v| PropValue::Str(v.into()))
                     .collect(),
             )),
         );
@@ -365,7 +365,7 @@ impl MockComponent for Select {
                     .iter()
                     .map(|x| x.clone().unwrap_str())
                     .collect();
-                self.states.set_choices(&choices);
+                self.states.set_choices(choices);
             }
             Attribute::Value => {
                 self.states
@@ -486,7 +486,7 @@ mod test {
         assert_eq!(states.selected, 1); // Move to first index available
         assert_eq!(states.choices.len(), 2);
         let choices = vec![];
-        states.set_choices(&choices);
+        states.set_choices(choices);
         assert_eq!(states.selected, 0); // Move to first index available
         assert_eq!(states.choices.len(), 0);
         // Rewind
@@ -529,7 +529,7 @@ mod test {
             .highlighted_color(Color::Red)
             .highlighted_str(">>")
             .title("C'est oui ou bien c'est non?", Alignment::Center)
-            .choices(&["Oui!", "Non", "Peut-être"])
+            .choices(["Oui!", "Non", "Peut-être"])
             .value(1)
             .rewind(false);
         assert_eq!(component.states.is_tab_open(), false);
@@ -596,5 +596,31 @@ mod test {
             CmdResult::None
         );
         assert_eq!(component.perform(Cmd::Move(Direction::Up)), CmdResult::None);
+    }
+
+    #[test]
+    fn various_set_choice_types() {
+        // static array of strings
+        SelectStates::default().set_choices(&["hello".to_string()]);
+        // vector of strings
+        SelectStates::default().set_choices(vec!["hello".to_string()]);
+        // boxed array of strings
+        SelectStates::default().set_choices(vec!["hello".to_string()].into_boxed_slice());
+    }
+
+    #[test]
+    fn various_choice_types() {
+        // static array of static strings
+        let _ = Select::default().choices(["hello"]);
+        // static array of strings
+        let _ = Select::default().choices(["hello".to_string()]);
+        // vec of static strings
+        let _ = Select::default().choices(vec!["hello"]);
+        // vec of strings
+        let _ = Select::default().choices(vec!["hello".to_string()]);
+        // boxed array of static strings
+        let _ = Select::default().choices(vec!["hello"].into_boxed_slice());
+        // boxed array of strings
+        let _ = Select::default().choices(vec!["hello".to_string()].into_boxed_slice());
     }
 }

@@ -73,8 +73,8 @@ impl RadioStates {
     /// Set RadioStates choices from a vector of text spans
     /// In addition resets current selection and keep index if possible or set it to the first value
     /// available
-    pub fn set_choices(&mut self, spans: &[String]) {
-        self.choices = spans.to_vec();
+    pub fn set_choices(&mut self, choices: impl Into<Vec<String>>) {
+        self.choices = choices.into();
         // Keep index if possible
         if self.choice >= self.choices.len() {
             self.choice = match self.choices.len() {
@@ -134,13 +134,13 @@ impl Radio {
         self
     }
 
-    pub fn choices<S: AsRef<str>>(mut self, choices: &[S]) -> Self {
+    pub fn choices<S: Into<String>>(mut self, choices: impl IntoIterator<Item = S>) -> Self {
         self.attr(
             Attribute::Content,
             AttrValue::Payload(PropPayload::Vec(
                 choices
-                    .iter()
-                    .map(|x| PropValue::Str(x.as_ref().to_string()))
+                    .into_iter()
+                    .map(|v| PropValue::Str(v.into()))
                     .collect(),
             )),
         );
@@ -232,7 +232,7 @@ impl MockComponent for Radio {
                     .iter()
                     .map(|x| x.clone().unwrap_str())
                     .collect();
-                self.states.set_choices(&choices);
+                self.states.set_choices(choices);
             }
             Attribute::Value => {
                 self.states
@@ -342,7 +342,7 @@ mod test {
             .foreground(Color::Red)
             .borders(Borders::default())
             .title("C'est oui ou bien c'est non?", Alignment::Center)
-            .choices(&["Oui!", "Non", "Peut-être"])
+            .choices(["Oui!", "Non", "Peut-être"])
             .value(1)
             .rewind(false);
         // Verify states
@@ -391,5 +391,31 @@ mod test {
             component.perform(Cmd::Submit),
             CmdResult::Submit(State::One(StateValue::Usize(2))),
         );
+    }
+
+    #[test]
+    fn various_set_choice_types() {
+        // static array of strings
+        RadioStates::default().set_choices(&["hello".to_string()]);
+        // vector of strings
+        RadioStates::default().set_choices(vec!["hello".to_string()]);
+        // boxed array of strings
+        RadioStates::default().set_choices(vec!["hello".to_string()].into_boxed_slice());
+    }
+
+    #[test]
+    fn various_choice_types() {
+        // static array of static strings
+        let _ = Radio::default().choices(["hello"]);
+        // static array of strings
+        let _ = Radio::default().choices(["hello".to_string()]);
+        // vec of static strings
+        let _ = Radio::default().choices(vec!["hello"]);
+        // vec of strings
+        let _ = Radio::default().choices(vec!["hello".to_string()]);
+        // boxed array of static strings
+        let _ = Radio::default().choices(vec!["hello"].into_boxed_slice());
+        // boxed array of strings
+        let _ = Radio::default().choices(vec!["hello".to_string()].into_boxed_slice());
     }
 }

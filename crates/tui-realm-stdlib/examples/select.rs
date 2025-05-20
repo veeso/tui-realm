@@ -162,7 +162,7 @@ impl Default for SelectAlfa {
                 .rewind(true)
                 .highlighted_color(Color::LightGreen)
                 .highlighted_str(">> ")
-                .choices(&[
+                .choices([
                     "vanilla",
                     "chocolate",
                     "coconut",
@@ -219,7 +219,7 @@ impl Default for SelectBeta {
                 .rewind(false)
                 .highlighted_color(Color::LightYellow)
                 .highlighted_str(">> ")
-                .choices(&[
+                .choices([
                     "hazelnuts",
                     "chocolate",
                     "maple cyrup",

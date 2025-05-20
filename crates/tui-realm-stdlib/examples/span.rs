@@ -133,7 +133,7 @@ impl Default for SpanAlfa {
         Self {
             component: Span::default()
                 .foreground(Color::Yellow)
-                .spans(&[
+                .spans([
                     TextSpan::new("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
                     TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est."),
                 ])
@@ -164,7 +164,7 @@ impl Default for SpanBeta {
                 .background(Color::White)
                 .alignment(Alignment::Right)
                 .modifiers(TextModifiers::BOLD)
-                .spans(&[
+                .spans([
                     TextSpan::new("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green).bg(Color::Red),
                     TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est."),
                 ])
