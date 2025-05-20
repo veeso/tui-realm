@@ -1,4 +1,4 @@
-/// A macro to generate a chain of [`crate::SubClause::And`] from a list of
+/// A macro to generate a chain of [`crate::SubClause::AndMany`] from a list of
 /// Ids with the case [`crate::SubClause::IsMounted`] for every id.
 ///
 /// ### example
@@ -21,13 +21,11 @@
 ///
 /// assert_eq!(
 ///     sub_clause,
-///     SubClause::And(
-///         Box::new(SubClause::IsMounted(Id::InputBar)),
-///         Box::new(SubClause::And(
-///             Box::new(SubClause::IsMounted(Id::InputFoo)),
-///             Box::new(SubClause::IsMounted(Id::InputOmar))
-///         ))
-///     )
+///     SubClause::AndMany(vec![
+///         SubClause::IsMounted(Id::InputBar),
+///         SubClause::IsMounted(Id::InputFoo),
+///         SubClause::IsMounted(Id::InputOmar),
+///     ])
 ///  );
 /// ```
 ///
@@ -36,11 +34,10 @@ macro_rules! subclause_and {
     ($id:expr) => {
         SubClause::IsMounted($id)
     };
-    ($id:expr, $($rest:expr),+) => {
-        SubClause::and(
-            SubClause::IsMounted($id),
-            tuirealm::subclause_and!($($rest),+)
-        )
+    ($($rest:expr),+ $(,)?) => {
+        SubClause::AndMany(vec![
+            $(SubClause::IsMounted($rest)),*
+        ])
     };
 }
 
@@ -140,4 +137,47 @@ macro_rules! subclause_or {
             tuirealm::subclause_or!($($rest),+)
         )
     };
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::SubClause;
+    use crate::mock::MockComponentId;
+
+    #[test]
+    fn subclause_and() {
+        // single
+        assert_eq!(
+            subclause_and!(MockComponentId::InputBar),
+            SubClause::IsMounted(MockComponentId::InputBar),
+        );
+
+        // multiple with no ending comma
+        assert_eq!(
+            subclause_and!(
+                MockComponentId::InputBar,
+                MockComponentId::InputFoo,
+                MockComponentId::InputOmar
+            ),
+            SubClause::AndMany(vec![
+                SubClause::IsMounted(MockComponentId::InputBar),
+                SubClause::IsMounted(MockComponentId::InputFoo),
+                SubClause::IsMounted(MockComponentId::InputOmar),
+            ])
+        );
+
+        // multiple with ending comma
+        assert_eq!(
+            subclause_and!(
+                MockComponentId::InputBar,
+                MockComponentId::InputFoo,
+                MockComponentId::InputOmar,
+            ),
+            SubClause::AndMany(vec![
+                SubClause::IsMounted(MockComponentId::InputBar),
+                SubClause::IsMounted(MockComponentId::InputFoo),
+                SubClause::IsMounted(MockComponentId::InputOmar),
+            ])
+        );
+    }
 }
