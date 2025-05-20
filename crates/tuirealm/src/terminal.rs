@@ -235,12 +235,12 @@ impl TerminalBridge<adapter::TermionTerminalAdapter> {
         Self::init(adapter::TermionTerminalAdapter::new().unwrap())
     }
 
-    /// Returns a reference to the underlying [`Terminal`]
+    /// Returns a reference to the underlying Terminal
     pub fn raw(&self) -> &adapter::TermionBackend {
         self.terminal.raw()
     }
 
-    /// Returns a mutable reference to the underlying [`Terminal`]
+    /// Returns a mutable reference to the underlying Terminal
     pub fn raw_mut(&mut self) -> &mut adapter::TermionBackend {
         self.terminal.raw_mut()
     }

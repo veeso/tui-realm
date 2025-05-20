@@ -49,49 +49,49 @@ impl State {
     pub fn unwrap_one(self) -> StateValue {
         match self {
             Self::One(val) => val,
-            state => panic!("Could not unwrap {:?} as `One`", state),
+            state => panic!("Could not unwrap {state:?} as `One`"),
         }
     }
 
     pub fn unwrap_tup2(self) -> (StateValue, StateValue) {
         match self {
             Self::Tup2(val) => val,
-            state => panic!("Could not unwrap {:?} as `Tup2`", state),
+            state => panic!("Could not unwrap {state:?} as `Tup2`"),
         }
     }
 
     pub fn unwrap_tup3(self) -> (StateValue, StateValue, StateValue) {
         match self {
             Self::Tup3(val) => val,
-            state => panic!("Could not unwrap {:?} as `Tup3`", state),
+            state => panic!("Could not unwrap {state:?} as `Tup3`"),
         }
     }
 
     pub fn unwrap_tup4(self) -> (StateValue, StateValue, StateValue, StateValue) {
         match self {
             Self::Tup4(val) => val,
-            state => panic!("Could not unwrap {:?} as `Tup4`", state),
+            state => panic!("Could not unwrap {state:?} as `Tup4`"),
         }
     }
 
     pub fn unwrap_vec(self) -> Vec<StateValue> {
         match self {
             Self::Vec(val) => val,
-            state => panic!("Could not unwrap {:?} as `Vec`", state),
+            state => panic!("Could not unwrap {state:?} as `Vec`"),
         }
     }
 
     pub fn unwrap_map(self) -> HashMap<String, StateValue> {
         match self {
             Self::Map(val) => val,
-            state => panic!("Could not unwrap {:?} as `Map`", state),
+            state => panic!("Could not unwrap {state:?} as `Map`"),
         }
     }
 
     pub fn unwrap_linked(self) -> LinkedList<State> {
         match self {
             Self::Linked(val) => val,
-            state => panic!("Could not unwrap {:?} as `Linked`", state),
+            state => panic!("Could not unwrap {state:?} as `Linked`"),
         }
     }
 
@@ -110,126 +110,126 @@ impl StateValue {
     pub fn unwrap_bool(self) -> bool {
         match self {
             Self::Bool(val) => val,
-            value => panic!("Could not unwrap {:?} as `Bool`", value),
+            value => panic!("Could not unwrap {value:?} as `Bool`"),
         }
     }
 
     pub fn unwrap_u8(self) -> u8 {
         match self {
             Self::U8(val) => val,
-            value => panic!("Could not unwrap {:?} as `U8`", value),
+            value => panic!("Could not unwrap {value:?} as `U8`"),
         }
     }
 
     pub fn unwrap_u16(self) -> u16 {
         match self {
             Self::U16(val) => val,
-            value => panic!("Could not unwrap {:?} as `U16`", value),
+            value => panic!("Could not unwrap {value:?} as `U16`"),
         }
     }
 
     pub fn unwrap_u32(self) -> u32 {
         match self {
             Self::U32(val) => val,
-            value => panic!("Could not unwrap {:?} as `U32`", value),
+            value => panic!("Could not unwrap {value:?} as `U32`"),
         }
     }
 
     pub fn unwrap_u64(self) -> u64 {
         match self {
             Self::U64(val) => val,
-            value => panic!("Could not unwrap {:?} as `U64`", value),
+            value => panic!("Could not unwrap {value:?} as `U64`"),
         }
     }
 
     pub fn unwrap_u128(self) -> u128 {
         match self {
             Self::U128(val) => val,
-            value => panic!("Could not unwrap {:?} as `U128`", value),
+            value => panic!("Could not unwrap {value:?} as `U128`"),
         }
     }
 
     pub fn unwrap_usize(self) -> usize {
         match self {
             Self::Usize(val) => val,
-            value => panic!("Could not unwrap {:?} as `Usize`", value),
+            value => panic!("Could not unwrap {value:?} as `Usize`"),
         }
     }
 
     pub fn unwrap_i8(self) -> i8 {
         match self {
             Self::I8(val) => val,
-            value => panic!("Could not unwrap {:?} as `I8`", value),
+            value => panic!("Could not unwrap {value:?} as `I8`"),
         }
     }
 
     pub fn unwrap_i16(self) -> i16 {
         match self {
             Self::I16(val) => val,
-            value => panic!("Could not unwrap {:?} as `I16`", value),
+            value => panic!("Could not unwrap {value:?} as `I16`"),
         }
     }
 
     pub fn unwrap_i32(self) -> i32 {
         match self {
             Self::I32(val) => val,
-            value => panic!("Could not unwrap {:?} as `I32`", value),
+            value => panic!("Could not unwrap {value:?} as `I32`"),
         }
     }
 
     pub fn unwrap_i64(self) -> i64 {
         match self {
             Self::I64(val) => val,
-            value => panic!("Could not unwrap {:?} as `I64`", value),
+            value => panic!("Could not unwrap {value:?} as `I64`"),
         }
     }
 
     pub fn unwrap_i128(self) -> i128 {
         match self {
             Self::I128(val) => val,
-            value => panic!("Could not unwrap {:?} as `I128`", value),
+            value => panic!("Could not unwrap {value:?} as `I128`"),
         }
     }
 
     pub fn unwrap_isize(self) -> isize {
         match self {
             Self::Isize(val) => val,
-            value => panic!("Could not unwrap {:?} as `Isize`", value),
+            value => panic!("Could not unwrap {value:?} as `Isize`"),
         }
     }
 
     pub fn unwrap_f64(self) -> f64 {
         match self {
             Self::F64(val) => val,
-            value => panic!("Could not unwrap {:?} as `F64`", value),
+            value => panic!("Could not unwrap {value:?} as `F64`"),
         }
     }
 
     pub fn unwrap_string(self) -> String {
         match self {
             Self::String(val) => val,
-            value => panic!("Could not unwrap {:?} as `String`", value),
+            value => panic!("Could not unwrap {value:?} as `String`"),
         }
     }
 
     pub fn unwrap_color(self) -> Color {
         match self {
             Self::Color(val) => val,
-            value => panic!("Could not unwrap {:?} as `Color`", value),
+            value => panic!("Could not unwrap {value:?} as `Color`"),
         }
     }
 
     pub fn unwrap_email(self) -> Email {
         match self {
             Self::Email(val) => val,
-            value => panic!("Could not unwrap {:?} as `Email`", value),
+            value => panic!("Could not unwrap {value:?} as `Email`"),
         }
     }
 
     pub fn unwrap_phone_number(self) -> PhoneNumber {
         match self {
             Self::PhoneNumber(val) => val,
-            value => panic!("Could not unwrap {:?} as `PhoneNumber`", value),
+            value => panic!("Could not unwrap {value:?} as `PhoneNumber`"),
         }
     }
 }

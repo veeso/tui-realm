@@ -54,7 +54,7 @@ impl TaskPool {
     /// NOTE: this will wait infinitely until the task tracker is closed!
     #[allow(dead_code)]
     pub async fn wait_done(&self) {
-        self.tracker.wait().await
+        self.tracker.wait().await;
     }
 
     /// Close the Tracker, cancel all tasks in the tracker and wait for all tasks to settle.

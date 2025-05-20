@@ -68,9 +68,10 @@ where
             .map(|x| x.next_poll())
             .min()
             .unwrap_or(fallback_time);
-        let next_tick = match self.tick_interval.is_some() {
-            false => fallback_time,
-            true => self.next_tick,
+        let next_tick = if self.tick_interval.is_none() {
+            fallback_time
+        } else {
+            self.next_tick
         };
         let min_time = std::cmp::min(min_listener_event, next_tick);
         // If min time is > now, returns diff, otherwise return 0
@@ -103,15 +104,10 @@ where
     /// Send tick to listener and calc next tick
     fn send_tick(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<U>>> {
         // Send tick
-        match self.sender.send(ListenerMsg::Tick) {
-            // Terminate thread on send failed
-            Err(err) => Err(err),
-            Ok(_) => {
-                // Calc next tick
-                self.calc_next_tick();
-                Ok(())
-            }
-        }
+        self.sender.send(ListenerMsg::Tick)?;
+        // Calc next tick
+        self.calc_next_tick();
+        Ok(())
     }
 
     /// Poll and send poll to listener. Calc next poll.

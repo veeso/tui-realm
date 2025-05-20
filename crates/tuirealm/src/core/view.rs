@@ -73,14 +73,14 @@ where
 {
     /// Mount component on View.
     /// Returns error if the component is already mounted
-    pub fn mount(&mut self, id: K, component: WrappedComponent<Msg, UserEvent>) -> ViewResult<()> {
-        if self.mounted(&id) {
+    pub fn mount(&mut self, id: &K, component: WrappedComponent<Msg, UserEvent>) -> ViewResult<()> {
+        if self.mounted(id) {
             Err(ViewError::ComponentAlreadyMounted)
         } else {
             // Insert
             self.components.insert(id.clone(), component);
             // Inject properties
-            self.inject(&id)
+            self.inject(id)
         }
     }
 
@@ -102,20 +102,20 @@ where
     /// Remount component. This method WON'T change the focus stack
     pub fn remount(
         &mut self,
-        id: K,
+        id: &K,
         component: WrappedComponent<Msg, UserEvent>,
     ) -> ViewResult<()> {
         // Umount, but keep focus
-        let had_focus = self.has_focus(&id);
-        if self.mounted(&id) {
-            self.components.remove(&id);
+        let had_focus = self.has_focus(id);
+        if self.mounted(id) {
+            self.components.remove(id);
         }
         // remount
         self.components.insert(id.clone(), component);
         // Inject properties
-        self.inject(&id)?;
+        self.inject(id)?;
         // give focus if needed
-        if had_focus { self.active(&id) } else { Ok(()) }
+        if had_focus { self.active(id) } else { Ok(()) }
     }
 
     /// Umount all components in the view and clear focus stack and state
@@ -283,7 +283,7 @@ where
     /// Inject properties for `id` using view injectors
     fn inject(&mut self, id: &K) -> ViewResult<()> {
         for (attr, value) in self.properties_to_inject(id) {
-            self.attr(id, attr, value)?
+            self.attr(id, attr, value)?;
         }
         Ok(())
     }
@@ -319,23 +319,32 @@ mod test {
         let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         // Mount foo
         assert!(
-            view.mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
         );
         assert_eq!(view.components.len(), 1);
         assert!(view.mounted(&MockComponentId::InputFoo));
         assert_eq!(view.mounted(&MockComponentId::InputBar), false);
         // Mount bar
         assert!(
-            view.mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_ok()
         );
         assert_eq!(view.components.len(), 2);
         assert!(view.mounted(&MockComponentId::InputBar));
         // Mount twice
         assert!(
-            view.mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
-                .is_err()
+            view.mount(
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_err()
         );
         assert_eq!(view.components.len(), 2);
         assert!(view.mounted(&MockComponentId::InputBar));
@@ -356,20 +365,29 @@ mod test {
         let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         // Mount foo
         assert!(
-            view.mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
         );
         assert!(view.active(&MockComponentId::InputFoo).is_ok());
         // mount another component
         assert!(
-            view.mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_ok()
         );
         assert!(view.active(&MockComponentId::InputBar).is_ok());
         // Remount foo
         assert!(
-            view.remount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
-                .is_ok()
+            view.remount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
         );
         // Blur bar
         assert!(view.blur().is_ok());
@@ -382,23 +400,32 @@ mod test {
         let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         // Mount foo
         assert!(
-            view.mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
         );
         assert_eq!(view.components.len(), 1);
         assert!(view.mounted(&MockComponentId::InputFoo));
         assert_eq!(view.mounted(&MockComponentId::InputBar), false);
         // Mount bar
         assert!(
-            view.mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_ok()
         );
         assert_eq!(view.components.len(), 2);
         assert!(view.mounted(&MockComponentId::InputBar));
         // Mount twice
         assert!(
-            view.mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
-                .is_err()
+            view.mount(
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_err()
         );
         assert_eq!(view.components.len(), 2);
         // Give focus
@@ -418,10 +445,7 @@ mod test {
             .map(|x| MockComponentId::Dyn(format!("INPUT_{}", x)))
             .collect();
         names.iter().for_each(|x| {
-            assert!(
-                view.mount(x.clone(), Box::new(MockBarInput::default()))
-                    .is_ok()
-            );
+            assert!(view.mount(x, Box::new(MockBarInput::default())).is_ok());
         });
         assert_eq!(view.components.len(), 10);
         names.iter().for_each(|x| assert!(view.mounted(x)));
@@ -431,16 +455,22 @@ mod test {
     fn view_should_handle_focus() {
         let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         assert!(
-            view.mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
-                .is_ok()
-        );
-        assert!(
-            view.mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
         );
         assert!(
             view.mount(
-                MockComponentId::InputOmar,
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_ok()
+        );
+        assert!(
+            view.mount(
+                &MockComponentId::InputOmar,
                 Box::new(MockBarInput::default())
             )
             .is_ok()
@@ -498,8 +528,11 @@ mod test {
         assert_eq!(view.focus_stack.len(), 0);
         // Remount BAR
         assert!(
-            view.mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_ok()
         );
         // Active BAR
         assert!(view.active(&MockComponentId::InputBar).is_ok());
@@ -519,8 +552,11 @@ mod test {
     fn view_should_forward_events() {
         let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         assert!(
-            view.mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
         );
         let ev: Event<MockEvent> = Event::Keyboard(KeyEvent::from(Key::Char('a')));
         assert_eq!(
@@ -541,8 +577,11 @@ mod test {
     fn view_should_read_and_write_attributes() {
         let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         assert!(
-            view.mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
         );
         assert_eq!(
             view.query(&MockComponentId::InputFoo, Attribute::Focus)
@@ -574,12 +613,15 @@ mod test {
     fn view_should_read_state() {
         let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         assert!(
-            view.mount(MockComponentId::InputFoo, Box::new(MockFooInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
         );
         assert_eq!(
             view.state(&MockComponentId::InputFoo).unwrap(),
-            State::One(StateValue::String(String::from("")))
+            State::One(StateValue::String(String::new()))
         );
         assert!(view.state(&MockComponentId::InputBar).is_err());
     }
@@ -589,8 +631,11 @@ mod test {
         let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
         view.add_injector(Box::new(MockInjector));
         assert!(
-            view.mount(MockComponentId::InputBar, Box::new(MockBarInput::default()))
-                .is_ok()
+            view.mount(
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_ok()
         );
         // Check if property has been injected
         assert_eq!(

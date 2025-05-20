@@ -140,7 +140,7 @@ impl PropPayload {
         }
     }
 
-    /// Get a Vec value from PropPa&Vec<PropValue>None
+    /// Get a Vec value from PropPayload, or None
     pub fn as_vec(&self) -> Option<&Vec<PropValue>> {
         match self {
             PropPayload::Vec(v) => Some(v),

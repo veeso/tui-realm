@@ -165,7 +165,7 @@ where
                             .attr(
                                 &Id::Label,
                                 Attribute::Text,
-                                AttrValue::String(format!("DigitCounter has now value: {}", v))
+                                AttrValue::String(format!("DigitCounter has now value: {v}"))
                             )
                             .is_ok()
                     );
@@ -183,7 +183,7 @@ where
                             .attr(
                                 &Id::Label,
                                 Attribute::Text,
-                                AttrValue::String(format!("LetterCounter has now value: {}", v))
+                                AttrValue::String(format!("LetterCounter has now value: {v}"))
                             )
                             .is_ok()
                     );

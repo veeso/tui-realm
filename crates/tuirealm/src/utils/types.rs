@@ -13,8 +13,7 @@ pub struct PhoneNumber {
 
 impl PhoneNumber {
     pub fn new<S: AsRef<str>>(prefix: Option<S>, number: S) -> Self {
-        let number = number.as_ref().replace(' ', "");
-        let number = number.replace('-', "");
+        let number = number.as_ref().replace([' ', '-'], "");
         Self {
             prefix: prefix.map(|x| x.as_ref().to_string()),
             number,
@@ -25,7 +24,7 @@ impl PhoneNumber {
     pub fn phone_number(&self) -> String {
         match &self.prefix {
             None => self.number.clone(),
-            Some(prefix) => format!("+{}{}", prefix, self.number),
+            Some(prefix) => format!("+{prefix}{}", self.number),
         }
     }
 }
@@ -40,10 +39,10 @@ pub struct Email {
 }
 
 impl Email {
-    pub fn new<S: AsRef<str>>(name: S, agent: S) -> Self {
+    pub fn new<S: Into<String>>(name: S, agent: S) -> Self {
         Self {
-            name: name.as_ref().to_string(),
-            agent: agent.as_ref().to_string(),
+            name: name.into(),
+            agent: agent.into(),
         }
     }
 

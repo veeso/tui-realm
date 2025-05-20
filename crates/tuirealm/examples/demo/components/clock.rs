@@ -56,7 +56,7 @@ impl Clock {
         let hours = (since_the_epoch / 3600) % 24;
         let minutes = (since_the_epoch / 60) % 60;
         let seconds = since_the_epoch % 60;
-        format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
+        format!("{hours:02}:{minutes:02}:{seconds:02}")
     }
 
     fn get_epoch_time(&self) -> u64 {

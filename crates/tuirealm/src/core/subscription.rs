@@ -106,7 +106,7 @@ pub struct MouseEventClause {
 }
 
 impl MouseEventClause {
-    fn is_in_range(&self, ev: &MouseEvent) -> bool {
+    fn is_in_range(&self, ev: MouseEvent) -> bool {
         self.column.contains(&ev.column) && self.row.contains(&ev.row)
     }
 }
@@ -154,7 +154,7 @@ where
         match self {
             EventClause::Any => true,
             EventClause::Keyboard(k) => Some(k) == ev.as_keyboard(),
-            EventClause::Mouse(m) => ev.as_mouse().map(|ev| m.is_in_range(ev)).unwrap_or(false),
+            EventClause::Mouse(m) => ev.as_mouse().is_some_and(|ev| m.is_in_range(*ev)),
             EventClause::WindowResize => ev.as_window_resize(),
             EventClause::Tick => ev.as_tick(),
             EventClause::User(u) => Some(u) == ev.as_user(),

@@ -101,7 +101,7 @@ where
             .collect();
         // Forward to subscriptions and extend vector
         if !self.sub_lock {
-            messages.extend(self.forward_to_subscriptions(events));
+            self.forward_to_subscriptions(&events, &mut messages);
         }
         Ok(messages)
     }
@@ -123,9 +123,9 @@ where
         subs: Vec<Sub<K, UserEvent>>,
     ) -> ApplicationResult<()> {
         // Mount
-        self.view.mount(id.clone(), component)?;
+        self.view.mount(&id, component)?;
         // Subscribe
-        self.insert_subscriptions(id, subs);
+        self.insert_subscriptions(&id, subs);
         Ok(())
     }
 
@@ -149,9 +149,9 @@ where
         // remove subs
         self.unsubscribe_component(&id);
         // remount into view
-        self.view.remount(id.clone(), component)?;
+        self.view.remount(&id, component)?;
         // re-add subs
-        self.insert_subscriptions(id, subs);
+        self.insert_subscriptions(&id, subs);
         Ok(())
     }
 
@@ -261,7 +261,7 @@ where
 
     /// remove all subscriptions for component
     fn unsubscribe_component(&mut self, id: &K) {
-        self.subs.retain(|x| x.target() != id)
+        self.subs.retain(|x| x.target() != id);
     }
 
     /// Returns whether component `id` is subscribed to event described by `clause`
@@ -272,14 +272,14 @@ where
     }
 
     /// Insert subscriptions
-    fn insert_subscriptions(&mut self, id: K, subs: Vec<Sub<K, UserEvent>>) {
-        subs.into_iter().for_each(|x| {
+    fn insert_subscriptions(&mut self, id: &K, subs: Vec<Sub<K, UserEvent>>) {
+        for sub in subs {
             // Push only if not already subscribed
-            let subscription = Subscription::new(id.clone(), x);
-            if !self.subscribed(&id, subscription.event()) {
+            let subscription = Subscription::new(id.clone(), sub);
+            if !self.subscribed(id, subscription.event()) {
                 self.subs.push(subscription);
             }
-        });
+        }
     }
 
     /// Poll listener according to provided strategy
@@ -334,11 +334,10 @@ where
     }
 
     /// Forward events to subscriptions listening to the incoming event.
-    fn forward_to_subscriptions(&mut self, events: Vec<Event<UserEvent>>) -> Vec<Msg> {
-        let mut messages: Vec<Msg> = Vec::new();
+    fn forward_to_subscriptions(&mut self, events: &[Event<UserEvent>], messages: &mut Vec<Msg>) {
         // NOTE: don't touch this code again and don't try to use iterators, cause it's not gonna work :)
-        for ev in events.iter() {
-            for sub in self.subs.iter() {
+        for ev in events {
+            for sub in &self.subs {
                 // ! Active component must be different from sub !
                 if self.view.has_focus(sub.target()) {
                     continue;
@@ -356,11 +355,11 @@ where
                 }
             }
         }
-        messages
     }
 }
 
 /// Poll strategy defines how to call `Application::poll` on the event listener.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PollStrategy {
     /// `Application::poll` function will be called once
     Once,
@@ -712,7 +711,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
         // Active BAR
         assert!(application.active(&MockComponentId::InputBar).is_ok());
@@ -729,7 +728,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::BarSubmit(String::from(""))]
+            &[MockMsg::BarSubmit(String::new())]
         );
         // Let's try TryFor strategy
         let events = application
@@ -784,7 +783,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from(""))]
+            &[MockMsg::FooSubmit(String::new())]
         );
         // unlock subs
         application.unlock_subs();
@@ -830,7 +829,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from(""))]
+            &[MockMsg::FooSubmit(String::new())]
         );
     }
 
@@ -872,7 +871,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
     }
 
@@ -910,7 +909,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from(""))]
+            &[MockMsg::FooSubmit(String::new())]
         );
     }
 
@@ -952,7 +951,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
     }
 
@@ -990,7 +989,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from(""))]
+            &[MockMsg::FooSubmit(String::new())]
         );
     }
 
@@ -1028,7 +1027,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
     }
 
@@ -1066,7 +1065,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
         // Lock ports
         assert!(application.lock_ports().is_ok());
@@ -1092,7 +1091,7 @@ mod test {
                 .ok()
                 .unwrap()
                 .as_slice(),
-            &[MockMsg::FooSubmit(String::from("")), MockMsg::BarTick]
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
     }
 

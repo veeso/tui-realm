@@ -62,10 +62,10 @@ impl fmt::Debug for InputType {
         match *self {
             Self::Color => write!(f, "InputType::Color"),
             Self::Custom(..) => write!(f, "InputType::Custom"),
-            Self::CustomPassword(c, _, _) => write!(f, "InputType::CustomPassword({})", c),
+            Self::CustomPassword(c, _, _) => write!(f, "InputType::CustomPassword({c})"),
             Self::Email => write!(f, "InputType::Email"),
             Self::Number => write!(f, "InputType::Number"),
-            Self::Password(ch) => write!(f, "InputType::Password({})", ch),
+            Self::Password(ch) => write!(f, "InputType::Password({ch})"),
             Self::SignedInteger => write!(f, "InputType::SignedInteger"),
             Self::Telephone => write!(f, "InputType::Telephone"),
             Self::Text => write!(f, "InputType::Text"),

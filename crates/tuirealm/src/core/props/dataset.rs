@@ -30,8 +30,8 @@ impl Default for Dataset {
 
 impl Dataset {
     /// Set name for dataset
-    pub fn name<S: AsRef<str>>(mut self, s: S) -> Self {
-        self.name = s.as_ref().to_string();
+    pub fn name<S: Into<String>>(mut self, s: S) -> Self {
+        self.name = s.into();
         self
     }
 
