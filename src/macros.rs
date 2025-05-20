@@ -1,7 +1,7 @@
 /// A macro to generate a chain of [`crate::SubClause::AndMany`] from a list of
 /// Ids with the case [`crate::SubClause::IsMounted`] for every id.
 ///
-/// ### example
+/// ### Example
 ///
 /// ```rust
 /// use tuirealm::{SubClause, subclause_and};
@@ -17,7 +17,7 @@
 ///    Id::InputBar,
 ///    Id::InputFoo,
 ///    Id::InputOmar
-///    );
+/// );
 ///
 /// assert_eq!(
 ///     sub_clause,
@@ -48,7 +48,7 @@ macro_rules! subclause_and {
 /// Well, it happens quite often at least in my application to require a subclause for a "Global Listener" item
 /// to have no "Popup" mounted in the application.
 ///
-/// ### example
+/// ### Example
 ///
 /// ```rust
 /// use tuirealm::{SubClause, subclause_and_not};
@@ -93,10 +93,10 @@ macro_rules! subclause_and_not {
     };
 }
 
-/// A macro to generate a chain of [`crate::SubClause::Or`] from a list of
+/// A macro to generate a chain of [`crate::SubClause::OrMany`] from a list of
 /// Ids with the case [`crate::SubClause::IsMounted`] for every id.
 ///
-/// ### example
+/// ### Example
 ///
 /// ```rust
 /// use tuirealm::{SubClause, subclause_or};
@@ -112,17 +112,15 @@ macro_rules! subclause_and_not {
 ///    Id::InputBar,
 ///    Id::InputFoo,
 ///    Id::InputOmar
-///    );
+/// );
 ///
 /// assert_eq!(
 ///     sub_clause,
-///     SubClause::or(
+///     SubClause::OrMany(vec![
 ///         SubClause::IsMounted(Id::InputBar),
-///         SubClause::or(
-///             SubClause::IsMounted(Id::InputFoo),
-///             SubClause::IsMounted(Id::InputOmar)
-///         )
-///     )
+///         SubClause::IsMounted(Id::InputFoo),
+///         SubClause::IsMounted(Id::InputOmar),
+///     ])
 ///  );
 /// ```
 ///
@@ -131,11 +129,10 @@ macro_rules! subclause_or {
     ($id:expr) => {
         SubClause::IsMounted($id)
     };
-    ($id:expr, $($rest:expr),+) => {
-        SubClause::or(
-            SubClause::IsMounted($id),
-            tuirealm::subclause_or!($($rest),+)
-        )
+    ($($rest:expr),+ $(,)?) => {
+        SubClause::OrMany(vec![
+            $(SubClause::IsMounted($rest)),*
+        ])
     };
 }
 
@@ -174,6 +171,43 @@ mod tests {
                 MockComponentId::InputOmar,
             ),
             SubClause::AndMany(vec![
+                SubClause::IsMounted(MockComponentId::InputBar),
+                SubClause::IsMounted(MockComponentId::InputFoo),
+                SubClause::IsMounted(MockComponentId::InputOmar),
+            ])
+        );
+    }
+
+    #[test]
+    fn subclause_or() {
+        // single
+        assert_eq!(
+            subclause_or!(MockComponentId::InputBar),
+            SubClause::IsMounted(MockComponentId::InputBar),
+        );
+
+        // multiple with no ending comma
+        assert_eq!(
+            subclause_or!(
+                MockComponentId::InputBar,
+                MockComponentId::InputFoo,
+                MockComponentId::InputOmar
+            ),
+            SubClause::OrMany(vec![
+                SubClause::IsMounted(MockComponentId::InputBar),
+                SubClause::IsMounted(MockComponentId::InputFoo),
+                SubClause::IsMounted(MockComponentId::InputOmar),
+            ])
+        );
+
+        // multiple with ending comma
+        assert_eq!(
+            subclause_or!(
+                MockComponentId::InputBar,
+                MockComponentId::InputFoo,
+                MockComponentId::InputOmar,
+            ),
+            SubClause::OrMany(vec![
                 SubClause::IsMounted(MockComponentId::InputBar),
                 SubClause::IsMounted(MockComponentId::InputFoo),
                 SubClause::IsMounted(MockComponentId::InputOmar),
