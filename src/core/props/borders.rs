@@ -9,7 +9,7 @@ pub use crate::ratatui::widgets::{BorderType, Borders as BorderSides};
 // -- Border
 
 /// Defines the properties of the borders
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Borders {
     pub sides: BorderSides,
     pub modifiers: BorderType,
