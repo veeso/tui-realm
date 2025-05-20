@@ -45,7 +45,7 @@ where
         self.max_poll
     }
 
-    /// Returns the interval for the current [`Port`]
+    /// Returns the interval for the current [`AsyncPort`]
     pub fn interval(&self) -> &Duration {
         &self.interval
     }

@@ -20,9 +20,9 @@ pub struct TextSpan {
 
 impl TextSpan {
     /// Instantiate a new `TextSpan`
-    pub fn new<S: AsRef<str>>(text: S) -> Self {
+    pub fn new<S: Into<String>>(text: S) -> Self {
         Self {
-            content: text.as_ref().to_string(),
+            content: text.into(),
             fg: Color::Reset,
             bg: Color::Reset,
             modifiers: Modifier::empty(),
@@ -90,7 +90,7 @@ impl Default for TextSpan {
 
 impl<S> From<S> for TextSpan
 where
-    S: AsRef<str>,
+    S: Into<String>,
 {
     fn from(txt: S) -> Self {
         TextSpan::new(txt)

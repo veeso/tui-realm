@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Ok(messages) if !messages.is_empty() => {
                 // NOTE: redraw if at least one msg has been processed
                 model.redraw = true;
-                for msg in messages.into_iter() {
+                for msg in messages {
                     let mut msg = Some(msg);
                     while msg.is_some() {
                         msg = model.update(msg);

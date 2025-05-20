@@ -112,7 +112,7 @@ where
         self
     }
 
-    /// Add a new [`Port`] (Poll, Interval) to the the event listener.
+    /// Add a new [`SyncPort`] (Poll, Interval) to the the event listener.
     ///
     /// The interval is the amount of time between each [`Poll::poll`] call.
     /// The max_poll is the maximum amount of times the port should be polled in a single poll.
@@ -120,9 +120,9 @@ where
         self.port(SyncPort::new(poll, interval, max_poll))
     }
 
-    /// Add a new [`Port`] to the the event listener
+    /// Add a new [`SyncPort`] to the the event listener
     ///
-    /// The [`Port`] needs to be manually constructed, unlike [`Self::add_port`]
+    /// The [`SyncPort`] needs to be manually constructed, unlike [`Self::add_port`]
     pub fn port(mut self, port: SyncPort<U>) -> Self {
         self.sync_ports.push(port);
         self
@@ -175,7 +175,7 @@ impl<U> EventListenerCfg<U>
 where
     U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
 {
-    /// Add a new [`Port`] (Poll, Interval) to the the event listener.
+    /// Add a new [`AsyncPort`] (Poll, Interval) to the the event listener.
     ///
     /// The interval is the amount of time between each [`super::PollAsync::poll`] call.
     /// The max_poll is the maximum amount of times the port should be polled in a single poll.
@@ -187,7 +187,7 @@ where
         interval: Duration,
         max_poll: usize,
     ) -> Self {
-        self.async_port(super::AsyncPort::new(poll, interval, max_poll))
+        self.async_port(AsyncPort::new(poll, interval, max_poll))
     }
 
     /// Add a new [`AsyncPort`] to the the event listener.
