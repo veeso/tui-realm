@@ -33,7 +33,7 @@ impl SpinnerStates {
     ///
     /// Get current step char and increments step
     pub fn step(&mut self) -> char {
-        let ch = self.sequence.get(self.step).cloned().unwrap_or(' ');
+        let ch = self.sequence.get(self.step).copied().unwrap_or(' ');
         // Incr step
         if self.step + 1 >= self.sequence.len() {
             self.step = 0;
@@ -50,6 +50,7 @@ impl SpinnerStates {
 ///
 /// A textual spinner which step changes at each `view()` call
 #[derive(Default)]
+#[must_use]
 pub struct Spinner {
     props: Props,
     pub states: SpinnerStates,

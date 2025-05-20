@@ -83,6 +83,7 @@ impl ChartStates {
 ///
 /// While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
 #[derive(Default)]
+#[must_use]
 pub struct Chart {
     props: Props,
     pub states: ChartStates,
@@ -158,7 +159,7 @@ impl Chart {
             AttrValue::Payload(PropPayload::Vec(
                 labels
                     .iter()
-                    .map(|x| PropValue::Str(x.to_string()))
+                    .map(|x| PropValue::Str((*x).to_string()))
                     .collect(),
             )),
         );
@@ -171,7 +172,7 @@ impl Chart {
             AttrValue::Payload(PropPayload::Vec(
                 labels
                     .iter()
-                    .map(|x| PropValue::Str(x.to_string()))
+                    .map(|x| PropValue::Str((*x).to_string()))
                     .collect(),
             )),
         );
@@ -216,7 +217,7 @@ impl Chart {
     fn max_dataset_len(&self) -> usize {
         self.props
             .get(Attribute::Dataset)
-            .map(|x| {
+            .and_then(|x| {
                 x.unwrap_payload()
                     .unwrap_vec()
                     .iter()
@@ -224,7 +225,6 @@ impl Chart {
                     .map(|x| x.unwrap_dataset().get_data().len())
                     .max()
             })
-            .unwrap_or(None)
             .unwrap_or(0)
     }
 
@@ -298,10 +298,7 @@ impl MockComponent for Chart {
                 .props
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
-            let active: bool = match self.is_disabled() {
-                true => true,
-                false => focus,
-            };
+            let active: bool = if self.is_disabled() { true } else { focus };
             let div = crate::utils::get_block(borders, title.as_ref(), active, inactive_style);
             // Create widget
             // -- x axis

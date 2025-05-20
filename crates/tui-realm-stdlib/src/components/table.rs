@@ -89,6 +89,7 @@ impl TableStates {
     /// ### calc_max_step_ahead
     ///
     /// Calculate the max step ahead to scroll list
+    #[must_use]
     pub fn calc_max_step_ahead(&self, max: usize) -> usize {
         let remaining: usize = match self.list_len {
             0 => 0,
@@ -104,6 +105,7 @@ impl TableStates {
     /// ### calc_max_step_ahead
     ///
     /// Calculate the max step ahead to scroll list
+    #[must_use]
     pub fn calc_max_step_behind(&self, max: usize) -> usize {
         if self.list_index > max {
             max
@@ -119,6 +121,7 @@ impl TableStates {
 ///
 /// represents a read-only text component without any container.
 #[derive(Default)]
+#[must_use]
 pub struct Table {
     props: Props,
     pub states: TableStates,
@@ -248,27 +251,57 @@ impl Table {
     /// Returns layout based on properties.
     /// If layout is not set in properties, they'll be divided by rows number
     fn layout(&self) -> Vec<Constraint> {
-        match self.props.get(Attribute::Width).map(|x| x.unwrap_payload()) {
-            Some(PropPayload::Vec(widths)) => widths
+        if let Some(PropPayload::Vec(widths)) =
+            self.props.get(Attribute::Width).map(|x| x.unwrap_payload())
+        {
+            widths
                 .iter()
                 .cloned()
                 .map(|x| x.unwrap_u16())
                 .map(Constraint::Percentage)
-                .collect(),
-            _ => {
-                // Get amount of columns (maximum len of row elements)
-                let columns: usize =
-                    match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
-                        Some(rows) => rows.iter().map(|col| col.len()).max().unwrap_or(1),
-                        _ => 1,
-                    };
-                // Calc width in equal way, make sure not to divide by zero (this can happen when rows is [[]])
-                let width: u16 = (100 / max(columns, 1)) as u16;
-                (0..columns)
-                    .map(|_| Constraint::Percentage(width))
-                    .collect()
-            }
+                .collect()
+        } else {
+            // Get amount of columns (maximum len of row elements)
+            let columns: usize = match self.props.get(Attribute::Content).map(|x| x.unwrap_table())
+            {
+                Some(rows) => rows.iter().map(|col| col.len()).max().unwrap_or(1),
+                _ => 1,
+            };
+            // Calc width in equal way, make sure not to divide by zero (this can happen when rows is [[]])
+            let width: u16 = (100 / max(columns, 1)) as u16;
+            (0..columns)
+                .map(|_| Constraint::Percentage(width))
+                .collect()
         }
+    }
+
+    /// Generate [`Row`]s from a 2d vector of [`TextSpan`](tuirealm::props::TextSpan)s in props [`Attribute::Content`].
+    fn make_rows(&self, row_height: u16) -> Vec<Row> {
+        let Some(table) = self
+            .props
+            .get_ref(Attribute::Content)
+            .and_then(|x| x.as_table())
+        else {
+            return Vec::new();
+        };
+
+        table
+            .iter()
+            .map(|row| {
+                let columns: Vec<Cell> = row
+                    .iter()
+                    .map(|col| {
+                        let (fg, bg, modifiers) =
+                            crate::utils::use_or_default_styles(&self.props, col);
+                        Cell::from(Span::styled(
+                            &col.content,
+                            Style::default().add_modifier(modifiers).fg(fg).bg(bg),
+                        ))
+                    })
+                    .collect();
+                Row::new(columns).height(row_height)
+            })
+            .collect() // Make List item from TextSpan
     }
 }
 
@@ -308,30 +341,7 @@ impl MockComponent for Table {
                 .get_or(Attribute::Height, AttrValue::Size(1))
                 .unwrap_size();
             // Make rows
-            let rows: Vec<Row> = match self
-                .props
-                .get_ref(Attribute::Content)
-                .and_then(|x| x.as_table())
-            {
-                Some(table) => table
-                    .iter()
-                    .map(|row| {
-                        let columns: Vec<Cell> = row
-                            .iter()
-                            .map(|col| {
-                                let (fg, bg, modifiers) =
-                                    crate::utils::use_or_default_styles(&self.props, col);
-                                Cell::from(Span::styled(
-                                    &col.content,
-                                    Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                                ))
-                            })
-                            .collect();
-                        Row::new(columns).height(row_height)
-                    })
-                    .collect(), // Make List item from TextSpan
-                _ => Vec::new(),
-            };
+            let rows: Vec<Row> = self.make_rows(row_height);
             let highlighted_color = self
                 .props
                 .get(Attribute::HighlightedColor)
@@ -347,9 +357,10 @@ impl MockComponent for Table {
             if let Some(highlighted_color) = highlighted_color {
                 table =
                     table.row_highlight_style(Style::default().fg(highlighted_color).add_modifier(
-                        match focus {
-                            true => modifiers | TextModifiers::REVERSED,
-                            false => modifiers,
+                        if focus {
+                            modifiers | TextModifiers::REVERSED
+                        } else {
+                            modifiers
                         },
                     ));
             }
@@ -377,7 +388,7 @@ impl MockComponent for Table {
                 .and_then(|v| v.as_vec())
                 .map(|v| {
                     v.iter()
-                        .flat_map(|v| v.as_str().map(|v| v.as_str()))
+                        .filter_map(|v| v.as_str().map(|v| v.as_str()))
                         .collect()
                 })
                 .unwrap_or_default();
@@ -422,16 +433,16 @@ impl MockComponent for Table {
             self.states.list_index = self
                 .props
                 .get(Attribute::Value)
-                .map(|x| x.unwrap_payload().unwrap_one().unwrap_usize())
-                .unwrap_or(0);
+                .map_or(0, |x| x.unwrap_payload().unwrap_one().unwrap_usize());
             self.states.fix_list_index();
         }
     }
 
     fn state(&self) -> State {
-        match self.is_scrollable() {
-            true => State::One(StateValue::Usize(self.states.list_index)),
-            false => State::None,
+        if self.is_scrollable() {
+            State::One(StateValue::Usize(self.states.list_index))
+        } else {
+            State::None
         }
     }
 
@@ -440,19 +451,19 @@ impl MockComponent for Table {
             Cmd::Move(Direction::Down) => {
                 let prev = self.states.list_index;
                 self.states.incr_list_index(self.rewindable());
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::Move(Direction::Up) => {
                 let prev = self.states.list_index;
                 self.states.decr_list_index(self.rewindable());
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::Scroll(Direction::Down) => {
@@ -463,10 +474,10 @@ impl MockComponent for Table {
                     .unwrap_length();
                 let step: usize = self.states.calc_max_step_ahead(step);
                 (0..step).for_each(|_| self.states.incr_list_index(false));
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::Scroll(Direction::Up) => {
@@ -477,28 +488,28 @@ impl MockComponent for Table {
                     .unwrap_length();
                 let step: usize = self.states.calc_max_step_behind(step);
                 (0..step).for_each(|_| self.states.decr_list_index(false));
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::GoTo(Position::Begin) => {
                 let prev = self.states.list_index;
                 self.states.list_index_at_first();
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::GoTo(Position::End) => {
                 let prev = self.states.list_index;
                 self.states.list_index_at_last();
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             _ => CmdResult::None,

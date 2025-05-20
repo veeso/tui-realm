@@ -19,13 +19,14 @@ use unicode_width::UnicodeWidthStr;
 ///
 /// Given a vector of `TextSpans`, it creates a list of `Spans` which mustn't exceed the provided width parameter.
 /// Each `Spans` in the returned `Vec` is a line in the text.
+#[must_use]
 pub fn wrap_spans<'a>(spans: &[&TextSpan], width: usize, props: &Props) -> Vec<Spans<'a>> {
     // Prepare result (capacity will be at least spans.len)
     let mut res: Vec<Spans> = Vec::with_capacity(spans.len());
     // Prepare environment
     let mut line_width: usize = 0; // Incremental line width; mustn't exceed `width`.
     let mut line_spans: Vec<Span> = Vec::new(); // Current line; when done, push to res and re-initialize
-    for span in spans.iter() {
+    for span in spans {
         // Get styles
         let (fg, bg, tmod) = use_or_default_styles(props, span);
         // Check if width would exceed...
@@ -35,7 +36,7 @@ pub fn wrap_spans<'a>(spans: &[&TextSpan], width: usize, props: &Props) -> Vec<S
                 // Wrap
                 let span_lines = textwrap::wrap(span.content.as_str(), width);
                 // iter lines
-                for span_line in span_lines.iter() {
+                for span_line in span_lines {
                     // Check if width would exceed...
                     if line_width + span_line.width() > width {
                         // New line
@@ -53,12 +54,11 @@ pub fn wrap_spans<'a>(spans: &[&TextSpan], width: usize, props: &Props) -> Vec<S
                 }
                 // Go to next iteration
                 continue;
-            } else {
-                // Just initialize a new line
-                res.push(Spans::from(line_spans));
-                line_width = 0;
-                line_spans = Vec::new();
             }
+            // Just initialize a new line
+            res.push(Spans::from(line_spans));
+            line_width = 0;
+            line_spans = Vec::new();
         }
         // Push span to line
         line_width += span.content.width();
@@ -79,6 +79,7 @@ pub fn wrap_spans<'a>(spans: &[&TextSpan], width: usize, props: &Props) -> Vec<S
 ///
 /// Returns the styles to be used; in case in span are default, use props'.
 /// The values returned are `(foreground, background, modifiers)`
+#[must_use]
 pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, Modifier) {
     (
         match span.fg {
@@ -93,14 +94,15 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
                 .unwrap_color(),
             _ => span.bg,
         },
-        match span.modifiers.is_empty() {
-            true => props
+        if span.modifiers.is_empty() {
+            props
                 .get_or(
                     Attribute::TextProps,
                     AttrValue::TextModifiers(TextModifiers::empty()),
                 )
-                .unwrap_text_modifiers(),
-            false => span.modifiers,
+                .unwrap_text_modifiers()
+        } else {
+            span.modifiers
         },
     )
 }
@@ -109,22 +111,20 @@ pub fn use_or_default_styles(props: &Props, span: &TextSpan) -> (Color, Color, M
 ///
 /// Construct a block for widget using block properties.
 /// If focus is true the border color is applied, otherwise inactive_style
+#[must_use]
 pub fn get_block<T: AsRef<str>>(
     props: Borders,
     title: Option<&(T, Alignment)>,
     focus: bool,
     inactive_style: Option<Style>,
 ) -> Block {
-    let title = title
-        .map(|v| (v.0.as_ref(), v.1))
-        .unwrap_or(("", Alignment::Left));
+    let title = title.map_or(("", Alignment::Left), |v| (v.0.as_ref(), v.1));
     Block::default()
         .borders(props.sides)
-        .border_style(match focus {
-            true => props.style(),
-            false => {
-                inactive_style.unwrap_or_else(|| Style::default().fg(Color::Reset).bg(Color::Reset))
-            }
+        .border_style(if focus {
+            props.style()
+        } else {
+            inactive_style.unwrap_or_else(|| Style::default().fg(Color::Reset).bg(Color::Reset))
         })
         .border_type(props.modifiers)
         .title(title.0)
@@ -132,18 +132,19 @@ pub fn get_block<T: AsRef<str>>(
 }
 
 /// Get the [`Attribute::Title`] or a Centered default
+#[must_use]
 pub fn get_title_or_center(props: &Props) -> (&str, Alignment) {
     props
         .get_ref(Attribute::Title)
         .and_then(|v| v.as_title())
-        .map(|v| (v.0.as_str(), v.1))
-        .unwrap_or(("", Alignment::Center))
+        .map_or(("", Alignment::Center), |v| (v.0.as_str(), v.1))
 }
 
 /// ### calc_utf8_cursor_position
 ///
 /// Calculate the UTF8 compliant position for the cursor given the characters preceeding the cursor position.
 /// Use this function to calculate cursor position whenever you want to handle UTF8 texts with cursors
+#[must_use]
 pub fn calc_utf8_cursor_position(chars: &[char]) -> u16 {
     chars.iter().collect::<String>().width() as u16
 }
@@ -227,13 +228,13 @@ mod test {
             .sides(BorderSides::ALL)
             .color(Color::Red)
             .modifiers(BorderType::Rounded);
-        get_block(
+        let _ = get_block(
             props.clone(),
             Some(&("title", Alignment::Center)),
             true,
             None,
         );
-        get_block::<&str>(props, None, false, None);
+        let _ = get_block::<&str>(props, None, false, None);
     }
 
     #[test]

@@ -25,6 +25,7 @@ use tuirealm::{Frame, MockComponent, State};
 ///
 /// represents a read-only text component without any container.
 #[derive(Default)]
+#[must_use]
 pub struct Paragraph {
     props: Props,
 }
@@ -89,7 +90,7 @@ impl MockComponent for Paragraph {
                 Some(PropPayload::Vec(spans)) => spans
                     .iter()
                     // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                    .flat_map(|x| x.as_text_span())
+                    .filter_map(|x| x.as_text_span())
                     .map(|x| {
                         let (fg, bg, modifiers) =
                             crate::utils::use_or_default_styles(&self.props, x);
@@ -156,7 +157,7 @@ impl MockComponent for Paragraph {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value)
+        self.props.set(attr, value);
     }
 
     fn state(&self) -> State {

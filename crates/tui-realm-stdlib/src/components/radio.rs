@@ -97,6 +97,7 @@ impl RadioStates {
 ///
 /// Radio component represents a group of tabs to select from
 #[derive(Default)]
+#[must_use]
 pub struct Radio {
     props: Props,
     pub states: RadioStates,
@@ -198,13 +199,15 @@ impl MockComponent for Radio {
                 .map(|x| x.unwrap_style());
             let div = crate::utils::get_block(borders, title, focus, inactive_style);
             // Make colors
-            let (fg, block_color): (Color, Color) = match focus {
-                true => (foreground, foreground),
-                false => (foreground, Color::Reset),
+            let (fg, block_color): (Color, Color) = if focus {
+                (foreground, foreground)
+            } else {
+                (foreground, Color::Reset)
             };
-            let modifiers = match focus {
-                true => TextModifiers::REVERSED,
-                false => TextModifiers::empty(),
+            let modifiers = if focus {
+                TextModifiers::REVERSED
+            } else {
+                TextModifiers::empty()
             };
             let radio: Tabs = Tabs::new(choices)
                 .block(div)

@@ -22,6 +22,7 @@ use tuirealm::{Frame, MockComponent, State};
 ///
 /// represents a read-only text component without any container, but with multy-style text parts
 #[derive(Default)]
+#[must_use]
 pub struct Span {
     props: Props,
 }
@@ -80,7 +81,7 @@ impl MockComponent for Span {
                 Some(PropPayload::Vec(ref spans)) => spans
                     .iter()
                     // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                    .flat_map(|x| x.as_text_span())
+                    .filter_map(|x| x.as_text_span())
                     .map(|x| {
                         // Keep colors and modifiers, or use default
                         let (fg, bg, modifiers) =
@@ -113,7 +114,7 @@ impl MockComponent for Span {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value)
+        self.props.set(attr, value);
     }
 
     fn state(&self) -> State {

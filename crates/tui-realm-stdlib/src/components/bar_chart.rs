@@ -81,6 +81,7 @@ impl BarChartStates {
 ///
 /// While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
 #[derive(Default)]
+#[must_use]
 pub struct BarChart {
     props: Props,
     pub states: BarChartStates,
@@ -119,12 +120,12 @@ impl BarChart {
 
     pub fn data(mut self, data: &[(&str, u64)]) -> Self {
         let mut list: LinkedList<PropPayload> = LinkedList::new();
-        data.iter().for_each(|(a, b)| {
+        for (a, b) in data {
             list.push_back(PropPayload::Tup2((
-                PropValue::Str(a.to_string()),
+                PropValue::Str((*a).to_string()),
                 PropValue::U64(*b),
-            )))
-        });
+            )));
+        }
         self.attr(
             Attribute::Dataset,
             AttrValue::Payload(PropPayload::Linked(list)),
@@ -180,8 +181,7 @@ impl BarChart {
     fn data_len(&self) -> usize {
         self.props
             .get(Attribute::Dataset)
-            .map(|x| x.unwrap_payload().unwrap_linked().len())
-            .unwrap_or(0)
+            .map_or(0, |x| x.unwrap_payload().unwrap_linked().len())
     }
 
     fn get_data(&self, start: usize, len: usize) -> Vec<(String, u64)> {
@@ -243,20 +243,16 @@ impl MockComponent for BarChart {
                 .props
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
-            let active: bool = match self.is_disabled() {
-                true => true,
-                false => focus,
-            };
+            let active: bool = if self.is_disabled() { true } else { focus };
             let mut div = crate::utils::get_block(borders, title, active, inactive_style);
             div = div.style(Style::default().bg(background).fg(foreground));
             // Get max elements
-            let data_max_len: u64 = self
+            let data_max_len = self
                 .props
                 .get(Attribute::Custom(BAR_CHART_MAX_BARS))
-                .map(|x| x.unwrap_length() as u64)
-                .unwrap_or(self.data_len() as u64);
+                .map_or(self.data_len(), |x| x.unwrap_length());
             // Get data
-            let data = self.get_data(self.states.cursor, data_max_len as usize);
+            let data = self.get_data(self.states.cursor, data_max_len);
             let data_ref: Vec<(&str, u64)> = data.iter().map(|x| (x.0.as_str(), x.1)).collect();
             // Create widget
             let mut widget: TuiBarChart =
@@ -302,7 +298,7 @@ impl MockComponent for BarChart {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value)
+        self.props.set(attr, value);
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {

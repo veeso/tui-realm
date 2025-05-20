@@ -26,7 +26,7 @@ impl DataGen<(f64, f64)> {
     pub fn generate(&mut self) -> Vec<(f64, f64)> {
         let y_max = self.max.1;
         let y_min = self.min.1;
-        let x = self.data.last().map(|x| x.0 + 1.0).unwrap_or(0.0);
+        let x = self.data.last().map_or(0.0, |x| x.0 + 1.0);
         let y = self.get_rand(y_min, y_max);
         self.data.push((x, y));
         self.data.clone()

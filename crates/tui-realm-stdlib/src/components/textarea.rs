@@ -117,6 +117,7 @@ impl TextareaStates {
 ///
 /// represents a read-only text component without any container.
 #[derive(Default)]
+#[must_use]
 pub struct Textarea {
     props: Props,
     pub states: TextareaStates,
@@ -186,8 +187,7 @@ impl MockComponent for Textarea {
                 .get_ref(Attribute::HighlightedStr)
                 .and_then(|x| x.as_string());
             // NOTE: wrap width is width of area minus 2 (block) minus width of highlighting string
-            let wrap_width =
-                (area.width as usize) - hg_str.as_ref().map(|x| x.width()).unwrap_or(0) - 2;
+            let wrap_width = (area.width as usize) - hg_str.as_ref().map_or(0, |x| x.width()) - 2;
             let lines: Vec<ListItem> = match self
                 .props
                 .get_ref(Attribute::Text)
@@ -196,7 +196,7 @@ impl MockComponent for Textarea {
                 Some(PropPayload::Vec(spans)) => spans
                     .iter()
                     // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                    .flat_map(|x| x.as_text_span())
+                    .filter_map(|x| x.as_text_span())
                     .map(|x| crate::utils::wrap_spans(&[x], wrap_width, &self.props))
                     .map(ListItem::new)
                     .collect(),

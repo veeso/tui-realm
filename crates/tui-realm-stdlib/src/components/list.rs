@@ -87,6 +87,7 @@ impl ListStates {
     /// ### calc_max_step_ahead
     ///
     /// Calculate the max step ahead to scroll list
+    #[must_use]
     pub fn calc_max_step_ahead(&self, max: usize) -> usize {
         let remaining: usize = match self.list_len {
             0 => 0,
@@ -102,6 +103,7 @@ impl ListStates {
     /// ### calc_max_step_ahead
     ///
     /// Calculate the max step ahead to scroll list
+    #[must_use]
     pub fn calc_max_step_behind(&self, max: usize) -> usize {
         if self.list_index > max {
             max
@@ -117,6 +119,7 @@ impl ListStates {
 ///
 /// represents a read-only text component without any container.
 #[derive(Default)]
+#[must_use]
 pub struct List {
     props: Props,
     pub states: ListStates,
@@ -238,10 +241,7 @@ impl MockComponent for List {
                 .props
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
-            let active: bool = match self.scrollable() {
-                true => focus,
-                false => true,
-            };
+            let active: bool = if self.scrollable() { focus } else { true };
             let div = crate::utils::get_block(borders, Some(&title), active, inactive_style);
             // Make list entries
             let list_items: Vec<ListItem> = match self
@@ -272,9 +272,10 @@ impl MockComponent for List {
                 .props
                 .get(Attribute::HighlightedColor)
                 .map(|x| x.unwrap_color());
-            let modifiers = match focus {
-                true => modifiers | TextModifiers::REVERSED,
-                false => modifiers,
+            let modifiers = if focus {
+                modifiers | TextModifiers::REVERSED
+            } else {
+                modifiers
             };
             // Make list
 
@@ -326,16 +327,16 @@ impl MockComponent for List {
             self.states.list_index = self
                 .props
                 .get(Attribute::Value)
-                .map(|x| x.unwrap_payload().unwrap_one().unwrap_usize())
-                .unwrap_or(0);
+                .map_or(0, |x| x.unwrap_payload().unwrap_one().unwrap_usize());
             self.states.fix_list_index();
         }
     }
 
     fn state(&self) -> State {
-        match self.scrollable() {
-            true => State::One(StateValue::Usize(self.states.list_index)),
-            false => State::None,
+        if self.scrollable() {
+            State::One(StateValue::Usize(self.states.list_index))
+        } else {
+            State::None
         }
     }
 
@@ -344,19 +345,19 @@ impl MockComponent for List {
             Cmd::Move(Direction::Down) => {
                 let prev = self.states.list_index;
                 self.states.incr_list_index(self.rewindable());
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::Move(Direction::Up) => {
                 let prev = self.states.list_index;
                 self.states.decr_list_index(self.rewindable());
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::Scroll(Direction::Down) => {
@@ -367,10 +368,10 @@ impl MockComponent for List {
                     .unwrap_length();
                 let step: usize = self.states.calc_max_step_ahead(step);
                 (0..step).for_each(|_| self.states.incr_list_index(false));
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::Scroll(Direction::Up) => {
@@ -381,28 +382,28 @@ impl MockComponent for List {
                     .unwrap_length();
                 let step: usize = self.states.calc_max_step_behind(step);
                 (0..step).for_each(|_| self.states.decr_list_index(false));
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::GoTo(Position::Begin) => {
                 let prev = self.states.list_index;
                 self.states.list_index_at_first();
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             Cmd::GoTo(Position::End) => {
                 let prev = self.states.list_index;
                 self.states.list_index_at_last();
-                if prev != self.states.list_index {
-                    CmdResult::Changed(self.state())
-                } else {
+                if prev == self.states.list_index {
                     CmdResult::None
+                } else {
+                    CmdResult::Changed(self.state())
                 }
             }
             _ => CmdResult::None,

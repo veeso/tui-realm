@@ -72,7 +72,7 @@ fn main() {
     while !model.quit {
         // Tick
         if let Ok(messages) = model.app.tick(PollStrategy::Once) {
-            for msg in messages.into_iter() {
+            for msg in messages {
                 model.redraw = true;
                 let mut msg = Some(msg);
                 while msg.is_some() {
@@ -147,14 +147,14 @@ impl Default for MyCanvas {
                     }),
                     Shape::Points((
                         vec![
-                            (21.0 as f64, 13.0 as f64),
-                            (66.0 as f64, 77.0 as f64),
-                            (34.0 as f64, 69.0 as f64),
-                            (45.0 as f64, 76.0 as f64),
-                            (120.0 as f64, 55.0 as f64),
-                            (-32.0 as f64, -50.0 as f64),
-                            (-4.0 as f64, 2.0 as f64),
-                            (-32.0 as f64, -48.0 as f64),
+                            (21.0, 13.0),
+                            (66.0, 77.0),
+                            (34.0, 69.0),
+                            (45.0, 76.0),
+                            (120.0, 55.0),
+                            (-32.0, -50.0),
+                            (-4.0, 2.0),
+                            (-32.0, -48.0),
                         ],
                         Color::Green,
                     )),
