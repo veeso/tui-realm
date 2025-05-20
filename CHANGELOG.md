@@ -50,6 +50,9 @@ Unreleased
 
 - Add `SubClause::AndMany` for easier adding of many clauses that would otherwise be nested `SubClause::And`.
 - Add `SubClause::OrMany` for easier adding of many clauses that would otherwise be nested `SubClause::Or`.
+- Change the `subclause_` macros to make use of the new `SubClause::*Many` variants.
+- Change the `subclause_` macros to be able to end with a `,` without error.
+- Change the `subclause_and_not` to only have one `Not` instead of for every case.
 
 ## 2.4.1
 
