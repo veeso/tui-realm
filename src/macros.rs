@@ -28,7 +28,6 @@
 ///     ])
 ///  );
 /// ```
-///
 #[macro_export]
 macro_rules! subclause_and {
     ($id:expr) => {
@@ -64,31 +63,27 @@ macro_rules! subclause_and {
 ///    Id::InputBar,
 ///    Id::InputFoo,
 ///    Id::InputOmar
-///    );
+/// );
 ///
 /// assert_eq!(
 ///     sub_clause,
-///     SubClause::And(
-///         Box::new(SubClause::Not(Box::new(SubClause::IsMounted(Id::InputBar)))),
-///         Box::new(SubClause::And(
-///             Box::new(SubClause::Not(Box::new(SubClause::IsMounted(Id::InputFoo)))),
-///             Box::new(SubClause::Not(Box::new(SubClause::IsMounted(
-///                 Id::InputOmar
-///             ))))
-///         ))
-///     )
+///     SubClause::not(SubClause::AndMany(vec![
+///         SubClause::IsMounted(Id::InputBar),
+///         SubClause::IsMounted(Id::InputFoo),
+///         SubClause::IsMounted(Id::InputOmar),
+///     ]))
 ///  );
 /// ```
-///
 #[macro_export]
 macro_rules! subclause_and_not {
     ($id:expr) => {
         SubClause::not(SubClause::IsMounted($id))
     };
-    ($id:expr, $($rest:expr),+) => {
-        SubClause::and(
-            SubClause::not(SubClause::IsMounted($id)),
-            tuirealm::subclause_and_not!($($rest),+)
+    ($($rest:expr),+ $(,)?) => {
+        SubClause::not(
+            SubClause::AndMany(vec![
+                $(SubClause::IsMounted($rest)),*
+            ])
         )
     };
 }
@@ -123,7 +118,6 @@ macro_rules! subclause_and_not {
 ///     ])
 ///  );
 /// ```
-///
 #[macro_export]
 macro_rules! subclause_or {
     ($id:expr) => {
@@ -175,6 +169,43 @@ mod tests {
                 SubClause::IsMounted(MockComponentId::InputFoo),
                 SubClause::IsMounted(MockComponentId::InputOmar),
             ])
+        );
+    }
+
+    #[test]
+    fn subclause_and_not() {
+        // single
+        assert_eq!(
+            subclause_and_not!(MockComponentId::InputBar),
+            SubClause::not(SubClause::IsMounted(MockComponentId::InputBar)),
+        );
+
+        // multiple with no ending comma
+        assert_eq!(
+            subclause_and_not!(
+                MockComponentId::InputBar,
+                MockComponentId::InputFoo,
+                MockComponentId::InputOmar
+            ),
+            SubClause::not(SubClause::AndMany(vec![
+                SubClause::IsMounted(MockComponentId::InputBar),
+                SubClause::IsMounted(MockComponentId::InputFoo),
+                SubClause::IsMounted(MockComponentId::InputOmar),
+            ]))
+        );
+
+        // multiple with ending comma
+        assert_eq!(
+            subclause_and_not!(
+                MockComponentId::InputBar,
+                MockComponentId::InputFoo,
+                MockComponentId::InputOmar,
+            ),
+            SubClause::not(SubClause::AndMany(vec![
+                SubClause::IsMounted(MockComponentId::InputBar),
+                SubClause::IsMounted(MockComponentId::InputFoo),
+                SubClause::IsMounted(MockComponentId::InputOmar),
+            ]))
         );
     }
 
