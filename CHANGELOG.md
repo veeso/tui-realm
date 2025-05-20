@@ -44,6 +44,13 @@
 
 ---
 
+## next
+
+Unreleased
+
+- Add `SubClause::AndMany` for easier adding of many clauses that would otherwise be nested `SubClause::And`.
+- Add `SubClause::OrMany` for easier adding of many clauses that would otherwise be nested `SubClause::Or`.
+
 ## 2.4.1
 
 Released on 19/05/2025
