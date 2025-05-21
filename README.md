@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 2.4.1 (19/05/2025)</p>
+<p align="center">Current version: 3.0.0 (21/05/2025)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -126,13 +126,13 @@ See tui-realm in action in the [Example](#run-examples-) or if you want to read 
 If you want the default features, just add tuirealm 1.x version:
 
 ```toml
-tuirealm = "2"
+tuirealm = "3"
 ```
 
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "2", default-features = false, features = [ "derive", "serialize", "termion" ] }
+tuirealm = { version = "3", default-features = false, features = [ "derive", "serialize", "termion" ] }
 ```
 
 Supported features are:
@@ -154,13 +154,13 @@ crate's default features.
 Example using crossterm:
 
 ```toml
-tuirealm = { version = "2", default-features = false, features = [ "derive", "crossterm" ]}
+tuirealm = { version = "3", default-features = false, features = [ "derive", "crossterm" ]}
 ```
 
 Example using the termion backend:
 
 ```toml
-tuirealm = { version = "2", default-features = false, features = [ "derive", "termion" ] }
+tuirealm = { version = "3", default-features = false, features = [ "derive", "termion" ] }
 ```
 
 ### Create a tui-realm application 🪂

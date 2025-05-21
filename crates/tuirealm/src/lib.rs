@@ -23,13 +23,13 @@
 //! If you want the default features, just add tuirealm 1.x version:
 //!
 //! ```toml
-//! tuirealm = "2"
+//! tuirealm = "3"
 //! ```
 //!
 //! otherwise you can specify the features you want to add:
 //!
 //! ```toml
-//! tuirealm = { version = "2", default-features = false, features = [ "derive", "serialize", "termion" ] }
+//! tuirealm = { version = "3", default-features = false, features = [ "derive", "serialize", "termion" ] }
 //! ```
 //!
 //! Supported features are:
