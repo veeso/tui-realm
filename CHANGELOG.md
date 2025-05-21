@@ -1,9 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
-  - [2.4.1](#241)
-  - [2.4.0](#240)
-  - [2.3.0](#230)
+  - [3.0.0](#300)
   - [2.2.0](#220)
   - [2.1.0](#210)
   - [2.0.3](#203)
@@ -44,20 +42,15 @@
 
 ---
 
-## next
+## 3.0.0
 
-Unreleased
+Released on 21/05/2025
 
 - Add `SubClause::AndMany` for easier adding of many clauses that would otherwise be nested `SubClause::And`.
 - Add `SubClause::OrMany` for easier adding of many clauses that would otherwise be nested `SubClause::Or`.
 - Change the `subclause_` macros to make use of the new `SubClause::*Many` variants.
 - Change the `subclause_` macros to be able to end with a `,` without error.
 - Change the `subclause_and_not` to only have one `Not` instead of for every case.
-
-## 2.4.1
-
-Released on 19/05/2025
-
 - Remove `+ Sync` bound on `PollAsync` trait and `U`(Event) bound and all related functions.
 - Fix bug that `EventListener::stop` did not actually stop any async tasks.
 - Add function `EventListenerCfg::async_tick` to switch the ticker from Sync-Port to Async-Ports. Note that `EventListenerCfg::tick_interval` is still necessary to enable any ticker.
@@ -65,11 +58,6 @@ Released on 19/05/2025
 - Fix accidental always inclusion of `crossterm` dependency, even if `crossterm` feature was disabled. (since [2.2.0](#220))
 - Change `PollAsync::poll` to take `&mut self` instead of `&self`.
 - Add async `crossterm` input listener `CrosstermAsyncStream` as a alternative to the sync `CrosstermInputListener`.
-
-## 2.4.0
-
-Released on 19/05/2025
-
 - [Issue 94](https://github.com/veeso/tui-realm/issues/94) / [PR 94](https://github.com/veeso/tui-realm/issues/97): improve **Async Ports** to make full use of it being async by running all async ports on the runtime instead of blocking on them like a Sync-port.
 
   ```rust
@@ -82,40 +70,6 @@ Released on 19/05/2025
             1,
         );
   ```
-
-## 2.3.0
-
-Released on 17/05/2025
-
-- [Issue 94](https://github.com/veeso/tui-realm/issues/94): Added support for **Async Ports**. It is now possible to create async ports by implementing the `PollAsync` trait and then by passing the `tokio::rt::Handle` to the `EventListenerCfg::port` method.
-
-    ```rust
-    let handle = Arc::new(tokio::rt::Handle::current());
-
-    let event_listener = EventListenerCfg::default()
-        .crossterm_input_listener(Duration::from_millis(10), 3)
-        .add_async_port(
-            Box::new(AsyncPort::new()),
-            Duration::from_millis(1000),
-            1,
-            &handle,
-        );
-
-    #[tuirealm::async_trait]
-    impl PollAsync<UserEvent> for AsyncPort {
-        async fn poll(&self) -> ListenerResult<Option<Event<UserEvent>>> {
-            let result = self.write_file().await;
-
-            Ok(Some(Event::User(UserEvent::WroteFile(result))))
-        }
-    }
-    ```
-
-    ⚠️ `PollAsync` takes a `&self` reference, and not a `&mut self` reference as `Poll` does; this is because it is not possible to have mutable references with async in this case. Also consider that `UserEvent` must be `Send` and `Sync` if you want to use it in an async context.
-
-    ‼️ **PollAsync** is featured behind the `async-ports` feature.
-
-    ❗ You can find an example of this at `examples/async_ports.rs`.
 
 ## 2.2.0
 
