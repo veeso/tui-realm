@@ -1,8 +1,8 @@
 [package]
 name = "tui-realm-stdlib"
-version = "2.0.1"
+version = "3.0.0"
 authors = ["Christian Visintin"]
-edition = "2021"
+edition = "2024"
 categories = ["command-line-utilities"]
 description = "Standard components library for tui-realm."
 documentation = "https://docs.rs/tui-realm-stdlib"
@@ -12,17 +12,18 @@ keywords = ["tui", "terminal"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/veeso/tui-realm-stdlib"
+rust-version = "1.85.1"
 
 [dependencies]
 textwrap = "^0.16"
-tuirealm = { version = "2.1.0", default-features = false, features = ["derive"] }
+tuirealm = { version = "3", default-features = false, features = ["derive"] }
 unicode-width = "^0.2"
 
 [dev-dependencies]
-crossterm = "^0.28"
+crossterm = "^0.29"
 pretty_assertions = "1"
-rand = "0.8.5"
-tuirealm = { version = "2.1.0", default-features = false }
+rand = "0.9"
+tuirealm = { version = "3", default-features = false }
 
 [features]
 default = ["crossterm"]

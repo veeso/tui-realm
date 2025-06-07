@@ -14,7 +14,7 @@ use tuirealm::props::{
 };
 use tuirealm::ratatui::{
     layout::Rect,
-    symbols::line::{Set, DOUBLE, NORMAL, ROUNDED, THICK},
+    symbols::line::{DOUBLE, NORMAL, ROUNDED, Set, THICK},
     widgets::LineGauge as TuiLineGauge,
 };
 use tuirealm::{Frame, MockComponent, State};

@@ -4,9 +4,9 @@ use tui_realm_stdlib::Canvas;
 use tuirealm::props::{Alignment, Borders, Color, Shape};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
+    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
     application::PollStrategy,
     event::{Key, KeyEvent},
-    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -36,9 +36,10 @@ impl Default for Model {
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
-        assert!(app
-            .mount(Id::Canvas, Box::new(MyCanvas::default()), vec![])
-            .is_ok());
+        assert!(
+            app.mount(Id::Canvas, Box::new(MyCanvas::default()), vec![])
+                .is_ok()
+        );
         // We need to give focus to input then
         assert!(app.active(&Id::Canvas).is_ok());
         Self {

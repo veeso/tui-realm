@@ -93,11 +93,7 @@ impl ListStates {
             0 => 0,
             len => len - 1 - self.list_index,
         };
-        if remaining > max {
-            max
-        } else {
-            remaining
-        }
+        if remaining > max { max } else { remaining }
     }
 
     /// ### calc_max_step_ahead

@@ -4,7 +4,7 @@
 
 extern crate rand;
 
-use rand::{thread_rng, Rng};
+use rand::{Rng as _, rng};
 
 pub struct DataGen<T> {
     max: T,
@@ -33,10 +33,10 @@ impl DataGen<(f64, f64)> {
     }
 
     fn get_rand(&mut self, min: f64, max: f64) -> f64 {
-        let mut rng = thread_rng();
+        let mut rng = rng();
         let min = (min * 10.0) as usize;
         let max = (max * 10.0) as usize;
-        rng.gen_range(min..max) as f64 / 10.0
+        rng.random_range(min..max) as f64 / 10.0
     }
 }
 
@@ -48,7 +48,7 @@ impl DataGen<u64> {
     }
 
     fn get_rand(&mut self, min: u64, max: u64) -> u64 {
-        let mut rng = thread_rng();
-        rng.gen_range(min..max)
+        let mut rng = rng();
+        rng.random_range(min..max)
     }
 }

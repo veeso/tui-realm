@@ -20,9 +20,9 @@ use tuirealm::props::{
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
+    Application, Component, Event, EventListenerCfg, MockComponent, Update,
     application::PollStrategy,
     event::{Key, KeyEvent},
-    Application, Component, Event, EventListenerCfg, MockComponent, Update,
 };
 
 #[derive(Debug, PartialEq)]
@@ -62,9 +62,10 @@ impl Default for Model {
                     1,
                 ),
         );
-        assert!(app
-            .mount(Id::ChartAlfa, Box::new(ChartAlfa::default()), vec![])
-            .is_ok());
+        assert!(
+            app.mount(Id::ChartAlfa, Box::new(ChartAlfa::default()), vec![])
+                .is_ok()
+        );
         // We need to give focus to input then
         assert!(app.active(&Id::ChartAlfa).is_ok());
         Self {

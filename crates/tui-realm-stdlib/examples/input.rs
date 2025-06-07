@@ -12,10 +12,10 @@ use tuirealm::props::{
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
-    application::PollStrategy,
-    event::{Key, KeyEvent},
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue,
     Update,
+    application::PollStrategy,
+    event::{Key, KeyEvent},
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -55,24 +55,30 @@ impl Default for Model {
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
-        assert!(app
-            .mount(Id::Text, Box::new(InputText::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::Email, Box::new(InputEmail::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::Number, Box::new(InputNumber::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::Password, Box::new(InputPassword::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::Phone, Box::new(InputPhone::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::Color, Box::new(InputColor::default()), vec![])
-            .is_ok());
+        assert!(
+            app.mount(Id::Text, Box::new(InputText::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::Email, Box::new(InputEmail::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::Number, Box::new(InputNumber::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::Password, Box::new(InputPassword::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::Phone, Box::new(InputPhone::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::Color, Box::new(InputColor::default()), vec![])
+                .is_ok()
+        );
         // We need to give focus to input then
         assert!(app.active(&Id::Text).is_ok());
         Self {

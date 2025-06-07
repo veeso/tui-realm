@@ -6,8 +6,8 @@
 extern crate textwrap;
 extern crate unicode_width;
 // local
-use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, TextModifiers, TextSpan};
 use tuirealm::Props;
+use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, TextModifiers, TextSpan};
 // ext
 use tuirealm::ratatui::style::{Color, Modifier, Style};
 use tuirealm::ratatui::text::Line as Spans;

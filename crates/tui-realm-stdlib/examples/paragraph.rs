@@ -9,9 +9,9 @@ use tuirealm::command::CmdResult;
 use tuirealm::props::{Alignment, BorderType, Borders, Color, TextSpan};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
+    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
     application::PollStrategy,
     event::{Key, KeyEvent},
-    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -41,20 +41,22 @@ impl Default for Model {
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
-        assert!(app
-            .mount(
+        assert!(
+            app.mount(
                 Id::ParagraphAlfa,
                 Box::new(ParagraphAlfa::default()),
                 vec![]
             )
-            .is_ok());
-        assert!(app
-            .mount(
+            .is_ok()
+        );
+        assert!(
+            app.mount(
                 Id::ParagraphBeta,
                 Box::new(ParagraphBeta::default()),
                 vec![]
             )
-            .is_ok());
+            .is_ok()
+        );
         // We need to give focus to input then
         assert!(app.active(&Id::ParagraphAlfa).is_ok());
         Self {

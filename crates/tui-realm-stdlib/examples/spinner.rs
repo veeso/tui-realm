@@ -9,9 +9,9 @@ use tuirealm::command::CmdResult;
 use tuirealm::props::{Alignment, Color, TextModifiers, TextSpan};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
+    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
     application::PollStrategy,
     event::{Key, KeyEvent},
-    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -43,18 +43,22 @@ impl Default for Model {
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
-        assert!(app
-            .mount(Id::SpanAlfa, Box::new(SpanAlfa::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::SpanBeta, Box::new(SpanBeta::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::SpinnerAlfa, Box::new(SpinnerAlfa::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::SpinnerBeta, Box::new(SpinnerBeta::default()), vec![])
-            .is_ok());
+        assert!(
+            app.mount(Id::SpanAlfa, Box::new(SpanAlfa::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::SpanBeta, Box::new(SpanBeta::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::SpinnerAlfa, Box::new(SpinnerAlfa::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::SpinnerBeta, Box::new(SpinnerBeta::default()), vec![])
+                .is_ok()
+        );
         // We need to give focus to input then
         assert!(app.active(&Id::SpanAlfa).is_ok());
         Self {

@@ -78,7 +78,7 @@ impl MockComponent for Span {
                 .get_ref(Attribute::Text)
                 .and_then(|x| x.as_payload());
             let spans: Vec<TuiSpan> = match payload {
-                Some(PropPayload::Vec(ref spans)) => spans
+                Some(PropPayload::Vec(spans)) => spans
                     .iter()
                     // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
                     .filter_map(|x| x.as_text_span())

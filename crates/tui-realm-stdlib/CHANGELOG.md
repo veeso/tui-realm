@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [3.0.0](#300)
   - [2.0.1](#201)
   - [2.0.0](#200)
   - [1.3.2](#132)
@@ -27,9 +28,9 @@
 
 ---
 
-## next
+## 3.0.0
 
-Unreleased
+Released on 07/06/2025
 
 - Change `Paragraph::text` to take a iterator to clone less values.
 - Change `Span::spans` to take a iterator to clone less values.
@@ -43,6 +44,8 @@ Unreleased
 - Change `SelectStates::set_choices` to take a `Into<Vec<String>>` to clone less values.
 - Change `Select::choices` to take a iterator to clone less values.
 - Change `Table::headers` to take a iterator to clone less values.
+- tuirealm `>= 3.0`
+- rust edition `2024`
 
 ## 2.0.1
 

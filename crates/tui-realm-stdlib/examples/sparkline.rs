@@ -17,9 +17,9 @@ use tuirealm::props::{
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
+    Application, Component, Event, EventListenerCfg, MockComponent, Update,
     application::PollStrategy,
     event::{Key, KeyEvent},
-    Application, Component, Event, EventListenerCfg, MockComponent, Update,
 };
 
 #[derive(Debug, PartialEq)]
@@ -55,13 +55,14 @@ impl Default for Model {
                 .crossterm_input_listener(Duration::from_millis(10), 10)
                 .add_port(Box::new(DataGen::new(0, 64)), Duration::from_millis(100), 1),
         );
-        assert!(app
-            .mount(
+        assert!(
+            app.mount(
                 Id::SparklineAlfa,
                 Box::new(SparklineAlfa::default()),
                 vec![]
             )
-            .is_ok());
+            .is_ok()
+        );
         // We need to give focus to input then
         assert!(app.active(&Id::SparklineAlfa).is_ok());
         Self {
