@@ -144,7 +144,7 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
                     panic!("`{component_name}` not found for struct '{ident}'",);
                 }
             }
-            _ => panic!("struct {} does not contain named fields", ident),
+            _ => panic!("struct {ident} does not contain named fields"),
         }
 
         let component_name = syn::Ident::new(&component_name, ident.span());
