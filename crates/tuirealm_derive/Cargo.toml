@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm_derive"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["Christian Visintin"]
 edition = "2021"
 categories = ["command-line-utilities"]
@@ -12,7 +12,7 @@ keywords = ["tui", "terminal"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/veeso/tuirealm_derive"
-rust-version = "1.56"
+rust-version = "1.64"
 
 [lib]
 doctest = false

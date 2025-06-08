@@ -108,48 +108,72 @@ use proc_macro::{self, TokenStream};
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput, FieldsNamed};
 
-#[proc_macro_derive(MockComponent)]
+#[proc_macro_derive(MockComponent, attributes(component))]
 pub fn mock_component(input: TokenStream) -> TokenStream {
-    let DeriveInput { ident, data, .. } = parse_macro_input!(input);
+    let DeriveInput {
+        ident,
+        data,
+        generics,
+        attrs,
+        ..
+    } = parse_macro_input!(input);
+
+    // get field name from attributes
+    let mut component_name = "component".to_string();
+    for attr in &attrs {
+        if attr.path().is_ident("component") {
+            // get value from attribute
+            attr.parse_args()
+                .map(|name: syn::LitStr| {
+                    component_name = name.value().as_str().to_string();
+                })
+                .unwrap_or_else(|_| {
+                    panic!("`component` attribute must be a string literal, e.g. #[component = \"my_component\"]");
+                });
+        }
+    }
 
     if let syn::Data::Struct(s) = data {
-        // Check if "component" exists
+        // Check if `component`` exists
         match s.fields {
             syn::Fields::Named(FieldsNamed { named, .. }) => {
                 if !named
                     .iter()
-                    .any(|x| x.ident.as_ref().unwrap() == "component")
+                    .any(|x| x.ident.as_ref().unwrap() == &component_name)
                 {
-                    panic!("`component` not found for struct '{}'", ident);
+                    panic!("`{component_name}` not found for struct '{ident}'",);
                 }
             }
             _ => panic!("struct {} does not contain named fields", ident),
         }
+
+        let component_name = syn::Ident::new(&component_name, ident.span());
+
         // Implement MockComponent for type
         let output = quote! {
             const _: () = {
                 use ::tuirealm::command::{Cmd, CmdResult};
                 use ::tuirealm::ratatui::layout::Rect;
                 use ::tuirealm::{Attribute, AttrValue, Frame, MockComponent, State};
-                impl MockComponent for #ident {
+                impl #generics MockComponent for #ident #generics {
                     fn view(&mut self, frame: &mut Frame, area: Rect) {
-                        self.component.view(frame, area);
+                        self.#component_name.view(frame, area);
                     }
 
                     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-                        self.component.query(attr)
+                        self.#component_name.query(attr)
                     }
 
                     fn attr(&mut self, query: Attribute, attr: AttrValue) {
-                        self.component.attr(query, attr)
+                        self.#component_name.attr(query, attr)
                     }
 
                     fn state(&self) -> State {
-                        self.component.state()
+                        self.#component_name.state()
                     }
 
                     fn perform(&mut self, cmd: Cmd) -> CmdResult {
-                        self.component.perform(cmd)
+                        self.#component_name.perform(cmd)
                     }
                 }
             };

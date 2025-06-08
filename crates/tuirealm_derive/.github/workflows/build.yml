@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [stable, nightly, "1.56"]
+        toolchain: [stable, nightly, "1.64"]
 
     steps:
       - uses: actions/checkout@v2
