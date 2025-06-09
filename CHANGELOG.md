@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [3.0.1](#301)
   - [3.0.0](#300)
   - [2.2.0](#220)
   - [2.1.0](#210)
@@ -41,6 +42,12 @@
   - [0.1.0](#010)
 
 ---
+
+## 3.0.1
+
+Released on 09/06/2025
+
+- Fix `subclause_and_not!` macro, which was creating a `not(AndMany...)` instead of `AndMany(not(...), not(...), ...)`.
 
 ## 3.0.0
 
