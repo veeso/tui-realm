@@ -67,11 +67,11 @@ macro_rules! subclause_and {
 ///
 /// assert_eq!(
 ///     sub_clause,
-///     SubClause::not(SubClause::AndMany(vec![
-///         SubClause::IsMounted(Id::InputBar),
-///         SubClause::IsMounted(Id::InputFoo),
-///         SubClause::IsMounted(Id::InputOmar),
-///     ]))
+///     SubClause::AndMany(vec![
+///         SubClause::not(SubClause::IsMounted(Id::InputBar)),
+///         SubClause::not(SubClause::IsMounted(Id::InputFoo)),
+///         SubClause::not(SubClause::IsMounted(Id::InputOmar)),
+///     ])
 ///  );
 /// ```
 #[macro_export]
@@ -80,11 +80,11 @@ macro_rules! subclause_and_not {
         SubClause::not(SubClause::IsMounted($id))
     };
     ($($rest:expr),+ $(,)?) => {
-        SubClause::not(
-            SubClause::AndMany(vec![
-                $(SubClause::IsMounted($rest)),*
-            ])
-        )
+        SubClause::AndMany(vec![
+            $(SubClause::not(
+                SubClause::IsMounted($rest)
+            )),*
+        ])
     };
 }
 
@@ -187,11 +187,11 @@ mod tests {
                 MockComponentId::InputFoo,
                 MockComponentId::InputOmar
             ),
-            SubClause::not(SubClause::AndMany(vec![
-                SubClause::IsMounted(MockComponentId::InputBar),
-                SubClause::IsMounted(MockComponentId::InputFoo),
-                SubClause::IsMounted(MockComponentId::InputOmar),
-            ]))
+            SubClause::AndMany(vec![
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputBar)),
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputFoo)),
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputOmar)),
+            ])
         );
 
         // multiple with ending comma
@@ -201,11 +201,11 @@ mod tests {
                 MockComponentId::InputFoo,
                 MockComponentId::InputOmar,
             ),
-            SubClause::not(SubClause::AndMany(vec![
-                SubClause::IsMounted(MockComponentId::InputBar),
-                SubClause::IsMounted(MockComponentId::InputFoo),
-                SubClause::IsMounted(MockComponentId::InputOmar),
-            ]))
+            SubClause::AndMany(vec![
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputBar)),
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputFoo)),
+                SubClause::not(SubClause::IsMounted(MockComponentId::InputOmar)),
+            ])
         );
     }
 
