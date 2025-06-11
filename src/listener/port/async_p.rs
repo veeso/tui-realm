@@ -28,9 +28,8 @@ where
     /// # Parameters
     ///
     /// * `poll` - The poll trait object
-    /// * `interval` - The interval between each poll
-    /// * `max_poll` - The maximum amount of times the port should be polled in a single poll
-    /// * `runtime` - The tokio runtime to use for async polling
+    /// * `interval` - The interval between each poll. For async ports it is recommended the set this to [`Duration::ZERO`]
+    /// * `max_poll` - The maximum amount of times the port should be polled in a single loop
     pub fn new(poll: Box<dyn PollAsync<UserEvent>>, interval: Duration, max_poll: usize) -> Self {
         Self {
             poll,
