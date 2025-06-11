@@ -13,29 +13,29 @@ use super::{ListenerMsg, SyncPort};
 // -- worker
 
 /// worker for event listener
-pub(super) struct EventListenerWorker<U>
+pub(super) struct EventListenerWorker<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
-    ports: Vec<SyncPort<U>>,
-    sender: mpsc::Sender<ListenerMsg<U>>,
+    ports: Vec<SyncPort<UserEvent>>,
+    sender: mpsc::Sender<ListenerMsg<UserEvent>>,
     paused: Arc<AtomicBool>,
     running: Arc<AtomicBool>,
     next_tick: Instant,
     tick_interval: Option<Duration>,
 }
 
-impl<U> EventListenerWorker<U>
+impl<UserEvent> EventListenerWorker<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Create a new Worker.
     ///
     /// If `tick_interval` is [`None`], no [`Event::Tick`](crate::Event::Tick) will be sent and a fallback interval time will be used.
     /// If `tick_interval` is [`Some`], [`Event::Tick`](crate::Event::Tick) will be sent and be used as the interval time.
     pub(super) fn new(
-        ports: Vec<SyncPort<U>>,
-        sender: mpsc::Sender<ListenerMsg<U>>,
+        ports: Vec<SyncPort<UserEvent>>,
+        sender: mpsc::Sender<ListenerMsg<UserEvent>>,
         paused: Arc<AtomicBool>,
         running: Arc<AtomicBool>,
         tick_interval: Option<Duration>,
@@ -102,7 +102,7 @@ where
     }
 
     /// Send tick to listener and calc next tick
-    fn send_tick(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<U>>> {
+    fn send_tick(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<UserEvent>>> {
         // Send tick
         self.sender.send(ListenerMsg::Tick)?;
         // Calc next tick
@@ -112,7 +112,7 @@ where
 
     /// Poll and send poll to listener. Calc next poll.
     /// Returns only the messages, while the None returned by poll are discarded
-    fn poll(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<U>>> {
+    fn poll(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<UserEvent>>> {
         let port_iter = self.ports.iter_mut().filter(|port| port.should_poll());
 
         for port in port_iter {

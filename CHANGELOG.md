@@ -43,6 +43,14 @@
 
 ---
 
+## next
+
+Unreleased
+
+- Remove `PartialOrd` bound for `UserEvent`.
+- Add `Send` bound for `UserEvent` to trait `Poll`, as was already required for adding it to `SyncPort`.
+- Remove unnecessary bounds on Input Event Listeners.
+
 ## 3.0.1
 
 Released on 09/06/2025

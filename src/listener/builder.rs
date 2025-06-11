@@ -12,13 +12,13 @@ use super::{Duration, EventListener, ListenerError, Poll, SyncPort};
 /// The event listener configurator is used to setup an event listener.
 /// Once you're done with configuration just call `EventListenerCfg::start` and the event listener will start and the listener
 /// will be returned.
-pub struct EventListenerCfg<U>
+pub struct EventListenerCfg<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
-    sync_ports: Vec<SyncPort<U>>,
+    sync_ports: Vec<SyncPort<UserEvent>>,
     #[cfg(feature = "async-ports")]
-    async_ports: Vec<AsyncPort<U>>,
+    async_ports: Vec<AsyncPort<UserEvent>>,
     #[cfg(feature = "async-ports")]
     handle: Option<Handle>,
     tick_interval: Option<Duration>,
@@ -27,9 +27,9 @@ where
     poll_timeout: Duration,
 }
 
-impl<U> Default for EventListenerCfg<U>
+impl<UserEvent> Default for EventListenerCfg<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
     fn default() -> Self {
         Self {
@@ -46,9 +46,9 @@ where
     }
 }
 
-impl<U> EventListenerCfg<U>
+impl<UserEvent> EventListenerCfg<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Create the event listener with the parameters provided and start the workers.
     ///
@@ -56,7 +56,7 @@ where
     ///
     /// - if there are async ports defined, but no handle is set.
     #[allow(unused_mut)] // mutability is necessary when "async-ports" is active
-    pub(crate) fn start(mut self) -> Result<EventListener<U>, ListenerError> {
+    pub(crate) fn start(mut self) -> Result<EventListener<UserEvent>, ListenerError> {
         #[cfg(feature = "async-ports")]
         let start_async =
             !self.async_ports.is_empty() || (self.async_tick && self.tick_interval.is_some());
@@ -116,14 +116,19 @@ where
     ///
     /// The interval is the amount of time between each [`Poll::poll`] call.
     /// The max_poll is the maximum amount of times the port should be polled in a single poll.
-    pub fn add_port(self, poll: Box<dyn Poll<U>>, interval: Duration, max_poll: usize) -> Self {
+    pub fn add_port(
+        self,
+        poll: Box<dyn Poll<UserEvent>>,
+        interval: Duration,
+        max_poll: usize,
+    ) -> Self {
         self.port(SyncPort::new(poll, interval, max_poll))
     }
 
     /// Add a new [`SyncPort`] to the the event listener
     ///
     /// The [`SyncPort`] needs to be manually constructed, unlike [`Self::add_port`]
-    pub fn port(mut self, port: SyncPort<U>) -> Self {
+    pub fn port(mut self, port: SyncPort<UserEvent>) -> Self {
         self.sync_ports.push(port);
         self
     }
@@ -135,7 +140,7 @@ where
     /// The max_poll is the maximum amount of times the port should be polled in a `interval`.
     pub fn crossterm_input_listener(self, interval: Duration, max_poll: usize) -> Self {
         self.add_port(
-            Box::new(crate::terminal::CrosstermInputListener::<U>::new(interval)),
+            Box::new(crate::terminal::CrosstermInputListener::new(interval)),
             interval,
             max_poll,
         )
@@ -163,7 +168,7 @@ where
     /// The max_poll is the maximum amount of times the port should be polled in a `interval`.
     pub fn termion_input_listener(self, interval: Duration, max_poll: usize) -> Self {
         self.add_port(
-            Box::new(crate::terminal::TermionInputListener::<U>::new(interval)),
+            Box::new(crate::terminal::TermionInputListener::new(interval)),
             interval,
             max_poll,
         )
@@ -171,9 +176,9 @@ where
 }
 
 /// Implementations for feature `async-ports`
-impl<U> EventListenerCfg<U>
+impl<UserEvent> EventListenerCfg<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Add a new [`AsyncPort`] (Poll, Interval) to the the event listener.
     ///
@@ -183,7 +188,7 @@ where
     #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
     pub fn add_async_port(
         self,
-        poll: Box<dyn super::PollAsync<U>>,
+        poll: Box<dyn super::PollAsync<UserEvent>>,
         interval: Duration,
         max_poll: usize,
     ) -> Self {
@@ -195,7 +200,7 @@ where
     /// The [`AsyncPort`] needs to be manually constructed, unlike [`Self::add_async_port`].
     #[cfg(feature = "async-ports")]
     #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
-    pub fn async_port(mut self, port: AsyncPort<U>) -> Self {
+    pub fn async_port(mut self, port: AsyncPort<UserEvent>) -> Self {
         self.async_ports.push(port);
         self
     }

@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
 pub enum Event<UserEvent>
 where
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// A keyboard event
     Keyboard(KeyEvent),
@@ -35,9 +35,9 @@ where
     User(UserEvent),
 }
 
-impl<U> Event<U>
+impl<UserEvent> Event<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     pub(crate) fn as_keyboard(&self) -> Option<&KeyEvent> {
         if let Event::Keyboard(k) = self {
@@ -63,7 +63,7 @@ where
         matches!(self, Self::Tick)
     }
 
-    pub(crate) fn as_user(&self) -> Option<&U> {
+    pub(crate) fn as_user(&self) -> Option<&UserEvent> {
         if let Event::User(u) = self {
             Some(u)
         } else {

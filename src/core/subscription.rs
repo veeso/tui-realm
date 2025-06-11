@@ -12,23 +12,23 @@ use crate::{AttrValue, Attribute, Event, State};
 pub struct Sub<ComponentId, UserEvent>(EventClause<UserEvent>, SubClause<ComponentId>)
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd;
+    UserEvent: Eq + PartialEq + Clone;
 
-impl<K, U> Sub<K, U>
+impl<ComponentId, UserEvent> Sub<ComponentId, UserEvent>
 where
-    K: Eq + PartialEq + Clone + Hash,
-    U: Eq + PartialEq + Clone + PartialOrd,
+    ComponentId: Eq + PartialEq + Clone + Hash,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Creates a new `Sub`
     #[must_use]
-    pub fn new(event_clause: EventClause<U>, sub_clause: SubClause<K>) -> Self {
+    pub fn new(event_clause: EventClause<UserEvent>, sub_clause: SubClause<ComponentId>) -> Self {
         Self(event_clause, sub_clause)
     }
 }
 
 /// Defines a subscription for a component.
 /// A subscription tells the application to forward an event to the `target` component, when an event of type `ev`
-/// is received by the listener. In order to forward the event, the `where` clause must also be satisfied.
+/// is received by the listener, regardless if it has focus or not. In order to forward the event, the `when` clause must also be satisfied.
 ///
 /// > NOTE: Remember that "Component has focus" is NOT a subscription. Events are ALWAYS FORWARDED to components that have
 /// > FOCUS
@@ -37,12 +37,10 @@ where
 ///     - target: the id of the target component
 ///     - ev: the event it listens for
 ///     - when: a clause that must be satisfied to forward the event to the component.
-///
-///
 pub(crate) struct Subscription<ComponentId, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Target component
     target: ComponentId,
@@ -52,14 +50,14 @@ where
     when: SubClause<ComponentId>,
 }
 
-impl<K, U> Subscription<K, U>
+impl<ComponentId, UserEvent> Subscription<ComponentId, UserEvent>
 where
-    K: Eq + PartialEq + Clone + Hash,
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    ComponentId: Eq + PartialEq + Clone + Hash,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
     /// Instantiates a new [`Subscription`]
     #[must_use]
-    pub fn new(target: K, sub: Sub<K, U>) -> Self {
+    pub fn new(target: ComponentId, sub: Sub<ComponentId, UserEvent>) -> Self {
         Self {
             target,
             ev: sub.0,
@@ -69,13 +67,13 @@ where
 
     /// Returns sub target
     #[must_use]
-    pub(crate) fn target(&self) -> &K {
+    pub(crate) fn target(&self) -> &ComponentId {
         &self.target
     }
 
     /// Returns reference to subscription event clause
     #[must_use]
-    pub(crate) fn event(&self) -> &EventClause<U> {
+    pub(crate) fn event(&self) -> &EventClause<UserEvent> {
         &self.ev
     }
 
@@ -83,15 +81,15 @@ where
     #[must_use]
     pub(crate) fn forward<HasAttrFn, GetStateFn, MountedFn>(
         &self,
-        ev: &Event<U>,
+        ev: &Event<UserEvent>,
         has_attr_fn: HasAttrFn,
         get_state_fn: GetStateFn,
         mounted_fn: MountedFn,
     ) -> bool
     where
-        HasAttrFn: Fn(&K, Attribute) -> Option<AttrValue>,
-        GetStateFn: Fn(&K) -> Option<State>,
-        MountedFn: Fn(&K) -> bool,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        GetStateFn: Fn(&ComponentId) -> Option<State>,
+        MountedFn: Fn(&ComponentId) -> bool,
     {
         self.ev.forward(ev) && self.when.forward(has_attr_fn, get_state_fn, mounted_fn)
     }
@@ -120,7 +118,7 @@ impl MouseEventClause {
 /// An event clause indicates on which kind of event the event must be forwarded to the `target` component.
 pub enum EventClause<UserEvent>
 where
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Forward, no matter what kind of event
     Any,
@@ -140,9 +138,9 @@ where
     Discriminant(UserEvent),
 }
 
-impl<U> EventClause<U>
+impl<UserEvent> EventClause<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Check whether to forward based on even type and event clause.
     ///
@@ -155,7 +153,7 @@ where
     /// - [`EventClause::Tick`]: matches tick event
     /// - [`EventClause::User`]: depends on UserEvent [`PartialEq`]
     /// - [`EventClause::Discriminant`]: matches only event type, not values
-    fn forward(&self, ev: &Event<U>) -> bool {
+    fn forward(&self, ev: &Event<UserEvent>) -> bool {
         match self {
             EventClause::Any => true,
             EventClause::Keyboard(k) => Some(k) == ev.as_keyboard(),
@@ -178,42 +176,42 @@ where
 /// - [`SubClause::Or`]: the OR of the two clauses must be `true`
 #[derive(Debug, PartialEq)]
 #[allow(clippy::large_enum_variant)]
-pub enum SubClause<Id>
+pub enum SubClause<ComponentId>
 where
-    Id: Eq + PartialEq + Clone + Hash,
+    ComponentId: Eq + PartialEq + Clone + Hash,
 {
     /// Always forward event to component
     Always,
     /// Forward event if target component has provided attribute with the provided value
     /// If the attribute doesn't exist on component, result is always `false`.
-    HasAttrValue(Id, Attribute, AttrValue),
+    HasAttrValue(ComponentId, Attribute, AttrValue),
     /// Forward event if target component has provided state
-    HasState(Id, State),
+    HasState(ComponentId, State),
     /// Forward event if target component is mounted
-    IsMounted(Id),
+    IsMounted(ComponentId),
     /// Forward event if the inner clause is `false`
-    Not(Box<SubClause<Id>>),
+    Not(Box<SubClause<ComponentId>>),
     /// Forward event if both the inner clauses are `true`
-    And(Box<SubClause<Id>>, Box<SubClause<Id>>),
+    And(Box<SubClause<ComponentId>>, Box<SubClause<ComponentId>>),
     /// Forward event if all the inner clauses are `true`.
     ///
     /// Short-circuits on first `false`.
     ///
     /// If empty will always return `false`.
-    AndMany(Vec<SubClause<Id>>),
+    AndMany(Vec<SubClause<ComponentId>>),
     /// Forward event if at least one of the inner clauses is `true`
-    Or(Box<SubClause<Id>>, Box<SubClause<Id>>),
+    Or(Box<SubClause<ComponentId>>, Box<SubClause<ComponentId>>),
     /// Forward event if at least one of the inner clauses is `true`.
     ///
     /// Short-circuits on first `true`.
     ///
     /// If empty will always return `false`.
-    OrMany(Vec<SubClause<Id>>),
+    OrMany(Vec<SubClause<ComponentId>>),
 }
 
-impl<Id> SubClause<Id>
+impl<ComponentId> SubClause<ComponentId>
 where
-    Id: Eq + PartialEq + Clone + Hash,
+    ComponentId: Eq + PartialEq + Clone + Hash,
 {
     /// Shortcut for [`SubClause::Not`] without specifying `Box::new(...)`
     #[allow(clippy::should_implement_trait)]
@@ -243,9 +241,9 @@ where
         mounted_fn: MountedFn,
     ) -> bool
     where
-        HasAttrFn: Fn(&Id, Attribute) -> Option<AttrValue>,
-        GetStateFn: Fn(&Id) -> Option<State>,
-        MountedFn: Fn(&Id) -> bool,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        GetStateFn: Fn(&ComponentId) -> Option<State>,
+        MountedFn: Fn(&ComponentId) -> bool,
     {
         self.check_forwarding(has_attr_fn, get_state_fn, mounted_fn)
             .0
@@ -260,9 +258,9 @@ where
         mounted_fn: MountedFn,
     ) -> (bool, HasAttrFn, GetStateFn, MountedFn)
     where
-        HasAttrFn: Fn(&Id, Attribute) -> Option<AttrValue>,
-        GetStateFn: Fn(&Id) -> Option<State>,
-        MountedFn: Fn(&Id) -> bool,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        GetStateFn: Fn(&ComponentId) -> Option<State>,
+        MountedFn: Fn(&ComponentId) -> bool,
     {
         match self {
             Self::Always => (true, has_attr_fn, get_state_fn, mounted_fn),
@@ -337,13 +335,13 @@ where
 
     #[must_use]
     fn has_attribute<HasAttrFn>(
-        id: &Id,
+        id: &ComponentId,
         query: &Attribute,
         value: &AttrValue,
         has_attr_fn: HasAttrFn,
     ) -> (bool, HasAttrFn)
     where
-        HasAttrFn: Fn(&Id, Attribute) -> Option<AttrValue>,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
     {
         (
             match has_attr_fn(id, *query) {
@@ -355,9 +353,13 @@ where
     }
 
     #[must_use]
-    fn has_state<GetStateFn>(id: &Id, state: &State, get_state_fn: GetStateFn) -> (bool, GetStateFn)
+    fn has_state<GetStateFn>(
+        id: &ComponentId,
+        state: &State,
+        get_state_fn: GetStateFn,
+    ) -> (bool, GetStateFn)
     where
-        GetStateFn: Fn(&Id) -> Option<State>,
+        GetStateFn: Fn(&ComponentId) -> Option<State>,
     {
         (
             match get_state_fn(id) {
@@ -369,9 +371,9 @@ where
     }
 
     #[must_use]
-    fn is_mounted<MountedFn>(id: &Id, mounted_fn: MountedFn) -> (bool, MountedFn)
+    fn is_mounted<MountedFn>(id: &ComponentId, mounted_fn: MountedFn) -> (bool, MountedFn)
     where
-        MountedFn: Fn(&Id) -> bool,
+        MountedFn: Fn(&ComponentId) -> bool,
     {
         (mounted_fn(id), mounted_fn)
     }

@@ -26,7 +26,7 @@ pub struct Application<ComponentId, Msg, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     listener: EventListener<UserEvent>,
     subs: Vec<Subscription<ComponentId, UserEvent>>,
@@ -35,11 +35,11 @@ where
     view: View<ComponentId, Msg, UserEvent>,
 }
 
-impl<K, Msg, UserEvent> Application<K, Msg, UserEvent>
+impl<ComponentId, Msg, UserEvent> Application<ComponentId, Msg, UserEvent>
 where
-    K: Eq + PartialEq + Clone + Hash,
+    ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Initialize a new [`Application`].
     /// The event listener is immediately created and started.
@@ -109,7 +109,7 @@ where
     // -- view bridge
 
     /// Add an injector to the view
-    pub fn add_injector(&mut self, injector: Box<dyn Injector<K>>) {
+    pub fn add_injector(&mut self, injector: Box<dyn Injector<ComponentId>>) {
         self.view.add_injector(injector);
     }
 
@@ -118,9 +118,9 @@ where
     /// NOTE: if subs vector contains duplicated, these will be discarded
     pub fn mount(
         &mut self,
-        id: K,
+        id: ComponentId,
         component: WrappedComponent<Msg, UserEvent>,
-        subs: Vec<Sub<K, UserEvent>>,
+        subs: Vec<Sub<ComponentId, UserEvent>>,
     ) -> ApplicationResult<()> {
         // Mount
         self.view.mount(&id, component)?;
@@ -131,7 +131,7 @@ where
 
     /// Umount component associated to `id` and remove ALL its SUBSCRIPTIONS.
     /// Returns Error if the component doesn't exist
-    pub fn umount(&mut self, id: &K) -> ApplicationResult<()> {
+    pub fn umount(&mut self, id: &ComponentId) -> ApplicationResult<()> {
         self.view.umount(id)?;
         self.unsubscribe_component(id);
         Ok(())
@@ -142,9 +142,9 @@ where
     /// If component had focus, focus is preserved
     pub fn remount(
         &mut self,
-        id: K,
+        id: ComponentId,
         component: WrappedComponent<Msg, UserEvent>,
-        subs: Vec<Sub<K, UserEvent>>,
+        subs: Vec<Sub<ComponentId, UserEvent>>,
     ) -> ApplicationResult<()> {
         // remove subs
         self.unsubscribe_component(&id);
@@ -162,25 +162,34 @@ where
     }
 
     /// Returns whether component `id` is mounted
-    pub fn mounted(&self, id: &K) -> bool {
+    pub fn mounted(&self, id: &ComponentId) -> bool {
         self.view.mounted(id)
     }
 
     /// Render component called `id`
-    pub fn view(&mut self, id: &K, f: &mut Frame, area: Rect) {
+    pub fn view(&mut self, id: &ComponentId, f: &mut Frame, area: Rect) {
         self.view.view(id, f, area);
     }
 
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
-    pub fn query(&self, id: &K, query: Attribute) -> ApplicationResult<Option<AttrValue>> {
+    pub fn query(
+        &self,
+        id: &ComponentId,
+        query: Attribute,
+    ) -> ApplicationResult<Option<AttrValue>> {
         self.view.query(id, query).map_err(ApplicationError::from)
     }
 
     /// Set attribute for component `id`
     /// Returns error if the component doesn't exist
-    pub fn attr(&mut self, id: &K, attr: Attribute, value: AttrValue) -> ApplicationResult<()> {
+    pub fn attr(
+        &mut self,
+        id: &ComponentId,
+        attr: Attribute,
+        value: AttrValue,
+    ) -> ApplicationResult<()> {
         self.view
             .attr(id, attr, value)
             .map_err(ApplicationError::from)
@@ -188,7 +197,7 @@ where
 
     /// Get state for component `id`.
     /// Returns `Err` if component doesn't exist
-    pub fn state(&self, id: &K) -> ApplicationResult<State> {
+    pub fn state(&self, id: &ComponentId) -> ApplicationResult<State> {
         self.view.state(id).map_err(ApplicationError::from)
     }
 
@@ -198,7 +207,7 @@ where
     /// Returns error: if component doesn't exist. Use `mounted()` to check if component exists
     ///
     /// > NOTE: users should always use this function to give focus to components.
-    pub fn active(&mut self, id: &K) -> ApplicationResult<()> {
+    pub fn active(&mut self, id: &ComponentId) -> ApplicationResult<()> {
         self.view.active(id).map_err(ApplicationError::from)
     }
 
@@ -213,7 +222,7 @@ where
     }
 
     /// Get a reference to the id of the current active component in the view
-    pub fn focus(&self) -> Option<&K> {
+    pub fn focus(&self) -> Option<&ComponentId> {
         self.view.focus()
     }
 
@@ -221,7 +230,11 @@ where
 
     /// Subscribe component to a certain event.
     /// Returns Error if the component doesn't exist or if the component is already subscribed to this event
-    pub fn subscribe(&mut self, id: &K, sub: Sub<K, UserEvent>) -> ApplicationResult<()> {
+    pub fn subscribe(
+        &mut self,
+        id: &ComponentId,
+        sub: Sub<ComponentId, UserEvent>,
+    ) -> ApplicationResult<()> {
         if !self.view.mounted(id) {
             return Err(ViewError::ComponentNotFound.into());
         }
@@ -235,7 +248,11 @@ where
 
     /// Unsubscribe a component from a certain event.
     /// Returns error if the component doesn't exist or if the component is not subscribed to this event
-    pub fn unsubscribe(&mut self, id: &K, ev: SubEventClause<UserEvent>) -> ApplicationResult<()> {
+    pub fn unsubscribe(
+        &mut self,
+        id: &ComponentId,
+        ev: SubEventClause<UserEvent>,
+    ) -> ApplicationResult<()> {
         if !self.view.mounted(id) {
             return Err(ViewError::ComponentNotFound.into());
         }
@@ -260,19 +277,19 @@ where
     // -- private
 
     /// remove all subscriptions for component
-    fn unsubscribe_component(&mut self, id: &K) {
+    fn unsubscribe_component(&mut self, id: &ComponentId) {
         self.subs.retain(|x| x.target() != id);
     }
 
     /// Returns whether component `id` is subscribed to event described by `clause`
-    fn subscribed(&self, id: &K, clause: &SubEventClause<UserEvent>) -> bool {
+    fn subscribed(&self, id: &ComponentId, clause: &SubEventClause<UserEvent>) -> bool {
         self.subs
             .iter()
             .any(|s| s.target() == id && s.event() == clause)
     }
 
     /// Insert subscriptions
-    fn insert_subscriptions(&mut self, id: &K, subs: Vec<Sub<K, UserEvent>>) {
+    fn insert_subscriptions(&mut self, id: &ComponentId, subs: Vec<Sub<ComponentId, UserEvent>>) {
         for sub in subs {
             // Push only if not already subscribed
             let subscription = Subscription::new(id.clone(), sub);
