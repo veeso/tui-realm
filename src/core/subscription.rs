@@ -28,7 +28,7 @@ where
 
 /// Defines a subscription for a component.
 /// A subscription tells the application to forward an event to the `target` component, when an event of type `ev`
-/// is received by the listener. In order to forward the event, the `where` clause must also be satisfied.
+/// is received by the listener, regardless if it has focus or not. In order to forward the event, the `when` clause must also be satisfied.
 ///
 /// > NOTE: Remember that "Component has focus" is NOT a subscription. Events are ALWAYS FORWARDED to components that have
 /// > FOCUS
@@ -37,8 +37,6 @@ where
 ///     - target: the id of the target component
 ///     - ev: the event it listens for
 ///     - when: a clause that must be satisfied to forward the event to the component.
-///
-///
 pub(crate) struct Subscription<ComponentId, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
