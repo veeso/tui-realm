@@ -29,10 +29,11 @@ impl Default for CrosstermAsyncStream {
 }
 
 #[async_trait::async_trait]
-impl<U: Eq + PartialEq + Clone + PartialOrd + Send + 'static> PollAsync<U>
-    for CrosstermAsyncStream
+impl<UserEvent> PollAsync<UserEvent> for CrosstermAsyncStream
+where
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    async fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
         let res = match self.stream.next().await {
             Some(Ok(event)) => event,
             Some(Err(_err)) => return Err(ListenerError::PollFailed),

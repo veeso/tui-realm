@@ -1,4 +1,3 @@
-use std::marker::PhantomData;
 use std::time::Duration;
 
 use termion::event::{Event as TonEvent, Key as TonKey};
@@ -11,27 +10,20 @@ use crate::listener::{ListenerResult, Poll};
 
 /// The input listener for [`termion`].
 #[doc(alias = "InputEventListener")]
-pub struct TermionInputListener<U>
-where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
-{
-    ghost: PhantomData<U>,
-}
+#[derive(Default)]
+pub struct TermionInputListener;
 
-impl<U> TermionInputListener<U>
-where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
-{
+impl TermionInputListener {
     pub fn new(_interval: Duration) -> Self {
-        Self { ghost: PhantomData }
+        Self
     }
 }
 
-impl<U> Poll<U> for TermionInputListener<U>
+impl<UserEvent> Poll<UserEvent> for TermionInputListener
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
         match std::io::stdin().events().next() {
             Some(Ok(ev)) => Ok(Some(Event::from(ev))),
             Some(Err(_)) => Err(ListenerError::PollFailed),
@@ -40,9 +32,9 @@ where
     }
 }
 
-impl<U> From<TonEvent> for Event<U>
+impl<UserEvent> From<TonEvent> for Event<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
     fn from(e: TonEvent) -> Self {
         match e {

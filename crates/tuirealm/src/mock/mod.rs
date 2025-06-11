@@ -35,18 +35,27 @@ pub enum MockComponentId {
 // -- poll
 
 /// Mock poll implementation
-pub struct MockPoll<U: Eq + PartialEq + Clone + PartialOrd + Send> {
-    ghost: PhantomData<U>,
+pub struct MockPoll<UserEvent>
+where
+    UserEvent: Eq + PartialEq + Clone + Send,
+{
+    ghost: PhantomData<UserEvent>,
 }
 
-impl<U: Eq + PartialEq + Clone + PartialOrd + Send> Default for MockPoll<U> {
+impl<UserEvent> Default for MockPoll<UserEvent>
+where
+    UserEvent: Eq + PartialEq + Clone + Send,
+{
     fn default() -> Self {
         Self { ghost: PhantomData }
     }
 }
 
-impl<U: Eq + PartialEq + Clone + PartialOrd + Send + 'static> Poll<U> for MockPoll<U> {
-    fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+impl<UserEvent> Poll<UserEvent> for MockPoll<UserEvent>
+where
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
+{
+    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
         Ok(Some(Event::Keyboard(KeyEvent::from(Key::Enter))))
     }
 }
@@ -57,10 +66,11 @@ pub struct MockPollAsync();
 
 #[cfg(feature = "async-ports")]
 #[async_trait::async_trait]
-impl<U: Eq + PartialEq + Clone + PartialOrd + Send + 'static> crate::listener::PollAsync<U>
-    for MockPollAsync
+impl<UserEvent> crate::listener::PollAsync<UserEvent> for MockPollAsync
+where
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    async fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
         let tempfile = tempfile::NamedTempFile::new().expect("tempfile");
         let _file = tokio::fs::File::open(tempfile.path()).await.expect("file");
 

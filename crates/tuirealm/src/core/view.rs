@@ -37,7 +37,7 @@ pub struct View<ComponentId, Msg, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Components Mounted onto View
     components: HashMap<ComponentId, WrappedComponent<Msg, UserEvent>>,
@@ -49,11 +49,11 @@ where
     injectors: Vec<Box<dyn Injector<ComponentId>>>,
 }
 
-impl<K, Msg, UserEvent> Default for View<K, Msg, UserEvent>
+impl<ComponentId, Msg, UserEvent> Default for View<ComponentId, Msg, UserEvent>
 where
-    K: Eq + PartialEq + Clone + Hash,
+    ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     fn default() -> Self {
         Self {
@@ -65,15 +65,19 @@ where
     }
 }
 
-impl<K, Msg, UserEvent> View<K, Msg, UserEvent>
+impl<ComponentId, Msg, UserEvent> View<ComponentId, Msg, UserEvent>
 where
-    K: Eq + PartialEq + Clone + Hash,
+    ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Mount component on View.
     /// Returns error if the component is already mounted
-    pub fn mount(&mut self, id: &K, component: WrappedComponent<Msg, UserEvent>) -> ViewResult<()> {
+    pub fn mount(
+        &mut self,
+        id: &ComponentId,
+        component: WrappedComponent<Msg, UserEvent>,
+    ) -> ViewResult<()> {
         if self.mounted(id) {
             Err(ViewError::ComponentAlreadyMounted)
         } else {
@@ -85,7 +89,7 @@ where
     }
 
     /// Umount component from View
-    pub fn umount(&mut self, id: &K) -> ViewResult<()> {
+    pub fn umount(&mut self, id: &ComponentId) -> ViewResult<()> {
         if !self.mounted(id) {
             return Err(ViewError::ComponentNotFound);
         }
@@ -102,7 +106,7 @@ where
     /// Remount component. This method WON'T change the focus stack
     pub fn remount(
         &mut self,
-        id: &K,
+        id: &ComponentId,
         component: WrappedComponent<Msg, UserEvent>,
     ) -> ViewResult<()> {
         // Umount, but keep focus
@@ -126,17 +130,17 @@ where
     }
 
     /// Returns whether component `id` is mounted
-    pub fn mounted(&self, id: &K) -> bool {
+    pub fn mounted(&self, id: &ComponentId) -> bool {
         self.components.contains_key(id)
     }
 
     /// Returns current active element (if any)
-    pub(crate) fn focus(&self) -> Option<&K> {
+    pub(crate) fn focus(&self) -> Option<&ComponentId> {
         self.focus.as_ref()
     }
 
     /// Render component called `id`
-    pub fn view(&mut self, id: &K, f: &mut Frame, area: Rect) {
+    pub fn view(&mut self, id: &ComponentId, f: &mut Frame, area: Rect) {
         if let Some(c) = self.components.get_mut(id) {
             c.view(f, area);
         }
@@ -144,7 +148,11 @@ where
 
     /// Forward `event` (call `on()`) on component `id` and return a `Msg` if any.
     /// Returns error if the component doesn't exist
-    pub(crate) fn forward(&mut self, id: &K, event: Event<UserEvent>) -> ViewResult<Option<Msg>> {
+    pub(crate) fn forward(
+        &mut self,
+        id: &ComponentId,
+        event: Event<UserEvent>,
+    ) -> ViewResult<Option<Msg>> {
         match self.components.get_mut(id) {
             None => Err(ViewError::ComponentNotFound),
             Some(c) => Ok(c.on(event)),
@@ -154,7 +162,7 @@ where
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
-    pub fn query(&self, id: &K, query: Attribute) -> ViewResult<Option<AttrValue>> {
+    pub fn query(&self, id: &ComponentId, query: Attribute) -> ViewResult<Option<AttrValue>> {
         match self.components.get(id) {
             None => Err(ViewError::ComponentNotFound),
             Some(c) => Ok(c.query(query)),
@@ -163,7 +171,7 @@ where
 
     /// Set attribute for component `id`
     /// Returns error if the component doesn't exist
-    pub fn attr(&mut self, id: &K, attr: Attribute, value: AttrValue) -> ViewResult<()> {
+    pub fn attr(&mut self, id: &ComponentId, attr: Attribute, value: AttrValue) -> ViewResult<()> {
         if let Some(c) = self.components.get_mut(id) {
             c.attr(attr, value);
             Ok(())
@@ -174,7 +182,7 @@ where
 
     /// Get state for component `id`.
     /// Returns `Err` if component doesn't exist
-    pub fn state(&self, id: &K) -> ViewResult<State> {
+    pub fn state(&self, id: &ComponentId) -> ViewResult<State> {
         self.components
             .get(id)
             .map(|c| c.state())
@@ -189,7 +197,7 @@ where
     /// Returns error: if component doesn't exist. Use `mounted()` to check if component exists
     ///
     /// > NOTE: users should always use this function to give focus to components.
-    pub fn active(&mut self, id: &K) -> ViewResult<()> {
+    pub fn active(&mut self, id: &ComponentId) -> ViewResult<()> {
         self.set_focus(id, true)?;
         self.change_focus(id);
         Ok(())
@@ -214,7 +222,7 @@ where
     // -- injectors
 
     /// Add an injector to the view
-    pub fn add_injector(&mut self, injector: Box<dyn Injector<K>>) {
+    pub fn add_injector(&mut self, injector: Box<dyn Injector<ComponentId>>) {
         self.injectors.push(injector);
     }
 
@@ -223,18 +231,18 @@ where
     /// Push component `id` to focus stack
     /// In case it is already in the focus stack,
     /// it will be first removed from it.
-    fn push_to_stack(&mut self, id: K) {
+    fn push_to_stack(&mut self, id: ComponentId) {
         self.pop_from_stack(&id);
         self.focus_stack.push(id);
     }
 
     /// Pop component `id` from focus stack
-    fn pop_from_stack(&mut self, id: &K) {
+    fn pop_from_stack(&mut self, id: &ComponentId) {
         self.focus_stack.retain(|x| x != id);
     }
 
     /// Returns whether `who` has focus
-    pub(crate) fn has_focus(&self, who: &K) -> bool {
+    pub(crate) fn has_focus(&self, who: &ComponentId) -> bool {
         match self.focus.as_ref() {
             None => false,
             Some(id) => who == id,
@@ -245,7 +253,7 @@ where
     /// Then pop from stack `new_focus` and set it to current `focus`.
     ///
     /// > Panics if `new_focus` doesn't exist in components
-    fn change_focus(&mut self, new_focus: &K) {
+    fn change_focus(&mut self, new_focus: &ComponentId) {
         if let Some(focus) = self.focus.take() {
             // Remove focus (can't return error)
             let _ = self.set_focus(&focus, false);
@@ -266,12 +274,12 @@ where
     }
 
     /// Take last element from stack if any
-    fn take_last_from_stack(&mut self) -> Option<K> {
+    fn take_last_from_stack(&mut self) -> Option<ComponentId> {
         self.focus_stack.pop()
     }
 
     /// Set focus value for component
-    fn set_focus(&mut self, id: &K, value: bool) -> ViewResult<()> {
+    fn set_focus(&mut self, id: &ComponentId, value: bool) -> ViewResult<()> {
         if let Some(c) = self.components.get_mut(id) {
             c.attr(Attribute::Focus, AttrValue::Flag(value));
             Ok(())
@@ -281,7 +289,7 @@ where
     }
 
     /// Inject properties for `id` using view injectors
-    fn inject(&mut self, id: &K) -> ViewResult<()> {
+    fn inject(&mut self, id: &ComponentId) -> ViewResult<()> {
         for (attr, value) in self.properties_to_inject(id) {
             self.attr(id, attr, value)?;
         }
@@ -289,7 +297,7 @@ where
     }
 
     /// Collect properties to inject for component `K`
-    fn properties_to_inject(&self, id: &K) -> Vec<(Attribute, AttrValue)> {
+    fn properties_to_inject(&self, id: &ComponentId) -> Vec<(Attribute, AttrValue)> {
         self.injectors.iter().flat_map(|x| x.inject(id)).collect()
     }
 }

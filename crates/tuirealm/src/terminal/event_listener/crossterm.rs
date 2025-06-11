@@ -1,4 +1,3 @@
-use std::marker::PhantomData;
 use std::time::Duration;
 
 use crossterm::event::{
@@ -19,31 +18,23 @@ use crate::listener::{ListenerResult, Poll};
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
 /// or you can use it directly in the event listener, calling [`EventListenerCfg::crossterm_input_listener()`](crate::EventListenerCfg::crossterm_input_listener)
 #[doc(alias = "InputEventListener")]
-pub struct CrosstermInputListener<U>
-where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
-{
-    ghost: PhantomData<U>,
+pub struct CrosstermInputListener {
     interval: Duration,
 }
 
-impl<U> CrosstermInputListener<U>
-where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
-{
+impl CrosstermInputListener {
     pub fn new(interval: Duration) -> Self {
         Self {
-            ghost: PhantomData,
             interval: interval / 2,
         }
     }
 }
 
-impl<U> Poll<U> for CrosstermInputListener<U>
+impl<UserEvent> Poll<UserEvent> for CrosstermInputListener
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
         match xterm::poll(self.interval) {
             Ok(true) => xterm::read()
                 .map(|x| Some(Event::from(x)))
@@ -54,9 +45,9 @@ where
     }
 }
 
-impl<U> From<XtermEvent> for Event<U>
+impl<UserEvent> From<XtermEvent> for Event<UserEvent>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
     fn from(e: XtermEvent) -> Self {
         match e {

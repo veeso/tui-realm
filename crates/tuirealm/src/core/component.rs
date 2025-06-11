@@ -55,7 +55,7 @@ pub trait MockComponent {
 pub trait Component<Msg, UserEvent>: MockComponent
 where
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Handle input event and update internal states.
     /// Returns a Msg to the view.

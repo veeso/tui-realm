@@ -14,11 +14,11 @@ impl AsyncTicker {
 }
 
 #[async_trait::async_trait]
-impl<U> PollAsync<U> for AsyncTicker
+impl<UserEvent> PollAsync<UserEvent> for AsyncTicker
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    async fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
         Ok(Some(Event::Tick))
     }
 }
