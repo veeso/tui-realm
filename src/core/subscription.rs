@@ -12,12 +12,12 @@ use crate::{AttrValue, Attribute, Event, State};
 pub struct Sub<ComponentId, UserEvent>(EventClause<UserEvent>, SubClause<ComponentId>)
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd;
+    UserEvent: Eq + PartialEq + Clone;
 
 impl<K, U> Sub<K, U>
 where
     K: Eq + PartialEq + Clone + Hash,
-    U: Eq + PartialEq + Clone + PartialOrd,
+    U: Eq + PartialEq + Clone,
 {
     /// Creates a new `Sub`
     #[must_use]
@@ -42,7 +42,7 @@ where
 pub(crate) struct Subscription<ComponentId, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Target component
     target: ComponentId,
@@ -55,7 +55,7 @@ where
 impl<K, U> Subscription<K, U>
 where
     K: Eq + PartialEq + Clone + Hash,
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     /// Instantiates a new [`Subscription`]
     #[must_use]
@@ -120,7 +120,7 @@ impl MouseEventClause {
 /// An event clause indicates on which kind of event the event must be forwarded to the `target` component.
 pub enum EventClause<UserEvent>
 where
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Forward, no matter what kind of event
     Any,
@@ -142,7 +142,7 @@ where
 
 impl<U> EventClause<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd,
+    U: Eq + PartialEq + Clone,
 {
     /// Check whether to forward based on even type and event clause.
     ///

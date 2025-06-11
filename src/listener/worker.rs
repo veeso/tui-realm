@@ -15,7 +15,7 @@ use super::{ListenerMsg, SyncPort};
 /// worker for event listener
 pub(super) struct EventListenerWorker<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     ports: Vec<SyncPort<U>>,
     sender: mpsc::Sender<ListenerMsg<U>>,
@@ -27,7 +27,7 @@ where
 
 impl<U> EventListenerWorker<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Create a new Worker.
     ///

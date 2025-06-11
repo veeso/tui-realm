@@ -9,7 +9,7 @@ use crate::listener::{ListenerResult, Poll};
 /// Its purpose is to listen for incoming events of a user-defined type
 pub struct SyncPort<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     poll: Box<dyn Poll<U>>,
     interval: Duration,
@@ -19,7 +19,7 @@ where
 
 impl<U> SyncPort<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Define a new [`SyncPort`]
     ///

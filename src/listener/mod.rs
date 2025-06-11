@@ -53,7 +53,7 @@ pub enum ListenerError {
 /// dedicated thread to poll for events if you use a [`SyncPort`].
 pub trait Poll<UserEvent>: Send
 where
-    UserEvent: Eq + PartialEq + Clone + PartialOrd + 'static,
+    UserEvent: Eq + PartialEq + Clone + 'static,
 {
     /// Poll for an event from user or from another source (e.g. Network).
     /// This function mustn't be blocking, and will be called within the configured interval of the event listener.
@@ -71,7 +71,7 @@ where
 #[async_trait::async_trait]
 pub trait PollAsync<UserEvent>: Send
 where
-    UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Poll for an with the possibility to do it asynchronously, from user or from another source (e.g. Network).
     /// This function mustn't be blocking, and will be called within the configured interval of the event listener.
@@ -88,7 +88,7 @@ where
 #[derive(Debug)]
 pub(crate) struct EventListener<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Max Time to wait when calling `recv()` on thread receiver
     poll_timeout: Duration,
@@ -111,7 +111,7 @@ where
 
 impl<U> EventListener<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Create a new [`EventListener`].
     /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
@@ -283,7 +283,7 @@ async fn poll_task<U>(
     paused: Arc<AtomicBool>,
 ) -> Result<(), mpsc::SendError<ListenerMsg<U>>>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     let mut times_remaining = port.max_poll();
     loop {
@@ -314,7 +314,7 @@ where
 
 impl<U> Drop for EventListener<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     fn drop(&mut self) {
         let _ = self.stop();
@@ -326,7 +326,7 @@ where
 /// Listener message is returned by the listener thread
 enum ListenerMsg<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     Error(ListenerError),
     Tick,
@@ -335,7 +335,7 @@ where
 
 impl<U> From<ListenerMsg<U>> for ListenerResult<Option<Event<U>>>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     fn from(msg: ListenerMsg<U>) -> Self {
         match msg {

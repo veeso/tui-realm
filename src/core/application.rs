@@ -26,7 +26,7 @@ pub struct Application<ComponentId, Msg, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     listener: EventListener<UserEvent>,
     subs: Vec<Subscription<ComponentId, UserEvent>>,
@@ -39,7 +39,7 @@ impl<K, Msg, UserEvent> Application<K, Msg, UserEvent>
 where
     K: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Initialize a new [`Application`].
     /// The event listener is immediately created and started.

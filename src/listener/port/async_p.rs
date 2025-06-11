@@ -11,7 +11,7 @@ use crate::listener::{ListenerResult, PollAsync};
 /// [`AsyncPort`] has the possibility to run
 pub struct AsyncPort<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     poll: Box<dyn PollAsync<U>>,
     interval: Duration,
@@ -21,7 +21,7 @@ where
 
 impl<U> AsyncPort<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Define a new [`AsyncPort`]
     ///

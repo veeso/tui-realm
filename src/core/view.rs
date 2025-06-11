@@ -37,7 +37,7 @@ pub struct View<ComponentId, Msg, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Components Mounted onto View
     components: HashMap<ComponentId, WrappedComponent<Msg, UserEvent>>,
@@ -53,7 +53,7 @@ impl<K, Msg, UserEvent> Default for View<K, Msg, UserEvent>
 where
     K: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     fn default() -> Self {
         Self {
@@ -69,7 +69,7 @@ impl<K, Msg, UserEvent> View<K, Msg, UserEvent>
 where
     K: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Mount component on View.
     /// Returns error if the component is already mounted

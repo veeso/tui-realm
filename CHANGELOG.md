@@ -43,6 +43,12 @@
 
 ---
 
+## next
+
+Unreleased
+
+- Remove `PartialOrd` bound for `UserEvent`.
+
 ## 3.0.1
 
 Released on 09/06/2025

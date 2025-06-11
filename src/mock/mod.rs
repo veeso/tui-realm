@@ -35,17 +35,17 @@ pub enum MockComponentId {
 // -- poll
 
 /// Mock poll implementation
-pub struct MockPoll<U: Eq + PartialEq + Clone + PartialOrd + Send> {
+pub struct MockPoll<U: Eq + PartialEq + Clone + Send> {
     ghost: PhantomData<U>,
 }
 
-impl<U: Eq + PartialEq + Clone + PartialOrd + Send> Default for MockPoll<U> {
+impl<U: Eq + PartialEq + Clone + Send> Default for MockPoll<U> {
     fn default() -> Self {
         Self { ghost: PhantomData }
     }
 }
 
-impl<U: Eq + PartialEq + Clone + PartialOrd + Send + 'static> Poll<U> for MockPoll<U> {
+impl<U: Eq + PartialEq + Clone + Send + 'static> Poll<U> for MockPoll<U> {
     fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         Ok(Some(Event::Keyboard(KeyEvent::from(Key::Enter))))
     }
@@ -57,9 +57,7 @@ pub struct MockPollAsync();
 
 #[cfg(feature = "async-ports")]
 #[async_trait::async_trait]
-impl<U: Eq + PartialEq + Clone + PartialOrd + Send + 'static> crate::listener::PollAsync<U>
-    for MockPollAsync
-{
+impl<U: Eq + PartialEq + Clone + Send + 'static> crate::listener::PollAsync<U> for MockPollAsync {
     async fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         let tempfile = tempfile::NamedTempFile::new().expect("tempfile");
         let _file = tokio::fs::File::open(tempfile.path()).await.expect("file");

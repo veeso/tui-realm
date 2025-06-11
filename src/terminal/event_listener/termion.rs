@@ -13,14 +13,14 @@ use crate::listener::{ListenerResult, Poll};
 #[doc(alias = "InputEventListener")]
 pub struct TermionInputListener<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     ghost: PhantomData<U>,
 }
 
 impl<U> TermionInputListener<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     pub fn new(_interval: Duration) -> Self {
         Self { ghost: PhantomData }
@@ -29,7 +29,7 @@ where
 
 impl<U> Poll<U> for TermionInputListener<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         match std::io::stdin().events().next() {
@@ -42,7 +42,7 @@ where
 
 impl<U> From<TonEvent> for Event<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     fn from(e: TonEvent) -> Self {
         match e {

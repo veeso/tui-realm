@@ -14,7 +14,7 @@ use super::{Duration, EventListener, ListenerError, Poll, SyncPort};
 /// will be returned.
 pub struct EventListenerCfg<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     sync_ports: Vec<SyncPort<U>>,
     #[cfg(feature = "async-ports")]
@@ -29,7 +29,7 @@ where
 
 impl<U> Default for EventListenerCfg<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     fn default() -> Self {
         Self {
@@ -48,7 +48,7 @@ where
 
 impl<U> EventListenerCfg<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Create the event listener with the parameters provided and start the workers.
     ///
@@ -173,7 +173,7 @@ where
 /// Implementations for feature `async-ports`
 impl<U> EventListenerCfg<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Add a new [`AsyncPort`] (Poll, Interval) to the the event listener.
     ///

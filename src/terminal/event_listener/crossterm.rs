@@ -21,7 +21,7 @@ use crate::listener::{ListenerResult, Poll};
 #[doc(alias = "InputEventListener")]
 pub struct CrosstermInputListener<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     ghost: PhantomData<U>,
     interval: Duration,
@@ -29,7 +29,7 @@ where
 
 impl<U> CrosstermInputListener<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     pub fn new(interval: Duration) -> Self {
         Self {
@@ -41,7 +41,7 @@ where
 
 impl<U> Poll<U> for CrosstermInputListener<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    U: Eq + PartialEq + Clone + Send + 'static,
 {
     fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
         match xterm::poll(self.interval) {
@@ -56,7 +56,7 @@ where
 
 impl<U> From<XtermEvent> for Event<U>
 where
-    U: Eq + PartialEq + Clone + PartialOrd + Send,
+    U: Eq + PartialEq + Clone + Send,
 {
     fn from(e: XtermEvent) -> Self {
         match e {
