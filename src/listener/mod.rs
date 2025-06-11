@@ -53,7 +53,7 @@ pub enum ListenerError {
 /// dedicated thread to poll for events if you use a [`SyncPort`].
 pub trait Poll<UserEvent>: Send
 where
-    UserEvent: Eq + PartialEq + Clone + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Poll for an event from user or from another source (e.g. Network).
     /// This function mustn't be blocking, and will be called within the configured interval of the event listener.
