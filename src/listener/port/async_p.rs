@@ -9,19 +9,19 @@ use crate::listener::{ListenerResult, PollAsync};
 /// Its purpose is to listen for incoming events of a user-defined type
 ///
 /// [`AsyncPort`] has the possibility to run
-pub struct AsyncPort<U>
+pub struct AsyncPort<UserEvent>
 where
-    U: Eq + PartialEq + Clone + Send,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
-    poll: Box<dyn PollAsync<U>>,
+    poll: Box<dyn PollAsync<UserEvent>>,
     interval: Duration,
     next_poll: Instant,
     max_poll: usize,
 }
 
-impl<U> AsyncPort<U>
+impl<UserEvent> AsyncPort<UserEvent>
 where
-    U: Eq + PartialEq + Clone + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Define a new [`AsyncPort`]
     ///
@@ -31,7 +31,7 @@ where
     /// * `interval` - The interval between each poll
     /// * `max_poll` - The maximum amount of times the port should be polled in a single poll
     /// * `runtime` - The tokio runtime to use for async polling
-    pub fn new(poll: Box<dyn PollAsync<U>>, interval: Duration, max_poll: usize) -> Self {
+    pub fn new(poll: Box<dyn PollAsync<UserEvent>>, interval: Duration, max_poll: usize) -> Self {
         Self {
             poll,
             interval,
@@ -61,7 +61,7 @@ where
     }
 
     /// Calls [`PollAsync::poll`] on the inner [`PollAsync`] trait object.
-    pub async fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+    pub async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
         self.poll.poll().await
     }
 

@@ -7,19 +7,19 @@ use crate::listener::{ListenerResult, Poll};
 /// A port is a wrapper around the poll trait object, which also defines an interval, which defines
 /// the amount of time between each [`Poll::poll`] call.
 /// Its purpose is to listen for incoming events of a user-defined type
-pub struct SyncPort<U>
+pub struct SyncPort<UserEvent>
 where
-    U: Eq + PartialEq + Clone + Send,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
-    poll: Box<dyn Poll<U>>,
+    poll: Box<dyn Poll<UserEvent>>,
     interval: Duration,
     next_poll: Instant,
     max_poll: usize,
 }
 
-impl<U> SyncPort<U>
+impl<UserEvent> SyncPort<UserEvent>
 where
-    U: Eq + PartialEq + Clone + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Define a new [`SyncPort`]
     ///
@@ -28,7 +28,7 @@ where
     /// * `poll` - The poll trait object
     /// * `interval` - The interval between each poll
     /// * `max_poll` - The maximum amount of times the port should be polled in a single poll
-    pub fn new(poll: Box<dyn Poll<U>>, interval: Duration, max_poll: usize) -> Self {
+    pub fn new(poll: Box<dyn Poll<UserEvent>>, interval: Duration, max_poll: usize) -> Self {
         Self {
             poll,
             interval,
@@ -58,7 +58,7 @@ where
     }
 
     /// Calls [`Poll::poll`] on the inner [`Poll`] trait object.
-    pub fn poll(&mut self) -> ListenerResult<Option<Event<U>>> {
+    pub fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
         self.poll.poll()
     }
 

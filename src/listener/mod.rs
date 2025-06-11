@@ -86,9 +86,9 @@ where
 /// from the [`Port`]s. It is responsible for sending events to the main thread and handling
 /// internal events like `Tick`.
 #[derive(Debug)]
-pub(crate) struct EventListener<U>
+pub(crate) struct EventListener<UserEvent>
 where
-    U: Eq + PartialEq + Clone + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Max Time to wait when calling `recv()` on thread receiver
     poll_timeout: Duration,
@@ -97,7 +97,7 @@ where
     /// Indicates whether the worker should keep running
     running: Arc<AtomicBool>,
     /// Msg receiver from worker
-    recv: mpsc::Receiver<ListenerMsg<U>>,
+    recv: mpsc::Receiver<ListenerMsg<UserEvent>>,
     /// Join handle for worker
     thread: Option<JoinHandle<()>>,
     /// The taskpool to track all async ports and cancel them
@@ -106,12 +106,12 @@ where
     /// The event emitter associated with `recv`, until `start` and `start_async` are called.
     ///
     /// This needs to be [`None`] after either [`start`](Self::start) or [`start_async`](Self::start_async) is called, otherwise the channel will never close.
-    tx: Option<mpsc::Sender<ListenerMsg<U>>>,
+    tx: Option<mpsc::Sender<ListenerMsg<UserEvent>>>,
 }
 
-impl<U> EventListener<U>
+impl<UserEvent> EventListener<UserEvent>
 where
-    U: Eq + PartialEq + Clone + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Create a new [`EventListener`].
     /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
@@ -155,7 +155,7 @@ where
     #[allow(unused_variables)] // "store_tx" is necessary when "async-ports" is active
     pub(self) fn start(
         self,
-        ports: Vec<SyncPort<U>>,
+        ports: Vec<SyncPort<UserEvent>>,
         tick_interval: Option<Duration>,
         store_tx: bool,
     ) -> Self {
@@ -184,7 +184,7 @@ where
     #[cfg(feature = "async-ports")]
     pub(self) fn start_async(
         mut self,
-        mut ports: Vec<AsyncPort<U>>,
+        mut ports: Vec<AsyncPort<UserEvent>>,
         handle: tokio::runtime::Handle,
         tick_interval: Option<Duration>,
     ) -> Self {
@@ -248,7 +248,7 @@ where
     }
 
     /// Checks whether there are new events available from event
-    pub fn poll(&self) -> ListenerResult<Option<Event<U>>> {
+    pub fn poll(&self) -> ListenerResult<Option<Event<UserEvent>>> {
         match self.recv.recv_timeout(self.poll_timeout) {
             Ok(msg) => ListenerResult::from(msg),
             Err(mpsc::RecvTimeoutError::Timeout) => Ok(None),
@@ -259,7 +259,7 @@ where
     /// Setup the thread and returns the structs necessary to interact with it
     fn setup_sync_worker(
         mut self,
-        ports: Vec<SyncPort<U>>,
+        ports: Vec<SyncPort<UserEvent>>,
         tick_interval: Option<Duration>,
     ) -> Self {
         self.running.store(true, Ordering::Relaxed);
@@ -277,13 +277,13 @@ where
 
 /// Continuesly drive a given port in a async fashion.
 #[cfg(feature = "async-ports")]
-async fn poll_task<U>(
-    mut port: AsyncPort<U>,
-    tx: mpsc::Sender<ListenerMsg<U>>,
+async fn poll_task<UserEvent>(
+    mut port: AsyncPort<UserEvent>,
+    tx: mpsc::Sender<ListenerMsg<UserEvent>>,
     paused: Arc<AtomicBool>,
-) -> Result<(), mpsc::SendError<ListenerMsg<U>>>
+) -> Result<(), mpsc::SendError<ListenerMsg<UserEvent>>>
 where
-    U: Eq + PartialEq + Clone + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     let mut times_remaining = port.max_poll();
     loop {
@@ -312,9 +312,9 @@ where
     Ok(())
 }
 
-impl<U> Drop for EventListener<U>
+impl<UserEvent> Drop for EventListener<UserEvent>
 where
-    U: Eq + PartialEq + Clone + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     fn drop(&mut self) {
         let _ = self.stop();
@@ -324,20 +324,20 @@ where
 // -- listener thread
 
 /// Listener message is returned by the listener thread
-enum ListenerMsg<U>
+enum ListenerMsg<UserEvent>
 where
-    U: Eq + PartialEq + Clone + Send,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
     Error(ListenerError),
     Tick,
-    User(Event<U>),
+    User(Event<UserEvent>),
 }
 
-impl<U> From<ListenerMsg<U>> for ListenerResult<Option<Event<U>>>
+impl<UserEvent> From<ListenerMsg<UserEvent>> for ListenerResult<Option<Event<UserEvent>>>
 where
-    U: Eq + PartialEq + Clone + Send,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
-    fn from(msg: ListenerMsg<U>) -> Self {
+    fn from(msg: ListenerMsg<UserEvent>) -> Self {
         match msg {
             ListenerMsg::Error(err) => Err(err),
             ListenerMsg::Tick => Ok(Some(Event::Tick)),

@@ -14,14 +14,14 @@ where
     ComponentId: Eq + PartialEq + Clone + Hash,
     UserEvent: Eq + PartialEq + Clone;
 
-impl<K, U> Sub<K, U>
+impl<ComponentId, UserEvent> Sub<ComponentId, UserEvent>
 where
-    K: Eq + PartialEq + Clone + Hash,
-    U: Eq + PartialEq + Clone,
+    ComponentId: Eq + PartialEq + Clone + Hash,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Creates a new `Sub`
     #[must_use]
-    pub fn new(event_clause: EventClause<U>, sub_clause: SubClause<K>) -> Self {
+    pub fn new(event_clause: EventClause<UserEvent>, sub_clause: SubClause<ComponentId>) -> Self {
         Self(event_clause, sub_clause)
     }
 }
@@ -52,14 +52,14 @@ where
     when: SubClause<ComponentId>,
 }
 
-impl<K, U> Subscription<K, U>
+impl<ComponentId, UserEvent> Subscription<ComponentId, UserEvent>
 where
-    K: Eq + PartialEq + Clone + Hash,
-    U: Eq + PartialEq + Clone + Send,
+    ComponentId: Eq + PartialEq + Clone + Hash,
+    UserEvent: Eq + PartialEq + Clone + Send,
 {
     /// Instantiates a new [`Subscription`]
     #[must_use]
-    pub fn new(target: K, sub: Sub<K, U>) -> Self {
+    pub fn new(target: ComponentId, sub: Sub<ComponentId, UserEvent>) -> Self {
         Self {
             target,
             ev: sub.0,
@@ -69,13 +69,13 @@ where
 
     /// Returns sub target
     #[must_use]
-    pub(crate) fn target(&self) -> &K {
+    pub(crate) fn target(&self) -> &ComponentId {
         &self.target
     }
 
     /// Returns reference to subscription event clause
     #[must_use]
-    pub(crate) fn event(&self) -> &EventClause<U> {
+    pub(crate) fn event(&self) -> &EventClause<UserEvent> {
         &self.ev
     }
 
@@ -83,15 +83,15 @@ where
     #[must_use]
     pub(crate) fn forward<HasAttrFn, GetStateFn, MountedFn>(
         &self,
-        ev: &Event<U>,
+        ev: &Event<UserEvent>,
         has_attr_fn: HasAttrFn,
         get_state_fn: GetStateFn,
         mounted_fn: MountedFn,
     ) -> bool
     where
-        HasAttrFn: Fn(&K, Attribute) -> Option<AttrValue>,
-        GetStateFn: Fn(&K) -> Option<State>,
-        MountedFn: Fn(&K) -> bool,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        GetStateFn: Fn(&ComponentId) -> Option<State>,
+        MountedFn: Fn(&ComponentId) -> bool,
     {
         self.ev.forward(ev) && self.when.forward(has_attr_fn, get_state_fn, mounted_fn)
     }
@@ -140,9 +140,9 @@ where
     Discriminant(UserEvent),
 }
 
-impl<U> EventClause<U>
+impl<UserEvent> EventClause<UserEvent>
 where
-    U: Eq + PartialEq + Clone,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// Check whether to forward based on even type and event clause.
     ///
@@ -155,7 +155,7 @@ where
     /// - [`EventClause::Tick`]: matches tick event
     /// - [`EventClause::User`]: depends on UserEvent [`PartialEq`]
     /// - [`EventClause::Discriminant`]: matches only event type, not values
-    fn forward(&self, ev: &Event<U>) -> bool {
+    fn forward(&self, ev: &Event<UserEvent>) -> bool {
         match self {
             EventClause::Any => true,
             EventClause::Keyboard(k) => Some(k) == ev.as_keyboard(),
