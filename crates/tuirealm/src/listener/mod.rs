@@ -50,22 +50,24 @@ pub enum ListenerError {
 }
 
 /// The poll trait defines the function [`Poll::poll`], which will be called by the event listener
-/// dedicated thread to poll for events if you use a [`SyncPort`].
+/// dedicated thread to poll for events when you use a [`SyncPort`].
 pub trait Poll<UserEvent>: Send
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Poll for an event from user or from another source (e.g. Network).
     /// This function mustn't be blocking, and will be called within the configured interval of the event listener.
-    /// It may return Error in case something went wrong.
-    /// If it was possible to poll for event, `Ok` must be returned.
-    /// If an event was read, then [`Some`] must be returned, otherwise [`None`].
+    ///
+    /// If polling failed, `Err` should be returned. The port will be polled again.
+    /// If a event is available, `Ok(Some)` needs to be returned.
+    /// If there is no event available, `Ok(None)` needs to be returned. The port will be polled again.
+    ///
     /// The event must be converted to `Event` using the `adapters`.
     fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>>;
 }
 
-/// The poll trait defines the function [`PollAsync::poll`], which will be called by the event listener
-/// dedicated thread to poll for events if you use a [`AsyncPort`].
+/// The poll trait defines the function [`PollAsync::poll`], which will be called by the runtime
+/// to poll for events when you use a [`AsyncPort`].
 #[cfg(feature = "async-ports")]
 #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
 #[async_trait::async_trait]
@@ -73,11 +75,13 @@ pub trait PollAsync<UserEvent>: Send
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    /// Poll for an with the possibility to do it asynchronously, from user or from another source (e.g. Network).
-    /// This function mustn't be blocking, and will be called within the configured interval of the event listener.
-    /// It may return Error in case something went wrong.
-    /// If it was possible to poll for event, `Ok` must be returned.
-    /// If an event was read, then [`Some`] must be returned, otherwise [`None`].
+    /// Poll for an event with the possibility to do it asynchronously, from user or from another source (e.g. Network).
+    ///
+    /// If polling failed, `Err` should be returned. The port will be polled again.
+    /// If a event is available, `Ok(Some)` needs to be returned.
+    /// If no events are available, either await until one becomes available, or return [`Ok(Some(Event::None))`] (note that the event will be send).
+    /// If there are no more events expected, `Ok(None)` should be returned. The port will not be polled again.
+    ///
     /// The event must be converted to `Event` using the `adapters`.
     async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>>;
 }
