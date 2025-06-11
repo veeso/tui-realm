@@ -176,42 +176,42 @@ where
 /// - [`SubClause::Or`]: the OR of the two clauses must be `true`
 #[derive(Debug, PartialEq)]
 #[allow(clippy::large_enum_variant)]
-pub enum SubClause<Id>
+pub enum SubClause<ComponentId>
 where
-    Id: Eq + PartialEq + Clone + Hash,
+    ComponentId: Eq + PartialEq + Clone + Hash,
 {
     /// Always forward event to component
     Always,
     /// Forward event if target component has provided attribute with the provided value
     /// If the attribute doesn't exist on component, result is always `false`.
-    HasAttrValue(Id, Attribute, AttrValue),
+    HasAttrValue(ComponentId, Attribute, AttrValue),
     /// Forward event if target component has provided state
-    HasState(Id, State),
+    HasState(ComponentId, State),
     /// Forward event if target component is mounted
-    IsMounted(Id),
+    IsMounted(ComponentId),
     /// Forward event if the inner clause is `false`
-    Not(Box<SubClause<Id>>),
+    Not(Box<SubClause<ComponentId>>),
     /// Forward event if both the inner clauses are `true`
-    And(Box<SubClause<Id>>, Box<SubClause<Id>>),
+    And(Box<SubClause<ComponentId>>, Box<SubClause<ComponentId>>),
     /// Forward event if all the inner clauses are `true`.
     ///
     /// Short-circuits on first `false`.
     ///
     /// If empty will always return `false`.
-    AndMany(Vec<SubClause<Id>>),
+    AndMany(Vec<SubClause<ComponentId>>),
     /// Forward event if at least one of the inner clauses is `true`
-    Or(Box<SubClause<Id>>, Box<SubClause<Id>>),
+    Or(Box<SubClause<ComponentId>>, Box<SubClause<ComponentId>>),
     /// Forward event if at least one of the inner clauses is `true`.
     ///
     /// Short-circuits on first `true`.
     ///
     /// If empty will always return `false`.
-    OrMany(Vec<SubClause<Id>>),
+    OrMany(Vec<SubClause<ComponentId>>),
 }
 
-impl<Id> SubClause<Id>
+impl<ComponentId> SubClause<ComponentId>
 where
-    Id: Eq + PartialEq + Clone + Hash,
+    ComponentId: Eq + PartialEq + Clone + Hash,
 {
     /// Shortcut for [`SubClause::Not`] without specifying `Box::new(...)`
     #[allow(clippy::should_implement_trait)]
@@ -241,9 +241,9 @@ where
         mounted_fn: MountedFn,
     ) -> bool
     where
-        HasAttrFn: Fn(&Id, Attribute) -> Option<AttrValue>,
-        GetStateFn: Fn(&Id) -> Option<State>,
-        MountedFn: Fn(&Id) -> bool,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        GetStateFn: Fn(&ComponentId) -> Option<State>,
+        MountedFn: Fn(&ComponentId) -> bool,
     {
         self.check_forwarding(has_attr_fn, get_state_fn, mounted_fn)
             .0
@@ -258,9 +258,9 @@ where
         mounted_fn: MountedFn,
     ) -> (bool, HasAttrFn, GetStateFn, MountedFn)
     where
-        HasAttrFn: Fn(&Id, Attribute) -> Option<AttrValue>,
-        GetStateFn: Fn(&Id) -> Option<State>,
-        MountedFn: Fn(&Id) -> bool,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        GetStateFn: Fn(&ComponentId) -> Option<State>,
+        MountedFn: Fn(&ComponentId) -> bool,
     {
         match self {
             Self::Always => (true, has_attr_fn, get_state_fn, mounted_fn),
@@ -335,13 +335,13 @@ where
 
     #[must_use]
     fn has_attribute<HasAttrFn>(
-        id: &Id,
+        id: &ComponentId,
         query: &Attribute,
         value: &AttrValue,
         has_attr_fn: HasAttrFn,
     ) -> (bool, HasAttrFn)
     where
-        HasAttrFn: Fn(&Id, Attribute) -> Option<AttrValue>,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
     {
         (
             match has_attr_fn(id, *query) {
@@ -353,9 +353,13 @@ where
     }
 
     #[must_use]
-    fn has_state<GetStateFn>(id: &Id, state: &State, get_state_fn: GetStateFn) -> (bool, GetStateFn)
+    fn has_state<GetStateFn>(
+        id: &ComponentId,
+        state: &State,
+        get_state_fn: GetStateFn,
+    ) -> (bool, GetStateFn)
     where
-        GetStateFn: Fn(&Id) -> Option<State>,
+        GetStateFn: Fn(&ComponentId) -> Option<State>,
     {
         (
             match get_state_fn(id) {
@@ -367,9 +371,9 @@ where
     }
 
     #[must_use]
-    fn is_mounted<MountedFn>(id: &Id, mounted_fn: MountedFn) -> (bool, MountedFn)
+    fn is_mounted<MountedFn>(id: &ComponentId, mounted_fn: MountedFn) -> (bool, MountedFn)
     where
-        MountedFn: Fn(&Id) -> bool,
+        MountedFn: Fn(&ComponentId) -> bool,
     {
         (mounted_fn(id), mounted_fn)
     }
