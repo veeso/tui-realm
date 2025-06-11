@@ -1,4 +1,3 @@
-use std::marker::PhantomData;
 use std::time::Duration;
 
 use termion::event::{Event as TonEvent, Key as TonKey};
@@ -11,23 +10,16 @@ use crate::listener::{ListenerResult, Poll};
 
 /// The input listener for [`termion`].
 #[doc(alias = "InputEventListener")]
-pub struct TermionInputListener<UserEvent>
-where
-    UserEvent: Eq + PartialEq + Clone + Send,
-{
-    ghost: PhantomData<UserEvent>,
-}
+#[derive(Default)]
+pub struct TermionInputListener;
 
-impl<UserEvent> TermionInputListener<UserEvent>
-where
-    UserEvent: Eq + PartialEq + Clone + Send,
-{
+impl TermionInputListener {
     pub fn new(_interval: Duration) -> Self {
-        Self { ghost: PhantomData }
+        Self
     }
 }
 
-impl<UserEvent> Poll<UserEvent> for TermionInputListener<UserEvent>
+impl<UserEvent> Poll<UserEvent> for TermionInputListener
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {

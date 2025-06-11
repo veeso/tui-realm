@@ -140,9 +140,7 @@ where
     /// The max_poll is the maximum amount of times the port should be polled in a `interval`.
     pub fn crossterm_input_listener(self, interval: Duration, max_poll: usize) -> Self {
         self.add_port(
-            Box::new(crate::terminal::CrosstermInputListener::<UserEvent>::new(
-                interval,
-            )),
+            Box::new(crate::terminal::CrosstermInputListener::new(interval)),
             interval,
             max_poll,
         )
@@ -170,9 +168,7 @@ where
     /// The max_poll is the maximum amount of times the port should be polled in a `interval`.
     pub fn termion_input_listener(self, interval: Duration, max_poll: usize) -> Self {
         self.add_port(
-            Box::new(crate::terminal::TermionInputListener::<UserEvent>::new(
-                interval,
-            )),
+            Box::new(crate::terminal::TermionInputListener::new(interval)),
             interval,
             max_poll,
         )

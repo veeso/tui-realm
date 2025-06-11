@@ -1,4 +1,3 @@
-use std::marker::PhantomData;
 use std::time::Duration;
 
 use crossterm::event::{
@@ -19,27 +18,19 @@ use crate::listener::{ListenerResult, Poll};
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
 /// or you can use it directly in the event listener, calling [`EventListenerCfg::crossterm_input_listener()`](crate::EventListenerCfg::crossterm_input_listener)
 #[doc(alias = "InputEventListener")]
-pub struct CrosstermInputListener<UserEvent>
-where
-    UserEvent: Eq + PartialEq + Clone + Send,
-{
-    ghost: PhantomData<UserEvent>,
+pub struct CrosstermInputListener {
     interval: Duration,
 }
 
-impl<UserEvent> CrosstermInputListener<UserEvent>
-where
-    UserEvent: Eq + PartialEq + Clone + Send,
-{
+impl CrosstermInputListener {
     pub fn new(interval: Duration) -> Self {
         Self {
-            ghost: PhantomData,
             interval: interval / 2,
         }
     }
 }
 
-impl<UserEvent> Poll<UserEvent> for CrosstermInputListener<UserEvent>
+impl<UserEvent> Poll<UserEvent> for CrosstermInputListener
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
