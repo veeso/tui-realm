@@ -224,17 +224,12 @@ mod test {
 
     #[test]
     fn test_components_utils_get_block() {
-        let props = Borders::default()
+        let borders = Borders::default()
             .sides(BorderSides::ALL)
             .color(Color::Red)
             .modifiers(BorderType::Rounded);
-        let _ = get_block(
-            props.clone(),
-            Some(&("title", Alignment::Center)),
-            true,
-            None,
-        );
-        let _ = get_block::<&str>(props, None, false, None);
+        let _ = get_block(borders, Some(&("title", Alignment::Center)), true, None);
+        let _ = get_block::<&str>(borders, None, false, None);
     }
 
     #[test]

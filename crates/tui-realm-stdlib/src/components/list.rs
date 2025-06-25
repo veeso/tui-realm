@@ -119,7 +119,6 @@ impl ListStates {
 pub struct List {
     props: Props,
     pub states: ListStates,
-    hg_str: Option<String>, // CRAP CRAP CRAP. Thanks to the author of tui-realm for using references every f time
 }
 
 impl List {
@@ -287,11 +286,11 @@ impl MockComponent for List {
                 );
             }
             // Highlighted symbol
-            self.hg_str = self
+            let hg_str = self
                 .props
-                .get(Attribute::HighlightedStr)
-                .map(|x| x.unwrap_string());
-            if let Some(hg_str) = &self.hg_str {
+                .get_ref(Attribute::HighlightedStr)
+                .and_then(|x| x.as_string());
+            if let Some(hg_str) = hg_str {
                 list = list.highlight_symbol(hg_str);
             }
             if self.scrollable() {
