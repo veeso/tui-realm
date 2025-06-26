@@ -334,22 +334,16 @@ impl<V: NodeValue> TreeView<V> {
     /// ### title
     ///
     /// Set widget title
-    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(
-            Attribute::Title,
-            AttrValue::Title((t.as_ref().to_string(), a)),
-        );
+    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
         self
     }
 
     /// ### highlight_symbol
     ///
     /// Set symbol to prepend to highlighted node
-    pub fn highlight_symbol<S: AsRef<str>>(mut self, symbol: S) -> Self {
-        self.attr(
-            Attribute::HighlightedStr,
-            AttrValue::String(symbol.as_ref().to_string()),
-        );
+    pub fn highlight_symbol<S: Into<String>>(mut self, symbol: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::String(symbol.into()));
         self
     }
 
@@ -365,10 +359,10 @@ impl<V: NodeValue> TreeView<V> {
     ///
     /// Set initial node for tree state.
     /// NOTE: this must be specified after `with_tree`
-    pub fn initial_node<S: AsRef<str>>(mut self, node: S) -> Self {
+    pub fn initial_node<S: Into<String>>(mut self, node: S) -> Self {
         self.attr(
             Attribute::Custom(TREE_INITIAL_NODE),
-            AttrValue::String(node.as_ref().to_string()),
+            AttrValue::String(node.into()),
         );
         self
     }
@@ -461,13 +455,12 @@ impl<V: NodeValue> TreeView<V> {
         }
     }
 
-    fn get_block<'a>(
+    fn get_block(
         props: Borders,
-        title: Option<(String, Alignment)>,
+        title: (&str, Alignment),
         focus: bool,
         inactive_style: Option<Style>,
-    ) -> Block<'a> {
-        let title = title.unwrap_or((String::default(), Alignment::Left));
+    ) -> Block<'_> {
         Block::default()
             .borders(props.sides)
             .border_style(match focus {
@@ -503,11 +496,10 @@ impl<V: NodeValue> MockComponent for TreeView<V> {
                 .unwrap_text_modifiers();
             let title = self
                 .props
-                .get_or(
-                    Attribute::Title,
-                    AttrValue::Title((String::default(), Alignment::Center)),
-                )
-                .unwrap_title();
+                .get_ref(Attribute::Title)
+                .and_then(|v| v.as_title())
+                .map(|v| (v.0.as_str(), v.1))
+                .unwrap_or(("", Alignment::Center));
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -535,9 +527,9 @@ impl<V: NodeValue> MockComponent for TreeView<V> {
             .add_modifier(modifiers);
             let hg_str = self
                 .props
-                .get(Attribute::HighlightedStr)
-                .map(|x| x.unwrap_string());
-            let div = Self::get_block(borders, Some(title), focus, inactive_style);
+                .get_ref(Attribute::HighlightedStr)
+                .and_then(|x| x.as_string());
+            let div = Self::get_block(borders, title, focus, inactive_style);
             // Make widget
             let mut tree = TreeWidget::new(self.tree())
                 .block(div)
@@ -550,7 +542,7 @@ impl<V: NodeValue> MockComponent for TreeView<V> {
                         .add_modifier(modifiers),
                 );
             if let Some(hg_str) = hg_str {
-                tree = tree.highlight_symbol(hg_str);
+                tree = tree.highlight_symbol(hg_str.as_str());
             }
             let mut state = self.states.clone();
             frame.render_stateful_widget(tree, area, &mut state);

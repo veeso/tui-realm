@@ -23,7 +23,7 @@ pub struct TreeWidget<'a, V: NodeValue> {
     /// Highlight style
     highlight_style: Style,
     /// Symbol to display on the side of the current highlighted
-    highlight_symbol: Option<String>,
+    highlight_symbol: Option<&'a str>,
     /// Spaces to use for indentation
     indent_size: usize,
     /// Tree to render
@@ -72,7 +72,7 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
     /// ### highlight_symbol
     ///
     /// Set symbol to prepend to highlighted entry
-    pub fn highlight_symbol(mut self, s: String) -> Self {
+    pub fn highlight_symbol(mut self, s: &'a str) -> Self {
         self.highlight_symbol = Some(s);
         self
     }
@@ -93,14 +93,14 @@ struct Render {
     skip_rows: usize,
 }
 
-impl<'a, V: NodeValue> Widget for TreeWidget<'a, V> {
+impl<V: NodeValue> Widget for TreeWidget<'_, V> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let mut state = TreeState::default();
         StatefulWidget::render(self, area, buf, &mut state);
     }
 }
 
-impl<'a, V: NodeValue> StatefulWidget for TreeWidget<'a, V> {
+impl<V: NodeValue> StatefulWidget for TreeWidget<'_, V> {
     type State = TreeState;
 
     fn render(mut self, area: Rect, buf: &mut Buffer, state: &mut Self::State) {
@@ -128,7 +128,7 @@ impl<'a, V: NodeValue> StatefulWidget for TreeWidget<'a, V> {
     }
 }
 
-impl<'a, V: NodeValue> TreeWidget<'a, V> {
+impl<V: NodeValue> TreeWidget<'_, V> {
     fn iter_nodes(
         &self,
         node: &Node<V>,
@@ -169,7 +169,7 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
             return area;
         }
         let highlight_symbol = match state.is_selected(node) {
-            true => Some(self.highlight_symbol.clone().unwrap_or_default()),
+            true => Some(self.highlight_symbol.unwrap_or_default()),
             false => None,
         };
         // Get area for current node
@@ -190,7 +190,7 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
         let indent_size = render.depth * self.indent_size;
         let indent_size = match state.is_selected(node) {
             true if highlight_symbol.is_some() => {
-                indent_size.saturating_sub(highlight_symbol.as_deref().unwrap().width() + 1)
+                indent_size.saturating_sub(highlight_symbol.unwrap().width() + 1)
             }
             _ => indent_size,
         };
@@ -321,13 +321,13 @@ mod test {
         let widget = TreeWidget::new(&tree)
             .block(Block::default())
             .highlight_style(Style::default().fg(Color::Red))
-            .highlight_symbol(String::from(">"))
+            .highlight_symbol(">")
             .indent_size(8)
             .style(Style::default().fg(Color::LightRed));
         assert!(widget.block.is_some());
         assert_eq!(widget.highlight_style.fg.unwrap(), Color::Red);
         assert_eq!(widget.indent_size, 8);
-        assert_eq!(widget.highlight_symbol.as_deref().unwrap(), ">");
+        assert_eq!(widget.highlight_symbol.unwrap(), ">");
         assert_eq!(widget.style.fg.unwrap(), Color::LightRed);
     }
 

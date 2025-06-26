@@ -131,10 +131,10 @@ impl TreeState {
                     } else {
                         // Then the next element becomes the next sibling of the parent
                         // this thing has to be performed recursively for all parents, until one is found (or root is reached)
-                        let mut current = selected.clone();
+                        let mut current = &selected;
                         loop {
-                            if let Some(parent) = root.parent(&current) {
-                                current = parent.id().to_string();
+                            if let Some(parent) = root.parent(current) {
+                                current = parent.id();
                                 if let Some(sibling) = self.next_sibling(root, parent) {
                                     self.selected = Some(sibling.id().to_string());
                                     break;
@@ -276,7 +276,7 @@ impl TreeState {
     ///
     /// Force open nodes
     pub fn force_open(&mut self, open: &[&str]) {
-        self.open = open.into_iter().map(|x| x.to_string()).collect();
+        self.open = open.iter().map(|x| x.to_string()).collect();
     }
 }
 
