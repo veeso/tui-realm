@@ -51,6 +51,7 @@ Unreleased
 - Add `Send` bound for `UserEvent` to trait `Poll`, as was already required for adding it to `SyncPort`.
 - Remove unnecessary bounds on Input Event Listeners.
 - Improve documentation for `PollAsync` and `Poll`.
+- Allow sharing `SubClause`s in `Sub` by passing in a instance of `Arc<SubClause>`.
 
 ## 3.0.1
 

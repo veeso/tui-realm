@@ -4,12 +4,13 @@
 
 use std::hash::Hash;
 use std::ops::Range;
+use std::sync::Arc;
 
 use crate::event::{KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
 use crate::{AttrValue, Attribute, Event, State};
 
 /// Public type to define a subscription.
-pub struct Sub<ComponentId, UserEvent>(EventClause<UserEvent>, SubClause<ComponentId>)
+pub struct Sub<ComponentId, UserEvent>(EventClause<UserEvent>, Arc<SubClause<ComponentId>>)
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     UserEvent: Eq + PartialEq + Clone;
@@ -21,8 +22,11 @@ where
 {
     /// Creates a new `Sub`
     #[must_use]
-    pub fn new(event_clause: EventClause<UserEvent>, sub_clause: SubClause<ComponentId>) -> Self {
-        Self(event_clause, sub_clause)
+    pub fn new<SC: Into<Arc<SubClause<ComponentId>>>>(
+        event_clause: EventClause<UserEvent>,
+        sub_clause: SC,
+    ) -> Self {
+        Self(event_clause, sub_clause.into())
     }
 }
 
@@ -47,7 +51,7 @@ where
     /// Event to forward and listen to
     ev: EventClause<UserEvent>,
     /// Restrict forwarding clauses
-    when: SubClause<ComponentId>,
+    when: Arc<SubClause<ComponentId>>,
 }
 
 impl<ComponentId, UserEvent> Subscription<ComponentId, UserEvent>
@@ -387,7 +391,7 @@ mod test {
     use crate::command::Cmd;
     use crate::event::{Key, KeyModifiers, MouseEventKind};
     use crate::mock::{MockComponentId, MockEvent, MockFooInput};
-    use crate::{MockComponent, StateValue};
+    use crate::{MockComponent, NoUserEvent, StateValue};
 
     #[test]
     fn subscription_should_forward() {
@@ -396,7 +400,7 @@ mod test {
         component.attr(Attribute::Focus, AttrValue::Flag(true));
         let sub = Subscription::new(
             MockComponentId::InputFoo,
-            Sub(
+            Sub::new(
                 EventClause::WindowResize,
                 SubClause::HasAttrValue(
                     MockComponentId::InputBar,
@@ -408,7 +412,7 @@ mod test {
         assert_eq!(sub.target(), &MockComponentId::InputFoo);
         assert_eq!(sub.event(), &EventClause::<MockEvent>::WindowResize);
         assert_eq!(
-            sub.when,
+            *sub.when,
             SubClause::HasAttrValue(
                 MockComponentId::InputBar,
                 Attribute::Focus,
@@ -466,7 +470,7 @@ mod test {
         // AndMany all "true", returns "true"
         let sub = Subscription::new(
             MockComponentId::InputFoo,
-            Sub(
+            Sub::new(
                 EventClause::Keyboard(Key::Char('q').into()),
                 SubClause::AndMany(vec![
                     SubClause::IsMounted(MockComponentId::InputFoo),
@@ -481,7 +485,7 @@ mod test {
             &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
         );
         assert_eq!(
-            sub.when,
+            *sub.when,
             SubClause::AndMany(vec![
                 SubClause::IsMounted(MockComponentId::InputFoo),
                 SubClause::IsMounted(MockComponentId::InputBar),
@@ -501,7 +505,7 @@ mod test {
         // AndMany one "false", returns "false"
         let sub = Subscription::new(
             MockComponentId::InputFoo,
-            Sub(
+            Sub::new(
                 EventClause::Keyboard(Key::Char('q').into()),
                 SubClause::AndMany(vec![
                     SubClause::IsMounted(MockComponentId::InputFoo),
@@ -516,7 +520,7 @@ mod test {
             &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
         );
         assert_eq!(
-            sub.when,
+            *sub.when,
             SubClause::AndMany(vec![
                 SubClause::IsMounted(MockComponentId::InputFoo),
                 SubClause::IsMounted(MockComponentId::InputBar),
@@ -536,7 +540,7 @@ mod test {
         // OrMany one "false", returns "true"
         let sub = Subscription::new(
             MockComponentId::InputFoo,
-            Sub(
+            Sub::new(
                 EventClause::Keyboard(Key::Char('q').into()),
                 SubClause::OrMany(vec![
                     SubClause::IsMounted(MockComponentId::InputFoo),
@@ -551,7 +555,7 @@ mod test {
             &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
         );
         assert_eq!(
-            sub.when,
+            *sub.when,
             SubClause::OrMany(vec![
                 SubClause::IsMounted(MockComponentId::InputFoo),
                 SubClause::IsMounted(MockComponentId::InputBar),
@@ -571,7 +575,7 @@ mod test {
         // OrMany all "false", returns "false"
         let sub = Subscription::new(
             MockComponentId::InputFoo,
-            Sub(
+            Sub::new(
                 EventClause::Keyboard(Key::Char('q').into()),
                 SubClause::OrMany(vec![
                     SubClause::not(SubClause::IsMounted(MockComponentId::InputFoo)),
@@ -586,7 +590,7 @@ mod test {
             &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
         );
         assert_eq!(
-            sub.when,
+            *sub.when,
             SubClause::OrMany(vec![
                 SubClause::not(SubClause::IsMounted(MockComponentId::InputFoo)),
                 SubClause::not(SubClause::IsMounted(MockComponentId::InputBar)),
@@ -613,7 +617,7 @@ mod test {
         // AndMany returns "true"
         let sub = Subscription::new(
             MockComponentId::InputFoo,
-            Sub(
+            Sub::new(
                 EventClause::Keyboard(Key::Char('q').into()),
                 SubClause::AndMany(vec![]),
             ),
@@ -623,7 +627,7 @@ mod test {
             sub.event(),
             &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
         );
-        assert_eq!(sub.when, SubClause::AndMany(vec![]));
+        assert_eq!(*sub.when, SubClause::AndMany(vec![]));
         assert_eq!(
             sub.forward(
                 &ev,
@@ -637,7 +641,7 @@ mod test {
         // OrMany returns "true"
         let sub = Subscription::new(
             MockComponentId::InputFoo,
-            Sub(
+            Sub::new(
                 EventClause::Keyboard(Key::Char('q').into()),
                 SubClause::OrMany(vec![]),
             ),
@@ -647,7 +651,7 @@ mod test {
             sub.event(),
             &EventClause::<MockEvent>::Keyboard(Key::Char('q').into())
         );
-        assert_eq!(sub.when, SubClause::OrMany(vec![]));
+        assert_eq!(*sub.when, SubClause::OrMany(vec![]));
         assert_eq!(
             sub.forward(
                 &ev,
@@ -1020,8 +1024,47 @@ mod test {
     fn should_create_a_sub() {
         let actual: Sub<MockComponentId, MockEvent> =
             Sub::new(EventClause::Tick, SubClause::Always);
-        let expected: Sub<MockComponentId, MockEvent> = Sub(EventClause::Tick, SubClause::Always);
+        let expected: Sub<MockComponentId, MockEvent> =
+            Sub::new(EventClause::Tick, SubClause::Always);
         assert_eq!(actual.0, expected.0);
         assert_eq!(actual.1, expected.1);
+    }
+
+    #[test]
+    fn should_share_subs() {
+        // image this is one big clause with "OrMany" or something
+        let no_popup_clause = Arc::new(SubClause::<MockComponentId>::Not(Box::new(
+            SubClause::Always,
+        )));
+
+        let subscriptions: Vec<Sub<MockComponentId, NoUserEvent>> = vec![
+            Sub::new(
+                EventClause::Keyboard(KeyEvent::new(Key::Enter, KeyModifiers::NONE)),
+                no_popup_clause.clone(),
+            ),
+            Sub::new(
+                EventClause::Keyboard(KeyEvent::new(Key::Esc, KeyModifiers::NONE)),
+                no_popup_clause.clone(),
+            ),
+            Sub::new(
+                EventClause::Keyboard(KeyEvent::new(Key::Backspace, KeyModifiers::NONE)),
+                no_popup_clause.clone(),
+            ),
+            Sub::new(EventClause::Tick, SubClause::Always),
+        ];
+
+        // assert that all shared subs point to the same memory location
+        assert!(Arc::ptr_eq(&no_popup_clause, &subscriptions[0].1));
+        assert!(Arc::ptr_eq(&no_popup_clause, &subscriptions[1].1));
+        assert!(Arc::ptr_eq(&no_popup_clause, &subscriptions[2].1));
+        assert!(!Arc::ptr_eq(&no_popup_clause, &subscriptions[3].1));
+    }
+
+    #[test]
+    fn should_allow_creation_without_arc() {
+        let sub1 = Sub::<MockComponentId, NoUserEvent>::new(EventClause::Tick, SubClause::Always);
+        let sub2 = Sub::<MockComponentId, NoUserEvent>::new(EventClause::Tick, SubClause::Always);
+
+        assert!(!Arc::ptr_eq(&sub1.1, &sub2.1));
     }
 }
