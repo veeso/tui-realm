@@ -15,11 +15,7 @@ repository = "https://github.com/veeso/tui-realm-treeview"
 
 [dependencies]
 orange-trees = "0.1.0"
-<<<<<<< optimize
-tuirealm = { version = "2.1.0", default-features = false, features = ["derive"] }
-=======
 tuirealm = { version = "3", default-features = false, features = ["derive"] }
->>>>>>> main
 unicode-width = "0.2"
 
 [dev-dependencies]
