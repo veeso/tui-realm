@@ -194,7 +194,7 @@ impl<V: NodeValue> TreeWidget<'_, V> {
             }
             _ => indent_size,
         };
-        let width: usize = area.width as usize;
+        let width: usize = (area.width + area.x) as usize;
         // Write indentation
         let (start_x, start_y) = buf.set_stringn(
             area.x,
@@ -302,7 +302,12 @@ mod test {
     use crate::mock::mock_tree;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::ratatui::style::Color;
+    use tuirealm::ratatui::{
+        backend::TestBackend,
+        layout::{Constraint, Direction as LayoutDirection, Layout},
+        style::Color,
+        Terminal,
+    };
 
     #[test]
     fn should_construct_default_widget() {
@@ -359,5 +364,56 @@ mod test {
         let widget = TreeWidget::new(&tree);
         // 20th element - height (12) + 1
         assert_eq!(widget.calc_rows_to_skip(&state, 8), 13);
+    }
+
+    #[test]
+    fn should_not_panic_per_layout_direction() {
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        let tree = mock_tree();
+        let constraints = [[50, 50], [100, 0]];
+        for direction in [LayoutDirection::Vertical, LayoutDirection::Horizontal] {
+            for constraint in constraints {
+                let widget = TreeWidget::new(&tree);
+                terminal
+                    .draw(|frame| {
+                        let layout = Layout::default()
+                            .direction(direction)
+                            .constraints(Constraint::from_percentages(constraint))
+                            .split(frame.area());
+                        frame.render_widget(widget, layout[1])
+                    })
+                    .unwrap();
+            }
+        }
+    }
+
+    #[test]
+    fn should_not_panic_when_layout_nested() {
+        let mut terminal = Terminal::new(TestBackend::new(80, 20)).unwrap();
+        let tree = mock_tree();
+        let constraints = [[50, 50], [100, 0]];
+        let directions = [LayoutDirection::Vertical, LayoutDirection::Horizontal];
+        for outer_direction in directions {
+            for inner_direction in directions {
+                for outer_constraint in constraints {
+                    for inner_constraint in constraints {
+                        let widget = TreeWidget::new(&tree);
+                        terminal
+                            .draw(|frame| {
+                                let layout = Layout::default()
+                                    .direction(outer_direction)
+                                    .constraints(Constraint::from_percentages(outer_constraint))
+                                    .split(frame.area());
+                                let nested_layout = Layout::default()
+                                    .direction(inner_direction)
+                                    .constraints(inner_constraint)
+                                    .split(layout[1]);
+                                frame.render_widget(widget, nested_layout[1])
+                            })
+                            .unwrap();
+                    }
+                }
+            }
+        }
     }
 }
