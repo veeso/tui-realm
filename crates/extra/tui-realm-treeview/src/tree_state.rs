@@ -283,10 +283,10 @@ impl TreeState {
 #[cfg(test)]
 mod test {
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::mock::mock_tree;
-
-    use pretty_assertions::assert_eq;
 
     #[test]
     fn should_initialize_tree_state() {

@@ -2,15 +2,13 @@
 //!
 //! This module implements the tui widget for rendering a treeview
 
-use super::{Node, NodeValue, Tree, TreeState};
-
-use tuirealm::ratatui::{
-    buffer::Buffer,
-    layout::Rect,
-    style::Style,
-    widgets::{Block, StatefulWidget, Widget},
-};
+use tuirealm::ratatui::buffer::Buffer;
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::style::Style;
+use tuirealm::ratatui::widgets::{Block, StatefulWidget, Widget};
 use unicode_width::UnicodeWidthStr;
+
+use super::{Node, NodeValue, Tree, TreeState};
 
 /// ## TreeWidget
 ///
@@ -292,16 +290,14 @@ impl<V: NodeValue> TreeWidget<'_, V> {
 #[cfg(test)]
 mod test {
 
+    use pretty_assertions::assert_eq;
+    use tuirealm::ratatui::backend::TestBackend;
+    use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+    use tuirealm::ratatui::style::Color;
+    use tuirealm::ratatui::Terminal;
+
     use super::*;
     use crate::mock::mock_tree;
-
-    use pretty_assertions::assert_eq;
-    use tuirealm::ratatui::{
-        backend::TestBackend,
-        layout::{Constraint, Direction as LayoutDirection, Layout},
-        style::Color,
-        Terminal,
-    };
 
     #[test]
     fn should_construct_default_widget() {

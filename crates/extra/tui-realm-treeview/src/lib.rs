@@ -209,17 +209,19 @@ mod tree_state;
 mod widget;
 
 use std::iter;
-// internal
-pub use tree_state::TreeState;
-pub use widget::TreeWidget;
+
 // deps
 pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
+// internal
+pub use tree_state::TreeState;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, Props, Style, TextModifiers, TextSpan,
 };
-use tuirealm::ratatui::{layout::Rect, widgets::Block};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::Block;
 use tuirealm::{Frame, MockComponent, State, StateValue};
+pub use widget::TreeWidget;
 
 /// Tree node value.
 pub trait NodeValue: Default {
@@ -637,10 +639,10 @@ impl<V: NodeValue> MockComponent for TreeView<V> {
 #[cfg(test)]
 mod test {
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::mock::mock_tree;
-
-    use pretty_assertions::assert_eq;
 
     #[test]
     fn should_initialize_component() {

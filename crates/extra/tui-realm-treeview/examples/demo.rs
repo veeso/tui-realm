@@ -1,20 +1,22 @@
 use std::path::{Path, PathBuf};
 use std::time::Duration;
+
 use tui_realm_stdlib::{Input, Phantom};
-use tuirealm::terminal::CrosstermTerminalAdapter;
-use tuirealm::{
-    application::PollStrategy,
-    command::{Cmd, CmdResult, Direction, Position},
-    event::{Event, Key, KeyEvent, KeyModifiers},
-    props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, InputType, Style},
-    terminal::TerminalBridge,
-    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue, Sub,
-    SubClause, SubEventClause, Update,
+// treeview
+use tui_realm_treeview::{Node, Tree, TreeView, TREE_CMD_CLOSE, TREE_CMD_OPEN};
+use tuirealm::application::PollStrategy;
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
+use tuirealm::props::{
+    Alignment, AttrValue, Attribute, BorderType, Borders, Color, InputType, Style,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
-// treeview
-use tui_realm_treeview::{Node, Tree, TreeView, TREE_CMD_CLOSE, TREE_CMD_OPEN};
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
+use tuirealm::{
+    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue, Sub,
+    SubClause, SubEventClause, Update,
+};
 
 const MAX_DEPTH: usize = 3;
 
