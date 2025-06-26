@@ -174,7 +174,7 @@ where
 /// - [`SubClause::Not`]: Negates inner condition
 /// - [`SubClause::And`]: the AND of the two clauses must be `true`
 /// - [`SubClause::Or`]: the OR of the two clauses must be `true`
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 #[allow(clippy::large_enum_variant)]
 pub enum SubClause<ComponentId>
 where
