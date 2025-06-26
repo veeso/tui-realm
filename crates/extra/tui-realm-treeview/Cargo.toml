@@ -1,8 +1,8 @@
 [package]
 name = "tui-realm-treeview"
-version = "2.0.0"
+version = "3.0.0"
 authors = ["Christian Visintin"]
-edition = "2021"
+edition = "2024"
 categories = ["command-line-utilities"]
 description = "Treeview component for tui-realm"
 documentation = "https://docs.rs/tui-realm-treeview"
@@ -19,7 +19,7 @@ tuirealm = { version = "3", default-features = false, features = ["derive"] }
 unicode-width = "0.2"
 
 [dev-dependencies]
-crossterm = "0.28"
+crossterm = "0.29"
 pretty_assertions = "1"
 tui-realm-stdlib = "3"
 

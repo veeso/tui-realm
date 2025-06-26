@@ -223,7 +223,7 @@ use tuirealm::ratatui::widgets::Block;
 use tuirealm::{Frame, MockComponent, State, StateValue};
 pub use widget::TreeWidget;
 
-/// Tree node value.
+/// [`Tree`] node value.
 pub trait NodeValue: Default {
     /// Return iterator over render parts - text with it style.
     /// If style is `None`, then it will be inherited from widget style.
@@ -291,74 +291,54 @@ impl<V: NodeValue> Default for TreeView<V> {
 }
 
 impl<V: NodeValue> TreeView<V> {
-    // -- constructors
-
-    /// ### foreground
-    ///
     /// Set widget foreground
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
-    /// ### background
-    ///
     /// Set widget background
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
-    /// ### inactive
-    ///
     /// Set another style from default to use when component is inactive
     pub fn inactive(mut self, s: Style) -> Self {
         self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
-    /// ### borders
-    ///
     /// Set widget border properties
     pub fn borders(mut self, b: Borders) -> Self {
         self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
-    /// ### modifiers
-    ///
     /// Set widget text modifiers
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
         self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
-    /// ### title
-    ///
     /// Set widget title
     pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
         self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
         self
     }
 
-    /// ### highlight_symbol
-    ///
     /// Set symbol to prepend to highlighted node
     pub fn highlight_symbol<S: Into<String>>(mut self, symbol: S) -> Self {
         self.attr(Attribute::HighlightedStr, AttrValue::String(symbol.into()));
         self
     }
 
-    /// ### highlighted_color
-    ///
     /// Set color to apply to highlighted item
     pub fn highlighted_color(mut self, color: Color) -> Self {
         self.attr(Attribute::HighlightedColor, AttrValue::Color(color));
         self
     }
 
-    /// ### initial_node
-    ///
     /// Set initial node for tree state.
     /// NOTE: this must be specified after `with_tree`
     pub fn initial_node<S: Into<String>>(mut self, node: S) -> Self {
@@ -369,8 +349,6 @@ impl<V: NodeValue> TreeView<V> {
         self
     }
 
-    /// ### preserve_state
-    ///
     /// Set whether to preserve state on tree change
     pub fn preserve_state(mut self, preserve: bool) -> Self {
         self.attr(
@@ -380,48 +358,34 @@ impl<V: NodeValue> TreeView<V> {
         self
     }
 
-    /// ### indent_size
-    ///
     /// Set indent size for widget for each level of depth
     pub fn indent_size(mut self, sz: u16) -> Self {
         self.attr(Attribute::Custom(TREE_INDENT_SIZE), AttrValue::Size(sz));
         self
     }
 
-    /// ### scroll_step
-    ///
     /// Set scroll step for scrolling command
     pub fn scroll_step(mut self, step: usize) -> Self {
         self.attr(Attribute::ScrollStep, AttrValue::Length(step));
         self
     }
 
-    /// ### with_tree
-    ///
     /// Set tree to use as data
     pub fn with_tree(mut self, tree: Tree<V>) -> Self {
         self.tree = tree;
         self
     }
 
-    // -- tree methods
-
-    /// ### tree
-    ///
     /// Get a reference to tree
     pub fn tree(&self) -> &Tree<V> {
         &self.tree
     }
 
-    /// ### tree_mut
-    ///
     /// Get mutable reference to tree
     pub fn tree_mut(&mut self) -> &mut Tree<V> {
         &mut self.tree
     }
 
-    /// ### set_tree
-    ///
     /// Set new tree in component.
     /// Current state is preserved if `PRESERVE_STATE` is set to `AttrValue::Flag(true)`
     pub fn set_tree(&mut self, tree: Tree<V>) {
@@ -437,17 +401,11 @@ impl<V: NodeValue> TreeView<V> {
         );
     }
 
-    /// ### tree_state
-    ///
     /// Get a reference to the current tree state
     pub fn tree_state(&self) -> &TreeState {
         &self.states
     }
 
-    // -- private
-
-    /// ### changed
-    ///
     /// Returns whether selectd node has changed
     fn changed(&self, prev: Option<&str>) -> CmdResult {
         match self.states.selected() {
@@ -797,9 +755,11 @@ mod test {
             component.perform(Cmd::Custom(TREE_CMD_CLOSE)),
             CmdResult::None
         );
-        assert!(component
-            .tree_state()
-            .is_closed(component.tree().root().query(&String::from("aA1")).unwrap()));
+        assert!(
+            component
+                .tree_state()
+                .is_closed(component.tree().root().query(&String::from("aA1")).unwrap())
+        );
     }
 
     #[test]
@@ -811,9 +771,11 @@ mod test {
             component.perform(Cmd::Custom(TREE_CMD_OPEN)),
             CmdResult::None
         );
-        assert!(component
-            .tree_state()
-            .is_open(component.tree().root().query(&String::from("aA")).unwrap()));
+        assert!(
+            component
+                .tree_state()
+                .is_open(component.tree().root().query(&String::from("aA")).unwrap())
+        );
     }
 
     #[test]

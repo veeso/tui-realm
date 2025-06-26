@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [3.0.0](#300)
   - [2.0.0](#200)
   - [1.2.0](#120)
   - [1.1.0](#110)
@@ -12,6 +13,15 @@
   - [0.1.0](#010)
 
 ---
+
+## 3.0.0
+
+Released on 26/06/2025
+
+- Migrated to `tuirealm` 3.x
+- Removed some useless allocations [PR13](https://github.com/veeso/tui-realm-treeview/pull/13)
+- LayoutDirection::Horizontal needs to be accounted for in render [PR12](https://github.com/veeso/tui-realm-treeview/pull/12)
+- Selected line is now rendered in the middle of the area [PR10](https://github.com/veeso/tui-realm-treeview/pull/10)
 
 ## 2.0.0
 

@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::{Input, Phantom};
 // treeview
-use tui_realm_treeview::{Node, Tree, TreeView, TREE_CMD_CLOSE, TREE_CMD_OPEN};
+use tui_realm_treeview::{Node, TREE_CMD_CLOSE, TREE_CMD_OPEN, Tree, TreeView};
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
@@ -55,19 +55,21 @@ impl Model {
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
-        assert!(app
-            .mount(
+        assert!(
+            app.mount(
                 Id::FsTree,
                 Box::new(FsTree::new(Tree::new(Self::dir_tree(p, MAX_DEPTH)), None)),
                 vec![]
             )
-            .is_ok());
-        assert!(app
-            .mount(Id::GoTo, Box::new(GoTo::default()), vec![])
-            .is_ok());
+            .is_ok()
+        );
+        assert!(
+            app.mount(Id::GoTo, Box::new(GoTo::default()), vec![])
+                .is_ok()
+        );
         // Mount global listener which will listen for <ESC>
-        assert!(app
-            .mount(
+        assert!(
+            app.mount(
                 Id::GlobalListener,
                 Box::new(GlobalListener::default()),
                 vec![Sub::new(
@@ -78,7 +80,8 @@ impl Model {
                     SubClause::Always
                 )]
             )
-            .is_ok());
+            .is_ok()
+        );
         // We need to give focus to input then
         assert!(app.active(&Id::FsTree).is_ok());
         Model {
@@ -150,14 +153,15 @@ impl Model {
         };
         // Remount tree
         assert!(self.app.umount(&Id::FsTree).is_ok());
-        assert!(self
-            .app
-            .mount(
-                Id::FsTree,
-                Box::new(FsTree::new(self.tree.clone(), current_node)),
-                vec![]
-            )
-            .is_ok());
+        assert!(
+            self.app
+                .mount(
+                    Id::FsTree,
+                    Box::new(FsTree::new(self.tree.clone(), current_node)),
+                    vec![]
+                )
+                .is_ok()
+        );
         assert!(self.app.active(&Id::FsTree).is_ok());
     }
 }

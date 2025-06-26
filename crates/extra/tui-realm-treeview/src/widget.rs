@@ -10,9 +10,7 @@ use unicode_width::UnicodeWidthStr;
 
 use super::{Node, NodeValue, Tree, TreeState};
 
-/// ## TreeWidget
-///
-/// tui-rs widget implementation of a tree view
+/// tui-rs widget implementation of a [`crate::TreeView`]
 pub struct TreeWidget<'a, V: NodeValue> {
     /// Block properties
     block: Option<Block<'a>>,
@@ -24,14 +22,12 @@ pub struct TreeWidget<'a, V: NodeValue> {
     highlight_symbol: Option<&'a str>,
     /// Spaces to use for indentation
     indent_size: usize,
-    /// Tree to render
+    /// [`Tree`] to render
     tree: &'a Tree<V>,
 }
 
 impl<'a, V: NodeValue> TreeWidget<'a, V> {
-    /// ### new
-    ///
-    /// Setup a new `TreeWidget`
+    /// Setup a new [`TreeWidget`]
     pub fn new(tree: &'a Tree<V>) -> Self {
         Self {
             block: None,
@@ -43,48 +39,36 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
         }
     }
 
-    /// ### block
-    ///
     /// Set block to render around the tree view
     pub fn block(mut self, block: Block<'a>) -> Self {
         self.block = Some(block);
         self
     }
 
-    /// ### style
-    ///
     /// Set style for tree view
     pub fn style(mut self, s: Style) -> Self {
         self.style = s;
         self
     }
 
-    /// ### highlight_style
-    ///
     /// Set highlighted entry style
     pub fn highlight_style(mut self, s: Style) -> Self {
         self.highlight_style = s;
         self
     }
 
-    /// ### highlight_symbol
-    ///
     /// Set symbol to prepend to highlighted entry
     pub fn highlight_symbol(mut self, s: &'a str) -> Self {
         self.highlight_symbol = Some(s);
         self
     }
 
-    /// ### indent_size
-    ///
     /// Size for indentation
     pub fn indent_size(mut self, sz: usize) -> Self {
         self.indent_size = sz;
         self
     }
 }
-
-// -- render
 
 struct Render {
     depth: usize,
@@ -242,8 +226,6 @@ impl<V: NodeValue> TreeWidget<'_, V> {
         }
     }
 
-    /// ### calc_rows_to__skip
-    ///
     /// Calculate rows to skip before starting rendering the current tree
     fn calc_rows_to_skip(&self, state: &TreeState, height: u16) -> usize {
         // if no node is selected, return 0
@@ -252,8 +234,6 @@ impl<V: NodeValue> TreeWidget<'_, V> {
             None => return 0,
         };
 
-        /// ### visit_nodes
-        ///
         /// Recursive visit each node (excluding closed ones) and calculate full size and index of selected node
         fn visit_nodes<V: NodeValue>(
             node: &Node<V>,
@@ -291,10 +271,10 @@ impl<V: NodeValue> TreeWidget<'_, V> {
 mod test {
 
     use pretty_assertions::assert_eq;
+    use tuirealm::ratatui::Terminal;
     use tuirealm::ratatui::backend::TestBackend;
     use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
     use tuirealm::ratatui::style::Color;
-    use tuirealm::ratatui::Terminal;
 
     use super::*;
     use crate::mock::mock_tree;
