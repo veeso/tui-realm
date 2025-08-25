@@ -303,18 +303,18 @@ where
     fn poll(&mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Event<UserEvent>>> {
         match strategy {
             PollStrategy::Once => self
-                .poll_listener()
+                .poll_listener_timeout()
                 .map(|x| x.map(|x| vec![x]).unwrap_or_default()),
-            PollStrategy::TryFor(timeout) => self.poll_with_timeout(timeout),
-            PollStrategy::UpTo(times) => self.poll_times(times),
+            PollStrategy::TryFor(timeout) => self.poll_try_for(timeout),
+            PollStrategy::UpTo(times) => self.poll_upto(times),
         }
     }
 
     /// Poll event listener up to `t` times
-    fn poll_times(&mut self, t: usize) -> ApplicationResult<Vec<Event<UserEvent>>> {
+    fn poll_upto(&mut self, t: usize) -> ApplicationResult<Vec<Event<UserEvent>>> {
         let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(t);
         for _ in 0..t {
-            match self.poll_listener() {
+            match self.poll_listener_timeout() {
                 Err(err) => return Err(err),
                 Ok(None) => break,
                 Ok(Some(ev)) => evs.push(ev),
@@ -324,11 +324,11 @@ where
     }
 
     /// Poll event listener until `timeout` is elapsed
-    fn poll_with_timeout(&mut self, timeout: Duration) -> ApplicationResult<Vec<Event<UserEvent>>> {
+    fn poll_try_for(&mut self, timeout: Duration) -> ApplicationResult<Vec<Event<UserEvent>>> {
         let started = Instant::now();
         let mut evs: Vec<Event<UserEvent>> = Vec::new();
         while started.elapsed() < timeout {
-            match self.poll_listener() {
+            match self.poll_listener_timeout() {
                 Err(err) => return Err(err),
                 Ok(None) => continue,
                 Ok(Some(ev)) => evs.push(ev),
@@ -337,9 +337,9 @@ where
         Ok(evs)
     }
 
-    /// Poll event listener once
-    fn poll_listener(&mut self) -> ApplicationResult<Option<Event<UserEvent>>> {
-        self.listener.poll().map_err(ApplicationError::from)
+    /// Poll event listener once with timeout
+    fn poll_listener_timeout(&mut self) -> ApplicationResult<Option<Event<UserEvent>>> {
+        self.listener.poll_timeout().map_err(ApplicationError::from)
     }
 
     /// Forward event to current active component, if any.
@@ -378,11 +378,16 @@ where
 /// Poll strategy defines how to call `Application::poll` on the event listener.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PollStrategy {
-    /// `Application::poll` function will be called once
+    /// `Application::poll` function will be called once, with the timeout specified in `EventListenerCfg`.
     Once,
-    /// The application will keep waiting for events for the provided duration
+    /// The application will keep waiting for events for the provided duration.
+    ///
+    /// This will block until the full duration is over, regardless if there is a event or not.
+    /// Will collect all events during that time.
     TryFor(Duration),
     /// `Application::poll` function will be called up to `n` times, until it will return [`Option::None`].
+    ///
+    /// This will block if there are not `n` events for up to the timeout specified in `EventListenerCfg`.
     UpTo(usize),
 }
 

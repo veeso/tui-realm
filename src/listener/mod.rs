@@ -251,11 +251,12 @@ where
         Ok(())
     }
 
-    /// Checks whether there are new events available from event
-    pub fn poll(&self) -> ListenerResult<Option<Event<UserEvent>>> {
+    /// Checks whether there are new events available, blocking until either a event is recieved or [`poll_timeout`](Self::poll_timeout).
+    pub fn poll_timeout(&self) -> ListenerResult<Option<Event<UserEvent>>> {
         match self.recv.recv_timeout(self.poll_timeout) {
             Ok(msg) => ListenerResult::from(msg),
             Err(mpsc::RecvTimeoutError::Timeout) => Ok(None),
+            // likely should be "ListenerDied"
             Err(_) => Err(ListenerError::PollFailed),
         }
     }
@@ -373,17 +374,17 @@ mod test {
         thread::sleep(Duration::from_secs(1));
         // Poll (event)
         assert_eq!(
-            listener.poll().ok().unwrap().unwrap(),
+            listener.poll_timeout().ok().unwrap().unwrap(),
             Event::Keyboard(KeyEvent::from(Key::Enter))
         );
         // Poll (tick)
-        assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
+        assert_eq!(listener.poll_timeout().ok().unwrap().unwrap(), Event::Tick);
         // Poll (None)
-        assert!(listener.poll().ok().unwrap().is_none());
+        assert!(listener.poll_timeout().ok().unwrap().is_none());
         // Wait 3 seconds
         thread::sleep(Duration::from_secs(3));
         // New tick
-        assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
+        assert_eq!(listener.poll_timeout().ok().unwrap().unwrap(), Event::Tick);
         // Stop
         assert!(listener.stop().is_ok());
     }
@@ -398,14 +399,14 @@ mod test {
         thread::sleep(Duration::from_millis(100));
         assert!(listener.pause().is_ok());
         // Should be some
-        assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
+        assert_eq!(listener.poll_timeout().ok().unwrap().unwrap(), Event::Tick);
         // Wait tick time
         thread::sleep(Duration::from_secs(1));
-        assert_eq!(listener.poll().ok().unwrap(), None);
+        assert_eq!(listener.poll_timeout().ok().unwrap(), None);
         // Unpause
         assert!(listener.unpause().is_ok());
         thread::sleep(Duration::from_millis(300));
-        assert_eq!(listener.poll().ok().unwrap().unwrap(), Event::Tick);
+        assert_eq!(listener.poll_timeout().ok().unwrap().unwrap(), Event::Tick);
         // Stop
         assert!(listener.stop().is_ok());
     }
@@ -436,7 +437,7 @@ mod test {
         let mut events = Vec::with_capacity(3);
 
         // due to how execution on the runtime works, events may arrive in any order
-        while let Some(event) = listener.poll().ok().flatten() {
+        while let Some(event) = listener.poll_timeout().ok().flatten() {
             events.push(event);
         }
 
