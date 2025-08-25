@@ -13,6 +13,7 @@ mod task_pool;
 mod worker;
 
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::TryRecvError;
 // -- export
 use std::sync::{Arc, mpsc};
 use std::thread::{self, JoinHandle};
@@ -261,6 +262,16 @@ where
         }
     }
 
+    /// Checks whether there are new events available, without blocking for any amount of time
+    pub fn try_poll(&self) -> ListenerResult<Option<Event<UserEvent>>> {
+        match self.recv.try_recv() {
+            Ok(msg) => ListenerResult::from(msg),
+            Err(TryRecvError::Empty) => Ok(None),
+            // likely should be "ListenerDied"
+            Err(_) => Err(ListenerError::PollFailed),
+        }
+    }
+
     /// Setup the thread and returns the structs necessary to interact with it
     fn setup_sync_worker(
         mut self,
@@ -407,6 +418,36 @@ mod test {
         assert!(listener.unpause().is_ok());
         thread::sleep(Duration::from_millis(300));
         assert_eq!(listener.poll_timeout().ok().unwrap().unwrap(), Event::Tick);
+        // Stop
+        assert!(listener.stop().is_ok());
+    }
+
+    #[test]
+    fn try_poll_should_work() {
+        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start(
+            vec![SyncPort::new(
+                Box::new(MockPoll::default()),
+                Duration::from_secs(10),
+                1,
+            )],
+            Some(Duration::from_secs(3)),
+            false,
+        );
+        // Wait 1 second
+        thread::sleep(Duration::from_secs(1));
+        // Poll (event)
+        assert_eq!(
+            listener.try_poll().ok().unwrap().unwrap(),
+            Event::Keyboard(KeyEvent::from(Key::Enter))
+        );
+        // Poll (tick)
+        assert_eq!(listener.try_poll().ok().unwrap().unwrap(), Event::Tick);
+        // Poll (None)
+        assert!(listener.try_poll().ok().unwrap().is_none());
+        // Wait 3 seconds
+        thread::sleep(Duration::from_secs(3));
+        // New tick
+        assert_eq!(listener.try_poll().ok().unwrap().unwrap(), Event::Tick);
         // Stop
         assert!(listener.stop().is_ok());
     }
