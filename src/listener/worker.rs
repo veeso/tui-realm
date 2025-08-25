@@ -224,7 +224,7 @@ mod test {
         assert!(worker.next_event() <= Duration::from_secs(5));
         // Receive
         assert_eq!(
-            ListenerResult::from(rx.recv().ok().unwrap()).ok().unwrap(),
+            ListenerResult::<Option<_>>::from(rx.recv().unwrap()).unwrap(),
             Some(Event::Keyboard(KeyEvent::from(Key::Enter)))
         );
     }
@@ -251,7 +251,7 @@ mod test {
         assert!(worker.next_tick > Instant::now());
         // Receive
         assert_eq!(
-            ListenerResult::from(rx.recv().ok().unwrap()).ok().unwrap(),
+            ListenerResult::<Option<_>>::from(rx.recv().unwrap()).unwrap(),
             Some(Event::Tick)
         );
     }

@@ -262,6 +262,15 @@ where
         }
     }
 
+    /// Checks whether there are new events available, blocking until a event is recieved.
+    pub fn poll_blocking(&self) -> ListenerResult<Event<UserEvent>> {
+        match self.recv.recv() {
+            Ok(msg) => ListenerResult::from(msg),
+            // likely should be "ListenerDied"
+            Err(_) => Err(ListenerError::PollFailed),
+        }
+    }
+
     /// Checks whether there are new events available, without blocking for any amount of time
     pub fn try_poll(&self) -> ListenerResult<Option<Event<UserEvent>>> {
         match self.recv.try_recv() {
@@ -362,8 +371,23 @@ where
     }
 }
 
+impl<UserEvent> From<ListenerMsg<UserEvent>> for ListenerResult<Event<UserEvent>>
+where
+    UserEvent: Eq + PartialEq + Clone + Send,
+{
+    fn from(msg: ListenerMsg<UserEvent>) -> Self {
+        match msg {
+            ListenerMsg::Error(err) => Err(err),
+            ListenerMsg::Tick => Ok(Event::Tick),
+            ListenerMsg::User(ev) => Ok(ev),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
+    use std::time::Instant;
+
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -448,6 +472,37 @@ mod test {
         thread::sleep(Duration::from_secs(3));
         // New tick
         assert_eq!(listener.try_poll().ok().unwrap().unwrap(), Event::Tick);
+        // Stop
+        assert!(listener.stop().is_ok());
+    }
+
+    #[test]
+    fn poll_blocking_should_work() {
+        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start(
+            vec![SyncPort::new(
+                Box::new(MockPoll::default()),
+                Duration::from_secs(10),
+                1,
+            )],
+            Some(Duration::from_secs(3)),
+            false,
+        );
+        // Wait 1 second
+        thread::sleep(Duration::from_secs(1));
+        // Poll (event)
+        assert_eq!(
+            listener.poll_blocking().ok().unwrap(),
+            Event::Keyboard(KeyEvent::from(Key::Enter))
+        );
+        // Poll (tick)
+        assert_eq!(listener.poll_blocking().ok().unwrap(), Event::Tick);
+        let before = Instant::now();
+        // Poll (tick) (with time waiting)
+        // blocking should wait until there is another event avaialble
+        assert_eq!(listener.poll_blocking().ok().unwrap(), Event::Tick);
+        let diff = Instant::now().duration_since(before);
+        // and the time for a tick is 3 seconds, and it is called immediately after the last poll, so it should be at least half that time between then
+        assert!(diff > Duration::from_millis(1500));
         // Stop
         assert!(listener.stop().is_ok());
     }

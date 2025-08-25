@@ -52,6 +52,7 @@ Unreleased
 - Remove unnecessary bounds on Input Event Listeners.
 - Improve documentation for `PollAsync` and `Poll`.
 - Add `PollStrategy::UpToNoWait` which is practially the same as `PollStrategy::UpTo`, just that it does not block again after the first event.
+- Add `PollStrategy::BlockCollectUpTo` to block until there is at least one event available, then collect up to `n` events, if available without blocking again.
 
 ## 3.0.1
 

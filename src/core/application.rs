@@ -308,6 +308,7 @@ where
             PollStrategy::TryFor(timeout) => self.poll_try_for(timeout),
             PollStrategy::UpTo(times) => self.poll_upto(times),
             PollStrategy::UpToNoWait(times) => self.poll_upto_nowait(times),
+            PollStrategy::BlockCollectUpTo(times) => self.poll_blocking_upto(times),
         }
     }
 
@@ -350,6 +351,31 @@ where
         Ok(evs)
     }
 
+    /// Poll event listener up to `t` times, without waiting to return if there are events in a blocking fashion.
+    fn poll_blocking_upto(&mut self, t: usize) -> ApplicationResult<Vec<Event<UserEvent>>> {
+        if t == 0 {
+            return Ok(Vec::new());
+        }
+
+        let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(t);
+
+        match self.poll_listener_blocking() {
+            Err(err) => return Err(err),
+            Ok(ev) => evs.push(ev),
+        }
+
+        let t = t.saturating_sub(1);
+
+        for _ in 0..t {
+            match self.try_poll_listener() {
+                Err(err) => return Err(err),
+                Ok(None) => break,
+                Ok(Some(ev)) => evs.push(ev),
+            }
+        }
+        Ok(evs)
+    }
+
     /// Poll event listener until `timeout` is elapsed
     fn poll_try_for(&mut self, timeout: Duration) -> ApplicationResult<Vec<Event<UserEvent>>> {
         let started = Instant::now();
@@ -367,6 +393,13 @@ where
     /// Poll event listener once with timeout
     fn poll_listener_timeout(&mut self) -> ApplicationResult<Option<Event<UserEvent>>> {
         self.listener.poll_timeout().map_err(ApplicationError::from)
+    }
+
+    /// Poll event listener once in a blocking fashion
+    fn poll_listener_blocking(&mut self) -> ApplicationResult<Event<UserEvent>> {
+        self.listener
+            .poll_blocking()
+            .map_err(ApplicationError::from)
     }
 
     /// Try to Poll event listener once, without blocking whatsoever
@@ -429,6 +462,11 @@ pub enum PollStrategy {
     ///
     /// This *might* become the default [`UpTo`](PollStrategy::UpTo) behavior in the future.
     UpToNoWait(usize),
+
+    /// Block until there is at least one event available, and then collect `n-1` additional events, if available.
+    ///
+    /// This ingores the timeout set in `EventListenerCfg`.
+    BlockCollectUpTo(usize),
 }
 
 // -- error
@@ -853,6 +891,63 @@ mod test {
         let time_taken = Instant::now().duration_since(before);
 
         // messages should be available, so "UpToNoWait" should not block again after the first event
+        assert!(time_taken < Duration::from_secs(5));
+    }
+
+    #[test]
+    fn strategy_blocking_upto_should_work() {
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> = Application::init(
+            listener_config_with_tick(Duration::from_secs(60))
+                .poll_timeout(Duration::from_secs(60)),
+        );
+
+        // Mount foo and bar
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputFoo,
+                    Box::new(MockFooInput::default()),
+                    vec![]
+                )
+                .is_ok()
+        );
+        assert!(
+            application
+                .mount(
+                    MockComponentId::InputBar,
+                    Box::new(MockBarInput::default()),
+                    vec![
+                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(
+                            // NOTE: won't be thrown, since requires focus
+                            SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
+                            SubClause::HasAttrValue(
+                                MockComponentId::InputBar,
+                                Attribute::Focus,
+                                AttrValue::Flag(true)
+                            )
+                        )
+                    ]
+                )
+                .is_ok()
+        );
+        // Active FOO
+        assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        let before = Instant::now();
+
+        assert_eq!(
+            application
+                .tick(PollStrategy::BlockCollectUpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
+        );
+
+        let time_taken = Instant::now().duration_since(before);
+
+        // messages should be available, so "BlockingCollectUpTo" should not block again after the first event
         assert!(time_taken < Duration::from_secs(5));
     }
 
