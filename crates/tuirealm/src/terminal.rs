@@ -183,7 +183,7 @@ where
     /// previous frame to determine what has changed, and only the changes are written to the
     /// terminal. If the render callback does not fully render the frame, the terminal will not be
     /// in a consistent state.
-    pub fn draw<F>(&mut self, render_callback: F) -> TerminalResult<CompletedFrame>
+    pub fn draw<F>(&mut self, render_callback: F) -> TerminalResult<CompletedFrame<'_>>
     where
         F: FnOnce(&mut Frame<'_>),
     {
