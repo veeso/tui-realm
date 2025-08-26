@@ -329,6 +329,6 @@ mod test {
         sleep(Duration::from_millis(25)).await; // wait for at least 1 event
 
         listener.stop().unwrap();
-        assert_eq!(listener.poll(), Ok(Some(Event::Tick)));
+        assert_eq!(listener.poll_timeout(), Ok(Some(Event::Tick)));
     }
 }
