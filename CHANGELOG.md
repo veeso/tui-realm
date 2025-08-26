@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [3.1.0](#310)
   - [3.0.1](#301)
   - [3.0.0](#300)
   - [2.2.0](#220)
@@ -43,9 +44,9 @@
 
 ---
 
-## next
+## 3.1.0
 
-Unreleased
+Released on 26/08/2025
 
 - Remove `PartialOrd` bound for `UserEvent`.
 - Add `Send` bound for `UserEvent` to trait `Poll`, as was already required for adding it to `SyncPort`.
