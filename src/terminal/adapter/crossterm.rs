@@ -35,7 +35,7 @@ impl CrosstermTerminalAdapter {
 }
 
 impl TerminalAdapter for CrosstermTerminalAdapter {
-    fn draw<F>(&mut self, render_callback: F) -> TerminalResult<ratatui::CompletedFrame>
+    fn draw<F>(&mut self, render_callback: F) -> TerminalResult<ratatui::CompletedFrame<'_>>
     where
         F: FnOnce(&mut ratatui::Frame<'_>),
     {
