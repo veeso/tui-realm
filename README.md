@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 3.0.1 (09/06/2025)</p>
+<p align="center">Current version: 3.1.0 (26/08/2025)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
