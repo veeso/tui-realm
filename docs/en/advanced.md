@@ -179,7 +179,7 @@ Whenever you want to restore event propagation, just call `application.unlock_su
 ## Tick Event
 
 The tick event is a special kind of event, which is raised by the **Application** with a specified interval.
-Whenevever initializing the **Applcation** you can specify the tick interval, as in the following example:
+Whenever initializing the **Application** you can specify the tick interval, as in the following example:
 
 ```rust
 let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
