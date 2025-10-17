@@ -45,6 +45,12 @@
 
 ---
 
+## next
+
+Unreleased
+
+- Add `PropPayload::Any` variant using `dyn Any`, allowing arbitrary data via `MockComponent::query` and `MockComponent::attr`.
+
 ## 3.2.0
 
 Released on 10/11/2025
