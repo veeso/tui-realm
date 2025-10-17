@@ -70,6 +70,11 @@ name = "user-events"
 path = "examples/user_events/user_events.rs"
 required-features = ["crossterm"]
 
+[[example]]
+name = "arbitrary-data"
+path = "examples/arbitrary_data.rs"
+required-features = ["crossterm"]
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
