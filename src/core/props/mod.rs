@@ -54,6 +54,11 @@ impl Props {
         self.attrs.get(&query)
     }
 
+    /// Get, if any, the attribute associated to the selector by mutable reference.
+    pub fn get_mut(&mut self, query: Attribute) -> Option<&mut AttrValue> {
+        self.attrs.get_mut(&query)
+    }
+
     /// Set a new attribute into Properties
     pub fn set(&mut self, query: Attribute, value: AttrValue) {
         self.attrs.insert(query, value);
@@ -498,6 +503,20 @@ mod test {
         assert_eq!(
             props.get_ref(Attribute::Alignment),
             Some(&AttrValue::Alignment(Alignment::Left))
+        );
+
+        let val = props.get_mut(Attribute::Alignment).unwrap();
+        assert_eq!(val, &AttrValue::Alignment(Alignment::Left));
+        // TODO: should be abstracted with "AttrValue::as_alignment_mut().unwrap()" when available
+        let v = match val {
+            AttrValue::Alignment(val) => val,
+            _ => unimplemented!(),
+        };
+        *v = Alignment::Center;
+
+        assert_eq!(
+            props.get_ref(Attribute::Alignment).unwrap(),
+            &AttrValue::Alignment(Alignment::Center)
         );
     }
 

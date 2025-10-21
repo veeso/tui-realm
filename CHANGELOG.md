@@ -44,6 +44,12 @@
 
 ---
 
+## next
+
+Unreleased
+
+- Add `get_mut` function for `Props`.
+
 ## 3.1.0
 
 Released on 26/08/2025
