@@ -281,7 +281,7 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
 
                 quote! { 0 }
             }
-            _ => panic!("struct {ident} does not contain named fields"),
+            _ => panic!("Only Named And Tuple structs are supported"),
         };
 
         // Implement MockComponent for type
