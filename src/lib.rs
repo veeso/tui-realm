@@ -19,6 +19,9 @@
 //! So basically instead of implementing `MockComponent` for your components, you can just do as follows:
 //!
 //! ```rust
+//! # use tuirealm_derive::MockComponent;
+//! # use tui_realm_stdlib::Input;
+//! #
 //! #[derive(MockComponent)]
 //! pub struct IpAddressInput {
 //!   component: Input,
@@ -32,6 +35,15 @@
 //! If we give a deeper look at the macro, we'll see that what it does is:
 //!
 //! ```rust
+//! # use tuirealm::command::{Cmd, CmdResult};
+//! # use tuirealm::ratatui::layout::Rect;
+//! # use tuirealm::{Attribute, AttrValue, Frame, MockComponent, State};
+//! # use tui_realm_stdlib::Input;
+//! #
+//! # pub struct IpAddressInput {
+//! #   component: Input,
+//! # }
+//! #
 //! impl MockComponent for IpAddressInput {
 //!     fn view(&mut self, frame: &mut Frame, area: Rect) {
 //!         self.component.view(frame, area);
@@ -85,9 +97,12 @@
 //! and finally derive `MockComponent` on your components:
 //!
 //! ```rust
+//! # use tuirealm_derive::MockComponent;
+//! # use tui_realm_stdlib::Radio;
+//!
 //! #[derive(MockComponent)]
 //! pub struct MyComponent {
-//!   component: MyMockComponentImpl,
+//!   component: Radio,
 //! }
 //! ```
 //!
@@ -102,6 +117,9 @@
 //! First option is to use a container-level attribute:
 //!
 //! ```rust
+//! # use tuirealm_derive::MockComponent;
+//! # use tui_realm_stdlib::Radio;
+//! #
 //! #[derive(MockComponent)]
 //! #[component("radio")]
 //! pub struct MyComponent1 {
@@ -118,6 +136,9 @@
 //! Or field-level attribute:
 //!
 //! ```rust
+//! # use tuirealm_derive::MockComponent;
+//! # use tui_realm_stdlib::Radio;
+//! #
 //! #[derive(MockComponent)]
 //! pub struct MyComponent {
 //!   #[component]
@@ -130,6 +151,11 @@
 //! Tuple Structs are also supported, but the component has to be the 0th field:
 //!
 //! ```rust
+//! # use tuirealm_derive::MockComponent;
+//! # use tui_realm_stdlib::Radio;
+//! #
+//! # pub struct SomeOtherType;
+//! #
 //! #[derive(MockComponent)]
 //! pub struct MyComponent(Radio, SomeOtherType);
 //! ```

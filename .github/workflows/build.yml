@@ -21,6 +21,8 @@ jobs:
           components: rustfmt, clippy
       - name: Build
         run: cargo build
+      - name: Test
+        run: cargo test --all-features --doc
       - name: Format
         run: cargo fmt --all -- --check
       - name: Clippy

@@ -24,4 +24,8 @@ proc-macro2 = "1"
 quote = "1"
 syn = "2"
 
+[dev-dependencies]
+tuirealm = "3.1"
+tui-realm-stdlib = "3"
+
 [features]
