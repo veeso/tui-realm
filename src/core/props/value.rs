@@ -52,6 +52,8 @@ pub enum PropValue {
 }
 
 impl PropPayload {
+    // -- unwrappers
+
     /// Unwrap a One value from PropPayload
     pub fn unwrap_one(self) -> PropValue {
         match self {
@@ -108,6 +110,8 @@ impl PropPayload {
         }
     }
 
+    // -- as reference
+
     /// Get a One value from PropPayload, or None
     pub fn as_one(&self) -> Option<&PropValue> {
         match self {
@@ -158,6 +162,64 @@ impl PropPayload {
 
     /// Get a Linked value from PropPayload, or None
     pub fn as_linked(&self) -> Option<&LinkedList<PropPayload>> {
+        match self {
+            PropPayload::Linked(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    // -- as mutable references
+
+    /// Get a One value from PropPayload, or None
+    pub fn as_one_mut(&mut self) -> Option<&mut PropValue> {
+        match self {
+            PropPayload::One(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup2 value from PropPayload, or None
+    pub fn as_tup2_mut(&mut self) -> Option<&mut (PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup2(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup3 value from PropPayload, or None
+    pub fn as_tup3_mut(&mut self) -> Option<&mut (PropValue, PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup3(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup4 value from PropPayload, or None
+    pub fn as_tup4_mut(&mut self) -> Option<&mut (PropValue, PropValue, PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup4(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vec value from PropPayload, or None
+    pub fn as_vec_mut(&mut self) -> Option<&mut Vec<PropValue>> {
+        match self {
+            PropPayload::Vec(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Map value from PropPayload, or None
+    pub fn as_map_mut(&mut self) -> Option<&mut HashMap<String, PropValue>> {
+        match self {
+            PropPayload::Map(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Linked value from PropPayload, or None
+    pub fn as_linked_mut(&mut self) -> Option<&mut LinkedList<PropPayload>> {
         match self {
             PropPayload::Linked(v) => Some(v),
             _ => None,
@@ -910,5 +972,77 @@ mod tests {
             Some(&LinkedList::new())
         );
         assert_eq!(PropPayload::None.as_linked(), None);
+    }
+
+    #[test]
+    fn as_prop_payloads_mut() {
+        assert_eq!(
+            PropPayload::One(PropValue::Bool(true)).as_one_mut(),
+            Some(&mut PropValue::Bool(true))
+        );
+        assert_eq!(PropPayload::None.as_one_mut(), None);
+
+        assert_eq!(
+            PropPayload::Tup2((PropValue::Bool(true), PropValue::Bool(true))).as_tup2_mut(),
+            Some(&mut (PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert_eq!(PropPayload::None.as_tup2_mut(), None);
+
+        assert_eq!(
+            PropPayload::Tup3((
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+            .as_tup3_mut(),
+            Some(&mut (
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+        );
+        assert_eq!(PropPayload::None.as_tup3_mut(), None);
+
+        assert_eq!(
+            PropPayload::Tup4((
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+            .as_tup4_mut(),
+            Some(&mut (
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+        );
+        assert_eq!(PropPayload::None.as_tup4_mut(), None);
+
+        assert_eq!(
+            PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec_mut(),
+            Some(&mut vec![PropValue::Bool(true)])
+        );
+        assert_eq!(PropPayload::None.as_vec_mut(), None);
+
+        assert_eq!(
+            PropPayload::Map(HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+            .as_map_mut(),
+            Some(&mut HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+        );
+        assert_eq!(PropPayload::None.as_map_mut(), None);
+
+        assert_eq!(
+            PropPayload::Linked(LinkedList::new()).as_linked_mut(),
+            Some(&mut LinkedList::new())
+        );
+        assert_eq!(PropPayload::None.as_linked_mut(), None);
     }
 }
