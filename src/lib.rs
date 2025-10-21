@@ -128,7 +128,7 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
                     component_name = name.value().as_str().to_string();
                 })
                 .unwrap_or_else(|_| {
-                    panic!("`component` attribute must be a string literal, e.g. #[component = \"my_component\"]");
+                    panic!("`component` attribute must be a string literal, e.g. `#[component(\"my_component\")]`");
                 });
         }
     }
