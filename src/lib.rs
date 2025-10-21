@@ -127,6 +127,13 @@
 //!
 //! > ❗ Only one field can be the component and container- & field-level attributes cannot be used together.
 //!
+//! Tuple Structs are also supported, but the component has to be the 0th field:
+//!
+//! ```rust
+//! #[derive(MockComponent)]
+//! pub struct MyComponent(Radio, SomeOtherType);
+//! ```
+//!
 
 #![doc(html_playground_url = "https://play.rust-lang.org")]
 #![doc(
@@ -139,7 +146,9 @@
 use proc_macro::{self, TokenStream};
 use proc_macro2::Span;
 use quote::{quote, ToTokens};
-use syn::{parse_macro_input, Attribute, DeriveInput, Field, FieldsNamed, Ident, Meta};
+use syn::{
+    parse_macro_input, Attribute, DeriveInput, Field, FieldsNamed, FieldsUnnamed, Ident, Meta,
+};
 
 /// Try to find if in the given attributes there is a `#[component]` with ident to the field
 fn get_container_attr_value(attrs: &[Attribute]) -> Option<Ident> {
@@ -218,22 +227,33 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
         ..
     } = parse_macro_input!(input);
 
-    // get field name from attributes
-    let component_field = get_container_attr_value(&attrs);
-
     if let syn::Data::Struct(s) = data {
         // Check if `component`` exists
         let component_field = match s.fields {
             syn::Fields::Named(FieldsNamed { named, .. }) => {
+                // get field name from attributes
+                let component_field = get_container_attr_value(&attrs);
+
                 if let Some(component_field) = component_field {
                     check_fields_for_path(&component_field, named.iter());
                     if find_field_with_attr(named.iter()).is_some() {
                         panic!("Cannot mix container level and field level `#[component]` usage!");
                     }
-                    component_field
+                    quote! { #component_field }
                 } else {
-                    find_field_with_attr(named.iter()).or_else(|| find_default_field(named.iter())).expect("Expected struct to have field \"component\" or a field with attribute \"#[component]\"")
+                    let component_field = find_field_with_attr(named.iter())
+                        .or_else(|| find_default_field(named.iter()))
+                        .expect("Expected struct to have field \"component\" or a field with attribute \"#[component]\"");
+
+                    quote! { #component_field }
                 }
+            }
+            syn::Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
+                if unnamed.is_empty() {
+                    panic!("Expected at least one unnamed field!");
+                }
+
+                quote! { 0 }
             }
             _ => panic!("struct {ident} does not contain named fields"),
         };

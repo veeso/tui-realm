@@ -12,6 +12,7 @@
 Unreleased
 
 - Feat: Add field-level attribute `#[component]`.
+- Feat: Support Tuple structs. The component has to be the 0th field.
 - Fix: support container-level `#[component = "field"]` syntax (in addition to the previous only `#[component("field")]`).
 - **MSRV**: 1.85.1
 
