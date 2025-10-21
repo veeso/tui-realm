@@ -228,11 +228,14 @@ pub struct MyComponent {
 
 > ❗ Only one field can be the component and container- & field-level attributes cannot be used together.
 
-Tuple Structs are also supported, but the component has to be the 0th field:
+Tuple Structs are also supported:
 
 ```rust
 #[derive(MockComponent)]
 pub struct MyComponent(Radio, SomeOtherType);
+
+#[derive(MockComponent)]
+pub struct MyComponent(SomeOtherType, #[component] Radio);
 ```
 
 ---

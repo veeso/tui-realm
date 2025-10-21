@@ -148,7 +148,7 @@
 //!
 //! > ❗ Only one field can be the component and container- & field-level attributes cannot be used together.
 //!
-//! Tuple Structs are also supported, but the component has to be the 0th field:
+//! Tuple Structs are also supported:
 //!
 //! ```rust
 //! # use tuirealm_derive::MockComponent;
@@ -157,7 +157,10 @@
 //! # pub struct SomeOtherType;
 //! #
 //! #[derive(MockComponent)]
-//! pub struct MyComponent(Radio, SomeOtherType);
+//! pub struct MyComponent1(Radio, SomeOtherType);
+//!
+//! #[derive(MockComponent)]
+//! pub struct MyComponent2(SomeOtherType, #[component] Radio);
 //! ```
 //!
 
@@ -232,6 +235,25 @@ fn find_field_with_attr<'a>(fields: impl Iterator<Item = &'a Field>) -> Option<I
     found_ident
 }
 
+/// Find a field with the `#[component]` attribute. Also checks for duplicate usage.
+///
+/// Similar to [`find_field_with_attr`], only that instead of the ident of the field, the index of the field is returned.
+fn find_field_with_attr_unnamed<'a>(fields: impl Iterator<Item = &'a Field>) -> Option<usize> {
+    let mut found_ident = None;
+
+    for (idx, field) in fields.enumerate() {
+        if let Some(_attr) = field.attrs.iter().find(|v| v.path().is_ident("component")) {
+            if let Some(found_idx) = found_ident {
+                panic!("Found attribute `#[component]` more than once! (first: `{found_idx}`, second: `{idx}`)")
+            }
+
+            found_ident = Some(idx);
+        }
+    }
+
+    found_ident
+}
+
 /// Find default field `component` in the given `fields`.
 fn find_default_field<'a>(fields: impl Iterator<Item = &'a Field>) -> Option<Ident> {
     for field in fields {
@@ -279,7 +301,10 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
                     panic!("Expected at least one unnamed field!");
                 }
 
-                quote! { 0 }
+                let field_idx = find_field_with_attr_unnamed(unnamed.iter()).unwrap_or(0);
+                let field_idx = syn::Index::from(field_idx);
+
+                quote! { #field_idx }
             }
             _ => panic!("Only Named And Tuple structs are supported"),
         };
