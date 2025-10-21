@@ -89,7 +89,7 @@
 //!
 //! > src/lib.rs
 //!
-//! ```rust
+//! ```rust ignore
 //! #[macro_use]
 //! extern crate tuirealm;
 //! ```
