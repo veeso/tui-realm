@@ -11,6 +11,7 @@
 
 Unreleased
 
+- Feat: Add field-level attribute `#[component]`.
 - **MSRV**: 1.85.1
 
 ## 2.0.1

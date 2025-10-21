@@ -95,6 +95,32 @@
 //!
 //! And ta-dah, you're ready to go 🎉
 //!
+//! ### Custom field names
+//!
+//! By default a field of name `component` will be used as can be seen in the earlier examples, but this can be customized.
+//!
+//! First option is to use a container-level attribute:
+//!
+//! ```rust
+//! #[derive(MockComponent)]
+//! #[component("radio")]
+//! pub struct MyComponent {
+//!   radio: Radio,
+//! }
+//! ```
+//!
+//! Or field-level attribute:
+//!
+//! ```rust
+//! #[derive(MockComponent)]
+//! pub struct MyComponent {
+//!   #[component]
+//!   radio: Radio,
+//! }
+//! ```
+//!
+//! > ❗ Only one field can be the component and container- & field-level attributes cannot be used together.
+//!
 
 #![doc(html_playground_url = "https://play.rust-lang.org")]
 #![doc(
@@ -105,8 +131,67 @@
 )]
 
 use proc_macro::{self, TokenStream};
+use proc_macro2::Span;
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput, FieldsNamed};
+use syn::{parse_macro_input, Attribute, DeriveInput, Field, FieldsNamed, Ident};
+
+/// Try to find if in the given attributes there is a `#[component]` with ident to the field
+fn get_container_attr_value(attrs: &[Attribute]) -> Option<Ident> {
+    let mut component_name = None;
+
+    for attr in attrs {
+        if attr.path().is_ident("component") {
+            // get value from attribute
+            attr.parse_args()
+                .map(|name: syn::LitStr| {
+                    component_name = Some(syn::Ident::new(&name.value(), Span::call_site()));
+                })
+                .unwrap_or_else(|_| {
+                    panic!("`component` attribute must be a string literal, e.g. `#[component(\"my_component\")]`!");
+                });
+        }
+    }
+
+    component_name
+}
+
+/// Check that the ident `field_ident` actually exists in the given fields.
+///
+/// Mostly to check [`get_container_attr_value`].
+fn check_fields_for_path<'a>(field_ident: &Ident, mut fields: impl Iterator<Item = &'a Field>) {
+    if !fields.any(|x| x.ident.as_ref().unwrap() == field_ident) {
+        panic!("`{field_ident}` not found on struct!",);
+    }
+}
+
+/// Find a field with the `#[component]` attribute. Also checks for duplicate usage.
+fn find_field_with_attr<'a>(fields: impl Iterator<Item = &'a Field>) -> Option<Ident> {
+    let mut found_ident = None;
+
+    for field in fields {
+        if let Some(_attr) = field.attrs.iter().find(|v| v.path().is_ident("component")) {
+            let attr_ident = field.ident.as_ref().unwrap().clone();
+            if let Some(found_ident) = found_ident {
+                panic!("Found attribute `#[component]` more than once! (first: `{found_ident}`, second: `{attr_ident}`)")
+            }
+
+            found_ident = Some(attr_ident);
+        }
+    }
+
+    found_ident
+}
+
+/// Find default field `component` in the given `fields`.
+fn find_default_field<'a>(fields: impl Iterator<Item = &'a Field>) -> Option<Ident> {
+    for field in fields {
+        if field.ident.as_ref().is_some_and(|v| v == "component") {
+            return Some(field.ident.as_ref().unwrap().clone());
+        }
+    }
+
+    None
+}
 
 #[proc_macro_derive(MockComponent, attributes(component))]
 pub fn mock_component(input: TokenStream) -> TokenStream {
@@ -119,35 +204,24 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
     } = parse_macro_input!(input);
 
     // get field name from attributes
-    let mut component_name = "component".to_string();
-    for attr in &attrs {
-        if attr.path().is_ident("component") {
-            // get value from attribute
-            attr.parse_args()
-                .map(|name: syn::LitStr| {
-                    component_name = name.value().as_str().to_string();
-                })
-                .unwrap_or_else(|_| {
-                    panic!("`component` attribute must be a string literal, e.g. `#[component(\"my_component\")]`");
-                });
-        }
-    }
+    let component_field = get_container_attr_value(&attrs);
 
     if let syn::Data::Struct(s) = data {
         // Check if `component`` exists
-        match s.fields {
+        let component_field = match s.fields {
             syn::Fields::Named(FieldsNamed { named, .. }) => {
-                if !named
-                    .iter()
-                    .any(|x| x.ident.as_ref().unwrap() == &component_name)
-                {
-                    panic!("`{component_name}` not found for struct '{ident}'",);
+                if let Some(component_field) = component_field {
+                    check_fields_for_path(&component_field, named.iter());
+                    if find_field_with_attr(named.iter()).is_some() {
+                        panic!("Cannot mix container level and field level `#[component]` usage!");
+                    }
+                    component_field
+                } else {
+                    find_field_with_attr(named.iter()).or_else(|| find_default_field(named.iter())).expect("Expected struct to have field \"component\" or a field with attribute \"#[component]\"")
                 }
             }
             _ => panic!("struct {ident} does not contain named fields"),
-        }
-
-        let component_name = syn::Ident::new(&component_name, ident.span());
+        };
 
         // Implement MockComponent for type
         let output = quote! {
@@ -158,23 +232,23 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
                 #[automatically_derived]
                 impl #generics MockComponent for #ident #generics {
                     fn view(&mut self, frame: &mut Frame, area: Rect) {
-                        self.#component_name.view(frame, area);
+                        self.#component_field.view(frame, area);
                     }
 
                     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-                        self.#component_name.query(attr)
+                        self.#component_field.query(attr)
                     }
 
                     fn attr(&mut self, query: Attribute, attr: AttrValue) {
-                        self.#component_name.attr(query, attr)
+                        self.#component_field.attr(query, attr)
                     }
 
                     fn state(&self) -> State {
-                        self.#component_name.state()
+                        self.#component_field.state()
                     }
 
                     fn perform(&mut self, cmd: Cmd) -> CmdResult {
-                        self.#component_name.perform(cmd)
+                        self.#component_field.perform(cmd)
                     }
                 }
             };
