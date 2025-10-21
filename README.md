@@ -196,6 +196,45 @@ pub struct MyComponent {
 
 And ta-dah, you're ready to go 🎉
 
+### Custom field names
+
+By default a field of name `component` will be used as can be seen in the earlier examples, but this can be customized.
+
+First option is to use a container-level attribute:
+
+```rust
+#[derive(MockComponent)]
+#[component("radio")]
+pub struct MyComponent1 {
+  radio: Radio,
+}
+
+#[derive(MockComponent)]
+#[component = "radio"]
+pub struct MyComponent2 {
+  radio: Radio,
+}
+```
+
+Or field-level attribute:
+
+```rust
+#[derive(MockComponent)]
+pub struct MyComponent {
+  #[component]
+  radio: Radio,
+}
+```
+
+> ❗ Only one field can be the component and container- & field-level attributes cannot be used together.
+
+Tuple Structs are also supported, but the component has to be the 0th field:
+
+```rust
+#[derive(MockComponent)]
+pub struct MyComponent(Radio, SomeOtherType);
+```
+
 ---
 
 ## Support the developer ☕
