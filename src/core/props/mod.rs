@@ -173,6 +173,7 @@ pub enum AttrValue {
 impl AttrValue {
     // -- unwrappers
 
+    /// Get the inner Alignment value from AttrValue, or panic.
     pub fn unwrap_alignment(self) -> Alignment {
         match self {
             AttrValue::Alignment(x) => x,
@@ -180,6 +181,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Borders value from AttrValue, or panic.
     pub fn unwrap_borders(self) -> Borders {
         match self {
             AttrValue::Borders(b) => b,
@@ -187,6 +189,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Color value from AttrValue, or panic.
     pub fn unwrap_color(self) -> Color {
         match self {
             AttrValue::Color(x) => x,
@@ -194,6 +197,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Dataset value from AttrValue, or panic.
     pub fn unwrap_dataset(self) -> Dataset {
         match self {
             AttrValue::Dataset(x) => x,
@@ -201,6 +205,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Direction value from AttrValue, or panic.
     pub fn unwrap_direction(self) -> Direction {
         match self {
             AttrValue::Direction(x) => x,
@@ -208,6 +213,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Flag value from AttrValue, or panic.
     pub fn unwrap_flag(self) -> bool {
         match self {
             AttrValue::Flag(x) => x,
@@ -215,6 +221,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner InputType value from AttrValue, or panic.
     pub fn unwrap_input_type(self) -> InputType {
         match self {
             AttrValue::InputType(x) => x,
@@ -222,6 +229,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Layout value from AttrValue, or panic.
     pub fn unwrap_layout(self) -> Layout {
         match self {
             AttrValue::Layout(l) => l,
@@ -229,6 +237,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Length value from AttrValue, or panic.
     pub fn unwrap_length(self) -> usize {
         match self {
             AttrValue::Length(x) => x,
@@ -236,6 +245,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Number value from AttrValue, or panic.
     pub fn unwrap_number(self) -> isize {
         match self {
             AttrValue::Number(x) => x,
@@ -243,6 +253,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Shape value from AttrValue, or panic.
     pub fn unwrap_shape(self) -> Shape {
         match self {
             AttrValue::Shape(x) => x,
@@ -250,6 +261,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Size value from AttrValue, or panic.
     pub fn unwrap_size(self) -> u16 {
         match self {
             AttrValue::Size(x) => x,
@@ -257,6 +269,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner String value from AttrValue, or panic.
     pub fn unwrap_string(self) -> String {
         match self {
             AttrValue::String(x) => x,
@@ -264,6 +277,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Style value from AttrValue, or panic.
     pub fn unwrap_style(self) -> Style {
         match self {
             AttrValue::Style(x) => x,
@@ -271,6 +285,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Table value from AttrValue, or panic.
     pub fn unwrap_table(self) -> Table {
         match self {
             AttrValue::Table(x) => x,
@@ -278,6 +293,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Text value from AttrValue, or panic.
     pub fn unwrap_text(self) -> TextSpan {
         match self {
             AttrValue::Text(x) => x,
@@ -285,6 +301,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner TextModifiers value from AttrValue, or panic.
     pub fn unwrap_text_modifiers(self) -> TextModifiers {
         match self {
             AttrValue::TextModifiers(x) => x,
@@ -292,6 +309,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Title value from AttrValue, or panic.
     pub fn unwrap_title(self) -> (String, Alignment) {
         match self {
             AttrValue::Title(x) => x,
@@ -299,6 +317,7 @@ impl AttrValue {
         }
     }
 
+    /// Get the inner Payload value from AttrValue, or panic.
     pub fn unwrap_payload(self) -> PropPayload {
         match self {
             AttrValue::Payload(x) => x,
