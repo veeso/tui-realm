@@ -12,6 +12,7 @@
 Unreleased
 
 - Feat: Add field-level attribute `#[component]`.
+- Fix: support container-level `#[component = "field"]` syntax (in addition to the previous only `#[component("field")]`).
 - **MSRV**: 1.85.1
 
 ## 2.0.1

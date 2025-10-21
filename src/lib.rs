@@ -104,7 +104,13 @@
 //! ```rust
 //! #[derive(MockComponent)]
 //! #[component("radio")]
-//! pub struct MyComponent {
+//! pub struct MyComponent1 {
+//!   radio: Radio,
+//! }
+//!
+//! #[derive(MockComponent)]
+//! #[component = "radio"]
+//! pub struct MyComponent2 {
 //!   radio: Radio,
 //! }
 //! ```
@@ -132,23 +138,32 @@
 
 use proc_macro::{self, TokenStream};
 use proc_macro2::Span;
-use quote::quote;
-use syn::{parse_macro_input, Attribute, DeriveInput, Field, FieldsNamed, Ident};
+use quote::{quote, ToTokens};
+use syn::{parse_macro_input, Attribute, DeriveInput, Field, FieldsNamed, Ident, Meta};
 
 /// Try to find if in the given attributes there is a `#[component]` with ident to the field
 fn get_container_attr_value(attrs: &[Attribute]) -> Option<Ident> {
     let mut component_name = None;
 
     for attr in attrs {
+        // get value from attribute
         if attr.path().is_ident("component") {
-            // get value from attribute
-            attr.parse_args()
-                .map(|name: syn::LitStr| {
-                    component_name = Some(syn::Ident::new(&name.value(), Span::call_site()));
-                })
+            // The follow "if" is the best way i had found to parse "#[component = \"field\"]"
+            if let Meta::NameValue(val) = &attr.meta {
+                if let Ok(val) = syn::parse2::<syn::LitStr>(val.value.clone().into_token_stream()) {
+                    component_name = Some(syn::Ident::new(&val.value(), Span::call_site()));
+                    break;
+                }
+            }
+
+            // The following handles "#[component(\"field\)]"
+            let name: syn::LitStr = attr.parse_args()
                 .unwrap_or_else(|_| {
                     panic!("`component` attribute must be a string literal, e.g. `#[component(\"my_component\")]`!");
                 });
+
+            component_name = Some(syn::Ident::new(&name.value(), Span::call_site()));
+            break;
         }
     }
 
