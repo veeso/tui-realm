@@ -7,6 +7,12 @@
 
 ---
 
+## next
+
+Unreleased
+
+- **MSRV**: 1.85.1
+
 ## 2.0.1
 
 Released on 08/06/2025
