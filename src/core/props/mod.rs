@@ -306,6 +306,8 @@ impl AttrValue {
         }
     }
 
+    // -- as reference
+
     /// Get a Alignment value from AttrValue, or None
     pub fn as_alignment(&self) -> Option<Alignment> {
         match self {
@@ -466,6 +468,160 @@ impl AttrValue {
             _ => None,
         }
     }
+
+    // -- as mutable references
+
+    /// Get a Alignment value from AttrValue, or None
+    pub fn as_alignment_mut(&mut self) -> Option<&mut Alignment> {
+        match self {
+            AttrValue::Alignment(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Borders value from AttrValue, or None
+    pub fn as_borders_mut(&mut self) -> Option<&mut Borders> {
+        match self {
+            AttrValue::Borders(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Color value from AttrValue, or None
+    pub fn as_color_mut(&mut self) -> Option<&mut Color> {
+        match self {
+            AttrValue::Color(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Dataset value from AttrValue, or None
+    pub fn as_dataset_mut(&mut self) -> Option<&mut Dataset> {
+        match self {
+            AttrValue::Dataset(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Direction value from AttrValue, or None
+    pub fn as_direction_mut(&mut self) -> Option<&mut Direction> {
+        match self {
+            AttrValue::Direction(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Flag value from AttrValue, or None
+    pub fn as_flag_mut(&mut self) -> Option<&mut bool> {
+        match self {
+            AttrValue::Flag(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a InputType value from AttrValue, or None
+    pub fn as_input_type_mut(&mut self) -> Option<&mut InputType> {
+        match self {
+            AttrValue::InputType(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Layout value from AttrValue, or None
+    pub fn as_layout_mut(&mut self) -> Option<&mut Layout> {
+        match self {
+            AttrValue::Layout(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Length value from AttrValue, or None
+    pub fn as_length_mut(&mut self) -> Option<&mut usize> {
+        match self {
+            AttrValue::Length(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Number value from AttrValue, or None
+    pub fn as_number_mut(&mut self) -> Option<&mut isize> {
+        match self {
+            AttrValue::Number(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Shape value from AttrValue, or None
+    pub fn as_shape_mut(&mut self) -> Option<&mut Shape> {
+        match self {
+            AttrValue::Shape(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Size value from AttrValue, or None
+    pub fn as_size_mut(&mut self) -> Option<&mut u16> {
+        match self {
+            AttrValue::Size(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a String value from AttrValue, or None
+    pub fn as_string_mut(&mut self) -> Option<&mut String> {
+        match self {
+            AttrValue::String(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Style value from AttrValue, or None
+    pub fn as_style_mut(&mut self) -> Option<&mut Style> {
+        match self {
+            AttrValue::Style(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Table value from AttrValue, or None
+    pub fn as_table_mut(&mut self) -> Option<&mut Table> {
+        match self {
+            AttrValue::Table(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Text value from AttrValue, or None
+    pub fn as_text_mut(&mut self) -> Option<&mut TextSpan> {
+        match self {
+            AttrValue::Text(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a TextModifiers value from AttrValue, or None
+    pub fn as_text_modifiers_mut(&mut self) -> Option<&mut TextModifiers> {
+        match self {
+            AttrValue::TextModifiers(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Title value from AttrValue, or None
+    pub fn as_title_mut(&mut self) -> Option<&mut (String, Alignment)> {
+        match self {
+            AttrValue::Title(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Payload value from AttrValue, or None
+    pub fn as_payload_mut(&mut self) -> Option<&mut PropPayload> {
+        match self {
+            AttrValue::Payload(v) => Some(v),
+            _ => None,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -507,11 +663,7 @@ mod test {
 
         let val = props.get_mut(Attribute::Alignment).unwrap();
         assert_eq!(val, &AttrValue::Alignment(Alignment::Left));
-        // TODO: should be abstracted with "AttrValue::as_alignment_mut().unwrap()" when available
-        let v = match val {
-            AttrValue::Alignment(val) => val,
-            _ => unimplemented!(),
-        };
+        let v = val.as_alignment_mut().unwrap();
         *v = Alignment::Center;
 
         assert_eq!(
@@ -688,6 +840,141 @@ mod test {
             Some(&PropPayload::None)
         );
         assert_eq!(AttrValue::Alignment(Alignment::Center).as_payload(), None);
+    }
+
+    #[test]
+    fn as_attrvalue_mut() {
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_alignment_mut(),
+            Some(&mut Alignment::Center)
+        );
+        assert_eq!(AttrValue::Color(Color::Black).as_alignment_mut(), None);
+
+        assert_eq!(
+            AttrValue::Borders(Borders::default()).as_borders_mut(),
+            Some(&mut Borders::default())
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_borders_mut(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Color(Color::Black).as_color_mut(),
+            Some(&mut Color::Black)
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_color_mut(), None);
+
+        assert_eq!(
+            AttrValue::Dataset(Dataset::default()).as_dataset_mut(),
+            Some(&mut Dataset::default())
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_dataset_mut(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Direction(Direction::Down).as_direction_mut(),
+            Some(&mut Direction::Down)
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_direction_mut(),
+            None
+        );
+
+        assert_eq!(AttrValue::Flag(true).as_flag_mut(), Some(&mut true));
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_flag_mut(), None);
+
+        assert_eq!(
+            AttrValue::InputType(InputType::Color).as_input_type_mut(),
+            Some(&mut InputType::Color)
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_input_type_mut(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Layout(Layout::default()).as_layout_mut(),
+            Some(&mut Layout::default())
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_layout_mut(),
+            None
+        );
+
+        assert_eq!(AttrValue::Length(1).as_length_mut(), Some(&mut 1));
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_length_mut(),
+            None
+        );
+
+        assert_eq!(AttrValue::Number(-1).as_number_mut(), Some(&mut -1));
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_number_mut(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Shape(Shape::Layer).as_shape_mut(),
+            Some(&mut Shape::Layer)
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_shape_mut(), None);
+
+        assert_eq!(AttrValue::Size(1).as_size_mut(), Some(&mut 1));
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_size_mut(), None);
+
+        assert_eq!(
+            AttrValue::String("hello".into()).as_string_mut(),
+            Some(&mut "hello".to_string())
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_string_mut(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Style(Style::default()).as_style_mut(),
+            Some(&mut Style::default())
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_style_mut(), None);
+
+        assert_eq!(
+            AttrValue::Table(Vec::new()).as_table_mut(),
+            Some(&mut Vec::new())
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_table_mut(), None);
+
+        assert_eq!(
+            AttrValue::Text(TextSpan::default()).as_text_mut(),
+            Some(&mut TextSpan::default())
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_text_mut(), None);
+
+        assert_eq!(
+            AttrValue::TextModifiers(TextModifiers::all()).as_text_modifiers_mut(),
+            Some(&mut TextModifiers::all())
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_text_modifiers_mut(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Title(("hello".into(), Alignment::Center)).as_title_mut(),
+            Some(&mut ("hello".into(), Alignment::Center))
+        );
+        assert_eq!(AttrValue::Alignment(Alignment::Center).as_title_mut(), None);
+
+        assert_eq!(
+            AttrValue::Payload(PropPayload::None).as_payload_mut(),
+            Some(&mut PropPayload::None)
+        );
+        assert_eq!(
+            AttrValue::Alignment(Alignment::Center).as_payload_mut(),
+            None
+        );
     }
 
     #[test]
