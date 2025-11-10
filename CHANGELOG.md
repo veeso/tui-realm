@@ -44,6 +44,13 @@
 
 ---
 
+## next
+
+Unreleased
+
+- Add `get_mut` function for `Props`.
+- Add `as_*_mut` functions for `AttrValue`, `PropPayload` & `PropValue`.
+
 ## 3.1.0
 
 Released on 26/08/2025
