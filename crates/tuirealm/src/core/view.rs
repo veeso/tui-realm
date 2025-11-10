@@ -255,6 +255,13 @@ where
     /// > Panics if `new_focus` doesn't exist in components
     fn change_focus(&mut self, new_focus: &ComponentId) {
         if let Some(focus) = self.focus.take() {
+            // dont do anything, if the newfocus is the same component
+            // otherwise we would be removing focus on remount
+            if focus == *new_focus {
+                self.focus = Some(focus);
+                return;
+            }
+
             // Remove focus (can't return error)
             let _ = self.set_focus(&focus, false);
             // Push to stack
@@ -380,6 +387,12 @@ mod test {
             .is_ok()
         );
         assert!(view.active(&MockComponentId::InputFoo).is_ok());
+        assert_eq!(
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .flatten(),
+            Some(AttrValue::Flag(true))
+        );
         // mount another component
         assert!(
             view.mount(
@@ -389,6 +402,18 @@ mod test {
             .is_ok()
         );
         assert!(view.active(&MockComponentId::InputBar).is_ok());
+        assert_eq!(
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .flatten(),
+            Some(AttrValue::Flag(false))
+        );
+        assert_eq!(
+            view.query(&MockComponentId::InputBar, Attribute::Focus)
+                .ok()
+                .flatten(),
+            Some(AttrValue::Flag(true))
+        );
         // Remount foo
         assert!(
             view.remount(
@@ -397,10 +422,95 @@ mod test {
             )
             .is_ok()
         );
+        assert_eq!(
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .flatten(),
+            None
+        );
+        assert_eq!(
+            view.query(&MockComponentId::InputBar, Attribute::Focus)
+                .ok()
+                .flatten(),
+            Some(AttrValue::Flag(true))
+        );
         // Blur bar
         assert!(view.blur().is_ok());
         // Foo MUST have focus now
         assert!(view.has_focus(&MockComponentId::InputFoo));
+        assert_eq!(
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .flatten(),
+            Some(AttrValue::Flag(true))
+        );
+        assert_eq!(
+            view.query(&MockComponentId::InputBar, Attribute::Focus)
+                .ok()
+                .flatten(),
+            Some(AttrValue::Flag(false))
+        );
+    }
+
+    #[test]
+    fn view_should_preserve_focus_on_remount() {
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
+        // Mount foo
+        assert!(
+            view.mount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
+        );
+        // mount another component
+        assert!(
+            view.mount(
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_ok()
+        );
+
+        assert!(view.active(&MockComponentId::InputFoo).is_ok());
+        assert!(view.has_focus(&MockComponentId::InputFoo));
+        assert_eq!(
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .flatten(),
+            Some(AttrValue::Flag(true))
+        );
+        assert_eq!(
+            view.query(&MockComponentId::InputBar, Attribute::Focus)
+                .ok()
+                .flatten(),
+            None
+        );
+
+        // Remount foo
+        assert!(
+            view.remount(
+                &MockComponentId::InputFoo,
+                Box::new(MockFooInput::default())
+            )
+            .is_ok()
+        );
+
+        // Foo should still have the focus as before
+        assert!(view.has_focus(&MockComponentId::InputFoo));
+        // Foo should also have the proper focus attribute
+        assert_eq!(
+            view.query(&MockComponentId::InputFoo, Attribute::Focus)
+                .ok()
+                .flatten(),
+            Some(AttrValue::Flag(true))
+        );
+        assert_eq!(
+            view.query(&MockComponentId::InputBar, Attribute::Focus)
+                .ok()
+                .flatten(),
+            None
+        );
     }
 
     #[test]
