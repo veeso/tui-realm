@@ -52,6 +52,8 @@ pub enum PropValue {
 }
 
 impl PropPayload {
+    // -- unwrappers
+
     /// Unwrap a One value from PropPayload
     pub fn unwrap_one(self) -> PropValue {
         match self {
@@ -108,6 +110,8 @@ impl PropPayload {
         }
     }
 
+    // -- as reference
+
     /// Get a One value from PropPayload, or None
     pub fn as_one(&self) -> Option<&PropValue> {
         match self {
@@ -163,9 +167,69 @@ impl PropPayload {
             _ => None,
         }
     }
+
+    // -- as mutable references
+
+    /// Get a One value from PropPayload, or None
+    pub fn as_one_mut(&mut self) -> Option<&mut PropValue> {
+        match self {
+            PropPayload::One(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup2 value from PropPayload, or None
+    pub fn as_tup2_mut(&mut self) -> Option<&mut (PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup2(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup3 value from PropPayload, or None
+    pub fn as_tup3_mut(&mut self) -> Option<&mut (PropValue, PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup3(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup4 value from PropPayload, or None
+    pub fn as_tup4_mut(&mut self) -> Option<&mut (PropValue, PropValue, PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup4(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vec value from PropPayload, or None
+    pub fn as_vec_mut(&mut self) -> Option<&mut Vec<PropValue>> {
+        match self {
+            PropPayload::Vec(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Map value from PropPayload, or None
+    pub fn as_map_mut(&mut self) -> Option<&mut HashMap<String, PropValue>> {
+        match self {
+            PropPayload::Map(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Linked value from PropPayload, or None
+    pub fn as_linked_mut(&mut self) -> Option<&mut LinkedList<PropPayload>> {
+        match self {
+            PropPayload::Linked(v) => Some(v),
+            _ => None,
+        }
+    }
 }
 
 impl PropValue {
+    // -- unwrappers
+
     /// Unwrap PropValue as Bool.
     /// Panics otherwise
     pub fn unwrap_bool(self) -> bool {
@@ -364,6 +428,8 @@ impl PropValue {
         }
     }
 
+    // -- as reference
+
     /// Get a Bool value from PropValue, or None
     pub fn as_bool(&self) -> Option<bool> {
         match self {
@@ -555,6 +621,184 @@ impl PropValue {
             _ => None,
         }
     }
+
+    // -- as mutable references
+
+    /// Get a Bool value from PropValue, or None
+    pub fn as_bool_mut(&mut self) -> Option<&mut bool> {
+        match self {
+            PropValue::Bool(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u8 value from PropValue, or None
+    pub fn as_u8_mut(&mut self) -> Option<&mut u8> {
+        match self {
+            PropValue::U8(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u16 value from PropValue, or None
+    pub fn as_u16_mut(&mut self) -> Option<&mut u16> {
+        match self {
+            PropValue::U16(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u32 value from PropValue, or None
+    pub fn as_u32_mut(&mut self) -> Option<&mut u32> {
+        match self {
+            PropValue::U32(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u64 value from PropValue, or None
+    pub fn as_u64_mut(&mut self) -> Option<&mut u64> {
+        match self {
+            PropValue::U64(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u128 value from PropValue, or None
+    pub fn as_u128_mut(&mut self) -> Option<&mut u128> {
+        match self {
+            PropValue::U128(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a usize value from PropValue, or None
+    pub fn as_usize_mut(&mut self) -> Option<&mut usize> {
+        match self {
+            PropValue::Usize(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i8 value from PropValue, or None
+    pub fn as_i8_mut(&mut self) -> Option<&mut i8> {
+        match self {
+            PropValue::I8(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i16 value from PropValue, or None
+    pub fn as_i16_mut(&mut self) -> Option<&mut i16> {
+        match self {
+            PropValue::I16(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i32 value from PropValue, or None
+    pub fn as_i32_mut(&mut self) -> Option<&mut i32> {
+        match self {
+            PropValue::I32(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i64 value from PropValue, or None
+    pub fn as_i64_mut(&mut self) -> Option<&mut i64> {
+        match self {
+            PropValue::I64(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i128 value from PropValue, or None
+    pub fn as_i128_mut(&mut self) -> Option<&mut i128> {
+        match self {
+            PropValue::I128(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a isize value from PropValue, or None
+    pub fn as_isize_mut(&mut self) -> Option<&mut isize> {
+        match self {
+            PropValue::Isize(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a f32 value from PropValue, or None
+    pub fn as_f32_mut(&mut self) -> Option<&mut f32> {
+        match self {
+            PropValue::F32(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a f64 value from PropValue, or None
+    pub fn as_f64_mut(&mut self) -> Option<&mut f64> {
+        match self {
+            PropValue::F64(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a String value from PropValue, or None
+    pub fn as_str_mut(&mut self) -> Option<&mut String> {
+        match self {
+            PropValue::Str(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Alignment value from PropValue, or None
+    pub fn as_alignment_mut(&mut self) -> Option<&mut Alignment> {
+        match self {
+            PropValue::Alignment(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Dataset value from PropValue, or None
+    pub fn as_dataset_mut(&mut self) -> Option<&mut Dataset> {
+        match self {
+            PropValue::Dataset(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a InputType value from PropValue, or None
+    pub fn as_input_type_mut(&mut self) -> Option<&mut InputType> {
+        match self {
+            PropValue::InputType(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Shape value from PropValue, or None
+    pub fn as_shape_mut(&mut self) -> Option<&mut Shape> {
+        match self {
+            PropValue::Shape(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Style value from PropValue, or None
+    pub fn as_style_mut(&mut self) -> Option<&mut Style> {
+        match self {
+            PropValue::Style(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a TextSpan value from PropValue, or None
+    pub fn as_text_span_mut(&mut self) -> Option<&mut TextSpan> {
+        match self {
+            PropValue::TextSpan(v) => Some(v),
+            _ => None,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -651,6 +895,14 @@ mod tests {
             *map.get("u").unwrap(),
             PropValue::Alignment(Alignment::Center)
         );
+
+        let value = map.get_mut("u").unwrap();
+        *value.as_alignment_mut().unwrap() = Alignment::Left;
+        assert_eq!(
+            *map.get("u").unwrap(),
+            PropValue::Alignment(Alignment::Left)
+        );
+
         let _ = PropPayload::Map(map);
         let mut link: LinkedList<PropPayload> = LinkedList::new();
         link.push_back(PropPayload::One(PropValue::Usize(1)));
@@ -796,6 +1048,96 @@ mod tests {
     }
 
     #[test]
+    fn as_prop_value_mut() {
+        assert_eq!(PropValue::Bool(true).as_bool_mut(), Some(&mut true));
+        assert_eq!(PropValue::U8(0).as_bool_mut(), None);
+
+        assert_eq!(PropValue::U8(1).as_u8_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u8_mut(), None);
+
+        assert_eq!(PropValue::U16(1).as_u16_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u16_mut(), None);
+
+        assert_eq!(PropValue::U32(1).as_u32_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u32_mut(), None);
+
+        assert_eq!(PropValue::U64(1).as_u64_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u64_mut(), None);
+
+        assert_eq!(PropValue::U128(1).as_u128_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u128_mut(), None);
+
+        assert_eq!(PropValue::Usize(1).as_usize_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_usize_mut(), None);
+
+        assert_eq!(PropValue::I8(-1).as_i8_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i8_mut(), None);
+
+        assert_eq!(PropValue::I16(-1).as_i16_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i16_mut(), None);
+
+        assert_eq!(PropValue::I32(-1).as_i32_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i32_mut(), None);
+
+        assert_eq!(PropValue::I64(-1).as_i64_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i64_mut(), None);
+
+        assert_eq!(PropValue::I128(-1).as_i128_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i128_mut(), None);
+
+        assert_eq!(PropValue::Isize(-1).as_isize_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_isize_mut(), None);
+
+        assert_eq!(PropValue::F32(1.1).as_f32_mut(), Some(&mut 1.1));
+        assert_eq!(PropValue::Bool(true).as_f32_mut(), None);
+
+        assert_eq!(PropValue::F64(1.1).as_f64_mut(), Some(&mut 1.1));
+        assert_eq!(PropValue::Bool(true).as_f64_mut(), None);
+
+        assert_eq!(
+            PropValue::Str("hello".to_string()).as_str_mut(),
+            Some(&mut "hello".to_string())
+        );
+        assert_eq!(PropValue::Bool(true).as_str_mut(), None);
+
+        assert_eq!(
+            PropValue::Alignment(Alignment::Center).as_alignment_mut(),
+            Some(&mut Alignment::Center)
+        );
+        assert_eq!(PropValue::Bool(true).as_alignment_mut(), None);
+
+        assert_eq!(
+            PropValue::Dataset(Dataset::default()).as_dataset_mut(),
+            Some(&mut Dataset::default())
+        );
+        assert_eq!(PropValue::Bool(true).as_dataset_mut(), None);
+
+        assert_eq!(
+            PropValue::InputType(InputType::Color).as_input_type_mut(),
+            Some(&mut InputType::Color)
+        );
+        assert_eq!(PropValue::Bool(true).as_input_type_mut(), None);
+
+        assert_eq!(
+            PropValue::Shape(Shape::Layer).as_shape_mut(),
+            Some(&mut Shape::Layer)
+        );
+        assert_eq!(PropValue::Bool(true).as_shape_mut(), None);
+
+        assert_eq!(
+            PropValue::Style(Style::new()).as_style_mut(),
+            Some(&mut Style::new())
+        );
+        assert_eq!(PropValue::Bool(true).as_style_mut(), None);
+
+        assert_eq!(
+            PropValue::TextSpan(TextSpan::new("hello")).as_text_span_mut(),
+            Some(&mut TextSpan::new("hello"))
+        );
+        assert_eq!(PropValue::Bool(true).as_text_span_mut(), None);
+    }
+
+    #[test]
     fn unwrap_prop_payloads() {
         assert!(
             !PropPayload::One(PropValue::Bool(false))
@@ -910,5 +1252,77 @@ mod tests {
             Some(&LinkedList::new())
         );
         assert_eq!(PropPayload::None.as_linked(), None);
+    }
+
+    #[test]
+    fn as_prop_payloads_mut() {
+        assert_eq!(
+            PropPayload::One(PropValue::Bool(true)).as_one_mut(),
+            Some(&mut PropValue::Bool(true))
+        );
+        assert_eq!(PropPayload::None.as_one_mut(), None);
+
+        assert_eq!(
+            PropPayload::Tup2((PropValue::Bool(true), PropValue::Bool(true))).as_tup2_mut(),
+            Some(&mut (PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert_eq!(PropPayload::None.as_tup2_mut(), None);
+
+        assert_eq!(
+            PropPayload::Tup3((
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+            .as_tup3_mut(),
+            Some(&mut (
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+        );
+        assert_eq!(PropPayload::None.as_tup3_mut(), None);
+
+        assert_eq!(
+            PropPayload::Tup4((
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+            .as_tup4_mut(),
+            Some(&mut (
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))
+        );
+        assert_eq!(PropPayload::None.as_tup4_mut(), None);
+
+        assert_eq!(
+            PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec_mut(),
+            Some(&mut vec![PropValue::Bool(true)])
+        );
+        assert_eq!(PropPayload::None.as_vec_mut(), None);
+
+        assert_eq!(
+            PropPayload::Map(HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+            .as_map_mut(),
+            Some(&mut HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+        );
+        assert_eq!(PropPayload::None.as_map_mut(), None);
+
+        assert_eq!(
+            PropPayload::Linked(LinkedList::new()).as_linked_mut(),
+            Some(&mut LinkedList::new())
+        );
+        assert_eq!(PropPayload::None.as_linked_mut(), None);
     }
 }
