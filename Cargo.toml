@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm"
-version = "3.1.0"
+version = "3.2.0"
 authors = ["Christian Visintin <christian.visintin@veeso.dev>"]
 edition = "2024"
 rust-version = "1.85.1"
@@ -36,7 +36,7 @@ tuirealm_derive = { version = "2", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "^1"
-toml = "^0.8"
+toml = "^0.9"
 tempfile = "^3"
 tokio = { version = "1", features = ["full"] }
 

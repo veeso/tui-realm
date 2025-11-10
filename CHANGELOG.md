@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [3.2.0](#320)
   - [3.1.0](#310)
   - [3.0.1](#301)
   - [3.0.0](#300)
@@ -44,9 +45,9 @@
 
 ---
 
-## next
+## 3.2.0
 
-Unreleased
+Released on 10/11/2025
 
 - Fix `Application::active` to not change focus if the given id is the same as the current focus.
   - This also fixes `Application::remount` unsetting focus, if the remounted component-id had focus.
