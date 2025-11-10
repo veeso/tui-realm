@@ -48,6 +48,8 @@
 
 Unreleased
 
+- Fix `Application::active` to not change focus if the given id is the same as the current focus.
+  - This also fixes `Application::remount` unsetting focus, if the remounted component-id had focus.
 - Add `get_mut` function for `Props`.
 - Add `as_*_mut` functions for `AttrValue`, `PropPayload` & `PropValue`.
 
