@@ -222,6 +222,7 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 - [todotui](https://github.com/newfla/todotui)
 - [tuifeed](https://github.com/veeso/tuifeed)
 - [turdle](https://crates.io/crates/turdle)
+- [quetty](https://crates.io/crates/quetty)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
 
