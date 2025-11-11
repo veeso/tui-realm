@@ -33,6 +33,7 @@ tokio-util = { version = "0.7", features = [
 ], default-features = false, optional = true }
 futures-util = { version = "0.3", default-features = false, optional = true }
 tuirealm_derive = { version = "2", optional = true }
+dyn-clone = "1.0"
 
 [dev-dependencies]
 pretty_assertions = "^1"
@@ -67,6 +68,11 @@ required-features = ["crossterm"]
 [[example]]
 name = "user-events"
 path = "examples/user_events/user_events.rs"
+required-features = ["crossterm"]
+
+[[example]]
+name = "arbitrary-data"
+path = "examples/arbitrary_data.rs"
 required-features = ["crossterm"]
 
 [package.metadata.docs.rs]

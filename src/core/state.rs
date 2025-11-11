@@ -4,7 +4,7 @@
 
 use std::collections::{HashMap, LinkedList};
 
-use crate::props::Color;
+use crate::props::{AnyProp, Color};
 use crate::utils::{Email, PhoneNumber};
 
 /// State describes a component state
@@ -17,6 +17,7 @@ pub enum State {
     Vec(Vec<StateValue>),
     Map(HashMap<String, StateValue>),
     Linked(LinkedList<State>),
+    Any(AnyProp),
     None,
 }
 
@@ -92,6 +93,13 @@ impl State {
         match self {
             Self::Linked(val) => val,
             state => panic!("Could not unwrap {state:?} as `Linked`"),
+        }
+    }
+
+    pub fn unwrap_any(self) -> AnyProp {
+        match self {
+            Self::Any(val) => val,
+            state => panic!("Could not unwrap {state:?} as `Any`"),
         }
     }
 
@@ -231,5 +239,105 @@ impl StateValue {
             Self::PhoneNumber(val) => val,
             value => panic!("Could not unwrap {value:?} as `PhoneNumber`"),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::State;
+    use crate::props::{PropBound, PropBoundExt};
+
+    #[test]
+    fn any() {
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        struct SomeCustomType {
+            field1: bool,
+            field2: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        struct SomeDifferentCustomType {
+            field1: bool,
+        }
+
+        let input = SomeCustomType {
+            field1: true,
+            field2: false,
+        };
+        let single_value = State::Any(input.to_any_prop());
+
+        assert_eq!(
+            single_value,
+            State::Any(
+                SomeCustomType {
+                    field1: true,
+                    field2: false
+                }
+                .to_any_prop()
+            )
+        );
+        assert_ne!(
+            single_value,
+            State::Any(
+                SomeCustomType {
+                    field1: false,
+                    field2: true
+                }
+                .to_any_prop()
+            )
+        );
+
+        assert_ne!(
+            single_value,
+            State::Any(SomeDifferentCustomType { field1: true }.to_any_prop())
+        );
+
+        #[derive(Debug, Clone, PartialEq)]
+        struct CloneableType {
+            field1: String,
+        }
+
+        let input = State::Any(
+            CloneableType {
+                field1: "Hello".to_string(),
+            }
+            .to_any_prop(),
+        );
+        let cloned = input.clone();
+
+        assert_eq!(input, cloned);
+        let input_downcasted = match &input {
+            State::Any(v) => v,
+            _ => unimplemented!(),
+        }
+        .as_any()
+        .downcast_ref::<CloneableType>()
+        .expect("Erased type should be CloneableType");
+        let cloned_downcasted = match &cloned {
+            State::Any(v) => v,
+            _ => unimplemented!(),
+        }
+        .as_any()
+        .downcast_ref::<CloneableType>()
+        .expect("Erased type should be CloneableType");
+        // should be cloned and so not have the same memory pointer
+        assert_ne!(
+            input_downcasted.field1.as_ptr(),
+            cloned_downcasted.field1.as_ptr()
+        );
+
+        let mut changed_data = cloned;
+
+        let downcasted = match &mut changed_data {
+            State::Any(v) => v,
+            _ => unimplemented!(),
+        }
+        .as_any_mut()
+        .downcast_mut::<CloneableType>()
+        .expect("Erased type should be CloneableType");
+
+        downcasted.field1 = "Changed later".to_string();
+
+        assert_ne!(input_downcasted, downcasted);
     }
 }
