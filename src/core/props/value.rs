@@ -2,10 +2,11 @@
 //!
 //! This module exposes the prop values
 
+use std::any::Any;
 use std::collections::{HashMap, LinkedList};
 
 use super::{Alignment, Color, Dataset, InputType, Shape, Style, Table, TextSpan};
-use crate::props::AnyProp;
+use crate::props::AnyPropBox;
 
 // -- Prop value
 
@@ -19,7 +20,7 @@ pub enum PropPayload {
     Vec(Vec<PropValue>),
     Map(HashMap<String, PropValue>),
     Linked(LinkedList<PropPayload>),
-    Any(AnyProp),
+    Any(AnyPropBox),
     None,
 }
 
@@ -113,7 +114,7 @@ impl PropPayload {
     }
 
     /// Unwrap a Any from PropPayload
-    pub fn unwrap_any(self) -> AnyProp {
+    pub fn unwrap_any(self) -> AnyPropBox {
         match self {
             PropPayload::Any(l) => l,
             _ => panic!("Called `unwrap_any` on a bad value"),
@@ -179,9 +180,9 @@ impl PropPayload {
     }
 
     /// Get a Any value from PropPayload, or None
-    pub fn as_any(&self) -> Option<&AnyProp> {
+    pub fn as_any(&self) -> Option<&dyn Any> {
         match self {
-            PropPayload::Any(v) => Some(v),
+            PropPayload::Any(v) => Some(v.as_ref()),
             _ => None,
         }
     }
@@ -245,9 +246,9 @@ impl PropPayload {
     }
 
     /// Get a Any value from PropPayload, or None
-    pub fn as_any_mut(&mut self) -> Option<&mut AnyProp> {
+    pub fn as_any_mut(&mut self) -> Option<&mut dyn Any> {
         match self {
-            PropPayload::Any(v) => Some(v),
+            PropPayload::Any(v) => Some(v.as_mut()),
             _ => None,
         }
     }
@@ -834,7 +835,7 @@ mod tests {
     use pretty_assertions::{assert_eq, assert_ne};
 
     use super::*;
-    use crate::props::{PropBound, PropBoundExt};
+    use crate::props::PropBound;
     use crate::ratatui::widgets::canvas::Map;
 
     #[test]
@@ -1416,13 +1417,11 @@ mod tests {
         let input_downcasted = input
             .as_any()
             .unwrap()
-            .as_any()
             .downcast_ref::<CloneableType>()
             .expect("Erased type should be CloneableType");
         let cloned_downcasted = cloned
             .as_any()
             .unwrap()
-            .as_any()
             .downcast_ref::<CloneableType>()
             .expect("Erased type should be CloneableType");
         // should be cloned and so not have the same memory pointer
@@ -1436,7 +1435,6 @@ mod tests {
         let downcasted = changed_data
             .as_any_mut()
             .unwrap()
-            .as_any_mut()
             .downcast_mut::<CloneableType>()
             .expect("Erased type should be CloneableType");
 

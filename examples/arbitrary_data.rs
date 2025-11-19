@@ -9,9 +9,7 @@ use std::time::Duration;
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::event::{Key, KeyEvent};
-use tuirealm::props::{
-    Alignment, Color, PropBound, PropBoundExt, PropPayload, Style, TextModifiers,
-};
+use tuirealm::props::{Alignment, Color, PropBound, PropPayload, Style, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalBridge};
@@ -191,7 +189,6 @@ impl MockComponent for StdLabel {
                 .get_ref(Attribute::Value)
                 .and_then(AttrValue::as_payload)
                 .and_then(PropPayload::as_any)
-                .map(PropBoundExt::as_any)
                 .and_then(|v| v.downcast_ref::<CustomState>())
                 .map(|v| v.text.as_str())
                 .unwrap_or("Unavailable; this is a bug");
@@ -274,7 +271,7 @@ impl Component<Msg, NoUserEvent> for OurLabel {
                 let tmp = existing_attr
                     .as_payload_mut()
                     .and_then(|v| v.as_any_mut())
-                    .and_then(|v| v.as_any_mut()
+                    .and_then(|v| v
                     .downcast_mut::<CustomState>())
                     .expect("Unexpected type in Attribute::Value! Expected PropPayload::Any + CustomState!");
                 tmp.text = match tmp.text.as_str() {

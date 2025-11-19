@@ -60,7 +60,7 @@ impl PartialEq<dyn DynCompare> for dyn DynCompare {
 #[allow(private_bounds)]
 pub trait PropBound: Any + DynClone + DynCompare + Debug {
     /// Convert any [`PropBound`] value to a [`AnyProp`] value.
-    fn to_any_prop(self) -> AnyProp;
+    fn to_any_prop(self) -> AnyPropBox;
     /// This function is necessary as rust as of 1.90 does not have stable cast to super-trait (here to `Any`)
     fn as_any_i(&self) -> &dyn Any;
 }
@@ -69,7 +69,7 @@ impl<T> PropBound for T
 where
     T: Any + DynClone + DynCompare + Debug + Sized,
 {
-    fn to_any_prop(self) -> AnyProp {
+    fn to_any_prop(self) -> AnyPropBox {
         Box::new(self)
     }
 
@@ -91,15 +91,13 @@ pub trait PropBoundExt {
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 
-impl PropBoundExt for AnyProp {
+impl PropBoundExt for dyn PropBound {
     fn as_any(&self) -> &dyn Any {
-        // this seemingly cannot be just `&(*self)` as this just results in `&(Box<dyn T>) as Any` for some reason
-        // but the following actually is `&dyn T as Any`
-        self.as_ref()
+        self
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
-        self.as_mut()
+        self
     }
 }
 
@@ -112,4 +110,4 @@ impl PartialEq<dyn PropBound> for dyn PropBound {
 dyn_clone::clone_trait_object!(PropBound);
 
 /// The outside type to use. It is also the type in [`PropPayload::Any`](super::PropPayload::Any).
-pub type AnyProp = Box<dyn PropBound>;
+pub type AnyPropBox = Box<dyn PropBound>;

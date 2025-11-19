@@ -4,7 +4,7 @@
 
 use std::collections::{HashMap, LinkedList};
 
-use crate::props::{AnyProp, Color};
+use crate::props::{AnyPropBox, Color};
 use crate::utils::{Email, PhoneNumber};
 
 /// State describes a component state
@@ -17,7 +17,7 @@ pub enum State {
     Vec(Vec<StateValue>),
     Map(HashMap<String, StateValue>),
     Linked(LinkedList<State>),
-    Any(AnyProp),
+    Any(AnyPropBox),
     None,
 }
 
@@ -96,7 +96,7 @@ impl State {
         }
     }
 
-    pub fn unwrap_any(self) -> AnyProp {
+    pub fn unwrap_any(self) -> AnyPropBox {
         match self {
             Self::Any(val) => val,
             state => panic!("Could not unwrap {state:?} as `Any`"),

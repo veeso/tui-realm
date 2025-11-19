@@ -16,7 +16,7 @@ mod texts;
 mod value;
 
 // -- exports
-pub use any::{AnyProp, PropBound, PropBoundExt};
+pub use any::{AnyPropBox, PropBound, PropBoundExt};
 pub use borders::{BorderSides, BorderType, Borders};
 pub use dataset::Dataset;
 pub use direction::Direction;
