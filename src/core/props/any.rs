@@ -40,7 +40,7 @@ impl PartialEq<dyn DynCompare> for dyn DynCompare {
 /// Note that equivalence ([`PartialEq`]) will only work if the types are the same (ex. `String` will compare with `String`, but not `str`).
 #[allow(private_bounds)]
 pub trait PropBound: Any + DynClone + DynCompare + Debug {
-    /// Convert any [`PropBound`] value to a [`AnyProp`] value.
+    /// Convert any [`PropBound`] value to a [`AnyPropBox`] value.
     fn to_any_prop(self) -> AnyPropBox;
 }
 
@@ -53,14 +53,15 @@ where
     }
 }
 
-/// Extra helpers for [`PropBound`] and [`AnyProp`].
-// This is mainly required due to not being able to specialize impl's yet or exempt specific types.
-// This *might* not be necessary, if [`AnyProp`] would be a distinct struct instead of a type alias,
-// but that still wouldnt solve [`PropBound::as_any_i`] to be potentially be callable on `Box` itself.
+/// Extra convenience functions for [`PropBound`].
+///
+/// This mainly exists because "negative trait implementations" are not stable / supported,
+/// so if we would add this to [`PropBound`]'s `impl _ for T`, it would implement the following functions
+/// for [`Box`] as well, causing `Box<_> as Any` instead of `Box<_>.deref() as Any`.
 pub trait PropBoundExt {
-    /// This function is necessary as rust as of 1.90 does not have stable cast to super-trait (here to `Any`)
+    /// Convenience function to cast to [`Any`].
     fn as_any(&self) -> &dyn Any;
-    /// This function is necessary as rust as of 1.90 does not have stable cast to super-trait (here to `Any`)
+    /// Convenience function to cast to [`Any`] mutably.
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 
