@@ -15,8 +15,6 @@ trait DynCompare: AsDynCompare {
 }
 
 trait AsDynCompare: Any {
-    /// This function is necessary as rust as of 1.90 does not have stable cast to super-trait (here to `Any`)
-    fn as_any(&self) -> &dyn Any;
     fn as_dyn_compare(&self) -> &dyn DynCompare;
 }
 
@@ -24,10 +22,6 @@ impl<T> AsDynCompare for T
 where
     T: Any + DynCompare,
 {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
     fn as_dyn_compare(&self) -> &dyn DynCompare {
         self
     }
@@ -38,7 +32,7 @@ where
     T: Any + PartialEq,
 {
     fn dyn_eq(&self, other: &dyn DynCompare) -> bool {
-        if let Some(other) = other.as_any().downcast_ref::<Self>() {
+        if let Some(other) = (other as &dyn Any).downcast_ref::<Self>() {
             self == other
         } else {
             false
