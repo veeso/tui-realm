@@ -39,14 +39,14 @@ impl PartialEq<dyn DynCompare> for dyn DynCompare {
 ///
 /// Note that equivalence ([`PartialEq`]) will only work if the types are the same (ex. `String` will compare with `String`, but not `str`).
 #[allow(private_bounds)]
-pub trait PropBound: Any + DynClone + DynCompare + Debug {
+pub trait PropBound: Any + DynClone + DynCompare + Debug + Send + Sync {
     /// Convert any [`PropBound`] value to a [`AnyPropBox`] value.
     fn to_any_prop(self) -> AnyPropBox;
 }
 
 impl<T> PropBound for T
 where
-    T: Any + DynClone + DynCompare + Debug + Sized,
+    T: Any + DynClone + DynCompare + Debug + Sized + Send + Sync,
 {
     fn to_any_prop(self) -> AnyPropBox {
         Box::new(self)
