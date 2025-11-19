@@ -10,21 +10,8 @@ use dyn_clone::DynClone;
 /// Or in other words `String("Hello") == String("Hello")` but not `str("Hello") != String("Hello")`.
 ///
 /// Implementation mainly from <https://quinedot.github.io/rust-learning/dyn-trait-eq.html>
-trait DynCompare: AsDynCompare {
+trait DynCompare: Any {
     fn dyn_eq(&self, other: &dyn DynCompare) -> bool;
-}
-
-trait AsDynCompare: Any {
-    fn as_dyn_compare(&self) -> &dyn DynCompare;
-}
-
-impl<T> AsDynCompare for T
-where
-    T: Any + DynCompare,
-{
-    fn as_dyn_compare(&self) -> &dyn DynCompare {
-        self
-    }
 }
 
 impl<T> DynCompare for T
@@ -97,7 +84,7 @@ impl PropBoundExt for dyn PropBound {
 
 impl PartialEq<dyn PropBound> for dyn PropBound {
     fn eq(&self, other: &dyn PropBound) -> bool {
-        self.as_dyn_compare() == other.as_dyn_compare()
+        self as &dyn DynCompare == other as &dyn DynCompare
     }
 }
 
