@@ -53,6 +53,17 @@ where
     }
 }
 
+impl PartialEq<dyn PropBound> for dyn PropBound {
+    fn eq(&self, other: &dyn PropBound) -> bool {
+        self as &dyn DynCompare == other as &dyn DynCompare
+    }
+}
+
+dyn_clone::clone_trait_object!(PropBound);
+
+/// The outside type to use. It is also the type in [`PropPayload::Any`](super::PropPayload::Any).
+pub type AnyPropBox = Box<dyn PropBound>;
+
 /// Extra convenience functions for [`PropBound`].
 ///
 /// This mainly exists because "negative trait implementations" are not stable / supported,
@@ -74,17 +85,6 @@ impl PropBoundExt for dyn PropBound {
         self
     }
 }
-
-impl PartialEq<dyn PropBound> for dyn PropBound {
-    fn eq(&self, other: &dyn PropBound) -> bool {
-        self as &dyn DynCompare == other as &dyn DynCompare
-    }
-}
-
-dyn_clone::clone_trait_object!(PropBound);
-
-/// The outside type to use. It is also the type in [`PropPayload::Any`](super::PropPayload::Any).
-pub type AnyPropBox = Box<dyn PropBound>;
 
 #[cfg(test)]
 mod tests {
