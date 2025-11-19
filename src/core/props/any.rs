@@ -42,8 +42,6 @@ impl PartialEq<dyn DynCompare> for dyn DynCompare {
 pub trait PropBound: Any + DynClone + DynCompare + Debug {
     /// Convert any [`PropBound`] value to a [`AnyProp`] value.
     fn to_any_prop(self) -> AnyPropBox;
-    /// This function is necessary as rust as of 1.90 does not have stable cast to super-trait (here to `Any`)
-    fn as_any_i(&self) -> &dyn Any;
 }
 
 impl<T> PropBound for T
@@ -52,12 +50,6 @@ where
 {
     fn to_any_prop(self) -> AnyPropBox {
         Box::new(self)
-    }
-
-    /// This function should likely not be called directly, instead via [`PropBoundExt`], if the input type is Boxed.
-    /// If the current type is *not* boxed, this is perfectly fine to call.
-    fn as_any_i(&self) -> &dyn Any {
-        self
     }
 }
 
@@ -92,3 +84,31 @@ dyn_clone::clone_trait_object!(PropBound);
 
 /// The outside type to use. It is also the type in [`PropPayload::Any`](super::PropPayload::Any).
 pub type AnyPropBox = Box<dyn PropBound>;
+
+#[cfg(test)]
+mod tests {
+    use crate::props::{PropBound, PropBoundExt};
+
+    #[test]
+    fn should_work_basic() {
+        let value = String::from("Some string");
+        let prop_boxed = value.to_any_prop();
+
+        assert_eq!(
+            prop_boxed.as_any().downcast_ref::<String>().unwrap(),
+            &String::from("Some string")
+        );
+
+        let mut prop_boxed = prop_boxed;
+        prop_boxed
+            .as_any_mut()
+            .downcast_mut::<String>()
+            .unwrap()
+            .push_str(" hello");
+
+        assert_eq!(
+            prop_boxed.as_any().downcast_ref::<String>().unwrap(),
+            &String::from("Some string hello")
+        );
+    }
+}
