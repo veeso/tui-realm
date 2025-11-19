@@ -68,8 +68,8 @@ where
 impl<ComponentId, Msg, UserEvent> View<ComponentId, Msg, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
-    Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone,
+    Msg: PartialEq + 'static,
+    UserEvent: Eq + PartialEq + Clone + 'static,
 {
     /// Mount component on View.
     /// Returns error if the component is already mounted
@@ -132,6 +132,19 @@ where
     /// Returns whether component `id` is mounted
     pub fn mounted(&self, id: &ComponentId) -> bool {
         self.components.contains_key(id)
+    }
+
+    /// Get a reference to the registered component for the given `id`, if there is one.
+    pub fn get_component(&self, id: &ComponentId) -> Option<&dyn Component<Msg, UserEvent>> {
+        self.components.get(id).map(|v| &**v)
+    }
+
+    /// Get a mutable reference to the registered component for the given `id`, if there is one.
+    pub fn get_component_mut(
+        &mut self,
+        id: &ComponentId,
+    ) -> Option<&mut dyn Component<Msg, UserEvent>> {
+        self.components.get_mut(id).map(|v| &mut **v)
     }
 
     /// Returns current active element (if any)
@@ -311,14 +324,14 @@ where
 
 #[cfg(test)]
 mod test {
-
     use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::StateValue;
+    use crate::core::component::ComponentAny;
     use crate::event::{Key, KeyEvent};
     use crate::mock::{
-        MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg,
+        MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockInput, MockMsg,
     };
 
     #[test]
@@ -763,5 +776,69 @@ mod test {
                 .unwrap(),
             AttrValue::String(String::from("hello, world!"))
         );
+    }
+
+    #[test]
+    fn view_component_should_be_downcastable() {
+        /// Some struct we can reference and has "&self" and "&mut self" requirements.
+        #[derive(MockComponent, Default)]
+        pub struct OurMockFooInput {
+            component: MockInput,
+        }
+
+        impl OurMockFooInput {
+            fn some_mut_fn(&mut self) -> usize {
+                10
+            }
+
+            fn some_ref_fn(&self) -> usize {
+                20
+            }
+        }
+
+        impl Component<MockMsg, MockEvent> for OurMockFooInput {
+            fn on(&mut self, _ev: &Event<MockEvent>) -> Option<MockMsg> {
+                None
+            }
+        }
+
+        let mut view: View<MockComponentId, MockMsg, MockEvent> = View::default();
+        // Mount foo
+        assert!(
+            view.mount(
+                &MockComponentId::InputFoo,
+                Box::new(OurMockFooInput::default())
+            )
+            .is_ok()
+        );
+        assert!(
+            view.mount(
+                &MockComponentId::InputBar,
+                Box::new(MockBarInput::default())
+            )
+            .is_ok()
+        );
+
+        // shouldnt return component for non-mounted id
+        assert!(view.get_component(&MockComponentId::InputOmar).is_none());
+
+        // reference
+        let comp = view.get_component(&MockComponentId::InputFoo).unwrap();
+
+        let downcasted = (comp).as_any().downcast_ref::<OurMockFooInput>().unwrap();
+        downcasted.some_ref_fn();
+
+        // mutable reference
+        let comp_mut = view.get_component_mut(&MockComponentId::InputFoo).unwrap();
+
+        let downcasted_mut = (comp_mut)
+            .as_any_mut()
+            .downcast_mut::<OurMockFooInput>()
+            .unwrap();
+        downcasted_mut.some_mut_fn();
+
+        // reference shouldnt downcast to another component
+        let comp = view.get_component(&MockComponentId::InputFoo).unwrap();
+        assert!((comp).as_any().downcast_ref::<MockFooInput>().is_none());
     }
 }

@@ -2,6 +2,8 @@
 //!
 //! This module exposes the component traits
 
+use std::any::Any;
+
 use ratatui::Frame;
 
 use crate::command::{Cmd, CmdResult};
@@ -52,7 +54,7 @@ pub trait MockComponent {
 ///
 /// Don't forget you can find an example in the `examples/` directory and you can discover many more information
 /// about components in the repository documentation.
-pub trait Component<Msg, UserEvent>: MockComponent
+pub trait Component<Msg, UserEvent>: MockComponent + Any
 where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone,
@@ -61,4 +63,30 @@ where
     /// Returns a Msg to the view.
     /// If [`None`] is returned it means there's no message to return for the provided event.
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg>;
+}
+
+/// Extra trait to cast [`Component`] to be `dyn Any` as it cannot be included in [`Component`] itself
+pub trait ComponentAny<Msg, UserEvent>
+where
+    Msg: PartialEq,
+    UserEvent: Eq + PartialEq + Clone,
+{
+    /// Convenience function to cast to [`Any`].
+    fn as_any(&self) -> &dyn Any;
+    /// Convenience function to cast to [`Any`] mutably.
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+}
+
+impl<Msg, UserEvent> ComponentAny<Msg, UserEvent> for dyn Component<Msg, UserEvent>
+where
+    Msg: PartialEq,
+    UserEvent: Eq + PartialEq + Clone,
+{
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
 }

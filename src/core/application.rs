@@ -11,7 +11,9 @@ use thiserror::Error;
 use super::{Subscription, View, WrappedComponent};
 use crate::listener::{EventListener, EventListenerCfg, ListenerError};
 use crate::ratatui::layout::Rect;
-use crate::{AttrValue, Attribute, Event, Injector, State, Sub, SubEventClause, ViewError};
+use crate::{
+    AttrValue, Attribute, Component, Event, Injector, State, Sub, SubEventClause, ViewError,
+};
 
 /// Result retuned by [`Application`].
 /// Ok depends on method
@@ -38,7 +40,7 @@ where
 impl<ComponentId, Msg, UserEvent> Application<ComponentId, Msg, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
-    Msg: PartialEq,
+    Msg: PartialEq + 'static,
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Initialize a new [`Application`].
@@ -224,6 +226,19 @@ where
     /// Get a reference to the id of the current active component in the view
     pub fn focus(&self) -> Option<&ComponentId> {
         self.view.focus()
+    }
+
+    /// Get a reference to the registered component for the given `id`, if there is one.
+    pub fn get_component(&self, id: &ComponentId) -> Option<&dyn Component<Msg, UserEvent>> {
+        self.view.get_component(id)
+    }
+
+    /// Get a mutable reference to the registered component for the given `id`, if there is one.
+    pub fn get_component_mut(
+        &mut self,
+        id: &ComponentId,
+    ) -> Option<&mut dyn Component<Msg, UserEvent>> {
+        self.view.get_component_mut(id)
     }
 
     // -- subs bridge
