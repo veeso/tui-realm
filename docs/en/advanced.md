@@ -1,3 +1,5 @@
+📍<u>**English**</u> | <a href="../zh-cn/advanced.md">简体中文</a>
+
 # Advanced concepts
 
 - [Advanced concepts](#advanced-concepts)
