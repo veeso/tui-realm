@@ -1,3 +1,5 @@
+📍<u>**English**</u> | <a href="../zh-cn/migrating-legacy.md">简体中文</a>
+
 # Migrating from tui-realm 0.x
 
 - [Migrating from tui-realm 0.x](#migrating-from-tui-realm-0x)

@@ -1,3 +1,5 @@
+📍<u>**English**</u> | <a href="../zh-cn/get-started.md">简体中文</a>
+
 # Get Started 🏁
 
 - [Get Started 🏁](#get-started-)
