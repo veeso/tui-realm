@@ -1,7 +1,10 @@
 [package]
 name = "tuirealm"
 version = "3.3.0"
-authors = ["Christian Visintin <christian.visintin@veeso.dev>"]
+authors = [
+  "Christian Visintin <christian.visintin@veeso.dev>",
+  "hasezoey <hasezoey@gmail.com>",
+]
 edition = "2024"
 rust-version = "1.85.1"
 categories = ["command-line-utilities"]
