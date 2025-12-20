@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm"
-version = "3.2.0"
+version = "3.3.0"
 authors = ["Christian Visintin <christian.visintin@veeso.dev>"]
 edition = "2024"
 rust-version = "1.85.1"
