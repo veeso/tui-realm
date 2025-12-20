@@ -117,7 +117,7 @@ pub fn get_block<T: AsRef<str>>(
     title: Option<&(T, Alignment)>,
     focus: bool,
     inactive_style: Option<Style>,
-) -> Block {
+) -> Block<'_> {
     let mut block = Block::default()
         .borders(props.sides)
         .border_style(if focus {
