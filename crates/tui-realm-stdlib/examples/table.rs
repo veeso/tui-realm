@@ -70,7 +70,7 @@ impl Model {
                 .margin(1)
                 .constraints(
                     [
-                        Constraint::Length(10),
+                        Constraint::Length(15),
                         Constraint::Length(6),
                         Constraint::Length(1),
                     ]
@@ -148,6 +148,8 @@ impl Default for TableAlfa {
                         .modifiers(BorderType::Thick)
                         .color(Color::Yellow),
                 )
+                .foreground(Color::Yellow)
+                .background(Color::Black)
                 .title("Keybindings", Alignment::Center)
                 .scroll(true)
                 .highlighted_color(Color::LightYellow)
@@ -238,6 +240,7 @@ impl Default for TableBeta {
                         .color(Color::Green),
                 )
                 .foreground(Color::Green)
+                .background(Color::Gray)
                 .title("Keybindings (not scrollable)", Alignment::Center)
                 .scroll(false)
                 .highlighted_color(Color::Green)

@@ -33,6 +33,10 @@ pub struct Canvas {
 }
 
 impl Canvas {
+    /// Note that setting this value has no effect.
+    ///
+    /// If you want to set the border color, use [`borders`](Self::borders).
+    /// If you want to set some point in the canvas, set it in the data.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
@@ -153,10 +157,10 @@ impl Canvas {
 impl MockComponent for Canvas {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
+            // let foreground = self
+            //     .props
+            //     .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+            //     .unwrap_color();
             let background = self
                 .props
                 .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
@@ -173,8 +177,7 @@ impl MockComponent for Canvas {
                 .props
                 .get_or(Attribute::Focus, AttrValue::Flag(false))
                 .unwrap_flag();
-            let mut block = crate::utils::get_block(borders, title, focus, None);
-            block = block.style(Style::default().bg(background).fg(foreground));
+            let block = crate::utils::get_block(borders, title, focus, None);
             // Get properties
             let x_bounds: [f64; 2] = self
                 .props

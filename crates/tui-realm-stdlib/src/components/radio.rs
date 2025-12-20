@@ -197,23 +197,19 @@ impl MockComponent for Radio {
                 .props
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
+
+            let normal_style = Style::default().fg(foreground).bg(background);
+
             let div = crate::utils::get_block(borders, title, focus, inactive_style);
-            // Make colors
-            let (fg, block_color): (Color, Color) = if focus {
-                (foreground, foreground)
-            } else {
-                (foreground, Color::Reset)
-            };
-            let modifiers = if focus {
-                TextModifiers::REVERSED
-            } else {
-                TextModifiers::empty()
-            };
             let radio: Tabs = Tabs::new(choices)
                 .block(div)
                 .select(self.states.choice)
-                .style(Style::default().fg(block_color).bg(background))
-                .highlight_style(Style::default().fg(fg).add_modifier(modifiers));
+                .style(normal_style)
+                .highlight_style(Style::default().fg(foreground).add_modifier(if focus {
+                    TextModifiers::REVERSED
+                } else {
+                    TextModifiers::empty()
+                }));
             render.render_widget(radio, area);
         }
     }

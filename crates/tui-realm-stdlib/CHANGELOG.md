@@ -28,6 +28,12 @@
 
 ---
 
+## next
+
+Unreleased
+
+- Fix a bunch of styling inconsistencies. (re #43)
+
 ## 3.0.0
 
 Released on 07/06/2025
