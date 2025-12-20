@@ -13,6 +13,7 @@ use tuirealm::{
     application::PollStrategy,
     event::{Key, KeyEvent},
 };
+use tuirealm::{Sub, SubClause, SubEventClause};
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 
@@ -41,7 +42,9 @@ impl Default for Model {
     fn default() -> Self {
         // Setup app
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
+            EventListenerCfg::default()
+                .crossterm_input_listener(Duration::from_millis(10), 10)
+                .tick_interval(Duration::from_millis(500)),
         );
         assert!(
             app.mount(Id::SpanAlfa, Box::new(SpanAlfa::default()), vec![])
@@ -52,8 +55,12 @@ impl Default for Model {
                 .is_ok()
         );
         assert!(
-            app.mount(Id::SpinnerAlfa, Box::new(SpinnerAlfa::default()), vec![])
-                .is_ok()
+            app.mount(
+                Id::SpinnerAlfa,
+                Box::new(SpinnerAlfa::default()),
+                vec![Sub::new(SubEventClause::Tick, SubClause::Always)]
+            )
+            .is_ok()
         );
         assert!(
             app.mount(Id::SpinnerBeta, Box::new(SpinnerBeta::default()), vec![])
@@ -214,13 +221,18 @@ impl Default for SpinnerAlfa {
         Self {
             component: Spinner::default()
                 .foreground(Color::LightBlue)
-                .sequence("⣾⣽⣻⢿⡿⣟⣯⣷"),
+                .sequence("⣾⣽⣻⢿⡿⣟⣯⣷")
+                .manual_step(),
         }
     }
 }
 
 impl Component<Msg, NoUserEvent> for SpinnerAlfa {
-    fn on(&mut self, _: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+        if ev == Event::Tick {
+            self.component.states.step();
+        }
+
         None
     }
 }

@@ -32,6 +32,8 @@
 
 Unreleased
 
+- Add option `view_auto_step` to `Spinner` to disable automatic sequence stepping in a `view` call.
+  - Add function `manual_step` to `Spinner` to set option `view_auto_step` in a builder-like fashion.
 - [Issue 35](https://github.com/veeso/tui-realm-stdlib/issues/35): dont let the `Input`'s cursor escape the component's area.
 - [Issue 35](https://github.com/veeso/tui-realm-stdlib/issues/35): add scrolling for `Input`'s text.
 - Change `Input::view` to not set cursor position if the effective text area is 0.

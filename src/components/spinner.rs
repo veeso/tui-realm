@@ -42,6 +42,13 @@ impl SpinnerStates {
         }
         ch
     }
+
+    /// Get the current char to display
+    ///
+    /// Unlike [`step`](Self::step), this function does not increment the step.
+    pub fn current_step(&self) -> char {
+        self.sequence.get(self.step).copied().unwrap_or(' ')
+    }
 }
 
 // -- Component
@@ -49,11 +56,24 @@ impl SpinnerStates {
 /// ## Spinner
 ///
 /// A textual spinner which step changes at each `view()` call
-#[derive(Default)]
 #[must_use]
 pub struct Spinner {
     props: Props,
     pub states: SpinnerStates,
+    /// Automatically call [`SpinnerStates::step`] in [`view`](Spinner::view).
+    ///
+    /// This option might be removed in a future major version
+    pub view_auto_step: bool,
+}
+
+impl Default for Spinner {
+    fn default() -> Self {
+        Self {
+            props: Default::default(),
+            states: Default::default(),
+            view_auto_step: true,
+        }
+    }
 }
 
 impl Spinner {
@@ -69,6 +89,12 @@ impl Spinner {
 
     pub fn sequence<S: Into<String>>(mut self, s: S) -> Self {
         self.attr(Attribute::Text, AttrValue::String(s.into()));
+        self
+    }
+
+    /// Dont automatically step the sequence in a [`view`](Self::view) call
+    pub fn manual_step(mut self) -> Self {
+        self.view_auto_step = false;
         self
     }
 }
@@ -87,7 +113,12 @@ impl MockComponent for Spinner {
                 .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
                 .unwrap_color();
             // Get text
-            let text: Text = Text::from(Spans::from(TuiSpan::from(self.states.step().to_string())));
+            let seq_char = if self.view_auto_step {
+                self.states.step()
+            } else {
+                self.states.current_step()
+            };
+            let text: Text = Text::from(Spans::from(TuiSpan::from(seq_char.to_string())));
             render.render_widget(
                 Paragraph::new(text)
                     .alignment(Alignment::Left)
@@ -125,6 +156,7 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
+    use tuirealm::ratatui::{self};
 
     #[test]
     fn test_components_span() {
@@ -134,5 +166,80 @@ mod tests {
             .sequence("⣾⣽⣻⢿⡿⣟⣯⣷");
         // Get value
         assert_eq!(component.state(), State::None);
+    }
+
+    #[test]
+    fn should_step_in_view() {
+        let mut component = Spinner::default().sequence("123");
+
+        assert_eq!(component.states.step, 0);
+
+        let mut terminal =
+            ratatui::Terminal::new(ratatui::backend::TestBackend::new(16, 16)).unwrap();
+
+        terminal
+            .draw(|f| {
+                component.view(f, f.area());
+                assert_eq!(component.states.step, 1);
+            })
+            .unwrap();
+
+        terminal
+            .draw(|f| {
+                component.view(f, f.area());
+                assert_eq!(component.states.step, 2);
+            })
+            .unwrap();
+
+        terminal
+            .draw(|f| {
+                component.view(f, f.area());
+                assert_eq!(component.states.step, 0);
+            })
+            .unwrap();
+    }
+
+    #[test]
+    fn should_not_step_in_view() {
+        let mut component = Spinner::default().sequence("123").manual_step();
+
+        assert_eq!(component.states.step, 0);
+
+        let mut terminal =
+            ratatui::Terminal::new(ratatui::backend::TestBackend::new(16, 16)).unwrap();
+
+        terminal
+            .draw(|f| {
+                component.view(f, f.area());
+                assert_eq!(component.states.step, 0);
+            })
+            .unwrap();
+
+        component.states.step();
+
+        terminal
+            .draw(|f| {
+                component.view(f, f.area());
+                assert_eq!(component.states.step, 1);
+            })
+            .unwrap();
+
+        component.states.step();
+
+        terminal
+            .draw(|f| {
+                component.view(f, f.area());
+                assert_eq!(component.states.step, 2);
+            })
+            .unwrap();
+
+        component.states.step();
+
+        terminal
+            .draw(|f| {
+                component.view(f, f.area());
+                assert_eq!(component.states.step, 0);
+            })
+            .unwrap();
     }
 }
