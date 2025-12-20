@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [3.3.0](#330)
   - [3.2.0](#320)
   - [3.1.0](#310)
   - [3.0.1](#301)
@@ -45,9 +46,9 @@
 
 ---
 
-## next
+## 3.3.0
 
-Unreleased
+Released on 2025-12-20
 
 - Add `PropPayload::Any` variant using `dyn Any`, allowing arbitrary data via `MockComponent::query` and `MockComponent::attr`.
 
