@@ -272,7 +272,7 @@ impl Table {
     }
 
     /// Generate [`Row`]s from a 2d vector of [`TextSpan`](tuirealm::props::TextSpan)s in props [`Attribute::Content`].
-    fn make_rows(&self, row_height: u16) -> Vec<Row> {
+    fn make_rows(&self, row_height: u16) -> Vec<Row<'_>> {
         let Some(table) = self
             .props
             .get_ref(Attribute::Content)
