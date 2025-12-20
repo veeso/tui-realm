@@ -28,6 +28,7 @@
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+    TextModifiers,
 };
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{layout::Rect, text::Span, widgets::Tabs};
@@ -215,12 +216,10 @@ impl MockComponent for Checkbox {
                 .props
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
+
+            let normal_style = Style::default().fg(foreground).bg(background);
+
             let div = crate::utils::get_block(borders, title, focus, inactive_style);
-            // Make colors
-            let (bg, fg, block_color): (Color, Color, Color) = match &focus {
-                true => (foreground, background, foreground),
-                false => (Color::Reset, foreground, Color::Reset),
-            };
             // Make choices
             let choices: Vec<Spans> = self
                 .states
@@ -229,26 +228,20 @@ impl MockComponent for Checkbox {
                 .enumerate()
                 .map(|(idx, x)| {
                     let checkbox: &str = if self.states.has(idx) { "☑ " } else { "☐ " };
-                    let (fg, bg) = if focus {
-                        if self.states.choice == idx {
-                            (fg, bg)
-                        } else {
-                            (bg, fg)
-                        }
-                    } else {
-                        (fg, bg)
-                    };
                     // Make spans
-                    Spans::from(vec![
-                        Span::styled(checkbox, Style::default().fg(fg).bg(bg)),
-                        Span::styled(x.to_string(), Style::default().fg(fg).bg(bg)),
-                    ])
+                    Spans::from(vec![Span::raw(checkbox), Span::raw(x.to_string())])
                 })
                 .collect();
             let checkbox: Tabs = Tabs::new(choices)
                 .block(div)
                 .select(self.states.choice)
-                .style(Style::default().fg(block_color));
+                .style(normal_style)
+                .highlight_style(Style::default().fg(foreground).add_modifier(if focus {
+                    TextModifiers::REVERSED
+                } else {
+                    TextModifiers::empty()
+                }));
+
             render.render_widget(checkbox, area);
         }
     }

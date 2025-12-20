@@ -11,7 +11,7 @@ use tuirealm::props::{
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{
     layout::{Constraint, Direction as LayoutDirection, Layout, Rect},
-    widgets::{Block, List, ListItem, ListState, Paragraph},
+    widgets::{List, ListItem, ListState, Paragraph},
 };
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
@@ -216,20 +216,6 @@ impl Select {
             None => String::default(),
             Some(s) => s.clone(),
         };
-        let borders = self
-            .props
-            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-            .unwrap_borders();
-        let block: Block = Block::default()
-            .borders(BorderSides::LEFT | BorderSides::TOP | BorderSides::RIGHT)
-            .border_style(borders.style())
-            .border_type(borders.modifiers)
-            .style(Style::default().bg(background));
-        let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
-        let block = match title {
-            Some((text, alignment)) => block.title(text).title_alignment(alignment),
-            None => block,
-        };
         let focus = self
             .props
             .get_or(Attribute::Focus, AttrValue::Flag(false))
@@ -238,30 +224,33 @@ impl Select {
             .props
             .get(Attribute::FocusStyle)
             .map(|x| x.unwrap_style());
+
+        let normal_style = Style::default().bg(background).fg(foreground);
+
+        let borders = self
+            .props
+            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+            .unwrap_borders();
+        let title = self
+            .props
+            .get_ref(Attribute::Title)
+            .and_then(|x| x.as_title());
+        let block_a = crate::utils::get_block(borders, title, focus, inactive_style)
+            .borders(BorderSides::LEFT | BorderSides::TOP | BorderSides::RIGHT);
+        let block_b = crate::utils::get_block::<&str>(borders, None, focus, inactive_style)
+            .borders(BorderSides::LEFT | BorderSides::BOTTOM | BorderSides::RIGHT);
+
         let p: Paragraph = Paragraph::new(selected_text)
-            .style(if focus {
-                borders.style()
-            } else {
-                inactive_style.unwrap_or_default()
-            })
-            .block(block);
+            .style(normal_style)
+            .block(block_a);
         render.render_widget(p, chunks[0]);
+
         // Render the list of elements in chunks [1]
         // Make list
         let mut list = List::new(choices)
-            .block(
-                Block::default()
-                    .borders(BorderSides::LEFT | BorderSides::BOTTOM | BorderSides::RIGHT)
-                    .border_style(if focus {
-                        borders.style()
-                    } else {
-                        Style::default()
-                    })
-                    .border_type(borders.modifiers)
-                    .style(Style::default().bg(background)),
-            )
+            .block(block_b)
             .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
-            .style(Style::default().fg(foreground).bg(background))
+            .style(normal_style)
             .highlight_style(
                 Style::default()
                     .fg(hg)
@@ -300,35 +289,26 @@ impl Select {
             .props
             .get_or(Attribute::Focus, AttrValue::Flag(false))
             .unwrap_flag();
-        let style = if focus {
-            Style::default().bg(background).fg(foreground)
-        } else {
-            inactive_style.unwrap_or_default()
-        };
+
+        let normal_style = Style::default().bg(background).fg(foreground);
+
         let borders = self
             .props
             .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
             .unwrap_borders();
-        let borders_style = if focus {
-            borders.style()
-        } else {
-            inactive_style.unwrap_or_default()
-        };
-        let block: Block = Block::default()
-            .borders(BorderSides::ALL)
-            .border_style(borders_style)
-            .border_type(borders.modifiers)
-            .style(style);
-        let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
-        let block = match title {
-            Some((text, alignment)) => block.title(text).title_alignment(alignment),
-            None => block,
-        };
+        let title = self
+            .props
+            .get_ref(Attribute::Title)
+            .and_then(|x| x.as_title());
+        let block = crate::utils::get_block(borders, title, focus, inactive_style);
+
         let selected_text: String = match self.states.choices.get(self.states.selected) {
             None => String::default(),
             Some(s) => s.clone(),
         };
-        let p: Paragraph = Paragraph::new(selected_text).style(style).block(block);
+        let p: Paragraph = Paragraph::new(selected_text)
+            .style(normal_style)
+            .block(block);
         render.render_widget(p, area);
     }
 

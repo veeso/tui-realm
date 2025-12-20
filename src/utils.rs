@@ -117,18 +117,21 @@ pub fn get_block<T: AsRef<str>>(
     title: Option<&(T, Alignment)>,
     focus: bool,
     inactive_style: Option<Style>,
-) -> Block<'_> {
-    let title = title.map_or(("", Alignment::Left), |v| (v.0.as_ref(), v.1));
-    Block::default()
+) -> Block {
+    let mut block = Block::default()
         .borders(props.sides)
         .border_style(if focus {
             props.style()
         } else {
             inactive_style.unwrap_or_else(|| Style::default().fg(Color::Reset).bg(Color::Reset))
         })
-        .border_type(props.modifiers)
-        .title(title.0)
-        .title_alignment(title.1)
+        .border_type(props.modifiers);
+
+    if let Some((title, alignment)) = title {
+        block = block.title(title.as_ref()).title_alignment(*alignment);
+    }
+
+    block
 }
 
 /// Get the [`Attribute::Title`] or a Centered default

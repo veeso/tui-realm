@@ -298,6 +298,7 @@ impl MockComponent for Chart {
                 .props
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
+            let normal_style = Style::default().fg(foreground).bg(background);
             let active: bool = if self.is_disabled() { true } else { focus };
             let div = crate::utils::get_block(borders, title.as_ref(), active, inactive_style);
             // Create widget
@@ -330,10 +331,7 @@ impl MockComponent for Chart {
                 .get(Attribute::Custom(CHART_X_TITLE))
                 .map(|x| x.unwrap_string())
             {
-                x_axis = x_axis.title(Span::styled(
-                    title,
-                    Style::default().fg(foreground).bg(background),
-                ));
+                x_axis = x_axis.title(Span::styled(title, normal_style));
             }
             // -- y axis
             let mut y_axis: Axis = Axis::default();
@@ -364,15 +362,16 @@ impl MockComponent for Chart {
                 .get(Attribute::Custom(CHART_Y_TITLE))
                 .map(|x| x.unwrap_string())
             {
-                y_axis = y_axis.title(Span::styled(
-                    title,
-                    Style::default().fg(foreground).bg(background),
-                ));
+                y_axis = y_axis.title(Span::styled(title, normal_style));
             }
             // Get data
             let data: Vec<TuiDataset> = self.get_data(self.states.cursor);
             // Build widget
-            let widget: TuiChart = TuiChart::new(data).block(div).x_axis(x_axis).y_axis(y_axis);
+            let widget: TuiChart = TuiChart::new(data)
+                .style(normal_style)
+                .block(div)
+                .x_axis(x_axis)
+                .y_axis(y_axis);
             // Render
             render.render_widget(widget, area);
         }

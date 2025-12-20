@@ -319,6 +319,12 @@ impl MockComponent for Table {
                     AttrValue::TextModifiers(TextModifiers::empty()),
                 )
                 .unwrap_text_modifiers();
+
+            let normal_style = Style::default()
+                .fg(foreground)
+                .bg(background)
+                .add_modifier(modifiers);
+
             let title = crate::utils::get_title_or_center(&self.props);
             let borders = self
                 .props
@@ -344,12 +350,15 @@ impl MockComponent for Table {
                 .map(|x| x.unwrap_color());
             let widths: Vec<Constraint> = self.layout();
 
-            let mut table = TuiTable::new(rows, &widths).block(crate::utils::get_block(
-                borders,
-                Some(&title),
-                focus,
-                inactive_style,
-            ));
+            let mut table =
+                TuiTable::new(rows, &widths)
+                    .style(normal_style)
+                    .block(crate::utils::get_block(
+                        borders,
+                        Some(&title),
+                        focus,
+                        inactive_style,
+                    ));
             if let Some(highlighted_color) = highlighted_color {
                 table =
                     table.row_highlight_style(Style::default().fg(highlighted_color).add_modifier(
@@ -389,16 +398,7 @@ impl MockComponent for Table {
                 })
                 .unwrap_or_default();
             if !headers.is_empty() {
-                table = table.header(
-                    Row::new(headers)
-                        .style(
-                            Style::default()
-                                .fg(foreground)
-                                .bg(background)
-                                .add_modifier(modifiers),
-                        )
-                        .height(row_height),
-                );
+                table = table.header(Row::new(headers).style(normal_style).height(row_height));
             }
             if self.is_scrollable() {
                 let mut state: TableState = TableState::default();

@@ -158,17 +158,19 @@ impl MockComponent for LineGauge {
                 .unwrap_payload()
                 .unwrap_one()
                 .unwrap_f64();
+
+            let normal_style = Style::default()
+                .fg(foreground)
+                .bg(background)
+                .add_modifier(modifiers);
+
             let div = crate::utils::get_block(borders, title, true, None);
             // Make progress bar
             render.render_widget(
                 TuiLineGauge::default()
                     .block(div)
-                    .filled_style(
-                        Style::default()
-                            .fg(foreground)
-                            .bg(background)
-                            .add_modifier(modifiers),
-                    )
+                    .style(normal_style)
+                    .filled_style(normal_style)
                     .line_set(self.line_set())
                     .label(label)
                     .ratio(percentage),

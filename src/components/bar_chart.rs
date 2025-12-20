@@ -244,8 +244,8 @@ impl MockComponent for BarChart {
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
             let active: bool = if self.is_disabled() { true } else { focus };
-            let mut div = crate::utils::get_block(borders, title, active, inactive_style);
-            div = div.style(Style::default().bg(background).fg(foreground));
+            let normal_style = Style::default().bg(background).fg(foreground);
+            let div = crate::utils::get_block(borders, title, active, inactive_style);
             // Get max elements
             let data_max_len = self
                 .props
@@ -255,8 +255,10 @@ impl MockComponent for BarChart {
             let data = self.get_data(self.states.cursor, data_max_len);
             let data_ref: Vec<(&str, u64)> = data.iter().map(|x| (x.0.as_str(), x.1)).collect();
             // Create widget
-            let mut widget: TuiBarChart =
-                TuiBarChart::default().block(div).data(data_ref.as_slice());
+            let mut widget: TuiBarChart = TuiBarChart::default()
+                .style(normal_style)
+                .block(div)
+                .data(data_ref.as_slice());
             if let Some(gap) = self
                 .props
                 .get(Attribute::Custom(BAR_CHART_BARS_GAP))

@@ -111,17 +111,19 @@ impl MockComponent for ProgressBar {
                 .unwrap_payload()
                 .unwrap_one()
                 .unwrap_f64();
+
+            let normal_style = Style::default()
+                .fg(foreground)
+                .bg(background)
+                .add_modifier(modifiers);
+
             let div = crate::utils::get_block(borders, title, true, None);
             // Make progress bar
             render.render_widget(
                 Gauge::default()
                     .block(div)
-                    .gauge_style(
-                        Style::default()
-                            .fg(foreground)
-                            .bg(background)
-                            .add_modifier(modifiers),
-                    )
+                    .style(normal_style)
+                    .gauge_style(normal_style)
                     .label(label)
                     .ratio(percentage),
                 area,
