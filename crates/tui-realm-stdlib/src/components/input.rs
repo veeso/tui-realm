@@ -302,8 +302,11 @@ impl MockComponent for Input {
                     + calc_utf8_cursor_position(
                         &self.states.render_value_chars(itype)[0..self.states.cursor],
                     );
-                render
-                    .set_cursor_position(tuirealm::ratatui::prelude::Position { x, y: area.y + 1 });
+                let x = x.min(block_inner_area.x + block_inner_area.width);
+                render.set_cursor_position(tuirealm::ratatui::prelude::Position {
+                    x,
+                    y: block_inner_area.y,
+                });
             }
         }
     }
