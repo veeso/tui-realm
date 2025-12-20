@@ -7,7 +7,7 @@ use utils::Loader;
 
 use std::time::Duration;
 
-use tui_realm_stdlib::ProgressBar;
+use tui_realm_stdlib::{Label, ProgressBar};
 use tuirealm::command::CmdResult;
 use tuirealm::listener::{ListenerResult, Poll};
 use tuirealm::props::{
@@ -33,6 +33,7 @@ pub enum Msg {
 // Let's define the component ids for our application
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub enum Id {
+    Label,
     GaugeAlfa,
     GaugeBeta,
 }
@@ -57,6 +58,10 @@ impl Default for Model {
             EventListenerCfg::default()
                 .crossterm_input_listener(Duration::from_millis(10), 10)
                 .add_port(Box::new(Loader::default()), Duration::from_millis(50), 1),
+        );
+        assert!(
+            app.mount(Id::Label, Box::new(KeyboardLabel::default()), vec![])
+                .is_ok()
         );
         assert!(
             app.mount(Id::GaugeAlfa, Box::new(GaugeAlfa::default()), vec![])
@@ -85,6 +90,7 @@ impl Model {
                 .margin(1)
                 .constraints(
                     [
+                        Constraint::Length(1),
                         Constraint::Length(3),
                         Constraint::Length(3),
                         Constraint::Length(1),
@@ -92,8 +98,10 @@ impl Model {
                     .as_ref(),
                 )
                 .split(f.area());
-            self.app.view(&Id::GaugeAlfa, f, chunks[0]);
-            self.app.view(&Id::GaugeBeta, f, chunks[1]);
+
+            self.app.view(&Id::Label, f, chunks[0]);
+            self.app.view(&Id::GaugeAlfa, f, chunks[1]);
+            self.app.view(&Id::GaugeBeta, f, chunks[2]);
         });
     }
 }
@@ -161,6 +169,25 @@ impl Poll<UserEvent> for Loader {
 // -- components
 
 #[derive(MockComponent)]
+struct KeyboardLabel {
+    component: Label,
+}
+
+impl Default for KeyboardLabel {
+    fn default() -> Self {
+        Self {
+            component: Label::default().text("Press <TAB> to switch between bars; <ESC> to exit"),
+        }
+    }
+}
+
+impl Component<Msg, UserEvent> for KeyboardLabel {
+    fn on(&mut self, _: Event<UserEvent>) -> Option<Msg> {
+        None
+    }
+}
+
+#[derive(MockComponent)]
 struct GaugeAlfa {
     component: ProgressBar,
 }
@@ -176,7 +203,7 @@ impl Default for GaugeAlfa {
                 )
                 .foreground(Color::Green)
                 .label("0%")
-                .title("Loading...", Alignment::Center)
+                .title("Fast Loading...", Alignment::Center)
                 .progress(0.0),
         }
     }
@@ -219,7 +246,7 @@ impl Default for GaugeBeta {
                 )
                 .foreground(Color::Yellow)
                 .label("0%")
-                .title("Loading...", Alignment::Center)
+                .title("Slow Loading...", Alignment::Center)
                 .progress(0.0),
         }
     }
@@ -228,7 +255,16 @@ impl Default for GaugeBeta {
 impl Component<Msg, UserEvent> for GaugeBeta {
     fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
-            Event::User(UserEvent::Loaded(prog)) => {
+            Event::User(UserEvent::Loaded(_)) => {
+                let mut prog = self
+                    .query(Attribute::Value)
+                    .as_ref()
+                    .and_then(AttrValue::as_payload)
+                    .and_then(PropPayload::as_one)
+                    .and_then(PropValue::as_f64)
+                    .unwrap_or_default();
+                prog += 0.001f64;
+
                 // Update
                 let label = format!("{:02}%", (prog * 100.0) as usize);
                 self.attr(

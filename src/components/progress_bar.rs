@@ -125,7 +125,8 @@ impl MockComponent for ProgressBar {
                     .style(normal_style)
                     .gauge_style(normal_style)
                     .label(label)
-                    .ratio(percentage),
+                    .ratio(percentage)
+                    .use_unicode(true),
                 area,
             );
         }
