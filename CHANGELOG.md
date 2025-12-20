@@ -1,6 +1,7 @@
 # Changelog
 
 - [Changelog](#changelog)
+  - [3.1.0](#310)
   - [3.0.0](#300)
   - [2.0.1](#201)
   - [2.0.0](#200)
@@ -28,9 +29,9 @@
 
 ---
 
-## next
+## 3.1.0
 
-Unreleased
+Released on 2025-12-20
 
 - Add option `view_auto_step` to `Spinner` to disable automatic sequence stepping in a `view` call.
   - Add function `manual_step` to `Spinner` to set option `view_auto_step` in a builder-like fashion.
