@@ -14,10 +14,21 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 
 // -- states
 
-#[derive(Default)]
+/// The number of characters [`InputStates::display_offset`] will keep in view in a single direction.
+const PREVIEW_DISTANCE: usize = 2;
+
+#[derive(Default, Debug)]
 pub struct InputStates {
-    pub input: Vec<char>, // Current input
-    pub cursor: usize,    // Input position
+    /// The current input text
+    pub input: Vec<char>,
+    /// The cursor into "input", used as a index on where a character gets added next
+    pub cursor: usize,
+    /// The display offset for scrolling, always tries to keep the cursor within bounds
+    pub display_offset: usize,
+    /// The last drawn width of the component that displays "input".
+    ///
+    /// This is necessary to keep "display_offset" from jumping around on width changes.
+    pub last_width: Option<u16>,
 }
 
 impl InputStates {
@@ -43,6 +54,10 @@ impl InputStates {
             self.input.remove(self.cursor - 1);
             // Decrement cursor
             self.cursor -= 1;
+
+            if self.cursor < self.display_offset.saturating_add(PREVIEW_DISTANCE) {
+                self.display_offset = self.display_offset.saturating_sub(1);
+            }
         }
     }
 
@@ -61,6 +76,21 @@ impl InputStates {
     pub fn incr_cursor(&mut self) {
         if self.cursor < self.input.len() {
             self.cursor += 1;
+
+            if let Some(last_width) = self.last_width {
+                let input_with_width = self.input.len().saturating_sub(
+                    usize::from(self.last_width.unwrap_or_default())
+                        .saturating_sub(PREVIEW_DISTANCE),
+                );
+                // only increase the offset IF cursor is higher than last_width
+                // and the remaining text does not fit within the last_width
+                if self.cursor
+                    > usize::from(last_width).saturating_sub(PREVIEW_DISTANCE) + self.display_offset
+                    && self.display_offset < input_with_width
+                {
+                    self.display_offset += 1;
+                }
+            }
         }
     }
 
@@ -69,6 +99,7 @@ impl InputStates {
     /// Place cursor at the begin of the input
     pub fn cursor_at_begin(&mut self) {
         self.cursor = 0;
+        self.display_offset = 0;
     }
 
     /// ### cursor_at_end
@@ -76,6 +107,9 @@ impl InputStates {
     /// Place cursor at the end of the input
     pub fn cursor_at_end(&mut self) {
         self.cursor = self.input.len();
+        self.display_offset = self.input.len().saturating_sub(
+            usize::from(self.last_width.unwrap_or_default()).saturating_sub(PREVIEW_DISTANCE),
+        );
     }
 
     /// ### decr_cursor
@@ -84,6 +118,38 @@ impl InputStates {
     pub fn decr_cursor(&mut self) {
         if self.cursor > 0 {
             self.cursor -= 1;
+
+            if self.cursor < self.display_offset.saturating_add(PREVIEW_DISTANCE) {
+                self.display_offset = self.display_offset.saturating_sub(1);
+            }
+        }
+    }
+
+    /// ### update_width
+    ///
+    /// Update the last width used to display [`InputStates::input`].
+    ///
+    /// This is necessary to update [`InputStates::display_offset`] correctly and keep it
+    /// from jumping around on width changes.
+    ///
+    /// Without using this function, no scrolling will effectively be applied.
+    pub fn update_width(&mut self, new_width: u16) {
+        let old_width = self.last_width;
+        self.last_width = Some(new_width);
+
+        // if the cursor would now be out-of-bounds, adjust the display offset to keep the cursor within bounds
+        if self.cursor
+            > (self.display_offset + usize::from(new_width)).saturating_sub(PREVIEW_DISTANCE)
+        {
+            let diff = if let Some(old_width) = old_width {
+                usize::from(old_width.saturating_sub(new_width))
+            } else {
+                // there was no previous width, use new_width minus cursor.
+                // this happens if "update_width" had never been called (like before the first draw)
+                // but the value is longer than the current display width and the cursor is not within bounds.
+                self.cursor.saturating_sub(usize::from(new_width))
+            };
+            self.display_offset += diff;
         }
     }
 
@@ -93,6 +159,17 @@ impl InputStates {
     #[must_use]
     pub fn render_value(&self, itype: InputType) -> String {
         self.render_value_chars(itype).iter().collect::<String>()
+    }
+
+    /// ### render_value_offset
+    ///
+    /// Get value as a string to render, with the [`InputStates::display_offset`] already skipped.
+    #[must_use]
+    pub fn render_value_offset(&self, itype: InputType) -> String {
+        self.render_value_chars(itype)
+            .iter()
+            .skip(self.display_offset)
+            .collect()
     }
 
     /// ### render_value_chars
@@ -258,10 +335,18 @@ impl MockComponent for Input {
                     background = style.bg.unwrap_or(Color::Reset);
                 }
             }
-            let text_to_display = self.states.render_value(self.get_input_type());
+
+            // Create input's area
+            let block_inner_area = block.inner(area);
+
+            self.states.update_width(block_inner_area.width);
+
+            let text_to_display = self.states.render_value_offset(self.get_input_type());
+
             let show_placeholder = text_to_display.is_empty();
             // Choose whether to show placeholder; if placeholder is unset, show nothing
             let text_to_display = if show_placeholder {
+                self.states.cursor = 0;
                 self.props
                     .get_or(
                         Attribute::Custom(INPUT_PLACEHOLDER),
@@ -290,18 +375,19 @@ impl MockComponent for Input {
             } else {
                 paragraph_style
             };
-            // Create widget
-            let block_inner_area = block.inner(area);
+
             let p: Paragraph = Paragraph::new(text_to_display)
                 .style(paragraph_style)
                 .block(block);
             render.render_widget(p, area);
+
             // Set cursor, if focus
-            if focus {
+            if focus && !block_inner_area.is_empty() {
                 let x: u16 = block_inner_area.x
                     + calc_utf8_cursor_position(
                         &self.states.render_value_chars(itype)[0..self.states.cursor],
-                    );
+                    )
+                    .saturating_sub(u16::try_from(self.states.display_offset).unwrap_or(u16::MAX));
                 let x = x.min(block_inner_area.x + block_inner_area.width);
                 render.set_cursor_position(tuirealm::ratatui::prelude::Position {
                     x,
@@ -614,5 +700,118 @@ mod tests {
             AttrValue::InputType(InputType::Number),
         );
         assert_eq!(component.state(), State::None);
+    }
+
+    #[test]
+    fn should_keep_cursor_within_bounds() {
+        let text = "The quick brown fox jumps over the lazy dog";
+        assert!(text.len() > 15);
+
+        let mut states = InputStates::default();
+
+        for ch in text.chars() {
+            states.append(ch, &InputType::Text, None);
+        }
+
+        // at first, without any "width" set, both functions should return the same
+        assert_eq!(states.cursor, text.len());
+        assert_eq!(
+            states.render_value(InputType::Text),
+            states.render_value_offset(InputType::Text)
+        );
+
+        states.update_width(10);
+
+        assert_eq!(
+            states.render_value_offset(InputType::Text),
+            text[text.len() - 10..]
+        );
+
+        // the displayed text should not change until being in PREVIEW_STEP
+        for i in 1..8 {
+            states.decr_cursor();
+            assert_eq!(states.cursor, text.len() - i);
+            let val = states.render_value_offset(InputType::Text);
+            assert_eq!(val, text[text.len() - 10..]);
+        }
+
+        // preview step space at the end
+        states.decr_cursor();
+        assert_eq!(states.cursor, text.len() - 8);
+        assert_eq!(
+            states.render_value_offset(InputType::Text),
+            text[text.len() - 10..]
+        );
+
+        states.decr_cursor();
+        assert_eq!(states.cursor, text.len() - 9);
+        assert_eq!(
+            states.render_value_offset(InputType::Text),
+            text[text.len() - 11..]
+        );
+
+        states.decr_cursor();
+        assert_eq!(states.cursor, text.len() - 10);
+        assert_eq!(
+            states.render_value_offset(InputType::Text),
+            text[text.len() - 12..]
+        );
+
+        states.cursor_at_begin();
+        assert_eq!(states.cursor, 0);
+        assert_eq!(states.render_value(InputType::Text), text);
+
+        // the displayed text should not change until being in PREVIEW_STEP
+        for i in 1..9 {
+            states.incr_cursor();
+            assert_eq!(states.cursor, i);
+            let val = states.render_value_offset(InputType::Text);
+            assert_eq!(val, text);
+        }
+
+        states.incr_cursor();
+        assert_eq!(states.cursor, 9);
+        assert_eq!(states.render_value_offset(InputType::Text), text[1..]);
+
+        states.incr_cursor();
+        assert_eq!(states.cursor, 10);
+        assert_eq!(states.render_value_offset(InputType::Text), text[2..]);
+
+        // increasing width should not change display_offset
+        states.update_width(30);
+        assert_eq!(states.cursor, 10);
+        assert_eq!(states.render_value_offset(InputType::Text), text[2..]);
+
+        // reset to 10, should also not change
+        states.update_width(10);
+        assert_eq!(states.cursor, 10);
+        assert_eq!(states.render_value_offset(InputType::Text), text[2..]);
+
+        // should change display_offset by 1
+        states.update_width(9);
+        assert_eq!(states.cursor, 10);
+        assert_eq!(states.render_value_offset(InputType::Text), text[3..]);
+
+        // reset to end
+        states.update_width(10);
+        states.cursor_at_end();
+
+        // the displayed text should not change until being in PREVIEW_STEP
+        for i in 1..=4 {
+            states.decr_cursor();
+            assert_eq!(states.cursor, text.len() - i);
+            let val = states.render_value_offset(InputType::Text);
+            assert_eq!(val, text[text.len() - 8..]);
+        }
+
+        assert_eq!(states.cursor, text.len() - 4);
+        states.incr_cursor();
+        assert_eq!(states.cursor, text.len() - 3);
+        assert_eq!(
+            states.render_value_offset(InputType::Text),
+            text[text.len() - 8..]
+        );
+
+        // note any width below PREVIEW_STEP * 2 + 1 is undefined behavior
     }
 }
