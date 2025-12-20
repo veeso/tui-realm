@@ -5,6 +5,7 @@
 use std::collections::HashMap;
 
 // -- modules
+mod any;
 mod borders;
 mod dataset;
 mod direction;
@@ -15,6 +16,7 @@ mod texts;
 mod value;
 
 // -- exports
+pub use any::{AnyPropBox, PropBound, PropBoundExt};
 pub use borders::{BorderSides, BorderType, Borders};
 pub use dataset::Dataset;
 pub use direction::Direction;

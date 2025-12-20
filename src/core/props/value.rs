@@ -2,9 +2,11 @@
 //!
 //! This module exposes the prop values
 
+use std::any::Any;
 use std::collections::{HashMap, LinkedList};
 
 use super::{Alignment, Color, Dataset, InputType, Shape, Style, Table, TextSpan};
+use crate::props::AnyPropBox;
 
 // -- Prop value
 
@@ -18,6 +20,7 @@ pub enum PropPayload {
     Vec(Vec<PropValue>),
     Map(HashMap<String, PropValue>),
     Linked(LinkedList<PropPayload>),
+    Any(AnyPropBox),
     None,
 }
 
@@ -110,6 +113,14 @@ impl PropPayload {
         }
     }
 
+    /// Unwrap a Any from PropPayload
+    pub fn unwrap_any(self) -> AnyPropBox {
+        match self {
+            PropPayload::Any(l) => l,
+            _ => panic!("Called `unwrap_any` on a bad value"),
+        }
+    }
+
     // -- as reference
 
     /// Get a One value from PropPayload, or None
@@ -168,6 +179,14 @@ impl PropPayload {
         }
     }
 
+    /// Get a Any value from PropPayload, or None
+    pub fn as_any(&self) -> Option<&dyn Any> {
+        match self {
+            PropPayload::Any(v) => Some(v.as_ref()),
+            _ => None,
+        }
+    }
+
     // -- as mutable references
 
     /// Get a One value from PropPayload, or None
@@ -222,6 +241,14 @@ impl PropPayload {
     pub fn as_linked_mut(&mut self) -> Option<&mut LinkedList<PropPayload>> {
         match self {
             PropPayload::Linked(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Any value from PropPayload, or None
+    pub fn as_any_mut(&mut self) -> Option<&mut dyn Any> {
+        match self {
+            PropPayload::Any(v) => Some(v.as_mut()),
             _ => None,
         }
     }
@@ -803,10 +830,12 @@ impl PropValue {
 
 #[cfg(test)]
 mod tests {
-
     use std::collections::HashMap;
 
+    use pretty_assertions::{assert_eq, assert_ne};
+
     use super::*;
+    use crate::props::PropBound;
     use crate::ratatui::widgets::canvas::Map;
 
     #[test]
@@ -1324,5 +1353,93 @@ mod tests {
             Some(&mut LinkedList::new())
         );
         assert_eq!(PropPayload::None.as_linked_mut(), None);
+    }
+
+    #[test]
+    fn any() {
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        struct SomeCustomType {
+            field1: bool,
+            field2: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        struct SomeDifferentCustomType {
+            field1: bool,
+        }
+
+        let input = SomeCustomType {
+            field1: true,
+            field2: false,
+        };
+        let single_value = PropPayload::Any(input.to_any_prop());
+
+        assert_eq!(
+            single_value,
+            PropPayload::Any(
+                SomeCustomType {
+                    field1: true,
+                    field2: false
+                }
+                .to_any_prop()
+            )
+        );
+        assert_ne!(
+            single_value,
+            PropPayload::Any(
+                SomeCustomType {
+                    field1: false,
+                    field2: true
+                }
+                .to_any_prop()
+            )
+        );
+
+        assert_ne!(
+            single_value,
+            PropPayload::Any(SomeDifferentCustomType { field1: true }.to_any_prop())
+        );
+
+        #[derive(Debug, Clone, PartialEq)]
+        struct CloneableType {
+            field1: String,
+        }
+
+        let input = PropPayload::Any(
+            CloneableType {
+                field1: "Hello".to_string(),
+            }
+            .to_any_prop(),
+        );
+        let cloned = input.clone();
+
+        assert_eq!(input, cloned);
+        let input_downcasted = input
+            .as_any()
+            .unwrap()
+            .downcast_ref::<CloneableType>()
+            .expect("Erased type should be CloneableType");
+        let cloned_downcasted = cloned
+            .as_any()
+            .unwrap()
+            .downcast_ref::<CloneableType>()
+            .expect("Erased type should be CloneableType");
+        // should be cloned and so not have the same memory pointer
+        assert_ne!(
+            input_downcasted.field1.as_ptr(),
+            cloned_downcasted.field1.as_ptr()
+        );
+
+        let mut changed_data = cloned;
+
+        let downcasted = changed_data
+            .as_any_mut()
+            .unwrap()
+            .downcast_mut::<CloneableType>()
+            .expect("Erased type should be CloneableType");
+
+        downcasted.field1 = "Changed later".to_string();
+
+        assert_ne!(input_downcasted, downcasted);
     }
 }
