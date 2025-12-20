@@ -117,7 +117,7 @@ pub fn get_block<T: AsRef<str>>(
     title: Option<&(T, Alignment)>,
     focus: bool,
     inactive_style: Option<Style>,
-) -> Block {
+) -> Block<'_> {
     let title = title.map_or(("", Alignment::Left), |v| (v.0.as_ref(), v.1));
     Block::default()
         .borders(props.sides)

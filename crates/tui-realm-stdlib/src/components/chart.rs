@@ -231,7 +231,7 @@ impl Chart {
     /// ### data
     ///
     /// Get data to be displayed, starting from provided index at `start`
-    fn get_data(&mut self, start: usize) -> Vec<TuiDataset> {
+    fn get_data(&mut self, start: usize) -> Vec<TuiDataset<'_>> {
         self.states.data = self
             .props
             .get(Attribute::Dataset)
