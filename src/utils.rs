@@ -1,6 +1,6 @@
 //! ## Utils
 //!
-//! `Utilities functions to work with components
+//! Utilities functions to work with components
 
 // deps
 extern crate textwrap;
