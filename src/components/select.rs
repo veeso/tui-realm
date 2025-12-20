@@ -209,7 +209,7 @@ impl Select {
         let chunks = Layout::default()
             .direction(LayoutDirection::Vertical)
             .margin(0)
-            .constraints(&[Constraint::Length(2), Constraint::Min(1)])
+            .constraints([Constraint::Length(2), Constraint::Min(1)])
             .split(area);
         // Render like "closed" tab in chunk 0
         let selected_text: String = match self.states.choices.get(self.states.selected) {
