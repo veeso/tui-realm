@@ -13,7 +13,7 @@
   <a href="https://docs.rs/tui-realm-stdlib" target="_blank">Documentation</a>
 </p>
 
-<p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
+<p align="center">Developed by <a href="https://veeso.me/" target="_blank">@veeso</a></p>
 <p align="center">Current version: 3.0.0 (07/06/2025)</p>
 
 <p align="center">
