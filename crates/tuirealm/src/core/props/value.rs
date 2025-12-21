@@ -5,7 +5,9 @@
 use std::any::Any;
 use std::collections::{HashMap, LinkedList};
 
-use super::{Alignment, Color, Dataset, InputType, Line, Shape, Span, Style, Table, Text};
+use super::{
+    Alignment, Color, Dataset, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic,
+};
 use crate::props::AnyPropBox;
 
 // -- Prop value
@@ -51,9 +53,9 @@ pub enum PropValue {
     Shape(Shape),
     Style(Style),
     Table(Table),
-    TextSpan(Span),
-    TextLine(Line),
-    Text(Text),
+    TextSpan(SpanStatic),
+    TextLine(LineStatic),
+    Text(TextStatic),
 }
 
 impl PropPayload {
@@ -450,7 +452,7 @@ impl PropValue {
 
     /// Unwrap PropValue as [`Span`].
     /// Panics otherwise
-    pub fn unwrap_textspan(self) -> Span {
+    pub fn unwrap_textspan(self) -> SpanStatic {
         match self {
             PropValue::TextSpan(b) => b,
             _ => panic!("Called `unwrap_textspan` on a bad value"),
@@ -459,7 +461,7 @@ impl PropValue {
 
     /// Unwrap PropValue as [`Line`].
     /// Panics otherwise
-    pub fn unwrap_textline(self) -> Line {
+    pub fn unwrap_textline(self) -> LineStatic {
         match self {
             PropValue::TextLine(b) => b,
             _ => panic!("Called `unwrap_textline` on a bad value"),
@@ -468,7 +470,7 @@ impl PropValue {
 
     /// Unwrap PropValue as [`Text`].
     /// Panics otherwise
-    pub fn unwrap_text(self) -> Text {
+    pub fn unwrap_text(self) -> TextStatic {
         match self {
             PropValue::Text(b) => b,
             _ => panic!("Called `unwrap_text` on a bad value"),
@@ -662,7 +664,7 @@ impl PropValue {
     }
 
     /// Get a [`Span`] value from PropValue, or None
-    pub fn as_textspan(&self) -> Option<&Span> {
+    pub fn as_textspan(&self) -> Option<&SpanStatic> {
         match self {
             PropValue::TextSpan(v) => Some(v),
             _ => None,
@@ -670,7 +672,7 @@ impl PropValue {
     }
 
     /// Get a [`Line`] value from PropValue, or None
-    pub fn as_textline(&self) -> Option<&Line> {
+    pub fn as_textline(&self) -> Option<&LineStatic> {
         match self {
             PropValue::TextLine(v) => Some(v),
             _ => None,
@@ -678,7 +680,7 @@ impl PropValue {
     }
 
     /// Get a [`Text`] value from PropValue, or None
-    pub fn as_text(&self) -> Option<&Text> {
+    pub fn as_text(&self) -> Option<&TextStatic> {
         match self {
             PropValue::Text(v) => Some(v),
             _ => None,
@@ -856,7 +858,7 @@ impl PropValue {
     }
 
     /// Get a [`Span`] value from PropValue, or None
-    pub fn as_textspan_mut(&mut self) -> Option<&mut Span> {
+    pub fn as_textspan_mut(&mut self) -> Option<&mut SpanStatic> {
         match self {
             PropValue::TextSpan(v) => Some(v),
             _ => None,
@@ -864,7 +866,7 @@ impl PropValue {
     }
 
     /// Get a [`Line`] value from PropValue, or None
-    pub fn as_textline_mut(&mut self) -> Option<&mut Line> {
+    pub fn as_textline_mut(&mut self) -> Option<&mut LineStatic> {
         match self {
             PropValue::TextLine(v) => Some(v),
             _ => None,
@@ -872,7 +874,7 @@ impl PropValue {
     }
 
     /// Get a [`Text`] value from PropValue, or None
-    pub fn as_text_mut(&mut self) -> Option<&mut Text> {
+    pub fn as_text_mut(&mut self) -> Option<&mut TextStatic> {
         match self {
             PropValue::Text(v) => Some(v),
             _ => None,
@@ -1033,16 +1035,16 @@ mod tests {
             Style::default()
         );
         assert_eq!(
-            PropValue::TextSpan(Span::from("ciao")).unwrap_textspan(),
-            Span::from("ciao")
+            PropValue::TextSpan(SpanStatic::from("ciao")).unwrap_textspan(),
+            SpanStatic::from("ciao")
         );
         assert_eq!(
-            PropValue::TextLine(Line::from("ciao")).unwrap_textline(),
-            Line::from("ciao")
+            PropValue::TextLine(LineStatic::from("ciao")).unwrap_textline(),
+            LineStatic::from("ciao")
         );
         assert_eq!(
-            PropValue::Text(Text::from("ciao")).unwrap_text(),
-            Text::from("ciao")
+            PropValue::Text(TextStatic::from("ciao")).unwrap_text(),
+            TextStatic::from("ciao")
         );
     }
 
@@ -1130,20 +1132,20 @@ mod tests {
         assert_eq!(PropValue::Bool(true).as_style(), None);
 
         assert_eq!(
-            PropValue::TextSpan(Span::from("hello")).as_textspan(),
-            Some(&Span::from("hello"))
+            PropValue::TextSpan(SpanStatic::from("hello")).as_textspan(),
+            Some(&SpanStatic::from("hello"))
         );
         assert_eq!(PropValue::Bool(true).as_textspan(), None);
 
         assert_eq!(
-            PropValue::TextLine(Line::from("hello")).as_textline(),
-            Some(&Line::from("hello"))
+            PropValue::TextLine(LineStatic::from("hello")).as_textline(),
+            Some(&LineStatic::from("hello"))
         );
         assert_eq!(PropValue::Bool(true).as_textline(), None);
 
         assert_eq!(
-            PropValue::Text(Text::from("hello")).as_text(),
-            Some(&Text::from("hello"))
+            PropValue::Text(TextStatic::from("hello")).as_text(),
+            Some(&TextStatic::from("hello"))
         );
         assert_eq!(PropValue::Bool(true).as_text(), None);
     }
@@ -1232,20 +1234,20 @@ mod tests {
         assert_eq!(PropValue::Bool(true).as_style_mut(), None);
 
         assert_eq!(
-            PropValue::TextSpan(Span::from("hello")).as_textspan_mut(),
-            Some(&mut Span::from("hello"))
+            PropValue::TextSpan(SpanStatic::from("hello")).as_textspan_mut(),
+            Some(&mut SpanStatic::from("hello"))
         );
         assert_eq!(PropValue::Bool(true).as_textspan_mut(), None);
 
         assert_eq!(
-            PropValue::TextLine(Line::from("hello")).as_textline_mut(),
-            Some(&mut Line::from("hello"))
+            PropValue::TextLine(LineStatic::from("hello")).as_textline_mut(),
+            Some(&mut LineStatic::from("hello"))
         );
         assert_eq!(PropValue::Bool(true).as_textline_mut(), None);
 
         assert_eq!(
-            PropValue::Text(Text::from("hello")).as_text_mut(),
-            Some(&mut Text::from("hello"))
+            PropValue::Text(TextStatic::from("hello")).as_text_mut(),
+            Some(&mut TextStatic::from("hello"))
         );
         assert_eq!(PropValue::Bool(true).as_text_mut(), None);
     }

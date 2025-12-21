@@ -3,12 +3,12 @@
 //! `Texts` is the module which defines the texts properties for components.
 //! It also provides some helpers and builders to facilitate the use of builders.
 
-pub type Span = crate::ratatui::text::Span<'static>;
-pub type Line = crate::ratatui::text::Line<'static>;
-pub type Text = crate::ratatui::text::Text<'static>;
+pub type SpanStatic = crate::ratatui::text::Span<'static>;
+pub type LineStatic = crate::ratatui::text::Line<'static>;
+pub type TextStatic = crate::ratatui::text::Text<'static>;
 
 /// Table represents a list of rows with a list of columns of text spans
-pub type Table = Vec<Vec<Line>>;
+pub type Table = Vec<Vec<LineStatic>>;
 
 /// Table builder is a helper to make it easier to build text tables
 pub struct TableBuilder {
@@ -17,7 +17,7 @@ pub struct TableBuilder {
 
 impl TableBuilder {
     /// Add a column to the last row
-    pub fn add_col(&mut self, line: Line) -> &mut Self {
+    pub fn add_col(&mut self, line: LineStatic) -> &mut Self {
         if let Some(table) = self.table.as_mut() {
             if let Some(row) = table.last_mut() {
                 row.push(line);
@@ -59,17 +59,17 @@ mod test {
     #[test]
     fn tables() {
         let table: Table = TableBuilder::default()
-            .add_col(Line::from("name"))
-            .add_col(Line::from("age"))
+            .add_col(LineStatic::from("name"))
+            .add_col(LineStatic::from("age"))
             .add_row()
-            .add_col(Line::from("christian"))
-            .add_col(Line::from("23"))
+            .add_col(LineStatic::from("christian"))
+            .add_col(LineStatic::from("23"))
             .add_row()
-            .add_col(Line::from("omar"))
-            .add_col(Line::from("25"))
+            .add_col(LineStatic::from("omar"))
+            .add_col(LineStatic::from("25"))
             .add_row()
             .add_row()
-            .add_col(Line::from("pippo"))
+            .add_col(LineStatic::from("pippo"))
             .build();
         // Verify table
         assert_eq!(table.len(), 5); // 5 spans
