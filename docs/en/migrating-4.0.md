@@ -20,3 +20,9 @@ Because of the new types, new `AttrValue` and `PropValue` variants have been int
 The previous `(String, Alignment)` Tuple has been replaced with a more feature-full `Title` struct.
 
 Due to the title now using `Line` under the hood, it is now possible to style individual characters in the title.
+
+### Removal of `PropPayload::Tup*` variants
+
+The tuple variants of `PropPayload` have been removed as they were blowing up the size of `PropPayload` in general.
+
+If multiple types are still necessary, consider either using `PropPayload::Vec` or for more descriptive fields use a custom struct in `PropPayload::Any`.
