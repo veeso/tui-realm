@@ -23,7 +23,7 @@ pub use direction::Direction;
 pub use input_type::InputType;
 pub use layout::Layout;
 pub use shape::Shape;
-pub use texts::{Table, TableBuilder, TextSpan};
+pub use texts::{Line, Span, Table, TableBuilder, Text};
 pub use value::{PropPayload, PropValue};
 
 pub use crate::ratatui::layout::Alignment;
@@ -165,7 +165,9 @@ pub enum AttrValue {
     String(String),
     Style(Style),
     Table(Table),
-    Text(TextSpan),
+    TextSpan(Span),
+    TextLine(Line),
+    Text(Text),
     TextModifiers(TextModifiers),
     Title((String, Alignment)),
     /// User defined complex attribute value
@@ -295,8 +297,24 @@ impl AttrValue {
         }
     }
 
-    /// Get the inner Text value from AttrValue, or panic.
-    pub fn unwrap_text(self) -> TextSpan {
+    /// Get the inner [`Span`] value from AttrValue, or panic.
+    pub fn unwrap_textspan(self) -> Span {
+        match self {
+            AttrValue::TextSpan(x) => x,
+            _ => panic!("AttrValue is not TextSpan"),
+        }
+    }
+
+    /// Get the inner [`Line`] value from AttrValue, or panic.
+    pub fn unwrap_textline(self) -> Line {
+        match self {
+            AttrValue::TextLine(x) => x,
+            _ => panic!("AttrValue is not TextLine"),
+        }
+    }
+
+    /// Get the inner [`Text`] value from AttrValue, or panic.
+    pub fn unwrap_text(self) -> Text {
         match self {
             AttrValue::Text(x) => x,
             _ => panic!("AttrValue is not Text"),
@@ -457,8 +475,24 @@ impl AttrValue {
         }
     }
 
-    /// Get a Text value from AttrValue, or None
-    pub fn as_text(&self) -> Option<&TextSpan> {
+    /// Get a [`Span`] value from AttrValue, or None
+    pub fn as_textspan(&self) -> Option<&Span> {
+        match self {
+            AttrValue::TextSpan(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`Line`] value from AttrValue, or None
+    pub fn as_textline(&self) -> Option<&Line> {
+        match self {
+            AttrValue::TextLine(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`Text`] value from AttrValue, or None
+    pub fn as_text(&self) -> Option<&Text> {
         match self {
             AttrValue::Text(v) => Some(v),
             _ => None,
@@ -612,8 +646,24 @@ impl AttrValue {
         }
     }
 
-    /// Get a Text value from AttrValue, or None
-    pub fn as_text_mut(&mut self) -> Option<&mut TextSpan> {
+    /// Get a [`Span`] value from AttrValue, or None
+    pub fn as_textspan_mut(&mut self) -> Option<&mut Span> {
+        match self {
+            AttrValue::TextSpan(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`Line`] value from AttrValue, or None
+    pub fn as_textline_mut(&mut self) -> Option<&mut Line> {
+        match self {
+            AttrValue::TextLine(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`Text`] value from AttrValue, or None
+    pub fn as_text_mut(&mut self) -> Option<&mut Text> {
         match self {
             AttrValue::Text(v) => Some(v),
             _ => None,
@@ -738,8 +788,16 @@ mod test {
             Table::default()
         );
         assert_eq!(
-            AttrValue::Text(TextSpan::default()).unwrap_text(),
-            TextSpan::default()
+            AttrValue::TextSpan(Span::default()).unwrap_textspan(),
+            Span::default()
+        );
+        assert_eq!(
+            AttrValue::TextLine(Line::default()).unwrap_textline(),
+            Line::default()
+        );
+        assert_eq!(
+            AttrValue::Text(Text::default()).unwrap_text(),
+            Text::default()
         );
         assert_eq!(
             AttrValue::TextModifiers(TextModifiers::BOLD).unwrap_text_modifiers(),
@@ -836,8 +894,16 @@ mod test {
         assert_eq!(AttrValue::Alignment(Alignment::Center).as_table(), None);
 
         assert_eq!(
-            AttrValue::Text(TextSpan::default()).as_text(),
-            Some(&TextSpan::default())
+            AttrValue::TextSpan(Span::default()).as_textspan(),
+            Some(&Span::default())
+        );
+        assert_eq!(
+            AttrValue::TextLine(Line::default()).as_textline(),
+            Some(&Line::default())
+        );
+        assert_eq!(
+            AttrValue::Text(Text::default()).as_text(),
+            Some(&Text::default())
         );
         assert_eq!(AttrValue::Alignment(Alignment::Center).as_text(), None);
 
@@ -968,8 +1034,16 @@ mod test {
         assert_eq!(AttrValue::Alignment(Alignment::Center).as_table_mut(), None);
 
         assert_eq!(
-            AttrValue::Text(TextSpan::default()).as_text_mut(),
-            Some(&mut TextSpan::default())
+            AttrValue::TextSpan(Span::default()).as_textspan_mut(),
+            Some(&mut Span::default())
+        );
+        assert_eq!(
+            AttrValue::TextLine(Line::default()).as_textline_mut(),
+            Some(&mut Line::default())
+        );
+        assert_eq!(
+            AttrValue::Text(Text::default()).as_text_mut(),
+            Some(&mut Text::default())
         );
         assert_eq!(AttrValue::Alignment(Alignment::Center).as_text_mut(), None);
 
