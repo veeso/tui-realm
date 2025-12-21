@@ -5,22 +5,23 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Color, PropPayload, PropValue, Props, Style, TextModifiers,
-    TextSpan,
+    Alignment, AttrValue, Attribute, Color, PropPayload, PropValue, Props, SpanStatic, Style,
+    TextModifiers,
 };
-use tuirealm::ratatui::text::Line;
 use tuirealm::ratatui::{
     layout::Rect,
-    text::{Span as TuiSpan, Text},
+    text::{Line, Span as RSpan, Text},
     widgets::Paragraph,
 };
 use tuirealm::{Frame, MockComponent, State};
+
+use crate::utils;
 
 // -- Component
 
 /// ## Span
 ///
-/// represents a read-only text component without any container, but with multy-style text parts
+/// Represents a read-only, single-line text component without any container, but with multi-style text parts
 #[derive(Default)]
 #[must_use]
 pub struct Span {
@@ -48,11 +49,17 @@ impl Span {
         self
     }
 
-    pub fn spans(mut self, s: impl IntoIterator<Item = TextSpan>) -> Self {
+    pub fn spans<T>(mut self, s: impl IntoIterator<Item = T>) -> Self
+    where
+        T: Into<SpanStatic>,
+    {
         self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
-                s.into_iter().map(PropValue::TextSpan).collect(),
+                s.into_iter()
+                    .map(Into::into)
+                    .map(PropValue::TextSpan)
+                    .collect(),
             )),
         );
         self
@@ -77,24 +84,18 @@ impl MockComponent for Span {
                 .props
                 .get_ref(Attribute::Text)
                 .and_then(|x| x.as_payload());
-            let spans: Vec<TuiSpan> = match payload {
-                Some(PropPayload::Vec(spans)) => spans
-                    .iter()
-                    // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                    .filter_map(|x| x.as_text_span())
-                    .map(|x| {
-                        // Keep colors and modifiers, or use default
-                        let (fg, bg, modifiers) =
-                            crate::utils::use_or_default_styles(&self.props, x);
-                        TuiSpan::styled(
-                            &x.content,
-                            Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                        )
-                    })
-                    .collect(),
-                _ => Vec::new(),
+            let text = match payload {
+                Some(PropPayload::Vec(lines)) => {
+                    let lines: Vec<RSpan> = lines
+                        .iter()
+                        // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
+                        .filter_map(|x| x.as_textspan())
+                        .map(utils::borrow_clone_span)
+                        .collect();
+                    Text::from(Line::from(lines))
+                }
+                _ => Text::default(),
             };
-            let text: Text = Text::from(Line::from(spans));
             // Text properties
             let alignment: Alignment = self
                 .props
@@ -132,6 +133,7 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
+    use tuirealm::{props::SpanStatic, ratatui::style::Stylize};
 
     #[test]
     fn test_components_span() {
@@ -141,9 +143,9 @@ mod tests {
             .modifiers(TextModifiers::BOLD)
             .alignment(Alignment::Center)
             .spans([
-                TextSpan::from("Press "),
-                TextSpan::from("<ESC>").fg(Color::Cyan).bold(),
-                TextSpan::from(" to quit"),
+                SpanStatic::from("Press "),
+                SpanStatic::from("<ESC>").fg(Color::Cyan).bold(),
+                SpanStatic::from(" to quit"),
             ]);
         // Get value
         assert_eq!(component.state(), State::None);
@@ -152,12 +154,12 @@ mod tests {
     #[test]
     fn various_spans_types() {
         // Vec
-        let _ = Span::default().spans(vec![TextSpan::new("hello")]);
+        let _ = Span::default().spans(vec![SpanStatic::raw("hello")]);
         // static array
-        let _ = Span::default().spans([TextSpan::new("hello")]);
+        let _ = Span::default().spans([SpanStatic::raw("hello")]);
         // boxed array
-        let _ = Span::default().spans(vec![TextSpan::new("hello")].into_boxed_slice());
+        let _ = Span::default().spans(vec![SpanStatic::raw("hello")].into_boxed_slice());
         // already a iterator
-        let _ = Span::default().spans(["Hello"].map(TextSpan::new));
+        let _ = Span::default().spans(["Hello"].map(SpanStatic::raw));
     }
 }

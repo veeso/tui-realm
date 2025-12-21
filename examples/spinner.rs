@@ -6,7 +6,8 @@ use std::time::Duration;
 
 use tui_realm_stdlib::{Span, Spinner};
 use tuirealm::command::CmdResult;
-use tuirealm::props::{Alignment, Color, TextModifiers, TextSpan};
+use tuirealm::props::{Alignment, Color, TextModifiers};
+use tuirealm::ratatui::style::Stylize;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
@@ -16,6 +17,7 @@ use tuirealm::{
 use tuirealm::{Sub, SubClause, SubEventClause};
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::ratatui::text::Span as RSpan;
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -159,10 +161,10 @@ impl Default for SpanAlfa {
     fn default() -> Self {
         Self {
             component: Span::default().foreground(Color::Yellow).spans([
-                TextSpan::new("Downloading tui-realm... ")
+                RSpan::raw("Downloading tui-realm... ")
                     .underlined()
                     .fg(Color::Green),
-                TextSpan::from("Please wait!"),
+                RSpan::from("Please wait!"),
             ]),
         }
     }
@@ -192,10 +194,10 @@ impl Default for SpanBeta {
                 .alignment(Alignment::Right)
                 .modifiers(TextModifiers::BOLD)
                 .spans([
-                    TextSpan::new("Downloading tui-realm-stdlib... ")
+                    RSpan::raw("Downloading tui-realm-stdlib... ")
                         .underlined()
                         .fg(Color::Green),
-                    TextSpan::from("Please wait!"),
+                    RSpan::from("Please wait!"),
                 ]),
         }
     }

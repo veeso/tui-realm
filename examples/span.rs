@@ -6,7 +6,8 @@ use std::time::Duration;
 
 use tui_realm_stdlib::Span;
 use tuirealm::command::CmdResult;
-use tuirealm::props::{Alignment, Color, TextModifiers, TextSpan};
+use tuirealm::props::{Alignment, Color, TextModifiers};
+use tuirealm::ratatui::style::Stylize;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
@@ -15,6 +16,7 @@ use tuirealm::{
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::ratatui::text::Span as RSpan;
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -136,8 +138,8 @@ impl Default for SpanAlfa {
             component: Span::default()
                 .foreground(Color::Yellow)
                 .spans([
-                    TextSpan::new("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
-                    TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est."),
+                    RSpan::raw("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
+                    RSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est."),
                 ])
         }
     }
@@ -167,8 +169,8 @@ impl Default for SpanBeta {
                 .alignment(Alignment::Right)
                 .modifiers(TextModifiers::BOLD)
                 .spans([
-                    TextSpan::new("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green).bg(Color::Red),
-                    TextSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est."),
+                    RSpan::raw("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green).bg(Color::Red),
+                    RSpan::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est."),
                 ])
         }
     }
