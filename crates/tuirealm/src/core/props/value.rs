@@ -16,9 +16,6 @@ use crate::props::AnyPropBox;
 #[derive(Debug, PartialEq, Clone)]
 pub enum PropPayload {
     One(PropValue),
-    Tup2((PropValue, PropValue)),
-    Tup3((PropValue, PropValue, PropValue)),
-    Tup4((PropValue, PropValue, PropValue, PropValue)),
     Vec(Vec<PropValue>),
     Map(HashMap<String, PropValue>),
     Linked(LinkedList<PropPayload>),
@@ -69,30 +66,6 @@ impl PropPayload {
         }
     }
 
-    /// Unwrap a Tup2 value from PropPayload
-    pub fn unwrap_tup2(self) -> (PropValue, PropValue) {
-        match self {
-            PropPayload::Tup2(t) => t,
-            _ => panic!("Called `unwrap_tup2` on a bad value"),
-        }
-    }
-
-    /// Unwrap a Tup3 value from PropPayload
-    pub fn unwrap_tup3(self) -> (PropValue, PropValue, PropValue) {
-        match self {
-            PropPayload::Tup3(t) => t,
-            _ => panic!("Called `unwrap_tup3` on a bad value"),
-        }
-    }
-
-    /// Unwrap a Tup4 value from PropPayload
-    pub fn unwrap_tup4(self) -> (PropValue, PropValue, PropValue, PropValue) {
-        match self {
-            PropPayload::Tup4(t) => t,
-            _ => panic!("Called `unwrap_tup4` on a bad value"),
-        }
-    }
-
     /// Unwrap a Vec value from PropPayload
     pub fn unwrap_vec(self) -> Vec<PropValue> {
         match self {
@@ -135,30 +108,6 @@ impl PropPayload {
         }
     }
 
-    /// Get a Tup2 value from PropPayload, or None
-    pub fn as_tup2(&self) -> Option<&(PropValue, PropValue)> {
-        match self {
-            PropPayload::Tup2(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    /// Get a Tup3 value from PropPayload, or None
-    pub fn as_tup3(&self) -> Option<&(PropValue, PropValue, PropValue)> {
-        match self {
-            PropPayload::Tup3(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    /// Get a Tup4 value from PropPayload, or None
-    pub fn as_tup4(&self) -> Option<&(PropValue, PropValue, PropValue, PropValue)> {
-        match self {
-            PropPayload::Tup4(v) => Some(v),
-            _ => None,
-        }
-    }
-
     /// Get a Vec value from PropPayload, or None
     pub fn as_vec(&self) -> Option<&Vec<PropValue>> {
         match self {
@@ -197,30 +146,6 @@ impl PropPayload {
     pub fn as_one_mut(&mut self) -> Option<&mut PropValue> {
         match self {
             PropPayload::One(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    /// Get a Tup2 value from PropPayload, or None
-    pub fn as_tup2_mut(&mut self) -> Option<&mut (PropValue, PropValue)> {
-        match self {
-            PropPayload::Tup2(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    /// Get a Tup3 value from PropPayload, or None
-    pub fn as_tup3_mut(&mut self) -> Option<&mut (PropValue, PropValue, PropValue)> {
-        match self {
-            PropPayload::Tup3(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    /// Get a Tup4 value from PropPayload, or None
-    pub fn as_tup4_mut(&mut self) -> Option<&mut (PropValue, PropValue, PropValue, PropValue)> {
-        match self {
-            PropPayload::Tup4(v) => Some(v),
             _ => None,
         }
     }
@@ -896,18 +821,6 @@ mod tests {
     fn prop_values() {
         // test that values can be created without compile errors
         let _ = PropPayload::One(PropValue::Usize(2));
-        let _ = PropPayload::Tup2((PropValue::Bool(true), PropValue::Usize(128)));
-        let _ = PropPayload::Tup3((
-            PropValue::Bool(true),
-            PropValue::Usize(128),
-            PropValue::Str(String::from("omar")),
-        ));
-        let _ = PropPayload::Tup4((
-            PropValue::Bool(true),
-            PropValue::U8(128),
-            PropValue::Str(String::from("pippo")),
-            PropValue::Isize(-2),
-        ));
         let _ = PropPayload::Vec(vec![
             PropValue::U16(1),
             PropValue::U32(2),
@@ -989,10 +902,6 @@ mod tests {
         let _ = PropPayload::Map(map);
         let mut link: LinkedList<PropPayload> = LinkedList::new();
         link.push_back(PropPayload::One(PropValue::Usize(1)));
-        link.push_back(PropPayload::Tup2((
-            PropValue::Usize(2),
-            PropValue::Usize(4),
-        )));
         let _ = PropPayload::Linked(link);
     }
 
@@ -1260,38 +1169,6 @@ mod tests {
                 .unwrap_bool(),
         );
         assert_eq!(
-            PropPayload::Tup2((PropValue::Bool(false), PropValue::Bool(false))).unwrap_tup2(),
-            (PropValue::Bool(false), PropValue::Bool(false))
-        );
-        assert_eq!(
-            PropPayload::Tup3((
-                PropValue::Bool(false),
-                PropValue::Bool(false),
-                PropValue::Bool(false)
-            ))
-            .unwrap_tup3(),
-            (
-                PropValue::Bool(false),
-                PropValue::Bool(false),
-                PropValue::Bool(false)
-            )
-        );
-        assert_eq!(
-            PropPayload::Tup4((
-                PropValue::Bool(false),
-                PropValue::Bool(false),
-                PropValue::Bool(false),
-                PropValue::Bool(false)
-            ))
-            .unwrap_tup4(),
-            (
-                PropValue::Bool(false),
-                PropValue::Bool(false),
-                PropValue::Bool(false),
-                PropValue::Bool(false)
-            )
-        );
-        assert_eq!(
             PropPayload::Vec(vec![PropValue::Bool(false), PropValue::Bool(false)]).unwrap_vec(),
             &[PropValue::Bool(false), PropValue::Bool(false)]
         );
@@ -1304,44 +1181,6 @@ mod tests {
             Some(&PropValue::Bool(true))
         );
         assert_eq!(PropPayload::None.as_one(), None);
-
-        assert_eq!(
-            PropPayload::Tup2((PropValue::Bool(true), PropValue::Bool(true))).as_tup2(),
-            Some(&(PropValue::Bool(true), PropValue::Bool(true)))
-        );
-        assert_eq!(PropPayload::None.as_tup2(), None);
-
-        assert_eq!(
-            PropPayload::Tup3((
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true)
-            ))
-            .as_tup3(),
-            Some(&(
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true)
-            ))
-        );
-        assert_eq!(PropPayload::None.as_tup3(), None);
-
-        assert_eq!(
-            PropPayload::Tup4((
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true)
-            ))
-            .as_tup4(),
-            Some(&(
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true)
-            ))
-        );
-        assert_eq!(PropPayload::None.as_tup4(), None);
 
         assert_eq!(
             PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec(),
@@ -1376,44 +1215,6 @@ mod tests {
             Some(&mut PropValue::Bool(true))
         );
         assert_eq!(PropPayload::None.as_one_mut(), None);
-
-        assert_eq!(
-            PropPayload::Tup2((PropValue::Bool(true), PropValue::Bool(true))).as_tup2_mut(),
-            Some(&mut (PropValue::Bool(true), PropValue::Bool(true)))
-        );
-        assert_eq!(PropPayload::None.as_tup2_mut(), None);
-
-        assert_eq!(
-            PropPayload::Tup3((
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true)
-            ))
-            .as_tup3_mut(),
-            Some(&mut (
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true)
-            ))
-        );
-        assert_eq!(PropPayload::None.as_tup3_mut(), None);
-
-        assert_eq!(
-            PropPayload::Tup4((
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true)
-            ))
-            .as_tup4_mut(),
-            Some(&mut (
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true),
-                PropValue::Bool(true)
-            ))
-        );
-        assert_eq!(PropPayload::None.as_tup4_mut(), None);
 
         assert_eq!(
             PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec_mut(),
