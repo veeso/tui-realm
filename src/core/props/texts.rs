@@ -17,10 +17,13 @@ pub struct TableBuilder {
 
 impl TableBuilder {
     /// Add a column to the last row
-    pub fn add_col(&mut self, line: LineStatic) -> &mut Self {
+    pub fn add_col<L>(&mut self, line: L) -> &mut Self
+    where
+        L: Into<LineStatic>,
+    {
         if let Some(table) = self.table.as_mut() {
             if let Some(row) = table.last_mut() {
-                row.push(line);
+                row.push(line.into());
             }
         }
         self
@@ -82,5 +85,13 @@ mod test {
         assert_eq!(table.get(2).unwrap().len(), 2); // 2 cols
         assert_eq!(table.get(3).unwrap().len(), 0); // 0 cols
         assert_eq!(table.get(4).unwrap().len(), 1); // 1 cols
+    }
+
+    #[test]
+    fn from_col_multi_value() {
+        let _ = TableBuilder::default()
+            .add_col(LineStatic::from("Line"))
+            .add_col("simple str")
+            .add_col(SpanStatic::from("span"));
     }
 }
