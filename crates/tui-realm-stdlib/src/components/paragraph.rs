@@ -8,16 +8,15 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
-    TextModifiers, TextSpan,
+    Alignment, AttrValue, Attribute, Borders, Color, Props, Style, TextModifiers, TextStatic,
 };
-use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{
     layout::Rect,
-    text::Span,
     widgets::{Paragraph as TuiParagraph, Wrap},
 };
 use tuirealm::{Frame, MockComponent, State};
+
+use crate::utils;
 
 // -- Component
 
@@ -62,14 +61,11 @@ impl Paragraph {
     }
 
     /// Set the text of the [`Paragraph`].
-    // This method takes a `IntoIterator` so that it is up to the user when a clone is necessary
-    pub fn text(mut self, s: impl IntoIterator<Item = TextSpan>) -> Self {
-        self.attr(
-            Attribute::Text,
-            AttrValue::Payload(PropPayload::Vec(
-                s.into_iter().map(PropValue::TextSpan).collect(),
-            )),
-        );
+    pub fn text<T>(mut self, text: T) -> Self
+    where
+        T: Into<TextStatic>,
+    {
+        self.attr(Attribute::Text, AttrValue::Text(text.into()));
         self
     }
 
@@ -84,26 +80,13 @@ impl MockComponent for Paragraph {
         // Make a Span
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make text items
-            let payload = self
+            let text = self
                 .props
                 .get_ref(Attribute::Text)
-                .and_then(|x| x.as_payload());
-            let text: Vec<Spans> = match payload {
-                Some(PropPayload::Vec(spans)) => spans
-                    .iter()
-                    // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                    .filter_map(|x| x.as_text_span())
-                    .map(|x| {
-                        let (fg, bg, modifiers) =
-                            crate::utils::use_or_default_styles(&self.props, x);
-                        Spans::from(vec![Span::styled(
-                            &x.content,
-                            Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                        )])
-                    })
-                    .collect(),
-                _ => Vec::new(),
-            };
+                .and_then(AttrValue::as_text)
+                .map(utils::borrow_clone_text)
+                .unwrap_or_default();
+
             // Text properties
             let alignment: Alignment = self
                 .props
@@ -177,6 +160,10 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
+    use tuirealm::ratatui::{
+        style::Stylize,
+        text::{Line, Text},
+    };
 
     #[test]
     fn test_components_paragraph() {
@@ -185,10 +172,10 @@ mod tests {
             .foreground(Color::Red)
             .modifiers(TextModifiers::BOLD)
             .alignment(Alignment::Center)
-            .text([
-                TextSpan::from("Press "),
-                TextSpan::from("<ESC>").fg(Color::Cyan).bold(),
-                TextSpan::from(" to quit"),
+            .text(vec![
+                Line::from("Press "),
+                Line::from("<ESC>").fg(Color::Cyan).bold(),
+                Line::from(" to quit"),
             ])
             .wrap(true)
             .title("title", Alignment::Center);
@@ -198,13 +185,9 @@ mod tests {
 
     #[test]
     fn various_text_types() {
-        // Vec
-        let _ = Paragraph::default().text(vec![TextSpan::new("hello")]);
-        // static array
-        let _ = Paragraph::default().text([TextSpan::new("hello")]);
-        // boxed array
-        let _ = Paragraph::default().text(vec![TextSpan::new("hello")].into_boxed_slice());
-        // already a iterator
-        let _ = Paragraph::default().text(["Hello"].map(TextSpan::new));
+        // Vec of Lines
+        let _ = Paragraph::default().text(vec![Line::raw("hello")]);
+        // Direct text
+        let _ = Paragraph::default().text(Text::from("hello"));
     }
 }

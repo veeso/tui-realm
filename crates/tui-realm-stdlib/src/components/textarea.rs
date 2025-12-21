@@ -8,8 +8,8 @@ extern crate unicode_width;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
-    TextModifiers, TextSpan,
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, SpanStatic,
+    Style, TextModifiers,
 };
 use tuirealm::ratatui::{
     layout::Rect,
@@ -160,7 +160,7 @@ impl Textarea {
         self
     }
 
-    pub fn text_rows(mut self, s: impl IntoIterator<Item = TextSpan>) -> Self {
+    pub fn text_rows(mut self, s: impl IntoIterator<Item = SpanStatic>) -> Self {
         let rows: Vec<PropValue> = s.into_iter().map(PropValue::TextSpan).collect();
         self.states.set_list_len(rows.len());
         self.attr(Attribute::Text, AttrValue::Payload(PropPayload::Vec(rows)));
@@ -180,6 +180,7 @@ impl MockComponent for Textarea {
                 .and_then(|x| x.as_string());
             // NOTE: wrap width is width of area minus 2 (block) minus width of highlighting string
             let wrap_width = (area.width as usize) - hg_str.as_ref().map_or(0, |x| x.width()) - 2;
+            // TODO: refactor to use "Text"?
             let lines: Vec<ListItem> = match self
                 .props
                 .get_ref(Attribute::Text)
@@ -188,8 +189,8 @@ impl MockComponent for Textarea {
                 Some(PropPayload::Vec(spans)) => spans
                     .iter()
                     // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                    .filter_map(|x| x.as_text_span())
-                    .map(|x| crate::utils::wrap_spans(&[x], wrap_width, &self.props))
+                    .filter_map(|x| x.as_textspan())
+                    .map(|x| crate::utils::wrap_spans(&[x], wrap_width))
                     .map(ListItem::new)
                     .collect(),
                 _ => Vec::new(),
@@ -310,6 +311,7 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
+    use tuirealm::ratatui::text::Span;
 
     #[test]
     fn test_components_textarea() {
@@ -322,7 +324,7 @@ mod tests {
             .highlighted_str("🚀")
             .step(4)
             .title("textarea", Alignment::Center)
-            .text_rows([TextSpan::from("welcome to "), TextSpan::from("tui-realm")]);
+            .text_rows([Span::from("welcome to "), Span::from("tui-realm")]);
         // Increment list index
         component.states.list_index += 1;
         assert_eq!(component.states.list_index, 1);
@@ -330,9 +332,9 @@ mod tests {
         component.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(vec![
-                PropValue::TextSpan(TextSpan::from("welcome")),
-                PropValue::TextSpan(TextSpan::from("to")),
-                PropValue::TextSpan(TextSpan::from("tui-realm")),
+                PropValue::TextSpan(Span::from("welcome")),
+                PropValue::TextSpan(Span::from("to")),
+                PropValue::TextSpan(Span::from("tui-realm")),
             ])),
         );
         // Verify states
@@ -382,12 +384,12 @@ mod tests {
     #[test]
     fn various_textrows_types() {
         // Vec
-        let _ = Textarea::default().text_rows(vec![TextSpan::new("hello")]);
+        let _ = Textarea::default().text_rows(vec![Span::raw("hello")]);
         // static array
-        let _ = Textarea::default().text_rows([TextSpan::new("hello")]);
+        let _ = Textarea::default().text_rows([Span::raw("hello")]);
         // boxed array
-        let _ = Textarea::default().text_rows(vec![TextSpan::new("hello")].into_boxed_slice());
+        let _ = Textarea::default().text_rows(vec![Span::raw("hello")].into_boxed_slice());
         // already a iterator
-        let _ = Textarea::default().text_rows(["Hello"].map(TextSpan::new));
+        let _ = Textarea::default().text_rows(["Hello"].map(Span::raw));
     }
 }

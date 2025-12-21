@@ -2,7 +2,6 @@
 //!
 //! `Table` represents a read-only textual table component which can be scrollable through arrows or inactive
 
-use super::props::TABLE_COLUMN_SPACING;
 use std::cmp::max;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
@@ -12,10 +11,13 @@ use tuirealm::props::{
 };
 use tuirealm::ratatui::{
     layout::{Constraint, Rect},
-    text::Span,
+    text::Line,
     widgets::{Cell, Row, Table as TuiTable, TableState},
 };
 use tuirealm::{Frame, MockComponent, State, StateValue};
+
+use super::props::TABLE_COLUMN_SPACING;
+use crate::utils;
 
 // -- States
 
@@ -287,12 +289,13 @@ impl Table {
                 let columns: Vec<Cell> = row
                     .iter()
                     .map(|col| {
-                        let (fg, bg, modifiers) =
-                            crate::utils::use_or_default_styles(&self.props, col);
-                        Cell::from(Span::styled(
-                            &col.content,
-                            Style::default().add_modifier(modifiers).fg(fg).bg(bg),
-                        ))
+                        let line = Line::from(
+                            col.spans
+                                .iter()
+                                .map(utils::borrow_clone_span)
+                                .collect::<Vec<_>>(),
+                        );
+                        Cell::from(line)
                     })
                     .collect();
                 Row::new(columns).height(row_height)
@@ -518,7 +521,7 @@ mod tests {
 
     use super::*;
     use pretty_assertions::assert_eq;
-    use tuirealm::props::{TableBuilder, TextSpan};
+    use tuirealm::props::TableBuilder;
 
     #[test]
     fn table_states() {
@@ -573,34 +576,34 @@ mod tests {
             .headers(["Event", "Message", "Behaviour", "???"])
             .table(
                 TableBuilder::default()
-                    .add_col(TextSpan::from("KeyCode::Down"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor down"))
+                    .add_col(Line::from("KeyCode::Down"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor down"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::Up"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor up"))
+                    .add_col(Line::from("KeyCode::Up"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor up"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::PageDown"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor down by 8"))
+                    .add_col(Line::from("KeyCode::PageDown"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor down by 8"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::PageUp"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("ove cursor up by 8"))
+                    .add_col(Line::from("KeyCode::PageUp"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("ove cursor up by 8"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::End"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor to last item"))
+                    .add_col(Line::from("KeyCode::End"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor to last item"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::Home"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor to first item"))
+                    .add_col(Line::from("KeyCode::Home"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor to first item"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::Char(_)"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Return pressed key"))
-                    .add_col(TextSpan::from("4th mysterious columns"))
+                    .add_col(Line::from("KeyCode::Char(_)"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Return pressed key"))
+                    .add_col(Line::from("4th mysterious columns"))
                     .build(),
             );
         assert_eq!(component.states.list_len, 7);
@@ -666,9 +669,9 @@ mod tests {
             Attribute::Content,
             AttrValue::Table(
                 TableBuilder::default()
-                    .add_col(TextSpan::from("name"))
-                    .add_col(TextSpan::from("age"))
-                    .add_col(TextSpan::from("birthdate"))
+                    .add_col(Line::from("name"))
+                    .add_col(Line::from("age"))
+                    .add_col(Line::from("birthdate"))
                     .build(),
             ),
         );
@@ -706,33 +709,33 @@ mod tests {
             .headers(["Event", "Message", "Behaviour"])
             .table(
                 TableBuilder::default()
-                    .add_col(TextSpan::from("KeyCode::Down"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor down"))
+                    .add_col(Line::from("KeyCode::Down"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor down"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::Up"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor up"))
+                    .add_col(Line::from("KeyCode::Up"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor up"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::PageDown"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor down by 8"))
+                    .add_col(Line::from("KeyCode::PageDown"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor down by 8"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::PageUp"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("ove cursor up by 8"))
+                    .add_col(Line::from("KeyCode::PageUp"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("ove cursor up by 8"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::End"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor to last item"))
+                    .add_col(Line::from("KeyCode::End"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor to last item"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::Home"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor to first item"))
+                    .add_col(Line::from("KeyCode::Home"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor to first item"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::Char(_)"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Return pressed key"))
+                    .add_col(Line::from("KeyCode::Char(_)"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Return pressed key"))
                     .build(),
             );
         // Get value (not scrollable)
@@ -751,33 +754,33 @@ mod tests {
             .title("events", Alignment::Center)
             .table(
                 TableBuilder::default()
-                    .add_col(TextSpan::from("KeyCode::Down"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor down"))
+                    .add_col(Line::from("KeyCode::Down"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor down"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::Up"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor up"))
+                    .add_col(Line::from("KeyCode::Up"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor up"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::PageDown"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor down by 8"))
+                    .add_col(Line::from("KeyCode::PageDown"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor down by 8"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::PageUp"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("ove cursor up by 8"))
+                    .add_col(Line::from("KeyCode::PageUp"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("ove cursor up by 8"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::End"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor to last item"))
+                    .add_col(Line::from("KeyCode::End"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor to last item"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::Home"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Move cursor to first item"))
+                    .add_col(Line::from("KeyCode::Home"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Move cursor to first item"))
                     .add_row()
-                    .add_col(TextSpan::from("KeyCode::Char(_)"))
-                    .add_col(TextSpan::from("OnKey"))
-                    .add_col(TextSpan::from("Return pressed key"))
+                    .add_col(Line::from("KeyCode::Char(_)"))
+                    .add_col(Line::from("OnKey"))
+                    .add_col(Line::from("Return pressed key"))
                     .build(),
             )
             .scroll(true)

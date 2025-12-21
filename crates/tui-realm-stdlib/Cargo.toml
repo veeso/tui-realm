@@ -19,14 +19,13 @@ rust-version = "1.85.1"
 
 [dependencies]
 textwrap = "^0.16"
-tuirealm = { version = "3", default-features = false, features = ["derive"] }
+tuirealm = { version = "3", default-features = false, features = ["derive"], git = "https://github.com/veeso/tui-realm.git", rev = "dcf35afe5917a15e54e1a72191b5e1689649b6e7" }
 unicode-width = "^0.2"
 
 [dev-dependencies]
 crossterm = "^0.29"
 pretty_assertions = "1"
 rand = "0.9"
-tuirealm = { version = "3", default-features = false }
 
 [features]
 default = ["crossterm"]
