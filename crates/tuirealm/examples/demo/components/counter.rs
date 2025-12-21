@@ -4,7 +4,7 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::event::{Key, KeyEvent, KeyModifiers};
-use tuirealm::props::{Alignment, Borders, Color, Style, TextModifiers};
+use tuirealm::props::{Alignment, Borders, Color, LineStatic, Style, TextModifiers, Title};
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::widgets::{BorderType, Paragraph};
 use tuirealm::{
@@ -24,11 +24,11 @@ struct Counter {
 impl Counter {
     pub fn label<S>(mut self, label: S) -> Self
     where
-        S: AsRef<str>,
+        S: Into<LineStatic>,
     {
         self.attr(
             Attribute::Title,
-            AttrValue::Title((label.as_ref().to_string(), Alignment::Center)),
+            AttrValue::Title(Title::from(label).alignment(Alignment::Center)),
         );
         self
     }
@@ -93,7 +93,7 @@ impl MockComponent for Counter {
                 .props
                 .get_or(
                     Attribute::Title,
-                    AttrValue::Title((String::default(), Alignment::Center)),
+                    AttrValue::Title(Title::default().alignment(Alignment::Center)),
                 )
                 .unwrap_title();
             let borders = self

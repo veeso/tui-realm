@@ -23,7 +23,7 @@ pub use direction::Direction;
 pub use input_type::InputType;
 pub use layout::Layout;
 pub use shape::Shape;
-pub use texts::{LineStatic, SpanStatic, Table, TableBuilder, TextStatic};
+pub use texts::{LineStatic, SpanStatic, Table, TableBuilder, TextStatic, Title};
 pub use value::{PropPayload, PropValue};
 
 pub use crate::ratatui::layout::Alignment;
@@ -169,7 +169,7 @@ pub enum AttrValue {
     TextLine(LineStatic),
     Text(TextStatic),
     TextModifiers(TextModifiers),
-    Title((String, Alignment)),
+    Title(Title),
     /// User defined complex attribute value
     Payload(PropPayload),
 }
@@ -329,8 +329,8 @@ impl AttrValue {
         }
     }
 
-    /// Get the inner Title value from AttrValue, or panic.
-    pub fn unwrap_title(self) -> (String, Alignment) {
+    /// Get the inner [`Title`] value from AttrValue, or panic.
+    pub fn unwrap_title(self) -> Title {
         match self {
             AttrValue::Title(x) => x,
             _ => panic!("AttrValue is not Title"),
@@ -508,8 +508,8 @@ impl AttrValue {
         }
     }
 
-    /// Get a Title value from AttrValue, or None
-    pub fn as_title(&self) -> Option<&(String, Alignment)> {
+    /// Get a [`Title`] value from AttrValue, or None
+    pub fn as_title(&self) -> Option<&Title> {
         match self {
             AttrValue::Title(v) => Some(v),
             _ => None,
@@ -678,8 +678,8 @@ impl AttrValue {
         }
     }
 
-    /// Get a Title value from AttrValue, or None
-    pub fn as_title_mut(&mut self) -> Option<&mut (String, Alignment)> {
+    /// Get a [`Title`] value from AttrValue, or None
+    pub fn as_title_mut(&mut self) -> Option<&mut Title> {
         match self {
             AttrValue::Title(v) => Some(v),
             _ => None,
@@ -804,8 +804,9 @@ mod test {
             TextModifiers::BOLD
         );
         assert_eq!(
-            AttrValue::Title((String::from("pippo"), Alignment::Left)).unwrap_title(),
-            (String::from("pippo"), Alignment::Left)
+            AttrValue::Title(Title::from(String::from("pippo")).alignment(Alignment::Left))
+                .unwrap_title(),
+            (Title::from(String::from("pippo")).alignment(Alignment::Left))
         );
         assert_eq!(
             AttrValue::Payload(PropPayload::None).unwrap_payload(),
@@ -917,8 +918,8 @@ mod test {
         );
 
         assert_eq!(
-            AttrValue::Title(("hello".into(), Alignment::Center)).as_title(),
-            Some(&("hello".into(), Alignment::Center))
+            AttrValue::Title(Title::from("hello").alignment(Alignment::Center)).as_title(),
+            Some(&Title::from("hello").alignment(Alignment::Center))
         );
         assert_eq!(AttrValue::Alignment(Alignment::Center).as_title(), None);
 
@@ -1057,8 +1058,8 @@ mod test {
         );
 
         assert_eq!(
-            AttrValue::Title(("hello".into(), Alignment::Center)).as_title_mut(),
-            Some(&mut ("hello".into(), Alignment::Center))
+            AttrValue::Title(Title::from("hello").alignment(Alignment::Right)).as_title_mut(),
+            Some(&mut Title::from("hello").alignment(Alignment::Right))
         );
         assert_eq!(AttrValue::Alignment(Alignment::Center).as_title_mut(), None);
 
