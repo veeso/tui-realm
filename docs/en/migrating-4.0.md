@@ -14,3 +14,9 @@ This document is a work in progress until 4.0 is released, listing the essential
 The previous `tuirealm::props::TextSpan` has been replaced with `ratatui::text::{Span, Line, Text}`.
 
 Because of the new types, new `AttrValue` and `PropValue` variants have been introduced: `TextSpan`, `TextLine` and `Text`.
+
+### Replace `(String, Alignment)` Titles with proper struct
+
+The previous `(String, Alignment)` Tuple has been replaced with a more feature-full `Title` struct.
+
+Due to the title now using `Line` under the hood, it is now possible to style individual characters in the title.

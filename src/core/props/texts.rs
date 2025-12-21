@@ -3,9 +3,58 @@
 //! `Texts` is the module which defines the texts properties for components.
 //! It also provides some helpers and builders to facilitate the use of builders.
 
+use crate::ratatui::layout::Alignment;
+use crate::ratatui::widgets::block::Position;
+
 pub type SpanStatic = crate::ratatui::text::Span<'static>;
 pub type LineStatic = crate::ratatui::text::Line<'static>;
 pub type TextStatic = crate::ratatui::text::Text<'static>;
+
+// Note that we cannot use "ratatui::widgets::block::Title" as that is deprecated.
+#[derive(Debug, Default, Clone, Eq, PartialEq, Hash)]
+pub struct Title {
+    /// The text and styling content of the title
+    pub content: LineStatic,
+    /// The Position the title should be in.
+    ///
+    /// This will determine if [`Block::title_top`](crate::ratatui::widgets::Block::title_top) or [`Block::title_bottom`](crate::ratatui::widgets::Block::title_bottom) is called.
+    pub position: Position,
+}
+
+impl Title {
+    /// Set a specific [`Alignment`] on the underlying [`Line`].
+    pub fn alignment(mut self, alignment: Alignment) -> Self {
+        self.content.alignment = Some(alignment);
+
+        self
+    }
+
+    /// Set a specific position the title should be in.
+    pub fn position(mut self, position: Position) -> Self {
+        self.position = position;
+
+        self
+    }
+
+    /// Overwrite the content of the title.
+    pub fn content(mut self, line: LineStatic) -> Self {
+        self.content = line;
+
+        self
+    }
+}
+
+impl<T> From<T> for Title
+where
+    T: Into<LineStatic>,
+{
+    fn from(value: T) -> Self {
+        Self {
+            content: value.into(),
+            ..Default::default()
+        }
+    }
+}
 
 /// Table represents a list of rows with a list of columns of text spans
 pub type Table = Vec<Vec<LineStatic>>;
@@ -93,5 +142,53 @@ mod test {
             .add_col(LineStatic::from("Line"))
             .add_col("simple str")
             .add_col(SpanStatic::from("span"));
+    }
+
+    #[test]
+    fn title_from() {
+        assert_eq!(
+            Title::from("simple str").content,
+            LineStatic::from("simple str")
+        );
+        assert_eq!(
+            Title::from(String::from("owned string")).content,
+            LineStatic::from(String::from("owned string"))
+        );
+        assert_eq!(
+            Title::from(LineStatic::from("Line")).content,
+            LineStatic::from("Line")
+        );
+    }
+
+    #[test]
+    fn title_builder() {
+        assert_eq!(Title::from("test").position, Position::Top);
+        assert_eq!(
+            Title::from("test").position(Position::Bottom).position,
+            Position::Bottom
+        );
+
+        assert_eq!(Title::from("test").content.alignment, None);
+        assert_eq!(
+            Title::from("test")
+                .alignment(Alignment::Left)
+                .content
+                .alignment,
+            Some(Alignment::Left)
+        );
+        assert_eq!(
+            Title::from("test")
+                .alignment(Alignment::Right)
+                .content
+                .alignment,
+            Some(Alignment::Right)
+        );
+        assert_eq!(
+            Title::from("test")
+                .alignment(Alignment::Center)
+                .content
+                .alignment,
+            Some(Alignment::Center)
+        );
     }
 }
