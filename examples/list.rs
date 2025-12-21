@@ -6,9 +6,9 @@ use std::time::Duration;
 
 use tui_realm_stdlib::List;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::props::{Alignment, BorderType, Borders, Color, TableBuilder};
+use tuirealm::props::{Alignment, BorderType, Borders, Color};
 use tuirealm::ratatui::style::Stylize;
-use tuirealm::ratatui::text::Line;
+use tuirealm::ratatui::text::Span;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
@@ -156,61 +156,73 @@ impl Default for ListAlfa {
                 .highlighted_str("🚀")
                 .rewind(true)
                 .step(4)
-                .rows(
-                    TableBuilder::default()
-                        .add_col(Line::from("01").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Lorem ipsum dolor sit amet, consectetur adipiscing elit"))
-                        .add_row()
-                        .add_col(Line::from("02").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Maecenas tincidunt dui ut gravida fringilla"))
-                        .add_row()
-                        .add_col(Line::from("03").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Duis est neque, fringilla sit amet enim id, congue hendrerit mauris"))
-                        .add_row()
-                        .add_col(Line::from("04").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Nulla facilisi. Vestibulum tincidunt tempor orci, in pellentesque lacus placerat id."))
-                        .add_row()
-                        .add_col(Line::from("05").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Integer at nisl scelerisque, egestas ipsum in, iaculis tellus. Pellentesque tincidunt vestibulum nisi, ut vehicula augue scelerisque at"))
-                        .add_row()
-                        .add_col(Line::from("06").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Quisque quis tincidunt tellus. Nam accumsan leo non nunc finibus feugiat."))
-                        .add_row()
-                        .add_col(Line::from("07").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("non lacus ac orci fermentum aliquam ut feugiat libero. Suspendisse eget nunc in erat molestie egestas eu at massa"))
-                        .add_row()
-                        .add_col(Line::from("08").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Donec feugiat dui quis libero ornare, vel sodales mauris ornare."))
-                        .add_row()
-                        .add_col(Line::from("09").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Aenean tempor porta nisi, at sodales eros semper ut. Vivamus sit amet commodo risus"))
-                        .add_row()
-                        .add_col(Line::from("10").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Etiam urna nisi, ullamcorper at justo et, rhoncus pellentesque dui. Nunc ante velit, ultrices a ornare sit amet, sagittis in ex. Nam pulvinar tellus tortor. Praesent ac accumsan nunc, ac consectetur nisi."))
-                        .add_row()
-                        .add_col(Line::from("11").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Proin non elit fermentum, pretium diam eget, facilisis mi"))
-                        .add_row()
-                        .add_col(Line::from("12").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Duis suscipit nibh lacus, quis porta enim accumsan vel"))
-                        .add_row()
-                        .add_col(Line::from("13").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Etiam volutpat magna tortor, a laoreet ex accumsan sit amet"))
-                        .build()
-                )
+                .rows([
+                    vec![
+                        Span::from("01").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Lorem ipsum dolor sit amet, consectetur adipiscing elit"),
+                    ],
+                    vec![
+                        Span::from("02").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Maecenas tincidunt dui ut gravida fringilla"),
+                    ],
+                    vec![
+                        Span::from("03").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Duis est neque, fringilla sit amet enim id, congue hendrerit mauris"),
+                    ],
+                    vec![
+                        Span::from("04").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Nulla facilisi. Vestibulum tincidunt tempor orci, in pellentesque lacus placerat id."),
+                    ],
+                    vec![
+                        Span::from("05").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Integer at nisl scelerisque, egestas ipsum in, iaculis tellus. Pellentesque tincidunt vestibulum nisi, ut vehicula augue scelerisque at"),
+                    ],
+                    vec![
+                        Span::from("06").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Quisque quis tincidunt tellus. Nam accumsan leo non nunc finibus feugiat."),
+                    ],
+                    vec![
+                        Span::from("07").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("non lacus ac orci fermentum aliquam ut feugiat libero. Suspendisse eget nunc in erat molestie egestas eu at massa"),
+                    ],
+                    vec![
+                        Span::from("08").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Donec feugiat dui quis libero ornare, vel sodales mauris ornare."),
+                    ],
+                    vec![
+                        Span::from("09").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Aenean tempor porta nisi, at sodales eros semper ut. Vivamus sit amet commodo risus"),
+                    ],
+                    vec![
+                        Span::from("10").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Etiam urna nisi, ullamcorper at justo et, rhoncus pellentesque dui. Nunc ante velit, ultrices a ornare sit amet, sagittis in ex. Nam pulvinar tellus tortor. Praesent ac accumsan nunc, ac consectetur nisi."),
+                    ],
+                    vec![
+                        Span::from("11").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Proin non elit fermentum, pretium diam eget, facilisis mi"),
+                    ],
+                    vec![
+                        Span::from("12").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Duis suscipit nibh lacus, quis porta enim accumsan vel"),
+                    ],
+                    vec![
+                        Span::from("13").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Etiam volutpat magna tortor, a laoreet ex accumsan sit amet"),
+                    ]
+                ])
                 .selected_line(2),
         }
     }
@@ -263,61 +275,73 @@ impl Default for ListBeta {
                 .foreground(Color::Green)
                 .title("Lorem ipsum (unscrollable)", Alignment::Center)
                 .scroll(false)
-                .rows(
-                    TableBuilder::default()
-                        .add_col(Line::from("01").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Lorem ipsum dolor sit amet, consectetur adipiscing elit"))
-                        .add_row()
-                        .add_col(Line::from("02").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Maecenas tincidunt dui ut gravida fringilla"))
-                        .add_row()
-                        .add_col(Line::from("03").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Duis est neque, fringilla sit amet enim id, congue hendrerit mauris"))
-                        .add_row()
-                        .add_col(Line::from("04").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Nulla facilisi. Vestibulum tincidunt tempor orci, in pellentesque lacus placerat id."))
-                        .add_row()
-                        .add_col(Line::from("05").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Integer at nisl scelerisque, egestas ipsum in, iaculis tellus. Pellentesque tincidunt vestibulum nisi, ut vehicula augue scelerisque at"))
-                        .add_row()
-                        .add_col(Line::from("06").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Quisque quis tincidunt tellus. Nam accumsan leo non nunc finibus feugiat."))
-                        .add_row()
-                        .add_col(Line::from("07").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("non lacus ac orci fermentum aliquam ut feugiat libero. Suspendisse eget nunc in erat molestie egestas eu at massa"))
-                        .add_row()
-                        .add_col(Line::from("08").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Donec feugiat dui quis libero ornare, vel sodales mauris ornare."))
-                        .add_row()
-                        .add_col(Line::from("09").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Aenean tempor porta nisi, at sodales eros semper ut. Vivamus sit amet commodo risus"))
-                        .add_row()
-                        .add_col(Line::from("10").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Etiam urna nisi, ullamcorper at justo et, rhoncus pellentesque dui. Nunc ante velit, ultrices a ornare sit amet, sagittis in ex. Nam pulvinar tellus tortor. Praesent ac accumsan nunc, ac consectetur nisi."))
-                        .add_row()
-                        .add_col(Line::from("11").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Proin non elit fermentum, pretium diam eget, facilisis mi"))
-                        .add_row()
-                        .add_col(Line::from("12").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Duis suscipit nibh lacus, quis porta enim accumsan vel"))
-                        .add_row()
-                        .add_col(Line::from("13").fg(Color::Cyan).italic())
-                        .add_col(Line::from(" "))
-                        .add_col(Line::from("Etiam volutpat magna tortor, a laoreet ex accumsan sit amet"))
-                        .build()
-                ),
+                .rows([
+                    vec![
+                        Span::from("01").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Lorem ipsum dolor sit amet, consectetur adipiscing elit"),
+                    ],
+                    vec![
+                        Span::from("02").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Maecenas tincidunt dui ut gravida fringilla"),
+                    ],
+                    vec![
+                        Span::from("03").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Duis est neque, fringilla sit amet enim id, congue hendrerit mauris"),
+                    ],
+                    vec![
+                        Span::from("04").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Nulla facilisi. Vestibulum tincidunt tempor orci, in pellentesque lacus placerat id."),
+                    ],
+                    vec![
+                        Span::from("05").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Integer at nisl scelerisque, egestas ipsum in, iaculis tellus. Pellentesque tincidunt vestibulum nisi, ut vehicula augue scelerisque at"),
+                    ],
+                    vec![
+                        Span::from("06").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Quisque quis tincidunt tellus. Nam accumsan leo non nunc finibus feugiat."),
+                    ],
+                    vec![
+                        Span::from("07").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("non lacus ac orci fermentum aliquam ut feugiat libero. Suspendisse eget nunc in erat molestie egestas eu at massa"),
+                    ],
+                    vec![
+                        Span::from("08").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Donec feugiat dui quis libero ornare, vel sodales mauris ornare."),
+                    ],
+                    vec![
+                        Span::from("09").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Aenean tempor porta nisi, at sodales eros semper ut. Vivamus sit amet commodo risus"),
+                    ],
+                    vec![
+                        Span::from("10").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Etiam urna nisi, ullamcorper at justo et, rhoncus pellentesque dui. Nunc ante velit, ultrices a ornare sit amet, sagittis in ex. Nam pulvinar tellus tortor. Praesent ac accumsan nunc, ac consectetur nisi."),
+                    ],
+                    vec![
+                        Span::from("11").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Proin non elit fermentum, pretium diam eget, facilisis mi"),
+                    ],
+                    vec![
+                        Span::from("12").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Duis suscipit nibh lacus, quis porta enim accumsan vel"),
+                    ],
+                    vec![
+                        Span::from("13").fg(Color::Cyan).italic(),
+                        Span::from(" "),
+                        Span::from("Etiam volutpat magna tortor, a laoreet ex accumsan sit amet"),
+                    ]
+                ]),
         }
     }
 }

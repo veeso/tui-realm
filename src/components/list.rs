@@ -4,8 +4,8 @@
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Table,
-    TextModifiers,
+    Alignment, AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props,
+    Style, TextModifiers,
 };
 use tuirealm::ratatui::{
     layout::Rect,
@@ -177,8 +177,19 @@ impl List {
         self
     }
 
-    pub fn rows(mut self, rows: Table) -> Self {
-        self.attr(Attribute::Content, AttrValue::Table(rows));
+    pub fn rows<T>(mut self, rows: impl IntoIterator<Item = T>) -> Self
+    where
+        T: Into<LineStatic>,
+    {
+        self.attr(
+            Attribute::Text,
+            AttrValue::Payload(PropPayload::Vec(
+                rows.into_iter()
+                    .map(Into::into)
+                    .map(PropValue::TextLine)
+                    .collect(),
+            )),
+        );
         self
     }
 
@@ -239,18 +250,20 @@ impl MockComponent for List {
             let active: bool = if self.scrollable() { focus } else { true };
             let div = crate::utils::get_block(borders, Some(&title), active, inactive_style);
             // Make list entries
-            let list_items: Vec<ListItem> = match self
+            let payload = self
                 .props
-                .get_ref(Attribute::Content)
-                .and_then(|x| x.as_table())
-            {
-                Some(table) => table
-                    .iter()
-                    .map(|row| {
-                        let columns = row.iter().map(utils::borrow_clone_line).collect::<Vec<_>>();
-                        ListItem::new(columns)
-                    })
-                    .collect(), // Make List item from TextSpan
+                .get_ref(Attribute::Text)
+                .and_then(|x| x.as_payload());
+            let list_items: Vec<ListItem> = match payload {
+                Some(PropPayload::Vec(lines)) => {
+                    lines
+                        .iter()
+                        // this will skip any "PropValue" that is not a "TextLine", instead of panicing
+                        .filter_map(|x| x.as_textline())
+                        .map(utils::borrow_clone_line)
+                        .map(ListItem::from)
+                        .collect()
+                }
                 _ => Vec::new(),
             };
             let highlighted_color = self
@@ -299,11 +312,16 @@ impl MockComponent for List {
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         self.props.set(attr, value);
-        if matches!(attr, Attribute::Content) {
+        if matches!(attr, Attribute::Text) {
             // Update list len and fix index
             self.states.set_list_len(
-                match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
-                    Some(spans) => spans.len(),
+                match self
+                    .props
+                    .get_ref(Attribute::Text)
+                    .and_then(AttrValue::as_payload)
+                    .and_then(PropPayload::as_vec)
+                {
+                    Some(rows) => rows.len(),
                     _ => 0,
                 },
             );
@@ -401,7 +419,7 @@ mod tests {
 
     use super::*;
     use pretty_assertions::assert_eq;
-    use tuirealm::{props::TableBuilder, ratatui::text::Line};
+    use tuirealm::ratatui::text::{Line, Span};
 
     #[test]
     fn list_states() {
@@ -450,38 +468,46 @@ mod tests {
             .borders(Borders::default())
             .title("events", Alignment::Center)
             .rewind(true)
-            .rows(
-                TableBuilder::default()
-                    .add_col(Line::from("KeyCode::Down"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor down"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::Up"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor up"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::PageDown"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor down by 8"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::PageUp"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("ove cursor up by 8"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::End"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor to last item"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::Home"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor to first item"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::Char(_)"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Return pressed key"))
-                    .add_col(Line::from("4th mysterious columns"))
-                    .build(),
-            );
+            .rows([
+                // Note: this could be improved if ratatui implements "From<[X; _]> for Line"
+                // will get automatically converted to lines
+                vec![
+                    Span::from("KeyCode::Down"),
+                    Span::from("OnKey"),
+                    Span::from("Move cursor down"),
+                ],
+                vec![
+                    Span::from("KeyCode::Up"),
+                    Span::from("OnKey"),
+                    Span::from("Move cursor up"),
+                ],
+                vec![
+                    Span::from("KeyCode::PageDown"),
+                    Span::from("OnKey"),
+                    Span::from("Move cursor down by 8"),
+                ],
+                vec![
+                    Span::from("KeyCode::PageUp"),
+                    Span::from("OnKey"),
+                    Span::from("ove cursor up by 8"),
+                ],
+                vec![
+                    Span::from("KeyCode::End"),
+                    Span::from("OnKey"),
+                    Span::from("Move cursor to last item"),
+                ],
+                vec![
+                    Span::from("KeyCode::Home"),
+                    Span::from("OnKey"),
+                    Span::from("Move cursor to first item"),
+                ],
+                vec![
+                    Span::from("KeyCode::Char(_)"),
+                    Span::from("OnKey"),
+                    Span::from("Return pressed key"),
+                    Span::from("4th mysterious columns"),
+                ],
+            ]);
         assert_eq!(component.states.list_len, 7);
         assert_eq!(component.states.list_index, 0);
         // Increment list index
@@ -540,14 +566,10 @@ mod tests {
         assert_eq!(component.states.list_index, 0);
         // Update
         component.attr(
-            Attribute::Content,
-            AttrValue::Table(
-                TableBuilder::default()
-                    .add_col(Line::from("name"))
-                    .add_col(Line::from("age"))
-                    .add_col(Line::from("birthdate"))
-                    .build(),
-            ),
+            Attribute::Text,
+            AttrValue::Payload(PropPayload::Vec(vec![PropValue::TextLine(Line::from(
+                "name age birthdate",
+            ))])),
         );
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
@@ -565,37 +587,15 @@ mod tests {
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
             .title("events", Alignment::Center)
-            .rows(
-                TableBuilder::default()
-                    .add_col(Line::from("KeyCode::Down"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor down"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::Up"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor up"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::PageDown"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor down by 8"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::PageUp"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("ove cursor up by 8"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::End"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor to last item"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::Home"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor to first item"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::Char(_)"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Return pressed key"))
-                    .build(),
-            );
+            .rows([
+                Line::from("KeyCode::Down OnKey Move cursor down"),
+                Line::from("KeyCode::Up OnKey Move cursor up"),
+                Line::from("KeyCode::PageDown OnKey Move cursor down by 8"),
+                Line::from("KeyCode::PageUp OnKey Move cursor up by 8"),
+                Line::from("KeyCode::End OnKey Move cursor to last item"),
+                Line::from("KeyCode::Home OnKey Move cursor to first item"),
+                Line::from("KeyCode::Char(_) OnKey Return pressed key"),
+            ]);
         // Get value (not scrollable)
         assert_eq!(component.state(), State::None);
     }
@@ -610,37 +610,15 @@ mod tests {
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
             .title("events", Alignment::Center)
-            .rows(
-                TableBuilder::default()
-                    .add_col(Line::from("KeyCode::Down"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor down"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::Up"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor up"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::PageDown"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor down by 8"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::PageUp"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("ove cursor up by 8"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::End"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor to last item"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::Home"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Move cursor to first item"))
-                    .add_row()
-                    .add_col(Line::from("KeyCode::Char(_)"))
-                    .add_col(Line::from("OnKey"))
-                    .add_col(Line::from("Return pressed key"))
-                    .build(),
-            )
+            .rows([
+                "KeyCode::Down OnKey Move cursor down",
+                "KeyCode::Up OnKey Move cursor up",
+                "KeyCode::PageDown OnKey Move cursor down by 8",
+                "KeyCode::PageUp OnKey Move cursor up by 8",
+                "KeyCode::End OnKey Move cursor to last item",
+                "KeyCode::Home OnKey Move cursor to first item",
+                "KeyCode::Char(_) OnKey Return pressed key",
+            ])
             .scroll(true)
             .selected_line(2);
         assert_eq!(component.states.list_index, 2);
