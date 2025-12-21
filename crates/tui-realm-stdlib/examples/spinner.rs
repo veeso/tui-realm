@@ -161,9 +161,10 @@ impl Default for SpanAlfa {
     fn default() -> Self {
         Self {
             component: Span::default().foreground(Color::Yellow).spans([
-                RSpan::raw("Downloading tui-realm... ")
+                RSpan::raw("Downloading tui-realm...")
                     .underlined()
                     .fg(Color::Green),
+                RSpan::raw(" "),
                 RSpan::from("Please wait!"),
             ]),
         }
@@ -189,14 +190,17 @@ impl Default for SpanBeta {
     fn default() -> Self {
         Self {
             component: Span::default()
-                .foreground(Color::Black)
-                .background(Color::White)
+                // fallback colors if the spans dont have their own
+                .foreground(Color::White)
+                .background(Color::DarkGray)
                 .alignment(Alignment::Right)
                 .modifiers(TextModifiers::BOLD)
                 .spans([
-                    RSpan::raw("Downloading tui-realm-stdlib... ")
+                    RSpan::raw("Downloading tui-realm-stdlib...")
                         .underlined()
-                        .fg(Color::Green),
+                        .fg(Color::Yellow)
+                        .bg(Color::Black),
+                    RSpan::raw(" "),
                     RSpan::from("Please wait!"),
                 ]),
         }
