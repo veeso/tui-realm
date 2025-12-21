@@ -26,3 +26,8 @@ Due to the title now using `Line` under the hood, it is now possible to style in
 The tuple variants of `PropPayload` have been removed as they were blowing up the size of `PropPayload` in general.
 
 If multiple types are still necessary, consider either using `PropPayload::Vec` or for more descriptive fields use a custom struct in `PropPayload::Any`.
+
+### `Component::on` parameter `Event` is now a reference
+
+With 4.0, `Component::on`'s `Event` parameter is now a reference. This allowed us to remove clones in-between that had always been done
+but now it is up to the user if a clone is actually necessary.

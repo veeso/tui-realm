@@ -151,7 +151,7 @@ where
     pub(crate) fn forward(
         &mut self,
         id: &ComponentId,
-        event: Event<UserEvent>,
+        event: &Event<UserEvent>,
     ) -> ViewResult<Option<Msg>> {
         match self.components.get_mut(id) {
             None => Err(ViewError::ComponentNotFound),
@@ -678,7 +678,7 @@ mod test {
         );
         let ev: Event<MockEvent> = Event::Keyboard(KeyEvent::from(Key::Char('a')));
         assert_eq!(
-            view.forward(&MockComponentId::InputFoo, ev)
+            view.forward(&MockComponentId::InputFoo, &ev)
                 .ok()
                 .unwrap()
                 .unwrap(),
@@ -686,7 +686,7 @@ mod test {
         );
         // To non-existing component
         assert!(
-            view.forward(&MockComponentId::InputBar, Event::Tick)
+            view.forward(&MockComponentId::InputBar, &Event::Tick)
                 .is_err()
         );
     }

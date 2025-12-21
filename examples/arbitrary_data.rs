@@ -260,7 +260,7 @@ struct OurLabel {
 }
 
 impl Component<Msg, NoUserEvent> for OurLabel {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         // Does nothing
         match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => Some(Msg::AppClose),

@@ -98,7 +98,7 @@ pub struct MockFooInput {
 }
 
 impl Component<MockMsg, MockEvent> for MockFooInput {
-    fn on(&mut self, ev: Event<MockEvent>) -> Option<MockMsg> {
+    fn on(&mut self, ev: &Event<MockEvent>) -> Option<MockMsg> {
         let cmd = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left,
@@ -111,7 +111,7 @@ impl Component<MockMsg, MockEvent> for MockFooInput {
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => Cmd::Type(ch),
+            }) => Cmd::Type(*ch),
             Event::Keyboard(KeyEvent {
                 code: Key::Enter,
                 modifiers: KeyModifiers::NONE,
@@ -133,7 +133,7 @@ pub struct MockBarInput {
 }
 
 impl Component<MockMsg, MockEvent> for MockBarInput {
-    fn on(&mut self, ev: Event<MockEvent>) -> Option<MockMsg> {
+    fn on(&mut self, ev: &Event<MockEvent>) -> Option<MockMsg> {
         let cmd = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left,
@@ -146,7 +146,7 @@ impl Component<MockMsg, MockEvent> for MockBarInput {
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => Cmd::Type(ch),
+            }) => Cmd::Type(*ch),
             Event::Keyboard(KeyEvent {
                 code: Key::Enter,
                 modifiers: KeyModifiers::NONE,

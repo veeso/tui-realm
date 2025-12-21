@@ -60,5 +60,5 @@ where
     /// Handle input event and update internal states.
     /// Returns a Msg to the view.
     /// If [`None`] is returned it means there's no message to return for the provided event.
-    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg>;
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg>;
 }
