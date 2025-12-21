@@ -110,7 +110,7 @@ impl MockComponent for Label {
 }
 
 impl Component<Msg, NoUserEvent> for Label {
-    fn on(&mut self, _: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, _: &Event<NoUserEvent>) -> Option<Msg> {
         // Does nothing
         None
     }

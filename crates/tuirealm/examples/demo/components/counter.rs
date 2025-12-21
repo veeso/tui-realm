@@ -180,7 +180,7 @@ impl LetterCounter {
 }
 
 impl Component<Msg, NoUserEvent> for LetterCounter {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         // Get command
         let cmd = match ev {
             Event::Keyboard(KeyEvent {
@@ -232,7 +232,7 @@ impl DigitCounter {
 }
 
 impl Component<Msg, NoUserEvent> for DigitCounter {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         // Get command
         let cmd = match ev {
             Event::Keyboard(KeyEvent {

@@ -97,7 +97,7 @@ where
         // Forward to active element
         let mut messages: Vec<Msg> = events
             .iter()
-            .filter_map(|x| self.forward_to_active_component(x.clone()))
+            .filter_map(|x| self.forward_to_active_component(x))
             .collect();
         // Forward to subscriptions and extend vector
         if !self.sub_lock {
@@ -408,7 +408,7 @@ where
     }
 
     /// Forward event to current active component, if any.
-    fn forward_to_active_component(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
+    fn forward_to_active_component(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         self.view
             .focus()
             .cloned()
@@ -432,7 +432,7 @@ where
                 ) {
                     continue;
                 }
-                if let Some(msg) = self.view.forward(sub.target(), ev.clone()).ok().unwrap() {
+                if let Some(msg) = self.view.forward(sub.target(), ev).ok().unwrap() {
                     messages.push(msg);
                 }
             }

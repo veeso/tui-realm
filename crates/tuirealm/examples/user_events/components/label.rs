@@ -81,7 +81,7 @@ impl MockComponent for Label {
 }
 
 impl Component<Msg, UserEvent> for Label {
-    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         // Does nothing
         match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => Some(Msg::AppClose),

@@ -93,7 +93,7 @@ impl MockComponent for Clock {
 }
 
 impl Component<Msg, NoUserEvent> for Clock {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         if let Event::Tick = ev {
             self.states.tick();
             // Set text
