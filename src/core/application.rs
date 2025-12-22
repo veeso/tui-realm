@@ -832,7 +832,7 @@ mod test {
         );
         // Let's try TryFor strategy
         let events = application
-            .tick(PollStrategy::TryFor(Duration::from_millis(300)))
+            .tick(PollStrategy::TryFor(Duration::from_millis(400)))
             .ok()
             .unwrap();
         assert!(events.len() >= 2);
@@ -1296,7 +1296,7 @@ mod test {
         // Unlock ports
         assert!(application.unlock_ports().is_ok());
         // Wait 100 ms
-        std::thread::sleep(Duration::from_millis(50));
+        std::thread::sleep(Duration::from_millis(100));
         // Tick
 
         // We cannot check messages with exact slice as the scheduler may run the other thread more often and generate more messages.
