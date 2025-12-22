@@ -8,8 +8,8 @@ extern crate unicode_width;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, SpanStatic,
-    Style, TextModifiers,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, SpanStatic, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::{
     layout::Rect,
@@ -145,8 +145,8 @@ impl Textarea {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -314,7 +314,7 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::ratatui::text::Span;
+    use tuirealm::{props::Alignment, ratatui::text::Span};
 
     #[test]
     fn test_components_textarea() {
@@ -326,7 +326,7 @@ mod tests {
             .borders(Borders::default())
             .highlighted_str("🚀")
             .step(4)
-            .title("textarea", Alignment::Center)
+            .title(Title::from("textarea").alignment(Alignment::Center))
             .text_rows([Span::from("welcome to "), Span::from("tui-realm")]);
         // Increment list index
         component.states.list_index += 1;

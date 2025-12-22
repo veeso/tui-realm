@@ -7,7 +7,7 @@
 //! By default it will forward `Commands' to all the children and will return a `CmdResult::Batch` with all the results.
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::props::{Alignment, AttrValue, Attribute, Borders, Color, Layout, Props};
+use tuirealm::props::{AttrValue, Attribute, Borders, Color, Layout, Props, Title};
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::{Frame, MockComponent, State};
 
@@ -40,8 +40,8 @@ impl Container {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -114,13 +114,14 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
+    use tuirealm::props::Alignment;
 
     #[test]
     fn test_components_paragraph() {
         let component = Container::default()
             .background(Color::Blue)
             .foreground(Color::Red)
-            .title("title", Alignment::Center);
+            .title(Title::from("title").alignment(Alignment::Center));
         // Get value
         assert_eq!(component.state(), State::None);
     }

@@ -8,11 +8,12 @@ extern crate unicode_width;
 use std::borrow::Cow;
 
 // local
-use tuirealm::props::{Alignment, Borders};
+use tuirealm::props::{Borders, Title};
 // ext
 use tuirealm::ratatui::style::{Color, Style};
 use tuirealm::ratatui::text::{Line, Span, Text};
 use tuirealm::ratatui::widgets::Block;
+use tuirealm::ratatui::widgets::block::Position;
 use unicode_width::UnicodeWidthStr;
 
 /// ### wrap_spans
@@ -72,9 +73,9 @@ pub fn wrap_spans<'a, 'b: 'a>(spans: &[&'b Span<'a>], width: usize) -> Vec<Line<
 /// Construct a block for widget using block properties.
 /// If focus is true the border color is applied, otherwise inactive_style
 #[must_use]
-pub fn get_block<T: AsRef<str>>(
+pub fn get_block(
     props: Borders,
-    title: Option<&(T, Alignment)>,
+    title: Option<&Title>,
     focus: bool,
     inactive_style: Option<Style>,
 ) -> Block<'_> {
@@ -87,8 +88,11 @@ pub fn get_block<T: AsRef<str>>(
         })
         .border_type(props.modifiers);
 
-    if let Some((title, alignment)) = title {
-        block = block.title(title.as_ref()).title_alignment(*alignment);
+    if let Some(title) = title {
+        block = match title.position {
+            Position::Top => block.title_top(borrow_clone_line(&title.content)),
+            Position::Bottom => block.title_bottom(borrow_clone_line(&title.content)),
+        };
     }
 
     block
@@ -195,8 +199,13 @@ mod test {
             .sides(BorderSides::ALL)
             .color(Color::Red)
             .modifiers(BorderType::Rounded);
-        let _ = get_block(borders, Some(&("title", Alignment::Center)), true, None);
-        let _ = get_block::<&str>(borders, None, false, None);
+        let _ = get_block(
+            borders,
+            Some(&Title::from("title").alignment(Alignment::Center)),
+            true,
+            None,
+        );
+        let _ = get_block(borders, None, false, None);
     }
 
     #[test]

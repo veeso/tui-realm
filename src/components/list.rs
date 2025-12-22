@@ -4,8 +4,8 @@
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props,
-    Style, TextModifiers,
+    AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::{
     layout::Rect,
@@ -142,8 +142,8 @@ impl List {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -422,7 +422,10 @@ mod tests {
 
     use super::*;
     use pretty_assertions::assert_eq;
-    use tuirealm::ratatui::text::{Line, Span};
+    use tuirealm::{
+        props::Alignment,
+        ratatui::text::{Line, Span},
+    };
 
     #[test]
     fn list_states() {
@@ -469,7 +472,7 @@ mod tests {
             .scroll(true)
             .step(4)
             .borders(Borders::default())
-            .title("events", Alignment::Center)
+            .title(Title::from("events").alignment(Alignment::Center))
             .rewind(true)
             .rows([
                 // Note: this could be improved if ratatui implements "From<[X; _]> for Line"
@@ -589,7 +592,7 @@ mod tests {
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
-            .title("events", Alignment::Center)
+            .title(Title::from("events").alignment(Alignment::Center))
             .rows([
                 Line::from("KeyCode::Down OnKey Move cursor down"),
                 Line::from("KeyCode::Up OnKey Move cursor up"),
@@ -612,7 +615,7 @@ mod tests {
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
-            .title("events", Alignment::Center)
+            .title(Title::from("events").alignment(Alignment::Center))
             .rows([
                 "KeyCode::Down OnKey Move cursor down",
                 "KeyCode::Up OnKey Move cursor up",

@@ -6,7 +6,7 @@ use std::any::Any;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Title,
 };
 use tuirealm::ratatui::text::Line;
 use tuirealm::ratatui::{
@@ -108,10 +108,8 @@ impl Chart {
         self
     }
 
-    /// Set a title for the Block
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.props
-            .set(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -422,7 +420,10 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::ratatui::{symbols::Marker, widgets::GraphType};
+    use tuirealm::{
+        props::Alignment,
+        ratatui::{symbols::Marker, widgets::GraphType},
+    };
 
     #[test]
     fn test_components_chart_states() {
@@ -454,7 +455,7 @@ mod test {
             .background(Color::Reset)
             .foreground(Color::Reset)
             .borders(Borders::default())
-            .title("average temperatures in Udine", Alignment::Center)
+            .title(Title::from("average temperatures in Udine").alignment(Alignment::Center))
             .x_bounds((0.0, 11.0))
             .x_labels(&[
                 "january",

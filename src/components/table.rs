@@ -6,8 +6,8 @@ use std::cmp::max;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
-    Table as PropTable, TextModifiers,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Table as PropTable,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::{
     layout::{Constraint, Rect},
@@ -151,8 +151,8 @@ impl Table {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -524,7 +524,7 @@ mod tests {
 
     use super::*;
     use pretty_assertions::assert_eq;
-    use tuirealm::props::TableBuilder;
+    use tuirealm::props::{Alignment, TableBuilder};
 
     #[test]
     fn table_states() {
@@ -572,7 +572,7 @@ mod tests {
             .scroll(true)
             .step(4)
             .borders(Borders::default())
-            .title("events", Alignment::Center)
+            .title(Title::from("events").alignment(Alignment::Center))
             .column_spacing(4)
             .widths(&[25, 25, 25, 25])
             .row_height(3)
@@ -705,7 +705,7 @@ mod tests {
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
-            .title("events", Alignment::Center)
+            .title(Title::from("events").alignment(Alignment::Center))
             .column_spacing(4)
             .widths(&[33, 33, 33])
             .row_height(3)
@@ -754,7 +754,7 @@ mod tests {
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
-            .title("events", Alignment::Center)
+            .title(Title::from("events").alignment(Alignment::Center))
             .table(
                 TableBuilder::default()
                     .add_col(Line::from("KeyCode::Down"))

@@ -27,8 +27,8 @@
  */
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
-    TextModifiers,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
+    Title,
 };
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{layout::Rect, widgets::Tabs};
@@ -119,8 +119,8 @@ impl Radio {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -273,7 +273,7 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::props::{PropPayload, PropValue};
+    use tuirealm::props::{Alignment, PropPayload, PropValue};
 
     #[test]
     fn test_components_radio_states() {
@@ -337,7 +337,7 @@ mod test {
             .background(Color::Blue)
             .foreground(Color::Red)
             .borders(Borders::default())
-            .title("C'est oui ou bien c'est non?", Alignment::Center)
+            .title(Title::from("C'est oui ou bien c'est non?").alignment(Alignment::Center))
             .choices(["Oui!", "Non", "Peut-être"])
             .value(1)
             .rewind(false);

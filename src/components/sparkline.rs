@@ -4,7 +4,7 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Title,
 };
 use tuirealm::ratatui::{layout::Rect, widgets::Sparkline as TuiSparkline};
 use tuirealm::{Frame, MockComponent, State};
@@ -36,8 +36,8 @@ impl Sparkline {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -147,13 +147,14 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
+    use tuirealm::props::Alignment;
 
     #[test]
     fn test_components_sparkline() {
         let component = Sparkline::default()
             .background(Color::White)
             .foreground(Color::Black)
-            .title("bandwidth", Alignment::Center)
+            .title(Title::from("bandwidth").alignment(Alignment::Center))
             .borders(Borders::default())
             .max_entries(8)
             .data(&[
