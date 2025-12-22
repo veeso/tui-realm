@@ -6,7 +6,7 @@ authors = [
   "hasezoey <hasezoey@gmail.com>",
 ]
 edition = "2024"
-rust-version = "1.85.1"
+rust-version = "1.86"
 categories = ["command-line-utilities"]
 description = "A tui-rs framework to build tui interfaces, inspired by React and Elm."
 documentation = "https://docs.rs/tuirealm"
