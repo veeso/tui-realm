@@ -31,6 +31,11 @@ If multiple types are still necessary, consider either using `PropPayload::Vec` 
 
 As other tuple variants are now removed, it is more descriptive to rename `Tup2` to `Pair`.
 
+### Removal of Dataset related value
+
+`Dataset` is practically only required for `tui_realm_stdlib::components::Chart`, and even then does not need to be stored in `Props`, so it can be easily
+moved to be carried over `PropPayload::Any`.
+
 ### `Component::on` parameter `Event` is now a reference
 
 With 4.0, `Component::on`'s `Event` parameter is now a reference. This allowed us to remove clones in-between that had always been done
