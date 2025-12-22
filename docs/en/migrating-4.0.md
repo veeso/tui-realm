@@ -21,9 +21,9 @@ The previous `(String, Alignment)` Tuple has been replaced with a more feature-f
 
 Due to the title now using `Line` under the hood, it is now possible to style individual characters in the title.
 
-### Removal of `PropPayload::Tup*` variants
+### Removal of `PropPayload::Tup3` and `PropPayload::Tup4` variants
 
-The tuple variants of `PropPayload` have been removed as they were blowing up the size of `PropPayload` in general.
+The `3` and `4` tuple variants of `PropPayload` have been removed as they were blowing up the size of `PropPayload` in general.
 
 If multiple types are still necessary, consider either using `PropPayload::Vec` or for more descriptive fields use a custom struct in `PropPayload::Any`.
 

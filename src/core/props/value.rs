@@ -16,6 +16,7 @@ use crate::props::AnyPropBox;
 #[derive(Debug, PartialEq, Clone)]
 pub enum PropPayload {
     One(PropValue),
+    Tup2((PropValue, PropValue)),
     Vec(Vec<PropValue>),
     Map(HashMap<String, PropValue>),
     Linked(LinkedList<PropPayload>),
@@ -66,6 +67,14 @@ impl PropPayload {
         }
     }
 
+    /// Unwrap a Tup2 value from PropPayload
+    pub fn unwrap_tup2(self) -> (PropValue, PropValue) {
+        match self {
+            PropPayload::Tup2(t) => t,
+            _ => panic!("Called `unwrap_tup2` on a bad value"),
+        }
+    }
+
     /// Unwrap a Vec value from PropPayload
     pub fn unwrap_vec(self) -> Vec<PropValue> {
         match self {
@@ -108,6 +117,14 @@ impl PropPayload {
         }
     }
 
+    /// Get a Tup2 value from PropPayload, or None
+    pub fn as_tup2(&self) -> Option<&(PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup2(v) => Some(v),
+            _ => None,
+        }
+    }
+
     /// Get a Vec value from PropPayload, or None
     pub fn as_vec(&self) -> Option<&Vec<PropValue>> {
         match self {
@@ -146,6 +163,14 @@ impl PropPayload {
     pub fn as_one_mut(&mut self) -> Option<&mut PropValue> {
         match self {
             PropPayload::One(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Tup2 value from PropPayload, or None
+    pub fn as_tup2_mut(&mut self) -> Option<&mut (PropValue, PropValue)> {
+        match self {
+            PropPayload::Tup2(v) => Some(v),
             _ => None,
         }
     }
@@ -821,6 +846,7 @@ mod tests {
     fn prop_values() {
         // test that values can be created without compile errors
         let _ = PropPayload::One(PropValue::Usize(2));
+        let _ = PropPayload::Tup2((PropValue::Bool(true), PropValue::Usize(128)));
         let _ = PropPayload::Vec(vec![
             PropValue::U16(1),
             PropValue::U32(2),
@@ -902,6 +928,10 @@ mod tests {
         let _ = PropPayload::Map(map);
         let mut link: LinkedList<PropPayload> = LinkedList::new();
         link.push_back(PropPayload::One(PropValue::Usize(1)));
+        link.push_back(PropPayload::Tup2((
+            PropValue::Usize(2),
+            PropValue::Usize(4),
+        )));
         let _ = PropPayload::Linked(link);
     }
 
@@ -1169,6 +1199,10 @@ mod tests {
                 .unwrap_bool(),
         );
         assert_eq!(
+            PropPayload::Tup2((PropValue::Bool(false), PropValue::Bool(false))).unwrap_tup2(),
+            (PropValue::Bool(false), PropValue::Bool(false))
+        );
+        assert_eq!(
             PropPayload::Vec(vec![PropValue::Bool(false), PropValue::Bool(false)]).unwrap_vec(),
             &[PropValue::Bool(false), PropValue::Bool(false)]
         );
@@ -1181,6 +1215,12 @@ mod tests {
             Some(&PropValue::Bool(true))
         );
         assert_eq!(PropPayload::None.as_one(), None);
+
+        assert_eq!(
+            PropPayload::Tup2((PropValue::Bool(true), PropValue::Bool(true))).as_tup2(),
+            Some(&(PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert_eq!(PropPayload::None.as_tup2(), None);
 
         assert_eq!(
             PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec(),
@@ -1215,6 +1255,12 @@ mod tests {
             Some(&mut PropValue::Bool(true))
         );
         assert_eq!(PropPayload::None.as_one_mut(), None);
+
+        assert_eq!(
+            PropPayload::Tup2((PropValue::Bool(true), PropValue::Bool(true))).as_tup2_mut(),
+            Some(&mut (PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert_eq!(PropPayload::None.as_tup2_mut(), None);
 
         assert_eq!(
             PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec_mut(),
