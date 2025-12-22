@@ -234,7 +234,10 @@ impl MockComponent for List {
                     AttrValue::TextModifiers(TextModifiers::empty()),
                 )
                 .unwrap_text_modifiers();
-            let title = crate::utils::get_title_or_center(&self.props);
+            let title = self
+                .props
+                .get_ref(Attribute::Title)
+                .and_then(|v| v.as_title());
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -248,7 +251,7 @@ impl MockComponent for List {
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
             let active: bool = if self.scrollable() { focus } else { true };
-            let div = crate::utils::get_block(borders, Some(&title), active, inactive_style);
+            let div = crate::utils::get_block(borders, title, active, inactive_style);
             // Make list entries
             let payload = self
                 .props

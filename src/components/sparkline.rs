@@ -99,7 +99,10 @@ impl MockComponent for Sparkline {
                 .props
                 .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
                 .unwrap_color();
-            let title = crate::utils::get_title_or_center(&self.props);
+            let title = self
+                .props
+                .get_ref(Attribute::Title)
+                .and_then(|v| v.as_title());
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -112,7 +115,7 @@ impl MockComponent for Sparkline {
             let data: Vec<u64> = self.get_data(max_entries);
             // Create widget
             let widget: TuiSparkline = TuiSparkline::default()
-                .block(crate::utils::get_block(borders, Some(&title), false, None))
+                .block(crate::utils::get_block(borders, title, false, None))
                 .data(data.as_slice())
                 .max(max_entries as u64)
                 .style(Style::default().fg(foreground).bg(background));

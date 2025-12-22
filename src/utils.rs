@@ -8,8 +8,7 @@ extern crate unicode_width;
 use std::borrow::Cow;
 
 // local
-use tuirealm::Props;
-use tuirealm::props::{Alignment, Attribute, Borders};
+use tuirealm::props::{Alignment, Borders};
 // ext
 use tuirealm::ratatui::style::{Color, Style};
 use tuirealm::ratatui::text::{Line, Span, Text};
@@ -93,15 +92,6 @@ pub fn get_block<T: AsRef<str>>(
     }
 
     block
-}
-
-/// Get the [`Attribute::Title`] or a Centered default
-#[must_use]
-pub fn get_title_or_center(props: &Props) -> (&str, Alignment) {
-    props
-        .get_ref(Attribute::Title)
-        .and_then(|v| v.as_title())
-        .map_or(("", Alignment::Center), |v| (v.0.as_str(), v.1))
 }
 
 /// ### calc_utf8_cursor_position
