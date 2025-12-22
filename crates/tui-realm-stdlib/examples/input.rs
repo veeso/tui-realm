@@ -8,7 +8,7 @@ use tui_realm_stdlib::Input;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::event::KeyModifiers;
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, InputType, Style,
+    Alignment, AttrValue, Attribute, BorderType, Borders, Color, InputType, Style, Title,
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
@@ -204,7 +204,7 @@ impl Default for InputText {
                 )
                 .foreground(Color::LightYellow)
                 .input_type(InputType::Text)
-                .title("Username", Alignment::Left)
+                .title(Title::from("Username").alignment(Alignment::Left))
                 .value("veeso")
                 .invalid_style(Style::default().fg(Color::Red)),
         }
@@ -261,7 +261,7 @@ impl Default for InputEmail {
                 )
                 .foreground(Color::LightCyan)
                 .input_type(InputType::Email)
-                .title("Email", Alignment::Left)
+                .title(Title::from("Email").alignment(Alignment::Left))
                 .placeholder(
                     "test@example.com",
                     Style::default().fg(Color::Rgb(120, 120, 120)),
@@ -322,7 +322,7 @@ impl Default for InputNumber {
                 .foreground(Color::LightGreen)
                 .input_type(InputType::UnsignedInteger)
                 .input_len(2)
-                .title("What's your age", Alignment::Left)
+                .title(Title::from("What's your age").alignment(Alignment::Left))
                 .invalid_style(Style::default().fg(Color::Red)),
         }
     }
@@ -378,7 +378,7 @@ impl Default for InputPassword {
                 )
                 .foreground(Color::LightMagenta)
                 .input_type(InputType::Password('●'))
-                .title("Password", Alignment::Left)
+                .title(Title::from("Password").alignment(Alignment::Left))
                 .invalid_style(Style::default().fg(Color::Red)),
         }
     }
@@ -435,7 +435,7 @@ impl Default for InputPhone {
                 .foreground(Color::LightBlue)
                 .input_type(InputType::Telephone)
                 .input_len(14)
-                .title("Phone number", Alignment::Left)
+                .title(Title::from("Phone number").alignment(Alignment::Left))
                 .placeholder(
                     "+39366123123",
                     Style::default().fg(Color::Rgb(120, 120, 120)),
@@ -495,7 +495,7 @@ impl Default for InputColor {
                 )
                 .foreground(Color::White)
                 .input_type(InputType::Color)
-                .title("What's your favourite color", Alignment::Left)
+                .title(Title::from("What's your favourite color").alignment(Alignment::Left))
                 .invalid_style(Style::default().fg(Color::Red)),
         }
     }

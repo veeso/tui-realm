@@ -7,7 +7,7 @@ use std::time::Duration;
 use tui_realm_stdlib::Select;
 use tuirealm::State;
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::props::{Alignment, BorderType, Borders, Color};
+use tuirealm::props::{Alignment, BorderType, Borders, Color, Title};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
@@ -160,7 +160,7 @@ impl Default for SelectAlfa {
                         .color(Color::LightGreen),
                 )
                 .foreground(Color::LightGreen)
-                .title("Select your ice cream flavour 🍦", Alignment::Center)
+                .title(Title::from("Select your ice cream flavour 🍦").alignment(Alignment::Center))
                 .rewind(true)
                 .highlighted_color(Color::LightGreen)
                 .highlighted_str(">> ")
@@ -217,7 +217,7 @@ impl Default for SelectBeta {
                         .color(Color::LightYellow),
                 )
                 .foreground(Color::LightYellow)
-                .title("Select your topping 🧁", Alignment::Center)
+                .title(Title::from("Select your topping 🧁").alignment(Alignment::Center))
                 .rewind(false)
                 .highlighted_color(Color::LightYellow)
                 .highlighted_str(">> ")

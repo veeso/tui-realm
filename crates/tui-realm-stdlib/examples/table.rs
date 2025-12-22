@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::Table;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::props::{Alignment, BorderType, Borders, Color, TableBuilder};
+use tuirealm::props::{Alignment, BorderType, Borders, Color, TableBuilder, Title};
 use tuirealm::ratatui::text::Line;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
@@ -151,7 +151,7 @@ impl Default for TableAlfa {
                 )
                 .foreground(Color::Yellow)
                 .background(Color::Black)
-                .title("Keybindings", Alignment::Center)
+                .title(Title::from("Keybindings").alignment(Alignment::Center))
                 .scroll(true)
                 .highlighted_color(Color::LightYellow)
                 .highlighted_str("🚀")
@@ -242,7 +242,7 @@ impl Default for TableBeta {
                 )
                 .foreground(Color::Green)
                 .background(Color::Gray)
-                .title("Keybindings (not scrollable)", Alignment::Center)
+                .title(Title::from("Keybindings (not scrollable)").alignment(Alignment::Center))
                 .scroll(false)
                 .highlighted_color(Color::Green)
                 .highlighted_str(">> ")

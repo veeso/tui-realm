@@ -8,7 +8,7 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, Props, Style, TextModifiers, TextStatic,
+    Alignment, AttrValue, Attribute, Borders, Color, Props, Style, TextModifiers, TextStatic, Title,
 };
 use tuirealm::ratatui::{
     layout::Rect,
@@ -55,8 +55,8 @@ impl Paragraph {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -178,7 +178,7 @@ mod tests {
                 Line::from(" to quit"),
             ])
             .wrap(true)
-            .title("title", Alignment::Center);
+            .title(Title::from("title").alignment(Alignment::Center));
         // Get value
         assert_eq!(component.state(), State::None);
     }

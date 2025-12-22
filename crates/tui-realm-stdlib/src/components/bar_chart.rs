@@ -5,7 +5,7 @@
 use std::collections::LinkedList;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Title,
 };
 use tuirealm::ratatui::{layout::Rect, widgets::BarChart as TuiBarChart};
 use tuirealm::{Frame, MockComponent, State};
@@ -103,8 +103,8 @@ impl BarChart {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -335,6 +335,7 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
+    use tuirealm::props::Alignment;
 
     #[test]
     fn test_components_bar_chart_states() {
@@ -363,7 +364,7 @@ mod test {
     fn test_components_bar_chart() {
         let mut component: BarChart = BarChart::default()
             .disabled(false)
-            .title("my incomes", Alignment::Center)
+            .title(Title::from("my incomes").alignment(Alignment::Center))
             .label_style(Style::default().fg(Color::Yellow))
             .bar_style(Style::default().fg(Color::LightYellow))
             .bar_gap(2)

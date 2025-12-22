@@ -7,7 +7,7 @@ use super::props::{INPUT_INVALID_STYLE, INPUT_PLACEHOLDER, INPUT_PLACEHOLDER_STY
 use crate::utils::calc_utf8_cursor_position;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, InputType, Props, Style, TextModifiers,
+    AttrValue, Attribute, Borders, Color, InputType, Props, Style, TextModifiers, Title,
 };
 use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
 use tuirealm::{Frame, MockComponent, State, StateValue};
@@ -227,8 +227,8 @@ impl Input {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -501,6 +501,7 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
+    use tuirealm::props::Alignment;
 
     #[test]
     fn test_components_input_states() {
@@ -551,7 +552,7 @@ mod tests {
             .inactive(Style::default())
             .input_len(5)
             .input_type(InputType::Text)
-            .title("pippo", Alignment::Center)
+            .title(Title::from("pippo").alignment(Alignment::Center))
             .value("home");
         // Verify initial state
         assert_eq!(component.states.cursor, 4);

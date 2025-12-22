@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::{Container, Table};
 use tuirealm::command::CmdResult;
-use tuirealm::props::{Alignment, BorderType, Borders, Color, Layout, TableBuilder};
+use tuirealm::props::{Alignment, BorderType, Borders, Color, Layout, TableBuilder, Title};
 use tuirealm::ratatui::text::Line;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
@@ -123,7 +123,7 @@ impl Default for MyContainer {
             component: Container::default()
                 .background(Color::Yellow)
                 .foreground(Color::Yellow)
-                .title("This is a div with two tables", Alignment::Left)
+                .title(Title::from("This is a div with two tables").alignment(Alignment::Left))
                 .layout(
                     Layout::default()
                         .constraints(&[Constraint::Percentage(30), Constraint::Percentage(70)])
@@ -140,7 +140,7 @@ impl Default for MyContainer {
                             )
                             .foreground(Color::Yellow)
                             .background(Color::Black)
-                            .title("Keybindings", Alignment::Center)
+                            .title(Title::from("Keybindings").alignment(Alignment::Center))
                             .scroll(true)
                             .highlighted_color(Color::LightYellow)
                             .highlighted_str("🚀")
@@ -191,7 +191,10 @@ impl Default for MyContainer {
                             )
                             .foreground(Color::Green)
                             .background(Color::Black)
-                            .title("Keybindings (not scrollable)", Alignment::Center)
+                            .title(
+                                Title::from("Keybindings (not scrollable)")
+                                    .alignment(Alignment::Center),
+                            )
                             .scroll(false)
                             .highlighted_color(Color::Green)
                             .highlighted_str(">> ")

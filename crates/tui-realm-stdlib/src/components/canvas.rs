@@ -4,7 +4,7 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style, Title,
 };
 use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::text::Line as Spans;
@@ -52,8 +52,8 @@ impl Canvas {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -238,13 +238,16 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::ratatui::widgets::canvas::{Line, Map, MapResolution, Rectangle};
+    use tuirealm::{
+        props::Alignment,
+        ratatui::widgets::canvas::{Line, Map, MapResolution, Rectangle},
+    };
 
     #[test]
     fn test_component_canvas_with_shapes() {
         let component: Canvas = Canvas::default()
             .background(Color::Black)
-            .title("playing risiko", Alignment::Center)
+            .title(Title::from("playing risiko").alignment(Alignment::Center))
             .borders(Borders::default())
             .marker(Marker::Dot)
             .x_bounds((-180.0, 180.0))

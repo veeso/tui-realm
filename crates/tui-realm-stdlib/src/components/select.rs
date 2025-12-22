@@ -5,8 +5,8 @@
 
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderSides, Borders, Color, PropPayload, PropValue, Props,
-    Style, TextModifiers,
+    AttrValue, Attribute, BorderSides, Borders, Color, PropPayload, PropValue, Props, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{
@@ -135,8 +135,8 @@ impl Select {
         self
     }
 
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -237,7 +237,7 @@ impl Select {
             .and_then(|x| x.as_title());
         let block_a = crate::utils::get_block(borders, title, focus, inactive_style)
             .borders(BorderSides::LEFT | BorderSides::TOP | BorderSides::RIGHT);
-        let block_b = crate::utils::get_block::<&str>(borders, None, focus, inactive_style)
+        let block_b = crate::utils::get_block(borders, None, focus, inactive_style)
             .borders(BorderSides::LEFT | BorderSides::BOTTOM | BorderSides::RIGHT);
 
         let p: Paragraph = Paragraph::new(selected_text)
@@ -418,7 +418,7 @@ mod test {
 
     use pretty_assertions::assert_eq;
 
-    use tuirealm::props::{PropPayload, PropValue};
+    use tuirealm::props::{Alignment, PropPayload, PropValue};
 
     #[test]
     fn test_components_select_states() {
@@ -507,7 +507,7 @@ mod test {
             .borders(Borders::default())
             .highlighted_color(Color::Red)
             .highlighted_str(">>")
-            .title("C'est oui ou bien c'est non?", Alignment::Center)
+            .title(Title::from("C'est oui ou bien c'est non?").alignment(Alignment::Center))
             .choices(["Oui!", "Non", "Peut-être"])
             .value(1)
             .rewind(false);
