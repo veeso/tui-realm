@@ -1,0 +1,99 @@
+name: Tests
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Check rustfmt
+  rustfmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  # Check clippy.
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: clippy
+      - name: Clippy all features
+        run: cargo clippy --all-targets --all-features -- -Dwarnings
+      - name: Clippy default features
+        run: cargo clippy --all-targets -- -Dwarnings
+
+  # Build examples, ensuring they compile
+  # This is for all targets, so no need to run it in each
+  build-examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - name: Examples
+        run: cargo build --all-targets --examples
+
+  test-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [stable, "1.86"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.toolchain }}
+      - name: Cargo Check
+        run: cargo build --all-features
+      - name: Test
+        # This tests both crossterm and termion
+        run: cargo test --no-fail-fast --all-features
+
+  test-win:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [stable, "1.86"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.toolchain }}
+      - name: Cargo Check
+        run: cargo build --all-features
+      - name: Test
+        # This tests both crossterm and termion
+        run: cargo test --no-fail-fast --all-features
+
+  test-mac:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [stable, "1.86"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.toolchain }}
+      - name: Cargo Check
+        run: cargo build --all-features
+      - name: Test
+        # This tests both crossterm and termion
+        run: cargo test --no-fail-fast --all-features
