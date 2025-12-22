@@ -1298,14 +1298,13 @@ mod test {
         // Wait 100 ms
         std::thread::sleep(Duration::from_millis(50));
         // Tick
-        assert_eq!(
-            application
-                .tick(PollStrategy::UpTo(5))
-                .ok()
-                .unwrap()
-                .as_slice(),
-            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
-        );
+
+        // We cannot check messages with exact slice as the scheduler may run the other thread more often and generate more messages.
+        let result = application.tick(PollStrategy::UpTo(5)).ok().unwrap();
+
+        assert!(result.len() >= 2);
+        assert!(result.contains(&MockMsg::FooSubmit(String::new())));
+        assert!(result.contains(&MockMsg::BarTick));
     }
 
     #[test]
