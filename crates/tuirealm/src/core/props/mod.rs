@@ -7,7 +7,6 @@ use std::collections::HashMap;
 // -- modules
 mod any;
 mod borders;
-mod dataset;
 mod direction;
 mod input_type;
 mod layout;
@@ -18,7 +17,6 @@ mod value;
 // -- exports
 pub use any::{AnyPropBox, PropBound, PropBoundExt};
 pub use borders::{BorderSides, BorderType, Borders};
-pub use dataset::Dataset;
 pub use direction::Direction;
 pub use input_type::InputType;
 pub use layout::Layout;
@@ -153,7 +151,6 @@ pub enum AttrValue {
     Alignment(Alignment),
     Borders(Borders),
     Color(Color),
-    Dataset(Dataset),
     Direction(Direction),
     Flag(bool),
     InputType(InputType),
@@ -198,14 +195,6 @@ impl AttrValue {
         match self {
             AttrValue::Color(x) => x,
             _ => panic!("AttrValue is not Color"),
-        }
-    }
-
-    /// Get the inner Dataset value from AttrValue, or panic.
-    pub fn unwrap_dataset(self) -> Dataset {
-        match self {
-            AttrValue::Dataset(x) => x,
-            _ => panic!("AttrValue is not Dataset"),
         }
     }
 
@@ -369,14 +358,6 @@ impl AttrValue {
         match self {
             // cheap copy, so no reference
             AttrValue::Color(v) => Some(*v),
-            _ => None,
-        }
-    }
-
-    /// Get a Dataset value from AttrValue, or None
-    pub fn as_dataset(&self) -> Option<&Dataset> {
-        match self {
-            AttrValue::Dataset(v) => Some(v),
             _ => None,
         }
     }
@@ -546,14 +527,6 @@ impl AttrValue {
     pub fn as_color_mut(&mut self) -> Option<&mut Color> {
         match self {
             AttrValue::Color(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    /// Get a Dataset value from AttrValue, or None
-    pub fn as_dataset_mut(&mut self) -> Option<&mut Dataset> {
-        match self {
-            AttrValue::Dataset(v) => Some(v),
             _ => None,
         }
     }
@@ -755,10 +728,6 @@ mod test {
         );
         assert_eq!(AttrValue::Color(Color::Red).unwrap_color(), Color::Red);
         assert_eq!(
-            AttrValue::Dataset(Dataset::default()).unwrap_dataset(),
-            Dataset::default()
-        );
-        assert_eq!(
             AttrValue::Direction(Direction::Left).unwrap_direction(),
             Direction::Left
         );
@@ -833,12 +802,6 @@ mod test {
             Some(Color::Black)
         );
         assert_eq!(AttrValue::Alignment(Alignment::Center).as_color(), None);
-
-        assert_eq!(
-            AttrValue::Dataset(Dataset::default()).as_dataset(),
-            Some(&Dataset::default())
-        );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_dataset(), None);
 
         assert_eq!(
             AttrValue::Direction(Direction::Down).as_direction(),
@@ -952,15 +915,6 @@ mod test {
             Some(&mut Color::Black)
         );
         assert_eq!(AttrValue::Alignment(Alignment::Center).as_color_mut(), None);
-
-        assert_eq!(
-            AttrValue::Dataset(Dataset::default()).as_dataset_mut(),
-            Some(&mut Dataset::default())
-        );
-        assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_dataset_mut(),
-            None
-        );
 
         assert_eq!(
             AttrValue::Direction(Direction::Down).as_direction_mut(),
@@ -1089,12 +1043,6 @@ mod test {
     #[should_panic]
     fn unwrapping_color_should_panic_if_not_identity() {
         AttrValue::Flag(true).unwrap_color();
-    }
-
-    #[test]
-    #[should_panic]
-    fn unwrapping_dataset_should_panic_if_not_identity() {
-        AttrValue::Flag(true).unwrap_dataset();
     }
 
     #[test]

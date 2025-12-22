@@ -5,9 +5,7 @@
 use std::any::Any;
 use std::collections::{HashMap, LinkedList};
 
-use super::{
-    Alignment, Color, Dataset, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic,
-};
+use super::{Alignment, Color, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic};
 use crate::props::AnyPropBox;
 
 // -- Prop value
@@ -46,7 +44,6 @@ pub enum PropValue {
     // -- tui props
     Alignment(Alignment),
     Color(Color),
-    Dataset(Dataset),
     InputType(InputType),
     Shape(Shape),
     Style(Style),
@@ -364,15 +361,6 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as Dataset.
-    /// Panics otherwise
-    pub fn unwrap_dataset(self) -> Dataset {
-        match self {
-            PropValue::Dataset(b) => b,
-            _ => panic!("Called `unwrap_dataset` on a bad value"),
-        }
-    }
-
     /// Unwrap PropValue as InputType.
     /// Panics otherwise
     pub fn unwrap_input_type(self) -> InputType {
@@ -581,14 +569,6 @@ impl PropValue {
         }
     }
 
-    /// Get a Dataset value from PropValue, or None
-    pub fn as_dataset(&self) -> Option<&Dataset> {
-        match self {
-            PropValue::Dataset(v) => Some(v),
-            _ => None,
-        }
-    }
-
     /// Get a InputType value from PropValue, or None
     pub fn as_input_type(&self) -> Option<&InputType> {
         match self {
@@ -775,14 +755,6 @@ impl PropValue {
         }
     }
 
-    /// Get a Dataset value from PropValue, or None
-    pub fn as_dataset_mut(&mut self) -> Option<&mut Dataset> {
-        match self {
-            PropValue::Dataset(v) => Some(v),
-            _ => None,
-        }
-    }
-
     /// Get a InputType value from PropValue, or None
     pub fn as_input_type_mut(&mut self) -> Option<&mut InputType> {
         match self {
@@ -891,14 +863,6 @@ mod tests {
             *map.get("p").unwrap(),
             PropValue::Style(Style::default().fg(Color::Red))
         );
-        map.insert(
-            String::from("q"),
-            PropValue::Dataset(Dataset::default().name("omar")),
-        );
-        assert_eq!(
-            *map.get("q").unwrap(),
-            PropValue::Dataset(Dataset::default().name("omar"))
-        );
         map.insert(String::from("s"), PropValue::InputType(InputType::Number));
         assert_eq!(
             *map.get("s").unwrap(),
@@ -942,10 +906,6 @@ mod tests {
             Alignment::Center
         );
         assert!(PropValue::Bool(true).unwrap_bool());
-        assert_eq!(
-            PropValue::Dataset(Dataset::default()).unwrap_dataset(),
-            Dataset::default()
-        );
         assert_eq!(PropValue::F32(0.32).unwrap_f32(), 0.32);
         assert_eq!(PropValue::F64(0.32).unwrap_f64(), 0.32);
         assert_eq!(PropValue::I128(5).unwrap_i128(), 5);
@@ -1047,12 +1007,6 @@ mod tests {
         assert_eq!(PropValue::Bool(true).as_alignment(), None);
 
         assert_eq!(
-            PropValue::Dataset(Dataset::default()).as_dataset(),
-            Some(&Dataset::default())
-        );
-        assert_eq!(PropValue::Bool(true).as_dataset(), None);
-
-        assert_eq!(
             PropValue::InputType(InputType::Color).as_input_type(),
             Some(&InputType::Color)
         );
@@ -1147,12 +1101,6 @@ mod tests {
             Some(&mut Alignment::Center)
         );
         assert_eq!(PropValue::Bool(true).as_alignment_mut(), None);
-
-        assert_eq!(
-            PropValue::Dataset(Dataset::default()).as_dataset_mut(),
-            Some(&mut Dataset::default())
-        );
-        assert_eq!(PropValue::Bool(true).as_dataset_mut(), None);
 
         assert_eq!(
             PropValue::InputType(InputType::Color).as_input_type_mut(),
