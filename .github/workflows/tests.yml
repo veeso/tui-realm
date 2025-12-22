@@ -26,6 +26,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy
+      - uses: Swatinem/rust-cache@v2
       - name: Clippy all features
         run: cargo clippy --all-targets --all-features -- -Dwarnings
       - name: Clippy default features
@@ -41,6 +42,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
+      - uses: Swatinem/rust-cache@v2
       - name: Examples
         run: cargo build --all-targets --examples
 
@@ -56,6 +58,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ matrix.toolchain }}
+      - uses: Swatinem/rust-cache@v2
       - name: Cargo Check
         run: cargo build --all-features
       - name: Test
@@ -74,6 +77,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ matrix.toolchain }}
+      - uses: Swatinem/rust-cache@v2
       - name: Cargo Check
         run: cargo build --all-features
       - name: Test
@@ -92,6 +96,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ matrix.toolchain }}
+      - uses: Swatinem/rust-cache@v2
       - name: Cargo Check
         run: cargo build --all-features
       - name: Test
