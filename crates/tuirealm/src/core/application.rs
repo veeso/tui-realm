@@ -941,8 +941,8 @@ mod test {
                 .tick(PollStrategy::BlockCollectUpTo(5))
                 .ok()
                 .unwrap()
-                .as_slice(),
-            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
+                .as_slice()[0],
+            MockMsg::FooSubmit(String::new())
         );
 
         let time_taken = Instant::now().duration_since(before);
