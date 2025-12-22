@@ -92,10 +92,11 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Cargo Check
-        run: cargo build --all-features
+        run: cargo build --features async-ports,serialize
       - name: Test
-        # This tests both crossterm and termion
-        run: cargo llvm-cov --no-fail-fast --all-features --workspace --lcov --output-path lcov.info
+        # This tests both crossterm
+        # Does NOT run termion, as that is is unix only
+        run: cargo llvm-cov --no-fail-fast --features async-ports,serialize --workspace --lcov --output-path lcov.info
       - name: Coveralls
         uses: coverallsapp/github-action@v2.3.6
         with:
