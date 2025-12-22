@@ -328,7 +328,10 @@ impl MockComponent for Table {
                 .bg(background)
                 .add_modifier(modifiers);
 
-            let title = crate::utils::get_title_or_center(&self.props);
+            let title = self
+                .props
+                .get_ref(Attribute::Title)
+                .and_then(|v| v.as_title());
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -358,7 +361,7 @@ impl MockComponent for Table {
                     .style(normal_style)
                     .block(crate::utils::get_block(
                         borders,
-                        Some(&title),
+                        title,
                         focus,
                         inactive_style,
                     ));

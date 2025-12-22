@@ -303,7 +303,10 @@ impl MockComponent for Input {
                     AttrValue::TextModifiers(TextModifiers::empty()),
                 )
                 .unwrap_text_modifiers();
-            let title = crate::utils::get_title_or_center(&self.props);
+            let title = self
+                .props
+                .get_ref(Attribute::Title)
+                .and_then(|v| v.as_title());
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -317,7 +320,7 @@ impl MockComponent for Input {
                 .get(Attribute::FocusStyle)
                 .map(|x| x.unwrap_style());
             let itype = self.get_input_type();
-            let mut block = crate::utils::get_block(borders, Some(&title), focus, inactive_style);
+            let mut block = crate::utils::get_block(borders, title, focus, inactive_style);
             // Apply invalid style
             if focus && !self.is_valid() {
                 if let Some(style) = self
@@ -330,7 +333,7 @@ impl MockComponent for Input {
                         .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
                         .unwrap_borders()
                         .color(style.fg.unwrap_or(Color::Reset));
-                    block = crate::utils::get_block(borders, Some(&title), focus, None);
+                    block = crate::utils::get_block(borders, title, focus, None);
                     foreground = style.fg.unwrap_or(Color::Reset);
                     background = style.bg.unwrap_or(Color::Reset);
                 }
