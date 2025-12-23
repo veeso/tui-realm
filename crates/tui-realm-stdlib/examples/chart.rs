@@ -15,8 +15,7 @@ use tuirealm::ratatui::widgets::GraphType;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::listener::{ListenerResult, Poll};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload,
-    Style,
+    Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, Style,
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
