@@ -27,6 +27,10 @@ The `3` and `4` tuple variants of `PropPayload` have been removed as they were b
 
 If multiple types are still necessary, consider either using `PropPayload::Vec` or for more descriptive fields use a custom struct in `PropPayload::Any`.
 
+### Rename `PropPayload::Tup2` to `Pair`
+
+As other tuple variants are now removed, it is more descriptive to rename `Tup2` to `Pair`.
+
 ### `Component::on` parameter `Event` is now a reference
 
 With 4.0, `Component::on`'s `Event` parameter is now a reference. This allowed us to remove clones in-between that had always been done
