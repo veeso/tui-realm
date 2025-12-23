@@ -108,6 +108,7 @@ impl Chart {
         self
     }
 
+    /// Set a title for the Block
     pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
         self.props
             .set(Attribute::Title, AttrValue::Title((t.into(), a)));
@@ -119,11 +120,13 @@ impl Chart {
         self
     }
 
+    /// Set the inactive style for the whole component
     pub fn inactive(mut self, s: Style) -> Self {
         self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
+    /// Builder-Style function to set the initial data
     pub fn data(mut self, data: impl IntoIterator<Item = ChartDataset>) -> Self {
         self.states.data = data.into_iter().collect();
         self
@@ -187,6 +190,7 @@ impl Chart {
         self
     }
 
+    /// Give the X axis a title
     pub fn x_title<S: Into<String>>(mut self, t: S) -> Self {
         self.props.set(
             Attribute::Custom(CHART_X_TITLE),
@@ -195,6 +199,7 @@ impl Chart {
         self
     }
 
+    /// Give the Y axis a title
     pub fn y_title<S: Into<String>>(mut self, t: S) -> Self {
         self.props.set(
             Attribute::Custom(CHART_Y_TITLE),
@@ -209,8 +214,6 @@ impl Chart {
             .unwrap_flag()
     }
 
-    /// ### max_dataset_len
-    ///
     /// Get the maximum len among the datasets
     fn max_dataset_len(&self) -> usize {
         self.states
@@ -226,7 +229,7 @@ impl Chart {
         self.states
             .data
             .iter()
-            .map(|x| Self::get_tui_dataset(x, start))
+            .map(|x| x.as_tuichart(start))
             .collect()
     }
 
@@ -256,24 +259,6 @@ impl Chart {
     /// Clone our data into a [`AttrValue`].
     fn data_to_attr(&self) -> AttrValue {
         AttrValue::Payload(PropPayload::Any(Box::new(self.states.data.to_vec())))
-    }
-}
-
-impl<'a> Chart {
-    /// ### get_tui_dataset
-    ///
-    /// Create tui_dataset from dataset
-    /// Only elements from `start` to the end
-    fn get_tui_dataset(dataset: &'a ChartDataset, start: usize) -> TuiDataset<'a> {
-        let points = dataset.get_data();
-
-        // Prepare data storage
-        TuiDataset::default()
-            .name(dataset.name.clone())
-            .marker(dataset.marker)
-            .graph_type(dataset.graph_type)
-            .style(dataset.style)
-            .data(&points[start..])
     }
 }
 

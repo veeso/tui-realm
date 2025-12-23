@@ -80,6 +80,19 @@ impl ChartDataset {
     pub fn get_data(&self) -> &[(f64, f64)] {
         &self.data
     }
+
+    /// Create [`TuiDataset`] from the current [`ChartDataset`].
+    ///
+    /// Only elements from `start` are included.
+    pub fn as_tuichart<'a>(&'a self, start: usize) -> TuiDataset<'a> {
+        // Prepare data storage
+        TuiDataset::default()
+            .name(self.name.clone())
+            .marker(self.marker)
+            .graph_type(self.graph_type)
+            .style(self.style)
+            .data(&self.get_data()[start..])
+    }
 }
 
 impl PartialEq for ChartDataset {
