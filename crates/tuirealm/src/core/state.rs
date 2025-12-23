@@ -12,8 +12,6 @@ use crate::utils::{Email, PhoneNumber};
 pub enum State {
     One(StateValue),
     Tup2((StateValue, StateValue)),
-    Tup3((StateValue, StateValue, StateValue)),
-    Tup4((StateValue, StateValue, StateValue, StateValue)),
     Vec(Vec<StateValue>),
     Map(HashMap<String, StateValue>),
     Linked(LinkedList<State>),
@@ -58,20 +56,6 @@ impl State {
         match self {
             Self::Tup2(val) => val,
             state => panic!("Could not unwrap {state:?} as `Tup2`"),
-        }
-    }
-
-    pub fn unwrap_tup3(self) -> (StateValue, StateValue, StateValue) {
-        match self {
-            Self::Tup3(val) => val,
-            state => panic!("Could not unwrap {state:?} as `Tup3`"),
-        }
-    }
-
-    pub fn unwrap_tup4(self) -> (StateValue, StateValue, StateValue, StateValue) {
-        match self {
-            Self::Tup4(val) => val,
-            state => panic!("Could not unwrap {state:?} as `Tup4`"),
         }
     }
 
