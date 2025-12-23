@@ -2,14 +2,14 @@
 //!
 //! `Dataset` is a wrapper for tui dataset
 
-use tuirealm::props::Style;
+use tuirealm::props::{LineStatic, Style};
 use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::widgets::{Dataset as TuiDataset, GraphType};
 
 /// Dataset describes a set of data for a chart
 #[derive(Clone, Debug)]
 pub struct ChartDataset {
-    pub name: String,
+    pub name: LineStatic,
     pub marker: Marker,
     pub graph_type: GraphType,
     pub style: Style,
@@ -19,7 +19,7 @@ pub struct ChartDataset {
 impl Default for ChartDataset {
     fn default() -> Self {
         Self {
-            name: String::default(),
+            name: LineStatic::default(),
             marker: Marker::Dot,
             graph_type: GraphType::Scatter,
             style: Style::default(),
@@ -30,8 +30,8 @@ impl Default for ChartDataset {
 
 impl ChartDataset {
     /// Set name for dataset
-    pub fn name<S: Into<String>>(mut self, s: S) -> Self {
-        self.name = s.into();
+    pub fn name<S: Into<LineStatic>>(mut self, name: S) -> Self {
+        self.name = name.into();
         self
     }
 
@@ -141,7 +141,7 @@ mod test {
                 (10.0, 4.0),
                 (11.0, 0.0),
             ]);
-        assert_eq!(dataset.name.as_str(), "Avg temperatures");
+        assert_eq!(dataset.name.to_string(), "Avg temperatures");
         assert_eq!(dataset.style.fg.unwrap_or(Color::Reset), Color::Cyan);
         assert_eq!(dataset.get_data().len(), 12);
         // mut
