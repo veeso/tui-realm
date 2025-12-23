@@ -6,7 +6,7 @@ mod utils;
 use utils::DataGen;
 
 use std::time::Duration;
-use tui_realm_stdlib::Chart;
+use tui_realm_stdlib::{Chart, ChartDataset};
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::symbols::Marker;
@@ -15,7 +15,7 @@ use tuirealm::ratatui::widgets::GraphType;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::listener::{ListenerResult, Poll};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, Dataset, PropPayload, PropValue,
+    Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload,
     Style,
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
@@ -191,7 +191,7 @@ impl Component<Msg, UserEvent> for ChartAlfa {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             Event::User(UserEvent::DataGenerated(data)) => {
                 // Update data
-                let dataset = Dataset::default()
+                let dataset = ChartDataset::default()
                     .name("Temperatures")
                     .graph_type(GraphType::Line)
                     .marker(Marker::Braille)
@@ -199,7 +199,7 @@ impl Component<Msg, UserEvent> for ChartAlfa {
                     .data(data);
                 self.attr(
                     Attribute::Dataset,
-                    AttrValue::Payload(PropPayload::Vec(vec![PropValue::Dataset(dataset)])),
+                    AttrValue::Payload(PropPayload::Any(Box::new(vec![dataset]))),
                 );
                 CmdResult::None
             }
