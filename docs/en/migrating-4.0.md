@@ -27,7 +27,7 @@ The `3` and `4` tuple variants of `PropPayload` and `State` have been removed as
 
 If multiple types are still necessary, consider either using `PropPayload::Vec` or for more descriptive fields use a custom struct in `PropPayload::Any`.
 
-### Rename `PropPayload::Tup2` to `Pair`
+### Rename `PropPayload` and `State` variant `Tup2` to `Pair`
 
 As other tuple variants are now removed, it is more descriptive to rename `Tup2` to `Pair`.
 
