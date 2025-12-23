@@ -235,11 +235,11 @@ impl Chart {
 
     /// Try downcasting the given [`Box<Any>`] into a concrete type.
     fn try_downcast(value: Box<dyn Any + Send + Sync>) -> Option<Vec<ChartDataset>> {
-        if let Ok(data) = value.downcast::<Vec<ChartDataset>>() {
-            Some(*data)
-        } else {
-            None
-        }
+        value
+            .downcast::<Vec<ChartDataset>>()
+            .map(|v| *v)
+            .or_else(|value| value.downcast::<ChartDataset>().map(|v| vec![*v]))
+            .ok()
     }
 
     /// Get our data from a [`AttrValue`].
@@ -557,5 +557,37 @@ mod test {
         assert_eq!(component.max_dataset_len(), 0);
         // Cursor is reset
         assert_eq!(component.states.cursor, 0);
+    }
+
+    #[test]
+    fn allowed_dataset_attrs() {
+        let mut component = Chart::default();
+        assert!(component.states.data.is_empty());
+
+        // allow overwriting multiple datasets at once
+        component.attr(
+            Attribute::Dataset,
+            AttrValue::Payload(PropPayload::Any(Box::new(vec![ChartDataset::default()]))),
+        );
+        assert_eq!(component.states.data.len(), 1);
+
+        component.attr(
+            Attribute::Dataset,
+            AttrValue::Payload(PropPayload::Any(Box::new(vec![ChartDataset::default()]))),
+        );
+        assert_eq!(component.states.data.len(), 1);
+
+        // allow overwriting using with just one dataset
+        component.attr(
+            Attribute::Dataset,
+            AttrValue::Payload(PropPayload::Any(Box::new(ChartDataset::default()))),
+        );
+        assert_eq!(component.states.data.len(), 1);
+
+        component.attr(
+            Attribute::Dataset,
+            AttrValue::Payload(PropPayload::Any(Box::new(ChartDataset::default()))),
+        );
+        assert_eq!(component.states.data.len(), 1);
     }
 }
