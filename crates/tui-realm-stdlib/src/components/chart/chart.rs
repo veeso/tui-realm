@@ -15,7 +15,7 @@ use tuirealm::ratatui::{
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Props
-use super::props::{
+use crate::props::{
     CHART_X_BOUNDS, CHART_X_LABELS, CHART_X_STYLE, CHART_X_TITLE, CHART_Y_BOUNDS, CHART_Y_LABELS,
     CHART_Y_STYLE, CHART_Y_TITLE,
 };
