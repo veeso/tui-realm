@@ -128,7 +128,7 @@ impl Chart {
 
     /// Builder-Style function to set the initial data
     pub fn data(mut self, data: impl IntoIterator<Item = ChartDataset>) -> Self {
-        self.states.data = data.into_iter().collect();
+        self.set_data(data.into_iter().collect());
         self
     }
 
@@ -208,6 +208,11 @@ impl Chart {
         self
     }
 
+    fn set_data(&mut self, data: Vec<ChartDataset>) {
+        self.states.data = data;
+        self.states.reset_cursor();
+    }
+
     fn is_disabled(&self) -> bool {
         self.props
             .get_or(Attribute::Disabled, AttrValue::Flag(false))
@@ -248,8 +253,7 @@ impl Chart {
             AttrValue::Dataset(_) => unimplemented!(), // to be removed soon https://github.com/veeso/tui-realm/pull/139
             AttrValue::Payload(PropPayload::Any(val)) => {
                 if let Some(data) = Self::try_downcast(val) {
-                    self.states.data = data;
-                    self.states.reset_cursor();
+                    self.set_data(data);
                 }
             }
             _ => (),
