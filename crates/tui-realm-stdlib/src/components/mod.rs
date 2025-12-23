@@ -29,7 +29,7 @@ pub mod states;
 // Exports
 pub use bar_chart::BarChart;
 pub use canvas::Canvas;
-pub use chart::Chart;
+pub use chart::{Chart, ChartDataset};
 pub use checkbox::Checkbox;
 pub use container::Container;
 pub use input::Input;

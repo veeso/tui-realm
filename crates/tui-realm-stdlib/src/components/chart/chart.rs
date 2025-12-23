@@ -2,9 +2,11 @@
 //!
 //! A component to plot one or more dataset in a cartesian coordinate system
 
+use std::any::Any;
+
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, Dataset, PropPayload, PropValue, Props, Style,
+    Alignment, AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style,
 };
 use tuirealm::ratatui::text::Line;
 use tuirealm::ratatui::{
@@ -15,6 +17,7 @@ use tuirealm::ratatui::{
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Props
+use super::dataset::ChartDataset;
 use crate::props::{
     CHART_X_BOUNDS, CHART_X_LABELS, CHART_X_STYLE, CHART_X_TITLE, CHART_Y_BOUNDS, CHART_Y_LABELS,
     CHART_Y_STYLE, CHART_Y_TITLE,
@@ -26,7 +29,7 @@ use crate::props::{
 #[derive(Default)]
 pub struct ChartStates {
     pub cursor: usize,
-    pub data: Vec<Dataset>,
+    pub data: Vec<ChartDataset>,
 }
 
 impl ChartStates {
@@ -121,13 +124,8 @@ impl Chart {
         self
     }
 
-    pub fn data(mut self, data: impl IntoIterator<Item = Dataset>) -> Self {
-        self.props.set(
-            Attribute::Dataset,
-            AttrValue::Payload(PropPayload::Vec(
-                data.into_iter().map(PropValue::Dataset).collect(),
-            )),
-        );
+    pub fn data(mut self, data: impl IntoIterator<Item = ChartDataset>) -> Self {
+        self.states.data = data.into_iter().collect();
         self
     }
 
@@ -215,39 +213,49 @@ impl Chart {
     ///
     /// Get the maximum len among the datasets
     fn max_dataset_len(&self) -> usize {
-        self.props
-            .get(Attribute::Dataset)
-            .and_then(|x| {
-                x.unwrap_payload()
-                    .unwrap_vec()
-                    .iter()
-                    .cloned()
-                    .map(|x| x.unwrap_dataset().get_data().len())
-                    .max()
-            })
+        self.states
+            .data
+            .iter()
+            .map(|v| v.get_data().len())
+            .max()
             .unwrap_or(0)
     }
 
-    /// ### data
-    ///
     /// Get data to be displayed, starting from provided index at `start`
-    fn get_data(&mut self, start: usize) -> Vec<TuiDataset<'_>> {
-        self.states.data = self
-            .props
-            .get(Attribute::Dataset)
-            .map(|x| {
-                x.unwrap_payload()
-                    .unwrap_vec()
-                    .into_iter()
-                    .map(|x| x.unwrap_dataset())
-                    .collect()
-            })
-            .unwrap_or_default();
+    fn get_tui_data(&mut self, start: usize) -> Vec<TuiDataset<'_>> {
         self.states
             .data
             .iter()
             .map(|x| Self::get_tui_dataset(x, start))
             .collect()
+    }
+
+    /// Try downcasting the given [`Box<Any>`] into a concrete type.
+    fn try_downcast(value: Box<dyn Any + Send + Sync>) -> Option<Vec<ChartDataset>> {
+        if let Ok(data) = value.downcast::<Vec<ChartDataset>>() {
+            Some(*data)
+        } else {
+            None
+        }
+    }
+
+    /// Get our data from a [`AttrValue`].
+    fn data_from_attr(&mut self, attr: AttrValue) {
+        match attr {
+            AttrValue::Dataset(_) => unimplemented!(), // to be removed soon https://github.com/veeso/tui-realm/pull/139
+            AttrValue::Payload(PropPayload::Any(val)) => {
+                if let Some(data) = Self::try_downcast(val) {
+                    self.states.data = data;
+                    self.states.reset_cursor();
+                }
+            }
+            _ => (),
+        }
+    }
+
+    /// Clone our data into a [`AttrValue`].
+    fn data_to_attr(&self) -> AttrValue {
+        AttrValue::Payload(PropPayload::Any(Box::new(self.states.data.to_vec())))
     }
 }
 
@@ -256,7 +264,7 @@ impl<'a> Chart {
     ///
     /// Create tui_dataset from dataset
     /// Only elements from `start` to the end
-    fn get_tui_dataset(dataset: &'a Dataset, start: usize) -> TuiDataset<'a> {
+    fn get_tui_dataset(dataset: &'a ChartDataset, start: usize) -> TuiDataset<'a> {
         let points = dataset.get_data();
 
         // Prepare data storage
@@ -365,7 +373,7 @@ impl MockComponent for Chart {
                 y_axis = y_axis.title(Span::styled(title, normal_style));
             }
             // Get data
-            let data: Vec<TuiDataset> = self.get_data(self.states.cursor);
+            let data: Vec<TuiDataset> = self.get_tui_data(self.states.cursor);
             // Build widget
             let widget: TuiChart = TuiChart::new(data)
                 .style(normal_style)
@@ -378,12 +386,19 @@ impl MockComponent for Chart {
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if attr == Attribute::Dataset {
+            return Some(self.data_to_attr());
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        if attr == Attribute::Dataset {
+            self.data_from_attr(value);
+            return;
+        }
         self.props.set(attr, value);
-        self.states.reset_cursor();
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
@@ -473,7 +488,7 @@ mod test {
             .y_style(Style::default().fg(Color::LightYellow))
             .y_title("Month")
             .data([
-                Dataset::default()
+                ChartDataset::default()
                     .name("Minimum")
                     .graph_type(GraphType::Scatter)
                     .marker(Marker::Braille)
@@ -492,7 +507,7 @@ mod test {
                         (10.0, 4.0),
                         (11.0, 0.0),
                     ]),
-                Dataset::default()
+                ChartDataset::default()
                     .name("Maximum")
                     .graph_type(GraphType::Line)
                     .marker(Marker::Dot)
@@ -538,21 +553,21 @@ mod test {
         // component funcs
         assert_eq!(component.max_dataset_len(), 12);
         assert_eq!(component.is_disabled(), false);
-        assert_eq!(component.get_data(2).len(), 2);
+        assert_eq!(component.get_tui_data(2).len(), 2);
 
-        let mut comp = Chart::default().data([Dataset::default()
+        let mut comp = Chart::default().data([ChartDataset::default()
             .name("Maximum")
             .graph_type(GraphType::Line)
             .marker(Marker::Dot)
             .style(Style::default().fg(Color::LightRed))
             .data(vec![(0.0, 7.0)])]);
-        assert!(!comp.get_data(0).is_empty());
+        assert!(!comp.get_tui_data(0).is_empty());
 
         // Update and test empty data
         component.states.cursor_at_end(12);
         component.attr(
             Attribute::Dataset,
-            AttrValue::Payload(PropPayload::Vec(vec![])),
+            AttrValue::Payload(PropPayload::Any(Box::new(Vec::<ChartDataset>::new()))),
         );
         assert_eq!(component.max_dataset_len(), 0);
         // Cursor is reset
