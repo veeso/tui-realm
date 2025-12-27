@@ -4,7 +4,7 @@
 //! It also provides some helpers and builders to facilitate the use of builders.
 
 use crate::ratatui::layout::Alignment;
-use crate::ratatui::widgets::block::Position;
+use crate::ratatui::widgets::TitlePosition;
 
 pub type SpanStatic = crate::ratatui::text::Span<'static>;
 pub type LineStatic = crate::ratatui::text::Line<'static>;
@@ -18,7 +18,7 @@ pub struct Title {
     /// The Position the title should be in.
     ///
     /// This will determine if [`Block::title_top`](crate::ratatui::widgets::Block::title_top) or [`Block::title_bottom`](crate::ratatui::widgets::Block::title_bottom) is called.
-    pub position: Position,
+    pub position: TitlePosition,
 }
 
 impl Title {
@@ -30,7 +30,7 @@ impl Title {
     }
 
     /// Set a specific position the title should be in.
-    pub fn position(mut self, position: Position) -> Self {
+    pub fn position(mut self, position: TitlePosition) -> Self {
         self.position = position;
 
         self
@@ -162,10 +162,10 @@ mod test {
 
     #[test]
     fn title_builder() {
-        assert_eq!(Title::from("test").position, Position::Top);
+        assert_eq!(Title::from("test").position, TitlePosition::Top);
         assert_eq!(
-            Title::from("test").position(Position::Bottom).position,
-            Position::Bottom
+            Title::from("test").position(TitlePosition::Bottom).position,
+            TitlePosition::Bottom
         );
 
         assert_eq!(Title::from("test").content.alignment, None);

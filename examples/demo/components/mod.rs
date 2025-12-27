@@ -3,7 +3,7 @@
 //! demo example components
 
 use tuirealm::props::{Borders, Color, Style, Title};
-use tuirealm::ratatui::widgets::Block;
+use tuirealm::ratatui::widgets::{Block, TitlePosition};
 
 use super::Msg;
 
@@ -31,7 +31,7 @@ pub(crate) fn get_block<'a>(props: Borders, title: Title, focus: bool) -> Block<
         .border_type(props.modifiers);
 
     match title.position {
-        ratatui::widgets::block::Position::Top => block.title_top(title.content),
-        ratatui::widgets::block::Position::Bottom => block.title_bottom(title.content),
+        TitlePosition::Top => block.title_top(title.content),
+        TitlePosition::Bottom => block.title_bottom(title.content),
     }
 }
