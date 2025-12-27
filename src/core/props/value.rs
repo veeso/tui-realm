@@ -13,7 +13,7 @@ use crate::props::AnyPropBox;
 /// The payload contains the actual value for user defined properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum PropPayload {
-    One(PropValue),
+    Single(PropValue),
     Pair((PropValue, PropValue)),
     Vec(Vec<PropValue>),
     Map(HashMap<String, PropValue>),
@@ -56,11 +56,11 @@ pub enum PropValue {
 impl PropPayload {
     // -- unwrappers
 
-    /// Unwrap a One value from PropPayload
-    pub fn unwrap_one(self) -> PropValue {
+    /// Unwrap a Single value from PropPayload
+    pub fn unwrap_single(self) -> PropValue {
         match self {
-            PropPayload::One(v) => v,
-            _ => panic!("Called `unwrap_one` on a bad value"),
+            PropPayload::Single(v) => v,
+            _ => panic!("Called `unwrap_single` on a bad value"),
         }
     }
 
@@ -106,10 +106,10 @@ impl PropPayload {
 
     // -- as reference
 
-    /// Get a One value from PropPayload, or None
-    pub fn as_one(&self) -> Option<&PropValue> {
+    /// Get a Single value from PropPayload, or None
+    pub fn as_single(&self) -> Option<&PropValue> {
         match self {
-            PropPayload::One(v) => Some(v),
+            PropPayload::Single(v) => Some(v),
             _ => None,
         }
     }
@@ -156,10 +156,10 @@ impl PropPayload {
 
     // -- as mutable references
 
-    /// Get a One value from PropPayload, or None
-    pub fn as_one_mut(&mut self) -> Option<&mut PropValue> {
+    /// Get a Single value from PropPayload, or None
+    pub fn as_single_mut(&mut self) -> Option<&mut PropValue> {
         match self {
-            PropPayload::One(v) => Some(v),
+            PropPayload::Single(v) => Some(v),
             _ => None,
         }
     }
@@ -817,7 +817,7 @@ mod tests {
     #[test]
     fn prop_values() {
         // test that values can be created without compile errors
-        let _ = PropPayload::One(PropValue::Usize(2));
+        let _ = PropPayload::Single(PropValue::Usize(2));
         let _ = PropPayload::Pair((PropValue::Bool(true), PropValue::Usize(128)));
         let _ = PropPayload::Vec(vec![
             PropValue::U16(1),
@@ -891,7 +891,7 @@ mod tests {
 
         let _ = PropPayload::Map(map);
         let mut link: LinkedList<PropPayload> = LinkedList::new();
-        link.push_back(PropPayload::One(PropValue::Usize(1)));
+        link.push_back(PropPayload::Single(PropValue::Usize(1)));
         link.push_back(PropPayload::Pair((
             PropValue::Usize(2),
             PropValue::Usize(4),
@@ -1142,8 +1142,8 @@ mod tests {
     #[test]
     fn unwrap_prop_payloads() {
         assert!(
-            !PropPayload::One(PropValue::Bool(false))
-                .unwrap_one()
+            !PropPayload::Single(PropValue::Bool(false))
+                .unwrap_single()
                 .unwrap_bool(),
         );
         assert_eq!(
@@ -1159,10 +1159,10 @@ mod tests {
     #[test]
     fn as_prop_payloads() {
         assert_eq!(
-            PropPayload::One(PropValue::Bool(true)).as_one(),
+            PropPayload::Single(PropValue::Bool(true)).as_single(),
             Some(&PropValue::Bool(true))
         );
-        assert_eq!(PropPayload::None.as_one(), None);
+        assert_eq!(PropPayload::None.as_single(), None);
 
         assert_eq!(
             PropPayload::Pair((PropValue::Bool(true), PropValue::Bool(true))).as_pair(),
@@ -1199,10 +1199,10 @@ mod tests {
     #[test]
     fn as_prop_payloads_mut() {
         assert_eq!(
-            PropPayload::One(PropValue::Bool(true)).as_one_mut(),
+            PropPayload::Single(PropValue::Bool(true)).as_single_mut(),
             Some(&mut PropValue::Bool(true))
         );
-        assert_eq!(PropPayload::None.as_one_mut(), None);
+        assert_eq!(PropPayload::None.as_single_mut(), None);
 
         assert_eq!(
             PropPayload::Pair((PropValue::Bool(true), PropValue::Bool(true))).as_pair_mut(),
