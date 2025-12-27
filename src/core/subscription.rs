@@ -848,7 +848,7 @@ mod test {
         let mut component = MockFooInput::default();
         let clause = SubClause::HasState(
             MockComponentId::InputBar,
-            State::One(StateValue::String(String::from("a"))),
+            State::Single(StateValue::String(String::from("a"))),
         );
         assert_eq!(
             clause.forward(
@@ -929,7 +929,7 @@ mod test {
             ),
             SubClause::HasState(
                 MockComponentId::InputBar,
-                State::One(StateValue::String(String::from("a"))),
+                State::Single(StateValue::String(String::from("a"))),
             ),
         );
         assert_eq!(
@@ -980,7 +980,7 @@ mod test {
             ),
             SubClause::HasState(
                 MockComponentId::InputBar,
-                State::One(StateValue::String(String::from("a"))),
+                State::Single(StateValue::String(String::from("a"))),
             ),
         );
         assert_eq!(

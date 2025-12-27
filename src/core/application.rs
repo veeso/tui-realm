@@ -605,7 +605,7 @@ mod test {
         // State
         assert_eq!(
             application.state(&MockComponentId::InputFoo).ok().unwrap(),
-            State::One(StateValue::String(String::default()))
+            State::Single(StateValue::String(String::default()))
         );
         // Active / blur
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
@@ -1149,7 +1149,7 @@ mod test {
                         SubEventClause::Tick,
                         SubClause::HasState(
                             MockComponentId::InputFoo,
-                            State::One(StateValue::String(String::new()))
+                            State::Single(StateValue::String(String::new()))
                         )
                     )]
                 )

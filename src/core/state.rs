@@ -10,7 +10,7 @@ use crate::utils::{Email, PhoneNumber};
 /// State describes a component state
 #[derive(Debug, PartialEq, Clone)]
 pub enum State {
-    One(StateValue),
+    Single(StateValue),
     Pair((StateValue, StateValue)),
     Vec(Vec<StateValue>),
     Map(HashMap<String, StateValue>),
@@ -45,10 +45,10 @@ pub enum StateValue {
 }
 
 impl State {
-    pub fn unwrap_one(self) -> StateValue {
+    pub fn unwrap_single(self) -> StateValue {
         match self {
-            Self::One(val) => val,
-            state => panic!("Could not unwrap {state:?} as `One`"),
+            Self::Single(val) => val,
+            state => panic!("Could not unwrap {state:?} as `Single`"),
         }
     }
 
