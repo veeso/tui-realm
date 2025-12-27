@@ -24,7 +24,7 @@ crossterm = { version = "0.29", optional = true }
 dyn-clone = "1"
 futures-util = { version = "0.3", default-features = false, optional = true }
 lazy-regex = "3"
-ratatui = { version = "0.29", default-features = false }
+ratatui = { version = "0.30", default-features = false, features = ["std"] }
 serde = { version = "1", features = ["derive"], optional = true }
 termion = { version = "^4", optional = true }
 thiserror = "2"
