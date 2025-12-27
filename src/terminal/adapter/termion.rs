@@ -1,16 +1,15 @@
 use std::io::Stdout;
 
-use ratatui::Terminal;
-use ratatui::prelude::TermionBackend as TermionLibBackend;
 use termion::input::MouseTerminal;
 use termion::raw::{IntoRawMode as _, RawTerminal};
 use termion::screen::{AlternateScreen, IntoAlternateScreen as _};
 
 use super::{TerminalAdapter, TerminalResult};
+use crate::ratatui::{Terminal, backend};
 use crate::terminal::TerminalError;
 
 pub type TermionBackend =
-    Terminal<TermionLibBackend<MouseTerminal<AlternateScreen<RawTerminal<Stdout>>>>>;
+    Terminal<backend::TermionBackend<MouseTerminal<AlternateScreen<RawTerminal<Stdout>>>>>;
 
 /// TermionTerminalAdapter is the adapter for the [`termion`] terminal
 ///
@@ -28,7 +27,7 @@ impl TermionTerminalAdapter {
             .map_err(|_| TerminalError::CannotConnectStdout)?;
         let stdout = MouseTerminal::from(stdout);
 
-        let terminal = Terminal::new(TermionLibBackend::new(stdout))
+        let terminal = Terminal::new(backend::TermionBackend::new(stdout))
             .map_err(|_| TerminalError::CannotConnectStdout)?;
 
         Ok(Self { terminal })
