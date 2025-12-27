@@ -31,7 +31,7 @@ If multiple types are still necessary, consider either using `PropPayload::Vec` 
 
 As other tuple variants are now removed, it is more descriptive to rename `Tup2` to `Pair`.
 
-### Rename `PropPayload` variant `One` to `Single`
+### Rename `PropPayload` and `State` variant `One` to `Single`
 
 With `Tup2` now being renamed to `Pair` and considering the other variants, `Single` aligns better with the naming scheme than `One`.
 
