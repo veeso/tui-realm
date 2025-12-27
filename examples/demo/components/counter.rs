@@ -120,10 +120,20 @@ impl MockComponent for Counter {
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if attr == Attribute::Value {
+            return Some(AttrValue::Number(self.states.counter));
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        if attr == Attribute::Value
+            && let Some(value) = value.as_number()
+        {
+            self.states.counter = value;
+        }
+
         self.props.set(attr, value);
     }
 
