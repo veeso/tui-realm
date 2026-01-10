@@ -24,9 +24,9 @@ pub use self::event_listener::CrosstermInputListener;
 #[cfg(feature = "termion")]
 #[cfg_attr(docsrs, doc(cfg(feature = "termion")))]
 pub use self::event_listener::TermionInputListener;
-// #[cfg(feature = "termwiz")]
-// #[cfg_attr(docsrs, doc(cfg(feature = "termwiz")))]
-// pub use self::event_listener::TermwizInputListener;
+#[cfg(feature = "termwiz")]
+#[cfg_attr(docsrs, doc(cfg(feature = "termwiz")))]
+pub use self::event_listener::TermwizInputListener;
 
 /// TerminalResult is a type alias for a Result that uses [`TerminalError`] as the error type.
 pub type TerminalResult<T> = Result<T, TerminalError>;
