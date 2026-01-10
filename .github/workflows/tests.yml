@@ -66,7 +66,7 @@ jobs:
       - name: Cargo Check
         run: cargo build --all-features
       - name: Test
-        # This tests both crossterm and termion
+        # This tests both crossterm, termion and termwiz
         run: cargo llvm-cov --no-fail-fast --all-features --workspace --lcov --output-path lcov.info --no-cfg-coverage
       - name: Coveralls
         uses: coverallsapp/github-action@v2.3.6
@@ -96,7 +96,7 @@ jobs:
       - name: Cargo Check
         run: cargo build --features async-ports,serialize
       - name: Test
-        # This tests both crossterm
+        # This tests both crossterm and termwiz
         # Does NOT run termion, as that is is unix only
         run: cargo llvm-cov --no-fail-fast --features async-ports,serialize --workspace --lcov --output-path lcov.info --no-cfg-coverage
       - name: Coveralls
@@ -127,7 +127,7 @@ jobs:
       - name: Cargo Check
         run: cargo build --all-features
       - name: Test
-        # This tests both crossterm and termion
+        # This tests both crossterm, termion and termwiz
         run: cargo llvm-cov --no-fail-fast --all-features --workspace --lcov --output-path lcov.info --no-cfg-coverage
       - name: Coveralls
         uses: coverallsapp/github-action@v2.3.6
