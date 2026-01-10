@@ -9,6 +9,10 @@
 
 This document is a work in progress until 4.0 is released, listing the essential changes as they are introduced.
 
+### ratatui 0.30
+
+`ratatui` has been upgraded to 0.30, for all their breaking changes, read their [Blockpost](https://ratatui.rs/highlights/v030).
+
 ### Replaced `TextSpan` with ratatui equivalent
 
 The previous `tuirealm::props::TextSpan` has been replaced with `ratatui::text::{Span, Line, Text}`.
