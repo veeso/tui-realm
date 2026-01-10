@@ -18,7 +18,9 @@ where
     Keyboard(KeyEvent),
     /// A Mouse event
     Mouse(MouseEvent),
-    /// This event is raised after the terminal window is resized
+    /// This event is raised after the terminal window is resized.
+    ///
+    /// Contains (width, height).
     WindowResize(u16, u16),
     /// Window focus gained
     FocusGained,
