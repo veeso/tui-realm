@@ -173,6 +173,22 @@ where
             max_poll,
         )
     }
+
+    #[cfg(feature = "termwiz")]
+    /// Add to the event listener the default termwiz input listener [`crate::terminal::TermwizInputListener`]
+    ///
+    /// The interval is the amount of time between each [`Poll::poll`] call.
+    /// The max_poll is the maximum amount of times the port should be polled in a `interval`.
+    pub fn termwiz_input_listener(self, interval: Duration, max_poll: usize) -> Self {
+        self.add_port(
+            Box::new(
+                crate::terminal::TermwizInputListener::new(interval)
+                    .expect("Creating termwiz listener"),
+            ),
+            interval,
+            max_poll,
+        )
+    }
 }
 
 /// Implementations for feature `async-ports`
