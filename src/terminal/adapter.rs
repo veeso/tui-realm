@@ -11,14 +11,14 @@ pub use termion::{TermionBackend, TermionTerminalAdapter};
 
 use super::TerminalResult;
 
-/// TerminalAdapter is a trait that defines the methods that a terminal adapter should implement.
+/// [`TerminalAdapter`] is a trait that defines the methods that a terminal adapter should implement.
 ///
 /// This trait is used to abstract the terminal implementation from the rest of the application.
 /// This allows tui-realm to be used with different terminal libraries, such as crossterm, termion, etc.
 pub trait TerminalAdapter {
     /// Draws a single frame to the terminal.
     ///
-    /// Returns a [`CompletedFrame`] if successful, otherwise a [`super::TerminalError`].
+    /// Returns a [`CompletedFrame`] if successful, otherwise a [`TerminalError`](super::TerminalError).
     ///
     /// This method will:
     ///
@@ -36,6 +36,8 @@ pub trait TerminalAdapter {
     /// previous frame to determine what has changed, and only the changes are written to the
     /// terminal. If the render callback does not fully render the frame, the terminal will not be
     /// in a consistent state.
+    ///
+    /// This function will call [`ratatui::Terminal::draw`].
     fn draw<F>(&mut self, render_callback: F) -> TerminalResult<CompletedFrame<'_>>
     where
         F: FnOnce(&mut Frame<'_>);
