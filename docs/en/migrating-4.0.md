@@ -44,3 +44,15 @@ moved to be carried over `PropPayload::Any`.
 
 With 4.0, `Component::on`'s `Event` parameter is now a reference. This allowed us to remove clones in-between that had always been done
 but now it is up to the user if a clone is actually necessary.
+
+### `termion` backend / adapter changes
+
+The `termion` backend adapter has been refactored to better fit-in with how `termion` works.
+
+This effectively means that `new` does not exist anymore, but more specific new functions now exist:
+- `new_raw`
+- `new_alternate_raw`
+- `new_mouse_alternate_raw`
+- `new_mouse_raw`
+
+Additionally, `TerminalBridge::new_termion` and `init_termion` have been removed, instead use `TerminalBridge::new_init_termion` instead.

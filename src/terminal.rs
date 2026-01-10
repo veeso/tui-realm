@@ -49,7 +49,7 @@ pub enum TerminalError {
 }
 
 /// An helper around [`crate::ratatui::Terminal`] to quickly setup and perform on terminal.
-/// You can opt whether to use or not this structure to interact with the terminal
+/// You can opt whether to use or not this structure to interact with the terminal.
 /// Anyway this structure is 100% cross-backend compatible and is really easy to use, so I suggest you to use it.
 /// If you need more advance terminal command, you can get a reference to it using the `raw()` and `raw_mut()` methods.
 ///
@@ -223,16 +223,11 @@ impl TerminalBridge<adapter::CrosstermTerminalAdapter> {
 
 #[cfg(feature = "termion")]
 impl TerminalBridge<adapter::TermionTerminalAdapter> {
-    /// Create a new instance of the [`TerminalBridge`] using [`termion`] as backend
-    pub fn new_termion() -> Self {
-        Self::new(adapter::TermionTerminalAdapter::new().unwrap())
-    }
-
     /// Initialize a terminal with reasonable defaults for most applications using [`termion`] as backend.
     ///
     /// See [`TerminalBridge::init`] for more information.
-    pub fn init_termion() -> TerminalResult<Self> {
-        Self::init(adapter::TermionTerminalAdapter::new().unwrap())
+    pub fn new_init_termion() -> TerminalResult<Self> {
+        Self::init(adapter::TermionTerminalAdapter::new_alternate_raw().unwrap())
     }
 
     /// Returns a reference to the underlying Terminal
