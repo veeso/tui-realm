@@ -885,7 +885,7 @@ fn init_app() -> Application<Id, Msg, NoUserEvent> {
 }
 ```
 
-The app requires the configuration for the `EventListener` which will poll `Ports`. We're telling the event listener to use the default input listener for our backend. `default_input_listener` will setup the default input listener for termion/crossterm or the backend you chose. Then we also define the `poll_timeout`, which describes the interval between each poll to the listener thread.
+The app requires the configuration for the `EventListener` which will poll `Ports`. We're telling the event listener to use the default input listener for our backend. `default_input_listener` will setup the default input listener for crossterm/termion/termwiz or the backend you chose. Then we also define the `poll_timeout`, which describes the interval between each poll to the listener thread.
 
 > ❗ Here we could also define other Ports thanks to the method `port()` or setup the `Tick` producer with `tick_interval()`
 

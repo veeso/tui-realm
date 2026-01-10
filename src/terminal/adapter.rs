@@ -2,19 +2,23 @@
 mod crossterm;
 #[cfg(feature = "termion")]
 mod termion;
+#[cfg(feature = "termwiz")]
+mod termwiz;
 
 #[cfg(feature = "crossterm")]
 pub use crossterm::CrosstermTerminalAdapter;
 use ratatui::{CompletedFrame, Frame};
 #[cfg(feature = "termion")]
 pub use termion::{TermionBackend, TermionTerminalAdapter};
+#[cfg(feature = "termwiz")]
+pub use termwiz::TermwizTerminalAdapter;
 
 use super::TerminalResult;
 
 /// [`TerminalAdapter`] is a trait that defines the methods that a terminal adapter should implement.
 ///
 /// This trait is used to abstract the terminal implementation from the rest of the application.
-/// This allows tui-realm to be used with different terminal libraries, such as crossterm, termion, etc.
+/// This allows tui-realm to be used with different terminal libraries, such as crossterm, termion, termwiz, etc.
 pub trait TerminalAdapter {
     /// Draws a single frame to the terminal.
     ///

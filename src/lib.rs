@@ -16,7 +16,7 @@
 //!
 //! ## Get started 🏁
 //!
-//! > ⚠️ Warning: currently tui-realm supports these backends: crossterm, termion
+//! > ⚠️ Warning: currently tui-realm supports these backends: crossterm, termion, termwiz
 //!
 //! ### Add tui-realm to your Cargo.toml 🦀
 //!
@@ -39,6 +39,7 @@
 //! - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
 //! - `crossterm`: use the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend
 //! - `termion`: use the [termion](https://github.com/redox-os/termion) terminal backend
+//! - `termwiz`: use the [termwiz](https://docs.rs/termwiz/latest/termwiz/index.html) terminal backend
 //!
 //! ### Create a tui-realm application 🪂
 //!

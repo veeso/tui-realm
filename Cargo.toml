@@ -20,13 +20,11 @@ repository = "https://github.com/veeso/tui-realm"
 [dependencies]
 async-trait = { version = "0.1", optional = true }
 bitflags = "2"
-crossterm = { version = "0.29", optional = true }
 dyn-clone = "1"
 futures-util = { version = "0.3", default-features = false, optional = true }
 lazy-regex = "3"
 ratatui = { version = "0.30", default-features = false, features = ["std", "layout-cache"] }
 serde = { version = "1", features = ["derive"], optional = true }
-termion = { version = "^4", optional = true }
 thiserror = "2"
 tokio = { version = "1", features = [
   "rt",
@@ -37,6 +35,10 @@ tokio-util = { version = "0.7", features = [
   "rt",
 ], default-features = false, optional = true }
 tuirealm_derive = { version = "2", optional = true }
+
+crossterm = { version = "0.29", optional = true }
+termion = { version = "^4", optional = true }
+termwiz = { version = "0.23", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "^1"
@@ -55,8 +57,10 @@ async-ports = [
 ]
 derive = ["dep:tuirealm_derive"]
 serialize = ["dep:serde", "bitflags/serde"]
+
 crossterm = ["dep:crossterm", "ratatui/crossterm"]
 termion = ["dep:termion", "ratatui/termion"]
+termwiz = ["dep:termwiz", "ratatui/termwiz"]
 
 [[example]]
 name = "async-ports"

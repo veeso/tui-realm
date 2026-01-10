@@ -24,6 +24,9 @@ pub use self::event_listener::CrosstermInputListener;
 #[cfg(feature = "termion")]
 #[cfg_attr(docsrs, doc(cfg(feature = "termion")))]
 pub use self::event_listener::TermionInputListener;
+// #[cfg(feature = "termwiz")]
+// #[cfg_attr(docsrs, doc(cfg(feature = "termwiz")))]
+// pub use self::event_listener::TermwizInputListener;
 
 /// TerminalResult is a type alias for a Result that uses [`TerminalError`] as the error type.
 pub type TerminalResult<T> = Result<T, TerminalError>;
@@ -62,6 +65,8 @@ pub enum TerminalError {
 /// let mut terminal = TerminalBridge::init_crossterm().unwrap();
 /// #[cfg(feature = "termion")]
 /// let mut terminal = TerminalBridge::init_termion().unwrap();
+/// #[cfg(feature = "termwiz")]
+/// let mut terminal = TerminalBridge::init_termwiz().unwrap();
 /// ```
 pub struct TerminalBridge<T>
 where
@@ -237,6 +242,33 @@ impl TerminalBridge<adapter::TermionTerminalAdapter> {
 
     /// Returns a mutable reference to the underlying Terminal
     pub fn raw_mut(&mut self) -> &mut adapter::TermionBackend {
+        self.terminal.raw_mut()
+    }
+}
+
+#[cfg(feature = "termwiz")]
+impl TerminalBridge<adapter::TermwizTerminalAdapter> {
+    /// Create a new instance of the [`TerminalBridge`] using [`termwiz`] as backend
+    pub fn new_termwiz() -> TerminalResult<Self> {
+        Ok(Self::new(adapter::TermwizTerminalAdapter::new()?))
+    }
+
+    /// Initialize a terminal with reasonable defaults for most applications using [`termwiz`] as backend.
+    ///
+    /// See [`TerminalBridge::init`] for more information.
+    pub fn init_termwiz() -> TerminalResult<Self> {
+        Self::init(adapter::TermwizTerminalAdapter::new()?)
+    }
+
+    /// Returns a reference to the underlying [`crate::ratatui::Terminal`]
+    pub fn raw(&self) -> &crate::ratatui::Terminal<crate::ratatui::backend::TermwizBackend> {
+        self.terminal.raw()
+    }
+
+    /// Returns a mutable reference the underlying [`crate::ratatui::Terminal`]
+    pub fn raw_mut(
+        &mut self,
+    ) -> &mut crate::ratatui::Terminal<crate::ratatui::backend::TermwizBackend> {
         self.terminal.raw_mut()
     }
 }
