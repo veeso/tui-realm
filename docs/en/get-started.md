@@ -159,7 +159,7 @@ Let's see what a component is in practice now:
 pub trait Component<Msg, UserEvent>: MockComponent
 where
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg>;
 }
@@ -186,7 +186,7 @@ Let's see what these two types are:
     ```rust
     pub enum Event<UserEvent>
     where
-        UserEvent: Eq + PartialEq + Clone + PartialOrd,
+        UserEvent: Eq + PartialEq + Clone,
     {
         /// A keyboard event
         Keyboard(KeyEvent),
@@ -248,7 +248,7 @@ If we give a look to the two type declarations, we'll see there is a difference 
 ```rust
 pub enum Event<UserEvent>
 where
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// A keyboard event
     Keyboard(KeyEvent),
@@ -366,7 +366,7 @@ pub trait Update<ComponentId, Msg, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
 
     /// update the current state handling a message from the view.
@@ -399,7 +399,7 @@ pub struct Application<ComponentId, Msg, UserEvent>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd + Send + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     listener: EventListener<UserEvent>,
     subs: Vec<Subscription<ComponentId, UserEvent>>,

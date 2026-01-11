@@ -52,7 +52,7 @@
 ```rust
 pub struct Sub<UserEvent>(EventClause<UserEvent>, SubClause)
 where
-    UserEvent: Eq + PartialEq + Clone + PartialOrd;
+    UserEvent: Eq + PartialEq + Clone;
 ```
 
 所以它是一个元组结构，接受一个 `EventClause` 和一个 `SubClause`，让我们深入了解：
@@ -64,7 +64,7 @@ where
     ```rust
     pub enum EventClause<UserEvent>
     where
-        UserEvent: Eq + PartialEq + Clone + PartialOrd,
+        UserEvent: Eq + PartialEq + Clone,
     {
         /// 无论何种事件都转发
         Any,
