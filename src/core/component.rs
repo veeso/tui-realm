@@ -65,28 +65,18 @@ where
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg>;
 }
 
-/// Extra trait to cast [`Component`] to be `dyn Any` as it cannot be included in [`Component`] itself
-pub trait ComponentAny<Msg, UserEvent>
+impl<Msg, UserEvent> dyn Component<Msg, UserEvent>
 where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone,
 {
     /// Convenience function to cast to [`Any`].
-    fn as_any(&self) -> &dyn Any;
-    /// Convenience function to cast to [`Any`] mutably.
-    fn as_any_mut(&mut self) -> &mut dyn Any;
-}
-
-impl<Msg, UserEvent> ComponentAny<Msg, UserEvent> for dyn Component<Msg, UserEvent>
-where
-    Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone,
-{
-    fn as_any(&self) -> &dyn Any {
+    pub fn as_any(&self) -> &dyn Any {
         self
     }
 
-    fn as_any_mut(&mut self) -> &mut dyn Any {
+    /// Convenience function to cast to [`Any`] mutably.
+    pub fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
 }
