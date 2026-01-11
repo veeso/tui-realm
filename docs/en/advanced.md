@@ -52,7 +52,7 @@ The subscription is defined as:
 ```rust
 pub struct Sub<UserEvent>(EventClause<UserEvent>, SubClause)
 where
-    UserEvent: Eq + PartialEq + Clone + PartialOrd;
+    UserEvent: Eq + PartialEq + Clone;
 ```
 
 So it's a tupled structure, which takes an `EventClause` and a `SubClause`, let's dive deeper:
@@ -64,7 +64,7 @@ So it's a tupled structure, which takes an `EventClause` and a `SubClause`, let'
     ```rust
     pub enum EventClause<UserEvent>
     where
-        UserEvent: Eq + PartialEq + Clone + PartialOrd,
+        UserEvent: Eq + PartialEq + Clone,
     {
         /// Forward, no matter what kind of event
         Any,

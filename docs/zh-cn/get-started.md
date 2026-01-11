@@ -159,7 +159,7 @@ trait 要求您实现：
 pub trait Component<Msg, UserEvent>: MockComponent
 where
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg>;
 }
@@ -186,7 +186,7 @@ impl Component for UsernameInput { ... }
     ```rust
     pub enum Event<UserEvent>
     where
-        UserEvent: Eq + PartialEq + Clone + PartialOrd,
+        UserEvent: Eq + PartialEq + Clone,
     {
         /// 键盘事件
         Keyboard(KeyEvent),
@@ -248,7 +248,7 @@ fn perform(&mut self, cmd: Cmd) -> CmdResult;
 ```rust
 pub enum Event<UserEvent>
 where
-    UserEvent: Eq + PartialEq + Clone + PartialOrd,
+    UserEvent: Eq + PartialEq + Clone,
 {
     /// 键盘事件
     Keyboard(KeyEvent),
