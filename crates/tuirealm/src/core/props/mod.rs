@@ -286,7 +286,7 @@ impl AttrValue {
         }
     }
 
-    /// Get the inner [`Span`] value from AttrValue, or panic.
+    /// Get the inner [`SpanStatic`] value from AttrValue, or panic.
     pub fn unwrap_textspan(self) -> SpanStatic {
         match self {
             AttrValue::TextSpan(x) => x,
@@ -294,7 +294,7 @@ impl AttrValue {
         }
     }
 
-    /// Get the inner [`Line`] value from AttrValue, or panic.
+    /// Get the inner [`LineStatic`] value from AttrValue, or panic.
     pub fn unwrap_textline(self) -> LineStatic {
         match self {
             AttrValue::TextLine(x) => x,
@@ -302,7 +302,7 @@ impl AttrValue {
         }
     }
 
-    /// Get the inner [`Text`] value from AttrValue, or panic.
+    /// Get the inner [`TextStatic`] value from AttrValue, or panic.
     pub fn unwrap_text(self) -> TextStatic {
         match self {
             AttrValue::Text(x) => x,
@@ -456,7 +456,7 @@ impl AttrValue {
         }
     }
 
-    /// Get a [`Span`] value from AttrValue, or None
+    /// Get a [`SpanStatic`] value from AttrValue, or None
     pub fn as_textspan(&self) -> Option<&SpanStatic> {
         match self {
             AttrValue::TextSpan(v) => Some(v),
@@ -464,7 +464,7 @@ impl AttrValue {
         }
     }
 
-    /// Get a [`Line`] value from AttrValue, or None
+    /// Get a [`LineStatic`] value from AttrValue, or None
     pub fn as_textline(&self) -> Option<&LineStatic> {
         match self {
             AttrValue::TextLine(v) => Some(v),
@@ -472,7 +472,7 @@ impl AttrValue {
         }
     }
 
-    /// Get a [`Text`] value from AttrValue, or None
+    /// Get a [`TextStatic`] value from AttrValue, or None
     pub fn as_text(&self) -> Option<&TextStatic> {
         match self {
             AttrValue::Text(v) => Some(v),
@@ -619,7 +619,7 @@ impl AttrValue {
         }
     }
 
-    /// Get a [`Span`] value from AttrValue, or None
+    /// Get a [`SpanStatic`] value from AttrValue, or None
     pub fn as_textspan_mut(&mut self) -> Option<&mut SpanStatic> {
         match self {
             AttrValue::TextSpan(v) => Some(v),
@@ -627,7 +627,7 @@ impl AttrValue {
         }
     }
 
-    /// Get a [`Line`] value from AttrValue, or None
+    /// Get a [`LineStatic`] value from AttrValue, or None
     pub fn as_textline_mut(&mut self) -> Option<&mut LineStatic> {
         match self {
             AttrValue::TextLine(v) => Some(v),
@@ -635,7 +635,7 @@ impl AttrValue {
         }
     }
 
-    /// Get a [`Text`] value from AttrValue, or None
+    /// Get a [`TextStatic`] value from AttrValue, or None
     pub fn as_text_mut(&mut self) -> Option<&mut TextStatic> {
         match self {
             AttrValue::Text(v) => Some(v),

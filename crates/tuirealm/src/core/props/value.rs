@@ -388,7 +388,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as [`Span`].
+    /// Unwrap PropValue as [`SpanStatic`].
     /// Panics otherwise
     pub fn unwrap_textspan(self) -> SpanStatic {
         match self {
@@ -397,7 +397,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as [`Line`].
+    /// Unwrap PropValue as [`LineStatic`].
     /// Panics otherwise
     pub fn unwrap_textline(self) -> LineStatic {
         match self {
@@ -406,7 +406,7 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as [`Text`].
+    /// Unwrap PropValue as [`TextStatic`].
     /// Panics otherwise
     pub fn unwrap_text(self) -> TextStatic {
         match self {
@@ -593,7 +593,7 @@ impl PropValue {
         }
     }
 
-    /// Get a [`Span`] value from PropValue, or None
+    /// Get a [`SpanStatic`] value from PropValue, or None
     pub fn as_textspan(&self) -> Option<&SpanStatic> {
         match self {
             PropValue::TextSpan(v) => Some(v),
@@ -601,7 +601,7 @@ impl PropValue {
         }
     }
 
-    /// Get a [`Line`] value from PropValue, or None
+    /// Get a [`LineStatic`] value from PropValue, or None
     pub fn as_textline(&self) -> Option<&LineStatic> {
         match self {
             PropValue::TextLine(v) => Some(v),
@@ -609,7 +609,7 @@ impl PropValue {
         }
     }
 
-    /// Get a [`Text`] value from PropValue, or None
+    /// Get a [`TextStatic`] value from PropValue, or None
     pub fn as_text(&self) -> Option<&TextStatic> {
         match self {
             PropValue::Text(v) => Some(v),
@@ -779,7 +779,7 @@ impl PropValue {
         }
     }
 
-    /// Get a [`Span`] value from PropValue, or None
+    /// Get a [`SpanStatic`] value from PropValue, or None
     pub fn as_textspan_mut(&mut self) -> Option<&mut SpanStatic> {
         match self {
             PropValue::TextSpan(v) => Some(v),
@@ -787,7 +787,7 @@ impl PropValue {
         }
     }
 
-    /// Get a [`Line`] value from PropValue, or None
+    /// Get a [`LineStatic`] value from PropValue, or None
     pub fn as_textline_mut(&mut self) -> Option<&mut LineStatic> {
         match self {
             PropValue::TextLine(v) => Some(v),
@@ -795,7 +795,7 @@ impl PropValue {
         }
     }
 
-    /// Get a [`Text`] value from PropValue, or None
+    /// Get a [`TextStatic`] value from PropValue, or None
     pub fn as_text_mut(&mut self) -> Option<&mut TextStatic> {
         match self {
             PropValue::Text(v) => Some(v),
