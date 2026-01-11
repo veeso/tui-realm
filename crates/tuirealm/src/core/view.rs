@@ -328,7 +328,6 @@ mod test {
 
     use super::*;
     use crate::StateValue;
-    use crate::core::component::ComponentAny;
     use crate::event::{Key, KeyEvent};
     use crate::mock::{
         MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockInput, MockMsg,
