@@ -22,7 +22,7 @@ pub struct Title {
 }
 
 impl Title {
-    /// Set a specific [`Alignment`] on the underlying [`Line`].
+    /// Set a specific [`Alignment`] on the underlying [`Line`](crate::ratatui::text::Line).
     pub fn alignment(mut self, alignment: Alignment) -> Self {
         self.content.alignment = Some(alignment);
 
