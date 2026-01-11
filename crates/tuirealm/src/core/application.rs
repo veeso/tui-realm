@@ -59,7 +59,7 @@ where
 
     /// Restart listener in case the previous listener has died or if you want to start a new one with a new configuration.
     ///
-    /// > The listener has died if you received a [`ApplicationError::Listener(ListenerError::ListenerDied))`]
+    /// > The listener has died if you received a [`ApplicationError::Listener(ListenerError::ListenerDied))`](ApplicationError::Listener).
     pub fn restart_listener(
         &mut self,
         listener_cfg: EventListenerCfg<UserEvent>,
