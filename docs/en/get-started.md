@@ -959,7 +959,6 @@ Once `quit` becomes true, the application terminates, but don't forget to finali
 ```rust
 let _ = model.terminal.leave_alternate_screen();
 let _ = model.terminal.disable_raw_mode();
-let _ = model.terminal.clear_screen();
 ```
 
 ---
