@@ -138,7 +138,7 @@ impl MockComponent for Counter {
     }
 
     fn state(&self) -> State {
-        State::One(StateValue::Isize(self.states.counter))
+        State::Single(StateValue::Isize(self.states.counter))
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
@@ -209,7 +209,7 @@ impl Component<Msg, NoUserEvent> for LetterCounter {
         };
         // perform
         match self.perform(cmd) {
-            CmdResult::Changed(State::One(StateValue::Isize(c))) => {
+            CmdResult::Changed(State::Single(StateValue::Isize(c))) => {
                 Some(Msg::LetterCounterChanged(c))
             }
             _ => None,
@@ -261,7 +261,7 @@ impl Component<Msg, NoUserEvent> for DigitCounter {
         };
         // perform
         match self.perform(cmd) {
-            CmdResult::Changed(State::One(StateValue::Isize(c))) => {
+            CmdResult::Changed(State::Single(StateValue::Isize(c))) => {
                 Some(Msg::DigitCounterChanged(c))
             }
             _ => None,

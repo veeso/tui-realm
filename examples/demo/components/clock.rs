@@ -84,7 +84,7 @@ impl MockComponent for Clock {
 
     fn state(&self) -> State {
         // Return current time
-        State::One(StateValue::U64(self.get_epoch_time()))
+        State::Single(StateValue::U64(self.get_epoch_time()))
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
