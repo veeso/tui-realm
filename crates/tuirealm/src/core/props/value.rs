@@ -13,7 +13,7 @@ use crate::props::AnyPropBox;
 /// The payload contains the actual value for user defined properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum PropPayload {
-    One(PropValue),
+    Single(PropValue),
     Pair((PropValue, PropValue)),
     Vec(Vec<PropValue>),
     Map(HashMap<String, PropValue>),
@@ -56,18 +56,18 @@ pub enum PropValue {
 impl PropPayload {
     // -- unwrappers
 
-    /// Unwrap a One value from PropPayload
-    pub fn unwrap_one(self) -> PropValue {
+    /// Unwrap a Single value from PropPayload
+    pub fn unwrap_single(self) -> PropValue {
         match self {
-            PropPayload::One(one) => one,
-            _ => panic!("Called `unwrap_one` on a bad value"),
+            PropPayload::Single(v) => v,
+            _ => panic!("Called `unwrap_single` on a bad value"),
         }
     }
 
     /// Unwrap a Pair value from PropPayload
     pub fn unwrap_pair(self) -> (PropValue, PropValue) {
         match self {
-            PropPayload::Pair(t) => t,
+            PropPayload::Pair(v) => v,
             _ => panic!("Called `unwrap_pair` on a bad value"),
         }
     }
@@ -83,7 +83,7 @@ impl PropPayload {
     /// Unwrap a Map value from PropPayload
     pub fn unwrap_map(self) -> HashMap<String, PropValue> {
         match self {
-            PropPayload::Map(m) => m,
+            PropPayload::Map(v) => v,
             _ => panic!("Called `unwrap_map` on a bad value"),
         }
     }
@@ -91,7 +91,7 @@ impl PropPayload {
     /// Unwrap a Linked list from PropPayload
     pub fn unwrap_linked(self) -> LinkedList<PropPayload> {
         match self {
-            PropPayload::Linked(l) => l,
+            PropPayload::Linked(v) => v,
             _ => panic!("Called `unwrap_linked` on a bad value"),
         }
     }
@@ -99,17 +99,17 @@ impl PropPayload {
     /// Unwrap a Any from PropPayload
     pub fn unwrap_any(self) -> AnyPropBox {
         match self {
-            PropPayload::Any(l) => l,
+            PropPayload::Any(v) => v,
             _ => panic!("Called `unwrap_any` on a bad value"),
         }
     }
 
     // -- as reference
 
-    /// Get a One value from PropPayload, or None
-    pub fn as_one(&self) -> Option<&PropValue> {
+    /// Get a Single value from PropPayload, or None
+    pub fn as_single(&self) -> Option<&PropValue> {
         match self {
-            PropPayload::One(v) => Some(v),
+            PropPayload::Single(v) => Some(v),
             _ => None,
         }
     }
@@ -156,10 +156,10 @@ impl PropPayload {
 
     // -- as mutable references
 
-    /// Get a One value from PropPayload, or None
-    pub fn as_one_mut(&mut self) -> Option<&mut PropValue> {
+    /// Get a Single value from PropPayload, or None
+    pub fn as_single_mut(&mut self) -> Option<&mut PropValue> {
         match self {
-            PropPayload::One(v) => Some(v),
+            PropPayload::Single(v) => Some(v),
             _ => None,
         }
     }
@@ -212,7 +212,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_bool(self) -> bool {
         match self {
-            PropValue::Bool(b) => b,
+            PropValue::Bool(v) => v,
             _ => panic!("Called `unwrap_bool` on a bad value"),
         }
     }
@@ -230,8 +230,8 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_u16(self) -> u16 {
         match self {
-            PropValue::U16(b) => b,
-            _ => panic!("Called `unwrap_bool` on a bad value"),
+            PropValue::U16(v) => v,
+            _ => panic!("Called `unwrap_u16` on a bad value"),
         }
     }
 
@@ -239,7 +239,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_u32(self) -> u32 {
         match self {
-            PropValue::U32(b) => b,
+            PropValue::U32(v) => v,
             _ => panic!("Called `unwrap_u32` on a bad value"),
         }
     }
@@ -248,7 +248,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_u64(self) -> u64 {
         match self {
-            PropValue::U64(b) => b,
+            PropValue::U64(v) => v,
             _ => panic!("Called `unwrap_u64` on a bad value"),
         }
     }
@@ -257,7 +257,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_u128(self) -> u128 {
         match self {
-            PropValue::U128(b) => b,
+            PropValue::U128(v) => v,
             _ => panic!("Called `unwrap_u128` on a bad value"),
         }
     }
@@ -266,7 +266,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_usize(self) -> usize {
         match self {
-            PropValue::Usize(b) => b,
+            PropValue::Usize(v) => v,
             _ => panic!("Called `unwrap_usize` on a bad value"),
         }
     }
@@ -284,7 +284,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_i16(self) -> i16 {
         match self {
-            PropValue::I16(b) => b,
+            PropValue::I16(v) => v,
             _ => panic!("Called `unwrap_i16` on a bad value"),
         }
     }
@@ -293,7 +293,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_i32(self) -> i32 {
         match self {
-            PropValue::I32(b) => b,
+            PropValue::I32(v) => v,
             _ => panic!("Called `unwrap_i32` on a bad value"),
         }
     }
@@ -302,7 +302,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_i64(self) -> i64 {
         match self {
-            PropValue::I64(b) => b,
+            PropValue::I64(v) => v,
             _ => panic!("Called `unwrap_i64` on a bad value"),
         }
     }
@@ -311,7 +311,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_i128(self) -> i128 {
         match self {
-            PropValue::I128(b) => b,
+            PropValue::I128(v) => v,
             _ => panic!("Called `unwrap_i128` on a bad value"),
         }
     }
@@ -320,7 +320,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_isize(self) -> isize {
         match self {
-            PropValue::Isize(b) => b,
+            PropValue::Isize(v) => v,
             _ => panic!("Called `unwrap_isize` on a bad value"),
         }
     }
@@ -329,7 +329,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_f32(self) -> f32 {
         match self {
-            PropValue::F32(b) => b,
+            PropValue::F32(v) => v,
             _ => panic!("Called `unwrap_f32` on a bad value"),
         }
     }
@@ -338,7 +338,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_f64(self) -> f64 {
         match self {
-            PropValue::F64(b) => b,
+            PropValue::F64(v) => v,
             _ => panic!("Called `unwrap_f64` on a bad value"),
         }
     }
@@ -347,7 +347,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_str(self) -> String {
         match self {
-            PropValue::Str(s) => s,
+            PropValue::Str(v) => v,
             _ => panic!("Called `unwrap_str` on a bad value"),
         }
     }
@@ -356,7 +356,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_alignment(self) -> Alignment {
         match self {
-            PropValue::Alignment(b) => b,
+            PropValue::Alignment(v) => v,
             _ => panic!("Called `unwrap_alignment` on a bad value"),
         }
     }
@@ -365,7 +365,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_input_type(self) -> InputType {
         match self {
-            PropValue::InputType(b) => b,
+            PropValue::InputType(v) => v,
             _ => panic!("Called `unwrap_input_type` on a bad value"),
         }
     }
@@ -374,7 +374,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_shape(self) -> Shape {
         match self {
-            PropValue::Shape(b) => b,
+            PropValue::Shape(v) => v,
             _ => panic!("Called `unwrap_shape` on a bad value"),
         }
     }
@@ -383,7 +383,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_style(self) -> Style {
         match self {
-            PropValue::Style(b) => b,
+            PropValue::Style(v) => v,
             _ => panic!("Called `unwrap_style` on a bad value"),
         }
     }
@@ -392,7 +392,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_textspan(self) -> SpanStatic {
         match self {
-            PropValue::TextSpan(b) => b,
+            PropValue::TextSpan(v) => v,
             _ => panic!("Called `unwrap_textspan` on a bad value"),
         }
     }
@@ -410,7 +410,7 @@ impl PropValue {
     /// Panics otherwise
     pub fn unwrap_text(self) -> TextStatic {
         match self {
-            PropValue::Text(b) => b,
+            PropValue::Text(v) => v,
             _ => panic!("Called `unwrap_text` on a bad value"),
         }
     }
@@ -817,7 +817,7 @@ mod tests {
     #[test]
     fn prop_values() {
         // test that values can be created without compile errors
-        let _ = PropPayload::One(PropValue::Usize(2));
+        let _ = PropPayload::Single(PropValue::Usize(2));
         let _ = PropPayload::Pair((PropValue::Bool(true), PropValue::Usize(128)));
         let _ = PropPayload::Vec(vec![
             PropValue::U16(1),
@@ -891,7 +891,7 @@ mod tests {
 
         let _ = PropPayload::Map(map);
         let mut link: LinkedList<PropPayload> = LinkedList::new();
-        link.push_back(PropPayload::One(PropValue::Usize(1)));
+        link.push_back(PropPayload::Single(PropValue::Usize(1)));
         link.push_back(PropPayload::Pair((
             PropValue::Usize(2),
             PropValue::Usize(4),
@@ -1142,8 +1142,8 @@ mod tests {
     #[test]
     fn unwrap_prop_payloads() {
         assert!(
-            !PropPayload::One(PropValue::Bool(false))
-                .unwrap_one()
+            !PropPayload::Single(PropValue::Bool(false))
+                .unwrap_single()
                 .unwrap_bool(),
         );
         assert_eq!(
@@ -1159,10 +1159,10 @@ mod tests {
     #[test]
     fn as_prop_payloads() {
         assert_eq!(
-            PropPayload::One(PropValue::Bool(true)).as_one(),
+            PropPayload::Single(PropValue::Bool(true)).as_single(),
             Some(&PropValue::Bool(true))
         );
-        assert_eq!(PropPayload::None.as_one(), None);
+        assert_eq!(PropPayload::None.as_single(), None);
 
         assert_eq!(
             PropPayload::Pair((PropValue::Bool(true), PropValue::Bool(true))).as_pair(),
@@ -1199,10 +1199,10 @@ mod tests {
     #[test]
     fn as_prop_payloads_mut() {
         assert_eq!(
-            PropPayload::One(PropValue::Bool(true)).as_one_mut(),
+            PropPayload::Single(PropValue::Bool(true)).as_single_mut(),
             Some(&mut PropValue::Bool(true))
         );
-        assert_eq!(PropPayload::None.as_one_mut(), None);
+        assert_eq!(PropPayload::None.as_single_mut(), None);
 
         assert_eq!(
             PropPayload::Pair((PropValue::Bool(true), PropValue::Bool(true))).as_pair_mut(),

@@ -36,18 +36,18 @@ impl MockComponent for MockInput {
     }
 
     fn state(&self) -> State {
-        State::One(StateValue::String(self.states.text.clone()))
+        State::Single(StateValue::String(self.states.text.clone()))
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
         match cmd {
             Cmd::Move(Direction::Left) => {
                 self.states.left();
-                CmdResult::Changed(State::One(StateValue::Usize(self.states.cursor)))
+                CmdResult::Changed(State::Single(StateValue::Usize(self.states.cursor)))
             }
             Cmd::Move(Direction::Right) => {
                 self.states.right();
-                CmdResult::Changed(State::One(StateValue::Usize(self.states.cursor)))
+                CmdResult::Changed(State::Single(StateValue::Usize(self.states.cursor)))
             }
             Cmd::Type(ch) => {
                 self.states.input(ch);
@@ -119,7 +119,7 @@ impl Component<MockMsg, MockEvent> for MockFooInput {
             _ => Cmd::None,
         };
         match self.component.perform(cmd) {
-            CmdResult::Changed(State::One(StateValue::String(s))) => {
+            CmdResult::Changed(State::Single(StateValue::String(s))) => {
                 Some(MockMsg::FooInputChanged(s))
             }
             _ => None,
@@ -155,7 +155,7 @@ impl Component<MockMsg, MockEvent> for MockBarInput {
             _ => Cmd::None,
         };
         match self.component.perform(cmd) {
-            CmdResult::Changed(State::One(StateValue::String(s))) => {
+            CmdResult::Changed(State::Single(StateValue::String(s))) => {
                 Some(MockMsg::BarInputChanged(s))
             }
             _ => None,
