@@ -64,31 +64,21 @@ dyn_clone::clone_trait_object!(PropBound);
 /// The outside type to use. It is also the type in [`PropPayload::Any`](super::PropPayload::Any).
 pub type AnyPropBox = Box<dyn PropBound>;
 
-/// Extra convenience functions for [`PropBound`].
-///
-/// This mainly exists because "negative trait implementations" are not stable / supported,
-/// so if we would add this to [`PropBound`]'s `impl _ for T`, it would implement the following functions
-/// for [`Box`] as well, causing `Box<_> as Any` instead of `Box<_>.deref() as Any`.
-pub trait PropBoundExt {
+impl dyn PropBound {
     /// Convenience function to cast to [`Any`].
-    fn as_any(&self) -> &dyn Any;
-    /// Convenience function to cast to [`Any`] mutably.
-    fn as_any_mut(&mut self) -> &mut dyn Any;
-}
-
-impl PropBoundExt for dyn PropBound {
-    fn as_any(&self) -> &dyn Any {
+    pub fn as_any(&self) -> &dyn Any {
         self
     }
 
-    fn as_any_mut(&mut self) -> &mut dyn Any {
+    /// Convenience function to cast to [`Any`] mutably.
+    pub fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::props::{PropBound, PropBoundExt};
+    use crate::props::PropBound;
 
     #[test]
     fn should_work_basic() {

@@ -60,3 +60,7 @@ This effectively means that `new` does not exist anymore, but more specific new 
 - `new_mouse_raw`
 
 Additionally, `TerminalBridge::new_termion` and `init_termion` have been removed, instead use `TerminalBridge::new_init_termion` instead.
+
+### Removal of `PropBoundExt`
+
+The function `as_any` and `as_any_mut` are now directly implemented on `dyn PropBound`, not requiring another trait to be imported.
