@@ -229,7 +229,7 @@ impl StateValue {
 #[cfg(test)]
 mod tests {
     use crate::State;
-    use crate::props::{PropBound, PropBoundExt};
+    use crate::props::PropBound;
 
     #[test]
     fn any() {

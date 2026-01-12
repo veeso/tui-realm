@@ -15,7 +15,7 @@ mod texts;
 mod value;
 
 // -- exports
-pub use any::{AnyPropBox, PropBound, PropBoundExt};
+pub use any::{AnyPropBox, PropBound};
 pub use borders::{BorderSides, BorderType, Borders};
 pub use direction::Direction;
 pub use input_type::InputType;
