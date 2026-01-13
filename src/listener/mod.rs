@@ -234,7 +234,9 @@ where
         self
     }
 
-    /// Stop event listener(s)
+    /// Stop event listener(s).
+    ///
+    /// This will *not* wait until the Sync and Async event listeners are fully stopped.
     pub fn stop(&mut self) -> ListenerResult<()> {
         self.running.store(false, Ordering::Relaxed);
 
@@ -247,7 +249,14 @@ where
         }
 
         // Join thread
-        match self.thread.take().map(|x| x.join()) {
+        match self.thread.take().map(|x| {
+            // "thread::JoinHandle" only allows blocking joins (as of rust 1.92), meaning that if the thread is doing stuff and not finished (ex deadlocking),
+            // then this will wait infinitely, so the best option is to just "detach" the thread, as we dont particularly care about the result.
+            // We already set the "stop" flag, so it should exit on the earliest opportunity it can (if not deadlocked).
+            // A deadlock can happen if the drop order is "listener, then BarrierRx", meaning the thread will wait until the BarrierRx
+            // can recieve, which will never happen as the only reciever's thread is waiting for the listener thread to stop, which results in a deadlock.
+            if x.is_finished() { x.join() } else { Ok(()) }
+        }) {
             Some(Ok(())) => Ok(()),
             Some(Err(_)) => Err(ListenerError::CouldNotStop),
             None => Ok(()), // Never happens, unless someone calls stop twice
