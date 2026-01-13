@@ -779,8 +779,10 @@ mod test {
 
     #[test]
     fn should_do_tick() {
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+            Application::init(listener);
         // Mount foo and bar
         assert!(
             application
@@ -813,6 +815,9 @@ mod test {
         );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        barrier_rx.recieve_cycle();
+
         /*
          * Here we should:
          *
@@ -830,8 +835,9 @@ mod test {
         );
         // Active BAR
         assert!(application.active(&MockComponentId::InputBar).is_ok());
-        // Wait 200ms (wait for poll)
-        std::thread::sleep(Duration::from_millis(100));
+
+        barrier_rx.recieve_cycle();
+
         /*
          * Here we should:
          *
@@ -846,6 +852,9 @@ mod test {
             &[MockMsg::BarSubmit(String::new())]
         );
 
+        barrier_rx.recieve_cycle();
+        barrier_rx.recieve_cycle();
+
         let before = Instant::now();
         // Let's try TryFor strategy
         let events = application
@@ -859,9 +868,11 @@ mod test {
 
     #[test]
     fn strategy_upto_nowait_should_work() {
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> = Application::init(
-            listener_config_with_tick(Duration::from_secs(60)).poll_timeout(Duration::from_secs(5)),
-        );
+        let mut listener =
+            listener_config_with_tick(Duration::from_secs(60)).poll_timeout(Duration::from_secs(5));
+        let barrier_rx = listener.with_test_barrier();
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener);
 
         // Mount foo and bar
         assert!(
@@ -895,6 +906,8 @@ mod test {
         );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        barrier_rx.recieve_cycle();
 
         let before = Instant::now();
 
@@ -907,18 +920,17 @@ mod test {
             &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
 
-        let time_taken = Instant::now().duration_since(before);
-
         // messages should be available, so "UpToNoWait" should not block again after the first event
-        assert!(time_taken < Duration::from_secs(5));
+        assert!(before.elapsed() < Duration::from_millis(100));
     }
 
     #[test]
     fn strategy_blocking_upto_should_work() {
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> = Application::init(
-            listener_config_with_tick(Duration::from_secs(60))
-                .poll_timeout(Duration::from_secs(60)),
-        );
+        let mut listener = listener_config_with_tick(Duration::from_secs(60))
+            .poll_timeout(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
+        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener);
 
         // Mount foo and bar
         assert!(
@@ -953,6 +965,8 @@ mod test {
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
 
+        barrier_rx.recieve_cycle();
+
         let before = Instant::now();
 
         assert_eq!(
@@ -960,14 +974,12 @@ mod test {
                 .tick(PollStrategy::BlockCollectUpTo(5))
                 .ok()
                 .unwrap()
-                .as_slice()[0],
-            MockMsg::FooSubmit(String::new())
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
 
-        let time_taken = Instant::now().duration_since(before);
-
         // messages should be available, so "BlockingCollectUpTo" should not block again after the first event
-        assert!(time_taken < Duration::from_secs(5));
+        assert!(before.elapsed() < Duration::from_millis(100));
     }
 
     #[test]
@@ -1009,6 +1021,7 @@ mod test {
         // lock subs
         application.lock_subs();
         assert_eq!(application.sub_lock, true);
+
         assert_eq!(
             application
                 .tick(PollStrategy::UpTo(5))
@@ -1057,7 +1070,7 @@ mod test {
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::BlockCollectUpTo(5))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -1099,7 +1112,7 @@ mod test {
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::BlockCollectUpTo(5))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -1137,7 +1150,7 @@ mod test {
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::BlockCollectUpTo(5))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -1179,7 +1192,7 @@ mod test {
         // No event should be generated
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::BlockCollectUpTo(5))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -1217,7 +1230,7 @@ mod test {
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::BlockCollectUpTo(5))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -1255,7 +1268,7 @@ mod test {
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::BlockCollectUpTo(5))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -1265,8 +1278,10 @@ mod test {
 
     #[test]
     fn should_lock_ports() {
+        let mut listener = listener_config_with_tick(Duration::from_millis(100));
+        let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener_config_with_tick(Duration::from_millis(500)));
+            Application::init(listener);
         // Mount foo and bar
         assert!(
             application
@@ -1291,22 +1306,31 @@ mod test {
         );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        // verify it start unpaused
+        barrier_rx.recieve_cycle();
+
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::BlockCollectUpTo(5))
                 .ok()
                 .unwrap()
                 .as_slice(),
             &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
         );
+
         // Lock ports
         assert!(application.lock_ports().is_ok());
-        // Wait 1 sec
-        std::thread::sleep(Duration::from_millis(1000));
+
+        // wait for multiple cycles to verify that no events are generated
+        barrier_rx.recieve_start();
+        barrier_rx.recieve_start();
+        barrier_rx.recieve_start();
+
         // Tick ( No tick event )
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::Once)
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -1314,16 +1338,21 @@ mod test {
         );
         // Unlock ports
         assert!(application.unlock_ports().is_ok());
-        // Wait 100 ms
+
+        // wait for the tick time to definitely be over
         std::thread::sleep(Duration::from_millis(100));
+        // only then run the loop which will trigger the tick
+        barrier_rx.recieve_cycle();
+
         // Tick
-
-        // We cannot check messages with exact slice as the scheduler may run the other thread more often and generate more messages.
-        let result = application.tick(PollStrategy::UpTo(5)).ok().unwrap();
-
-        assert!(result.len() >= 2);
-        assert!(result.contains(&MockMsg::FooSubmit(String::new())));
-        assert!(result.contains(&MockMsg::BarTick));
+        assert_eq!(
+            application
+                .tick(PollStrategy::BlockCollectUpTo(5))
+                .ok()
+                .unwrap()
+                .as_slice(),
+            &[MockMsg::FooSubmit(String::new()), MockMsg::BarTick]
+        );
     }
 
     #[test]
