@@ -9,6 +9,105 @@ use tokio::runtime::Handle;
 use super::AsyncPort;
 use super::{Duration, EventListener, ListenerError, Poll, SyncPort};
 
+#[cfg(test)]
+pub mod test_utils {
+    use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
+
+    /// State to describe what the event listener worker is currently in.
+    ///
+    /// This is not strictly necessary, but makes it more explicit what a test expects the state to be in.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum WorkerState {
+        LoopStart,
+        LoopEnd,
+    }
+
+    /// Barrier to stop the event listener from running until the test is ready.
+    /// Also only run controlled loops.
+    ///
+    /// This is necessary for tests to be able to wait for the exact amount of events they expected, as otherwise
+    /// they are beholden to the system's scheduler and have to indiscriminately "sleep" or not be able to properly test "PollStrategy".
+    #[derive(Debug)]
+    pub struct BarrierTx {
+        tx: SyncSender<WorkerState>,
+    }
+
+    impl BarrierTx {
+        /// Create a new Tx-Rx Pair.
+        pub fn new() -> (BarrierRx, Self) {
+            // 0-size channel makes it behave as a barrier, waiting until the recieving side accepts messages, from the docs:
+            // > Note that a bound of 0 is allowed, causing the channel to become a “rendezvous” channel where each sender atomically hands off a message to a receiver.
+            let (tx, rx) = sync_channel(0);
+
+            (BarrierRx(rx), Self { tx })
+        }
+
+        /// Block until the reciever is ready or the channel is closed.
+        ///
+        /// Sends along the currently known [`State`].
+        pub fn send_start(&mut self) {
+            // ignore errors on the listener side; the only error that can happen is "Channel Closed"
+            let _ = self.tx.send(WorkerState::LoopStart);
+        }
+
+        /// Block until the reciever is ready or the channel is closed.
+        ///
+        /// Sends along the currently known [`State`].
+        pub fn send_end(&mut self) {
+            // ignore errors on the listener side; the only error that can happen is "Channel Closed"
+            let _ = self.tx.send(WorkerState::LoopEnd);
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct BarrierRx(Receiver<WorkerState>);
+
+    impl BarrierRx {
+        /// Allow the event lister to run to the next state.
+        ///
+        /// # Panics
+        ///
+        /// This function will always panic if the channel is closed.
+        pub fn recieve(&self) -> WorkerState {
+            self.0
+                .recv()
+                .expect("Expected Channel to not be closed yet")
+        }
+
+        /// Allow the event lister to start running a loop.
+        ///
+        /// # Panics
+        ///
+        /// - This function will always panic if the channel is closed.
+        /// - If the recieved message is not [`WorkerState::LoopStart`]
+        pub fn recieve_start(&self) {
+            assert_eq!(self.recieve(), WorkerState::LoopStart);
+        }
+
+        /// Allow the event lister to end running a loop.
+        ///
+        /// # Panics
+        ///
+        /// - This function will always panic if the channel is closed.
+        /// - If the recieved message is not [`WorkerState::LoopEnd`]
+        pub fn recieve_end(&self) {
+            assert_eq!(self.recieve(), WorkerState::LoopEnd);
+        }
+
+        /// Allow the event lister to run a full cycle.
+        ///
+        /// # Panics
+        ///
+        /// - This function will always panic if the channel is closed.
+        /// - If the first recieved message is not [`WorkerState::LoopStart`]
+        /// - If the second recieved message is not [`WorkerState::LoopEnd`]
+        pub fn recieve_cycle(&self) {
+            self.recieve_start();
+            self.recieve_end();
+        }
+    }
+}
+
 /// The event listener configurator is used to setup an event listener.
 /// Once you're done with configuration just call `EventListenerCfg::start` and the event listener will start and the listener
 /// will be returned.
@@ -25,6 +124,9 @@ where
     #[cfg(feature = "async-ports")]
     async_tick: bool,
     poll_timeout: Duration,
+
+    #[cfg(test)]
+    barrier: Option<test_utils::BarrierTx>,
 }
 
 impl<UserEvent> Default for EventListenerCfg<UserEvent>
@@ -42,6 +144,9 @@ where
             tick_interval: None,
             #[cfg(feature = "async-ports")]
             async_tick: false,
+
+            #[cfg(test)]
+            barrier: None,
         }
     }
 }
@@ -70,6 +175,9 @@ where
         let sync_tick_interval = self.tick_interval.take_if(|_| !self.async_tick);
         let mut res = EventListener::new(self.poll_timeout);
 
+        #[cfg(test)]
+        res.with_test_barrier(self.barrier);
+
         // dont start a sync worker if there are no sync tasks
         if !self.sync_ports.is_empty() || sync_tick_interval.is_some() {
             res = res.start(self.sync_ports, sync_tick_interval, store_tx);
@@ -89,6 +197,17 @@ where
         }
 
         Ok(res)
+    }
+
+    /// Attach a test barrier to the event listener.
+    ///
+    /// This currently only applies to the SYNC worker.
+    #[cfg(test)]
+    pub fn with_test_barrier(&mut self) -> test_utils::BarrierRx {
+        let (rx, barrier) = test_utils::BarrierTx::new();
+        self.barrier = Some(barrier);
+
+        rx
     }
 
     /// Set poll timeout.
