@@ -845,12 +845,16 @@ mod test {
                 .as_slice(),
             &[MockMsg::BarSubmit(String::new())]
         );
+
+        let before = Instant::now();
         // Let's try TryFor strategy
         let events = application
             .tick(PollStrategy::TryFor(Duration::from_millis(400)))
             .ok()
             .unwrap();
         assert!(events.len() >= 2);
+        assert!(before.elapsed() > Duration::from_millis(400));
+        assert!(before.elapsed() < Duration::from_millis(500));
     }
 
     #[test]
