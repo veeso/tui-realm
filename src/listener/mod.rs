@@ -112,6 +112,9 @@ where
     ///
     /// This needs to be [`None`] after either [`start`](Self::start) or [`start_async`](Self::start_async) is called, otherwise the channel will never close.
     tx: Option<mpsc::Sender<ListenerMsg<UserEvent>>>,
+
+    #[cfg(test)]
+    barrier: Option<builder::test_utils::BarrierTx>,
 }
 
 impl<UserEvent> EventListener<UserEvent>
@@ -144,7 +147,18 @@ where
             #[cfg(feature = "async-ports")]
             taskpool: None,
             tx: Some(sender),
+
+            #[cfg(test)]
+            barrier: None,
         }
+    }
+
+    /// Attach a test barrier to the event listener.
+    ///
+    /// This currently only applies to the SYNC worker.
+    #[cfg(test)]
+    pub fn with_test_barrier(&mut self, barrier: Option<builder::test_utils::BarrierTx>) {
+        self.barrier = barrier;
     }
 
     /// Start a worker for Sync-Ports.
@@ -291,9 +305,17 @@ where
         let paused_t = self.paused.clone();
         let running_t = self.running.clone();
         let sender_t = self.tx.take().unwrap().clone();
+        #[cfg(test)]
+        let barrier = self.barrier.take();
         // Start thread
         let thread = thread::spawn(move || {
-            EventListenerWorker::new(ports, sender_t, paused_t, running_t, tick_interval).run();
+            let mut worker =
+                EventListenerWorker::new(ports, sender_t, paused_t, running_t, tick_interval);
+
+            #[cfg(test)]
+            worker.with_test_barrier(barrier);
+
+            worker.run();
         });
         self.thread = Some(thread);
         self

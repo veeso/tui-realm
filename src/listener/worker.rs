@@ -23,6 +23,9 @@ where
     running: Arc<AtomicBool>,
     next_tick: Instant,
     tick_interval: Option<Duration>,
+
+    #[cfg(test)]
+    barrier: Option<super::builder::test_utils::BarrierTx>,
 }
 
 impl<UserEvent> EventListenerWorker<UserEvent>
@@ -47,7 +50,16 @@ where
             running,
             next_tick: Instant::now(),
             tick_interval,
+
+            #[cfg(test)]
+            barrier: None,
         }
+    }
+
+    /// Attach a test barrier to the event listener.
+    #[cfg(test)]
+    pub fn with_test_barrier(&mut self, barrier: Option<super::builder::test_utils::BarrierTx>) {
+        self.barrier = barrier;
     }
 
     /// Calculate next tick time.
@@ -144,6 +156,14 @@ where
     /// thread run method
     pub(super) fn run(&mut self) {
         loop {
+            // wait until the reciever is ready, which signals that the loop should start
+            #[cfg(test)]
+            {
+                if let Some(barrier) = &mut self.barrier {
+                    barrier.send_start();
+                }
+            }
+
             // Check if running or send_error has occurred
             if !self.running() {
                 break;
@@ -161,6 +181,15 @@ where
             if self.should_tick() && self.send_tick().is_err() {
                 break;
             }
+
+            // wait until the reciever is ready, which signals that the loop has ended
+            #[cfg(test)]
+            {
+                if let Some(barrier) = &mut self.barrier {
+                    barrier.send_end();
+                }
+            }
+
             // Sleep till next event
             thread::sleep(self.next_event());
         }
