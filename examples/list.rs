@@ -229,7 +229,7 @@ impl Default for ListAlfa {
 }
 
 impl Component<Msg, NoUserEvent> for ListAlfa {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
@@ -347,7 +347,7 @@ impl Default for ListBeta {
 }
 
 impl Component<Msg, NoUserEvent> for ListBeta {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::ListBetaBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),

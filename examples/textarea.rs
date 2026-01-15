@@ -176,7 +176,7 @@ impl Default for TextareaAlfa {
 }
 
 impl Component<Msg, NoUserEvent> for TextareaAlfa {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
@@ -242,7 +242,7 @@ impl Default for TextareaBeta {
 }
 
 impl Component<Msg, NoUserEvent> for TextareaBeta {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..

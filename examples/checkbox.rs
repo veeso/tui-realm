@@ -169,7 +169,7 @@ impl Default for CheckboxAlfa {
 }
 
 impl Component<Msg, NoUserEvent> for CheckboxAlfa {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -222,7 +222,7 @@ impl Default for CheckboxBeta {
 }
 
 impl Component<Msg, NoUserEvent> for CheckboxBeta {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..

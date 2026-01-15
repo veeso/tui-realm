@@ -197,7 +197,7 @@ impl Default for TableAlfa {
 }
 
 impl Component<Msg, NoUserEvent> for TableAlfa {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
@@ -286,7 +286,7 @@ impl Default for TableBeta {
 }
 
 impl Component<Msg, NoUserEvent> for TableBeta {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::TableBetaBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),

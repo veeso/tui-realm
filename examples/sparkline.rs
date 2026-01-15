@@ -162,11 +162,11 @@ impl Default for SparklineAlfa {
 }
 
 impl Component<Msg, UserEvent> for SparklineAlfa {
-    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             Event::User(UserEvent::DataGenerated(data)) => {
-                let data: Vec<PropValue> = data.into_iter().map(PropValue::U64).collect();
+                let data: Vec<PropValue> = data.iter().copied().map(PropValue::U64).collect();
                 self.attr(
                     Attribute::Dataset,
                     AttrValue::Payload(PropPayload::Vec(data)),

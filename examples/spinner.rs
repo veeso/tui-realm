@@ -172,7 +172,7 @@ impl Default for SpanAlfa {
 }
 
 impl Component<Msg, NoUserEvent> for SpanAlfa {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
@@ -208,7 +208,7 @@ impl Default for SpanBeta {
 }
 
 impl Component<Msg, NoUserEvent> for SpanBeta {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
@@ -234,8 +234,8 @@ impl Default for SpinnerAlfa {
 }
 
 impl Component<Msg, NoUserEvent> for SpinnerAlfa {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
-        if ev == Event::Tick {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
+        if *ev == Event::Tick {
             self.component.states.step();
         }
 
@@ -259,7 +259,7 @@ impl Default for SpinnerBeta {
 }
 
 impl Component<Msg, NoUserEvent> for SpinnerBeta {
-    fn on(&mut self, _: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, _: &Event<NoUserEvent>) -> Option<Msg> {
         None
     }
 }

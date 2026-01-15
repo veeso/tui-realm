@@ -179,7 +179,7 @@ impl Default for SelectAlfa {
 }
 
 impl Component<Msg, NoUserEvent> for SelectAlfa {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
@@ -233,7 +233,7 @@ impl Default for SelectBeta {
 }
 
 impl Component<Msg, NoUserEvent> for SelectBeta {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..

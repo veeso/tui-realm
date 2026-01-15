@@ -212,7 +212,7 @@ impl Default for InputText {
 }
 
 impl Component<Msg, NoUserEvent> for InputText {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -236,7 +236,7 @@ impl Component<Msg, NoUserEvent> for InputText {
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(ch)),
+            }) => self.perform(Cmd::Type(*ch)),
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::TextBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
@@ -272,7 +272,7 @@ impl Default for InputEmail {
 }
 
 impl Component<Msg, NoUserEvent> for InputEmail {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -296,7 +296,7 @@ impl Component<Msg, NoUserEvent> for InputEmail {
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(ch)),
+            }) => self.perform(Cmd::Type(*ch)),
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::EmailBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
@@ -329,7 +329,7 @@ impl Default for InputNumber {
 }
 
 impl Component<Msg, NoUserEvent> for InputNumber {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -353,7 +353,7 @@ impl Component<Msg, NoUserEvent> for InputNumber {
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(ch)),
+            }) => self.perform(Cmd::Type(*ch)),
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::NumberBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
@@ -385,7 +385,7 @@ impl Default for InputPassword {
 }
 
 impl Component<Msg, NoUserEvent> for InputPassword {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -409,7 +409,7 @@ impl Component<Msg, NoUserEvent> for InputPassword {
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(ch)),
+            }) => self.perform(Cmd::Type(*ch)),
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::PasswordBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
@@ -446,7 +446,7 @@ impl Default for InputPhone {
 }
 
 impl Component<Msg, NoUserEvent> for InputPhone {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -470,7 +470,7 @@ impl Component<Msg, NoUserEvent> for InputPhone {
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(ch)),
+            }) => self.perform(Cmd::Type(*ch)),
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::PhoneBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
@@ -502,7 +502,7 @@ impl Default for InputColor {
 }
 
 impl Component<Msg, NoUserEvent> for InputColor {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -528,7 +528,7 @@ impl Component<Msg, NoUserEvent> for InputColor {
                 modifiers: KeyModifiers::NONE,
             }) => {
                 if let CmdResult::Changed(State::One(StateValue::String(color))) =
-                    self.perform(Cmd::Type(ch))
+                    self.perform(Cmd::Type(*ch))
                 {
                     let color = tuirealm::utils::parser::parse_color(&color).unwrap();
                     self.attr(Attribute::Foreground, AttrValue::Color(color));
