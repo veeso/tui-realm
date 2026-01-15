@@ -12,8 +12,7 @@ use tuirealm::props::{Borders, Title};
 // ext
 use tuirealm::ratatui::style::{Color, Style};
 use tuirealm::ratatui::text::{Line, Span, Text};
-use tuirealm::ratatui::widgets::Block;
-use tuirealm::ratatui::widgets::block::Position;
+use tuirealm::ratatui::widgets::{Block, TitlePosition};
 use unicode_width::UnicodeWidthStr;
 
 /// ### wrap_spans
@@ -90,8 +89,8 @@ pub fn get_block(
 
     if let Some(title) = title {
         block = match title.position {
-            Position::Top => block.title_top(borrow_clone_line(&title.content)),
-            Position::Bottom => block.title_bottom(borrow_clone_line(&title.content)),
+            TitlePosition::Top => block.title_top(borrow_clone_line(&title.content)),
+            TitlePosition::Bottom => block.title_bottom(borrow_clone_line(&title.content)),
         };
     }
 
