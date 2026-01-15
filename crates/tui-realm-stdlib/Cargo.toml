@@ -19,7 +19,7 @@ rust-version = "1.85.1"
 
 [dependencies]
 textwrap = "^0.16"
-tuirealm = { version = "3", default-features = false, features = ["derive"], git = "https://github.com/veeso/tui-realm.git", rev = "17ad10bd602d00cbe5e01b35db7dec6776509bb9" }
+tuirealm = { version = "3", default-features = false, features = ["derive"], git = "https://github.com/veeso/tui-realm.git", rev = "b140498e70c1fa5bcfe60eb6f4cbce02a1d82434" }
 unicode-width = "^0.2"
 
 [dev-dependencies]

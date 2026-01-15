@@ -133,7 +133,7 @@ impl Chart {
     pub fn x_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.props.set(
             Attribute::Custom(CHART_X_BOUNDS),
-            AttrValue::Payload(PropPayload::Tup2((
+            AttrValue::Payload(PropPayload::Pair((
                 PropValue::F64(bounds.0),
                 PropValue::F64(bounds.1),
             ))),
@@ -144,7 +144,7 @@ impl Chart {
     pub fn y_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.props.set(
             Attribute::Custom(CHART_Y_BOUNDS),
-            AttrValue::Payload(PropPayload::Tup2((
+            AttrValue::Payload(PropPayload::Pair((
                 PropValue::F64(bounds.0),
                 PropValue::F64(bounds.1),
             ))),
@@ -302,7 +302,7 @@ impl MockComponent for Chart {
             if let Some((PropValue::F64(floor), PropValue::F64(ceil))) = self
                 .props
                 .get(Attribute::Custom(CHART_X_BOUNDS))
-                .map(|x| x.unwrap_payload().unwrap_tup2())
+                .map(|x| x.unwrap_payload().unwrap_pair())
             {
                 let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
                 x_axis = x_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);
@@ -333,7 +333,7 @@ impl MockComponent for Chart {
             if let Some((PropValue::F64(floor), PropValue::F64(ceil))) = self
                 .props
                 .get(Attribute::Custom(CHART_Y_BOUNDS))
-                .map(|x| x.unwrap_payload().unwrap_tup2())
+                .map(|x| x.unwrap_payload().unwrap_pair())
             {
                 let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
                 y_axis = y_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);

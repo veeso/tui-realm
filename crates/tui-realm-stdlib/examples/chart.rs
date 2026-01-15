@@ -173,7 +173,7 @@ impl Default for ChartAlfa {
 }
 
 impl Component<Msg, UserEvent> for ChartAlfa {
-    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -195,7 +195,7 @@ impl Component<Msg, UserEvent> for ChartAlfa {
                     .graph_type(GraphType::Line)
                     .marker(Marker::Braille)
                     .style(Style::default().fg(Color::Cyan))
-                    .data(data);
+                    .data(data.clone());
                 self.attr(
                     Attribute::Dataset,
                     AttrValue::Payload(PropPayload::Any(Box::new(vec![dataset]))),

@@ -183,14 +183,14 @@ impl Default for GaugeAlfa {
 }
 
 impl Component<Msg, UserEvent> for GaugeAlfa {
-    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::User(UserEvent::Loaded(prog)) => {
                 // Update
                 let label = format!("{:02}%", (prog * 100.0) as usize);
                 self.attr(
                     Attribute::Value,
-                    AttrValue::Payload(PropPayload::One(PropValue::F64(prog))),
+                    AttrValue::Payload(PropPayload::One(PropValue::F64(*prog))),
                 );
                 self.attr(Attribute::Text, AttrValue::String(label));
                 CmdResult::None
@@ -226,14 +226,14 @@ impl Default for GaugeBeta {
 }
 
 impl Component<Msg, UserEvent> for GaugeBeta {
-    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::User(UserEvent::Loaded(prog)) => {
                 // Update
                 let label = format!("{:02}%", (prog * 100.0) as usize);
                 self.attr(
                     Attribute::Value,
-                    AttrValue::Payload(PropPayload::One(PropValue::F64(prog))),
+                    AttrValue::Payload(PropPayload::One(PropValue::F64(*prog))),
                 );
                 self.attr(Attribute::Text, AttrValue::String(label));
                 CmdResult::None

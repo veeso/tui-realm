@@ -121,7 +121,7 @@ impl BarChart {
     pub fn data(mut self, data: &[(&str, u64)]) -> Self {
         let mut list: LinkedList<PropPayload> = LinkedList::new();
         for (a, b) in data {
-            list.push_back(PropPayload::Tup2((
+            list.push_back(PropPayload::Pair((
                 PropValue::Str((*a).to_string()),
                 PropValue::U64(*b),
             )));
@@ -200,7 +200,7 @@ impl BarChart {
                     continue;
                 }
                 // Push item
-                if let PropPayload::Tup2((PropValue::Str(label), PropValue::U64(value))) = item {
+                if let PropPayload::Pair((PropValue::Str(label), PropValue::U64(value))) = item {
                     data.push((label.clone(), *value));
                 }
                 // Break

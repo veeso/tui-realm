@@ -76,7 +76,7 @@ impl Canvas {
     pub fn x_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.attr(
             Attribute::Custom(CANVAS_X_BOUNDS),
-            AttrValue::Payload(PropPayload::Tup2((
+            AttrValue::Payload(PropPayload::Pair((
                 PropValue::F64(bounds.0),
                 PropValue::F64(bounds.1),
             ))),
@@ -93,7 +93,7 @@ impl Canvas {
     pub fn y_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.attr(
             Attribute::Custom(CANVAS_Y_BOUNDS),
-            AttrValue::Payload(PropPayload::Tup2((
+            AttrValue::Payload(PropPayload::Pair((
                 PropValue::F64(bounds.0),
                 PropValue::F64(bounds.1),
             ))),
@@ -182,12 +182,12 @@ impl MockComponent for Canvas {
             let x_bounds: [f64; 2] = self
                 .props
                 .get(Attribute::Custom(CANVAS_X_BOUNDS))
-                .map(|x| x.unwrap_payload().unwrap_tup2())
+                .map(|x| x.unwrap_payload().unwrap_pair())
                 .map_or([0.0, 0.0], |(a, b)| [a.unwrap_f64(), b.unwrap_f64()]);
             let y_bounds: [f64; 2] = self
                 .props
                 .get(Attribute::Custom(CANVAS_Y_BOUNDS))
-                .map(|x| x.unwrap_payload().unwrap_tup2())
+                .map(|x| x.unwrap_payload().unwrap_pair())
                 .map_or([0.0, 0.0], |(a, b)| [a.unwrap_f64(), b.unwrap_f64()]);
             // Get shapes
             let shapes: Vec<Shape> = self

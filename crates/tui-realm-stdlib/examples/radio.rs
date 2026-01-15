@@ -166,7 +166,7 @@ impl Default for RadioAlfa {
 }
 
 impl Component<Msg, NoUserEvent> for RadioAlfa {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -214,7 +214,7 @@ impl Default for RadioBeta {
 }
 
 impl Component<Msg, NoUserEvent> for RadioBeta {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..

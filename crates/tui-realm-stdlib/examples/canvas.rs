@@ -165,7 +165,7 @@ impl Default for MyCanvas {
 }
 
 impl Component<Msg, NoUserEvent> for MyCanvas {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         if let Event::Keyboard(KeyEvent { code: Key::Esc, .. }) = ev {
             Some(Msg::AppClose)
         } else {
