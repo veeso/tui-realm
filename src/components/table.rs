@@ -6,8 +6,8 @@ use std::cmp::max;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Table as PropTable,
-    TextModifiers, Title,
+    AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
+    Table as PropTable, TextModifiers, Title,
 };
 use tuirealm::ratatui::{
     layout::{Constraint, Rect},
@@ -17,7 +17,7 @@ use tuirealm::ratatui::{
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
 use super::props::TABLE_COLUMN_SPACING;
-use crate::utils;
+use crate::utils::{self, borrow_clone_line};
 
 // -- States
 
@@ -166,8 +166,8 @@ impl Table {
         self
     }
 
-    pub fn highlighted_str<S: Into<String>>(mut self, s: S) -> Self {
-        self.attr(Attribute::HighlightedStr, AttrValue::String(s.into()));
+    pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
 
@@ -379,9 +379,9 @@ impl MockComponent for Table {
             let hg_str = self
                 .props
                 .get_ref(Attribute::HighlightedStr)
-                .and_then(|x| x.as_string());
+                .and_then(|x| x.as_textline());
             if let Some(hg_str) = hg_str {
-                table = table.highlight_symbol(hg_str.as_str());
+                table = table.highlight_symbol(borrow_clone_line(hg_str));
             }
             // Col spacing
             if let Some(spacing) = self

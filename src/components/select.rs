@@ -5,8 +5,8 @@
 
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{
-    AttrValue, Attribute, BorderSides, Borders, Color, PropPayload, PropValue, Props, Style,
-    TextModifiers, Title,
+    AttrValue, Attribute, BorderSides, Borders, Color, LineStatic, PropPayload, PropValue, Props,
+    Style, TextModifiers, Title,
 };
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{
@@ -14,6 +14,8 @@ use tuirealm::ratatui::{
     widgets::{List, ListItem, ListState, Paragraph},
 };
 use tuirealm::{Frame, MockComponent, State, StateValue};
+
+use crate::utils::borrow_clone_line;
 
 // -- states
 
@@ -140,8 +142,8 @@ impl Select {
         self
     }
 
-    pub fn highlighted_str<S: Into<String>>(mut self, s: S) -> Self {
-        self.attr(Attribute::HighlightedStr, AttrValue::String(s.into()));
+    pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
 
@@ -260,9 +262,9 @@ impl Select {
         let hg_str = self
             .props
             .get_ref(Attribute::HighlightedStr)
-            .and_then(|x| x.as_string());
+            .and_then(|x| x.as_textline());
         if let Some(hg_str) = hg_str {
-            list = list.highlight_symbol(hg_str.as_str());
+            list = list.highlight_symbol(borrow_clone_line(hg_str));
         }
         let mut state: ListState = ListState::default();
         state.select(Some(self.states.selected));
