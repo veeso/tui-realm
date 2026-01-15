@@ -13,7 +13,7 @@ use tuirealm::ratatui::{
 };
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
-use crate::utils;
+use crate::utils::{self, borrow_clone_line};
 
 // -- States
 
@@ -167,8 +167,8 @@ impl List {
         self
     }
 
-    pub fn highlighted_str<S: Into<String>>(mut self, s: S) -> Self {
-        self.attr(Attribute::HighlightedStr, AttrValue::String(s.into()));
+    pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
 
@@ -295,9 +295,9 @@ impl MockComponent for List {
             let hg_str = self
                 .props
                 .get_ref(Attribute::HighlightedStr)
-                .and_then(|x| x.as_string());
+                .and_then(|x| x.as_textline());
             if let Some(hg_str) = hg_str {
-                list = list.highlight_symbol(hg_str.as_str());
+                list = list.highlight_symbol(borrow_clone_line(hg_str));
             }
             if self.scrollable() {
                 let mut state: ListState = ListState::default();

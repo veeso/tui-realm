@@ -8,15 +8,16 @@ extern crate unicode_width;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, SpanStatic, Style,
-    TextModifiers, Title,
+    AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, SpanStatic,
+    Style, TextModifiers, Title,
 };
 use tuirealm::ratatui::{
     layout::Rect,
     widgets::{List, ListItem, ListState},
 };
 use tuirealm::{Frame, MockComponent, State};
-use unicode_width::UnicodeWidthStr;
+
+use crate::utils::borrow_clone_line;
 
 // -- States
 
@@ -155,8 +156,8 @@ impl Textarea {
         self
     }
 
-    pub fn highlighted_str<S: Into<String>>(mut self, s: S) -> Self {
-        self.attr(Attribute::HighlightedStr, AttrValue::String(s.into()));
+    pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
 
@@ -177,7 +178,7 @@ impl MockComponent for Textarea {
             let hg_str = self
                 .props
                 .get_ref(Attribute::HighlightedStr)
-                .and_then(|x| x.as_string());
+                .and_then(|x| x.as_textline());
             // NOTE: wrap width is width of area minus 2 (block) minus width of highlighting string
             let wrap_width = (area.width as usize) - hg_str.as_ref().map_or(0, |x| x.width()) - 2;
             // TODO: refactor to use "Text"?
@@ -246,7 +247,7 @@ impl MockComponent for Textarea {
                 );
 
             if let Some(hg_str) = hg_str {
-                list = list.highlight_symbol(hg_str.as_str());
+                list = list.highlight_symbol(borrow_clone_line(hg_str));
             }
             render.render_stateful_widget(list, area, &mut state);
         }
