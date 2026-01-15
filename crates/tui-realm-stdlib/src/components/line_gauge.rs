@@ -2,21 +2,13 @@
 //!
 //! `LineGauge` is a line gauge
 
-use super::props::{
-    LINE_GAUGE_STYLE_DOUBLE, LINE_GAUGE_STYLE_NORMAL, LINE_GAUGE_STYLE_ROUND,
-    LINE_GAUGE_STYLE_THICK,
-};
-
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
-    Title,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, SpanStatic, Style,
+    TextModifiers, Title,
 };
-use tuirealm::ratatui::{
-    layout::Rect,
-    symbols::line::{DOUBLE, NORMAL, ROUNDED, Set, THICK},
-    widgets::LineGauge as TuiLineGauge,
-};
+use tuirealm::ratatui::text::Span;
+use tuirealm::ratatui::{layout::Rect, widgets::LineGauge as TuiLineGauge};
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Component
@@ -70,42 +62,31 @@ impl LineGauge {
         self
     }
 
-    pub fn style(mut self, s: u8) -> Self {
-        Self::assert_line_style(s);
+    /// Set custom Style & Symbols for the filled & unfilled styles.
+    ///
+    /// By default ratatui uses [`HORIZONTAL`](tuirealm::ratatui::symbols::line::HORIZONTAL) for *both*.
+    pub fn line_style<F: Into<SpanStatic>, U: Into<SpanStatic>>(
+        mut self,
+        filled: F,
+        unfilled: U,
+    ) -> Self {
         self.attr(
-            Attribute::Style,
-            AttrValue::Payload(PropPayload::One(PropValue::U8(s))),
+            Attribute::HighlightedStr,
+            AttrValue::Payload(PropPayload::Pair((
+                PropValue::TextSpan(filled.into()),
+                PropValue::TextSpan(unfilled.into()),
+            ))),
         );
+
         self
     }
 
-    fn line_set(&'_ self) -> Set<'_> {
-        match self
-            .props
-            .get_or(
-                Attribute::Style,
-                AttrValue::Payload(PropPayload::One(PropValue::U8(LINE_GAUGE_STYLE_NORMAL))),
-            )
-            .unwrap_payload()
-        {
-            PropPayload::One(PropValue::U8(LINE_GAUGE_STYLE_DOUBLE)) => DOUBLE,
-            PropPayload::One(PropValue::U8(LINE_GAUGE_STYLE_ROUND)) => ROUNDED,
-            PropPayload::One(PropValue::U8(LINE_GAUGE_STYLE_THICK)) => THICK,
-            _ => NORMAL,
-        }
-    }
-
-    fn assert_line_style(s: u8) {
-        if !(&[
-            LINE_GAUGE_STYLE_DOUBLE,
-            LINE_GAUGE_STYLE_NORMAL,
-            LINE_GAUGE_STYLE_ROUND,
-            LINE_GAUGE_STYLE_THICK,
-        ]
-        .contains(&s))
-        {
-            panic!("Invalid line style");
-        }
+    fn get_line_style(&self) -> Option<(&Span<'_>, &Span<'_>)> {
+        self.props
+            .get_ref(Attribute::HighlightedStr)
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_pair)
+            .and_then(|pair| Some((pair.0.as_textspan()?, pair.1.as_textspan()?)))
     }
 
     fn assert_progress(p: f64) {
@@ -165,19 +146,24 @@ impl MockComponent for LineGauge {
                 .add_modifier(modifiers);
 
             let div = crate::utils::get_block(borders, title, true, None);
+
+            let mut line_guage = TuiLineGauge::default()
+                .block(div)
+                .style(normal_style)
+                .filled_style(normal_style)
+                .label(label)
+                .ratio(percentage);
+
+            if let Some(line_style) = self.get_line_style() {
+                line_guage = line_guage
+                    .filled_symbol(&line_style.0.content)
+                    .filled_style(line_style.0.style)
+                    .unfilled_symbol(&line_style.1.content)
+                    .unfilled_style(line_style.1.style);
+            }
+
             // Make progress bar
-            render.render_widget(
-                TuiLineGauge::default()
-                    .block(div)
-                    .style(normal_style)
-                    .filled_style(normal_style)
-                    .filled_symbol(self.line_set().horizontal)
-                    // TODO: allow styling unfilled style
-                    // .unfilled_symbol(self.line_set().horizontal)
-                    .label(label)
-                    .ratio(percentage),
-                area,
-            );
+            render.render_widget(line_guage, area);
         }
     }
 
@@ -186,11 +172,6 @@ impl MockComponent for LineGauge {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        if let Attribute::Style = attr {
-            if let AttrValue::Payload(s) = value.clone() {
-                Self::assert_line_style(s.unwrap_one().unwrap_u8());
-            }
-        }
         if let Attribute::Value = attr {
             if let AttrValue::Payload(p) = value.clone() {
                 Self::assert_progress(p.unwrap_one().unwrap_f64());
@@ -214,7 +195,10 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::props::Alignment;
+    use tuirealm::{
+        props::{Alignment, BorderType},
+        ratatui::symbols::line::{DOUBLE_HORIZONTAL, HORIZONTAL},
+    };
 
     #[test]
     fn test_components_progress_bar() {
@@ -224,7 +208,7 @@ mod test {
             .progress(0.60)
             .title(Title::from("Downloading file...").alignment(Alignment::Center))
             .label("60% - ETA 00:20")
-            .style(LINE_GAUGE_STYLE_DOUBLE)
+            .line_style(DOUBLE_HORIZONTAL, HORIZONTAL)
             .borders(Borders::default());
         // Get value
         assert_eq!(component.state(), State::None);
@@ -243,14 +227,20 @@ mod test {
     }
 
     #[test]
-    #[should_panic = "Invalid line style"]
-    fn line_gauge_bad_symbol() {
+    fn should_allow_styling_line() {
         let _ = LineGauge::default()
-            .background(Color::Red)
-            .foreground(Color::White)
-            .style(254)
-            .title(Title::from("Downloading file...").alignment(Alignment::Center))
-            .label("60% - ETA 00:20")
-            .borders(Borders::default());
+            .borders(
+                Borders::default()
+                    .color(Color::Blue)
+                    .modifiers(BorderType::Rounded),
+            )
+            .foreground(Color::Blue)
+            .label("0%")
+            .title(Title::from("Loading...").alignment(Alignment::Center))
+            .line_style(
+                Span::styled(HORIZONTAL, Style::new().fg(Color::Red)),
+                Span::styled(HORIZONTAL, Style::new().fg(Color::Gray)),
+            )
+            .progress(0.0);
     }
 }

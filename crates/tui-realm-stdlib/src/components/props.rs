@@ -41,13 +41,6 @@ pub const INPUT_INVALID_STYLE: &str = "invalid-style";
 pub const INPUT_PLACEHOLDER: &str = "placeholder";
 pub const INPUT_PLACEHOLDER_STYLE: &str = "placeholder-style";
 
-// -- line gauge
-
-pub const LINE_GAUGE_STYLE_NORMAL: u8 = 0;
-pub const LINE_GAUGE_STYLE_DOUBLE: u8 = 1;
-pub const LINE_GAUGE_STYLE_ROUND: u8 = 2;
-pub const LINE_GAUGE_STYLE_THICK: u8 = 3;
-
 // -- table
 
 pub const TABLE_COLUMN_SPACING: &str = "col-spacing";

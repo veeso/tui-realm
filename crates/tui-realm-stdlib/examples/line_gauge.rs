@@ -3,16 +3,18 @@
 //! `Demo` shows how to use tui-realm in a real case
 
 mod utils;
+use tuirealm::ratatui::symbols::line::{HORIZONTAL, THICK_HORIZONTAL};
+use tuirealm::ratatui::text::Span;
 use utils::Loader;
 
 use std::time::Duration;
 
 use tui_realm_stdlib::LineGauge;
-use tui_realm_stdlib::props::LINE_GAUGE_STYLE_THICK;
 use tuirealm::command::CmdResult;
 use tuirealm::listener::{ListenerResult, Poll};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, PropValue, Title,
+    Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, PropValue, Style,
+    Title,
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
 use tuirealm::{
@@ -176,7 +178,7 @@ impl Default for GaugeAlfa {
                 .foreground(Color::Green)
                 .label("0%")
                 .title(Title::from("Loading...").alignment(Alignment::Center))
-                .style(LINE_GAUGE_STYLE_THICK)
+                .line_style(THICK_HORIZONTAL, HORIZONTAL)
                 .progress(0.0),
         }
     }
@@ -220,6 +222,10 @@ impl Default for GaugeBeta {
                 .foreground(Color::Blue)
                 .label("0%")
                 .title(Title::from("Loading...").alignment(Alignment::Center))
+                .line_style(
+                    Span::styled(HORIZONTAL, Style::new().fg(Color::Red)),
+                    Span::styled(HORIZONTAL, Style::new().fg(Color::Gray)),
+                )
                 .progress(0.0),
         }
     }
