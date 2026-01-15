@@ -246,7 +246,7 @@ impl MockComponent for Textarea {
                 );
 
             if let Some(hg_str) = hg_str {
-                list = list.highlight_symbol(hg_str);
+                list = list.highlight_symbol(hg_str.as_str());
             }
             render.render_stateful_widget(list, area, &mut state);
         }

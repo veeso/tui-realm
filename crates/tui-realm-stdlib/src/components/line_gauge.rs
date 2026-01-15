@@ -79,7 +79,7 @@ impl LineGauge {
         self
     }
 
-    fn line_set(&self) -> Set {
+    fn line_set(&'_ self) -> Set<'_> {
         match self
             .props
             .get_or(
@@ -171,7 +171,9 @@ impl MockComponent for LineGauge {
                     .block(div)
                     .style(normal_style)
                     .filled_style(normal_style)
-                    .line_set(self.line_set())
+                    .filled_symbol(self.line_set().horizontal)
+                    // TODO: allow styling unfilled style
+                    // .unfilled_symbol(self.line_set().horizontal)
                     .label(label)
                     .ratio(percentage),
                 area,

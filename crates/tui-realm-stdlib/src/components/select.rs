@@ -262,7 +262,7 @@ impl Select {
             .get_ref(Attribute::HighlightedStr)
             .and_then(|x| x.as_string());
         if let Some(hg_str) = hg_str {
-            list = list.highlight_symbol(hg_str);
+            list = list.highlight_symbol(hg_str.as_str());
         }
         let mut state: ListState = ListState::default();
         state.select(Some(self.states.selected));

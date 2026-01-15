@@ -18,7 +18,8 @@ use tuirealm::{Frame, MockComponent, State};
 // -- Props
 use super::props::{
     CANVAS_MARKER, CANVAS_MARKER_BAR, CANVAS_MARKER_BLOCK, CANVAS_MARKER_BRAILLE,
-    CANVAS_MARKER_DOT, CANVAS_MARKER_HALF_BLOCK, CANVAS_X_BOUNDS, CANVAS_Y_BOUNDS,
+    CANVAS_MARKER_DOT, CANVAS_MARKER_HALF_BLOCK, CANVAS_MARKER_OCTANT, CANVAS_MARKER_QUADRANT,
+    CANVAS_MARKER_SEXTANT, CANVAS_X_BOUNDS, CANVAS_Y_BOUNDS,
 };
 
 // -- Component
@@ -117,6 +118,10 @@ impl Canvas {
             Marker::Block => CANVAS_MARKER_BLOCK,
             Marker::Braille => CANVAS_MARKER_BRAILLE,
             Marker::Dot => CANVAS_MARKER_DOT,
+            Marker::Quadrant => CANVAS_MARKER_QUADRANT,
+            Marker::Sextant => CANVAS_MARKER_SEXTANT,
+            Marker::Octant => CANVAS_MARKER_OCTANT,
+            marker => unimplemented!("{:#?}", marker),
         })
     }
 
@@ -134,6 +139,9 @@ impl Canvas {
             CANVAS_MARKER_BRAILLE => Marker::Braille,
             CANVAS_MARKER_BAR => Marker::Bar,
             CANVAS_MARKER_HALF_BLOCK => Marker::HalfBlock,
+            CANVAS_MARKER_QUADRANT => Marker::Quadrant,
+            CANVAS_MARKER_SEXTANT => Marker::Sextant,
+            CANVAS_MARKER_OCTANT => Marker::Octant,
             num => unimplemented!("Mapping: {:#?}", num),
         }
     }
