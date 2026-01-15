@@ -15,7 +15,7 @@ keywords = ["tui", "terminal"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/veeso/tui-realm-stdlib"
-rust-version = "1.85.1"
+rust-version = "1.86"
 
 [dependencies]
 textwrap = "^0.16"
