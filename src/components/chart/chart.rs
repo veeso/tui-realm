@@ -247,14 +247,10 @@ impl Chart {
 
     /// Get our data from a [`AttrValue`].
     fn data_from_attr(&mut self, attr: AttrValue) {
-        match attr {
-            AttrValue::Dataset(_) => unimplemented!(), // to be removed soon https://github.com/veeso/tui-realm/pull/139
-            AttrValue::Payload(PropPayload::Any(val)) => {
-                if let Some(data) = Self::try_downcast(val) {
-                    self.set_data(data);
-                }
+        if let AttrValue::Payload(PropPayload::Any(val)) = attr {
+            if let Some(data) = Self::try_downcast(val) {
+                self.set_data(data);
             }
-            _ => (),
         }
     }
 
