@@ -68,6 +68,7 @@ The function `as_any` and `as_any_mut` are now directly implemented on `dyn Prop
 ### Change of `Poll` return types
 
 With 4.0, `Poll::poll` and `PollAsync::poll` return types changed from `ListenerResult` to `PortResult`.
+Due to this change the new `PortError` allows passing more context on what happend. It also support specifying if the Error is Intermittent(should poll again) or Permanent(should stop the port).
 
 This is due to `ListenerError`'s variants being meant to be mostly internal.
 `ListenerResult` has also been changed to be non-public.

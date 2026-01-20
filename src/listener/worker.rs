@@ -9,6 +9,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use super::{ListenerMsg, SyncPort};
+use crate::listener::PortError;
 
 // -- worker
 
@@ -125,6 +126,7 @@ where
     /// Poll and send poll to listener. Calc next poll.
     /// Returns only the messages, while the None returned by poll are discarded
     fn poll(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<UserEvent>>> {
+        let mut needs_drop = false;
         let port_iter = self.ports.iter_mut().filter(|port| port.should_poll());
 
         for port in port_iter {
@@ -134,7 +136,14 @@ where
                 let msg = match port.poll() {
                     Ok(Some(ev)) => ListenerMsg::User(ev),
                     Ok(None) => break,
-                    Err(err) => ListenerMsg::Error(err),
+                    Err(err) => {
+                        if let PortError::PermanentError(_) = &err {
+                            needs_drop = true;
+                            port.mark_for_drop();
+                        }
+
+                        ListenerMsg::Error(err)
+                    }
                 };
 
                 self.sender.send(msg)?;
@@ -148,6 +157,12 @@ where
             }
             // Update next poll
             port.calc_next_poll();
+        }
+
+        // this needs to be done due to us operating on a reference in the "for loop" above, which cannot drop the port itself
+        // but we can make use of that "max_poll" *should* be at least 1 to mark for dropping
+        if needs_drop {
+            self.ports.retain(|port| port.max_poll() != 0);
         }
 
         Ok(())
@@ -199,13 +214,15 @@ where
 #[cfg(test)]
 mod test {
 
+    use std::sync::atomic::Ordering;
+
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::Event;
     use crate::core::event::{Key, KeyEvent};
-    use crate::listener::{PollResult, SyncPort};
+    use crate::listener::{Poll, PollError, PollResult, SyncPort};
     use crate::mock::{MockEvent, MockPoll};
+    use crate::{Event, NoUserEvent};
 
     #[test]
     fn worker_should_poll_multiple_times() {
@@ -365,5 +382,44 @@ mod test {
         let mut worker =
             EventListenerWorker::<MockEvent>::new(vec![], tx, paused_t, running_t, None);
         worker.calc_next_tick();
+    }
+
+    #[test]
+    fn worker_should_drop_port_in_perma_error() {
+        #[derive(Debug)]
+        struct TestPoll;
+
+        impl Poll<NoUserEvent> for TestPoll {
+            fn poll(&mut self) -> crate::listener::PortResult<Option<Event<NoUserEvent>>> {
+                Err(PortError::PermanentError("Test".to_string()))
+            }
+        }
+
+        let (tx, rx) = mpsc::channel();
+        let paused = Arc::new(AtomicBool::new(true));
+        let paused_t = Arc::clone(&paused);
+        let running = Arc::new(AtomicBool::new(true));
+        let running_t = Arc::clone(&running);
+        let mut worker = EventListenerWorker::<NoUserEvent>::new(
+            vec![SyncPort::new(Box::new(TestPoll), Duration::from_secs(5), 1)],
+            tx,
+            paused_t,
+            running_t,
+            Some(Duration::from_secs(1)),
+        );
+        assert_eq!(worker.ports.len(), 1);
+        paused.store(false, Ordering::Relaxed);
+
+        assert!(worker.poll().is_ok());
+
+        paused.store(true, Ordering::Relaxed);
+
+        assert_eq!(worker.ports.len(), 0);
+
+        // Receive
+        assert_eq!(
+            PollResult::<Option<_>>::from(rx.recv().unwrap()).unwrap_err(),
+            PollError::PortError(PortError::PermanentError("Test".to_string()))
+        );
     }
 }

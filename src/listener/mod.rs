@@ -53,9 +53,12 @@ pub enum ListenerError {
 /// Errors from a port directly.
 #[derive(Debug, Error, PartialEq)]
 pub enum PortError {
-    // TODO: this should likely be more specific
-    #[error("A port has failed to poll")]
-    PollFailed,
+    /// A Intermittend Error in a port will result in the port being polled again.
+    #[error("A intermittend Error happened: {0}")]
+    IntermittentError(String),
+    /// A Permanent Error in a port will result in the port not being polled again.
+    #[error("A permanent Error happened: {0}")]
+    PermanentError(String),
 }
 
 /// Errors that can happen in a Listener `poll`.
@@ -76,7 +79,7 @@ where
     /// Poll for a event from input listeners, or from custom ports (e.g. Network).
     /// This function must not be blocking, and will be called within the configured interval of the event listener.
     ///
-    /// - If polling failed, `Err` should be returned. The port will be polled again.
+    /// - If polling failed, `Err` should be returned. The port will be polled again if the error is [`PortError::IntermittendError`].
     /// - If a event is available, `Ok(Some)` needs to be returned.
     /// - If there is no event available, `Ok(None)` needs to be returned. The port will be polled again.
     fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>>;
@@ -93,9 +96,9 @@ where
 {
     /// Poll for a event with the possibility to do it asynchronously, from input listeners, or from custom ports (e.g. Network).
     ///
-    /// - If polling failed, `Err` should be returned. The port will be polled again.
+    /// - If polling failed, `Err` should be returned. The port will be polled again if the error is [`PortError::IntermittendError`].
     /// - If a event is available, `Ok(Some)` needs to be returned.
-    /// - If no events are available, either await until one becomes available.
+    /// - If no events are available, await until one becomes available.
     /// - If there are no more events expected, `Ok(None)` should be returned. The port will not be polled again.
     async fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>>;
 }
@@ -353,6 +356,7 @@ where
 {
     let mut times_remaining = port.max_poll();
     loop {
+        let mut should_stop = false;
         if paused.load(Ordering::Relaxed) {
             tokio::time::sleep(Duration::from_millis(25)).await;
             continue;
@@ -361,10 +365,19 @@ where
         let msg = match port.poll().await {
             Ok(Some(ev)) => ListenerMsg::User(ev),
             Ok(None) => break,
-            Err(err) => ListenerMsg::Error(err),
+            Err(err) => {
+                if let PortError::PermanentError(_) = &err {
+                    should_stop = true;
+                }
+                ListenerMsg::Error(err)
+            }
         };
 
         tx.send(msg)?;
+
+        if should_stop {
+            break;
+        }
 
         // do this at the end to at least call it once
         times_remaining = times_remaining.saturating_sub(1);

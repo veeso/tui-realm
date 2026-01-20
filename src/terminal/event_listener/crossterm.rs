@@ -11,7 +11,8 @@ use super::Event;
 use crate::event::{
     Key, KeyEvent, KeyModifiers, MediaKeyCode, MouseButton, MouseEvent, MouseEventKind,
 };
-use crate::listener::{Poll, PortError, PortResult};
+use crate::listener::{Poll, PortResult};
+use crate::terminal::event_listener::io_err_to_port_err;
 
 /// The input listener for crossterm.
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
@@ -37,9 +38,9 @@ where
         match xterm::poll(self.interval) {
             Ok(true) => xterm::read()
                 .map(|x| Some(Event::from(x)))
-                .map_err(|_| PortError::PollFailed),
+                .map_err(io_err_to_port_err),
             Ok(false) => Ok(None),
-            Err(_) => Err(PortError::PollFailed),
+            Err(err) => Err(io_err_to_port_err(err)),
         }
     }
 }

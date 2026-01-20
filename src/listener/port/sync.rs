@@ -27,7 +27,7 @@ where
     ///
     /// * `poll` - The poll trait object
     /// * `interval` - The interval between each poll
-    /// * `max_poll` - The maximum amount of times the port should be polled in a single poll
+    /// * `max_poll` - The maximum amount of times the port should be polled in a single poll; needs to be at least 1
     pub fn new(poll: Box<dyn Poll<UserEvent>>, interval: Duration, max_poll: usize) -> Self {
         Self {
             poll,
@@ -65,5 +65,10 @@ where
     /// Calculate the next poll (t_now + interval)
     pub fn calc_next_poll(&mut self) {
         self.next_poll = Instant::now().add(self.interval);
+    }
+
+    /// Mark the Port for dropping.
+    pub(crate) fn mark_for_drop(&mut self) {
+        self.max_poll = 0;
     }
 }
