@@ -64,3 +64,10 @@ Additionally, `TerminalBridge::new_termion` and `init_termion` have been removed
 ### Removal of `PropBoundExt`
 
 The function `as_any` and `as_any_mut` are now directly implemented on `dyn PropBound`, not requiring another trait to be imported.
+
+### Change of `Poll` return types
+
+With 4.0, `Poll::poll` and `PollAsync::poll` return types changed from `ListenerResult` to `PortResult`.
+
+This is due to `ListenerError`'s variants being meant to be mostly internal.
+`ListenerResult` has also been changed to be non-public.

@@ -34,7 +34,9 @@ use super::Event;
 
 /// Result returned by `EventListener`. [`Ok`] value depends on the method, while the
 /// Err value is always [`ListenerError`].
-pub type ListenerResult<T> = Result<T, ListenerError>;
+type ListenerResult<T> = Result<T, ListenerError>;
+/// Result type for [`Poll`] and [`PollAsync`].
+pub type PortResult<T> = Result<T, PortError>;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum ListenerError {
@@ -44,10 +46,17 @@ pub enum ListenerError {
     CouldNotStop,
     #[error("the event listener has died")]
     ListenerDied,
-    #[error("poll() call returned error")]
-    PollFailed,
     #[error("failed to start async listener because of missing runtime handle")]
     NoHandle,
+    #[error("a port returned a error: {0}")]
+    PortError(#[from] PortError),
+}
+
+#[derive(Debug, Error, PartialEq)]
+pub enum PortError {
+    // TODO: this should likely be more specific
+    #[error("A port has failed to poll")]
+    PollFailed,
 }
 
 /// The poll trait defines the function [`Poll::poll`], which will be called by the event listener
@@ -62,7 +71,7 @@ where
     /// - If polling failed, `Err` should be returned. The port will be polled again.
     /// - If a event is available, `Ok(Some)` needs to be returned.
     /// - If there is no event available, `Ok(None)` needs to be returned. The port will be polled again.
-    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>>;
+    fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>>;
 }
 
 /// The poll trait defines the function [`PollAsync::poll`], which will be called by the runtime
@@ -80,7 +89,7 @@ where
     /// - If a event is available, `Ok(Some)` needs to be returned.
     /// - If no events are available, either await until one becomes available.
     /// - If there are no more events expected, `Ok(None)` should be returned. The port will not be polled again.
-    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>>;
+    async fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>>;
 }
 
 /// The event listener is a worker that runs in a separate thread and polls for events
@@ -377,7 +386,7 @@ enum ListenerMsg<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone + Send,
 {
-    Error(ListenerError),
+    Error(PortError),
     Tick,
     User(Event<UserEvent>),
 }
@@ -388,7 +397,7 @@ where
 {
     fn from(msg: ListenerMsg<UserEvent>) -> Self {
         match msg {
-            ListenerMsg::Error(err) => Err(err),
+            ListenerMsg::Error(err) => Err(err.into()),
             ListenerMsg::Tick => Ok(Some(Event::Tick)),
             ListenerMsg::User(ev) => Ok(Some(ev)),
         }
@@ -401,7 +410,7 @@ where
 {
     fn from(msg: ListenerMsg<UserEvent>) -> Self {
         match msg {
-            ListenerMsg::Error(err) => Err(err),
+            ListenerMsg::Error(err) => Err(err.into()),
             ListenerMsg::Tick => Ok(Event::Tick),
             ListenerMsg::User(ev) => Ok(ev),
         }

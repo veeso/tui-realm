@@ -4,7 +4,7 @@ mod model;
 use std::time::{Duration, SystemTime};
 
 use components::Label;
-use tuirealm::listener::{ListenerResult, Poll};
+use tuirealm::listener::{Poll, PortResult};
 use tuirealm::terminal::CrosstermTerminalAdapter;
 use tuirealm::{
     Application, Event, EventListenerCfg, PollStrategy, Sub, SubClause, SubEventClause, Update,
@@ -44,8 +44,8 @@ impl PartialEq for UserEvent {
 struct UserDataPort;
 
 impl Poll<UserEvent> for UserDataPort {
-    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
-        ListenerResult::Ok(Some(Event::User(UserEvent::GotData(SystemTime::now()))))
+    fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
+        Ok(Some(Event::User(UserEvent::GotData(SystemTime::now()))))
     }
 }
 
