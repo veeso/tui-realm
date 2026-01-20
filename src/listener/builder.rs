@@ -213,13 +213,8 @@ where
     /// Set poll timeout.
     /// Poll timeout is the maximum time to wait when fetching the thread receiver.
     ///
-    /// > Panics if timeout is 0
+    /// It is recommended to not set the time to [`Duration::ZERO`].
     pub fn poll_timeout(mut self, timeout: Duration) -> Self {
-        if timeout == Duration::ZERO {
-            panic!(
-                "poll timeout cannot be 0 (see <https://github.com/rust-lang/rust/issues/39364>)"
-            )
-        }
         self.poll_timeout = timeout;
         self
     }
@@ -403,14 +398,6 @@ mod test {
         assert_eq!(builder.sync_ports.len(), 2);
         let mut listener = builder.start().unwrap();
         assert!(listener.stop().is_ok());
-    }
-
-    #[test]
-    #[should_panic]
-    fn event_listener_cfg_should_panic_with_poll_timeout_zero() {
-        let _ = EventListenerCfg::<MockEvent>::default()
-            .poll_timeout(Duration::from_secs(0))
-            .start();
     }
 
     #[test]

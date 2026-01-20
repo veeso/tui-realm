@@ -140,16 +140,8 @@ where
     /// Create a new [`EventListener`].
     /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
     ///
-    /// # Panics
-    ///
-    /// - if `poll_timeout` is 0
+    /// It is recommended to not set the time to [`Duration::ZERO`].
     pub(self) fn new(poll_timeout: Duration) -> Self {
-        if poll_timeout == Duration::ZERO {
-            panic!(
-                "poll timeout cannot be 0 (see <https://github.com/rust-lang/rust/issues/39364>)"
-            )
-        }
-
         let (sender, recv) = mpsc::channel();
         let paused = Arc::new(AtomicBool::new(false));
         let running = Arc::new(AtomicBool::new(false));
@@ -597,11 +589,5 @@ mod test {
         assert!(listener.stop().is_ok());
         sleep(Duration::from_millis(5)).await; // ensure the tasks have a chance to execute again to cancel themself
         assert_eq!(Handle::current().metrics().num_alive_tasks(), 0);
-    }
-
-    #[test]
-    #[should_panic = "poll timeout cannot be 0"]
-    fn event_listener_with_poll_timeout_zero_should_panic() {
-        EventListener::<MockEvent>::new(Duration::from_millis(0));
     }
 }
