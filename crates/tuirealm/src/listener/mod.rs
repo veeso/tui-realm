@@ -382,12 +382,12 @@ where
 // -- listener thread
 
 /// Listener message is returned by the listener thread
+#[derive(Debug)]
 enum ListenerMsg<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone + Send,
 {
     Error(PortError),
-    Tick,
     User(Event<UserEvent>),
 }
 
@@ -398,7 +398,6 @@ where
     fn from(msg: ListenerMsg<UserEvent>) -> Self {
         match msg {
             ListenerMsg::Error(err) => Err(err.into()),
-            ListenerMsg::Tick => Ok(Some(Event::Tick)),
             ListenerMsg::User(ev) => Ok(Some(ev)),
         }
     }
@@ -411,7 +410,6 @@ where
     fn from(msg: ListenerMsg<UserEvent>) -> Self {
         match msg {
             ListenerMsg::Error(err) => Err(err.into()),
-            ListenerMsg::Tick => Ok(Event::Tick),
             ListenerMsg::User(ev) => Ok(ev),
         }
     }

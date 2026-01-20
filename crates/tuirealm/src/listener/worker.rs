@@ -116,7 +116,7 @@ where
     /// Send tick to listener and calc next tick
     fn send_tick(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<UserEvent>>> {
         // Send tick
-        self.sender.send(ListenerMsg::Tick)?;
+        self.sender.send(ListenerMsg::User(crate::Event::Tick))?;
         // Calc next tick
         self.calc_next_tick();
         Ok(())
