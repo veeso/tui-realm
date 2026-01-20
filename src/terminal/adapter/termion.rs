@@ -5,7 +5,7 @@ use termion::raw::{IntoRawMode as _, RawTerminal};
 use termion::screen::{AlternateScreen, IntoAlternateScreen as _};
 
 use super::{TerminalAdapter, TerminalResult};
-use crate::ratatui::{Terminal, backend};
+use crate::ratatui::{Terminal, TerminalOptions, backend};
 use crate::terminal::TerminalError;
 
 pub type TermionBackend = Terminal<backend::TermionBackend<TermionWrapper>>;
@@ -60,10 +60,17 @@ impl TermionTerminalAdapter {
     ///
     /// This is likely not what you want.
     pub fn new_nothing() -> TerminalResult<Self> {
+        Self::new_nothing_with_options(TerminalOptions::default())
+    }
+
+    /// Create a new Termion Backend with no modes activated and custom ratatui Terminal options.
+    ///
+    /// This is likely not what you want.
+    pub fn new_nothing_with_options(options: TerminalOptions) -> TerminalResult<Self> {
         let stdout = std::io::stdout();
         let stdout = TermionWrapper::Nothing(stdout);
 
-        let terminal = Terminal::new(backend::TermionBackend::new(stdout))
+        let terminal = Terminal::with_options(backend::TermionBackend::new(stdout), options)
             .map_err(|_| TerminalError::CannotConnectStdout)?;
 
         Ok(Self { terminal })
@@ -71,12 +78,17 @@ impl TermionTerminalAdapter {
 
     /// Create a new Termion Backend with raw-mode activated.
     pub fn new_raw() -> TerminalResult<Self> {
+        Self::new_raw_with_options(TerminalOptions::default())
+    }
+
+    /// Create a new Termion Backend with raw-mode activated and custom ratatui Terminal options.
+    pub fn new_raw_with_options(options: TerminalOptions) -> TerminalResult<Self> {
         let stdout = std::io::stdout()
             .into_raw_mode()
             .map_err(|_| TerminalError::CannotConnectStdout)?;
         let stdout = TermionWrapper::Raw(stdout);
 
-        let terminal = Terminal::new(backend::TermionBackend::new(stdout))
+        let terminal = Terminal::with_options(backend::TermionBackend::new(stdout), options)
             .map_err(|_| TerminalError::CannotConnectStdout)?;
 
         Ok(Self { terminal })
@@ -84,6 +96,11 @@ impl TermionTerminalAdapter {
 
     /// Create a new Termion Backend with raw-mode and alternate screen activated.
     pub fn new_alternate_raw() -> TerminalResult<Self> {
+        Self::new_alternate_raw_with_options(TerminalOptions::default())
+    }
+
+    /// Create a new Termion Backend with raw-mode and alternate screen activated and custom ratatui Terminal options.
+    pub fn new_alternate_raw_with_options(options: TerminalOptions) -> TerminalResult<Self> {
         let stdout = std::io::stdout()
             .into_raw_mode()
             .map_err(|_| TerminalError::CannotConnectStdout)?
@@ -91,7 +108,7 @@ impl TermionTerminalAdapter {
             .map_err(|_| TerminalError::CannotConnectStdout)?;
         let stdout = TermionWrapper::AlternateRaw(stdout);
 
-        let terminal = Terminal::new(backend::TermionBackend::new(stdout))
+        let terminal = Terminal::with_options(backend::TermionBackend::new(stdout), options)
             .map_err(|_| TerminalError::CannotConnectStdout)?;
 
         Ok(Self { terminal })
@@ -99,6 +116,11 @@ impl TermionTerminalAdapter {
 
     /// Create a new Termion Backend with raw-mode, alternate screen and mouse capture activated.
     pub fn new_mouse_alternate_raw() -> TerminalResult<Self> {
+        Self::new_mouse_alternate_raw_with_options(TerminalOptions::default())
+    }
+
+    /// Create a new Termion Backend with raw-mode, alternate screen, mouse capture activated and custom ratatui Terminal options.
+    pub fn new_mouse_alternate_raw_with_options(options: TerminalOptions) -> TerminalResult<Self> {
         let stdout = std::io::stdout()
             .into_raw_mode()
             .map_err(|_| TerminalError::CannotConnectStdout)?
@@ -106,7 +128,7 @@ impl TermionTerminalAdapter {
             .map_err(|_| TerminalError::CannotConnectStdout)?;
         let stdout = TermionWrapper::MouseAlternateRaw(MouseTerminal::from(stdout));
 
-        let terminal = Terminal::new(backend::TermionBackend::new(stdout))
+        let terminal = Terminal::with_options(backend::TermionBackend::new(stdout), options)
             .map_err(|_| TerminalError::CannotConnectStdout)?;
 
         Ok(Self { terminal })
@@ -114,12 +136,17 @@ impl TermionTerminalAdapter {
 
     /// Create a new Termion Backend with raw-mode and mouse capture activated.
     pub fn new_mouse_raw() -> TerminalResult<Self> {
+        Self::new_mouse_raw_with_options(TerminalOptions::default())
+    }
+
+    /// Create a new Termion Backend with raw-mode and mouse capture activated and with custom ratatui Terminal options.
+    pub fn new_mouse_raw_with_options(options: TerminalOptions) -> TerminalResult<Self> {
         let stdout = std::io::stdout()
             .into_raw_mode()
             .map_err(|_| TerminalError::CannotConnectStdout)?;
         let stdout = TermionWrapper::MouseRaw(MouseTerminal::from(stdout));
 
-        let terminal = Terminal::new(backend::TermionBackend::new(stdout))
+        let terminal = Terminal::with_options(backend::TermionBackend::new(stdout), options)
             .map_err(|_| TerminalError::CannotConnectStdout)?;
 
         Ok(Self { terminal })
