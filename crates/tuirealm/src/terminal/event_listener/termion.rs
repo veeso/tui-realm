@@ -1,7 +1,8 @@
 use std::time::Duration;
 
+use termion::AsyncReader;
 use termion::event::{Event as TonEvent, Key as TonKey};
-use termion::input::TermRead as _;
+use termion::input::{Events, TermRead as _};
 
 use super::Event;
 use crate::event::{Key, KeyEvent, KeyModifiers};
@@ -10,12 +11,11 @@ use crate::terminal::event_listener::io_err_to_port_err;
 
 /// The input listener for [`termion`].
 #[doc(alias = "InputEventListener")]
-#[derive(Default)]
-pub struct TermionInputListener;
+pub struct TermionInputListener(Events<AsyncReader>);
 
 impl TermionInputListener {
     pub fn new(_interval: Duration) -> Self {
-        Self
+        Self(termion::async_stdin().events())
     }
 }
 
@@ -24,7 +24,8 @@ where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
-        match std::io::stdin().events().next() {
+        // termion's "AsyncReader::read" will never block and instead return "Ok(0)", which is handled as "None" here
+        match self.0.next() {
             Some(Ok(ev)) => Ok(Some(Event::from(ev))),
             Some(Err(err)) => Err(io_err_to_port_err(err)),
             None => Ok(None),
