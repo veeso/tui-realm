@@ -276,8 +276,7 @@ where
         match self.recv.recv_timeout(self.poll_timeout) {
             Ok(msg) => ListenerResult::from(msg),
             Err(mpsc::RecvTimeoutError::Timeout) => Ok(None),
-            // likely should be "ListenerDied"
-            Err(_) => Err(ListenerError::PollFailed),
+            Err(mpsc::RecvTimeoutError::Disconnected) => Err(ListenerError::ListenerDied),
         }
     }
 
@@ -285,8 +284,7 @@ where
     pub fn poll_blocking(&self) -> ListenerResult<Event<UserEvent>> {
         match self.recv.recv() {
             Ok(msg) => ListenerResult::from(msg),
-            // likely should be "ListenerDied"
-            Err(_) => Err(ListenerError::PollFailed),
+            Err(mpsc::RecvError) => Err(ListenerError::ListenerDied),
         }
     }
 
@@ -295,8 +293,7 @@ where
         match self.recv.try_recv() {
             Ok(msg) => ListenerResult::from(msg),
             Err(TryRecvError::Empty) => Ok(None),
-            // likely should be "ListenerDied"
-            Err(_) => Err(ListenerError::PollFailed),
+            Err(TryRecvError::Disconnected) => Err(ListenerError::ListenerDied),
         }
     }
 
