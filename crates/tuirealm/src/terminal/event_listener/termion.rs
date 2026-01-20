@@ -1,15 +1,23 @@
 use std::time::Duration;
 
 use termion::AsyncReader;
-use termion::event::{Event as TonEvent, Key as TonKey};
+use termion::event::{
+    Event as TonEvent, Key as TonKey, MouseButton as TonMouseButton, MouseEvent as TonMouseEvent,
+};
 use termion::input::{Events, TermRead as _};
 
 use super::Event;
-use crate::event::{Key, KeyEvent, KeyModifiers};
+use crate::event::{Key, KeyEvent, KeyModifiers, MouseButton, MouseEvent, MouseEventKind};
 use crate::listener::{Poll, PortResult};
 use crate::terminal::event_listener::io_err_to_port_err;
 
 /// The input listener for [`termion`].
+///
+/// # Known Issues
+///
+/// - Mouse Events only have a key associated on `Down` / `Press`, not on `Up` / `Release` or `Hold` / `Drag`
+/// - Mouse Hover location is not implemented in termion
+/// - Mouse Events cannot have modifiers (CTRL, SHIFT; ALT) associated with it
 #[doc(alias = "InputEventListener")]
 pub struct TermionInputListener(Events<AsyncReader>);
 
@@ -40,6 +48,8 @@ where
     fn from(e: TonEvent) -> Self {
         match e {
             TonEvent::Key(key) => Self::Keyboard(key.into()),
+            // As of termion@4.0.6, the following does *not* handle mouse hover locations
+            TonEvent::Mouse(key) => Self::Mouse(key.into()),
             _ => Self::None,
         }
     }
@@ -73,9 +83,8 @@ impl From<TonKey> for KeyEvent {
             TonKey::PageDown => Key::PageDown,
             TonKey::Insert => Key::Insert,
             TonKey::F(f) => Key::Function(f),
-            TonKey::Null => Key::Null,
+            TonKey::Null | TonKey::__IsNotComplete => Key::Null,
             TonKey::Esc => Key::Esc,
-            TonKey::__IsNotComplete => Key::Null,
             TonKey::ShiftLeft => Key::ShiftLeft,
             TonKey::AltLeft => Key::AltLeft,
             TonKey::CtrlLeft => Key::CtrlLeft,
@@ -95,11 +104,45 @@ impl From<TonKey> for KeyEvent {
     }
 }
 
+impl From<TonMouseEvent> for MouseEvent {
+    fn from(value: TonMouseEvent) -> Self {
+        match value {
+            TonMouseEvent::Press(mouse_button, x, y) => Self {
+                kind: mouse_button.into(),
+                modifiers: KeyModifiers::NONE,
+                column: x,
+                row: y,
+            },
+            // FIXME: The following is not correct, but it cannot be implemented without termion changing or us doing key-tracking
+            TonMouseEvent::Release(x, y) | TonMouseEvent::Hold(x, y) => Self {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: x,
+                row: y,
+            },
+        }
+    }
+}
+
+impl From<TonMouseButton> for MouseEventKind {
+    fn from(value: TonMouseButton) -> Self {
+        match value {
+            // FIXME: This is not correct and needs to be fixed-up by the caller (if we ever implement it)
+            TonMouseButton::Left => Self::Down(MouseButton::Left),
+            TonMouseButton::Right => Self::Down(MouseButton::Right),
+            TonMouseButton::Middle => Self::Down(MouseButton::Middle),
+            TonMouseButton::WheelUp => Self::ScrollUp,
+            TonMouseButton::WheelDown => Self::ScrollDown,
+            TonMouseButton::WheelLeft => Self::ScrollLeft,
+            TonMouseButton::WheelRight => Self::ScrollRight,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
 
     use pretty_assertions::assert_eq;
-    use termion::event::MouseEvent;
 
     use super::*;
     use crate::mock::MockEvent;
@@ -177,8 +220,89 @@ mod test {
             Event::Keyboard(KeyEvent::from(Key::Backspace))
         );
         assert_eq!(
-            AppEvent::from(TonEvent::Mouse(MouseEvent::Hold(0, 0))),
-            Event::None
+            AppEvent::from(TonEvent::Mouse(TonMouseEvent::Press(
+                TonMouseButton::Left,
+                1,
+                1
+            ))),
+            Event::Mouse(MouseEvent {
+                kind: MouseEventKind::Down(MouseButton::Left),
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            })
+        );
+    }
+
+    #[test]
+    fn should_adapt_mouse_event() {
+        assert_eq!(
+            MouseEvent::from(TonMouseEvent::Press(TonMouseButton::Left, 1, 1)),
+            MouseEvent {
+                kind: MouseEventKind::Down(MouseButton::Left),
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(TonMouseEvent::Release(1, 1)),
+            MouseEvent {
+                kind: MouseEventKind::Moved,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        // assert_eq!(
+        //     MouseEvent::from(TMouseEvent {
+        //         mouse_buttons: XtermMouseEventKind::Drag(XtermMouseButton::Middle),
+        //         x: 1,
+        //         y: 1,
+        //         modifiers: Modifiers::NONE
+        //     }),
+        //     MouseEvent {
+        //         kind: MouseEventKind::Drag(MouseButton::Middle),
+        //         modifiers: KeyModifiers::NONE,
+        //         column: 1,
+        //         row: 1
+        //     }
+        // );
+        assert_eq!(
+            MouseEvent::from(TonMouseEvent::Press(TonMouseButton::WheelUp, 1, 1)),
+            MouseEvent {
+                kind: MouseEventKind::ScrollUp,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(TonMouseEvent::Press(TonMouseButton::WheelDown, 1, 1)),
+            MouseEvent {
+                kind: MouseEventKind::ScrollDown,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(TonMouseEvent::Press(TonMouseButton::WheelLeft, 1, 1)),
+            MouseEvent {
+                kind: MouseEventKind::ScrollLeft,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
+        );
+        assert_eq!(
+            MouseEvent::from(TonMouseEvent::Press(TonMouseButton::WheelRight, 1, 1)),
+            MouseEvent {
+                kind: MouseEventKind::ScrollRight,
+                modifiers: KeyModifiers::NONE,
+                column: 1,
+                row: 1
+            }
         );
     }
 }
