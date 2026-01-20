@@ -2,7 +2,7 @@ use std::ops::Add as _;
 use std::time::{Duration, Instant};
 
 use crate::Event;
-use crate::listener::{ListenerResult, Poll};
+use crate::listener::{Poll, PortResult};
 
 /// A port is a wrapper around the poll trait object, which also defines an interval, which defines
 /// the amount of time between each [`Poll::poll`] call.
@@ -58,7 +58,7 @@ where
     }
 
     /// Calls [`Poll::poll`] on the inner [`Poll`] trait object.
-    pub fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    pub fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         self.poll.poll()
     }
 

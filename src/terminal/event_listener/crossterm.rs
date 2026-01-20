@@ -8,11 +8,10 @@ use crossterm::event::{
 };
 
 use super::Event;
-use crate::ListenerError;
 use crate::event::{
     Key, KeyEvent, KeyModifiers, MediaKeyCode, MouseButton, MouseEvent, MouseEventKind,
 };
-use crate::listener::{ListenerResult, Poll};
+use crate::listener::{Poll, PortError, PortResult};
 
 /// The input listener for crossterm.
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
@@ -34,13 +33,13 @@ impl<UserEvent> Poll<UserEvent> for CrosstermInputListener
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         match xterm::poll(self.interval) {
             Ok(true) => xterm::read()
                 .map(|x| Some(Event::from(x)))
-                .map_err(|_| ListenerError::PollFailed),
+                .map_err(|_| PortError::PollFailed),
             Ok(false) => Ok(None),
-            Err(_) => Err(ListenerError::PollFailed),
+            Err(_) => Err(PortError::PollFailed),
         }
     }
 }

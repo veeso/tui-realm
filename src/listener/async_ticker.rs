@@ -1,5 +1,6 @@
-use super::{ListenerResult, PollAsync};
+use super::PollAsync;
 use crate::Event;
+use crate::listener::PortResult;
 
 /// [`PollAsync`] implementation to have a Async-Port for emitting [`Event::Tick`].
 ///
@@ -18,7 +19,7 @@ impl<UserEvent> PollAsync<UserEvent> for AsyncTicker
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    async fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         Ok(Some(Event::Tick))
     }
 }

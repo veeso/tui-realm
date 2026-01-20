@@ -4,9 +4,8 @@ use termion::event::{Event as TonEvent, Key as TonKey};
 use termion::input::TermRead as _;
 
 use super::Event;
-use crate::ListenerError;
 use crate::event::{Key, KeyEvent, KeyModifiers};
-use crate::listener::{ListenerResult, Poll};
+use crate::listener::{Poll, PortError, PortResult};
 
 /// The input listener for [`termion`].
 #[doc(alias = "InputEventListener")]
@@ -23,10 +22,10 @@ impl<UserEvent> Poll<UserEvent> for TermionInputListener
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         match std::io::stdin().events().next() {
             Some(Ok(ev)) => Ok(Some(Event::from(ev))),
-            Some(Err(_)) => Err(ListenerError::PollFailed),
+            Some(Err(_)) => Err(PortError::PollFailed),
             None => Ok(None),
         }
     }

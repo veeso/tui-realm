@@ -5,7 +5,7 @@
 use std::marker::PhantomData;
 
 use crate::event::{Event, Key, KeyEvent};
-use crate::listener::{ListenerResult, Poll};
+use crate::listener::{Poll, PortResult};
 use crate::{AttrValue, Attribute, Injector};
 
 // -- modules
@@ -55,7 +55,7 @@ impl<UserEvent> Poll<UserEvent> for MockPoll<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         Ok(Some(Event::Keyboard(KeyEvent::from(Key::Enter))))
     }
 }
@@ -70,7 +70,7 @@ impl<UserEvent> crate::listener::PollAsync<UserEvent> for MockPollAsync
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    async fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         let tempfile = tempfile::NamedTempFile::new().expect("tempfile");
         let _file = tokio::fs::File::open(tempfile.path()).await.expect("file");
 

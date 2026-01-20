@@ -6,7 +6,7 @@ use tokio::io::AsyncWriteExt as _;
 use tokio::runtime::Handle;
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::event::{Key, KeyEvent};
-use tuirealm::listener::{ListenerResult, PollAsync};
+use tuirealm::listener::{PollAsync, PortResult};
 use tuirealm::props::{Alignment, Color, Style, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::widgets::Paragraph;
@@ -190,7 +190,7 @@ impl AsyncPort {
 
 #[tuirealm::async_trait]
 impl PollAsync<UserEvent> for AsyncPort {
-    async fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    async fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         let result = self.write_file().await;
 
         Ok(Some(Event::User(UserEvent::WroteFile(result))))
