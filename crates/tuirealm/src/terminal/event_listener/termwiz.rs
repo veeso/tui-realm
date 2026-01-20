@@ -53,7 +53,7 @@ where
                 }
             }
             Ok(None) => Ok(None),
-            Err(_) => Err(PortError::PollFailed),
+            Err(err) => Err(PortError::PermanentError(err.to_string())),
         }
     }
 }

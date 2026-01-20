@@ -5,7 +5,8 @@ use termion::input::TermRead as _;
 
 use super::Event;
 use crate::event::{Key, KeyEvent, KeyModifiers};
-use crate::listener::{Poll, PortError, PortResult};
+use crate::listener::{Poll, PortResult};
+use crate::terminal::event_listener::io_err_to_port_err;
 
 /// The input listener for [`termion`].
 #[doc(alias = "InputEventListener")]
@@ -25,7 +26,7 @@ where
     fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         match std::io::stdin().events().next() {
             Some(Ok(ev)) => Ok(Some(Event::from(ev))),
-            Some(Err(_)) => Err(PortError::PollFailed),
+            Some(Err(err)) => Err(io_err_to_port_err(err)),
             None => Ok(None),
         }
     }

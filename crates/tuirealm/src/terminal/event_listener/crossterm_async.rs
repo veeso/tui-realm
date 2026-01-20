@@ -2,7 +2,8 @@ use crossterm::event::EventStream;
 use futures_util::StreamExt;
 
 use crate::Event;
-use crate::listener::{PollAsync, PortError, PortResult};
+use crate::listener::{PollAsync, PortResult};
+use crate::terminal::event_listener::io_err_to_port_err;
 
 /// The async input listener for crossterm.
 /// This can be manually added as a async port, or directly via [`EventListenerCfg::async_crossterm_input_listener()`](crate::EventListenerCfg::async_crossterm_input_listener)
@@ -36,7 +37,7 @@ where
     async fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         let res = match self.stream.next().await {
             Some(Ok(event)) => event,
-            Some(Err(_err)) => return Err(PortError::PollFailed),
+            Some(Err(err)) => return Err(io_err_to_port_err(err)),
             None => return Ok(None),
         };
 
