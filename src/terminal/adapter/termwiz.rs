@@ -1,8 +1,8 @@
 use termwiz::terminal::Terminal as _;
 
 use super::{TerminalAdapter, TerminalResult};
-use crate::ratatui::Terminal;
 use crate::ratatui::backend::TermwizBackend;
+use crate::ratatui::{Terminal, TerminalOptions};
 use crate::terminal::TerminalError;
 
 /// [`TermwizTerminalAdapter`] is the adapter for the [`termwiz`] terminal
@@ -13,10 +13,16 @@ pub struct TermwizTerminalAdapter {
 }
 
 impl TermwizTerminalAdapter {
-    /// Create a new instance
+    /// Create a new termwiz instance with default ratatui Terminal options
     pub fn new() -> TerminalResult<Self> {
+        Self::new_with_options(TerminalOptions::default())
+    }
+
+    /// Create a new termwiz instance with custom ratatui Terminal options
+    pub fn new_with_options(options: TerminalOptions) -> TerminalResult<Self> {
         let backend = TermwizBackend::new().map_err(|_| TerminalError::CannotConnectStdout)?;
-        let terminal = Terminal::new(backend).map_err(|_| TerminalError::CannotConnectStdout)?;
+        let terminal = Terminal::with_options(backend, options)
+            .map_err(|_| TerminalError::CannotConnectStdout)?;
 
         Ok(Self { terminal })
     }
