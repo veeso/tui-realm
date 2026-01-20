@@ -82,6 +82,11 @@ name = "arbitrary-data"
 path = "examples/arbitrary_data.rs"
 required-features = ["crossterm"]
 
+[[example]]
+name = "inline-display"
+path = "examples/inline_display.rs"
+required-features = ["crossterm"]
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
