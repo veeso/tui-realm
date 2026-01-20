@@ -71,3 +71,7 @@ With 4.0, `Poll::poll` and `PollAsync::poll` return types changed from `Listener
 
 This is due to `ListenerError`'s variants being meant to be mostly internal.
 `ListenerResult` has also been changed to be non-public.
+
+### Separate Error types for `poll`
+
+In addition to the [`*Poll::poll` return type changes](#change-of-poll-return-types), `ApplicationError` got a specific `Poll` variant over it being combined with Listener start / stop errors.

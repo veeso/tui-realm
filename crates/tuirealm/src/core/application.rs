@@ -9,7 +9,7 @@ use ratatui::Frame;
 use thiserror::Error;
 
 use super::{Subscription, View, WrappedComponent};
-use crate::listener::{EventListener, EventListenerCfg, ListenerError};
+use crate::listener::{EventListener, EventListenerCfg, ListenerError, PollError};
 use crate::ratatui::layout::Rect;
 use crate::{
     AttrValue, Attribute, Component, Event, Injector, State, Sub, SubEventClause, ViewError,
@@ -492,23 +492,13 @@ pub enum ApplicationError {
     #[error("already subscribed")]
     AlreadySubscribed,
     #[error("listener error: {0}")]
-    Listener(ListenerError),
+    Listener(#[from] ListenerError),
+    #[error("poll(): {0}")]
+    Poll(#[from] PollError),
     #[error("no such subscription")]
     NoSuchSubscription,
     #[error("view error: {0}")]
-    View(ViewError),
-}
-
-impl From<ListenerError> for ApplicationError {
-    fn from(e: ListenerError) -> Self {
-        Self::Listener(e)
-    }
-}
-
-impl From<ViewError> for ApplicationError {
-    fn from(e: ViewError) -> Self {
-        Self::View(e)
-    }
+    View(#[from] ViewError),
 }
 
 #[cfg(test)]
