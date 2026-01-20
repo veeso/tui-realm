@@ -201,11 +201,10 @@ mod test {
 
     use pretty_assertions::assert_eq;
 
-    use super::super::ListenerResult;
     use super::*;
     use crate::Event;
     use crate::core::event::{Key, KeyEvent};
-    use crate::listener::SyncPort;
+    use crate::listener::{PollResult, SyncPort};
     use crate::mock::{MockEvent, MockPoll};
 
     #[test]
@@ -253,7 +252,7 @@ mod test {
         assert!(worker.next_event() <= Duration::from_secs(5));
         // Receive
         assert_eq!(
-            ListenerResult::<Option<_>>::from(rx.recv().unwrap()).unwrap(),
+            PollResult::<Option<_>>::from(rx.recv().unwrap()).unwrap(),
             Some(Event::Keyboard(KeyEvent::from(Key::Enter)))
         );
     }
@@ -280,7 +279,7 @@ mod test {
         assert!(worker.next_tick > Instant::now());
         // Receive
         assert_eq!(
-            ListenerResult::<Option<_>>::from(rx.recv().unwrap()).unwrap(),
+            PollResult::<Option<_>>::from(rx.recv().unwrap()).unwrap(),
             Some(Event::Tick)
         );
     }

@@ -37,26 +37,34 @@ use super::Event;
 type ListenerResult<T> = Result<T, ListenerError>;
 /// Result type for [`Poll`] and [`PollAsync`].
 pub type PortResult<T> = Result<T, PortError>;
+type PollResult<T> = Result<T, PollError>;
 
+/// Start / Stop Errors in a Listener.
 #[derive(Debug, Error, PartialEq)]
 pub enum ListenerError {
     #[error("failed to start event listener")]
     CouldNotStart,
     #[error("failed to stop event listener")]
     CouldNotStop,
-    #[error("the event listener has died")]
-    ListenerDied,
     #[error("failed to start async listener because of missing runtime handle")]
     NoHandle,
-    #[error("a port returned a error: {0}")]
-    PortError(#[from] PortError),
 }
 
+/// Errors from a port directly.
 #[derive(Debug, Error, PartialEq)]
 pub enum PortError {
     // TODO: this should likely be more specific
     #[error("A port has failed to poll")]
     PollFailed,
+}
+
+/// Errors that can happen in a Listener `poll`.
+#[derive(Debug, Error, PartialEq)]
+pub enum PollError {
+    #[error("the event listener has died")]
+    ListenerDied,
+    #[error("a port returned a error: {0}")]
+    PortError(#[from] PortError),
 }
 
 /// The poll trait defines the function [`Poll::poll`], which will be called by the event listener
@@ -281,28 +289,28 @@ where
     }
 
     /// Checks whether there are new events available, blocking until either a event is recieved or [`poll_timeout`](Self::poll_timeout).
-    pub fn poll_timeout(&self) -> ListenerResult<Option<Event<UserEvent>>> {
+    pub fn poll_timeout(&self) -> PollResult<Option<Event<UserEvent>>> {
         match self.recv.recv_timeout(self.poll_timeout) {
-            Ok(msg) => ListenerResult::from(msg),
+            Ok(msg) => PollResult::from(msg),
             Err(mpsc::RecvTimeoutError::Timeout) => Ok(None),
-            Err(mpsc::RecvTimeoutError::Disconnected) => Err(ListenerError::ListenerDied),
+            Err(mpsc::RecvTimeoutError::Disconnected) => Err(PollError::ListenerDied),
         }
     }
 
     /// Checks whether there are new events available, blocking until a event is recieved.
-    pub fn poll_blocking(&self) -> ListenerResult<Event<UserEvent>> {
+    pub fn poll_blocking(&self) -> PollResult<Event<UserEvent>> {
         match self.recv.recv() {
-            Ok(msg) => ListenerResult::from(msg),
-            Err(mpsc::RecvError) => Err(ListenerError::ListenerDied),
+            Ok(msg) => PollResult::from(msg),
+            Err(mpsc::RecvError) => Err(PollError::ListenerDied),
         }
     }
 
     /// Checks whether there are new events available, without blocking for any amount of time
-    pub fn try_poll(&self) -> ListenerResult<Option<Event<UserEvent>>> {
+    pub fn try_poll(&self) -> PollResult<Option<Event<UserEvent>>> {
         match self.recv.try_recv() {
-            Ok(msg) => ListenerResult::from(msg),
+            Ok(msg) => PollResult::from(msg),
             Err(TryRecvError::Empty) => Ok(None),
-            Err(TryRecvError::Disconnected) => Err(ListenerError::ListenerDied),
+            Err(TryRecvError::Disconnected) => Err(PollError::ListenerDied),
         }
     }
 
@@ -391,7 +399,7 @@ where
     User(Event<UserEvent>),
 }
 
-impl<UserEvent> From<ListenerMsg<UserEvent>> for ListenerResult<Option<Event<UserEvent>>>
+impl<UserEvent> From<ListenerMsg<UserEvent>> for PollResult<Option<Event<UserEvent>>>
 where
     UserEvent: Eq + PartialEq + Clone + Send,
 {
@@ -403,7 +411,7 @@ where
     }
 }
 
-impl<UserEvent> From<ListenerMsg<UserEvent>> for ListenerResult<Event<UserEvent>>
+impl<UserEvent> From<ListenerMsg<UserEvent>> for PollResult<Event<UserEvent>>
 where
     UserEvent: Eq + PartialEq + Clone + Send,
 {
