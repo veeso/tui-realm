@@ -974,8 +974,10 @@ mod test {
 
     #[test]
     fn should_not_propagate_event_when_subs_are_locked() {
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+            Application::init(listener);
         // Mount foo and bar
         assert!(
             application
@@ -1012,6 +1014,8 @@ mod test {
         application.lock_subs();
         assert_eq!(application.sub_lock, true);
 
+        barrier_rx.recieve_cycle();
+
         assert_eq!(
             application
                 .tick(PollStrategy::UpTo(5))
@@ -1027,8 +1031,10 @@ mod test {
 
     #[test]
     fn should_not_propagate_events_if_has_attr_cond_is_not_satisfied() {
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+            Application::init(listener);
         // Mount foo and bar
         assert!(
             application
@@ -1058,6 +1064,9 @@ mod test {
         );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        barrier_rx.recieve_cycle();
+
         assert_eq!(
             application
                 .tick(PollStrategy::BlockCollectUpTo(5))
@@ -1070,8 +1079,10 @@ mod test {
 
     #[test]
     fn should_propagate_events_if_has_attr_cond_is_satisfied() {
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+            Application::init(listener);
         // Mount foo and bar
         assert!(
             application
@@ -1100,6 +1111,9 @@ mod test {
         );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        barrier_rx.recieve_cycle();
+
         assert_eq!(
             application
                 .tick(PollStrategy::BlockCollectUpTo(5))
@@ -1112,8 +1126,10 @@ mod test {
 
     #[test]
     fn should_not_propagate_events_if_has_state_cond_is_not_satisfied() {
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+            Application::init(listener);
         // Mount foo and bar
         assert!(
             application
@@ -1138,6 +1154,9 @@ mod test {
         );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        barrier_rx.recieve_cycle();
+
         assert_eq!(
             application
                 .tick(PollStrategy::BlockCollectUpTo(5))
@@ -1150,8 +1169,10 @@ mod test {
 
     #[test]
     fn should_propagate_events_if_has_state_cond_is_satisfied() {
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+            Application::init(listener);
         // Mount foo and bar
         assert!(
             application
@@ -1179,6 +1200,9 @@ mod test {
         );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        barrier_rx.recieve_cycle();
+
         // No event should be generated
         assert_eq!(
             application
@@ -1192,8 +1216,10 @@ mod test {
 
     #[test]
     fn should_not_propagate_events_if_is_mounted_cond_is_not_satisfied() {
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+            Application::init(listener);
         // Mount foo and bar
         assert!(
             application
@@ -1218,6 +1244,9 @@ mod test {
         );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        barrier_rx.recieve_cycle();
+
         assert_eq!(
             application
                 .tick(PollStrategy::BlockCollectUpTo(5))
@@ -1230,8 +1259,10 @@ mod test {
 
     #[test]
     fn should_propagate_events_if_is_mounted_cond_is_not_satisfied() {
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener_config_with_tick(Duration::from_secs(60)));
+            Application::init(listener);
         // Mount foo and bar
         assert!(
             application
@@ -1256,6 +1287,9 @@ mod test {
         );
         // Active FOO
         assert!(application.active(&MockComponentId::InputFoo).is_ok());
+
+        barrier_rx.recieve_cycle();
+
         assert_eq!(
             application
                 .tick(PollStrategy::BlockCollectUpTo(5))
