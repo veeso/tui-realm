@@ -510,10 +510,22 @@ mod test {
 
     use super::*;
     use crate::event::{Key, KeyEvent};
+    use crate::listener::builder::test_utils::BarrierRx;
     use crate::mock::{
         MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg, MockPoll,
     };
     use crate::{StateValue, SubClause};
+
+    /// Create a common Application with Tick that is configured to only happen once (high interval) and have the lister have a test barrier
+    fn create_app_tick_once_barrier()
+    -> (Application<MockComponentId, MockMsg, MockEvent>, BarrierRx) {
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
+        let barrier_rx = listener.with_test_barrier();
+        let application: Application<MockComponentId, MockMsg, MockEvent> =
+            Application::init(listener);
+
+        (application, barrier_rx)
+    }
 
     #[test]
     fn should_initialize_application() {
@@ -769,10 +781,8 @@ mod test {
 
     #[test]
     fn should_do_tick() {
-        let mut listener = listener_config_with_tick(Duration::from_secs(60));
-        let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener);
+        let (mut application, barrier_rx) = create_app_tick_once_barrier();
+
         // Mount foo and bar
         assert!(
             application
@@ -916,11 +926,7 @@ mod test {
 
     #[test]
     fn strategy_blocking_upto_should_work() {
-        let mut listener = listener_config_with_tick(Duration::from_secs(60))
-            .poll_timeout(Duration::from_secs(60));
-        let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener);
+        let (mut application, barrier_rx) = create_app_tick_once_barrier();
 
         // Mount foo and bar
         assert!(
@@ -974,10 +980,8 @@ mod test {
 
     #[test]
     fn should_not_propagate_event_when_subs_are_locked() {
-        let mut listener = listener_config_with_tick(Duration::from_secs(60));
-        let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener);
+        let (mut application, barrier_rx) = create_app_tick_once_barrier();
+
         // Mount foo and bar
         assert!(
             application
@@ -1031,10 +1035,8 @@ mod test {
 
     #[test]
     fn should_not_propagate_events_if_has_attr_cond_is_not_satisfied() {
-        let mut listener = listener_config_with_tick(Duration::from_secs(60));
-        let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener);
+        let (mut application, barrier_rx) = create_app_tick_once_barrier();
+
         // Mount foo and bar
         assert!(
             application
@@ -1079,10 +1081,8 @@ mod test {
 
     #[test]
     fn should_propagate_events_if_has_attr_cond_is_satisfied() {
-        let mut listener = listener_config_with_tick(Duration::from_secs(60));
-        let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener);
+        let (mut application, barrier_rx) = create_app_tick_once_barrier();
+
         // Mount foo and bar
         assert!(
             application
@@ -1126,10 +1126,8 @@ mod test {
 
     #[test]
     fn should_not_propagate_events_if_has_state_cond_is_not_satisfied() {
-        let mut listener = listener_config_with_tick(Duration::from_secs(60));
-        let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener);
+        let (mut application, barrier_rx) = create_app_tick_once_barrier();
+
         // Mount foo and bar
         assert!(
             application
@@ -1169,10 +1167,8 @@ mod test {
 
     #[test]
     fn should_propagate_events_if_has_state_cond_is_satisfied() {
-        let mut listener = listener_config_with_tick(Duration::from_secs(60));
-        let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener);
+        let (mut application, barrier_rx) = create_app_tick_once_barrier();
+
         // Mount foo and bar
         assert!(
             application
@@ -1216,10 +1212,8 @@ mod test {
 
     #[test]
     fn should_not_propagate_events_if_is_mounted_cond_is_not_satisfied() {
-        let mut listener = listener_config_with_tick(Duration::from_secs(60));
-        let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener);
+        let (mut application, barrier_rx) = create_app_tick_once_barrier();
+
         // Mount foo and bar
         assert!(
             application
@@ -1259,10 +1253,8 @@ mod test {
 
     #[test]
     fn should_propagate_events_if_is_mounted_cond_is_not_satisfied() {
-        let mut listener = listener_config_with_tick(Duration::from_secs(60));
-        let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
-            Application::init(listener);
+        let (mut application, barrier_rx) = create_app_tick_once_barrier();
+
         // Mount foo and bar
         assert!(
             application

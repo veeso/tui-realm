@@ -6,7 +6,7 @@
 // -- modules
 #[cfg(feature = "async-ports")]
 mod async_ticker;
-mod builder;
+pub(crate) mod builder;
 mod port;
 #[cfg(feature = "async-ports")]
 mod task_pool;
