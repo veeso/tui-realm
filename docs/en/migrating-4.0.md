@@ -76,3 +76,8 @@ This is due to `ListenerError`'s variants being meant to be mostly internal.
 ### Separate Error types for `poll`
 
 In addition to the [`*Poll::poll` return type changes](#change-of-poll-return-types), `ApplicationError` got a specific `Poll` variant over it being combined with Listener start / stop errors.
+
+### Poll timeout moved to be in `PollStrategy`
+
+The timeout that was previously stored on the `EventListener(Cfg|Builder)` has been moved to be stored on the `PollStrategy` instead.
+This has been done due to some strategies not using a timeout alltogether, and some have different meanings for the duration specified.

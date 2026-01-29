@@ -879,13 +879,12 @@ fn init_app() -> Application<Id, Msg, NoUserEvent> {
     let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
         EventListenerCfg::default()
             .default_input_listener(Duration::from_millis(20))
-            .poll_timeout(Duration::from_millis(10))
             .tick_interval(Duration::from_secs(1)),
     );
 }
 ```
 
-The app requires the configuration for the `EventListener` which will poll `Ports`. We're telling the event listener to use the default input listener for our backend. `default_input_listener` will setup the default input listener for crossterm/termion/termwiz or the backend you chose. Then we also define the `poll_timeout`, which describes the interval between each poll to the listener thread.
+The app requires the configuration for the `EventListener` which will poll `Ports`. We're telling the event listener to use the default input listener for our backend. `default_input_listener` will setup the default input listener for crossterm/termion/termwiz or the backend you chose.
 
 > ❗ Here we could also define other Ports thanks to the method `port()` or setup the `Tick` producer with `tick_interval()`
 
@@ -928,7 +927,7 @@ and we can finally implement the **main loop**:
 ```rust
 while !model.quit {
     // Tick
-    match app.tick(&mut model, PollStrategy::Once) {
+    match app.tick(&mut model, PollStrategy::Once(Duration::from_millis(10))) {
         Err(err) => {
             // Handle error...
         }
@@ -952,7 +951,7 @@ while !model.quit {
 }
 ```
 
-On each cycle we call `tick()` on our application, with strategy `Once` and we ask the model to redraw the view only if at least one message has been processed (otherwise there shouldn't be any change to display).
+On each cycle we call `tick()` on our application, with strategy `Once` with a `10ms` timeout and we ask the model to redraw the view only if at least one message has been processed (otherwise there shouldn't be any change to display).
 
 Once `quit` becomes true, the application terminates, but don't forget to finalize the terminal:
 

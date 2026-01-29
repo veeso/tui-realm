@@ -4,6 +4,8 @@
 
 extern crate tuirealm;
 
+use std::time::Duration;
+
 use tuirealm::application::PollStrategy;
 use tuirealm::{AttrValue, Attribute, Update};
 // -- internal
@@ -41,7 +43,10 @@ fn main() {
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {
         // Tick
-        match model.app.tick(PollStrategy::Once) {
+        match model
+            .app
+            .tick(PollStrategy::Once(Duration::from_millis(10)))
+        {
             Err(err) => {
                 assert!(
                     model

@@ -111,8 +111,6 @@ pub(crate) struct EventListener<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    /// Max Time to wait when calling `recv()` on thread receiver
-    poll_timeout: Duration,
     /// Indicates whether the worker should paused polling ports
     paused: Arc<AtomicBool>,
     /// Indicates whether the worker should keep running
@@ -138,16 +136,12 @@ where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Create a new [`EventListener`].
-    /// - `poll_interval` is the interval to poll for input events. It should always be at least a poll time used by `poll`
-    ///
-    /// It is recommended to not set the time to [`Duration::ZERO`].
-    pub(self) fn new(poll_timeout: Duration) -> Self {
+    pub(self) fn new() -> Self {
         let (sender, recv) = mpsc::channel();
         let paused = Arc::new(AtomicBool::new(false));
         let running = Arc::new(AtomicBool::new(false));
 
         Self {
-            poll_timeout,
             paused,
             running,
             recv,
@@ -283,16 +277,16 @@ where
         Ok(())
     }
 
-    /// Checks whether there are new events available, blocking until either a event is recieved or [`poll_timeout`](Self::poll_timeout).
-    pub fn poll_timeout(&self) -> PollResult<Option<Event<UserEvent>>> {
-        match self.recv.recv_timeout(self.poll_timeout) {
+    /// Poll for a single new event for `timeout` Duration.
+    pub fn poll_timeout(&self, timeout: Duration) -> PollResult<Option<Event<UserEvent>>> {
+        match self.recv.recv_timeout(timeout) {
             Ok(msg) => PollResult::from(msg),
             Err(mpsc::RecvTimeoutError::Timeout) => Ok(None),
             Err(mpsc::RecvTimeoutError::Disconnected) => Err(PollError::ListenerDied),
         }
     }
 
-    /// Checks whether there are new events available, blocking until a event is recieved.
+    /// Poll blockingly until there is a event available.
     pub fn poll_blocking(&self) -> PollResult<Event<UserEvent>> {
         match self.recv.recv() {
             Ok(msg) => PollResult::from(msg),
@@ -300,7 +294,7 @@ where
         }
     }
 
-    /// Checks whether there are new events available, without blocking for any amount of time
+    /// Polls for a event, without blocking for any amount of time.
     pub fn try_poll(&self) -> PollResult<Option<Event<UserEvent>>> {
         match self.recv.try_recv() {
             Ok(msg) => PollResult::from(msg),
@@ -440,7 +434,7 @@ mod test {
 
     #[test]
     fn worker_should_run_thread() {
-        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start(
+        let mut listener = EventListener::<MockEvent>::new().start(
             vec![SyncPort::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(10),
@@ -449,50 +443,64 @@ mod test {
             Some(Duration::from_secs(3)),
             false,
         );
+        let timeout = Duration::from_millis(10);
         // Wait 1 second
         thread::sleep(Duration::from_secs(1));
         // Poll (event)
         assert_eq!(
-            listener.poll_timeout().ok().unwrap().unwrap(),
+            listener.poll_timeout(timeout).ok().unwrap().unwrap(),
             Event::Keyboard(KeyEvent::from(Key::Enter))
         );
         // Poll (tick)
-        assert_eq!(listener.poll_timeout().ok().unwrap().unwrap(), Event::Tick);
+        assert_eq!(
+            listener.poll_timeout(timeout).ok().unwrap().unwrap(),
+            Event::Tick
+        );
         // Poll (None)
-        assert!(listener.poll_timeout().ok().unwrap().is_none());
+        assert!(listener.poll_timeout(timeout).ok().unwrap().is_none());
         // Wait 3 seconds
         thread::sleep(Duration::from_secs(3));
         // New tick
-        assert_eq!(listener.poll_timeout().ok().unwrap().unwrap(), Event::Tick);
+        assert_eq!(
+            listener.poll_timeout(timeout).ok().unwrap().unwrap(),
+            Event::Tick
+        );
         // Stop
         assert!(listener.stop().is_ok());
     }
 
     #[test]
     fn worker_should_be_paused() {
-        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start(
+        let mut listener = EventListener::<MockEvent>::new().start(
             vec![],
             Some(Duration::from_millis(750)),
             false,
         );
+        let timeout = Duration::from_millis(10);
         thread::sleep(Duration::from_millis(100));
         assert!(listener.pause().is_ok());
         // Should be some
-        assert_eq!(listener.poll_timeout().ok().unwrap().unwrap(), Event::Tick);
+        assert_eq!(
+            listener.poll_timeout(timeout).ok().unwrap().unwrap(),
+            Event::Tick
+        );
         // Wait tick time
         thread::sleep(Duration::from_secs(1));
-        assert_eq!(listener.poll_timeout().ok().unwrap(), None);
+        assert_eq!(listener.poll_timeout(timeout).ok().unwrap(), None);
         // Unpause
         assert!(listener.unpause().is_ok());
         thread::sleep(Duration::from_millis(300));
-        assert_eq!(listener.poll_timeout().ok().unwrap().unwrap(), Event::Tick);
+        assert_eq!(
+            listener.poll_timeout(timeout).ok().unwrap().unwrap(),
+            Event::Tick
+        );
         // Stop
         assert!(listener.stop().is_ok());
     }
 
     #[test]
     fn try_poll_should_work() {
-        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start(
+        let mut listener = EventListener::<MockEvent>::new().start(
             vec![SyncPort::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(10),
@@ -522,7 +530,7 @@ mod test {
 
     #[test]
     fn poll_blocking_should_work() {
-        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start(
+        let mut listener = EventListener::<MockEvent>::new().start(
             vec![SyncPort::new(
                 Box::new(MockPoll::default()),
                 Duration::from_secs(10),
@@ -566,18 +574,19 @@ mod test {
         );
         assert_eq!(Handle::current().metrics().num_alive_tasks(), 0);
 
-        let mut listener = EventListener::<MockEvent>::new(Duration::from_millis(10)).start_async(
+        let mut listener = EventListener::<MockEvent>::new().start_async(
             vec![port],
             Handle::current(),
             Some(Duration::from_secs(3)),
         );
+        let timeout = Duration::from_millis(10);
         sleep(Duration::from_millis(5)).await; // ensure the tasks are spawned and have a chance to generate already
         assert_eq!(Handle::current().metrics().num_alive_tasks(), 2);
 
         let mut events = Vec::with_capacity(3);
 
         // due to how execution on the runtime works, events may arrive in any order
-        while let Some(event) = listener.poll_timeout().ok().flatten() {
+        while let Some(event) = listener.poll_timeout(timeout).ok().flatten() {
             events.push(event);
         }
 

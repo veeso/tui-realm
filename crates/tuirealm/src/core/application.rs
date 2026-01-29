@@ -317,21 +317,25 @@ where
     /// Poll listener according to provided strategy
     fn poll(&mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Event<UserEvent>>> {
         match strategy {
-            PollStrategy::Once => self
-                .poll_listener_timeout()
+            PollStrategy::Once(timeout) => self
+                .poll_listener_timeout(timeout)
                 .map(|x| x.map(|x| vec![x]).unwrap_or_default()),
             PollStrategy::TryFor(timeout) => self.poll_try_for(timeout),
-            PollStrategy::UpTo(times) => self.poll_upto(times),
-            PollStrategy::UpToNoWait(times) => self.poll_upto_nowait(times),
+            PollStrategy::UpTo(times, timeout) => self.poll_upto(times, timeout),
+            PollStrategy::UpToNoWait(times, timeout) => self.poll_upto_nowait(times, timeout),
             PollStrategy::BlockCollectUpTo(times) => self.poll_blocking_upto(times),
         }
     }
 
     /// Poll event listener up to `t` times
-    fn poll_upto(&mut self, t: usize) -> ApplicationResult<Vec<Event<UserEvent>>> {
-        let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(t);
-        for _ in 0..t {
-            match self.poll_listener_timeout() {
+    fn poll_upto(
+        &mut self,
+        upto: usize,
+        timeout: Duration,
+    ) -> ApplicationResult<Vec<Event<UserEvent>>> {
+        let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(upto);
+        for _ in 0..upto {
+            match self.poll_listener_timeout(timeout) {
                 Err(err) => return Err(err),
                 Ok(None) => break,
                 Ok(Some(ev)) => evs.push(ev),
@@ -341,20 +345,24 @@ where
     }
 
     /// Poll event listener up to `t` times, without waiting to return if there are events.
-    fn poll_upto_nowait(&mut self, t: usize) -> ApplicationResult<Vec<Event<UserEvent>>> {
-        if t == 0 {
+    fn poll_upto_nowait(
+        &mut self,
+        upto: usize,
+        timeout: Duration,
+    ) -> ApplicationResult<Vec<Event<UserEvent>>> {
+        if upto == 0 {
             return Ok(Vec::new());
         }
 
-        let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(t);
+        let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(upto);
 
-        match self.poll_listener_timeout() {
+        match self.poll_listener_timeout(timeout) {
             Err(err) => return Err(err),
             Ok(None) => (),
             Ok(Some(ev)) => evs.push(ev),
         }
 
-        let t = t.saturating_sub(1);
+        let t = upto.saturating_sub(1);
 
         for _ in 0..t {
             match self.try_poll_listener() {
@@ -367,19 +375,19 @@ where
     }
 
     /// Poll event listener up to `t` times, without waiting to return if there are events in a blocking fashion.
-    fn poll_blocking_upto(&mut self, t: usize) -> ApplicationResult<Vec<Event<UserEvent>>> {
-        if t == 0 {
+    fn poll_blocking_upto(&mut self, upto: usize) -> ApplicationResult<Vec<Event<UserEvent>>> {
+        if upto == 0 {
             return Ok(Vec::new());
         }
 
-        let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(t);
+        let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(upto);
 
         match self.poll_listener_blocking() {
             Err(err) => return Err(err),
             Ok(ev) => evs.push(ev),
         }
 
-        let t = t.saturating_sub(1);
+        let t = upto.saturating_sub(1);
 
         for _ in 0..t {
             match self.try_poll_listener() {
@@ -396,7 +404,8 @@ where
         let started = Instant::now();
         let mut evs: Vec<Event<UserEvent>> = Vec::new();
         while started.elapsed() < timeout {
-            match self.poll_listener_timeout() {
+            // TODO: change to use "deadline" when it becomes stable
+            match self.poll_listener_timeout(Duration::from_millis(10)) {
                 Err(err) => return Err(err),
                 Ok(None) => continue,
                 Ok(Some(ev)) => evs.push(ev),
@@ -405,9 +414,14 @@ where
         Ok(evs)
     }
 
-    /// Poll event listener once with timeout
-    fn poll_listener_timeout(&mut self) -> ApplicationResult<Option<Event<UserEvent>>> {
-        self.listener.poll_timeout().map_err(ApplicationError::from)
+    /// Poll event listener once with timeout.
+    fn poll_listener_timeout(
+        &mut self,
+        timeout: Duration,
+    ) -> ApplicationResult<Option<Event<UserEvent>>> {
+        self.listener
+            .poll_timeout(timeout)
+            .map_err(ApplicationError::from)
     }
 
     /// Poll event listener once in a blocking fashion
@@ -458,28 +472,25 @@ where
 /// Poll strategy defines how to call `Application::poll` on the event listener.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PollStrategy {
-    /// Poll for one event, waiting for the specified timeout, which is set in `EventListenerCfg`.
-    Once,
+    /// Poll for one event, waiting for the specified timeout
+    Once(Duration),
     /// Try to poll for `n` duration, regardless if there is a event or not and collect all events that happen in this time.
     ///
-    /// This strategy will currently poll with the timeout set in `EventListenerCfg`, so the actual time waited might at worst be higher than the set `n` duration
-    ///
-    /// This *might* change in the future to become similar to [`std::sync::mpsc::Receiver::recv_deadline`].
+    /// This strategy will currently poll with a static timeout of 10ms, so the actual time waited might at worst be `n+10ms`.
+    /// This *might* be resolved in the future when [`std::sync::mpsc::Receiver::recv_deadline`] becomes stable.
     TryFor(Duration),
-    /// Poll for up to `n` events, waiting each time for the specified timeout, which is set in `EventListenerCfg`, until [`None`] is returned or `n` number
+    /// Poll for up to `n` events, waiting each time for the specified timeout, until [`None`] is returned or `n` number
     /// of events has been reached.
     /// `Application::poll` function will be called up to `n` times, until it will return [`Option::None`].
     ///
     /// This *might* be removed in the future and be replaced with [`UpToNoWait`](PollStrategy::UpToNoWait).
-    UpTo(usize),
-    /// Poll for up to `n` events, waiting the first time for the specified timeout, which is set in `EventListenerCfg`, after that try to collect up to `n-1`
+    UpTo(usize, Duration),
+    /// Poll for up to `n` events, waiting the first time for the specified timeout, after that try to collect up to `n-1`
     /// events without waiting again.
     ///
     /// This *might* become the default [`UpTo`](PollStrategy::UpTo) behavior in the future.
-    UpToNoWait(usize),
+    UpToNoWait(usize, Duration),
     /// Block until there is at least one event available, and then collect `n-1` additional events, if available.
-    ///
-    /// This ignores the timeout set in `EventListenerCfg`.
     BlockCollectUpTo(usize),
 }
 
@@ -826,7 +837,7 @@ mod test {
          */
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::UpTo(5, Duration::from_millis(10)))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -844,7 +855,7 @@ mod test {
          */
         assert_eq!(
             application
-                .tick(PollStrategy::Once)
+                .tick(PollStrategy::Once(Duration::from_millis(10)))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -867,8 +878,7 @@ mod test {
 
     #[test]
     fn strategy_upto_nowait_should_work() {
-        let mut listener =
-            listener_config_with_tick(Duration::from_secs(60)).poll_timeout(Duration::from_secs(5));
+        let mut listener = listener_config_with_tick(Duration::from_secs(60));
         let barrier_rx = listener.with_test_barrier();
         let mut application: Application<MockComponentId, MockMsg, MockEvent> =
             Application::init(listener);
@@ -912,7 +922,7 @@ mod test {
 
         assert_eq!(
             application
-                .tick(PollStrategy::UpToNoWait(5))
+                .tick(PollStrategy::UpToNoWait(5, Duration::from_secs(5)))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -1021,7 +1031,7 @@ mod test {
 
         assert_eq!(
             application
-                .tick(PollStrategy::UpTo(5))
+                .tick(PollStrategy::UpTo(5, Duration::from_millis(10)))
                 .ok()
                 .unwrap()
                 .as_slice(),
@@ -1345,7 +1355,7 @@ mod test {
         // Tick ( No tick event )
         assert_eq!(
             application
-                .tick(PollStrategy::Once)
+                .tick(PollStrategy::Once(Duration::from_millis(10)))
                 .ok()
                 .unwrap()
                 .as_slice(),
