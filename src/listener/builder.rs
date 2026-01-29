@@ -123,7 +123,6 @@ where
     tick_interval: Option<Duration>,
     #[cfg(feature = "async-ports")]
     async_tick: bool,
-    poll_timeout: Duration,
 
     #[cfg(test)]
     barrier: Option<test_utils::BarrierTx>,
@@ -140,7 +139,6 @@ where
             async_ports: Vec::default(),
             #[cfg(feature = "async-ports")]
             handle: None,
-            poll_timeout: Duration::from_millis(10),
             tick_interval: None,
             #[cfg(feature = "async-ports")]
             async_tick: false,
@@ -173,7 +171,7 @@ where
         let sync_tick_interval = self.tick_interval;
         #[cfg(feature = "async-ports")]
         let sync_tick_interval = self.tick_interval.take_if(|_| !self.async_tick);
-        let mut res = EventListener::new(self.poll_timeout);
+        let mut res = EventListener::new();
 
         #[cfg(test)]
         res.with_test_barrier(self.barrier);
@@ -208,15 +206,6 @@ where
         self.barrier = Some(barrier);
 
         rx
-    }
-
-    /// Set poll timeout.
-    /// Poll timeout is the maximum time to wait when fetching the thread receiver.
-    ///
-    /// It is recommended to not set the time to [`Duration::ZERO`].
-    pub fn poll_timeout(mut self, timeout: Duration) -> Self {
-        self.poll_timeout = timeout;
-        self
     }
 
     /// Defines the tick interval for the event listener.
@@ -368,11 +357,8 @@ mod test {
         let builder = EventListenerCfg::<MockEvent>::default();
         assert!(builder.sync_ports.is_empty());
         assert!(builder.tick_interval.is_none());
-        assert_eq!(builder.poll_timeout, Duration::from_millis(10));
         let builder = builder.tick_interval(Duration::from_secs(10));
         assert_eq!(builder.tick_interval.unwrap(), Duration::from_secs(10));
-        let builder = builder.poll_timeout(Duration::from_millis(50));
-        assert_eq!(builder.poll_timeout, Duration::from_millis(50));
         let builder = builder
             .crossterm_input_listener(Duration::from_millis(200), 1)
             .add_port(Box::new(MockPoll::default()), Duration::from_secs(300), 1);
@@ -387,11 +373,8 @@ mod test {
         let builder = EventListenerCfg::<MockEvent>::default();
         assert!(builder.sync_ports.is_empty());
         assert!(builder.tick_interval.is_none());
-        assert_eq!(builder.poll_timeout, Duration::from_millis(10));
         let builder = builder.tick_interval(Duration::from_secs(10));
         assert_eq!(builder.tick_interval.unwrap(), Duration::from_secs(10));
-        let builder = builder.poll_timeout(Duration::from_millis(50));
-        assert_eq!(builder.poll_timeout, Duration::from_millis(50));
         let builder = builder
             .termion_input_listener(Duration::from_millis(200), 1)
             .add_port(Box::new(MockPoll::default()), Duration::from_secs(300), 1);
@@ -451,6 +434,9 @@ mod test {
         sleep(Duration::from_millis(25)).await; // wait for at least 1 event
 
         listener.stop().unwrap();
-        assert_eq!(listener.poll_timeout(), Ok(Some(Event::Tick)));
+        assert_eq!(
+            listener.poll_timeout(Duration::from_millis(10)),
+            Ok(Some(Event::Tick))
+        );
     }
 }

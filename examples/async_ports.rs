@@ -44,7 +44,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {
         // Tick
-        match model.app.tick(PollStrategy::Once) {
+        match model
+            .app
+            .tick(PollStrategy::Once(Duration::from_millis(10)))
+        {
             Err(err) => {
                 panic!("application error {err}");
             }
