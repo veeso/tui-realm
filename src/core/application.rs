@@ -480,7 +480,7 @@ pub enum PollStrategy {
 
     /// Block until there is at least one event available, and then collect `n-1` additional events, if available.
     ///
-    /// This ingores the timeout set in `EventListenerCfg`.
+    /// This ignores the timeout set in `EventListenerCfg`.
     BlockCollectUpTo(usize),
 }
 
