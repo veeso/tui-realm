@@ -458,26 +458,25 @@ where
 /// Poll strategy defines how to call `Application::poll` on the event listener.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PollStrategy {
-    /// `Application::poll` function will be called once, with the timeout specified in `EventListenerCfg`.
+    /// Poll for one event, waiting for the specified timeout, which is set in `EventListenerCfg`.
     Once,
-    /// The application will keep waiting for events for the provided duration.
+    /// Try to poll for `n` duration, regardless if there is a event or not and collect all events that happen in this time.
     ///
-    /// This will block until the full duration is over, regardless if there is a event or not.
-    /// Will collect all events during that time.
+    /// This strategy will currently poll with the timeout set in `EventListenerCfg`, so the actual time waited might at worst be higher than the set `n` duration
+    ///
+    /// This *might* change in the future to become similar to [`std::sync::mpsc::Receiver::recv_deadline`].
     TryFor(Duration),
+    /// Poll for up to `n` events, waiting each time for the specified timeout, which is set in `EventListenerCfg`, until [`None`] is returned or `n` number
+    /// of events has been reached.
     /// `Application::poll` function will be called up to `n` times, until it will return [`Option::None`].
     ///
-    /// This will block if there are not `n` events for up to the timeout specified in `EventListenerCfg`.
+    /// This *might* be removed in the future and be replaced with [`UpToNoWait`](PollStrategy::UpToNoWait).
     UpTo(usize),
-
-    /// Practially the same as [`UpTo`](PollStrategy::UpTo), only that it does not wait the timeout specified in `EventListenerCfg` if there is at least one event.
-    ///
-    /// This will because of that wait for the first event to be come available for `timeout`, but collect all remaining event without waiting.
-    /// If there are enough event already, never blocks.
+    /// Poll for up to `n` events, waiting the first time for the specified timeout, which is set in `EventListenerCfg`, after that try to collect up to `n-1`
+    /// events without waiting again.
     ///
     /// This *might* become the default [`UpTo`](PollStrategy::UpTo) behavior in the future.
     UpToNoWait(usize),
-
     /// Block until there is at least one event available, and then collect `n-1` additional events, if available.
     ///
     /// This ignores the timeout set in `EventListenerCfg`.
