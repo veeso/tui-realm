@@ -51,6 +51,10 @@ impl Write for TermionWrapper {
 /// - [`new_mouse_alternate_raw`](Self::new_mouse_alternate_raw): Enable raw mode, alternate screen and Mouse capture (used for full-screen Viewports)
 ///
 /// It implements the [`TerminalAdapter`] trait.
+///
+/// # Panic Handler
+///
+/// `termion` uses RAII guards to reset state on drop, meaning that as long as panic is set to `unwind`, it will automatically be reset.
 pub struct TermionTerminalAdapter {
     terminal: TermionBackend,
 }
