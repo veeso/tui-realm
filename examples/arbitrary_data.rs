@@ -12,7 +12,7 @@ use tuirealm::event::{Key, KeyEvent};
 use tuirealm::props::{Alignment, Color, PropBound, PropPayload, Style, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::widgets::Paragraph;
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalBridge};
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
     NoUserEvent, PollStrategy, Props, State, Update,
@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     app.active(&Id::Label).expect("failed to active");
 
-    let mut model = Model::new(app, CrosstermTerminalAdapter::new()?);
+    let mut model = Model::new(app)?;
     // Main loop
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {
@@ -77,10 +77,7 @@ pub enum Id {
     Label,
 }
 
-pub struct Model<T>
-where
-    T: TerminalAdapter,
-{
+pub struct Model {
     /// Application
     pub app: Application<Id, Msg, NoUserEvent>,
     /// Indicates that the application must quit
@@ -88,20 +85,25 @@ where
     /// Tells whether to redraw interface
     pub redraw: bool,
     /// Used to draw to terminal
-    pub terminal: TerminalBridge<T>,
+    pub terminal: CrosstermTerminalAdapter,
 }
 
-impl<T> Model<T>
-where
-    T: TerminalAdapter,
-{
-    pub fn new(app: Application<Id, Msg, NoUserEvent>, adapter: T) -> Self {
-        Self {
+impl Model {
+    fn init_adapter() -> TerminalResult<CrosstermTerminalAdapter> {
+        let mut adapter = CrosstermTerminalAdapter::new()?;
+        adapter.enable_raw_mode()?;
+        adapter.enter_alternate_screen()?;
+
+        Ok(adapter)
+    }
+
+    pub fn new(app: Application<Id, Msg, NoUserEvent>) -> TerminalResult<Self> {
+        Ok(Self {
             app,
             quit: false,
             redraw: true,
-            terminal: TerminalBridge::init(adapter).expect("Cannot initialize terminal"),
-        }
+            terminal: Self::init_adapter()?,
+        })
     }
 
     pub fn view(&mut self) {
@@ -127,10 +129,7 @@ where
 
 // Let's implement Update for model
 
-impl<T> Update<Msg> for Model<T>
-where
-    T: TerminalAdapter,
-{
+impl Update<Msg> for Model {
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         if let Some(msg) = msg {
             // Set redraw

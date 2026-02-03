@@ -7,7 +7,7 @@ use std::time::{Duration, SystemTime};
 use tuirealm::event::NoUserEvent;
 use tuirealm::props::{Alignment, Color, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalBridge};
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
     Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause, Update,
 };
@@ -26,7 +26,7 @@ where
     /// Tells whether to redraw interface
     pub redraw: bool,
     /// Used to draw to terminal
-    pub terminal: TerminalBridge<T>,
+    pub terminal: T,
 }
 
 impl Default for Model<CrosstermTerminalAdapter> {
@@ -35,8 +35,19 @@ impl Default for Model<CrosstermTerminalAdapter> {
             app: Self::init_app(),
             quit: false,
             redraw: true,
-            terminal: TerminalBridge::init_crossterm().expect("Cannot initialize terminal"),
+            terminal: Self::init_adapter().expect("Cannot initialize terminal"),
         }
+    }
+}
+
+impl Model<CrosstermTerminalAdapter> {
+    fn init_adapter() -> TerminalResult<CrosstermTerminalAdapter> {
+        let mut adapter = CrosstermTerminalAdapter::new()?;
+        adapter.enable_raw_mode()?;
+        adapter.enter_alternate_screen()?;
+        // adapter.enable_mouse_capture()?; // Not necessary for this example
+
+        Ok(adapter)
     }
 }
 

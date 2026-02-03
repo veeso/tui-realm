@@ -36,9 +36,7 @@ pub enum Id {
 fn main() {
     // Setup model
     let mut model = Model::default();
-    // Enter alternate screen
-    let _ = model.terminal.enter_alternate_screen();
-    let _ = model.terminal.enable_raw_mode();
+
     // Main loop
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {
@@ -77,7 +75,4 @@ fn main() {
             model.redraw = false;
         }
     }
-    // Terminate terminal
-    let _ = model.terminal.leave_alternate_screen();
-    let _ = model.terminal.disable_raw_mode();
 }
