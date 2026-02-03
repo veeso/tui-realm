@@ -19,6 +19,13 @@ use super::TerminalResult;
 ///
 /// This trait is used to abstract the terminal implementation from the rest of the application.
 /// This allows tui-realm to be used with different terminal libraries, such as crossterm, termion, termwiz, etc.
+///
+/// # Expectations
+///
+/// All backends use different methods to enable modes, so the only required part to be implemented is [`draw`](Self::draw).
+/// Otherwise, there is expected to be `new` functions, which includes calling with default [`TerminalOptions`](ratatui::TerminalOptions) and with custom ones.
+///
+/// It is also expected of all backends to automatically restore modes on [`Drop`].
 pub trait TerminalAdapter {
     /// Draws a single frame to the terminal.
     ///
