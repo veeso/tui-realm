@@ -9,11 +9,15 @@ use crate::terminal::TerminalError;
 ///
 /// It implements the [`TerminalAdapter`] trait
 ///
-/// # Panic Handler
+/// # Restore
 ///
-/// `termwiz` automatically restores all modes on panic.
+/// `termwiz` automatically restores all modes on Drop.
 ///
-/// NOTE: due to `termwiz` automatically restoring modes on drop, [panic messages may not get displayed correctly](https://github.com/wezterm/wezterm/issues/7552)
+/// ## On Panic
+///
+/// Due to restoring on `Drop` and [not providing a simple way to do it in a panic](https://github.com/wezterm/wezterm/issues/7552), panic messages may not display correctly:
+/// - in alternative screen, messages may get "eaten" / not displayed
+/// - in raw mode, messages will not get displayed correctly and may have a lot of padding
 pub struct TermwizTerminalAdapter {
     terminal: Terminal<TermwizBackend>,
 }
