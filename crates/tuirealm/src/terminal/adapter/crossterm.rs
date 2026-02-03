@@ -12,6 +12,10 @@ use crate::terminal::TerminalError;
 /// CrosstermTerminalAdapter is the adapter for the [`crossterm`] terminal
 ///
 /// It implements the [`TerminalAdapter`] trait
+///
+/// # Panic Handler
+///
+/// None; needs to be done manually; TODO
 pub struct CrosstermTerminalAdapter {
     terminal: Terminal<CrosstermBackend<std::io::Stdout>>,
 }

@@ -8,6 +8,10 @@ use crate::terminal::TerminalError;
 /// [`TermwizTerminalAdapter`] is the adapter for the [`termwiz`] terminal
 ///
 /// It implements the [`TerminalAdapter`] trait
+///
+/// # Panic Handler
+///
+/// None; needs to be done manually; TODO
 pub struct TermwizTerminalAdapter {
     terminal: Terminal<TermwizBackend>,
 }
