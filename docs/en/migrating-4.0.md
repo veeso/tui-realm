@@ -77,6 +77,13 @@ This is due to `ListenerError`'s variants being meant to be mostly internal.
 
 In addition to the [`*Poll::poll` return type changes](#change-of-poll-return-types), `ApplicationError` got a specific `Poll` variant over it being combined with Listener start / stop errors.
 
+### Change `PollStrategy::UpToNoWait` to be `PollStrategy::UpTo`
+
+The old `PollStrategy::UpTo` has been removed and replaced with previously known `PollStrategy::UpToNoWait`.
+
+This has been done as the behavior of "wait TIMEOUT for each N, if there was a event available" is not something that is useful to event-driven tui applications.
+(With the new `UpTo`, previously known as `UpToNoWait` will "wait TIMEOUT once, collect event, afterwards collect up to N-1 amount (without blocking again), as long as there are events")
+
 ### Poll timeout moved to be in `PollStrategy`
 
 The timeout that was previously stored on the `EventListener(Cfg|Builder)` has been moved to be stored on the `PollStrategy` instead.

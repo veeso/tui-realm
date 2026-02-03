@@ -322,30 +322,12 @@ where
                 .map(|x| x.map(|x| vec![x]).unwrap_or_default()),
             PollStrategy::TryFor(timeout) => self.poll_try_for(timeout),
             PollStrategy::UpTo(times, timeout) => self.poll_upto(times, timeout),
-            PollStrategy::UpToNoWait(times, timeout) => self.poll_upto_nowait(times, timeout),
             PollStrategy::BlockCollectUpTo(times) => self.poll_blocking_upto(times),
         }
     }
 
-    /// Poll event listener up to `t` times
+    /// Poll event listener up to `upto` times, without waiting to return if there are events.
     fn poll_upto(
-        &mut self,
-        upto: usize,
-        timeout: Duration,
-    ) -> ApplicationResult<Vec<Event<UserEvent>>> {
-        let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(upto);
-        for _ in 0..upto {
-            match self.poll_listener_timeout(timeout) {
-                Err(err) => return Err(err),
-                Ok(None) => break,
-                Ok(Some(ev)) => evs.push(ev),
-            }
-        }
-        Ok(evs)
-    }
-
-    /// Poll event listener up to `t` times, without waiting to return if there are events.
-    fn poll_upto_nowait(
         &mut self,
         upto: usize,
         timeout: Duration,
@@ -479,17 +461,9 @@ pub enum PollStrategy {
     /// This strategy will currently poll with a static timeout of 10ms, so the actual time waited might at worst be `n+10ms`.
     /// This *might* be resolved in the future when [`std::sync::mpsc::Receiver::recv_deadline`] becomes stable.
     TryFor(Duration),
-    /// Poll for up to `n` events, waiting each time for the specified timeout, until [`None`] is returned or `n` number
-    /// of events has been reached.
-    /// `Application::poll` function will be called up to `n` times, until it will return [`Option::None`].
-    ///
-    /// This *might* be removed in the future and be replaced with [`UpToNoWait`](PollStrategy::UpToNoWait).
-    UpTo(usize, Duration),
     /// Poll for up to `n` events, waiting the first time for the specified timeout, after that try to collect up to `n-1`
     /// events without waiting again.
-    ///
-    /// This *might* become the default [`UpTo`](PollStrategy::UpTo) behavior in the future.
-    UpToNoWait(usize, Duration),
+    UpTo(usize, Duration),
     /// Block until there is at least one event available, and then collect `n-1` additional events, if available.
     BlockCollectUpTo(usize),
 }
@@ -922,7 +896,7 @@ mod test {
 
         assert_eq!(
             application
-                .tick(PollStrategy::UpToNoWait(5, Duration::from_secs(5)))
+                .tick(PollStrategy::UpTo(5, Duration::from_secs(5)))
                 .ok()
                 .unwrap()
                 .as_slice(),
