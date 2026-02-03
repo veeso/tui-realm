@@ -167,15 +167,11 @@ impl TerminalAdapter for CrosstermTerminalAdapter {
     }
 
     fn enter_alternate_screen(&mut self) -> TerminalResult<()> {
-        execute!(
-            self.terminal.backend_mut(),
-            EnterAlternateScreen,
-            EnableMouseCapture
-        )
-        .map_err(|_| TerminalError::CannotEnterAlternateMode)
-        .inspect(|_| {
-            self.set_mode(Modes::ALTERNATE | Modes::MOUSE);
-        })
+        execute!(self.terminal.backend_mut(), EnterAlternateScreen)
+            .map_err(|_| TerminalError::CannotEnterAlternateMode)
+            .inspect(|_| {
+                self.set_mode(Modes::ALTERNATE);
+            })
     }
 
     fn leave_alternate_screen(&mut self) -> TerminalResult<()> {
@@ -186,7 +182,7 @@ impl TerminalAdapter for CrosstermTerminalAdapter {
         )
         .map_err(|_| TerminalError::CannotLeaveAlternateMode)
         .inspect(|_| {
-            self.unset_mode(Modes::ALTERNATE | Modes::MOUSE);
+            self.unset_mode(Modes::ALTERNATE);
         })
     }
 
