@@ -30,7 +30,8 @@ bitflags::bitflags! {
 ///
 /// # Restore
 ///
-/// This implementation keeps track of modes activated via [`TerminalAdapter`] methods.
+/// This implementation keeps track of modes activated via [`TerminalAdapter`] methods
+/// and automatically restores on `Drop`, or via explicit [`restore`](Self::restore) call.
 ///
 /// ## On Panic
 ///
@@ -72,6 +73,8 @@ impl CrosstermTerminalAdapter {
     }
 
     /// Restore the terminal state to pre [`TerminalAdapter`] state.
+    ///
+    /// This is automatically called on `Drop`.
     pub fn restore(&mut self) -> std::io::Result<()> {
         // NOTE: if changing something here, dont forget to change it in the panic handler too
         let writer = self.terminal.backend_mut();
@@ -200,5 +203,11 @@ impl TerminalAdapter for CrosstermTerminalAdapter {
             .inspect(|_| {
                 self.unset_mode(Modes::MOUSE);
             })
+    }
+}
+
+impl Drop for CrosstermTerminalAdapter {
+    fn drop(&mut self) {
+        let _ = self.restore();
     }
 }
