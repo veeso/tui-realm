@@ -11,7 +11,9 @@ use crate::terminal::TerminalError;
 ///
 /// # Panic Handler
 ///
-/// None; needs to be done manually; TODO
+/// `termwiz` automatically restores all modes on panic.
+///
+/// NOTE: due to `termwiz` automatically restoring modes on drop, [panic messages may not get displayed correctly](https://github.com/wezterm/wezterm/issues/7552)
 pub struct TermwizTerminalAdapter {
     terminal: Terminal<TermwizBackend>,
 }
