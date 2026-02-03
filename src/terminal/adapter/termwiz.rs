@@ -27,10 +27,12 @@ impl TermwizTerminalAdapter {
         Ok(Self { terminal })
     }
 
+    /// Access the underlying [`ratatui::backend::TermwizBackend`] immutably.
     pub fn raw(&self) -> &Terminal<TermwizBackend> {
         &self.terminal
     }
 
+    /// Access the underlying [`ratatui::backend::TermwizBackend`] mutably.
     pub fn raw_mut(&mut self) -> &mut Terminal<TermwizBackend> {
         &mut self.terminal
     }

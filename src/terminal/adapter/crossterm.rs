@@ -31,10 +31,12 @@ impl CrosstermTerminalAdapter {
         Ok(Self { terminal })
     }
 
+    /// Access the underlying [`ratatui::backend::CrosstermBackend`] immutably.
     pub fn raw(&self) -> &Terminal<CrosstermBackend<std::io::Stdout>> {
         &self.terminal
     }
 
+    /// Access the underlying [`ratatui::backend::CrosstermBackend`] mutably.
     pub fn raw_mut(&mut self) -> &mut Terminal<CrosstermBackend<std::io::Stdout>> {
         &mut self.terminal
     }
