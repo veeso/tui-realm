@@ -9,7 +9,7 @@ mod termwiz;
 pub use crossterm::CrosstermTerminalAdapter;
 use ratatui::{CompletedFrame, Frame};
 #[cfg(feature = "termion")]
-pub use termion::{TermionBackend, TermionTerminalAdapter};
+pub use termion::TermionTerminalAdapter;
 #[cfg(feature = "termwiz")]
 pub use termwiz::TermwizTerminalAdapter;
 

@@ -5,7 +5,6 @@ use std::time::{Duration, SystemTime};
 
 use components::Label;
 use tuirealm::listener::{Poll, PortResult};
-use tuirealm::terminal::CrosstermTerminalAdapter;
 use tuirealm::{
     Application, Event, EventListenerCfg, PollStrategy, Sub, SubClause, SubEventClause, Update,
 };
@@ -82,10 +81,7 @@ fn main() {
 
     app.active(&Id::Label).expect("failed to active");
 
-    let mut model = Model::new(
-        app,
-        CrosstermTerminalAdapter::new().expect("failed to create terminal"),
-    );
+    let mut model = Model::new(app).expect("failed to create backend writer");
     // Main loop
     // NOTE: loop until quit; quit is set in update if AppClose is received from counter
     while !model.quit {

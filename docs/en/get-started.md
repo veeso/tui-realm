@@ -772,7 +772,7 @@ pub struct Model {
     /// Tells whether to redraw interface
     pub redraw: bool,
     /// Used to draw to terminal
-    pub terminal: TerminalBridge,
+    pub terminal: CrosstermTerminalAdapter,
 }
 ```
 
@@ -953,12 +953,8 @@ while !model.quit {
 
 On each cycle we call `tick()` on our application, with strategy `Once` with a `10ms` timeout and we ask the model to redraw the view only if at least one message has been processed (otherwise there shouldn't be any change to display).
 
-Once `quit` becomes true, the application terminates, but don't forget to finalize the terminal:
-
-```rust
-let _ = model.terminal.leave_alternate_screen();
-let _ = model.terminal.disable_raw_mode();
-```
+Once `quit` becomes true, the application terminates.
+All backends provided by `tui-realm` itself, will automatically clean-up terminal modes on `Drop`.
 
 ---
 

@@ -81,3 +81,10 @@ In addition to the [`*Poll::poll` return type changes](#change-of-poll-return-ty
 
 The timeout that was previously stored on the `EventListener(Cfg|Builder)` has been moved to be stored on the `PollStrategy` instead.
 This has been done due to some strategies not using a timeout alltogether, and some have different meanings for the duration specified.
+
+### Removal of `TerminalBridge`
+
+The wrapper `TerminalBridge` has been removed as it did not provide any benefit over using the backends directly, or using the trait directly.
+
+Panic handlers and restore have been implemented on the backends themself now, where necessary & possible.
+For individual notes, see `Restore` and `On Panic` sections on the backends themself.
