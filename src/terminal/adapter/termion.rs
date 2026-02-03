@@ -52,11 +52,15 @@ impl Write for TermionWrapper {
 ///
 /// It implements the [`TerminalAdapter`] trait.
 ///
-/// # Panic Handler
+/// # Restore
 ///
-/// `termion` uses RAII guards to reset state on drop, meaning that as long as panic is set to `unwind`, it will automatically be reset.
+/// `termion` uses RAII guards to reset state on drop.
 ///
-/// NOTE: due to `termion` automatically restoring modes on drop, panic messages may not get displayed correctly.
+/// ## On Panic
+///
+/// Due to restoring on `Drop` and not providing a simple way to do it in a panic, panic messages may not display correctly:
+/// - in alternative screen, messages may get "eaten" / not displayed
+/// - in raw mode, messages will not get displayed correctly and may have a lot of padding
 pub struct TermionTerminalAdapter {
     terminal: TermionBackend,
 }

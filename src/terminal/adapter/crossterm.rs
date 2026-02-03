@@ -28,9 +28,13 @@ bitflags::bitflags! {
 ///
 /// It implements the [`TerminalAdapter`] trait
 ///
-/// # Panic Handler
+/// # Restore
 ///
-/// This implementation keeps track of modes activated via [`TerminalAdapter`] methods, and automatically resets them on panic.
+/// This implementation keeps track of modes activated via [`TerminalAdapter`] methods.
+///
+/// ## On Panic
+///
+/// Automatically restores all modes on panic (so that the message is printed correctly).
 #[derive(Debug)]
 pub struct CrosstermTerminalAdapter {
     terminal: Terminal<CrosstermBackend<std::io::Stdout>>,
