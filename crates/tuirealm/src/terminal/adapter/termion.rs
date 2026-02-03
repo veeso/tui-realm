@@ -152,10 +152,12 @@ impl TermionTerminalAdapter {
         Ok(Self { terminal })
     }
 
+    /// Access the underlying [`ratatui::backend::TermionBackend`] immutably.
     pub fn raw(&self) -> &TermionBackend {
         &self.terminal
     }
 
+    /// Access the underlying [`ratatui::backend::TermionBackend`] mutably.
     pub fn raw_mut(&mut self) -> &mut TermionBackend {
         &mut self.terminal
     }
