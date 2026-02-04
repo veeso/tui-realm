@@ -27,6 +27,7 @@ pub enum Msg {
 // Let's define the component ids for our application
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub enum Id {
+    Help,
     Clock,
     DigitCounter,
     LetterCounter,
