@@ -95,15 +95,15 @@
 
 ## About tui-realm 👑
 
-tui-realm is a **framework** for **[ratatui](https://github.com/ratatui-org/ratatui)** to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React. But that's not all: the components communicate with the ui engine via a system based on **Messages** and **Events**, providing you with the possibility to implement `update` routines as happens in Elm. In addition, the components are organized inside the **View**, which manages mounting/umounting, focus and event forwarding for you.
+`tui-realm` is a **framework** for **[ratatui](https://github.com/ratatui-org/ratatui)** to simplify the implementation of terminal user interfaces adding the possibility to work with re-usable components with properties and states, as you'd do in React. But that's not all: the components communicate with the ui engine via a system based on **Messages** and **Events**, providing you with the possibility to implement `update` routines as happens in Elm. In addition, the components are organized inside the **View**, which manages mounting/umounting, focus and event forwarding for you.
 
 And that also explains the reason of the name: **Realm stands for React and Elm**.
 
-tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-).
+tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-) section.
 
 ![Demo](/docs/images/demo.gif)
 
-See tui-realm in action in the [Example](#run-examples-) or if you want to read more about tui-realm start reading the official guide [HERE](docs/en/get-started.md).
+See tui-realm in action in the [Example](#run-examples-) or if you want to read more about tui-realm start reading the official [Get Started Guide](docs/en/get-started.md).
 
 ## Features 🎁
 
@@ -119,11 +119,11 @@ See tui-realm in action in the [Example](#run-examples-) or if you want to read 
 
 ## Get started 🏁
 
-> ⚠️ Warning: currently tui-realm supports these backends: crossterm, termion
+> ⚠️ Warning: currently tui-realm supports these backends: crossterm, termion, termwiz
 
 ### Add tui-realm to your Cargo.toml 🦀
 
-If you want the default features, just add tuirealm 1.x version:
+If you want the default features, just add tuirealm with version:
 
 ```toml
 tuirealm = "3"
@@ -139,20 +139,21 @@ Supported features are:
 
 - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
 - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
-- `crossterm`: use the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend
-- `termion`: use the [termion](https://github.com/redox-os/termion) terminal backend
-- `termwiz`: use the [termwiz](https://docs.rs/termwiz/latest/termwiz/index.html) terminal backend
+- `crossterm`: use the [crossterm](https://github.com/crossterm-rs/crossterm) terminal & input backend
+- `termion`: use the [termion](https://github.com/redox-os/termion) terminal & input backend
+- `termwiz`: use the [termwiz](https://docs.rs/termwiz/latest/termwiz/index.html) terminal & input backend
+- `async-ports`: enable async (tokio) ports
 
 #### Enabling other backends ⚠️
 
-This library supports two backends: `crossterm` and `termion`, and two high
-level terminal TUI libraries: `tui` and `ratatui`. Whenever you explicitly
-declare any of the TUI library or backend feature sets you should disable the
-crate's default features.
+This library supports all backends supported by `ratatui`, which are `crossterm`(default),
+`termion` and `termwiz`. When deciding to use any other backend other than `crossterm`,
+`default-features` should be disabled to save on extra dependencies of unused backends.
 
 > ❗ The two features can co-exist, even if it doesn't make too much sense.
+> ❗ Backends other than `crossterm` may not have the best support.
 
-Example using crossterm:
+Example using crossterm backend explicitly:
 
 ```toml
 tuirealm = { version = "3", default-features = false, features = [ "derive", "crossterm" ]}
@@ -172,31 +173,32 @@ tuirealm = { version = "3", default-features = false, features = [ "derive", "te
 
 ### Create a tui-realm application 🪂
 
-View how to implement a tui-realm application in the [related guide](/docs/en/get-started.md).
+View how to implement a tui-realm application in the [Get Started Guide](/docs/en/get-started.md).
 
 ### Run examples 🔍
 
-Still confused about how tui-realm works? Don't worry, try with the examples:
+Interested in how tui-realm works and how the resulting code looks? Try the examples:
 
-- [demo](/examples/demo/demo.rs): a simple application which shows how tui-realm works
-
-    ```sh
-    cargo run --example demo
-    ```
+- [demo](/examples/demo/demo.rs): a simple example that shows basic tui-realm usage
+- [user-events](/examples/user_events/user_events.rs): showcase using custom events
+- [inline-display](/examples/inline_display.rs): showcase how tui-realm can be used without requiring a alternate screen
+- [async-ports](/examples/async_ports.rs): showcase usage of async ports
+- [arbitrary-data](/examples/arbitrary_data.rs): showcase usage of `PropPayload::Any` to send custom data across `query` and `attr`
 
 ---
 
 ## Standard components library 🎨
 
-Tui-realm comes with an optional standard library of components I thought would have been useful for most of the applications.
-If you want to use it, just add the [tui-realm-stdlib](https://github.com/veeso/tui-realm-stdlib) to your `Cargo.toml` dependencies.
+`tui-realm` has a optional standard library called [`tui-realm-stdlib`](https://github.com/veeso/tui-realm-stdlib),
+which wraps common widgets from `ratatui` for usage in tui-realm.
+If you want to use it, just add the [`tui-realm-stdlib`](https://github.com/veeso/tui-realm-stdlib) to your `Cargo.toml` dependencies.
 
 ## Community components 🏘️
 
-These components are not included in tui-realm, but have been developed by other users. I like advertising other's contents, so here you can find a list of components you may find useful for your next tui-realm project 💜.
+These components may not included in tui-realm or the stdlib, but have been developed by other users. I like advertising other's contents, so here you can find a list of components you may find useful for your next tui-realm project 💜.
 
-- [tui-realm-textarea](https://github.com/veeso/tui-realm-textarea) A textarea/editor component developed by [@veeso](https://github.com/veeso)
-- [tui-realm-treeview](https://github.com/veeso/tui-realm-treeview) A treeview component developed by [@veeso](https://github.com/veeso)
+- [`tui-realm-textarea`](https://github.com/veeso/tui-realm-textarea) A textarea/editor component developed by [@veeso](https://github.com/veeso)
+- [`tui-realm-treeview`](https://github.com/veeso/tui-realm-treeview) A treeview component developed by [@veeso](https://github.com/veeso)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
 
