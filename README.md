@@ -199,6 +199,7 @@ These components may not included in tui-realm or the stdlib, but have been deve
 
 - [`tui-realm-textarea`](https://github.com/veeso/tui-realm-textarea) A textarea/editor component developed by [@veeso](https://github.com/veeso)
 - [`tui-realm-treeview`](https://github.com/veeso/tui-realm-treeview) A treeview component developed by [@veeso](https://github.com/veeso)
+- [`tuirealm-orx-tree`](https://github.com/hasezoey/tuirealm-orx-tree) Another treeview component developed by [@hasezoey](https://github.com/hasezoey)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
 
