@@ -445,8 +445,69 @@ Along to the `tick()` routine, the application provides many other functionaliti
 We're finally ready to put it all together to see the entire lifecycle of the application.
 Once the application is set up, the cycle of our application will be the following one:
 
-![lifecycle](/docs/images/lifecycle.png)
-<!--TODO: consider using mermaid instead-->
+```mermaid
+---
+title: Lifecycle
+---
+flowchart TD
+    %% Define nodes first, as otherwise they may end up in the wrong subgraph.
+    Loop["Loop Start"]
+    Match{"Has Messages?"}
+    Update["Update::update"]
+    Redraw{"Redraw necessary?"}
+    View["Model::view"]
+    ViewComponent["MockComponent::view"]
+    LoopEnd["End of Loop"]
+
+    subgraph Application::tick
+        Poll["Poll for events"]
+        Focused["Process focused Component"]
+        FocusedRet["Return from Focused processing"]
+        Subscriptions["Process subscriptions"]
+        SubscriptionsRet["Return from Subscriptions processing"]
+    end
+
+    subgraph comp [Component]
+        Component["Component::on"]
+        MockComponent["MockComponent::perform"]
+    end
+
+    %% Do edges after defining all nodes and their subgraph positions, otherwise they may
+    %% end up in the wrong subgraph for whatever reason.
+
+    %% Main loop
+    Loop --> Poll
+    Match -->|has messages| Update
+    Match -->|has no messages| LoopEnd
+    Update --> Redraw
+    Redraw -->|yes| View
+    Redraw -->|no| LoopEnd
+    View --> ViewComponent
+    ViewComponent --> LoopEnd
+    LoopEnd --> Loop
+
+    %% Application::tick links
+    Poll ==>|has Events| Focused
+    Poll ==>|has no Events| Match
+    Focused ==> Component
+    FocusedRet ==> Subscriptions
+    Subscriptions ==> Component
+    SubscriptionsRet ==>|"Vec&lt;Msg>"| Match
+
+    %% Slightly links those paths to make it easier to follow.
+    %% And to indicate to mermaid to lay them out better.
+    Focused-..->FocusedRet
+    Subscriptions-..->SubscriptionsRet
+
+    %% Component links
+    Component -->|Cmd| MockComponent
+    MockComponent -->|CmdResult| Component
+    Component ==>|Msg| FocusedRet & SubscriptionsRet
+```
+
+<!--Convenietly edit on https://mermaid.live-->
+
+In the diagramm above we can see the flow of what gets executed when. There are 3 types of lines: Thin, Thick and Dottet. The Dottet line is to help understand flow, the Thick line is to indicate automatic calling by the **Application**, finally the Thin line is what needs to be implemented by the users.
 
 In the image, we can see there are all the entities we've talked about earlier, which are connected through two kind of arrows, the *black* arrows defines the flow you have to implement, while the *red* arrows, follows what is already implemented and implicitly called by the application.
 
