@@ -161,7 +161,7 @@ where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone,
 {
-    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg>;
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg>;
 }
 ```
 
@@ -414,7 +414,7 @@ impl Counter {
 }
 
 impl Component<Msg, NoUserEvent> for Counter {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent { code: KeyCode::Char('+'), .. }) => {
                 Some(Msg::CounterIncrement(self.id as usize))

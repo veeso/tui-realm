@@ -35,28 +35,27 @@ What you will learn:
 - How to code a tui-realm application from scratch
 - What makes tui-realm cool
 
-tui-realm is a ratatui **framework** which provides an easy way to implement stateful application.
+`tui-realm` is a ratatui **framework** which provides an easy way to implement stateful application.
 First of all, let's give a look to the main features of tui-realm and why you should opt for this framework when building
 terminal user interfaces:
 
 - ⌨️ **Event-driven**
 
-    tui-realm uses the `Event -> Msg` approach, taken from Elm. **Events** are produced by some entities called `Port`, which work as event listener (such as a stdin reader or an HTTP client), which produce Events. These are then forwarded to **Components**, which will produce a **Message**. The message will cause then a certain behaviour on your application model, based on its variant.
-    Kinda simple and everything in your application will work around this logic, so it's really easy to implement whatever you want.
+    `tui-realm` uses the `Event -> Msg` approach, taken from Elm. **Events** are produced by entities called `Port`, which work as event listener (such as a stdin reader or an HTTP client), which produce Events. These are then forwarded to **Components**, which will produce a **Message**. The message then will cause a certain behaviour on your application model, based on its variant.
 
 - ⚛️ Based on **React** and **Elm**
 
-    tui-realm is based on [React](https://reactjs.org/) and [Elm](https://elm-lang.org/). These two are kinda different as approach, but I decided to take the best from each of them to combine them in **Realm**. From React I took the **Component** concept. In realm each component represents a single graphic instance, which could potentially include some children; each component then has a **State** and some **Properties**.
-    From Elm I basically took every other concept implemented in Realm. I really like Elm as a language, in particular the **TEA**.
-    Indeed, as in Elm, in realm the lifecycle of the application is `Event -> Msg -> Update -> View -> Event -> ...`
+    `tui-realm` is based on select elements of [React](https://reactjs.org/) and [Elm](https://elm-lang.org/). These two are different in their approaches, but I decided to take the best from each of them to combine them in **Realm**. From React I took the **Component** concept. In realm each component represents a single graphic instance, which could potentially include some children; each component then has a **State** and some **Properties**.
+    From Elm I basically took every other concept implemented in Realm. I really like Elm as a language, in particular the **TEA**(`The Elm Architecture`).
+    Like as in Elm, in realm the lifecycle of the application is `-> Event -> Msg -> Update -> View ->`.
 
 - 🍲 **Boilerplate** code
 
-    tui-realm may look hard to work with at the beginning, but after a while you'll be start realizing how the code you're implementing is just boilerplate code you're copying from your previous components.
+    `tui-realm` may look hard to work with at the beginning, but after a while you'll be start realizing how the code you're implementing is just boilerplate code you're copying from your previous components.
 
 - 🚀 Quick-setup
 
-    Since the newest tui-realm API (1.x) tui-realm has become really easy to learn and to setup, thanks to the new `Application` data type, event listeners and to the `Terminal` helper.
+    Thank to the `Application`, `EventListener`, Terminal backend and the stdlib, it is easy to get started.
 
 - 🎯 Single **focus** and **states** management
 
@@ -64,50 +63,54 @@ terminal user interfaces:
 
 - 🙂 Easy to learn
 
-    Thanks to the few data types exposed to the user and to the guides, it's really easy to learn tui-realm, even if you've never worked with tui or Elm before.
+    Thanks to the Guides, Examples and straight-forward types, it's really easy to learn tui-realm, even if you've never worked with a tui, React or Elm before.
 
 - 🤖 Adaptable to any use case
 
-    As you will learn through this guide, tui-realm exposes some advanced concepts to create your own event listener, to work with your own event and to implement complex components.
+    As you will learn through this guide, `tui-realm` exposes some advanced concepts to create your own event listener, to work with your own event and to implement complex components.
 
 ---
 
 ## Key Concepts
 
-Let's see now what are the key concepts of tui-realm. In the introduction you've probably read about some of them in **bold**, but let's see them in details now. Key concepts are really important to understand, luckily they're easy to understand and there aren't many of them:
+In the introduction you've probably read about some of them in **bold**, but let's see them in detail now. Key concepts are really important to understand, luckily they're easy to understand and there aren't many of them:
 
-- **MockComponent**: A Mock component represents a re-usable UI component, which can have some **properties** for rendering or to handle commands. It can also have its own **states**, if necessary. In practice it is a trait which exposes some methods to render and to handle properties, states and events. We'll see it in details in the next chapter.
-- **Component**: A component is a wrapper around a mock component which represents a single component in your application. It directly takes events and generates messages for the application consumer. Underneath it relies on its Mock component for properties/states management and rendering.
+- **MockComponent**: A Mock component represents a re-usable UI component, which can have some **properties** for rendering or to handle commands. It can also have its own **states**, if necessary. In practice it is a trait which exposes some methods to render and to handle properties, states and events. We'll see it in detail in the next chapter.
+- **Component**: A component is a wrapper around a **MockComponent** which represents a single component in your application. It directly takes events and generates messages for the application consumer. Underneath it relies on its Mock component for properties/states management and rendering.
 - **State**: The state represents the current state for a component (e.g. the current text in a text input). The state depends on how the user (or other sources) interacts with the component (e.g. the user press 'a', and the char is pushed to the text input).
 - **Attribute**: An attribute describes a single property in a component. The attribute shouldn't depend on the component state, but should only be configured by the user when the component is initialized. Usually a mock component exposes many attributes to be configured, and the component using the mock, sets them based on what the user requires.
-- **Event**: an event is a **raw** entity describing an event caused mainly by the user (such as a keystroke), but could also be generated by an external source (we're going to talk about these last in the "advanced concepts").
-- **Message** (or usually called `Msg`): A message is a Logic event that is generated by the Components, after an **Event**.
+- **Event**: an event is a **raw** entity describing that something happened, for example user input or other sources (we're going to talk about these last in the "advanced concepts").
+- **Message** (or usually called `Msg`): A message is a Logic event that is generated by the Components in reaction to a `Event`, to be consumed by the `Model`.
+    While the Event is *raw* (such as a keystroke), the message is application-oriented. The message is later consumed by the **Update routine**.
 
-    While the Event is *raw* (such as a keystroke), the message is application-oriented. The message is later consumed by the **Update routine**. I think an example would explain it better: let's say we have a popup component, that when `ESC` is pressed, it must report to the application to hide it. Then the event will be `Key::Esc`, it will consume it, and will return a `PopupClose` message. The mesage are totally user-defined through template types, but we'll see that later in this guide.
-
-- **Command** (or usually called `Cmd`): Is an entity generated by the **Component** when it receives an **Event**. It is used by the component to operate on its **MockComponent**. We'll see why of these two entities later.
+- **Command** (or usually called `Cmd`): Is an entity generated by the **Component** when it receives an **Event**. It is used by the component to operate on its **MockComponent**.
 - **View**: The view is where all the components are stored. The view has basically three tasks:
-  - **Managing components mounting/unmounting**: components are mounted into the view when they're created. The view prevents to mount duplicated components and will warn you when you try to operate on unexisting component.
-  - **Managing focus**: the view guarantees that only one component at a time is active. The active component is enabled with a dedicated attribute (we'll see that later) and all the events will be forwarded to it. The view keeps track of all the previous active component, so if the current active component loses focus, the previous active one is active if there's no other component to active.
-  - **Providing an API to operate on components**: Once components are mounted into the view, they must be accessible to the outside, but in a safe way. That's possible thanks to the bridge methods the view exposes. Since each component must be uniquely identified to be accessed, you'll have to define some IDs for your components.
+  - **Managing components mounting/unmounting**: components are mounted into the view when they're created. The view prevents mounting duplicated components (on the same `Id`) and will warn you when you try to operate on unmounted component.
+  - **Managing focus**: the view guarantees that only one component at a time is active. The active component is enabled with a dedicated attribute (we'll see that later) and all the events will be forwarded to it (and all *Subscribed* components). The view keeps track of all the previously focused components, so if the current active component loses focus, the previous active one is active if there's no other component to active.
+  - **Providing an API to operate on components**: Once components are mounted into the view, they must be accessible to the outside, but in a safe way. That's possible thanks to the bridge methods the view exposes. Since each component must be uniquely identified to be accessed, you'll have to define some **ID**s for your components.
 - **Model**: The model is a structure you'll define for your application to implement the **Update routine**.
-- **Subscription** or *Sub*: A subscription is a ruleset which tells the **application** to forward events to other components even if they're not active, based on some rules. We'll talk about subscription in advanced concepts.
-- **Port**: A port is an event listener which will use a trait called `Poll` to fetch for incoming events. A port defines both the trait to call and an interval which must elapse between each call. The events are then forwarded to the subscribed components. The input listener is a port, but you may also implement for example an HTTP client, which fetches for some data. We'll see ports in advanced concepts anyway, since they're kinda uncommon to be used.
-- **Event Listener**: It is a thread which polls ports to read for incoming events. The events are then reported to the **Application**.
-- **Application**: The application is a super wrapper around the *View*, the *Subscriptions* and the *Event Listener*. It exposes a bridge to the view, some shorthands to the *subscriptions*; but is main function, though, is called `tick()`. As we'll see later, tick is where all the framework magic happens.
-- **Update routine**: The update routine is a function, which must be implemented by the **Model** and is part of the *Update trait*. This function is as simple as important. It takes as parameter a mutable ref to the *Model*, a mutable ref to the *View* and the incoming **Message**. Based on the value of the *Message*, it provoke a certain behaviour on the Model or on the view. It is just a *match case* if you ask and it can return a *Message*, which will cause the routine to be called recursively by the application. Later, when we'll see the example you'll see how this is just cool.
+- **Update routine**: The update routine is a function, which must be implemented by the **Model** and is part of the *Update trait*. This function is as simple as it is important. It only takes 2 parameters: itself mutably and the **Message** to process. Based on the *Message*, it invokes a certain behaviour on the Model or on the view. The routine can return a *Message* aswell, which will cause the routine to be called again by the application with the given *Message*. Later, when we'll see the example you'll see how this is just cool.
+- **Subscription** (or usually called *Sub*): A subscription is a ruleset which tells the **application** to also forward specific events to other components even if they're not focused. We'll talk about subscription in advanced concepts.
+- **Port**: A port is an event listener which will use a trait called `Poll` to fetch for incoming events. A port defines both the trait to call and an interval which must elapse between each call. The events are then forwarded to the subscribed components. The input listener is a port, but you may also implement for example an HTTP client, which fetches for some data. Ports are explained in advanced concepts.
+- **Event Listener**: It is a thread which polls **Ports** to read for incoming events. The **Events** are then reported to the **Application**.
+- **Application**: The application is a super wrapper around the **View**, the **Subscriptions** and the **Event Listener**. It exposes a bridge to the view, some shorthands to the *subscriptions*; but is main function, though, is called `tick()`. As we'll see later, `tick` is where all the framework magic happens.
 
 ---
 
 ## MockComponent Vs. Component
 
-We've already roughly said what these two entities are, but now it's time to see them in practice.
-The first thing we should remind, is that both of them are **Traits** and that by design a *Component* is also a *MockComponent*.
+Even with the description above, you may ask yourself "What is the difference between those 2, why are they necessary?".
+This is mainly due to how Events are designed to allow for custom `UserEvent`s and how rust works. If those 2 traits would be one, then libraries (like stdlib) would still need to implement a partial `on` update function, only relying on Event variants provided by `tui-realm` core. They would also likely need a generic on every component that practically would go unused to to being unable to rely on `UserEvent`s, adding extra clutter.
+Separate traits also make for a good separation of concerns and allow modifying how things are passed to the underlying MockComponent.
+
+Additionally, keep in mind that **Component** is always a **MockComponent**, but a **MockComponent** only *may* be a **Component**.
+
 Let's see their definition in details:
 
 ### The Mock Component
 
-The mock component is meant to be *generic* (but not too much) and *re-usable*, but at the same time with *one responsibility*.
+The mock component is meant to be agnostic regarding events and *re-usable* in other places (even different projects).
+
 For instance:
 
 - ✅ A Label which shows a single line of text makes a good mock component.
@@ -141,17 +144,17 @@ the trait requires you to implement:
 
 ### The Component
 
-So, apparently the mock component defines everything we need handle properties, states and rendering. So why we're not done yet and we need a component trait too?
+So, apparently the mock component defines everything we need handle properties, states and rendering. So why are we not done yet and we need a component trait too?
 
-1. MockComponent must be **generic**: mock components are distribuited in library (e.g. `tui-realm-stdlib`) and because of that, they cannot consume `Event` or produce `Message`.
-2. Because of point 1, we need an entity which produces `Msg` and consume `Event`. These two entities are totally or partially user-defined, which means, they are different for each realm application. This means the component must fit to the application.
-3. **It's impossible to fit a component to everybody's needs**: I tried to in tui-realm 0.x, but it was just impossible. At a certain point I just started to add properties among other properties, but eventually I ended up re-implementing stdlib components from scratch just to have some different logics. Mock Components are good because they're generic, but not too much; they must behave as dummies to us. Components are exactly what we want for the application. We want an input text, but we want that when we type 'a' it changes color. You can do it with component, you can't do it with mocks. Oh, and I almost forgot the worst thing about generalizing mocks: **keybindings**.
+1. MockComponent must be agnostic over **Event**s: mock components may be distribuited in libraries (e.g. `tui-realm-stdlib`) and because of that, they cannot consume `Event` or produce `Message`.
+2. Because of point 1, we need an entity which consumed **Event**s and produces **Messages**. These two entities are totally or partially user-defined, which means, they are different for each realm application. This means the component must fit to the application.
+3. **It's impossible to fit a component to everybody's needs**: I tried to in `tui-realm` 0.x, but it was just impossible. At a certain point I just started to add properties among other properties, but eventually I ended up re-implementing stdlib components from scratch just to have some different logics. Mock Components are good because they're generic, but not too much; they must behave as dummies to us. Components are exactly what we want for the application. For example, we have a Input, and want to change its colors based on what is written; one application may want to change color everytime when `a` is types, others may want to `the` is written. This may be possible with a lot of options, or validation in a given Input, but this logic is better suited to **Component** instead of *MockComponent**. Oh, and I almost forgot the worst thing about generalizing mocks: **keybindings**.
 
-Said so, what is a component?
+With that said, what actually is a component?
 
-A component is an application specific unique implementation of a mock. Let's think for example of a form and let's say the first field is an input text which takes the username. If we think about it in HTML, it will be for sure a `<input type="text" />` right? And so it's for many other components in your web page. So the input text will be the `MockComponent` in tui-realm. But *THAT* username input field, will be your **username input text**. The `UsernameInput` will wrapp a `Input` mock component, but based on incoming events it will operate differently on the mock and will produce different **Messages** if compared for instance to a `EmailInput`.
+A component is an application specific unique implementation of a mock. Let's think for example of a form and let's say the first field is an input text which takes the username. If we think about it in HTML, it will be for sure a `<input type="text" />` right? With just that definition, the input is generic over what text is input, it may have some validation associated, but ultimately it has no meaning on submit. But we want it to be our username input and on Submit generate the appropriate **Message**. So the input text will be the `MockComponent` in tui-realm. But *that* "username" input field, will be *your* **username input text**. The `UsernameInput` *Component* will wrap a `Input` *MockComponent*, but based on incoming events it will operate differently on the mock and will produce different **Messages** if compared for instance to a `EmailInput`.
 
-So, let me state the most important thing you must keep in mind from now on: **Components are unique ❗** in your application. You **should never use the same Component more than once**.
+So, let me state the most important thing you must keep in mind from now on: **Components are unique ❗** to your application. You **should never blindly use the same Component more than once**.
 
 Let's see what a component is in practice now:
 
@@ -161,27 +164,30 @@ where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone,
 {
-    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg>;
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg>;
 }
 ```
 
-Quite simple uh? Yep, it was my intention to make them the lighter as possible, since you'll have to implement one for each component in your view. As you can also notice, a Component requires to impl a `MockComponent` so in practice we'll also have something like:
+Quite simple eh? Yep, it was my intention to make them as light as possible, since you'll have to implement one for each component in your view. As you can also notice, a **Component** requires to also be a **MockComponent** so in practice we'll also have something like:
 
 ```rust
 pub struct UsernameInput {
     component: Input, // Where input implements `MockComponent`
 }
 
+impl MockComponent for UsernameInput { /* Passthrough to "self.component" */ }
 impl Component for UsernameInput { ... }
 ```
+
+Due to requiring **MockComponent** to be implemented for each **Component** and it being quite common to pass-through the calls, `#[derive(MockComponent)]` can be used instead.
 
 Another thing you may have noticed and that may frighten some of you are the two generic types that Component takes.
 Let's see what these two types are:
 
-- `Msg`: defines the type of the **message** your application will handle in the **Update routine**. Indeed, in tui-realm the message are not defined in the library, but are defined by the user. We'll see this in details later in "the making of the first application". The only requirements for Message, is that it must implement `PartialEq`, since you must be able to match it in the **Update**.
-- `UserEvent`: The user event defines a custom event your application can handle. As we said before tui-realm usually will send events concerning user input or terminal events, plus a special event called `Tick` (but we'll talk about it later). In addition to these though, we've seen there are other special entities called `Port`, which may return events from other source. Since tui-realm needs to know what these events are, you need to provide the type your ports will produce.
+- `Msg` (or also called **Message**): defines the type of the **Message** your application will handle in the **Update routine**. Indeed, in `tui-realm` the messages are not defined in the library, but are defined by the user. We'll see this in detail later in [Our first application](#our-first-application). The only requirements for Message, is that it must implement `PartialEq`, since you must be able to match it in the **Update routine**.
+- `UserEvent`: The user event defines a custom events your application can handle. As we said before `tui-realm` usually will send events concerning user input or terminal events, plus a special event called `Tick` (but we'll talk about it later). In addition to these common events though, custom **Port**s may return events from other sources that dont align with the common events. Since `tui-realm` needs to know what these events are, you need to provide the type your ports will produce. (more on that in the [advanced guide](./advanced.md))
 
-    If we give a look to the `Event` enum, everything will become clear.
+    If we give a look to the `Event` enum, everything will become clear:
 
     ```rust
     pub enum Event<UserEvent>
@@ -204,7 +210,7 @@ Let's see what these two types are:
 
     As you can see there is a special variant for `Event` called `User` which takes a special type `UserEvent`, which can be indeed used to use user-defined events.
 
-    > ❗If you don't have any `UserEvent` in your application, you can declare events passing `Event<NoUserEvent>`, which is an empty enum
+    > ❗If you don't have any `UserEvent` in your application, you can declare events passing `Event<NoUserEvent>`, which `tui-realm` provides.
 
 ### Properties Vs. States
 
@@ -227,7 +233,7 @@ Let's see for example how to distinguish properties from states on a component a
 
 ### Events Vs. Commands
 
-We've almost seen all of the aspects behind components, but we still need to talk about an important concept, which is the difference between `Event` and `Cmd`.
+We've almost seen all of the aspects behind components, but we still need to talk about an important concept, which is the difference between **Events** and **Commands**.
 
 If we give a look to the **Component** trait, we'll see that the method `on()` has the following signature:
 
@@ -292,19 +298,19 @@ For some aspects, they both look similiar, but something immediately appears cle
 - Event is strictly bounded to the "hardware", it takes key event, terminal events or event from other sources.
 - Cmd is completely independent from the hardware and terminal, and it's all about UI logic. We still have `KeyEvent`, but we've also got `Type`, `Move`, `Submit`, custom events (but not with generics) and etc.
 
-The reason behind this, is quite simple: **MockComponent** must be application-independent. You can create your components library and distribuite it on Github, or wherever you want, and it still must be able to work. If they took events as parameters, this couldn't be possible, since event takes in a type, which is application-dependent.
+The reason behind this, is quite simple: **MockComponent** must be application-independent. You can create your components in a library and distribute it on Github, crate.io, or wherever you want, and it still must be able to work. If they took events as parameters, this couldn't be possible, since event takes in a generic, which is application-dependent.
 
-And there's also another reason: let's imagine we have a component with a list you can scroll on and view different elements. You can scroll up/down with keys. If I wanted to create a library of components and we had events only, it wouldn't be possible to use different keybindings. Think about, with mock components I expect that in perform(), when we receive a `Cmd::Scroll(Direction::Up)` the list scrolls up, then I can implement my `Component` which will send a `Cmd::Scroll(Direction::Up)` when `W` is typed and another component which will send the same event when `<UP>` is pressed. Thanks to this mechanism, tui-realm mock components are also totally independent from key-bindings, which in tui-realm 0.x, was just a hassle.
+And there's also another reason: let's imagine we have a component with a list you can scroll on and view different elements. You can scroll up/down with keys. If I wanted to create a library of components and we had events only, it wouldn't be possible to use different keybindings. Think about, with mock components I expect that in `perform()`, when we receive a `Cmd::Scroll(Direction::Up)` the list scrolls up, then I can implement my `Component` which will send a `Cmd::Scroll(Direction::Up)` when `W` is typed and another component which will send the same event when `<UP>` is pressed. Thanks to this mechanism, `tui-realm` mock components are also totally independent from key-bindings, which in tui-realm 0.x, was just a hassle.
 
-So whenever you implement a MockComponent, you must keep in mind that you should make it application-independent, so you must define its **Command API** and define what kind of **CmdResult** it'll produce. Then, your components must generate on whatever kind of events the `Cmd` accepted by the API, and handle the `CmdResult`, and finally, based on the value of the `CmdResult` return a certain kind of **Message** based on your application.
+So whenever you implement a **MockComponent**, you must keep in mind that you should make it application-independent, so you must define its **Command API** and define what kind of **CmdResult** it'll produce. Then, your components must generate on whatever kind of events the `Cmd` accepted by the API, and handle the `CmdResult`, and finally, based on the value of the `CmdResult` return a certain kind of **Message** based on your application.
 
-We're then, finally starting to define the lifecycle of the tui-realm. This segment of the cycle, is described as `Event -> (Cmd -> CmdResult) -> Msg`.
+We're finally starting to define the lifecycle of `tui-realm`. This segment of the cycle, is described as `Event -> (Cmd -> CmdResult) -> Msg`.
 
 ---
 
 ## Application, Model and View
 
-Now that we have defined what Components are, we can finally start talking about how all these components can be put together to create an application.
+Now that we have defined what Components are, we can finally start talking about how all these components can be put together to create an **Application**.
 
 In order to put everything together, we'll use three different entities, we've already briefly seen before, which are:
 
@@ -317,82 +323,75 @@ First, starting from components, the first thing we need to talk about, is the *
 ### The View
 
 The view is basically a box for all the components. All the components which are part of the same "view" (in terms of UI) must be *mounted* in the same **View**.
-Each component in the view, **Must** be identified uniquely by an *identifier*, where the identifier is a type you must define (you can use an enum, you can use a String, we'll see that later).
-Once a component is mounted, it won't be directly usable anymore. The view will store it as a generic `Component` and will expose a bridge to operate on all the components in the view, querying them with their identifier.
+Each component in the view, **Must** be identified uniquely by an **Identifier**(or also usually called *Id*), where the identifier is a type you must define, usually it is a Enum, but it can be other things like (static) strings too.
 
-The component will be part of the view, until you unmount the component. Once the component is unmounted, it won't be usable anymore and it'll be destroyed.
+Once a component is mounted, it won't be directly accessable anymore. The view will store it as a generic `Component` and will expose a bridge to operate on all the components in the view, querying them with their **Identifier**.
 
-The view is not just a list of components though, it also plays a fundamental role in the UI development, indeed, it will handle focus. Let's talk about it in the next chapter
+The component will be part of the view, until you unmount the component. Once the component is unmounted, it won't be usable anymore and it'll be dropped.
+
+The view is not just a list of components though, it also plays a fundamental role in the UI development. For example, the **View** also handles focus and event forwarding. Let's talk about it in the next chapter
 
 #### Focus
 
-Whenever you interact with components in a UI, there must always be a way to determine which component will handle the interaction. If I press a key, the View must be able whether to type a character in an input field or into another and this is resolved through **focus**.
-Focus is just a state the view tracks. At any time, the view must know which component is currently *active* and what to do, in case that component is unmounted.
+Whenever you interact with components in a UI, there must always be a way to determine which component will handle the interaction. If I press a key, the View must be able to correctly forward those **Event**s to the focused **Component**.
+Focus is just a state the View tracks. At any time, the view must know which component is currently *active* and what to do, in case that component is unmounted.
 
-In tui-realm, I decided to define the following rules, when working with focus:
+In `tui-realm`, I decided to define the following rules, when working with focus:
 
 1. Only one component at a time can have focus
 2. All events will be forwarded to the component that currently owns focus.
-3. A componet to become active, must get focus via the `active()` method.
+3. A Component can only gain focused via the `active()` method.
 4. If a component gets focus, then its `Attribute::Focus` property becomes `AttrValue::Flag(true)`
 5. If a component loses focus, then its `Attribute::Focus` property becomes `AttrValue::Flag(false)`
-6. Each time a component gets focus, the previous active component, is tracked into a `Stack` (called *focus stack*) holding all the previous components owning focus.
-7. If a component owning focus, is **unmounted**, the first component in the **Focus stack** becomes active
-8. If a component owning focus, gets disabled via the `blur()` method, the first component in the **Focus stack** becomes active, but the *blurred* component, is not pushed into the **Focus stack**.
+6. Each time a component gets focus, the previously active component loses focus and is appended into a `Stack` (called *focus stack*) holding all the previous components owning focus.
+7. If a component owning focus, is **unmounted**, the most recent component in the **Focus stack** that is still mounted becomes active
+8. If a component owning focus, gets disabled via the `blur()` method, the most recent component in the **Focus stack** becomes active, but the *blurred* component, is not pushed into the **Focus stack**. (`blur` can also be read as `focus_previous_component`)
 
-Follow the following table to understand how focus works:
+The following table shows how focus works:
 
-| Action   | Focus | Focus Stack | Components |
-|----------|-------|-------------|------------|
-| Active A | A     |             | A, B, C    |
-| Active B | B     | A           | A, B, C    |
-| Active C | C     | B, A        | A, B, C    |
-| Blur C   | B     | A           | A, B, C    |
-| Active C | C     | B, A        | A, B, C    |
-| Active A | A     | C, B        | A, B, C    |
-| Umount A | C     | B           | B, C       |
-| Mount D  | C     | B           | B, C, D    |
-| Umount B | C     |             | C, D       |
+| Action    | Focus | Focus Stack | Components |
+|-----------|-------|-------------|------------|
+| Active A  | A     |             | A, B, C    |
+| Active B  | B     | A           | A, B, C    |
+| Active C  | C     | B, A        | A, B, C    |
+| Blur      | B     | A           | A, B, C    |
+| Active C  | C     | B, A        | A, B, C    |
+| Active A  | A     | C, B        | A, B, C    |
+| Umount A  | C     | B           | B, C       |
+| Mount D   | C     | B           | B, C, D    |
+| Umount B  | C     |             | C, D       |
+| Blur(err) | C     |             | C, D       |
 
 ### Model
 
-The model is a struct which is totally defined by the developer implementing a tui-realm application. Its purpose is basically to update its states, perform some actions or update the view, after the components return messages.
-This is done through the **Update routine**, which is defined in the **Update** trait. We'll soon see this in details, when we'll talk about the *application*, but for now, what we need to know, is what the update routine does:
+The model is a struct which is fully defined by the user implementing a `tui-realm` application. Its only 2 required methods are the **Update routine** and **Draw routine**.
 
-first of all your *model* must implement the **Update** trait:
+We'll soon see this in detail, when we'll talk about the *application*, but for now, all we need to know is what the **Update routine** does, which is implemented via the `Update` trait:
 
 ```rust
-pub trait Update<ComponentId, Msg, UserEvent>
+pub trait Update<Msg>
 where
-    ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
-    UserEvent: Eq + PartialEq + Clone,
 {
-
     /// update the current state handling a message from the view.
     /// This function may return a Message,
     /// so this function has to be intended to be call recursively if necessary
-    fn update(
-        &mut self,
-        view: &mut View<ComponentId, Msg, UserEvent>,
-        msg: Option<Msg>,
-    ) -> Option<Msg>;
+    fn update(&mut self, msg: Option<Msg>) -> Option<Msg>;
 }
 ```
 
-Here finally we can see almost everything put together: we have the view and we have all the 3 different custom types, defining how components are identified in the view (*ComponentId*), the *Msg* and the *UserEvent* for the *Event* type.
-The update method, receives a mutable reference to the model, a mutable reference to the view and the incoming message from the component, which processed a certain type of event.
-Inside the update, we'll match the msg, to perform certain operation on the model or on the view and we'll return `None` or another message, if necessary. As we'll see, if we return `Some(Msg)`, the *Application*, will re-call the routine passing as argument the last generated message.
+The update method, receives a mutable reference to the model(self) and potentially the incoming message from the component, which processed a certain type of event.
+Inside the update, we'll match the msg, to perform certain operation on the model or on the view and we'll return `None` or another message, if necessary. As we'll see, if we return `Some(Msg)`, we can re-call the routine passing as argument the last generated message.
 
 ### The Application
 
 Finally we're ready to talk about the core struct of tui-realm, the **Application**. Let's see which tasks it takes care of:
 
-- It contains the view and exposes a bridge to it: the application contains the view itself, and provides a way to operate on it, as usual using the component identifiers.
-- It handles subscriptions: as we've already seen before, subscriptions are special rules which tells the application to forward events to other components if some clauses are satisfied.
-- It reads incoming events from **Ports**
+- It contains the **View** and provides a way to operate on it, as usual using the component *identifiers*.
+- It handles **Subscriptions**. As we've already seen before, *subscriptions* are special rules which tells the application to forward events to other components if some clauses are satisfied, even if that component is not focused.
+- It reads incoming events from **Ports**.
 
-indeed as we can see, the application is a container for all these entities:
+As we can see in its definition, the application is a container for all these entities:
 
 ```rust
 pub struct Application<ComponentId, Msg, UserEvent>
@@ -407,9 +406,9 @@ where
 }
 ```
 
-so the application will be the sandbox for the all the entities a tui-realm app needs (and that's why is called *Application*).
+So the application will be the sandbox for all the entities a `tui-realm` app needs (and that's why is called **Application**).
 
-But the coolest thing here, is that all the application can be run, using a single method! This method is called `tick()` and as we'll see in the next chapter it performs all what is necessary to complete a single cycle of the application lifecycle:
+But the coolest thing here, is that all of the application can be run using a single method! This method is called `tick()` and as we'll see in the next chapter it performs all what is necessary to complete a `Event -> Component(s) -> Msg` cycle:
 
 ```rust
 pub fn tick(&mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Msg>> {
@@ -431,13 +430,13 @@ As we can quickly see, the tick method has the following workflow:
 
 1. The event listener is fetched according to the provided `PollStrategy`
 
-    > ❗The poll strategy tells how to poll the event listener. You can fetch One event for cycle, or up to `n` or for a maximum amount of time
+    > ❗The poll strategy tells how to poll the event listener. For example you can only fetch one event per cycle, or multiple; various Strategies are available. For a fully event driven application `BlockingUpTo` is recommended.
 
 2. All the incoming events are immediately forwarded to the current *active* component in the *view*, which may return some *messages*
 3. All the incoming events are sent to all the components subscribed to that event, which satisfied the clauses described in the subscription. They, as usual, will may return some *messages*
 4. The messages are returned
 
-Along to the tick() routine, the application provides many other functionalities, but we'll see later in the example and don't forget to checkout the documentation on rust docs.
+Along to the `tick()` routine, the application provides many other functionalities, but we'll see later in the example and don't forget to checkout the documentation.
 
 ---
 
@@ -447,65 +446,53 @@ We're finally ready to put it all together to see the entire lifecycle of the ap
 Once the application is set up, the cycle of our application will be the following one:
 
 ![lifecycle](/docs/images/lifecycle.png)
+<!--TODO: consider using mermaid instead-->
 
-in the image, we can see there are all the entities we've talked about earlier, which are connected through two kind of arrows, the *black* arrows defines the flow you have to implement, while the *red* arrows, follows what is already implemented and implicitly called by the application.
+In the image, we can see there are all the entities we've talked about earlier, which are connected through two kind of arrows, the *black* arrows defines the flow you have to implement, while the *red* arrows, follows what is already implemented and implicitly called by the application.
 
-So the tui-realm lifecycle consists in:
+So the `tui-realm` lifecycle consists of:
 
 1. the `tick()` routine is called on **Application**
    1. Ports are polled for incoming events
-   2. event is forwarded to active component in the view
-   3. subscriptions are queried to know whether the event should be forwarded to other components
-   4. incoming messages are collected
-2. Messages are returned to the caller
-3. the `update()` routine is called on **Model** providing each message from component
-4. The model gets updated thanks to the `update()` method
-5. The `view()` function is called to render the UI
+   2. Events are forwarded to the active component in the view
+   3. Subscriptions are queried to know whether the event should be forwarded to other components, then forward those events
+   4. incoming messages are returned to the caller
+2. the **`update()` routine** is called on **Model** for each message from `tick` (and each message `update` may return)
+3. The model gets updated thanks to the `update()` method
+4. The `view()` function is called to render the UI
 
-This simple 4 steps cycle is called **Tick**, because it defines the interval between each UI refresh in fact.
-Now that we know how a tui-realm application works, let's see how to implement one.
+This simple 4-step cycle is called a **Tick**, because it defines the interval between each UI refresh in fact.
+Now that we know how a `tui-realm` application works, let's see how to implement one.
 
 ---
 
 ## Our first application
 
-We're finally ready to set up a realm tui-realm application. In this example we're going to start with simple very simple.
-The application we're going to implement is really simple, we've got two **counters**, one will track when an alphabetic character is pressed by the user and the other when a digit is pressed by the user. Both of them will track events, only when active. The active component will switch between the two counters pressing `<TAB>`, while pressing `<ESC>` the application will terminate.
+We're finally ready to set up a realm `tui-realm` application. In this example we're going to start with something very simple.
+The application we're going to implement is really simple, we've got two **counters**, one will track when an alphabetic character is pressed by the user and the other when a digit is pressed by the user. Both of them will track events only when active. The active component will switch between the two counters pressing `<TAB>`, while pressing `<ESC>` the application will terminate.
 
-> ❗ Want to see something more complex? Check out [tuifeed](https://github.com/veeso/tuifeed)
+> This example will result in something similar to [the demo example](/examples/demo/demo.rs).
 
 ### Let's implement the Counter
 
-So we've said we have two Counters, one tracking alphabetic characters and one digits, so we've found a potential mock component: the **Counter**. The counter will just have a state keeping track of "times" as a number and will increment each time a certain command will be sent.
-Said so, let's implement the counter:
+So we've said we have two Counters, one tracking alphabetic characters and one digits, so we've found a potential **MockComponent**: the **Counter**. The counter will just have a state keeping track of "times" as a number and will increment each time a certain command will be sent.
+With that said, let's start to implement the counter:
 
 ```rust
 struct Counter {
     props: Props,
     states: OwnStates,
 }
-
-impl Default for Counter {
-    fn default() -> Self {
-        Self {
-            props: Props::default(),
-            states: OwnStates::default(),
-        }
-    }
-}
 ```
 
-so the counter, as all components must have the `props` which defines its properties and in this case the counter is a stateful component, so, we need to declare its states:
+Like many other components, we need `props` to store properties like color and text style.
+We also have `states` due to us needing to keep track of the `times` to display.
+Because we have states, we also need to declare them:
 
 ```rust
+#[derive(Default)]
 struct OwnStates {
     counter: isize,
-}
-
-impl Default for OwnStates {
-    fn default() -> Self {
-        Self { counter: 0 }
-    }
 }
 
 impl OwnStates {
@@ -515,7 +502,7 @@ impl OwnStates {
 }
 ```
 
-Then, we'll implement an easy-to-use constructor for our mock component:
+Then, we'll implement easy-to-use Builder methods for our mock component:
 
 ```rust
 impl Counter {
@@ -535,11 +522,6 @@ impl Counter {
         self
     }
 
-    pub fn alignment(mut self, a: Alignment) -> Self {
-        self.attr(Attribute::TextAlign, AttrValue::Alignment(a));
-        self
-    }
-
     pub fn foreground(mut self, c: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(c));
         self
@@ -549,75 +531,64 @@ impl Counter {
         self.attr(Attribute::Background, AttrValue::Color(c));
         self
     }
-
-    pub fn modifiers(mut self, m: TextModifiers) -> Self {
-        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
-        self
-    }
-
-    pub fn borders(mut self, b: Borders) -> Self {
-        self.attr(Attribute::Borders, AttrValue::Borders(b));
-        self
-    }
 }
 ```
 
-finally we can implement `MockComponent` for `Counter`
+Finally we can implement `MockComponent` for `Counter`
 
 ```rust
 impl MockComponent for Counter {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
-        // Check if visible
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // Get properties
-            let text = self.states.counter.to_string();
-            let alignment = self
-                .props
-                .get_or(Attribute::TextAlign, AttrValue::Alignment(Alignment::Left))
-                .unwrap_alignment();
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
-            let title = self
-                .props
-                .get_or(
-                    Attribute::Title,
-                    AttrValue::Title((String::default(), Alignment::Center)),
-                )
-                .unwrap_title();
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            frame.render_widget(
-                Paragraph::new(text)
-                    .block(get_block(borders, title, focus))
-                    .style(
-                        Style::default()
-                            .fg(foreground)
-                            .bg(background)
-                            .add_modifier(modifiers),
-                    )
-                    .alignment(alignment),
-                area,
-            );
+        // Check if the component is meant to be displayed or hidden
+        if !self.props.get_or(Attribute::Display, AttrValue::Flag(true)).unwrap_flag() {
+            return;
         }
+
+        // Get the text we want to display
+        let count_str = self.states.counter.to_string();
+
+        // Get other properties to apply
+        let foreground = self
+            .props
+            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let background = self
+            .props
+            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let style = Style::default()
+            .fg(foreground)
+            .bg(background);
+
+        let title = self
+            .props
+            .get_or(
+                Attribute::Title,
+                AttrValue::Title(Title::default()),
+            )
+            .unwrap_title();
+        let borders = self
+            .props
+            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+            .unwrap_borders();
+        // we also want to draw the block border differently depending if the component is focused or not
+        let focus = self
+            .props
+            .get_or(Attribute::Focus, AttrValue::Flag(false))
+            .unwrap_flag();
+
+        let block = Block::default()
+            .title_top(title.content)
+            .borders(borders.sides)
+            .border_style(if focus { borders.style() } else { Style::default().fg(Color::DarkGrey) });
+
+        frame.render_widget(
+            Paragraph::new(count_str)
+                .block(block)
+                .style(style)
+                .alignment(alignment),
+            area,
+        );
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
@@ -644,43 +615,42 @@ impl MockComponent for Counter {
 }
 ```
 
-so as state, we return the current value for the counter and on perform we handle the `Cmd::Submit` to increment the current value for the counter. As result we return `CmdResult::Changed()` with the state.
+This is one big code dump, so lets break it down:
 
-So our Mock component is ready, we can now implement our two components.
+- in `view` we fetch all properties that can be set and apply them to be drawn
+- in `query` and `attr` just pass them right through to `Props` to get / set the properties
+- in `state` return the current counter `times` value
+- in `perform`, on Command `Submit` we increment the counter and return a `Changed` value and ignore all other commands
+
+With that our **MockComponent** is ready, we could now implement our two **Components**, but we also need some other types like **Messages**, so lets go and do those first.
 
 ### Let's define the message type
 
 Before implementing the two `Component` we first need to define the messages our application will handle.
-So, in on top of our application we define an enum `Msg`:
+So for our Application, we define an enum `Msg`:
 
 ```rust
 #[derive(Debug, PartialEq)]
 pub enum Msg {
+    /// Stop the application
     AppClose,
+    /// Digit counter has changed to the given value
     DigitCounterChanged(isize),
+    /// Blurring has been requested while on "Digit" counter
     DigitCounterBlur,
+    /// Letter counter has changed to the given value
     LetterCounterChanged(isize),
+    /// Blurring has been requested while on "Letter" counter
     LetterCounterBlur,
-    /// Used to unwrap on update()
-    None,
 }
 ```
 
-where:
-
-- `AppClose` will tell to terminate the app
-- `DigitCounterChanged` tells the digit counter value has changed
-- `DigitCounterBlur` tells that the digit counter shall lose focus
-- `LetterCounterChanged` tells the letter counter value has changed
-- `LetterCounterBlur` tells that the letter counter shall lose focus
-
 ### Let's define the component identifiers
 
-We need also to define the ids for our components, that will be used by the view to query mounted components.
-So on top of our application, as we did for `Msg`, let's define `Id`:
+We also need to define the **Identifiers** for our components, they will be used by the view to query mounted components.
+So for our application, as we did for `Msg`, let's define `Id` with a Enum:
 
 ```rust
-// Let's define the component ids for our application
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub enum Id {
     DigitCounter,
@@ -690,9 +660,9 @@ pub enum Id {
 
 ### Implementing the two counter components
 
-We'll have two type of counters, so we'll call them `LetterCounter` and `DigitCounter`. Let's implement them!
+We'll have two types of counters, so we'll call them `LetterCounter` and `DigitCounter`. Let's implement them!
 
-First we define the `LetterCounter` with the mock component within. Since we don't need any particular behaviour for the `MockComponent` trait, we can simply derive `MockComponent`, which will implement the default implementation for MockComponent. If you want to read more read see [tuirealm_derive](https://github.com/veeso/tuirealm_derive).
+First we define the `LetterCounter` with the mock component within. Since we don't need any particular behaviour for the `MockComponent` trait, we can simply derive `MockComponent`, which will automatically pass through all `MockComponent` calls to the underlying `MockComponent`. If you want to read more read see [tuirealm_derive](https://github.com/veeso/tuirealm_derive).
 
 ```rust
 #[derive(MockComponent)]
@@ -701,35 +671,31 @@ pub struct LetterCounter {
 }
 ```
 
-then we implement the constructor for the counter, that accepts the initial value and construct a `Counter` using the mock component constructor:
+Then we implement the constructor for the letter counter, it accepts the initial value and construct a `Counter` using the mock component constructor:
 
 ```rust
 impl LetterCounter {
     pub fn new(initial_value: isize) -> Self {
         Self {
             component: Counter::default()
-                .alignment(Alignment::Center)
                 .background(Color::Reset)
                 .borders(
-                    Borders::default()
-                        .color(Color::LightGreen)
-                        .modifiers(BorderType::Rounded),
+                    Borders::default().color(Color::LightGreen),
                 )
                 .foreground(Color::LightGreen)
-                .modifiers(TextModifiers::BOLD)
-                .value(initial_value)
-                .label("Letter counter"),
+                .label("Letter counter")
+                .value(initial_value),
         }
     }
 }
 ```
 
-Finally we implement the `Component` trait for the `LetterCounter`, were we first convert the incoming `Event` to a consumable `Cmd`, then we call `perform()` on the mock to get the `CmdResult` in order to produce a `Msg`.
-When event is `Esc` or `Tab` we directly return the `Msg` to close app or to change focus.
+Finally we implement the `Component` trait for the `LetterCounter`. Here we first convert the incoming `Event` to a `Cmd`, then we call `perform()` on the mock to get the `CmdResult` in order to produce a `Msg`.
+When the event is `Esc` or `Tab` we directly return the `Msg` to close app or to change focus.
 
 ```rust
 impl Component<Msg, NoUserEvent> for LetterCounter {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         // Get command
         let cmd = match ev {
             Event::Keyboard(KeyEvent {
@@ -757,7 +723,7 @@ impl Component<Msg, NoUserEvent> for LetterCounter {
 }
 ```
 
-We'll do the same for the `DigitCounter`, but on `on()` it will check whether char is a digit, instead of alphabetic.
+We'll do the same for the `DigitCounter`, but on `on()` instead of `is_alphabetic` we use `is_ascii_digit`.
 
 ### Implementing the model
 
@@ -776,19 +742,17 @@ pub struct Model {
 }
 ```
 
-> ❗ the terminal bridge is a helper struct implemented in tui-realm to interface with ratatui terminal with some helper functions.
-> It also is totally backend-independent, so you won't have to know how to setup the terminal for your backend.
+> ❗ Insted of `CrosstermTerminalAdapter` other backends can be used, or it could even be generic over `TerminalAdapter`.
 
 Now, we'll implement the `view()` method, which will render the GUI after updating the model:
 
 ```rust
 impl Model {
-    pub fn view(&mut self, app: &mut Application<Id, Msg, NoUserEvent>) {
-        assert!(self
+    pub fn view(&mut self) {
+        self
             .terminal
-            .raw_mut()
             .draw(|f| {
-                let chunks = Layout::default()
+                let [letter, digit] = Layout::default()
                     .direction(Direction::Vertical)
                     .margin(1)
                     .constraints(
@@ -796,115 +760,109 @@ impl Model {
                             Constraint::Length(3), // Letter Counter
                             Constraint::Length(3), // Digit Counter
                         ]
-                        .as_ref(),
                     )
-                    .split(f.size());
-                app.view(&Id::LetterCounter, f, chunks[0]);
-                app.view(&Id::DigitCounter, f, chunks[1]);
-            })
-            .is_ok());
+                    .areas(f.size());
+                self.app.view(&Id::LetterCounter, f, letter);
+                self.app.view(&Id::DigitCounter, f, digit);
+            }).expect("App to draw without error");
     }
 }
 ```
 
 > ❗ If you're not familiar with the `draw()` function, please read the [ratatui](https://ratatui.rs/) documentation.
 
-and finally we can implement the `Update` trait:
+Finally we can implement the `Update` trait:
 
 ```rust
 impl Update<Msg> for Model {
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
-        if let Some(msg) = msg {
-            // Set redraw
-            self.redraw = true;
-            // Match message
-            match msg {
-                Msg::AppClose => {
-                    self.quit = true; // Terminate
-                    None
-                }
-                Msg::Clock => None,
-                Msg::DigitCounterBlur => {
-                    // Give focus to letter counter
-                    assert!(self.app.active(&Id::LetterCounter).is_ok());
-                    None
-                }
-                Msg::DigitCounterChanged(v) => {
-                    // Update label
-                    assert!(self
-                        .app
-                        .attr(
-                            &Id::Label,
-                            Attribute::Text,
-                            AttrValue::String(format!("DigitCounter has now value: {}", v))
-                        )
-                        .is_ok());
-                    None
-                }
-                Msg::LetterCounterBlur => {
-                    // Give focus to digit counter
-                    assert!(self.app.active(&Id::DigitCounter).is_ok());
-                    None
-                }
-                Msg::LetterCounterChanged(v) => {
-                    // Update label
-                    assert!(self
-                        .app
-                        .attr(
-                            &Id::Label,
-                            Attribute::Text,
-                            AttrValue::String(format!("LetterCounter has now value: {}", v))
-                        )
-                        .is_ok());
-                    None
-                }
+        let msg = msg?;
+
+        // Set redraw
+        self.redraw = true;
+        // Match message
+        match msg {
+            Msg::AppClose => {
+                self.quit = true; // Terminate
+                None
             }
-        } else {
-            None
+            Msg::DigitCounterBlur => {
+                // Give focus to letter counter
+                self.app.active(&Id::LetterCounter).expect("LetterCounter to be mounted");
+                None
+            }
+            Msg::DigitCounterChanged(v) => {
+                // Update label
+                self
+                    .app
+                    .attr(
+                        &Id::Label,
+                        Attribute::Text,
+                        AttrValue::String(format!("DigitCounter has now value: {}", v))
+                    )
+                    .expect("Label to be mounted");
+                None
+            }
+            Msg::LetterCounterBlur => {
+                // Give focus to digit counter
+                self.app.active(&Id::DigitCounter).expect("DigitCounter to be mounted");
+                None
+            }
+            Msg::LetterCounterChanged(v) => {
+                // Update label
+                self
+                    .app
+                    .attr(
+                        &Id::Label,
+                        Attribute::Text,
+                        AttrValue::String(format!("LetterCounter has now value: {}", v))
+                    )
+                    .expect("Label to be mounted");
+                None
+            }
         }
     }
 }
 ```
 
+If you are familiar with how Elm works, here is the biggest difference: the `update` in `tui-realm` modifies in-place, instead of returning a new Model / Clone.
+
+You may notice that the **Update routine** is within a trait, but the `view` method is not required to be a trait. Strictly speaking the `update` method also does not need to be a trait. Currently this allows passing-in extra data to `view` or calling it whatever you want.
+This might change in the future.
+
 ### Application setup and main loop
 
-We're almost done, let's just setup the Application in our `main()`:
+We're almost done, lets just quickly create a helper method to create the **Application**. This is commonly associated to be in `Model`:
 
 ```rust
 fn init_app() -> Application<Id, Msg, NoUserEvent> {
     // Setup application
     // NOTE: NoUserEvent is a shorthand to tell tui-realm we're not going to use any custom user event
-    // NOTE: the event listener is configured to use the default crossterm input listener and to raise a Tick event each second
-    // which we will use to update the clock
+    // NOTE: the event listener is configured to use the default crossterm input listener
     let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
         EventListenerCfg::default()
-            .default_input_listener(Duration::from_millis(20))
-            .tick_interval(Duration::from_secs(1)),
+            .crossterm_input_listener(Duration::from_millis(20)),
     );
 }
 ```
 
-The app requires the configuration for the `EventListener` which will poll `Ports`. We're telling the event listener to use the default input listener for our backend. `default_input_listener` will setup the default input listener for crossterm/termion/termwiz or the backend you chose.
+The app requires the configuration for the `EventListener` which will poll `Ports`. We're telling the event listener to use the crossterm input listener for our backend.
 
-> ❗ Here we could also define other Ports thanks to the method `port()` or setup the `Tick` producer with `tick_interval()`
+> ❗ Here we could also define other Ports or setup the `Tick` producer with `tick_interval()`
 
 Then we can mount the two components into the view:
 
 ```rust
-assert!(app
-    .mount(
-        Id::LetterCounter,
-        Box::new(LetterCounter::new(0)),
-        Vec::default()
-    )
-    .is_ok());
-assert!(app
-    .mount(
-        Id::DigitCounter,
-        Box::new(DigitCounter::new(5)),
-        Vec::default()
-    )
-.is_ok());
+app.mount(
+    Id::LetterCounter,
+    Box::new(LetterCounter::new(0)),
+    Vec::default()
+)?;
+app.mount(
+    Id::DigitCounter,
+    Box::new(DigitCounter::new(5)),
+    Vec::default()
+)?;
 ```
 
 > ❗ The two empty vectors are the subscriptions related to the component. (In this case none)
@@ -912,36 +870,77 @@ assert!(app
 Then we initilize focus:
 
 ```rust
-assert!(app.active(&Id::LetterCounter).is_ok());
+app.active(&Id::LetterCounter)?;
 ```
 
-We can now setup the terminal configuration:
+This can all be put together in a `Model` constructor:
 
 ```rust
-let _ = model.terminal.enter_alternate_screen();
-let _ = model.terminal.enable_raw_mode();
+impl Model {
+    // this could also be a default impl
+    pub fn new() -> Self {
+        Self {
+            app: Self::init_app().expect("Failed to mount components"),
+            quit: false,
+            redraw: true,
+            terminal: Self::init_adapter().expect("Cannot initialize terminal"),
+        }
+    }
+
+    fn init_app() -> Result<Application<Id, Msg, NoUserEvent>, Box<dyn Error>> { 
+        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+            EventListenerCfg::default()
+                .crossterm_input_listener(Duration::from_millis(20)),
+        );
+
+        app.mount(
+            Id::LetterCounter,
+            Box::new(LetterCounter::new(0)),
+            Vec::default()
+        )?;
+        app.mount(
+            Id::DigitCounter,
+            Box::new(DigitCounter::new(5)),
+            Vec::default()
+        )?;
+
+        app.active(&Id::LetterCounter)?;
+
+        Ok(app)
+    }
+
+    /// Create the Backend and enter all modes we require
+    fn init_adapter() -> TerminalResult<CrosstermTerminalAdapter> {
+        let mut adapter = CrosstermTerminalAdapter::new()?;
+        adapter.enable_raw_mode()?;
+        adapter.enter_alternate_screen()?;
+
+        Ok(adapter)
+    }
+}
 ```
 
-and we can finally implement the **main loop**:
+Finally implement the **main loop**:
 
 ```rust
+// Initial draw, otherwise we would have to wait for at least one event before *anything* is drawn (the output would remain blank)
+model.view();
+
 while !model.quit {
     // Tick
-    match app.tick(&mut model, PollStrategy::Once(Duration::from_millis(10))) {
+    match model.app.tick(PollStrategy::BlockingUpTo(1)) {
         Err(err) => {
             // Handle error...
         }
-        Ok(messages) if messages.len() > 0 => {
-            // NOTE: redraw if at least one msg has been processed
-            model.redraw = true;
-            for msg in messages.into_iter() {
+        Ok(messages) if !messages.is_empty() => {
+            for msg in messages {
+                // process messages returned by the Model immediately before other messages
                 let mut msg = Some(msg);
                 while msg.is_some() {
                     msg = model.update(msg);
                 }
             }
         }
-        _ => {}
     }
     // Redraw
     if model.redraw {
@@ -951,7 +950,7 @@ while !model.quit {
 }
 ```
 
-On each cycle we call `tick()` on our application, with strategy `Once` with a `10ms` timeout and we ask the model to redraw the view only if at least one message has been processed (otherwise there shouldn't be any change to display).
+On each cycle we call `tick()` on our application, with strategy `BlockingUpTo` with a max collection of events of `1`. If there is a message, we ask the Model to process the messages. After processing, we redraw, only if the Model has decided it needs to be re-drawn.
 
 Once `quit` becomes true, the application terminates.
 All backends provided by `tui-realm` itself, will automatically clean-up terminal modes on `Drop`.
@@ -960,7 +959,8 @@ All backends provided by `tui-realm` itself, will automatically clean-up termina
 
 ## What's next
 
-Now you know pretty much how tui-realm works and its essential concepts, but there's still a lot of features to explore, if you want to discover them, you now might be interested in these reads:
+Now you know the fundamentals of `tui-realm`. There are still more advanced concepts to explore. Reading further is recommended for:
 
 - [Advanced concepts](advanced.md)
-- [Migrating tui-realm 0.x to 1.x](migrating-legacy.md)
+- [Migrating from 3.x to 4.0](migrating-4.0.md)
+- [ratatui: The Elm Architecture (TEA)](https://ratatui.rs/concepts/application-patterns/the-elm-architecture/)
