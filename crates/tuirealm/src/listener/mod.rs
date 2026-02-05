@@ -1,5 +1,3 @@
-//! ## Listener
-//!
 //! This module exposes everything required to run the event listener to handle Input and
 //! internal events in a tui-realm application.
 

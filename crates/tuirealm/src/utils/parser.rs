@@ -1,5 +1,3 @@
-//! ## Parser
-//!
 //! This module exposes parsing utilities
 
 use std::str::FromStr;

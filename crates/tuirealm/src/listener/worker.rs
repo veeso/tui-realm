@@ -1,6 +1,4 @@
-//! ## Worker
-//!
-//! This module implements the worker thread for the event listener
+//! This module implements the Sync-worker thread for the event listener
 
 use std::ops::{Add, Sub};
 use std::sync::atomic::AtomicBool;

@@ -1,5 +1,3 @@
-//! ## Texts
-//!
 //! `Texts` is the module which defines the texts properties for components.
 //! It also provides some helpers and builders to facilitate the use of builders.
 

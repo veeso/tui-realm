@@ -1,5 +1,3 @@
-//! ## Direction
-//!
 //! Describes a generic direction
 
 /// Defines the 4 directions

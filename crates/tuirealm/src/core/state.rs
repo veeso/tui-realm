@@ -1,5 +1,3 @@
-//! ## State
-//!
 //! This module exposes the state type and values
 
 use std::collections::{HashMap, LinkedList};

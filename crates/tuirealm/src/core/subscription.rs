@@ -1,5 +1,3 @@
-//! # Subscription
-//!
 //! This module defines the model for the Subscriptions
 
 use std::hash::Hash;

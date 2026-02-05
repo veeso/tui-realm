@@ -1,5 +1,3 @@
-//! ## Utils
-//!
 //! This module exposes utilities
 
 pub mod parser;

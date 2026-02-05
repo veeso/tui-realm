@@ -1,5 +1,3 @@
-//! ## Core
-//!
 //! Core implements the core functionalities and types for tui-realm
 
 pub mod application;

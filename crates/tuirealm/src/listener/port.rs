@@ -1,6 +1,4 @@
-//! ## Port
-//!
-//! This module exposes the poll wrapper to include in the worker
+//! This module exposes the poll wrapper for usage in Ports
 
 #[cfg(feature = "async-ports")]
 mod async_p;
