@@ -1,6 +1,6 @@
-📍<u>**English**</u> | <a href="../zh-cn/get-started.md">简体中文</a>
-
 # Get Started 🏁
+
+📍<u>**English**</u> | <a href="../zh-cn/get-started.md">简体中文</a>
 
 - [Get Started 🏁](#get-started-)
   - [An introduction to realm](#an-introduction-to-realm)
