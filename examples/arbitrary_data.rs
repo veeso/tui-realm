@@ -9,7 +9,7 @@ use std::time::Duration;
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::event::{Key, KeyEvent};
-use tuirealm::props::{Alignment, Color, PropBound, PropPayload, Style, TextModifiers};
+use tuirealm::props::{Color, HorizontalAlignment, PropBound, PropPayload, Style, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
@@ -196,8 +196,11 @@ impl MockComponent for StdLabel {
                 .unwrap_or("Unavailable; this is a bug");
             let alignment = self
                 .props
-                .get_or(Attribute::TextAlign, AttrValue::Alignment(Alignment::Left))
-                .unwrap_alignment();
+                .get_or(
+                    Attribute::TextAlign,
+                    AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+                )
+                .unwrap_alignment_horizontal();
             let foreground = self
                 .props
                 .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))

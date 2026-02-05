@@ -6,7 +6,7 @@ use std::time::UNIX_EPOCH;
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::event::{Key, KeyEvent};
-use tuirealm::props::{Alignment, Color, Style, TextModifiers};
+use tuirealm::props::{Color, HorizontalAlignment, Style, TextModifiers};
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::{AttrValue, Attribute, Component, Event, Frame, MockComponent, Props, State};
@@ -32,8 +32,11 @@ impl MockComponent for Label {
                 .unwrap_string();
             let alignment = self
                 .props
-                .get_or(Attribute::TextAlign, AttrValue::Alignment(Alignment::Left))
-                .unwrap_alignment();
+                .get_or(
+                    Attribute::TextAlign,
+                    AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+                )
+                .unwrap_alignment_horizontal();
             let foreground = self
                 .props
                 .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))

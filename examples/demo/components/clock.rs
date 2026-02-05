@@ -6,7 +6,7 @@ use std::ops::Add;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::props::{Alignment, Color, TextModifiers};
+use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::{
     AttrValue, Attribute, Component, Event, Frame, MockComponent, NoUserEvent, State, StateValue,
@@ -28,9 +28,9 @@ impl Clock {
         }
     }
 
-    pub fn alignment(mut self, a: Alignment) -> Self {
+    pub fn alignment(mut self, a: HorizontalAlignment) -> Self {
         self.component
-            .attr(Attribute::TextAlign, AttrValue::Alignment(a));
+            .attr(Attribute::TextAlign, AttrValue::AlignmentHorizontal(a));
         self
     }
 

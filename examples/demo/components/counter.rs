@@ -4,7 +4,9 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::event::{Key, KeyEvent, KeyModifiers};
-use tuirealm::props::{Alignment, Borders, Color, LineStatic, Style, TextModifiers, Title};
+use tuirealm::props::{
+    Borders, Color, HorizontalAlignment, LineStatic, Style, TextModifiers, Title,
+};
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::widgets::{BorderType, Paragraph};
 use tuirealm::{
@@ -28,7 +30,7 @@ impl Counter {
     {
         self.attr(
             Attribute::Title,
-            AttrValue::Title(Title::from(label).alignment(Alignment::Center)),
+            AttrValue::Title(Title::from(label).alignment(HorizontalAlignment::Center)),
         );
         self
     }
@@ -38,8 +40,8 @@ impl Counter {
         self
     }
 
-    pub fn alignment(mut self, a: Alignment) -> Self {
-        self.attr(Attribute::TextAlign, AttrValue::Alignment(a));
+    pub fn alignment(mut self, a: HorizontalAlignment) -> Self {
+        self.attr(Attribute::TextAlign, AttrValue::AlignmentHorizontal(a));
         self
     }
 
@@ -72,8 +74,11 @@ impl MockComponent for Counter {
             let text = self.states.counter.to_string();
             let alignment = self
                 .props
-                .get_or(Attribute::TextAlign, AttrValue::Alignment(Alignment::Left))
-                .unwrap_alignment();
+                .get_or(
+                    Attribute::TextAlign,
+                    AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+                )
+                .unwrap_alignment_horizontal();
             let foreground = self
                 .props
                 .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
@@ -93,7 +98,7 @@ impl MockComponent for Counter {
                 .props
                 .get_or(
                     Attribute::Title,
-                    AttrValue::Title(Title::default().alignment(Alignment::Center)),
+                    AttrValue::Title(Title::default().alignment(HorizontalAlignment::Center)),
                 )
                 .unwrap_title();
             let borders = self
@@ -174,7 +179,7 @@ impl LetterCounter {
     pub fn new(initial_value: isize) -> Self {
         Self {
             component: Counter::default()
-                .alignment(Alignment::Center)
+                .alignment(HorizontalAlignment::Center)
                 .background(Color::Reset)
                 .borders(
                     Borders::default()
@@ -226,7 +231,7 @@ impl DigitCounter {
     pub fn new(initial_value: isize) -> Self {
         Self {
             component: Counter::default()
-                .alignment(Alignment::Center)
+                .alignment(HorizontalAlignment::Center)
                 .background(Color::Reset)
                 .borders(
                     Borders::default()

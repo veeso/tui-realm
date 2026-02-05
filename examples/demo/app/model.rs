@@ -6,7 +6,7 @@ use std::error::Error;
 use std::time::{Duration, SystemTime};
 
 use tuirealm::event::NoUserEvent;
-use tuirealm::props::{Alignment, Color, TextModifiers};
+use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
@@ -101,7 +101,7 @@ where
             Box::new(
                 Label::default()
                     .text("Switch counters with <TAB>, exit with <ESC>")
-                    .alignment(Alignment::Left)
+                    .alignment(HorizontalAlignment::Left)
                     .background(Color::Reset)
                     .foreground(Color::DarkGray),
             ),
@@ -113,7 +113,7 @@ where
             Box::new(
                 Label::default()
                     .text("Waiting for a Msg...")
-                    .alignment(Alignment::Left)
+                    .alignment(HorizontalAlignment::Left)
                     .background(Color::Reset)
                     .foreground(Color::LightYellow)
                     .modifiers(TextModifiers::BOLD),
@@ -125,7 +125,7 @@ where
             Id::Clock,
             Box::new(
                 Clock::new(SystemTime::now())
-                    .alignment(Alignment::Center)
+                    .alignment(HorizontalAlignment::Center)
                     .background(Color::Reset)
                     .foreground(Color::Cyan)
                     .modifiers(TextModifiers::BOLD),
