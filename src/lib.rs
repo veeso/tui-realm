@@ -70,7 +70,7 @@ extern crate tuirealm_derive;
 
 mod core;
 pub mod listener;
-pub mod macros;
+mod macros;
 #[cfg(test)]
 pub mod mock;
 pub mod ratatui;
