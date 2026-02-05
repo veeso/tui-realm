@@ -1,7 +1,5 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-//! # tui-realm
-//!
 //! tui-realm is a **framework** for **[ratatui](https://github.com/ratatui-org/ratatui)**
 //! to simplify the implementation of terminal user interfaces adding the possibility to work
 //! with re-usable components with properties and states, as you'd do in React. But that's not all:
@@ -11,25 +9,23 @@
 //! In addition, the components are organized inside the **View**, which manages mounting/umounting,
 //! focus and event forwarding for you.
 //!
-//! tui-realm also comes with a standard library of components, which can be added to your dependencies,
-//! that you may find very useful.
+//! `tui-realm` also comes with a standard library of components, that you may find very useful.
+//! The stdlib can be found in [`tui-realm-stdlib`](https://docs.rs/tui-realm-stdlib/latest/tui_realm_stdlib/)
 //!
 //! ## Get started 🏁
 //!
-//! > ⚠️ Warning: currently tui-realm supports these backends: crossterm, termion, termwiz
-//!
 //! ### Add tui-realm to your Cargo.toml 🦀
 //!
-//! If you want the default features, just add tuirealm 1.x version:
+//! If you want the default features:
 //!
 //! ```toml
 //! tuirealm = "3"
 //! ```
 //!
-//! otherwise you can specify the features you want to add:
+//! Alternatively you can specify the features you want to add:
 //!
 //! ```toml
-//! tuirealm = { version = "3", default-features = false, features = [ "derive", "serialize", "termion" ] }
+//! tuirealm = { version = "3", default-features = false, features = [ "derive", "serialize", "crossterm" ] }
 //! ```
 //!
 //! Supported features are:
@@ -37,23 +33,23 @@
 //! - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
 //! - `async-ports`: add support for async ports
 //! - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
-//! - `crossterm`: use the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend
-//! - `termion`: use the [termion](https://github.com/redox-os/termion) terminal backend
-//! - `termwiz`: use the [termwiz](https://docs.rs/termwiz/latest/termwiz/index.html) terminal backend
+//! - `crossterm` (*default*): enable the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend
+//! - `termion`: enable the [termion](https://github.com/redox-os/termion) terminal backend
+//! - `termwiz`: enable the [termwiz](https://docs.rs/termwiz/latest/termwiz/index.html) terminal backend
 //!
 //! ### Create a tui-realm application 🪂
 //!
-//! You can read the guide to get started with tui-realm on [Github](https://github.com/veeso/tui-realm/blob/main/docs/en/get-started.md)
+//! You can read the [Get Started guide](https://github.com/veeso/tui-realm/blob/main/docs/en/get-started.md) guide on github.
 //!
 //! ### Run examples 🔍
 //!
 //! Still confused about how tui-realm works? Don't worry, try with the examples:
 //!
-//! - [demo](https://github.com/veeso/tui-realm/blob/main/examples/demo.rs): a simple application which shows how tui-realm works
-//!
-//!    ```sh
-//!    cargo run --example demo
-//!    ```
+//! - [demo](https://github.com/veeso/tui-realm/blob/main/examples/demo/demo.rs): a simple example that shows basic tui-realm usage
+//! - [user-events](https://github.com/veeso/tui-realm/blob/main/examples/user_events/user_events.rs): showcase using custom events
+//! - [inline-display](https://github.com/veeso/tui-realm/blob/main/examples/inline_display.rs): showcase how tui-realm can be used without requiring a alternate screen
+//! - [async-ports](https://github.com/veeso/tui-realm/blob/main/examples/async_ports.rs): showcase usage of async ports
+//! - [arbitrary-data](https://github.com/veeso/tui-realm/blob/main/examples/arbitrary_data.rs): showcase usage of `PropPayload::Any` to send custom data across `query` and `attr`
 //!
 
 #![doc(html_playground_url = "https://play.rust-lang.org")]
