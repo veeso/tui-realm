@@ -22,7 +22,7 @@ pub use shape::Shape;
 pub use texts::{LineStatic, SpanStatic, Table, TableBuilder, TextStatic, Title};
 pub use value::{PropPayload, PropValue};
 
-pub use crate::ratatui::layout::Alignment;
+pub use crate::ratatui::layout::{HorizontalAlignment /* , VerticalAlignment */};
 pub use crate::ratatui::style::{Color, Modifier as TextModifiers, Style};
 
 /// The props struct holds all the attributes associated to the component.
@@ -71,9 +71,10 @@ impl Props {
 /// (But consider documenting if they have different meaning)
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 pub enum Attribute {
-    /// Layout alignment
-    // TODO: add 2 values for horizontal and vertical?
-    Alignment,
+    /// Horizontal Layout Alignment
+    AlignmentHorizontal,
+    // /// Vertical Layout Alignment
+    // AlignmentVertical,
     /// Background color or style
     Background,
     /// Borders styles
@@ -149,7 +150,8 @@ pub enum Attribute {
 #[derive(Debug, PartialEq, Clone)]
 #[allow(clippy::large_enum_variant)]
 pub enum AttrValue {
-    Alignment(Alignment),
+    AlignmentHorizontal(HorizontalAlignment),
+    // AlignmentVertical(VerticalAlignment),
     Borders(Borders),
     Color(Color),
     Direction(Direction),
@@ -175,10 +177,10 @@ pub enum AttrValue {
 impl AttrValue {
     // -- unwrappers
 
-    /// Get the inner Alignment value from AttrValue, or panic.
-    pub fn unwrap_alignment(self) -> Alignment {
+    /// Get the inner Horizontal Alignment value from AttrValue, or panic.
+    pub fn unwrap_alignment_horizontal(self) -> HorizontalAlignment {
         match self {
-            AttrValue::Alignment(x) => x,
+            AttrValue::AlignmentHorizontal(v) => v,
             _ => panic!("AttrValue is not Alignment"),
         }
     }
@@ -337,11 +339,11 @@ impl AttrValue {
 
     // -- as reference
 
-    /// Get a Alignment value from AttrValue, or None
-    pub fn as_alignment(&self) -> Option<Alignment> {
+    /// Get a Horizontal Alignment value from AttrValue, or None
+    pub fn as_alignment_horizontal(&self) -> Option<HorizontalAlignment> {
         match self {
             // cheap copy, so no reference
-            AttrValue::Alignment(v) => Some(*v),
+            AttrValue::AlignmentHorizontal(v) => Some(*v),
             _ => None,
         }
     }
@@ -508,10 +510,10 @@ impl AttrValue {
 
     // -- as mutable references
 
-    /// Get a Alignment value from AttrValue, or None
-    pub fn as_alignment_mut(&mut self) -> Option<&mut Alignment> {
+    /// Get a Horizontal Alignment value from AttrValue, or None
+    pub fn as_alignment_horizontal_mut(&mut self) -> Option<&mut HorizontalAlignment> {
         match self {
-            AttrValue::Alignment(v) => Some(v),
+            AttrValue::AlignmentHorizontal(v) => Some(v),
             _ => None,
         }
     }
@@ -679,49 +681,56 @@ mod test {
     #[test]
     fn should_set_get_props() {
         let mut props = Props::default();
-        assert_eq!(props.get(Attribute::Alignment), None);
+        assert_eq!(props.get(Attribute::AlignmentHorizontal), None);
         assert_eq!(
             props.get_or(
-                Attribute::Alignment,
-                AttrValue::Alignment(Alignment::Center)
+                Attribute::AlignmentHorizontal,
+                AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
             ),
-            AttrValue::Alignment(Alignment::Center)
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
         );
-        assert_eq!(props.get_ref(Attribute::Alignment), None);
+        assert_eq!(props.get_ref(Attribute::AlignmentHorizontal), None);
 
-        props.set(Attribute::Alignment, AttrValue::Alignment(Alignment::Left));
+        props.set(
+            Attribute::AlignmentHorizontal,
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+        );
         assert_eq!(
-            props.get(Attribute::Alignment),
-            Some(AttrValue::Alignment(Alignment::Left))
+            props.get(Attribute::AlignmentHorizontal),
+            Some(AttrValue::AlignmentHorizontal(HorizontalAlignment::Left))
         );
         assert_eq!(
             props.get_or(
-                Attribute::Alignment,
-                AttrValue::Alignment(Alignment::Center)
+                Attribute::AlignmentHorizontal,
+                AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
             ),
-            AttrValue::Alignment(Alignment::Left)
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Left)
         );
         assert_eq!(
-            props.get_ref(Attribute::Alignment),
-            Some(&AttrValue::Alignment(Alignment::Left))
+            props.get_ref(Attribute::AlignmentHorizontal),
+            Some(&AttrValue::AlignmentHorizontal(HorizontalAlignment::Left))
         );
 
-        let val = props.get_mut(Attribute::Alignment).unwrap();
-        assert_eq!(val, &AttrValue::Alignment(Alignment::Left));
-        let v = val.as_alignment_mut().unwrap();
-        *v = Alignment::Center;
+        let val = props.get_mut(Attribute::AlignmentHorizontal).unwrap();
+        assert_eq!(
+            val,
+            &AttrValue::AlignmentHorizontal(HorizontalAlignment::Left)
+        );
+        let v = val.as_alignment_horizontal_mut().unwrap();
+        *v = HorizontalAlignment::Center;
 
         assert_eq!(
-            props.get_ref(Attribute::Alignment).unwrap(),
-            &AttrValue::Alignment(Alignment::Center)
+            props.get_ref(Attribute::AlignmentHorizontal).unwrap(),
+            &AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
         );
     }
 
     #[test]
     fn unwrapping_should_unwrap() {
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).unwrap_alignment(),
-            Alignment::Center
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
+                .unwrap_alignment_horizontal(),
+            HorizontalAlignment::Center
         );
         assert_eq!(
             AttrValue::Borders(Borders::default()).unwrap_borders(),
@@ -774,9 +783,11 @@ mod test {
             TextModifiers::BOLD
         );
         assert_eq!(
-            AttrValue::Title(Title::from(String::from("pippo")).alignment(Alignment::Left))
-                .unwrap_title(),
-            (Title::from(String::from("pippo")).alignment(Alignment::Left))
+            AttrValue::Title(
+                Title::from(String::from("pippo")).alignment(HorizontalAlignment::Left)
+            )
+            .unwrap_title(),
+            (Title::from(String::from("pippo")).alignment(HorizontalAlignment::Left))
         );
         assert_eq!(
             AttrValue::Payload(PropPayload::None).unwrap_payload(),
@@ -787,38 +798,53 @@ mod test {
     #[test]
     fn as_attrvalue() {
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_alignment(),
-            Some(Alignment::Center)
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_alignment_horizontal(),
+            Some(HorizontalAlignment::Center)
         );
-        assert_eq!(AttrValue::Color(Color::Black).as_alignment(), None);
+        assert_eq!(
+            AttrValue::Color(Color::Black).as_alignment_horizontal(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Borders(Borders::default()).as_borders(),
             Some(&Borders::default())
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_borders(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_borders(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Color(Color::Black).as_color(),
             Some(Color::Black)
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_color(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_color(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Direction(Direction::Down).as_direction(),
             Some(Direction::Down)
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_direction(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_direction(),
+            None
+        );
 
         assert_eq!(AttrValue::Flag(true).as_flag(), Some(true));
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_flag(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_flag(),
+            None
+        );
 
         assert_eq!(
             AttrValue::InputType(InputType::Color).as_input_type(),
             Some(&InputType::Color)
         );
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_input_type(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_input_type(),
             None
         );
 
@@ -826,37 +852,61 @@ mod test {
             AttrValue::Layout(Layout::default()).as_layout(),
             Some(&Layout::default())
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_layout(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_layout(),
+            None
+        );
 
         assert_eq!(AttrValue::Length(1).as_length(), Some(1));
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_length(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_length(),
+            None
+        );
 
         assert_eq!(AttrValue::Number(-1).as_number(), Some(-1));
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_number(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_number(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Shape(Shape::Layer).as_shape(),
             Some(&Shape::Layer)
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_shape(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_shape(),
+            None
+        );
 
         assert_eq!(AttrValue::Size(1).as_size(), Some(1));
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_size(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_size(),
+            None
+        );
 
         assert_eq!(
             AttrValue::String("hello".into()).as_string(),
             Some(&"hello".to_string())
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_string(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_string(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Style(Style::default()).as_style(),
             Some(Style::default())
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_style(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_style(),
+            None
+        );
 
         assert_eq!(AttrValue::Table(Vec::new()).as_table(), Some(&Vec::new()));
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_table(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_table(),
+            None
+        );
 
         assert_eq!(
             AttrValue::TextSpan(SpanStatic::default()).as_textspan(),
@@ -870,44 +920,58 @@ mod test {
             AttrValue::Text(TextStatic::default()).as_text(),
             Some(&TextStatic::default())
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_text(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_text(),
+            None
+        );
 
         assert_eq!(
             AttrValue::TextModifiers(TextModifiers::all()).as_text_modifiers(),
             Some(TextModifiers::all())
         );
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_text_modifiers(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_text_modifiers(),
             None
         );
 
         assert_eq!(
-            AttrValue::Title(Title::from("hello").alignment(Alignment::Center)).as_title(),
-            Some(&Title::from("hello").alignment(Alignment::Center))
+            AttrValue::Title(Title::from("hello").alignment(HorizontalAlignment::Center))
+                .as_title(),
+            Some(&Title::from("hello").alignment(HorizontalAlignment::Center))
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_title(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_title(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Payload(PropPayload::None).as_payload(),
             Some(&PropPayload::None)
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_payload(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_payload(),
+            None
+        );
     }
 
     #[test]
     fn as_attrvalue_mut() {
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_alignment_mut(),
-            Some(&mut Alignment::Center)
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
+                .as_alignment_horizontal_mut(),
+            Some(&mut HorizontalAlignment::Center)
         );
-        assert_eq!(AttrValue::Color(Color::Black).as_alignment_mut(), None);
+        assert_eq!(
+            AttrValue::Color(Color::Black).as_alignment_horizontal_mut(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Borders(Borders::default()).as_borders_mut(),
             Some(&mut Borders::default())
         );
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_borders_mut(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_borders_mut(),
             None
         );
 
@@ -915,26 +979,32 @@ mod test {
             AttrValue::Color(Color::Black).as_color_mut(),
             Some(&mut Color::Black)
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_color_mut(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_color_mut(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Direction(Direction::Down).as_direction_mut(),
             Some(&mut Direction::Down)
         );
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_direction_mut(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_direction_mut(),
             None
         );
 
         assert_eq!(AttrValue::Flag(true).as_flag_mut(), Some(&mut true));
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_flag_mut(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_flag_mut(),
+            None
+        );
 
         assert_eq!(
             AttrValue::InputType(InputType::Color).as_input_type_mut(),
             Some(&mut InputType::Color)
         );
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_input_type_mut(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_input_type_mut(),
             None
         );
 
@@ -943,19 +1013,19 @@ mod test {
             Some(&mut Layout::default())
         );
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_layout_mut(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_layout_mut(),
             None
         );
 
         assert_eq!(AttrValue::Length(1).as_length_mut(), Some(&mut 1));
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_length_mut(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_length_mut(),
             None
         );
 
         assert_eq!(AttrValue::Number(-1).as_number_mut(), Some(&mut -1));
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_number_mut(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_number_mut(),
             None
         );
 
@@ -963,17 +1033,23 @@ mod test {
             AttrValue::Shape(Shape::Layer).as_shape_mut(),
             Some(&mut Shape::Layer)
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_shape_mut(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_shape_mut(),
+            None
+        );
 
         assert_eq!(AttrValue::Size(1).as_size_mut(), Some(&mut 1));
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_size_mut(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_size_mut(),
+            None
+        );
 
         assert_eq!(
             AttrValue::String("hello".into()).as_string_mut(),
             Some(&mut "hello".to_string())
         );
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_string_mut(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_string_mut(),
             None
         );
 
@@ -981,13 +1057,19 @@ mod test {
             AttrValue::Style(Style::default()).as_style_mut(),
             Some(&mut Style::default())
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_style_mut(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_style_mut(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Table(Vec::new()).as_table_mut(),
             Some(&mut Vec::new())
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_table_mut(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_table_mut(),
+            None
+        );
 
         assert_eq!(
             AttrValue::TextSpan(SpanStatic::default()).as_textspan_mut(),
@@ -1001,37 +1083,44 @@ mod test {
             AttrValue::Text(TextStatic::default()).as_text_mut(),
             Some(&mut TextStatic::default())
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_text_mut(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_text_mut(),
+            None
+        );
 
         assert_eq!(
             AttrValue::TextModifiers(TextModifiers::all()).as_text_modifiers_mut(),
             Some(&mut TextModifiers::all())
         );
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_text_modifiers_mut(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_text_modifiers_mut(),
             None
         );
 
         assert_eq!(
-            AttrValue::Title(Title::from("hello").alignment(Alignment::Right)).as_title_mut(),
-            Some(&mut Title::from("hello").alignment(Alignment::Right))
+            AttrValue::Title(Title::from("hello").alignment(HorizontalAlignment::Right))
+                .as_title_mut(),
+            Some(&mut Title::from("hello").alignment(HorizontalAlignment::Right))
         );
-        assert_eq!(AttrValue::Alignment(Alignment::Center).as_title_mut(), None);
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_title_mut(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Payload(PropPayload::None).as_payload_mut(),
             Some(&mut PropPayload::None)
         );
         assert_eq!(
-            AttrValue::Alignment(Alignment::Center).as_payload_mut(),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_payload_mut(),
             None
         );
     }
 
     #[test]
     #[should_panic]
-    fn unwrapping_alignment_should_panic_if_not_identity() {
-        AttrValue::Flag(true).unwrap_alignment();
+    fn unwrapping_alignment_horizontal_should_panic_if_not_identity() {
+        AttrValue::Flag(true).unwrap_alignment_horizontal();
     }
 
     #[test]

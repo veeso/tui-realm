@@ -39,6 +39,11 @@ As other tuple variants are now removed, it is more descriptive to rename `Tup2`
 
 With `Tup2` now being renamed to `Pair` and considering the other variants, `Single` aligns better with the naming scheme than `One`.
 
+### Attribute `Alignment` has been split into horizontal and vertical
+
+To align with ratatui `0.30` change of renaming `Alignment` to `HorizontalAlignment`, `tui-realm` renames the old Attribute `Alignment` to `AlignmentHorizontal`
+and adds a new attribute named `AlignmentVertical` for `VerticalAlignment`.
+
 ### Removal of Dataset related value
 
 `Dataset` is practically only required for `tui_realm_stdlib::components::Chart`, and even then does not need to be stored in `Props`, so it can be easily

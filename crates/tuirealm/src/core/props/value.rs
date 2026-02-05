@@ -3,7 +3,9 @@
 use std::any::Any;
 use std::collections::{HashMap, LinkedList};
 
-use super::{Alignment, Color, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic};
+use super::{
+    Color, HorizontalAlignment, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic,
+};
 use crate::props::AnyPropBox;
 
 // -- Prop value
@@ -40,7 +42,7 @@ pub enum PropValue {
     F32(f32),
     Str(String),
     // -- tui props
-    Alignment(Alignment),
+    AlignmentHorizontal(HorizontalAlignment),
     Color(Color),
     InputType(InputType),
     Shape(Shape),
@@ -350,12 +352,12 @@ impl PropValue {
         }
     }
 
-    /// Unwrap PropValue as Alignment.
+    /// Unwrap PropValue as Horizontal Alignment.
     /// Panics otherwise
-    pub fn unwrap_alignment(self) -> Alignment {
+    pub fn unwrap_alignment_horizontal(self) -> HorizontalAlignment {
         match self {
-            PropValue::Alignment(v) => v,
-            _ => panic!("Called `unwrap_alignment` on a bad value"),
+            PropValue::AlignmentHorizontal(v) => v,
+            _ => panic!("Called `unwrap_alignment_horizontal` on a bad value"),
         }
     }
 
@@ -558,11 +560,11 @@ impl PropValue {
         }
     }
 
-    /// Get a Alignment value from PropValue, or None
-    pub fn as_alignment(&self) -> Option<Alignment> {
+    /// Get a Horizontal Alignment value from PropValue, or None
+    pub fn as_alignment_horizontal(&self) -> Option<HorizontalAlignment> {
         match self {
             // cheap copy, so no reference
-            PropValue::Alignment(v) => Some(*v),
+            PropValue::AlignmentHorizontal(v) => Some(*v),
             _ => None,
         }
     }
@@ -745,10 +747,10 @@ impl PropValue {
         }
     }
 
-    /// Get a Alignment value from PropValue, or None
-    pub fn as_alignment_mut(&mut self) -> Option<&mut Alignment> {
+    /// Get a Horizontal Alignment value from PropValue, or None
+    pub fn as_alignment_horizontal_mut(&mut self) -> Option<&mut HorizontalAlignment> {
         match self {
-            PropValue::Alignment(v) => Some(v),
+            PropValue::AlignmentHorizontal(v) => Some(v),
             _ => None,
         }
     }
@@ -874,17 +876,20 @@ mod tests {
             *map.get("t").unwrap(),
             PropValue::Shape(Shape::Map(Map::default()))
         );
-        map.insert(String::from("u"), PropValue::Alignment(Alignment::Center));
+        map.insert(
+            String::from("u"),
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center),
+        );
         assert_eq!(
             *map.get("u").unwrap(),
-            PropValue::Alignment(Alignment::Center)
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center)
         );
 
         let value = map.get_mut("u").unwrap();
-        *value.as_alignment_mut().unwrap() = Alignment::Left;
+        *value.as_alignment_horizontal_mut().unwrap() = HorizontalAlignment::Left;
         assert_eq!(
             *map.get("u").unwrap(),
-            PropValue::Alignment(Alignment::Left)
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Left)
         );
 
         let _ = PropPayload::Map(map);
@@ -900,8 +905,9 @@ mod tests {
     #[test]
     fn unwrap_prop_values() {
         assert_eq!(
-            PropValue::Alignment(Alignment::Center).unwrap_alignment(),
-            Alignment::Center
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center)
+                .unwrap_alignment_horizontal(),
+            HorizontalAlignment::Center
         );
         assert!(PropValue::Bool(true).unwrap_bool());
         assert_eq!(PropValue::F32(0.32).unwrap_f32(), 0.32);
@@ -999,10 +1005,10 @@ mod tests {
         assert_eq!(PropValue::Bool(true).as_str(), None);
 
         assert_eq!(
-            PropValue::Alignment(Alignment::Center).as_alignment(),
-            Some(Alignment::Center)
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center).as_alignment_horizontal(),
+            Some(HorizontalAlignment::Center)
         );
-        assert_eq!(PropValue::Bool(true).as_alignment(), None);
+        assert_eq!(PropValue::Bool(true).as_alignment_horizontal(), None);
 
         assert_eq!(
             PropValue::InputType(InputType::Color).as_input_type(),
@@ -1095,10 +1101,11 @@ mod tests {
         assert_eq!(PropValue::Bool(true).as_str_mut(), None);
 
         assert_eq!(
-            PropValue::Alignment(Alignment::Center).as_alignment_mut(),
-            Some(&mut Alignment::Center)
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center)
+                .as_alignment_horizontal_mut(),
+            Some(&mut HorizontalAlignment::Center)
         );
-        assert_eq!(PropValue::Bool(true).as_alignment_mut(), None);
+        assert_eq!(PropValue::Bool(true).as_alignment_horizontal_mut(), None);
 
         assert_eq!(
             PropValue::InputType(InputType::Color).as_input_type_mut(),
