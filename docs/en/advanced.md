@@ -5,9 +5,9 @@
 - [Advanced concepts](#advanced-concepts)
   - [Introduction](#introduction)
   - [Subscriptions](#subscriptions)
-    - [Handle subscriptions](#handle-subscriptions)
-    - [Event clauses in details](#event-clauses-in-details)
-    - [Sub clauses in details](#sub-clauses-in-details)
+    - [Handle Subscriptions](#handle-subscriptions)
+    - [Event clauses in detail](#event-clauses-in-detail)
+    - [Sub clauses in detail](#sub-clauses-in-detail)
     - [Subscriptions lock](#subscriptions-lock)
   - [Tick Event](#tick-event)
   - [Ports](#ports)
@@ -15,7 +15,7 @@
     - [What the component should look like](#what-the-component-should-look-like)
     - [Defining the component properties](#defining-the-component-properties)
     - [Defining the component states](#defining-the-component-states)
-    - [Defining the Cmd API](#defining-the-cmd-api)
+    - [Defining the Command API](#defining-the-command-api)
     - [Rendering the component](#rendering-the-component)
   - [Properties Injectors](#properties-injectors)
   - [What's next](#whats-next)
@@ -24,91 +24,62 @@
 
 ## Introduction
 
-This guide will introduce you to all the advanced concepts of tui-realm, that haven't been covered in the [get-started guide](get-started.md). Altough tui-realm is quite simple, it can also get quiet powerful, thanks to all these features that we're gonna cover in this document.
+This guide will introduce you to all the advanced concepts of `tui-realm`, that haven't been covered in the [Get Started guide](get-started.md).
+Altough `tui-realm` is quite simple, it can also get quite powerful, thanks to all these features that we're gonna cover in this document.
 
 What you will learn:
 
-- How to handle subscriptions, making some components to listen to certain events under certain circumstances.
-- What is the `Event::Tick`
-- How to use custom source for events through `Ports`.
-- How to implement new components
+- How to handle **Subscriptions**, making some components to listen to certain events under certain circumstances, even when not focused.
+- How to use custom sources for events with `Ports`.
+- More details on how to design reusable custom components than the [Get Started guide](get-started.md)
 
 ---
 
 ## Subscriptions
 
-> A subscription is a ruleset which tells the **application** to forward events to other components even if they're not active, based on some rules.
+> A subscription is a ruleset which tells the **Application** to forward events to other components even if they're not active.
 
-As we've already covered in the base concepts of tui-realm, the application takes care of forwarding events from ports to components.
-By default events are forwarded only to the current active component, but this can be be quite annoying:
+As we've already covered in the base concepts of `tui-realm`, the *Application* takes care of forwarding events from *Ports* to *Components*.
+By default events are forwarded only to the currently active component, but this can be be quite annoying:
 
-- First, we may need a component always listening for incoming events. Imagine some loaders polling a remote server. They can't get updated only when they've got focus, they probably needs to be updated each time an event coming from the *Port* is received by the *Event listener*. Without *Subscriptions* this would be impossible.
-- Sometimes is just a fact of "it's boring" and scope: in the example I had two counters, and both of them were listening for `<ESC>` key to quit the application returning a `AppClose` message. But is that their responsiblity to tell whether the application should terminate? I mean, they're just counter, so they shouldn't know whether to close the app right? Besides of that, it's also really annoying to write a case for `<ESC>` for each component to return `AppClose`. Having an invisible component always listening for `<ESC>` to return `AppClose` would be much more comfy.
+- First, we may need a component to always listen for specific incoming events. Imagine some *Components* need some data from a remote server.
+  They can't get updated only when they've got focus, they probably needs to be updated each time an event is coming from the *Port* and is received by the *Event listener*.
+  Without *Subscriptions* this would be impossible to do easily.
+- Sometimes it is just repetetive and a choice of scoping: in the example from [Get Started](get-started.md#our-first-application) we had two counters,
+  and both of them were listening for the `<ESC>` key to quit the application, returning a `AppClose` message.
+  But should it really be their responsiblity to tell whether the application should terminate?
+  I mean, they're just counters, so they shouldn't know whether to close the app right?
+  Besides that, it's also really annoying to write a case for `<ESC>` key for each component to return `AppClose`.
+  Having an invisible component that always listens for `<ESC>` and returns `AppClose` would be much more comfy.
 
 So what is a subscription actually, and how we can create them?
 
 The subscription is defined as:
 
 ```rust
-pub struct Sub<UserEvent>(EventClause<UserEvent>, SubClause)
+pub struct Sub<ComponentId, UserEvent>(SubEventClause<UserEvent>, Arc<SubClause<ComponentId>>)
 where
+    ComponentId: Eq + PartialEq + Clone + Hash,
     UserEvent: Eq + PartialEq + Clone;
 ```
 
-So it's a tupled structure, which takes an `EventClause` and a `SubClause`, let's dive deeper:
+It takes 2 parameters:
+- `SubEventClause<UserEvent>`: The **Event Clause**, which determines what type of event to forward. This practically mirrors `Event`'s Variants directly.
+- `SubClause<ComponentId>`: The actual *ruleset* to determine, well, *when* to forward a given Event to the target Component.
 
-- An **Event clause** is a match clause the incoming event must satisfy. As we said before the application must know whether to forward a certain *event* to a certain component. So the first thing it must check, is whether it is listening for that kind of event.
+**`SubClause`** has many variants to allow a broad range of possibilities, for example it has `Always`, which will always forward a event, no specific rules; it has `IsMounted`, which is like `Always`, only that it only forwards to **Id** if there is a component mounted to it; finally there are logical combinators like `And`, `Or` and `Not`. There are some other variants, which should be self-describing. More on that in a later section.
 
-    The event clause is declared as follows:
+So when an event is received, if a component, **that is not active**, satisfies the *event clause* and the *sub clause*, then the event will be forwarded to that component too.
 
-    ```rust
-    pub enum EventClause<UserEvent>
-    where
-        UserEvent: Eq + PartialEq + Clone,
-    {
-        /// Forward, no matter what kind of event
-        Any,
-        /// Check whether a certain key has been pressed
-        Keyboard(KeyEvent),
-        /// Check whether window has been resized
-        WindowResize,
-        /// The event will be forwarded on a tick
-        Tick,
-        /// Event will be forwarded on this specific user event.
-        /// The way user event is matched, depends on its partialEq implementation
-        User(UserEvent),
-    }
-    ```
+> ❗ In order to forward an event, both the `SubEventClause` and the `SubClause` must be satisfied
 
-- A **Sub clause** is an additional condition that must be satisfied by the component associated to the subscription in order to forward the event:
-
-    ```rust
-    pub enum SubClause {
-        /// Always forward event to component
-        Always,
-        /// Forward event if target component has provided attribute with the provided value
-        /// If the attribute doesn't exist on component, result is always `false`.
-        HasAttrValue(Attribute, AttrValue),
-        /// Forward event if target component has provided state
-        HasState(State),
-        /// Forward event if the inner clause is `false`
-        Not(Box<SubClause>),
-        /// Forward event if both the inner clauses are `true`
-        And(Box<SubClause>, Box<SubClause>),
-        /// Forward event if at least one of the inner clauses is `true`
-        Or(Box<SubClause>, Box<SubClause>),
-    }
-    ```
-
-So when an event is received, if a component, **that is not active** satisfies the event clause and the sub clause, then the event will be forwarded to that component too.
-
-> ❗ In order to forward an event, both the `EventClause` and the `SubClause` must be satisfied
+Note that if a given Component is active, it will never get the event twice through being focused and through a subscription it may also have.
 
 Let's see in details how to handle subscriptions and how to use clauses.
 
-### Handle subscriptions
+### Handle Subscriptions
 
-You can create subscriptions both on component mounting and whenever you want.
+You can create subscriptions both on component mounting and dynamically afterward.
 
 To subscribe a component on `mount` it will be enough to provide a vector of `Sub` to `mount()`:
 
@@ -118,63 +89,76 @@ app.mount(
     Box::new(
         Clock::new(SystemTime::now())
             .alignment(Alignment::Center)
-            .background(Color::Reset)
-            .foreground(Color::Cyan)
-            .modifiers(TextModifiers::BOLD)
     ),
     vec![Sub::new(SubEventClause::Tick, SubClause::Always)]
 );
 ```
 
-or you can create new subscriptions whenever you want:
+Or you can create new subscriptions whenever you want:
 
 ```rust
 app.subscribe(&Id::Clock, Sub::new(SubEventClause::Tick, SubClause::Always));
 ```
 
-and if you need to remove a subscription you can unsubscribe simply with:
+And if you need to remove a subscription you can unsubscribe simply with:
 
 ```rust
 app.unsubscribe(&Id::Clock, SubEventClause::Tick);
 ```
 
-### Event clauses in details
+> ❗ If you have multiple rules for a given `SubEventClause`, `unsubscribe` will remove *all* subscriptions matching that clause.
 
-Event clauses are used to define for which kind of event the subscription should be set.
+### Event clauses in detail
+
+Event clauses are used to define which kind of event the subscription should apply to.
 Once the application checks whether to forward an event, it must check the event clause first and verify whether it satisfies the bounds with the incoming event. The event clauses are:
 
 - `Any`: the event clause is satisfied, no matter what kind of event is. Everything depends on the result of the `SubClause` then.
 - `Keyboard(KeyEvent)`: in order to satisfy the clause, the incoming event must be of type `Keyboard` and the `KeyEvent` must exactly be the same.
 - `WindowResize`: in order to satisfy the clause, the incoming event must be of type `WindowResize`, no matter which size the window has.
 - `Tick`: in order to satisfy the clause, the incoming event must be of type `Tick`.
-- `User(UserEvent)`: in order to be satisfied the incoming event must be of type of `User`. The value of `UserEvent` must match, according on how `PartialEq` is implemented for this type.
+- `User(UserEvent)`: in order to be satisfied, the incoming event must be of type of `User`. The value of `UserEvent` must match, according on how `PartialEq` is implemented for this type.
+- `Discriminant(UserEvent)`: in order to be statisfied, the incoming event must be of type `User`. Then the `UserEvent`'s `std::mem::discriminant` must match.
 
-### Sub clauses in details
+> ❗ `Discriminant` will only check the top-level variants of `UserEvent`, meaning that something akin to `UserEvent::VariantA(OtherEnum::A)` and `UserEvent::Variant(OtherEnum::B)` **will match**. If this is not behavior you want, use `User(UserEvent)` and implement a custom `PartialEq` matching.
 
-Sub clauses are verified once the event clause is satisfied, and they define some clauses that must be satisfied on the **target** component (which is the component associated to the subscription).
+### Sub clauses in detail
+
+Sub clauses are verified once the event clause is satisfied. They define some clauses that must be satisfied to actually forward the event.
 In particular sub clauses are:
 
-- `Always`: the clause is always satisfied
-- `HasAttrValue(Id, Attribute, AttrValue)`: the clause is satisfied if the target component (defined in `Id`) has `Attribute` with `AttrValue` in its `Props`.
-- `HasState(Id, State)`: the clause is satisfied if the target component (defined in `Id`) has `State` equal to provided state.
-- `IsMounted(Id)`: the clause is satisfied if the target component (defines in `Id`) is mounted in the View.
+- `Always`: the clause is always satisfied.
+- `HasAttrValue(Id, Attribute, AttrValue)`: the clause is satisfied if the Component at **Id** has `Attribute` with `AttrValue`.
+- `HasState(Id, State)`: the clause is satisfied if the Component at **Id** has `State` equal to provided state.
+- `IsMounted(Id)`: the clause is satisfied if the Component at **Id** is mounted in the View.
 
-In addition to these, it is also possible to combine Sub clauses using expressions:
+> If the current Component for the subscription does not depend on another Component being mounted, then `Always` should be used over `IsMounted(Self)`.
 
-- `Not(SubClause)`: the clause is satisfied if the inner clause is NOT satisfied (negates the result)
-- `And(SubClause, SubClause)`: the clause is satisfied if both clause are satisfied
-- `Or(SubClause, SubClause)`: the clause is satisfied if at least one of the two clauses is satisfied.
+In addition to these, it is also possible to combine Sub clauses using logical expressions:
 
-Using `And` and `Or` you can create even long expression and keep in mind that they are evaluated recursively, so for example:
+- `Not(SubClause)`: the clause is satisfied if the inner clause is NOT satisfied (inverts the result) (locial NOT)
+- `And(SubClause, SubClause)`: the clause is satisfied if both clause are satisfied (logical AND)
+- `Or(SubClause, SubClause)`: the clause is satisfied if at least one of the two clauses is satisfied. (logical OR)
 
-`And(Or(A, And(B, C)), And(D, Or(E, F)))` is evaluated as `(A || (B && C)) && (D && (E || F))`
+Using `And` and `Or` you can create even longer expression and keep in mind that they are evaluated recursively, so for example:
+
+`And(Or(A, And(B, C)), And(D, Or(E, F)))` is evaluated as `(A || (B && C)) && (D && (E || F))`.
+
+Short-circuiting is supported where possible. For example if in `Or(A, B)` `A` evaluates to `true`, then `B` is **NOT** evaluated.
+Similarly in `And(A, B)`, if `A` evaluates to `false`, then `B` is **NOT** evaluated.
+
+Additionally, to better optimize memory locality, additional variants are available:
+
+- `AndMany`: basically the same as `And`, but which allows more (or less) than 2 clauses at once (also supports short-circuiting)
+- `OrMany`: basically the same as `Or`, but which allos more (or less) than 2 clauses at once (also supports short-circuiting)
 
 ### Subscriptions lock
 
-It is possible to temporarily disable the subscriptions propagation.
-To do so, you just need to call `application.lock_subs()`.
+It is possible to temporarily disable the event forwarding the subscriptions allow.
+To do so, you just need to call `Application::lock_subs()`.
 
-Whenever you want to restore event propagation, just call `application.unlock_subs()`.
+Whenever you want to restore event propagation, just call `Application::unlock_subs()`.
+Events inbetween those 2 calls will *not* be forwarded once unlocked again.
 
 ---
 
@@ -184,33 +168,34 @@ The tick event is a special kind of event, which is raised by the **Application*
 Whenevever initializing the **Applcation** you can specify the tick interval, as in the following example:
 
 ```rust
-let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+let app = Application::init(
     EventListenerCfg::default()
         .tick_interval(Duration::from_secs(1)),
 );
 ```
 
-with the `tick_interval()` method, we specify the tick interval.
-Each time the tick interval elapses, the application runtime will throw a `Event::Tick` which will be forwarded on `tick()` to the
-current active component and to all the components subscribed to the `Tick` event.
+With the `tick_interval()` method, we specify the tick interval.
+Each time the tick interval elapses, the application runtime will provide a `Event::Tick` which will be forwarded on `tick()` to the
+currently active component and to all the components subscribed to the `Tick` event.
 
-The purpose of the tick event is to schedule actions based on a certain interval.
+The purpose of the tick event is to schedule actions based on a certain interval. For example step a spinner consistently.
 
 ---
 
 ## Ports
 
-Ports are basically **Event producer** which are handled by the application *Event listener*.
-Usually a tui-realm application will consume only input events, or the tick event, but what if we need *some more* events?
+Ports are basically **Event producers** which are handled by the applications *Event listener*.
+Simple `tui-realm` applications will only consume the core provided events, but what if we need *more* events?
 
-We may for example need a worker which fetches a remote server for data. Ports allow you to create automatized workers which will produce the events and if you set up everything correctly, your model and components will be updated.
+We may for example need a worker which fetches data from a remote server. You dont want the TUI to block (not process any events) until that data fetching has finished, right?
+Ports allow you to create workers which will produce the events and if you set up everything correctly, your model and components will be updated.
 
-Let's see now how to setup a *Port*:
+Let's see now how to setup a custom *Port*:
 
 1. First we need to define the `UserEvent` type for our application:
 
     ```rust
-    #[derive(PartialEq, Clone, PartialOrd)]
+    #[derive(PartialEq, Clone)]
     pub enum UserEvent {
         GotData(Data)
         // ... other events if you need
@@ -228,25 +213,26 @@ Let's see now how to setup a *Port*:
     ```
 
     Now we need to implement the `Poll` trait for the *Port*.
+    If you have ever worked with async rust, this trait is quite similar to `std::future::Future`.
     The poll trait tells the application event listener how to poll for events on a *port*:
 
     ```rust
     impl Poll<UserEvent> for MyHttpClient {
-        fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+        fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
             // ... do something ...
             Ok(Some(Event::User(UserEvent::GotData(data))))
         }
     }
     ```
 
-3. Port setup in application
+3. Add the Port to the Application
 
     ```rust
     let mut app: Application<Id, Msg, UserEvent> = Application::init(
         EventListenerCfg::default()
-            .default_input_listener(Duration::from_millis(10))
+            /* ...Other ports like "crossterm_input_listener" */
             .port(
-                Box::new(MyHttpClient::new(/* ... */)),
+                Box::new(MyHttpClient::new()),
                 Duration::from_millis(100),
             ),
     );
@@ -256,29 +242,36 @@ Let's see now how to setup a *Port*:
     box containing the type implementing the *Poll* trait and an interval.
     The interval defines the interval between each poll to the port.
 
+Ports in `tui-realm` can also be described as the `Actor Pattern`. You can read more about this pattern in rust in the [Actors with Tokio](https://ryhl.io/blog/actors-with-tokio/) blog post.
+
+`tui-realm` also supports async ports (though only via `tokio` for now), which can be enabled with feature `async-ports`.
+
+If your application already makes use of async, it is recommended you use async ports over sync-ports.
+
 ---
 
 ## Implementing new components
 
-Implementing new components is actually quite simple in tui-realm, but requires you to have at least little knowledge about **tui-rs widgets**.
+Implementing components is quite simple in tui-realm. This example will implement a more complex Component that what was shown in [Get Started](get-started.md#the-mock-component) and requires the knowledge of the difference between *Mock Component* and *Component* and at least a little knowledge about *ratatui widgets*.
 
-In addition to tui-rs knowledge, you should also have in mind the difference between a *MockComponent* and a *Component*, in order not to implement bad components.
-
-Said that, let's see how to implement a component. For this example I will implement a simplified version of the `Radio` component of the stdlib.
+That said, let's see how to implement a more complex component. For this example I will implement a simplified version of the `Radio` component of the stdlib.
 
 ### What the component should look like
 
-The first thing we need to define is what the component should look like.
-In this case the component is a box with a list of options within and you can select one, which is the user choice.
-The user will be able to move through different choices and to submit one.
+The first thing we need to define is what the component should look like (as in output to display).
+In this case, the component should be a box with all options listed horizontally. For this we will use the ratatui widget `Tabs`.
+
+Next, we need to define what the component interaction should look like.
+We want the user to be able to move left and right to select one and then be able to submit the currently selected option.
 
 ### Defining the component properties
 
-Once we've defined what the component look like, we can start defining the component properties:
+Once we've defined what the component should look like, we can start defining the component properties to expose:
 
-- `Background(Color)`: will define the background color for the component
-- `Borders(Borders)`: will define the borders properties for the component
 - `Foreground(Color)`: will define the foreground color for the component
+- `Background(Color)`: will define the background color for the component
+- `HighlightedColor(Color)`: will define the background color for the highlighted choice
+- `Borders(Borders)`: will define the border properties for the component
 - `Content(Payload(Vec(String)))`: will define the possible options for the radio group
 - `Title(Title)`: will define the box title
 - `Value(Payload(One(Usize)))`: will work as a prop, but will update the state too, for the current selected option.
@@ -286,11 +279,10 @@ Once we've defined what the component look like, we can start defining the compo
 ```rust
 pub struct Radio {
     props: Props,
-    // ...
+    state: RadioState
 }
 
 impl Radio {
-
     // Constructors...
 
     pub fn foreground(mut self, fg: Color) -> Self {
@@ -298,11 +290,10 @@ impl Radio {
         self
     }
 
-    // ...
+    // Other builder functions for all the properties...
 }
 
 impl MockComponent for Radio {
-
     // ...
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
@@ -312,18 +303,18 @@ impl MockComponent for Radio {
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         match attr {
             Attribute::Content => {
-                // Reset choices
+                // Overwrite choices, but keep index if possible
                 let choices: Vec<String> = value
                     .unwrap_payload()
                     .unwrap_vec()
-                    .iter()
-                    .map(|x| x.clone().unwrap_str())
+                    .into_iter()
+                    .map(|x| x.unwrap_str())
                     .collect();
-                self.states.set_choices(&choices);
+                self.state.set_choices(choices);
             }
             Attribute::Value => {
-                self.states
-                    .select(value.unwrap_payload().unwrap_one().unwrap_usize());
+                let index = value.unwrap_payload().unwrap_one().unwrap_usize();
+                self.state.select(index);
             }
             attr => {
                 self.props.set(attr, value);
@@ -332,30 +323,27 @@ impl MockComponent for Radio {
     }
 
     // ...
-
 }
 ```
 
 ### Defining the component states
 
-Since this component can be interactive and the user must be able to select a certain option, we must implement some states.
+Since this component can be interactive and the user must be able to select a certain option, we must implement some state.
 The component states must track the current selected item. For practical reasons, we also use the available choices as a state.
 
 ```rust
-struct OwnStates {
+struct RadioState {
     choice: usize,        // Selected option
     choices: Vec<String>, // Available choices
 }
 
-impl OwnStates {
-
+impl RadioState {
     /// Move choice index to next choice
     pub fn next_choice(&mut self) {
         if self.choice + 1 < self.choices.len() {
             self.choice += 1;
         }
     }
-
 
     /// Move choice index to previous choice
     pub fn prev_choice(&mut self) {
@@ -364,34 +352,30 @@ impl OwnStates {
         }
     }
 
-
-    /// Set OwnStates choices from a vector of text spans
-    /// In addition resets current selection and keep index if possible or set it to the first value
-    /// available
-    pub fn set_choices(&mut self, spans: &[String]) {
-        self.choices = spans.to_vec();
-        // Keep index if possible
-        if self.choice >= self.choices.len() {
-            self.choice = match self.choices.len() {
-                0 => 0,
-                l => l - 1,
-            };
-        }
-    }
-
+    /// Select a specific index
     pub fn select(&mut self, i: usize) {
         if i < self.choices.len() {
             self.choice = i;
         }
     }
+
+    /// Set RadioState choices from a vector of text spans.
+    /// In addition resets current selection and keep index if possible or set it to the first value
+    /// available.
+    pub fn set_choices<S: Into<Vec<String>>>(&mut self, spans: S) {
+        self.choices = spans.into();
+        // Keep index if possible
+        if self.choice >= self.choices.len() {
+            self.choice = self.choices.len().saturating_sub(1);
+        }
+    }
 }
 ```
 
-Then we can define the `state()` method
+Then we can define the `state()` method of `MockComponent`:
 
 ```rust
 impl MockComponent for Radio {
-
     // ...
 
     fn state(&self) -> State {
@@ -399,13 +383,12 @@ impl MockComponent for Radio {
     }
 
     // ...
-
 }
 ```
 
-### Defining the Cmd API
+### Defining the Command API
 
-Once we've defined the component states, we can start thinking of the Command API. The command api defines how the component
+Once we've defined the component states, we can start thinking of the Command API. The Command API defines how the component
 behaves in front of incoming commands and what kind of result it should return.
 
 For this component we'll handle the following commands:
@@ -416,7 +399,6 @@ For this component we'll handle the following commands:
 
 ```rust
 impl MockComponent for Radio {
-
     // ...
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
@@ -442,13 +424,12 @@ impl MockComponent for Radio {
     }
 
     // ...
-
 }
 ```
 
 ### Rendering the component
 
-Finally, we can implement the component `view()` method which will render the component:
+Finally, we can implement the component `view()` method of `MockComponent` which will render the component:
 
 ```rust
 impl MockComponent for Radio {
@@ -456,11 +437,13 @@ impl MockComponent for Radio {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make choices
             let choices: Vec<Spans> = self
-                .states
+                .state
                 .choices
                 .iter()
-                .map(|x| Spans::from(x.clone()))
+                .map(|x| Spans::from(x))
                 .collect();
+
+            // Fetch all other style properties
             let foreground = self
                 .props
                 .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
@@ -469,6 +452,18 @@ impl MockComponent for Radio {
                 .props
                 .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
                 .unwrap_color();
+            let highlight_bg = self
+                .props
+                .get_or(Attribute::HighlightedColor, AttrValue::Color(Color::Reset))
+                .unwrap_color();
+
+            let normal_style = Style::default()
+                .fg(foreground)
+                .bg(background);
+
+            let highlight_style = style.patch(Style::default().bg(highlight_bg));
+
+            // assemble the Block (borders)
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -478,18 +473,19 @@ impl MockComponent for Radio {
                 .props
                 .get_or(Attribute::Focus, AttrValue::Flag(false))
                 .unwrap_flag();
-            let div = crate::utils::get_block(borders, title, focus, None);
-            // Make colors
-            let (bg, fg, block_color): (Color, Color, Color) = match focus {
-                true => (foreground, background, foreground),
-                false => (Color::Reset, foreground, Color::Reset),
-            };
-            let radio: Tabs = Tabs::new(choices)
-                .block(div)
-                .select(self.states.choice)
-                .style(Style::default().fg(block_color))
-                .highlight_style(Style::default().fg(fg).bg(bg));
-            render.render_widget(radio, area);
+
+            let block = Block::default()
+                .title_top(title.content)
+                .borders(borders.sides)
+                .border_style(if focus { borders.style() } else { Style::default().fg(Color::DarkGrey) });
+
+            // Finally, use a ratatui widget to draw the contents
+            let tabs = Tabs::new(choices)
+                .block(block)
+                .select(self.state.choice)
+                .style(style)
+                .highlight_style(highlight_style);
+            render.render_widget(tabs, area);
         }
     }
 
@@ -521,8 +517,9 @@ Whenever you mount a new component into your view, the `inject()` method is call
 
 ## What's next
 
-If you come from tui-realm 0.x and you want to migrate to tui-realm 1.x, there is a guide that explains
-[how to migrate from tui-realm 0.x to 1.x](migrating-legacy.md).
-Otherwise, I think you're ready to start implementing you tui-realm application right now 😉.
+This is the end of the currently available guides for `tui-realm`, but consider reading further into:
+
+- documentation of [`tuirealm`](https://docs.rs/tuirealm/latest/tuirealm/)
+- documentation of [`tui-realm-stdlib`](https://docs.rs/tui-realm-stdlib/latest/tui_realm_stdlib/)
 
 If you have any question, feel free to open an issue with the `question` label and I will answer you ASAP 🙂.
