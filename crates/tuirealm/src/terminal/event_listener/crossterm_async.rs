@@ -7,8 +7,7 @@ use crate::terminal::event_listener::io_err_to_port_err;
 
 /// The async input listener for crossterm.
 /// This can be manually added as a async port, or directly via [`EventListenerCfg::async_crossterm_input_listener()`](crate::EventListenerCfg::async_crossterm_input_listener)
-///
-/// NOTE: This relies on [`From`] implementations in [`super::crossterm`].
+// NOTE: This relies on [`From`] implementations in [`super::crossterm`].
 #[doc(alias = "InputEventListener")]
 #[derive(Debug)]
 pub struct CrosstermAsyncStream {
