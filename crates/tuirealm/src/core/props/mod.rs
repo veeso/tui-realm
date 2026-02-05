@@ -22,7 +22,7 @@ pub use shape::Shape;
 pub use texts::{LineStatic, SpanStatic, Table, TableBuilder, TextStatic, Title};
 pub use value::{PropPayload, PropValue};
 
-pub use crate::ratatui::layout::{HorizontalAlignment /* , VerticalAlignment */};
+pub use crate::ratatui::layout::{HorizontalAlignment, VerticalAlignment};
 pub use crate::ratatui::style::{Color, Modifier as TextModifiers, Style};
 
 /// The props struct holds all the attributes associated to the component.
@@ -73,8 +73,8 @@ impl Props {
 pub enum Attribute {
     /// Horizontal Layout Alignment
     AlignmentHorizontal,
-    // /// Vertical Layout Alignment
-    // AlignmentVertical,
+    /// Vertical Layout Alignment
+    AlignmentVertical,
     /// Background color or style
     Background,
     /// Borders styles
@@ -151,7 +151,7 @@ pub enum Attribute {
 #[allow(clippy::large_enum_variant)]
 pub enum AttrValue {
     AlignmentHorizontal(HorizontalAlignment),
-    // AlignmentVertical(VerticalAlignment),
+    AlignmentVertical(VerticalAlignment),
     Borders(Borders),
     Color(Color),
     Direction(Direction),
@@ -181,7 +181,15 @@ impl AttrValue {
     pub fn unwrap_alignment_horizontal(self) -> HorizontalAlignment {
         match self {
             AttrValue::AlignmentHorizontal(v) => v,
-            _ => panic!("AttrValue is not Alignment"),
+            _ => panic!("AttrValue is not AlignmentHorizontal"),
+        }
+    }
+
+    /// Get the inner Vertical Alignment value from AttrValue, or panic.
+    pub fn unwrap_alignment_vertical(self) -> VerticalAlignment {
+        match self {
+            AttrValue::AlignmentVertical(v) => v,
+            _ => panic!("AttrValue is not AlignmentVertical"),
         }
     }
 
@@ -344,6 +352,15 @@ impl AttrValue {
         match self {
             // cheap copy, so no reference
             AttrValue::AlignmentHorizontal(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vertical Alignment value from AttrValue, or None
+    pub fn as_alignment_vertical(&self) -> Option<VerticalAlignment> {
+        match self {
+            // cheap copy, so no reference
+            AttrValue::AlignmentVertical(v) => Some(*v),
             _ => None,
         }
     }
@@ -514,6 +531,14 @@ impl AttrValue {
     pub fn as_alignment_horizontal_mut(&mut self) -> Option<&mut HorizontalAlignment> {
         match self {
             AttrValue::AlignmentHorizontal(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vertical Alignment value from AttrValue, or None
+    pub fn as_alignment_vertical_mut(&mut self) -> Option<&mut VerticalAlignment> {
+        match self {
+            AttrValue::AlignmentVertical(v) => Some(v),
             _ => None,
         }
     }
@@ -733,6 +758,10 @@ mod test {
             HorizontalAlignment::Center
         );
         assert_eq!(
+            AttrValue::AlignmentVertical(VerticalAlignment::Top).unwrap_alignment_vertical(),
+            VerticalAlignment::Top
+        );
+        assert_eq!(
             AttrValue::Borders(Borders::default()).unwrap_borders(),
             Borders::default()
         );
@@ -805,6 +834,11 @@ mod test {
             AttrValue::Color(Color::Black).as_alignment_horizontal(),
             None
         );
+        assert_eq!(
+            AttrValue::AlignmentVertical(VerticalAlignment::Top).as_alignment_vertical(),
+            Some(VerticalAlignment::Top)
+        );
+        assert_eq!(AttrValue::Color(Color::Black).as_alignment_vertical(), None);
 
         assert_eq!(
             AttrValue::Borders(Borders::default()).as_borders(),
@@ -965,6 +999,14 @@ mod test {
             AttrValue::Color(Color::Black).as_alignment_horizontal_mut(),
             None
         );
+        assert_eq!(
+            AttrValue::AlignmentVertical(VerticalAlignment::Top).as_alignment_vertical_mut(),
+            Some(&mut VerticalAlignment::Top)
+        );
+        assert_eq!(
+            AttrValue::Color(Color::Black).as_alignment_vertical_mut(),
+            None
+        );
 
         assert_eq!(
             AttrValue::Borders(Borders::default()).as_borders_mut(),
@@ -1121,6 +1163,12 @@ mod test {
     #[should_panic]
     fn unwrapping_alignment_horizontal_should_panic_if_not_identity() {
         AttrValue::Flag(true).unwrap_alignment_horizontal();
+    }
+
+    #[test]
+    #[should_panic]
+    fn unwrapping_alignment_vertical_should_panic_if_not_identity() {
+        AttrValue::Flag(true).unwrap_alignment_vertical();
     }
 
     #[test]
