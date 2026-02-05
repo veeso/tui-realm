@@ -5,6 +5,7 @@ use std::collections::{HashMap, LinkedList};
 
 use super::{
     Color, HorizontalAlignment, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic,
+    VerticalAlignment,
 };
 use crate::props::AnyPropBox;
 
@@ -43,6 +44,7 @@ pub enum PropValue {
     Str(String),
     // -- tui props
     AlignmentHorizontal(HorizontalAlignment),
+    AlignmentVertical(VerticalAlignment),
     Color(Color),
     InputType(InputType),
     Shape(Shape),
@@ -361,6 +363,15 @@ impl PropValue {
         }
     }
 
+    /// Unwrap PropValue as Vertical Alignment.
+    /// Panics otherwise
+    pub fn unwrap_alignment_vertical(self) -> VerticalAlignment {
+        match self {
+            PropValue::AlignmentVertical(v) => v,
+            _ => panic!("Called `unwrap_alignment_vertical` on a bad value"),
+        }
+    }
+
     /// Unwrap PropValue as InputType.
     /// Panics otherwise
     pub fn unwrap_input_type(self) -> InputType {
@@ -569,6 +580,15 @@ impl PropValue {
         }
     }
 
+    /// Get a Vertical Alignment value from PropValue, or None
+    pub fn as_alignment_vertical(&self) -> Option<VerticalAlignment> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::AlignmentVertical(v) => Some(*v),
+            _ => None,
+        }
+    }
+
     /// Get a InputType value from PropValue, or None
     pub fn as_input_type(&self) -> Option<&InputType> {
         match self {
@@ -755,6 +775,14 @@ impl PropValue {
         }
     }
 
+    /// Get a Vertical Alignment value from PropValue, or None
+    pub fn as_alignment_vertical_mut(&mut self) -> Option<&mut VerticalAlignment> {
+        match self {
+            PropValue::AlignmentVertical(v) => Some(v),
+            _ => None,
+        }
+    }
+
     /// Get a InputType value from PropValue, or None
     pub fn as_input_type_mut(&mut self) -> Option<&mut InputType> {
         match self {
@@ -909,6 +937,10 @@ mod tests {
                 .unwrap_alignment_horizontal(),
             HorizontalAlignment::Center
         );
+        assert_eq!(
+            PropValue::AlignmentVertical(VerticalAlignment::Top).unwrap_alignment_vertical(),
+            VerticalAlignment::Top
+        );
         assert!(PropValue::Bool(true).unwrap_bool());
         assert_eq!(PropValue::F32(0.32).unwrap_f32(), 0.32);
         assert_eq!(PropValue::F64(0.32).unwrap_f64(), 0.32);
@@ -1011,6 +1043,12 @@ mod tests {
         assert_eq!(PropValue::Bool(true).as_alignment_horizontal(), None);
 
         assert_eq!(
+            PropValue::AlignmentVertical(VerticalAlignment::Top).as_alignment_vertical(),
+            Some(VerticalAlignment::Top)
+        );
+        assert_eq!(PropValue::Bool(true).as_alignment_vertical(), None);
+
+        assert_eq!(
             PropValue::InputType(InputType::Color).as_input_type(),
             Some(&InputType::Color)
         );
@@ -1106,6 +1144,12 @@ mod tests {
             Some(&mut HorizontalAlignment::Center)
         );
         assert_eq!(PropValue::Bool(true).as_alignment_horizontal_mut(), None);
+
+        assert_eq!(
+            PropValue::AlignmentVertical(VerticalAlignment::Top).as_alignment_vertical_mut(),
+            Some(&mut VerticalAlignment::Top)
+        );
+        assert_eq!(PropValue::Bool(true).as_alignment_vertical_mut(), None);
 
         assert_eq!(
             PropValue::InputType(InputType::Color).as_input_type_mut(),
