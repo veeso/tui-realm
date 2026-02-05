@@ -1,5 +1,5 @@
-//! This module exposes everything required to run the event listener to handle Input and
-//! internal events in a tui-realm application.
+//! This module exposes everything required to run the event listener which handles Input and
+//! custom events in a tui-realm application.
 
 // -- modules
 #[cfg(feature = "async-ports")]
@@ -68,8 +68,10 @@ pub enum PollError {
     PortError(#[from] PortError),
 }
 
-/// The poll trait defines the function [`Poll::poll`], which will be called by the event listener
-/// dedicated thread to poll for events when you use a [`SyncPort`].
+/// The poll trait defines the [`Poll::poll`] function, which will be called by the *sync* event listener
+/// dedicated thread.
+///
+/// The corresponding port is [`SyncPort`].
 pub trait Poll<UserEvent>: Send
 where
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
@@ -83,8 +85,10 @@ where
     fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>>;
 }
 
-/// The poll trait defines the function [`PollAsync::poll`], which will be called by the runtime
-/// to poll for events when you use a [`AsyncPort`].
+/// The poll-async trait defines the [`PollAsync::poll`] function, which will be called by the async runtime
+/// to poll for events.
+///
+/// The corresponding port is [`AsyncPort`].
 #[cfg(feature = "async-ports")]
 #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
 #[async_trait::async_trait]

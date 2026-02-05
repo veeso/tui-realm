@@ -1,4 +1,4 @@
-//! This module exposes the Application, which is the core struct of tui-realm.
+//! This module exposes the [`Application`], the core of `tui-realm` and its directly related types.
 
 use std::hash::Hash;
 use std::time::{Duration, Instant};
@@ -13,9 +13,7 @@ use crate::{
     AttrValue, Attribute, Component, Event, Injector, State, Sub, SubEventClause, ViewError,
 };
 
-/// Result retuned by [`Application`].
-/// Ok depends on method
-/// Err is always [`ApplicationError`]
+/// Result retuned by [`Application`] functions.
 pub type ApplicationResult<T> = Result<T, ApplicationError>;
 
 /// The application defines a tui-realm application.
@@ -449,7 +447,7 @@ where
     }
 }
 
-/// Poll strategy defines how to call `Application::poll` on the event listener.
+/// Define how [`Application::tick`] should poll for events from the event listener.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PollStrategy {
     /// Poll for one event, waiting for the specified timeout
@@ -468,7 +466,7 @@ pub enum PollStrategy {
 
 // -- error
 
-/// Error variants returned by [`Application`]
+/// Error variants returned by [`Application`] functions.
 #[derive(Debug, Error)]
 pub enum ApplicationError {
     #[error("already subscribed")]

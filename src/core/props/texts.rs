@@ -4,8 +4,11 @@
 use crate::ratatui::layout::Alignment;
 use crate::ratatui::widgets::TitlePosition;
 
+/// Simple alias for [`Span<'static>`](ratatui::text::Span).
 pub type SpanStatic = crate::ratatui::text::Span<'static>;
+/// Simple alias for [`Line<'static>`](ratatui::text::Line).
 pub type LineStatic = crate::ratatui::text::Line<'static>;
+/// Simple alias for [`Text<'static>`](ratatui::text::Text).
 pub type TextStatic = crate::ratatui::text::Text<'static>;
 
 // Note that we cannot use "ratatui::widgets::block::Title" as that is deprecated.

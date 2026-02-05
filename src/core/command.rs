@@ -1,5 +1,5 @@
-//! This module exposes the Command type, which must be used when sending command to the `MockComponent` from the
-//! `Component` after an `Event`.
+//! This module exposes the [`Cmd`] type, which must be used when sending commands to the [`MockComponent`](crate::MockComponent) from the
+//! [`Component`](crate::Component) after an `Event`.
 
 use super::State;
 
@@ -38,8 +38,8 @@ pub enum Cmd {
     None,
 }
 
-/// Defines the 4 directions in front of a cursor movement.
-/// This may be used after a `Arrow::Up` event or for example if you want something more geeky
+/// Defines the 4 2D directions a cursor can move.
+/// This may be used after a `Arrow::Up` event or if you want something more geeky
 /// when using `WASD`
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 pub enum Direction {
@@ -49,7 +49,7 @@ pub enum Direction {
     Up,
 }
 
-/// Describes position on movement
+/// Describes specific positions. Mostly used for exact cursor movement.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 pub enum Position {
     Begin,
