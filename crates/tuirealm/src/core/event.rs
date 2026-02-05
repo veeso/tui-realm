@@ -1,4 +1,4 @@
-//! `events` exposes the event raised by a user interaction or by the runtime
+//! `events` contains all the types related to [`Event`].
 
 use bitflags::bitflags;
 #[cfg(feature = "serialize")]
@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 // -- event
 
-/// An event raised by a user interaction
+/// An event raised by a port.
 #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
 pub enum Event<UserEvent>
 where
@@ -72,7 +72,7 @@ where
     }
 }
 
-/// When using event you can use this as type parameter if you don't want to use user events
+/// When using [`Event`], but dont need custom `UserEvent`s, you can use this as type parameter instead of defining a custom empty type.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd)]
 pub enum NoUserEvent {}
 
@@ -90,7 +90,7 @@ pub struct KeyEvent {
     pub modifiers: KeyModifiers,
 }
 
-/// A keyboard event
+/// Defines the possible Keyboard keys.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 #[cfg_attr(
     feature = "serialize",
@@ -152,6 +152,7 @@ pub enum Key {
     Media(MediaKeyCode),
     /// Escape key.
     Esc,
+
     /// Shift left
     ShiftLeft,
     /// Alt left; warning: it is supported only on termion
@@ -182,7 +183,7 @@ pub enum Key {
     CtrlEnd,
 }
 
-/// Defines special key states, such as shift, control, alt...
+/// Defines the modifier states, such as shift, control and alt.
 #[derive(Clone, Copy, Hash, Eq, PartialEq, Debug, PartialOrd, Ord)]
 #[cfg_attr(feature = "serialize", derive(Deserialize, Serialize))]
 pub struct KeyModifiers(u8);
@@ -214,7 +215,7 @@ impl From<Key> for KeyEvent {
     derive(Deserialize, Serialize),
     serde(tag = "type", content = "args")
 )]
-/// Describe a keycode for a media key
+/// Defines Possible Media-related keys.
 pub enum MediaKeyCode {
     /// Play media key.
     Play,
@@ -244,7 +245,7 @@ pub enum MediaKeyCode {
     MuteVolume,
 }
 
-/// A keyboard event
+/// A Mouse event
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 #[cfg_attr(
     feature = "serialize",
@@ -262,7 +263,7 @@ pub struct MouseEvent {
     pub row: u16,
 }
 
-/// A Mouse event
+/// Defines what kind of [`MouseEvent`] is possible
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 #[cfg_attr(
     feature = "serialize",
@@ -288,7 +289,7 @@ pub enum MouseEventKind {
     ScrollRight,
 }
 
-/// A keyboard event
+/// Defines all possible mouse buttons
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 #[cfg_attr(
     feature = "serialize",

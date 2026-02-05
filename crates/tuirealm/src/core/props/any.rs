@@ -35,7 +35,9 @@ impl PartialEq<dyn DynCompare> for dyn DynCompare {
 
 // Public type
 
-/// Trait for multiple supertraits, as we need to implement custom behavior (see `PartialEq` impl).
+/// Trait for [`PropPayload::Any`](crate::props::PropPayload::Any).
+///
+/// This trait is necessary because we need multiple supertraits, this is necessary as we need to implement custom behavior for [`Clone`] and [`PartialEq`].
 ///
 /// Note that equivalence ([`PartialEq`]) will only work if the types are the same (ex. `String` will compare with `String`, but not `str`).
 #[allow(private_bounds)]

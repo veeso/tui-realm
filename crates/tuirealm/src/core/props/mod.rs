@@ -1,4 +1,4 @@
-//! the props module expose the Properties supported by the components and all the values they can get.
+//! The `props` module exposes the Properties supported by the components and all the values they can get.
 
 use std::collections::HashMap;
 
@@ -63,13 +63,16 @@ impl Props {
     }
 }
 
-/// Describes a "selector" to query an attribute on props.
-/// The selector must identify uniquely an attribute in the properties.
+/// Describes a "selector" to query a attribute on props.
+///
+/// The selector must uniquely identify a attribute in the properties.
 /// Check each attribute documentation to see how they're supposed to be used, but remember that
 /// when implementing a component, you're free to use each attribute as you prefer!
+/// (But consider documenting if they have different meaning)
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
 pub enum Attribute {
     /// Layout alignment
+    // TODO: add 2 values for horizontal and vertical?
     Alignment,
     /// Background color or style
     Background,

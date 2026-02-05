@@ -31,6 +31,7 @@ pub use self::event_listener::TermwizInputListener;
 /// TerminalResult is a type alias for a Result that uses [`TerminalError`] as the error type.
 pub type TerminalResult<T> = Result<T, TerminalError>;
 
+/// Errors that can happen when calling any method in [`TerminalAdapter`].
 #[derive(Debug, Error)]
 pub enum TerminalError {
     #[error("cannot draw frame")]

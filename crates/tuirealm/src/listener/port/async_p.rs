@@ -4,11 +4,8 @@ use std::time::{Duration, Instant};
 use crate::Event;
 use crate::listener::{PollAsync, PortResult};
 
-/// An async port is a wrapper around the [`PollAsync`] trait object, which also defines an interval, which defines
+/// An async port is a wrapper around the [`PollAsync`] trait object, which also defines a interval, which defines
 /// the amount of time between each [`PollAsync::poll`] call.
-/// Its purpose is to listen for incoming events of a user-defined type
-///
-/// [`AsyncPort`] has the possibility to run
 pub struct AsyncPort<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone + Send,

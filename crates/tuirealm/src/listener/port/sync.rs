@@ -4,9 +4,8 @@ use std::time::{Duration, Instant};
 use crate::Event;
 use crate::listener::{Poll, PortResult};
 
-/// A port is a wrapper around the poll trait object, which also defines an interval, which defines
+/// A port is a wrapper around the [`Poll`] trait object, which also defines a interval, which defines
 /// the amount of time between each [`Poll::poll`] call.
-/// Its purpose is to listen for incoming events of a user-defined type
 pub struct SyncPort<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone + Send,
