@@ -79,7 +79,7 @@ where
     /// Poll for a event from input listeners, or from custom ports (e.g. Network).
     /// This function must not be blocking, and will be called within the configured interval of the event listener.
     ///
-    /// - If polling failed, `Err` should be returned. The port will be polled again if the error is [`PortError::IntermittendError`].
+    /// - If polling failed, `Err` should be returned. The port will be polled again if the error is [`PortError::IntermittentError`].
     /// - If a event is available, `Ok(Some)` needs to be returned.
     /// - If there is no event available, `Ok(None)` needs to be returned. The port will be polled again.
     fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>>;
@@ -96,7 +96,7 @@ where
 {
     /// Poll for a event with the possibility to do it asynchronously, from input listeners, or from custom ports (e.g. Network).
     ///
-    /// - If polling failed, `Err` should be returned. The port will be polled again if the error is [`PortError::IntermittendError`].
+    /// - If polling failed, `Err` should be returned. The port will be polled again if the error is [`PortError::IntermittentError`].
     /// - If a event is available, `Ok(Some)` needs to be returned.
     /// - If no events are available, await until one becomes available.
     /// - If there are no more events expected, `Ok(None)` should be returned. The port will not be polled again.
