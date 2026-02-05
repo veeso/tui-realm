@@ -1,8 +1,5 @@
-//! ## View
-//!
 //! This module exposes the View structure, which is the wrapper for all the components in an application.
 
-// -- ext
 use std::collections::HashMap;
 use std::hash::Hash;
 

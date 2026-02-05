@@ -1,5 +1,3 @@
-//! ## Injector
-//!
 //! properties injector
 
 use std::hash::Hash;

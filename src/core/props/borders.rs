@@ -1,5 +1,3 @@
-//! ## Borders
-//!
 //! `Borders` is the module which defines the border properties
 
 use super::{Color, Style};

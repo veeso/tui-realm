@@ -1,6 +1,4 @@
-//! ## Builder
-//!
-//! This module exposes the EventListenerCfg which is used to build the event listener
+//! This module exposes the [`EventListenerCfg`] which is used to build the event listener
 
 #[cfg(feature = "async-ports")]
 use tokio::runtime::Handle;

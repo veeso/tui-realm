@@ -1,5 +1,3 @@
-//! ## events
-//!
 //! `events` exposes the event raised by a user interaction or by the runtime
 
 use bitflags::bitflags;

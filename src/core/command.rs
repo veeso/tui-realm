@@ -1,5 +1,3 @@
-//! ## Command
-//!
 //! This module exposes the Command type, which must be used when sending command to the `MockComponent` from the
 //! `Component` after an `Event`.
 

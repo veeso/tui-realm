@@ -1,5 +1,3 @@
-//! ## Shape
-//!
 //! This module exposes the shape attribute type
 
 use super::Color;

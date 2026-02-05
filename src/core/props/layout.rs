@@ -1,5 +1,3 @@
-//! ## Layout
-//!
 //! This module exposes the layout type
 
 use crate::ratatui::layout::{Constraint, Direction, Layout as TuiLayout, Margin, Rect};

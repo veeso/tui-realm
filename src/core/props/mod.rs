@@ -1,5 +1,3 @@
-//! ## props
-//!
 //! the props module expose the Properties supported by the components and all the values they can get.
 
 use std::collections::HashMap;

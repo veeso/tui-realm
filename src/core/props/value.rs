@@ -1,5 +1,3 @@
-//! ## Value
-//!
 //! This module exposes the prop values
 
 use std::any::Any;

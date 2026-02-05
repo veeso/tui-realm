@@ -1,5 +1,3 @@
-//! ## Application
-//!
 //! This module exposes the Application, which is the core struct of tui-realm.
 
 use std::hash::Hash;

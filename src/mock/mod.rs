@@ -1,5 +1,3 @@
-//! # Mock
-//!
 //! This module contains data type for unit tests only
 
 use std::marker::PhantomData;

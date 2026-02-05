@@ -1,5 +1,3 @@
-//! # Component
-//!
 //! This module exposes the component traits
 
 use std::any::Any;

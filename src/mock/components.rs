@@ -1,6 +1,4 @@
-//! # Components
-//!
-//! mock components
+//! Mock Components for testing
 
 use ratatui::Frame;
 

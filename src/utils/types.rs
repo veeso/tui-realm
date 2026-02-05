@@ -1,5 +1,3 @@
-//! ## Types
-//!
 //! This module exposes types used by utilities
 
 /// Represents a phone number

@@ -1,6 +1,4 @@
-//! ## terminal
-//!
-//! Cross platform Terminal helper
+//! All render and input backends
 
 mod adapter;
 mod event_listener;

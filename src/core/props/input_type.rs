@@ -1,5 +1,3 @@
-//! ## InputType
-//!
 //! This module exposes the input type
 
 use std::fmt;
