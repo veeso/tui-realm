@@ -11,7 +11,8 @@ use tui_realm_stdlib::{Label, ProgressBar};
 use tuirealm::command::CmdResult;
 use tuirealm::listener::{Poll, PortResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, PropValue, Title,
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, PropPayload, PropValue,
+    Title,
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
@@ -206,7 +207,7 @@ impl Default for GaugeAlfa {
                 )
                 .foreground(Color::Green)
                 .label("0%")
-                .title(Title::from("Fast Loading...").alignment(Alignment::Center))
+                .title(Title::from("Fast Loading...").alignment(HorizontalAlignment::Center))
                 .progress(0.0),
         }
     }
@@ -249,7 +250,7 @@ impl Default for GaugeBeta {
                 )
                 .foreground(Color::Yellow)
                 .label("0%")
-                .title(Title::from("Slow Loading...").alignment(Alignment::Center))
+                .title(Title::from("Slow Loading...").alignment(HorizontalAlignment::Center))
                 .progress(0.0),
         }
     }

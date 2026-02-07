@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::Label;
 use tuirealm::command::CmdResult;
-use tuirealm::props::{Alignment, Color, TextModifiers};
+use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
@@ -136,7 +136,7 @@ impl Default for LabelAlfa {
     fn default() -> Self {
         Self {
             component: Label::default()
-                .alignment(Alignment::Center)
+                .alignment(HorizontalAlignment::Center)
                 .foreground(Color::Green)
                 .modifiers(TextModifiers::BOLD)
                 .text("This is a label"),
@@ -163,7 +163,7 @@ impl Default for LabelBeta {
     fn default() -> Self {
         Self {
             component: Label::default()
-                .alignment(Alignment::Right)
+                .alignment(HorizontalAlignment::Right)
                 .foreground(Color::White)
                 .background(Color::Blue)
                 .modifiers(TextModifiers::ITALIC)

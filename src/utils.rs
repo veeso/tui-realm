@@ -136,7 +136,7 @@ pub fn borrow_clone_text<'a, 'b: 'a>(text: &'b Text<'a>) -> Text<'a> {
 mod test {
 
     use super::*;
-    use tuirealm::props::{Alignment, BorderSides, BorderType};
+    use tuirealm::props::{BorderSides, BorderType, HorizontalAlignment};
 
     use pretty_assertions::assert_eq;
 
@@ -200,7 +200,7 @@ mod test {
             .modifiers(BorderType::Rounded);
         let _ = get_block(
             borders,
-            Some(&Title::from("title").alignment(Alignment::Center)),
+            Some(&Title::from("title").alignment(HorizontalAlignment::Center)),
             true,
             None,
         );

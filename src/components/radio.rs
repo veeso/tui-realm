@@ -273,7 +273,7 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::props::{Alignment, PropPayload, PropValue};
+    use tuirealm::props::{HorizontalAlignment, PropPayload, PropValue};
 
     #[test]
     fn test_components_radio_states() {
@@ -337,7 +337,9 @@ mod test {
             .background(Color::Blue)
             .foreground(Color::Red)
             .borders(Borders::default())
-            .title(Title::from("C'est oui ou bien c'est non?").alignment(Alignment::Center))
+            .title(
+                Title::from("C'est oui ou bien c'est non?").alignment(HorizontalAlignment::Center),
+            )
             .choices(["Oui!", "Non", "Peut-être"])
             .value(1)
             .rewind(false);

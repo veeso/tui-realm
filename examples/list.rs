@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::List;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::props::{Alignment, BorderType, Borders, Color, Title};
+use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::ratatui::style::Stylize;
 use tuirealm::ratatui::text::Span;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
@@ -153,7 +153,7 @@ impl Default for ListAlfa {
                         .modifiers(BorderType::Rounded)
                         .color(Color::Yellow),
                 )
-                .title(Title::from("Lorem ipsum (scrollable)").alignment(Alignment::Center))
+                .title(Title::from("Lorem ipsum (scrollable)").alignment(HorizontalAlignment::Center))
                 .scroll(true)
                 .highlighted_color(Color::LightYellow)
                 .highlighted_str("🚀")
@@ -276,7 +276,7 @@ impl Default for ListBeta {
                         .color(Color::Green),
                 )
                 .foreground(Color::Green)
-                .title(Title::from("Lorem ipsum (unscrollable)").alignment(Alignment::Center))
+                .title(Title::from("Lorem ipsum (unscrollable)").alignment(HorizontalAlignment::Center))
                 .scroll(false)
                 .rows([
                     vec![

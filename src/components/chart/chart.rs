@@ -417,7 +417,7 @@ mod test {
 
     use pretty_assertions::assert_eq;
     use tuirealm::{
-        props::Alignment,
+        props::HorizontalAlignment,
         ratatui::{symbols::Marker, widgets::GraphType},
     };
 
@@ -451,7 +451,9 @@ mod test {
             .background(Color::Reset)
             .foreground(Color::Reset)
             .borders(Borders::default())
-            .title(Title::from("average temperatures in Udine").alignment(Alignment::Center))
+            .title(
+                Title::from("average temperatures in Udine").alignment(HorizontalAlignment::Center),
+            )
             .x_bounds((0.0, 11.0))
             .x_labels(&[
                 "january",

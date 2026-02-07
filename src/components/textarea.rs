@@ -315,7 +315,7 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::{props::Alignment, ratatui::text::Span};
+    use tuirealm::{props::HorizontalAlignment, ratatui::text::Span};
 
     #[test]
     fn test_components_textarea() {
@@ -327,7 +327,7 @@ mod tests {
             .borders(Borders::default())
             .highlighted_str("🚀")
             .step(4)
-            .title(Title::from("textarea").alignment(Alignment::Center))
+            .title(Title::from("textarea").alignment(HorizontalAlignment::Center))
             .text_rows([Span::from("welcome to "), Span::from("tui-realm")]);
         // Increment list index
         component.states.list_index += 1;

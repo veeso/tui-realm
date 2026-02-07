@@ -3,7 +3,9 @@
 //! `Label` represents a read-only text component without any container.
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::props::{Alignment, AttrValue, Attribute, Color, Props, Style, TextModifiers};
+use tuirealm::props::{
+    AttrValue, Attribute, Color, HorizontalAlignment, Props, Style, TextModifiers,
+};
 use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
 use tuirealm::{Frame, MockComponent, State};
 
@@ -39,8 +41,11 @@ impl Label {
         self
     }
 
-    pub fn alignment(mut self, alignment: Alignment) -> Self {
-        self.attr(Attribute::Alignment, AttrValue::Alignment(alignment));
+    pub fn alignment(mut self, alignment: HorizontalAlignment) -> Self {
+        self.attr(
+            Attribute::AlignmentHorizontal,
+            AttrValue::AlignmentHorizontal(alignment),
+        );
         self
     }
 }
@@ -63,10 +68,13 @@ impl MockComponent for Label {
                 .props
                 .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
                 .unwrap_color();
-            let alignment: Alignment = self
+            let alignment: HorizontalAlignment = self
                 .props
-                .get_or(Attribute::Alignment, AttrValue::Alignment(Alignment::Left))
-                .unwrap_alignment();
+                .get_or(
+                    Attribute::AlignmentHorizontal,
+                    AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+                )
+                .unwrap_alignment_horizontal();
             let modifiers = self
                 .props
                 .get_or(
@@ -115,7 +123,7 @@ mod tests {
     #[test]
     fn test_components_label() {
         let component: Label = Label::default()
-            .alignment(Alignment::Center)
+            .alignment(HorizontalAlignment::Center)
             .background(Color::Red)
             .foreground(Color::Yellow)
             .modifiers(TextModifiers::BOLD)

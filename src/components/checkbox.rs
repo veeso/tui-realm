@@ -326,7 +326,7 @@ mod test {
     use super::*;
 
     use pretty_assertions::{assert_eq, assert_ne};
-    use tuirealm::props::{Alignment, PropPayload, PropValue};
+    use tuirealm::props::{HorizontalAlignment, PropPayload, PropValue};
 
     #[test]
     fn test_components_checkbox_states() {
@@ -404,7 +404,7 @@ mod test {
             .background(Color::Blue)
             .foreground(Color::Red)
             .borders(Borders::default())
-            .title(Title::from("Which food do you prefer?").alignment(Alignment::Center))
+            .title(Title::from("Which food do you prefer?").alignment(HorizontalAlignment::Center))
             .choices(["Pizza", "Hummus", "Ramen", "Gyoza", "Pasta"])
             .values(&[1, 4])
             .rewind(false);

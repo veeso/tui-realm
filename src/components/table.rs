@@ -524,7 +524,7 @@ mod tests {
 
     use super::*;
     use pretty_assertions::assert_eq;
-    use tuirealm::props::{Alignment, TableBuilder};
+    use tuirealm::props::{HorizontalAlignment, TableBuilder};
 
     #[test]
     fn table_states() {
@@ -572,7 +572,7 @@ mod tests {
             .scroll(true)
             .step(4)
             .borders(Borders::default())
-            .title(Title::from("events").alignment(Alignment::Center))
+            .title(Title::from("events").alignment(HorizontalAlignment::Center))
             .column_spacing(4)
             .widths(&[25, 25, 25, 25])
             .row_height(3)
@@ -705,7 +705,7 @@ mod tests {
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
-            .title(Title::from("events").alignment(Alignment::Center))
+            .title(Title::from("events").alignment(HorizontalAlignment::Center))
             .column_spacing(4)
             .widths(&[33, 33, 33])
             .row_height(3)
@@ -754,7 +754,7 @@ mod tests {
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
-            .title(Title::from("events").alignment(Alignment::Center))
+            .title(Title::from("events").alignment(HorizontalAlignment::Center))
             .table(
                 TableBuilder::default()
                     .add_col(Line::from("KeyCode::Down"))

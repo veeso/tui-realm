@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::{Span, Spinner};
 use tuirealm::command::CmdResult;
-use tuirealm::props::{Alignment, Color, TextModifiers};
+use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::style::Stylize;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
@@ -196,7 +196,7 @@ impl Default for SpanBeta {
                 // fallback colors if the spans dont have their own
                 .foreground(Color::White)
                 .background(Color::DarkGray)
-                .alignment(Alignment::Right)
+                .alignment(HorizontalAlignment::Right)
                 .modifiers(TextModifiers::BOLD)
                 .spans([
                     RSpan::raw("Downloading tui-realm-stdlib...")

@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::Checkbox;
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::props::{Alignment, BorderType, Borders, Color, Title};
+use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
@@ -154,7 +154,8 @@ impl Default for CheckboxAlfa {
                 .foreground(Color::LightGreen)
                 .background(Color::Black)
                 .title(
-                    Title::from("Select your ice cream flavours 🍦").alignment(Alignment::Center),
+                    Title::from("Select your ice cream flavours 🍦")
+                        .alignment(HorizontalAlignment::Center),
                 )
                 .rewind(true)
                 .choices([
@@ -211,7 +212,9 @@ impl Default for CheckboxBeta {
                 )
                 .foreground(Color::LightYellow)
                 .background(Color::Black)
-                .title(Title::from("Select your toppings 🧁").alignment(Alignment::Center))
+                .title(
+                    Title::from("Select your toppings 🧁").alignment(HorizontalAlignment::Center),
+                )
                 .rewind(false)
                 .choices([
                     "hazelnuts",

@@ -423,7 +423,7 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
     use tuirealm::{
-        props::Alignment,
+        props::HorizontalAlignment,
         ratatui::text::{Line, Span},
     };
 
@@ -472,7 +472,7 @@ mod tests {
             .scroll(true)
             .step(4)
             .borders(Borders::default())
-            .title(Title::from("events").alignment(Alignment::Center))
+            .title(Title::from("events").alignment(HorizontalAlignment::Center))
             .rewind(true)
             .rows([
                 // Note: this could be improved if ratatui implements "From<[X; _]> for Line"
@@ -592,7 +592,7 @@ mod tests {
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
-            .title(Title::from("events").alignment(Alignment::Center))
+            .title(Title::from("events").alignment(HorizontalAlignment::Center))
             .rows([
                 Line::from("KeyCode::Down OnKey Move cursor down"),
                 Line::from("KeyCode::Up OnKey Move cursor up"),
@@ -615,7 +615,7 @@ mod tests {
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
-            .title(Title::from("events").alignment(Alignment::Center))
+            .title(Title::from("events").alignment(HorizontalAlignment::Center))
             .rows([
                 "KeyCode::Down OnKey Move cursor down",
                 "KeyCode::Up OnKey Move cursor up",

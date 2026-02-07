@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use tui_realm_stdlib::Canvas;
-use tuirealm::props::{Alignment, Borders, Color, Shape, Title};
+use tuirealm::props::{Borders, Color, HorizontalAlignment, Shape, Title};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
@@ -122,7 +122,7 @@ impl Default for MyCanvas {
             component: Canvas::default()
                 .background(Color::Reset)
                 .foreground(Color::LightYellow)
-                .title(Title::from("playing risiko").alignment(Alignment::Center))
+                .title(Title::from("playing risiko").alignment(HorizontalAlignment::Center))
                 .borders(Borders::default().color(Color::LightBlue))
                 .marker(Marker::Dot)
                 .x_bounds((-180.0, 180.0))

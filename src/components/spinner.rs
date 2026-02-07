@@ -3,7 +3,7 @@
 //! A loading spinner. You can provide the "spinning sequence". At each `view()` call, the sequence step is increased
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::props::{Alignment, AttrValue, Attribute, Color, Props, Style};
+use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, Props, Style};
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{
     layout::Rect,
@@ -121,7 +121,7 @@ impl MockComponent for Spinner {
             let text: Text = Text::from(Spans::from(TuiSpan::from(seq_char.to_string())));
             render.render_widget(
                 Paragraph::new(text)
-                    .alignment(Alignment::Left)
+                    .alignment(HorizontalAlignment::Left)
                     .style(Style::default().bg(background).fg(foreground)),
                 area,
             );

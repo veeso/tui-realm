@@ -13,7 +13,8 @@ use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout
 use tuirealm::command::CmdResult;
 use tuirealm::listener::{Poll, PortResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, PropValue, Title,
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, PropPayload, PropValue,
+    Title,
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
@@ -153,7 +154,10 @@ impl Default for SparklineAlfa {
     fn default() -> Self {
         Self {
             component: Sparkline::default()
-                .title(Title::from("bandwidth (Mbps) *data is fake*").alignment(Alignment::Center))
+                .title(
+                    Title::from("bandwidth (Mbps) *data is fake*")
+                        .alignment(HorizontalAlignment::Center),
+                )
                 .borders(
                     Borders::default()
                         .modifiers(BorderType::Double)
