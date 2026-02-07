@@ -13,7 +13,7 @@ use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::widgets::GraphType;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::listener::{ListenerResult, Poll};
+use tuirealm::listener::{Poll, PortResult};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, Style, Title,
 };
@@ -135,7 +135,7 @@ impl Update<Msg> for Model {
 // -- poll
 
 impl Poll<UserEvent> for DataGen<(f64, f64)> {
-    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         Ok(Some(Event::User(UserEvent::DataGenerated(self.generate()))))
     }
 }

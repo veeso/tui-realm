@@ -9,7 +9,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::{Label, ProgressBar};
 use tuirealm::command::CmdResult;
-use tuirealm::listener::{ListenerResult, Poll};
+use tuirealm::listener::{Poll, PortResult};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, PropValue, Title,
 };
@@ -161,7 +161,7 @@ impl Update<Msg> for Model {
 // -- poll
 
 impl Poll<UserEvent> for Loader {
-    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         Ok(Some(Event::User(UserEvent::Loaded(self.load()))))
     }
 }

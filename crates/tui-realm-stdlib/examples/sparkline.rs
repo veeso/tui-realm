@@ -11,7 +11,7 @@ use tui_realm_stdlib::Sparkline;
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 
 use tuirealm::command::CmdResult;
-use tuirealm::listener::{ListenerResult, Poll};
+use tuirealm::listener::{Poll, PortResult};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, PropValue, Title,
 };
@@ -134,7 +134,7 @@ impl Update<Msg> for Model {
 // -- poll
 
 impl Poll<UserEvent> for DataGen<u64> {
-    fn poll(&mut self) -> ListenerResult<Option<Event<UserEvent>>> {
+    fn poll(&mut self) -> PortResult<Option<Event<UserEvent>>> {
         Ok(Some(Event::User(UserEvent::DataGenerated(self.generate()))))
     }
 }
