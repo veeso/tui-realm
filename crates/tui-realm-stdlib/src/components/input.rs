@@ -433,7 +433,7 @@ impl MockComponent for Input {
     fn state(&self) -> State {
         // Validate input
         if self.is_valid() {
-            State::One(StateValue::String(self.states.get_value()))
+            State::Single(StateValue::String(self.states.get_value()))
         } else {
             State::None
         }
@@ -560,38 +560,38 @@ mod tests {
         // Get value
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::from("home")))
+            State::Single(StateValue::String(String::from("home")))
         );
         // Character
         assert_eq!(
             component.perform(Cmd::Type('/')),
-            CmdResult::Changed(State::One(StateValue::String(String::from("home/"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("home/"))))
         );
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::from("home/")))
+            State::Single(StateValue::String(String::from("home/")))
         );
         assert_eq!(component.states.cursor, 5);
         // Verify max length (shouldn't push any character)
         assert_eq!(component.perform(Cmd::Type('a')), CmdResult::None);
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::from("home/")))
+            State::Single(StateValue::String(String::from("home/")))
         );
         assert_eq!(component.states.cursor, 5);
         // Submit
         assert_eq!(
             component.perform(Cmd::Submit),
-            CmdResult::Submit(State::One(StateValue::String(String::from("home/"))))
+            CmdResult::Submit(State::Single(StateValue::String(String::from("home/"))))
         );
         // Backspace
         assert_eq!(
             component.perform(Cmd::Delete),
-            CmdResult::Changed(State::One(StateValue::String(String::from("home"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("home"))))
         );
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::from("home")))
+            State::Single(StateValue::String(String::from("home")))
         );
         assert_eq!(component.states.cursor, 4);
         // Check backspace at 0
@@ -599,25 +599,25 @@ mod tests {
         component.states.cursor = 1;
         assert_eq!(
             component.perform(Cmd::Delete),
-            CmdResult::Changed(State::One(StateValue::String(String::new())))
+            CmdResult::Changed(State::Single(StateValue::String(String::new())))
         );
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::new()))
+            State::Single(StateValue::String(String::new()))
         );
         assert_eq!(component.states.cursor, 0);
         // Another one...
         assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::new()))
+            State::Single(StateValue::String(String::new()))
         );
         assert_eq!(component.states.cursor, 0);
         // See del behaviour here
         assert_eq!(component.perform(Cmd::Cancel), CmdResult::None);
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::new()))
+            State::Single(StateValue::String(String::new()))
         );
         assert_eq!(component.states.cursor, 0);
         // Check del behaviour
@@ -625,18 +625,18 @@ mod tests {
         component.states.cursor = 1;
         assert_eq!(
             component.perform(Cmd::Cancel),
-            CmdResult::Changed(State::One(StateValue::String(String::from("h"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("h"))))
         );
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::from("h")))
+            State::Single(StateValue::String(String::from("h")))
         );
         assert_eq!(component.states.cursor, 1);
         // Another one (should do nothing)
         assert_eq!(component.perform(Cmd::Cancel), CmdResult::None);
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::from("h")))
+            State::Single(StateValue::String(String::from("h")))
         );
         assert_eq!(component.states.cursor, 1);
         // Move cursor right
@@ -652,11 +652,11 @@ mod tests {
         // Put a character here
         assert_eq!(
             component.perform(Cmd::Type('a')),
-            CmdResult::Changed(State::One(StateValue::String(String::from("heallo"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("heallo"))))
         );
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::from("heallo")))
+            State::Single(StateValue::String(String::from("heallo")))
         );
         assert_eq!(component.states.cursor, 3);
         // Move left
@@ -696,7 +696,7 @@ mod tests {
         component.attr(Attribute::Value, AttrValue::String("new-value".to_string()));
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::from("new-value")))
+            State::Single(StateValue::String(String::from("new-value")))
         );
         // Invalidate input type
         component.attr(

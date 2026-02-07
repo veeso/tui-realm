@@ -224,7 +224,7 @@ impl Table {
     pub fn selected_line(mut self, line: usize) -> Self {
         self.attr(
             Attribute::Value,
-            AttrValue::Payload(PropPayload::One(PropValue::Usize(line))),
+            AttrValue::Payload(PropPayload::Single(PropValue::Usize(line))),
         );
         self
     }
@@ -435,14 +435,14 @@ impl MockComponent for Table {
             self.states.list_index = self
                 .props
                 .get(Attribute::Value)
-                .map_or(0, |x| x.unwrap_payload().unwrap_one().unwrap_usize());
+                .map_or(0, |x| x.unwrap_payload().unwrap_single().unwrap_usize());
             self.states.fix_list_index();
         }
     }
 
     fn state(&self) -> State {
         if self.is_scrollable() {
-            State::One(StateValue::Usize(self.states.list_index))
+            State::Single(StateValue::Usize(self.states.list_index))
         } else {
             State::None
         }
@@ -620,51 +620,51 @@ mod tests {
         // Handle inputs
         assert_eq!(
             component.perform(Cmd::Move(Direction::Down)),
-            CmdResult::Changed(State::One(StateValue::Usize(2)))
+            CmdResult::Changed(State::Single(StateValue::Usize(2)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be decremented
         assert_eq!(
             component.perform(Cmd::Move(Direction::Up)),
-            CmdResult::Changed(State::One(StateValue::Usize(1)))
+            CmdResult::Changed(State::Single(StateValue::Usize(1)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 1);
         // Index should be 2
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Down)),
-            CmdResult::Changed(State::One(StateValue::Usize(5)))
+            CmdResult::Changed(State::Single(StateValue::Usize(5)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 5);
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Down)),
-            CmdResult::Changed(State::One(StateValue::Usize(6)))
+            CmdResult::Changed(State::Single(StateValue::Usize(6)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 6);
         // Index should be 0
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Up)),
-            CmdResult::Changed(State::One(StateValue::Usize(2)))
+            CmdResult::Changed(State::Single(StateValue::Usize(2)))
         );
         assert_eq!(component.states.list_index, 2);
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Up)),
-            CmdResult::Changed(State::One(StateValue::Usize(0)))
+            CmdResult::Changed(State::Single(StateValue::Usize(0)))
         );
         assert_eq!(component.states.list_index, 0);
         // End
         assert_eq!(
             component.perform(Cmd::GoTo(Position::End)),
-            CmdResult::Changed(State::One(StateValue::Usize(6)))
+            CmdResult::Changed(State::Single(StateValue::Usize(6)))
         );
         assert_eq!(component.states.list_index, 6);
         // Home
         assert_eq!(
             component.perform(Cmd::GoTo(Position::Begin)),
-            CmdResult::Changed(State::One(StateValue::Usize(0)))
+            CmdResult::Changed(State::Single(StateValue::Usize(0)))
         );
         assert_eq!(component.states.list_index, 0);
         // Update
@@ -681,7 +681,7 @@ mod tests {
         assert_eq!(component.states.list_len, 1);
         assert_eq!(component.states.list_index, 0);
         // Get value
-        assert_eq!(component.state(), State::One(StateValue::Usize(0)));
+        assert_eq!(component.state(), State::Single(StateValue::Usize(0)));
     }
 
     #[test]
@@ -792,7 +792,7 @@ mod tests {
         // Index out of bounds
         component.attr(
             Attribute::Value,
-            AttrValue::Payload(PropPayload::One(PropValue::Usize(50))),
+            AttrValue::Payload(PropPayload::Single(PropValue::Usize(50))),
         );
         assert_eq!(component.states.list_index, 6);
     }

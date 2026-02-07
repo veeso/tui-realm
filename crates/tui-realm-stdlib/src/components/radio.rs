@@ -151,7 +151,7 @@ impl Radio {
         // Set state
         self.attr(
             Attribute::Value,
-            AttrValue::Payload(PropPayload::One(PropValue::Usize(i))),
+            AttrValue::Payload(PropPayload::Single(PropValue::Usize(i))),
         );
         self
     }
@@ -232,7 +232,7 @@ impl MockComponent for Radio {
             }
             Attribute::Value => {
                 self.states
-                    .select(value.unwrap_payload().unwrap_one().unwrap_usize());
+                    .select(value.unwrap_payload().unwrap_single().unwrap_usize());
             }
             attr => {
                 self.props.set(attr, value);
@@ -241,7 +241,7 @@ impl MockComponent for Radio {
     }
 
     fn state(&self) -> State {
-        State::One(StateValue::Usize(self.states.choice))
+        State::Single(StateValue::Usize(self.states.choice))
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
@@ -346,46 +346,46 @@ mod test {
         assert_eq!(component.states.choices.len(), 3);
         component.attr(
             Attribute::Value,
-            AttrValue::Payload(PropPayload::One(PropValue::Usize(2))),
+            AttrValue::Payload(PropPayload::Single(PropValue::Usize(2))),
         );
-        assert_eq!(component.state(), State::One(StateValue::Usize(2)));
+        assert_eq!(component.state(), State::Single(StateValue::Usize(2)));
         // Get value
         component.states.choice = 1;
-        assert_eq!(component.state(), State::One(StateValue::Usize(1)));
+        assert_eq!(component.state(), State::Single(StateValue::Usize(1)));
         // Handle events
         assert_eq!(
             component.perform(Cmd::Move(Direction::Left)),
-            CmdResult::Changed(State::One(StateValue::Usize(0))),
+            CmdResult::Changed(State::Single(StateValue::Usize(0))),
         );
-        assert_eq!(component.state(), State::One(StateValue::Usize(0)));
+        assert_eq!(component.state(), State::Single(StateValue::Usize(0)));
         // Left again
         assert_eq!(
             component.perform(Cmd::Move(Direction::Left)),
-            CmdResult::Changed(State::One(StateValue::Usize(0))),
+            CmdResult::Changed(State::Single(StateValue::Usize(0))),
         );
-        assert_eq!(component.state(), State::One(StateValue::Usize(0)));
+        assert_eq!(component.state(), State::Single(StateValue::Usize(0)));
         // Right
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::Changed(State::One(StateValue::Usize(1))),
+            CmdResult::Changed(State::Single(StateValue::Usize(1))),
         );
-        assert_eq!(component.state(), State::One(StateValue::Usize(1)));
+        assert_eq!(component.state(), State::Single(StateValue::Usize(1)));
         // Right again
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::Changed(State::One(StateValue::Usize(2))),
+            CmdResult::Changed(State::Single(StateValue::Usize(2))),
         );
-        assert_eq!(component.state(), State::One(StateValue::Usize(2)));
+        assert_eq!(component.state(), State::Single(StateValue::Usize(2)));
         // Right again
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::Changed(State::One(StateValue::Usize(2))),
+            CmdResult::Changed(State::Single(StateValue::Usize(2))),
         );
-        assert_eq!(component.state(), State::One(StateValue::Usize(2)));
+        assert_eq!(component.state(), State::Single(StateValue::Usize(2)));
         // Submit
         assert_eq!(
             component.perform(Cmd::Submit),
-            CmdResult::Submit(State::One(StateValue::Usize(2))),
+            CmdResult::Submit(State::Single(StateValue::Usize(2))),
         );
     }
 

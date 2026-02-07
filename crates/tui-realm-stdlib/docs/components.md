@@ -223,7 +223,7 @@ An input text. Provides the possiblity to input a text with the possibility to s
 | `Submit`             | `Submit | None`   | Submit input                                         |
 | `Type(ch)`           | `Changed | None`  | Push character, if allowed by method, into the input |
 
-**State**: the state returned is a `State::One(StateValue::String)` if the input is valid, `State::None` otherwise.
+**State**: the state returned is a `State::Single(StateValue::String)` if the input is valid, `State::None` otherwise.
 
 **Properties**:
 

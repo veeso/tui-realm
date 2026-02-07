@@ -527,7 +527,7 @@ impl Component<Msg, NoUserEvent> for InputColor {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
             }) => {
-                if let CmdResult::Changed(State::One(StateValue::String(color))) =
+                if let CmdResult::Changed(State::Single(StateValue::String(color))) =
                     self.perform(Cmd::Type(*ch))
                 {
                     let color = tuirealm::utils::parser::parse_color(&color).unwrap();
