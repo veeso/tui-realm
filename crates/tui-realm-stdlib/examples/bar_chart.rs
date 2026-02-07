@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::BarChart;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::props::{Alignment, BorderType, Borders, Color, Style, Title};
+use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Style, Title};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
@@ -142,7 +142,7 @@ impl Default for ChartAlfa {
         Self {
             component: BarChart::default()
                 .disabled(false)
-                .title(Title::from("my incomes").alignment(Alignment::Center))
+                .title(Title::from("my incomes").alignment(HorizontalAlignment::Center))
                 .label_style(Style::default().fg(Color::Yellow))
                 .bar_style(Style::default().fg(Color::LightYellow))
                 .bar_gap(6)
@@ -203,7 +203,7 @@ impl Default for ChartBeta {
         Self {
             component: BarChart::default()
                 .disabled(false)
-                .title(Title::from("my incomes").alignment(Alignment::Left))
+                .title(Title::from("my incomes").alignment(HorizontalAlignment::Left))
                 .label_style(Style::default().fg(Color::Yellow))
                 .bar_style(Style::default().fg(Color::LightYellow))
                 .bar_gap(6)

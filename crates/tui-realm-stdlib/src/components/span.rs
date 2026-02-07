@@ -5,8 +5,8 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Color, PropPayload, PropValue, Props, SpanStatic, Style,
-    TextModifiers,
+    AttrValue, Attribute, Color, HorizontalAlignment, PropPayload, PropValue, Props, SpanStatic,
+    Style, TextModifiers,
 };
 use tuirealm::ratatui::{
     layout::Rect,
@@ -44,8 +44,11 @@ impl Span {
         self
     }
 
-    pub fn alignment(mut self, a: Alignment) -> Self {
-        self.attr(Attribute::Alignment, AttrValue::Alignment(a));
+    pub fn alignment(mut self, a: HorizontalAlignment) -> Self {
+        self.attr(
+            Attribute::AlignmentHorizontal,
+            AttrValue::AlignmentHorizontal(a),
+        );
         self
     }
 
@@ -97,10 +100,13 @@ impl MockComponent for Span {
                 _ => Text::default(),
             };
             // Text properties
-            let alignment: Alignment = self
+            let alignment: HorizontalAlignment = self
                 .props
-                .get_or(Attribute::Alignment, AttrValue::Alignment(Alignment::Left))
-                .unwrap_alignment();
+                .get_or(
+                    Attribute::AlignmentHorizontal,
+                    AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+                )
+                .unwrap_alignment_horizontal();
             render.render_widget(
                 Paragraph::new(text)
                     .alignment(alignment)
@@ -141,7 +147,7 @@ mod tests {
             .background(Color::Blue)
             .foreground(Color::Red)
             .modifiers(TextModifiers::BOLD)
-            .alignment(Alignment::Center)
+            .alignment(HorizontalAlignment::Center)
             .spans([
                 SpanStatic::from("Press "),
                 SpanStatic::from("<ESC>").fg(Color::Cyan).bold(),

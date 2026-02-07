@@ -501,7 +501,7 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::props::Alignment;
+    use tuirealm::props::HorizontalAlignment;
 
     #[test]
     fn test_components_input_states() {
@@ -552,7 +552,7 @@ mod tests {
             .inactive(Style::default())
             .input_len(5)
             .input_type(InputType::Text)
-            .title(Title::from("pippo").alignment(Alignment::Center))
+            .title(Title::from("pippo").alignment(HorizontalAlignment::Center))
             .value("home");
         // Verify initial state
         assert_eq!(component.states.cursor, 4);

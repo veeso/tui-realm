@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::Paragraph;
 use tuirealm::command::CmdResult;
-use tuirealm::props::{Alignment, BorderType, Borders, Color, Title};
+use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::ratatui::style::Stylize;
 use tuirealm::ratatui::text::Line;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
@@ -153,7 +153,7 @@ impl Default for ParagraphAlfa {
                 )
                 .foreground(Color::Yellow)
                 .background(Color::Black)
-                .title(Title::from("Lorem ipsum (wrap)").alignment(Alignment::Center))
+                .title(Title::from("Lorem ipsum (wrap)").alignment(HorizontalAlignment::Center))
                 .wrap(true)
                 .text(vec![
                     Line::raw("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
@@ -190,7 +190,7 @@ impl Default for ParagraphBeta {
                 )
                 .foreground(Color::Cyan)
                 .background(Color::Black)
-                .title(Title::from("Lorem ipsum (no wrap)").alignment(Alignment::Center))
+                .title(Title::from("Lorem ipsum (no wrap)").alignment(HorizontalAlignment::Center))
                 .wrap(false)
                 .text(vec![
                     Line::raw("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),

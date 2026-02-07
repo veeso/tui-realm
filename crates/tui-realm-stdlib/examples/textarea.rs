@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::Textarea;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::props::{Alignment, BorderType, Borders, Color, Title};
+use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::ratatui::style::Stylize;
 use tuirealm::ratatui::text::Span;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
@@ -154,7 +154,9 @@ impl Default for TextareaAlfa {
                         .color(Color::Yellow),
                 )
                 .foreground(Color::Yellow)
-                .title(Title::from("Night Moves (Bob Seger)").alignment(Alignment::Center))
+                .title(
+                    Title::from("Night Moves (Bob Seger)").alignment(HorizontalAlignment::Center),
+                )
                 .step(4)
                 .highlighted_str("🎵")
                 .text_rows([
@@ -223,7 +225,7 @@ impl Default for TextareaBeta {
                         .color(Color::LightBlue),
                 )
                 .foreground(Color::LightBlue)
-                .title(Title::from("Roxanne (The Police)").alignment(Alignment::Center))
+                .title(Title::from("Roxanne (The Police)").alignment(HorizontalAlignment::Center))
                 .step(4)
                 .highlighted_str("🎵")
                 .text_rows([

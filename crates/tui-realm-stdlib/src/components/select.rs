@@ -420,7 +420,7 @@ mod test {
 
     use pretty_assertions::assert_eq;
 
-    use tuirealm::props::{Alignment, PropPayload, PropValue};
+    use tuirealm::props::{HorizontalAlignment, PropPayload, PropValue};
 
     #[test]
     fn test_components_select_states() {
@@ -509,7 +509,9 @@ mod test {
             .borders(Borders::default())
             .highlighted_color(Color::Red)
             .highlighted_str(">>")
-            .title(Title::from("C'est oui ou bien c'est non?").alignment(Alignment::Center))
+            .title(
+                Title::from("C'est oui ou bien c'est non?").alignment(HorizontalAlignment::Center),
+            )
             .choices(["Oui!", "Non", "Peut-être"])
             .value(1)
             .rewind(false);

@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::Radio;
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::props::{Alignment, BorderType, Borders, Color, Title};
+use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
@@ -152,7 +152,10 @@ impl Default for RadioAlfa {
                         .color(Color::LightGreen),
                 )
                 .foreground(Color::LightGreen)
-                .title(Title::from("Select your ice cream flavour 🍦").alignment(Alignment::Center))
+                .title(
+                    Title::from("Select your ice cream flavour 🍦")
+                        .alignment(HorizontalAlignment::Center),
+                )
                 .rewind(true)
                 .choices([
                     "vanilla",
@@ -203,7 +206,7 @@ impl Default for RadioBeta {
                         .color(Color::LightYellow),
                 )
                 .foreground(Color::LightYellow)
-                .title(Title::from("Select your topping 🧁").alignment(Alignment::Center))
+                .title(Title::from("Select your topping 🧁").alignment(HorizontalAlignment::Center))
                 .rewind(false)
                 .choices([
                     "hazelnuts",

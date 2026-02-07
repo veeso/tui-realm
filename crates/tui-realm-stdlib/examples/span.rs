@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use tui_realm_stdlib::Span;
 use tuirealm::command::CmdResult;
-use tuirealm::props::{Alignment, Color, TextModifiers};
+use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::style::Stylize;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
@@ -169,7 +169,7 @@ impl Default for SpanBeta {
             component: Span::default()
                 .foreground(Color::Black)
                 .background(Color::White)
-                .alignment(Alignment::Right)
+                .alignment(HorizontalAlignment::Right)
                 .modifiers(TextModifiers::BOLD)
                 .spans([
                     RSpan::raw("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green).bg(Color::Red),

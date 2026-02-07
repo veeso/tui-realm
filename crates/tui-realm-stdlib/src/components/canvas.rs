@@ -250,7 +250,7 @@ mod test {
 
     use pretty_assertions::assert_eq;
     use tuirealm::{
-        props::Alignment,
+        props::HorizontalAlignment,
         ratatui::widgets::canvas::{Line, Map, MapResolution, Rectangle},
     };
 
@@ -258,7 +258,7 @@ mod test {
     fn test_component_canvas_with_shapes() {
         let component: Canvas = Canvas::default()
             .background(Color::Black)
-            .title(Title::from("playing risiko").alignment(Alignment::Center))
+            .title(Title::from("playing risiko").alignment(HorizontalAlignment::Center))
             .borders(Borders::default())
             .marker(Marker::Dot)
             .x_bounds((-180.0, 180.0))

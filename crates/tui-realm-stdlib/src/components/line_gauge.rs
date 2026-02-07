@@ -196,7 +196,7 @@ mod test {
 
     use pretty_assertions::assert_eq;
     use tuirealm::{
-        props::{Alignment, BorderType},
+        props::{BorderType, HorizontalAlignment},
         ratatui::symbols::line::{DOUBLE_HORIZONTAL, HORIZONTAL},
     };
 
@@ -206,7 +206,7 @@ mod test {
             .background(Color::Red)
             .foreground(Color::White)
             .progress(0.60)
-            .title(Title::from("Downloading file...").alignment(Alignment::Center))
+            .title(Title::from("Downloading file...").alignment(HorizontalAlignment::Center))
             .label("60% - ETA 00:20")
             .line_style(DOUBLE_HORIZONTAL, HORIZONTAL)
             .borders(Borders::default());
@@ -221,7 +221,7 @@ mod test {
             .background(Color::Red)
             .foreground(Color::White)
             .progress(6.0)
-            .title(Title::from("Downloading file...").alignment(Alignment::Center))
+            .title(Title::from("Downloading file...").alignment(HorizontalAlignment::Center))
             .label("60% - ETA 00:20")
             .borders(Borders::default());
     }
@@ -236,7 +236,7 @@ mod test {
             )
             .foreground(Color::Blue)
             .label("0%")
-            .title(Title::from("Loading...").alignment(Alignment::Center))
+            .title(Title::from("Loading...").alignment(HorizontalAlignment::Center))
             .line_style(
                 Span::styled(HORIZONTAL, Style::new().fg(Color::Red)),
                 Span::styled(HORIZONTAL, Style::new().fg(Color::Gray)),

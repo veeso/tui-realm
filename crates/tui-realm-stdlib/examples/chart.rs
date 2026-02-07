@@ -15,7 +15,8 @@ use tuirealm::ratatui::widgets::GraphType;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::listener::{Poll, PortResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, Style, Title,
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, PropPayload, Style,
+    Title,
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
@@ -155,7 +156,7 @@ impl Default for ChartAlfa {
         Self {
             component: Chart::default()
                 .disabled(false)
-                .title(Title::from("Temperatures in room").alignment(Alignment::Center))
+                .title(Title::from("Temperatures in room").alignment(HorizontalAlignment::Center))
                 .borders(
                     Borders::default()
                         .modifiers(BorderType::Double)

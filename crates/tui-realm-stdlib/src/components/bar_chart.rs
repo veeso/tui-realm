@@ -335,7 +335,7 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::props::Alignment;
+    use tuirealm::props::HorizontalAlignment;
 
     #[test]
     fn test_components_bar_chart_states() {
@@ -364,7 +364,7 @@ mod test {
     fn test_components_bar_chart() {
         let mut component: BarChart = BarChart::default()
             .disabled(false)
-            .title(Title::from("my incomes").alignment(Alignment::Center))
+            .title(Title::from("my incomes").alignment(HorizontalAlignment::Center))
             .label_style(Style::default().fg(Color::Yellow))
             .bar_style(Style::default().fg(Color::LightYellow))
             .bar_gap(2)

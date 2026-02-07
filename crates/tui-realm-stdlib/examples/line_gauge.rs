@@ -13,8 +13,8 @@ use tui_realm_stdlib::LineGauge;
 use tuirealm::command::CmdResult;
 use tuirealm::listener::{Poll, PortResult};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, PropValue, Style,
-    Title,
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, PropPayload, PropValue,
+    Style, Title,
 };
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
@@ -180,7 +180,7 @@ impl Default for GaugeAlfa {
                 )
                 .foreground(Color::Green)
                 .label("0%")
-                .title(Title::from("Loading...").alignment(Alignment::Center))
+                .title(Title::from("Loading...").alignment(HorizontalAlignment::Center))
                 .line_style(THICK_HORIZONTAL, HORIZONTAL)
                 .progress(0.0),
         }
@@ -224,7 +224,7 @@ impl Default for GaugeBeta {
                 )
                 .foreground(Color::Blue)
                 .label("0%")
-                .title(Title::from("Loading...").alignment(Alignment::Center))
+                .title(Title::from("Loading...").alignment(HorizontalAlignment::Center))
                 .line_style(
                     Span::styled(HORIZONTAL, Style::new().fg(Color::Red)),
                     Span::styled(HORIZONTAL, Style::new().fg(Color::Gray)),

@@ -114,14 +114,14 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::props::Alignment;
+    use tuirealm::props::HorizontalAlignment;
 
     #[test]
     fn test_components_paragraph() {
         let component = Container::default()
             .background(Color::Blue)
             .foreground(Color::Red)
-            .title(Title::from("title").alignment(Alignment::Center));
+            .title(Title::from("title").alignment(HorizontalAlignment::Center));
         // Get value
         assert_eq!(component.state(), State::None);
     }

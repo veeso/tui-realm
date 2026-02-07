@@ -147,14 +147,14 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::props::Alignment;
+    use tuirealm::props::HorizontalAlignment;
 
     #[test]
     fn test_components_sparkline() {
         let component = Sparkline::default()
             .background(Color::White)
             .foreground(Color::Black)
-            .title(Title::from("bandwidth").alignment(Alignment::Center))
+            .title(Title::from("bandwidth").alignment(HorizontalAlignment::Center))
             .borders(Borders::default())
             .max_entries(8)
             .data(&[
