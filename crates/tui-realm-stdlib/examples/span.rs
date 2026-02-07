@@ -169,7 +169,7 @@ impl Default for SpanBeta {
             component: Span::default()
                 .foreground(Color::Black)
                 .background(Color::White)
-                .alignment(HorizontalAlignment::Right)
+                .alignment_horizontal(HorizontalAlignment::Right)
                 .modifiers(TextModifiers::BOLD)
                 .spans([
                     RSpan::raw("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green).bg(Color::Red),

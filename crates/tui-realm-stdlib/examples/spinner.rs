@@ -196,7 +196,7 @@ impl Default for SpanBeta {
                 // fallback colors if the spans dont have their own
                 .foreground(Color::White)
                 .background(Color::DarkGray)
-                .alignment(HorizontalAlignment::Right)
+                .alignment_horizontal(HorizontalAlignment::Right)
                 .modifiers(TextModifiers::BOLD)
                 .spans([
                     RSpan::raw("Downloading tui-realm-stdlib...")

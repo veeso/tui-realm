@@ -41,7 +41,7 @@ impl Label {
         self
     }
 
-    pub fn alignment(mut self, alignment: HorizontalAlignment) -> Self {
+    pub fn alignment_horizontal(mut self, alignment: HorizontalAlignment) -> Self {
         self.attr(
             Attribute::AlignmentHorizontal,
             AttrValue::AlignmentHorizontal(alignment),
@@ -123,7 +123,7 @@ mod tests {
     #[test]
     fn test_components_label() {
         let component: Label = Label::default()
-            .alignment(HorizontalAlignment::Center)
+            .alignment_horizontal(HorizontalAlignment::Center)
             .background(Color::Red)
             .foreground(Color::Yellow)
             .modifiers(TextModifiers::BOLD)

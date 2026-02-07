@@ -51,7 +51,7 @@ impl Paragraph {
         self
     }
 
-    pub fn alignment(mut self, a: HorizontalAlignment) -> Self {
+    pub fn alignment_horizontal(mut self, a: HorizontalAlignment) -> Self {
         self.attr(
             Attribute::AlignmentHorizontal,
             AttrValue::AlignmentHorizontal(a),
@@ -178,7 +178,7 @@ mod tests {
             .background(Color::Blue)
             .foreground(Color::Red)
             .modifiers(TextModifiers::BOLD)
-            .alignment(HorizontalAlignment::Center)
+            .alignment_horizontal(HorizontalAlignment::Center)
             .text(vec![
                 Line::from("Press "),
                 Line::from("<ESC>").fg(Color::Cyan).bold(),
