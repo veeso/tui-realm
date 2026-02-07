@@ -136,7 +136,7 @@ impl Default for LabelAlfa {
     fn default() -> Self {
         Self {
             component: Label::default()
-                .alignment(HorizontalAlignment::Center)
+                .alignment_horizontal(HorizontalAlignment::Center)
                 .foreground(Color::Green)
                 .modifiers(TextModifiers::BOLD)
                 .text("This is a label"),
@@ -163,7 +163,7 @@ impl Default for LabelBeta {
     fn default() -> Self {
         Self {
             component: Label::default()
-                .alignment(HorizontalAlignment::Right)
+                .alignment_horizontal(HorizontalAlignment::Right)
                 .foreground(Color::White)
                 .background(Color::Blue)
                 .modifiers(TextModifiers::ITALIC)
