@@ -15,7 +15,7 @@ use tuirealm::listener::{Poll, PortResult};
 use tuirealm::props::{
     Alignment, AttrValue, Attribute, BorderType, Borders, Color, PropPayload, PropValue, Title,
 };
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, Update,
     application::PollStrategy,
@@ -74,7 +74,7 @@ impl Default for Model {
 }
 
 impl Model {
-    fn view(&mut self, terminal: &mut TerminalBridge<CrosstermTerminalAdapter>) {
+    fn view(&mut self, terminal: &mut CrosstermTerminalAdapter) {
         let _ = terminal.raw_mut().draw(|f| {
             // Prepare chunks
             let chunks = Layout::default()
@@ -89,7 +89,7 @@ impl Model {
 
 fn main() {
     let mut model = Model::default();
-    let mut terminal = TerminalBridge::init_crossterm().expect("Cannot create terminal bridge");
+    let mut terminal = CrosstermTerminalAdapter::new().expect("Cannot create terminal bridge");
     let _ = terminal.enable_raw_mode();
     let _ = terminal.enter_alternate_screen();
 
