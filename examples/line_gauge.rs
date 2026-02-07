@@ -192,7 +192,7 @@ impl Component<Msg, UserEvent> for GaugeAlfa {
                 let label = format!("{:02}%", (prog * 100.0) as usize);
                 self.attr(
                     Attribute::Value,
-                    AttrValue::Payload(PropPayload::One(PropValue::F64(*prog))),
+                    AttrValue::Payload(PropPayload::Single(PropValue::F64(*prog))),
                 );
                 self.attr(Attribute::Text, AttrValue::String(label));
                 CmdResult::None
@@ -239,7 +239,7 @@ impl Component<Msg, UserEvent> for GaugeBeta {
                 let label = format!("{:02}%", (prog * 100.0) as usize);
                 self.attr(
                     Attribute::Value,
-                    AttrValue::Payload(PropPayload::One(PropValue::F64(*prog))),
+                    AttrValue::Payload(PropPayload::Single(PropValue::F64(*prog))),
                 );
                 self.attr(Attribute::Text, AttrValue::String(label));
                 CmdResult::None

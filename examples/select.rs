@@ -66,11 +66,11 @@ impl Model {
     fn view(&mut self, terminal: &mut TerminalBridge<CrosstermTerminalAdapter>) {
         // Calc len
         let select_alfa_len = match self.app.state(&Id::SelectAlfa) {
-            Ok(State::One(_)) => 3,
+            Ok(State::Single(_)) => 3,
             _ => 8,
         };
         let select_beta_len = match self.app.state(&Id::SelectBeta) {
-            Ok(State::One(_)) => 3,
+            Ok(State::Single(_)) => 3,
             _ => 8,
         };
         let _ = terminal.raw_mut().draw(|f| {

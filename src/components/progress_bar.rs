@@ -56,7 +56,7 @@ impl ProgressBar {
         Self::assert_progress(p);
         self.attr(
             Attribute::Value,
-            AttrValue::Payload(PropPayload::One(PropValue::F64(p))),
+            AttrValue::Payload(PropPayload::Single(PropValue::F64(p))),
         );
         self
     }
@@ -106,10 +106,10 @@ impl MockComponent for ProgressBar {
                 .props
                 .get_or(
                     Attribute::Value,
-                    AttrValue::Payload(PropPayload::One(PropValue::F64(0.0))),
+                    AttrValue::Payload(PropPayload::Single(PropValue::F64(0.0))),
                 )
                 .unwrap_payload()
-                .unwrap_one()
+                .unwrap_single()
                 .unwrap_f64();
 
             let normal_style = Style::default()
@@ -139,7 +139,7 @@ impl MockComponent for ProgressBar {
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
         if let Attribute::Value = attr {
             if let AttrValue::Payload(p) = value.clone() {
-                Self::assert_progress(p.unwrap_one().unwrap_f64());
+                Self::assert_progress(p.unwrap_single().unwrap_f64());
             }
         }
         self.props.set(attr, value);

@@ -179,7 +179,7 @@ impl Select {
         // Set state
         self.attr(
             Attribute::Value,
-            AttrValue::Payload(PropPayload::One(PropValue::Usize(i))),
+            AttrValue::Payload(PropPayload::Single(PropValue::Usize(i))),
         );
         self
     }
@@ -350,7 +350,7 @@ impl MockComponent for Select {
             }
             Attribute::Value => {
                 self.states
-                    .select(value.unwrap_payload().unwrap_one().unwrap_usize());
+                    .select(value.unwrap_payload().unwrap_single().unwrap_usize());
             }
             Attribute::Focus if self.states.is_tab_open() => {
                 if let AttrValue::Flag(false) = value {
@@ -368,7 +368,7 @@ impl MockComponent for Select {
         if self.states.is_tab_open() {
             State::None
         } else {
-            State::One(StateValue::Usize(self.states.selected))
+            State::Single(StateValue::Usize(self.states.selected))
         }
     }
 
@@ -379,7 +379,7 @@ impl MockComponent for Select {
                 self.states.next_choice(self.rewindable());
                 // Return CmdResult On Change or None if tab is closed
                 if self.states.is_tab_open() {
-                    CmdResult::Changed(State::One(StateValue::Usize(self.states.selected)))
+                    CmdResult::Changed(State::Single(StateValue::Usize(self.states.selected)))
                 } else {
                     CmdResult::None
                 }
@@ -389,7 +389,7 @@ impl MockComponent for Select {
                 self.states.prev_choice(self.rewindable());
                 // Return CmdResult On Change or None if tab is closed
                 if self.states.is_tab_open() {
-                    CmdResult::Changed(State::One(StateValue::Usize(self.states.selected)))
+                    CmdResult::Changed(State::Single(StateValue::Usize(self.states.selected)))
                 } else {
                     CmdResult::None
                 }
@@ -521,45 +521,45 @@ mod test {
         // Update
         component.attr(
             Attribute::Value,
-            AttrValue::Payload(PropPayload::One(PropValue::Usize(2))),
+            AttrValue::Payload(PropPayload::Single(PropValue::Usize(2))),
         );
         // Get value
-        assert_eq!(component.state(), State::One(StateValue::Usize(2)));
+        assert_eq!(component.state(), State::Single(StateValue::Usize(2)));
         // Open tab
         component.states.open_tab();
         // Events
         // Move cursor
         assert_eq!(
             component.perform(Cmd::Move(Direction::Up)),
-            CmdResult::Changed(State::One(StateValue::Usize(1))),
+            CmdResult::Changed(State::Single(StateValue::Usize(1))),
         );
         assert_eq!(
             component.perform(Cmd::Move(Direction::Up)),
-            CmdResult::Changed(State::One(StateValue::Usize(0))),
+            CmdResult::Changed(State::Single(StateValue::Usize(0))),
         );
         // Upper boundary
         assert_eq!(
             component.perform(Cmd::Move(Direction::Up)),
-            CmdResult::Changed(State::One(StateValue::Usize(0))),
+            CmdResult::Changed(State::Single(StateValue::Usize(0))),
         );
         // Move down
         assert_eq!(
             component.perform(Cmd::Move(Direction::Down)),
-            CmdResult::Changed(State::One(StateValue::Usize(1))),
+            CmdResult::Changed(State::Single(StateValue::Usize(1))),
         );
         assert_eq!(
             component.perform(Cmd::Move(Direction::Down)),
-            CmdResult::Changed(State::One(StateValue::Usize(2))),
+            CmdResult::Changed(State::Single(StateValue::Usize(2))),
         );
         // Lower boundary
         assert_eq!(
             component.perform(Cmd::Move(Direction::Down)),
-            CmdResult::Changed(State::One(StateValue::Usize(2))),
+            CmdResult::Changed(State::Single(StateValue::Usize(2))),
         );
         // Press enter
         assert_eq!(
             component.perform(Cmd::Submit),
-            CmdResult::Submit(State::One(StateValue::Usize(2))),
+            CmdResult::Submit(State::Single(StateValue::Usize(2))),
         );
         // Tab should be closed
         assert_eq!(component.states.is_tab_open(), false);
@@ -569,7 +569,7 @@ mod test {
         // Move arrows
         assert_eq!(
             component.perform(Cmd::Submit),
-            CmdResult::Submit(State::One(StateValue::Usize(2))),
+            CmdResult::Submit(State::Single(StateValue::Usize(2))),
         );
         assert_eq!(component.states.is_tab_open(), false);
         assert_eq!(
