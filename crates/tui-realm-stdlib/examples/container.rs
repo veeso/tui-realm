@@ -8,7 +8,7 @@ use tui_realm_stdlib::{Container, Table};
 use tuirealm::command::CmdResult;
 use tuirealm::props::{Alignment, BorderType, Borders, Color, Layout, TableBuilder, Title};
 use tuirealm::ratatui::text::Line;
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
     application::PollStrategy,
@@ -56,7 +56,7 @@ impl Default for Model {
 }
 
 impl Model {
-    fn view(&mut self, terminal: &mut TerminalBridge<CrosstermTerminalAdapter>) {
+    fn view(&mut self, terminal: &mut CrosstermTerminalAdapter) {
         let _ = terminal.raw_mut().draw(|f| {
             // Prepare chunks
             let chunks = TuiLayout::default()
@@ -71,7 +71,7 @@ impl Model {
 
 fn main() {
     let mut model = Model::default();
-    let mut terminal = TerminalBridge::init_crossterm().expect("Cannot create terminal bridge");
+    let mut terminal = CrosstermTerminalAdapter::new().expect("Cannot create terminal bridge");
     let _ = terminal.enable_raw_mode();
     let _ = terminal.enter_alternate_screen();
     // Now we use the Model struct to keep track of some states
