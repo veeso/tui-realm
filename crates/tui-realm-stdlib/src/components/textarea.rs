@@ -9,6 +9,7 @@ use tuirealm::ratatui::{
 };
 use tuirealm::{Frame, MockComponent, State};
 
+use crate::prop_ext::CommonProps;
 use crate::utils::borrow_clone_line;
 
 // -- States
@@ -109,51 +110,69 @@ impl TextareaStates {
 #[derive(Default)]
 #[must_use]
 pub struct Textarea {
+    common: CommonProps,
     props: Props,
     pub states: TextareaStates,
 }
 
 impl Textarea {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
-    pub fn inactive(mut self, s: Style) -> Self {
-        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
-        self
-    }
-
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
         self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set a custom style for the border when the component is unfocused.
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Add a border to the component.
     pub fn borders(mut self, b: Borders) -> Self {
         self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
+    /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
+    /// Set the scroll stepping to use on `Cmd::Scroll(Direction::Up)` or `Cmd::Scroll(Direction::Down)`.
     pub fn step(mut self, step: usize) -> Self {
         self.attr(Attribute::ScrollStep, AttrValue::Length(step));
         self
     }
 
+    /// Set the Symbol and Style for the indicator of the current line.
     pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
         self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
 
+    /// Set the Text content.
     pub fn text_rows(mut self, s: impl IntoIterator<Item = SpanStatic>) -> Self {
         let rows: Vec<PropValue> = s.into_iter().map(PropValue::TextSpan).collect();
         self.states.set_list_len(rows.len());
@@ -164,102 +183,71 @@ impl Textarea {
 
 impl MockComponent for Textarea {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        // Make a Span
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // Make text items
-            // Highlighted symbol
-            let hg_str = self
-                .props
-                .get_ref(Attribute::HighlightedStr)
-                .and_then(|x| x.as_textline());
-            // NOTE: wrap width is width of area minus 2 (block) minus width of highlighting string
-            let wrap_width = (area.width as usize) - hg_str.as_ref().map_or(0, |x| x.width()) - 2;
-            // TODO: refactor to use "Text"?
-            let lines: Vec<ListItem> = match self
-                .props
-                .get_ref(Attribute::Text)
-                .and_then(|x| x.as_payload())
-            {
-                Some(PropPayload::Vec(spans)) => spans
-                    .iter()
-                    // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                    .filter_map(|x| x.as_textspan())
-                    .map(|x| crate::utils::wrap_spans(&[x], wrap_width))
-                    .map(ListItem::new)
-                    .collect(),
-                _ => Vec::new(),
-            };
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|v| v.as_title());
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let inactive_style = self
-                .props
-                .get(Attribute::FocusStyle)
-                .map(|x| x.unwrap_style());
-            let mut state: ListState = ListState::default();
-            state.select(Some(self.states.list_index));
-            // Make component
-
-            let mut list = List::new(lines)
-                .block(crate::utils::get_block(
-                    borders,
-                    title,
-                    focus,
-                    inactive_style,
-                ))
-                .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
-                .style(
-                    Style::default()
-                        .fg(foreground)
-                        .bg(background)
-                        .add_modifier(modifiers),
-                );
-
-            if let Some(hg_str) = hg_str {
-                list = list.highlight_symbol(borrow_clone_line(hg_str));
-            }
-            render.render_stateful_widget(list, area, &mut state);
+        if !self.common.display {
+            return;
         }
+
+        // Highlighted symbol
+        let hg_str = self
+            .props
+            .get_ref(Attribute::HighlightedStr)
+            .and_then(|x| x.as_textline());
+        // NOTE: wrap width is width of area minus 2 (block) minus width of highlighting string
+        let wrap_width = (area.width as usize) - hg_str.as_ref().map_or(0, |x| x.width()) - 2;
+        // TODO: refactor to use "Text"?
+        let lines: Vec<ListItem> = match self
+            .props
+            .get_ref(Attribute::Text)
+            .and_then(|x| x.as_payload())
+        {
+            Some(PropPayload::Vec(spans)) => spans
+                .iter()
+                // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
+                .filter_map(|x| x.as_textspan())
+                .map(|x| crate::utils::wrap_spans(&[x], wrap_width))
+                .map(ListItem::new)
+                .collect(),
+            _ => Vec::new(),
+        };
+
+        let mut state: ListState = ListState::default();
+        state.select(Some(self.states.list_index));
+        // Make component
+
+        let mut list = List::new(lines)
+            .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
+            .style(self.common.style);
+
+        if let Some(block) = self.common.get_block() {
+            list = list.block(block);
+        }
+        if let Some(hg_str) = hg_str {
+            list = list.highlight_symbol(borrow_clone_line(hg_str));
+        }
+
+        render.render_stateful_widget(list, area, &mut state);
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value);
-        // Update list len and fix index
-        self.states.set_list_len(
-            match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
-                Some(PropPayload::Vec(spans)) => spans.len(),
-                _ => 0,
-            },
-        );
-        self.states.fix_list_index();
+        if let Some(value) = self.common.set(attr, value) {
+            self.props.set(attr, value);
+            // Update list len and fix index
+            self.states.set_list_len(
+                match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
+                    Some(PropPayload::Vec(spans)) => spans.len(),
+                    _ => 0,
+                },
+            );
+            self.states.fix_list_index();
+        }
     }
 
     fn state(&self) -> State {
