@@ -15,6 +15,8 @@ use tuirealm::ratatui::{
 };
 use tuirealm::{Frame, MockComponent, State};
 
+use crate::prop_ext::CommonProps;
+
 // -- Props
 use super::props::{
     CANVAS_MARKER, CANVAS_MARKER_BAR, CANVAS_MARKER_BLOCK, CANVAS_MARKER_BRAILLE,
@@ -30,6 +32,7 @@ use super::props::{
 #[derive(Default)]
 #[must_use]
 pub struct Canvas {
+    common: CommonProps,
     props: Props,
 }
 
@@ -43,21 +46,39 @@ impl Canvas {
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set a custom style for the border when the component is unfocused.
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Add a border to the component.
     pub fn borders(mut self, b: Borders) -> Self {
         self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
+    /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
+    /// Set the initial data to display on the Canvas.
     pub fn data(mut self, data: impl IntoIterator<Item = Shape>) -> Self {
         self.attr(
             Attribute::Shape,
@@ -167,71 +188,64 @@ impl Canvas {
 
 impl MockComponent for Canvas {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // let foreground = self
-            //     .props
-            //     .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-            //     .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|x| x.as_title());
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let block = crate::utils::get_block(borders, title, focus, None);
-            // Get properties
-            let x_bounds: [f64; 2] = self
-                .props
-                .get(Attribute::Custom(CANVAS_X_BOUNDS))
-                .map(|x| x.unwrap_payload().unwrap_pair())
-                .map_or([0.0, 0.0], |(a, b)| [a.unwrap_f64(), b.unwrap_f64()]);
-            let y_bounds: [f64; 2] = self
-                .props
-                .get(Attribute::Custom(CANVAS_Y_BOUNDS))
-                .map(|x| x.unwrap_payload().unwrap_pair())
-                .map_or([0.0, 0.0], |(a, b)| [a.unwrap_f64(), b.unwrap_f64()]);
-            // Get shapes
-            let shapes: Vec<Shape> = self
-                .props
-                .get(Attribute::Shape)
-                .map(|x| {
-                    x.unwrap_payload()
-                        .unwrap_vec()
-                        .iter()
-                        .cloned()
-                        .map(|x| x.unwrap_shape())
-                        .collect()
-                })
-                .unwrap_or_default();
-            // Make canvas
-            let canvas = TuiCanvas::default()
-                .background_color(background)
-                .block(block)
-                .marker(self.prop_to_marker())
-                .x_bounds(x_bounds)
-                .y_bounds(y_bounds)
-                .paint(|ctx| shapes.iter().for_each(|x| Self::draw_shape(ctx, x)));
-            // Render
-            render.render_widget(canvas, area);
+        if !self.common.display {
+            return;
         }
+
+        // Get properties
+        let x_bounds: [f64; 2] = self
+            .props
+            .get(Attribute::Custom(CANVAS_X_BOUNDS))
+            .map(|x| x.unwrap_payload().unwrap_pair())
+            .map_or([0.0, 0.0], |(a, b)| [a.unwrap_f64(), b.unwrap_f64()]);
+        let y_bounds: [f64; 2] = self
+            .props
+            .get(Attribute::Custom(CANVAS_Y_BOUNDS))
+            .map(|x| x.unwrap_payload().unwrap_pair())
+            .map_or([0.0, 0.0], |(a, b)| [a.unwrap_f64(), b.unwrap_f64()]);
+        // Get shapes
+        let shapes: Vec<Shape> = self
+            .props
+            .get(Attribute::Shape)
+            .map(|x| {
+                x.unwrap_payload()
+                    .unwrap_vec()
+                    .iter()
+                    .cloned()
+                    .map(|x| x.unwrap_shape())
+                    .collect()
+            })
+            .unwrap_or_default();
+        // Make canvas
+        let mut widget = TuiCanvas::default()
+            .marker(self.prop_to_marker())
+            .x_bounds(x_bounds)
+            .y_bounds(y_bounds)
+            .paint(|ctx| shapes.iter().for_each(|x| Self::draw_shape(ctx, x)));
+
+        if let Some(block) = self.common.get_block() {
+            widget = widget.block(block);
+        }
+        if let Some(color) = self.common.style.bg {
+            widget = widget.background_color(color);
+        }
+
+        // Render
+        render.render_widget(widget, area);
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value);
+        if let Some(value) = self.common.set(attr, value) {
+            self.props.set(attr, value);
+        }
     }
 
     fn state(&self) -> State {
