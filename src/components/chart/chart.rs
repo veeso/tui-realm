@@ -18,6 +18,7 @@ use tuirealm::{Frame, MockComponent, State};
 
 // -- Props
 use super::dataset::ChartDataset;
+use crate::prop_ext::CommonProps;
 use crate::props::{
     CHART_X_BOUNDS, CHART_X_LABELS, CHART_X_STYLE, CHART_X_TITLE, CHART_Y_BOUNDS, CHART_Y_LABELS,
     CHART_Y_STYLE, CHART_Y_TITLE,
@@ -88,31 +89,45 @@ impl ChartStates {
 #[derive(Default)]
 #[must_use]
 pub struct Chart {
+    common: CommonProps,
     props: Props,
     pub states: ChartStates,
 }
 
 impl Chart {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.props.set(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.props.set(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Add a border to the component.
     pub fn borders(mut self, b: Borders) -> Self {
         self.props.set(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
+    /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
+    /// Set whether this component should appear "disabled" (or also known as "locked").
     pub fn disabled(mut self, disabled: bool) -> Self {
         self.attr(Attribute::Disabled, AttrValue::Flag(disabled));
         self
@@ -130,6 +145,7 @@ impl Chart {
         self
     }
 
+    /// Set the bounds for the X-axis.
     pub fn x_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.props.set(
             Attribute::Custom(CHART_X_BOUNDS),
@@ -141,6 +157,7 @@ impl Chart {
         self
     }
 
+    /// Set the bounds for the Y-axis.
     pub fn y_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.props.set(
             Attribute::Custom(CHART_Y_BOUNDS),
@@ -152,6 +169,7 @@ impl Chart {
         self
     }
 
+    /// Set labels for the X-Axis, see [`Axis::labels`].
     pub fn x_labels(mut self, labels: &[&str]) -> Self {
         self.attr(
             Attribute::Custom(CHART_X_LABELS),
@@ -165,6 +183,7 @@ impl Chart {
         self
     }
 
+    /// Set labels for the Y-Axis, see [`Axis::labels`].
     pub fn y_labels(mut self, labels: &[&str]) -> Self {
         self.attr(
             Attribute::Custom(CHART_Y_LABELS),
@@ -178,11 +197,13 @@ impl Chart {
         self
     }
 
+    /// Set a specific style for the X-Axis.
     pub fn x_style(mut self, s: Style) -> Self {
         self.attr(Attribute::Custom(CHART_X_STYLE), AttrValue::Style(s));
         self
     }
 
+    /// Set a specific style for the Y-Axis.
     pub fn y_style(mut self, s: Style) -> Self {
         self.attr(Attribute::Custom(CHART_Y_STYLE), AttrValue::Style(s));
         self
@@ -228,7 +249,7 @@ impl Chart {
     }
 
     /// Get data to be displayed, starting from provided index at `start`
-    fn get_tui_data(&mut self, start: usize) -> Vec<TuiDataset<'_>> {
+    fn get_tui_data(&self, start: usize) -> Vec<TuiDataset<'_>> {
         self.states
             .data
             .iter()
@@ -262,113 +283,97 @@ impl Chart {
 
 impl MockComponent for Chart {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|x| x.as_title())
-                // this needs to be cloned as "self" is later mutably borrowed, while this immutably borrows "self"
-                .cloned();
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let inactive_style = self
-                .props
-                .get(Attribute::FocusStyle)
-                .map(|x| x.unwrap_style());
-            let normal_style = Style::default().fg(foreground).bg(background);
-            let active: bool = if self.is_disabled() { true } else { focus };
-            let div = crate::utils::get_block(borders, title.as_ref(), active, inactive_style);
-            // Create widget
-            // -- x axis
-            let mut x_axis: Axis = Axis::default();
-            if let Some((PropValue::F64(floor), PropValue::F64(ceil))) = self
-                .props
-                .get(Attribute::Custom(CHART_X_BOUNDS))
-                .map(|x| x.unwrap_payload().unwrap_pair())
-            {
-                let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
-                x_axis = x_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);
-            }
-            if let Some(PropPayload::Vec(labels)) = self
-                .props
-                .get(Attribute::Custom(CHART_X_LABELS))
-                .map(|x| x.unwrap_payload())
-            {
-                x_axis = x_axis.labels(labels.iter().cloned().map(|x| Line::from(x.unwrap_str())));
-            }
-            if let Some(s) = self
-                .props
-                .get(Attribute::Custom(CHART_X_STYLE))
-                .map(|x| x.unwrap_style())
-            {
-                x_axis = x_axis.style(s);
-            }
-            if let Some(title) = self
-                .props
-                .get(Attribute::Custom(CHART_X_TITLE))
-                .map(|x| x.unwrap_string())
-            {
-                x_axis = x_axis.title(Span::styled(title, normal_style));
-            }
-            // -- y axis
-            let mut y_axis: Axis = Axis::default();
-            if let Some((PropValue::F64(floor), PropValue::F64(ceil))) = self
-                .props
-                .get(Attribute::Custom(CHART_Y_BOUNDS))
-                .map(|x| x.unwrap_payload().unwrap_pair())
-            {
-                let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
-                y_axis = y_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);
-            }
-            if let Some(PropPayload::Vec(labels)) = self
-                .props
-                .get(Attribute::Custom(CHART_Y_LABELS))
-                .map(|x| x.unwrap_payload())
-            {
-                y_axis = y_axis.labels(labels.iter().cloned().map(|x| Line::from(x.unwrap_str())));
-            }
-            if let Some(s) = self
-                .props
-                .get(Attribute::Custom(CHART_Y_STYLE))
-                .map(|x| x.unwrap_style())
-            {
-                y_axis = y_axis.style(s);
-            }
-            if let Some(title) = self
-                .props
-                .get(Attribute::Custom(CHART_Y_TITLE))
-                .map(|x| x.unwrap_string())
-            {
-                y_axis = y_axis.title(Span::styled(title, normal_style));
-            }
-            // Get data
-            let data: Vec<TuiDataset> = self.get_tui_data(self.states.cursor);
-            // Build widget
-            let widget: TuiChart = TuiChart::new(data)
-                .style(normal_style)
-                .block(div)
-                .x_axis(x_axis)
-                .y_axis(y_axis);
-            // Render
-            render.render_widget(widget, area);
+        if !self.common.display {
+            return;
         }
+
+        let normal_style = self.common.style;
+
+        // Create widget
+        // -- x axis
+        let mut x_axis: Axis = Axis::default();
+        if let Some((PropValue::F64(floor), PropValue::F64(ceil))) = self
+            .props
+            .get(Attribute::Custom(CHART_X_BOUNDS))
+            .map(|x| x.unwrap_payload().unwrap_pair())
+        {
+            let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
+            x_axis = x_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);
+        }
+        if let Some(PropPayload::Vec(labels)) = self
+            .props
+            .get(Attribute::Custom(CHART_X_LABELS))
+            .map(|x| x.unwrap_payload())
+        {
+            x_axis = x_axis.labels(labels.iter().cloned().map(|x| Line::from(x.unwrap_str())));
+        }
+        if let Some(s) = self
+            .props
+            .get(Attribute::Custom(CHART_X_STYLE))
+            .map(|x| x.unwrap_style())
+        {
+            x_axis = x_axis.style(s);
+        }
+        if let Some(title) = self
+            .props
+            .get(Attribute::Custom(CHART_X_TITLE))
+            .map(|x| x.unwrap_string())
+        {
+            x_axis = x_axis.title(Span::styled(title, normal_style));
+        }
+        // -- y axis
+        let mut y_axis: Axis = Axis::default();
+        if let Some((PropValue::F64(floor), PropValue::F64(ceil))) = self
+            .props
+            .get(Attribute::Custom(CHART_Y_BOUNDS))
+            .map(|x| x.unwrap_payload().unwrap_pair())
+        {
+            let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
+            y_axis = y_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);
+        }
+        if let Some(PropPayload::Vec(labels)) = self
+            .props
+            .get(Attribute::Custom(CHART_Y_LABELS))
+            .map(|x| x.unwrap_payload())
+        {
+            y_axis = y_axis.labels(labels.iter().cloned().map(|x| Line::from(x.unwrap_str())));
+        }
+        if let Some(s) = self
+            .props
+            .get(Attribute::Custom(CHART_Y_STYLE))
+            .map(|x| x.unwrap_style())
+        {
+            y_axis = y_axis.style(s);
+        }
+        if let Some(title) = self
+            .props
+            .get(Attribute::Custom(CHART_Y_TITLE))
+            .map(|x| x.unwrap_string())
+        {
+            y_axis = y_axis.title(Span::styled(title, normal_style));
+        }
+
+        // Get data
+        let data: Vec<TuiDataset> = self.get_tui_data(self.states.cursor);
+        // Build widget
+        let mut widget: TuiChart = TuiChart::new(data)
+            .style(normal_style)
+            .x_axis(x_axis)
+            .y_axis(y_axis);
+
+        if let Some(block) = self.common.get_block() {
+            widget = widget.block(block);
+        }
+
+        // Render
+        render.render_widget(widget, area);
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         if attr == Attribute::Dataset {
             return Some(self.data_to_attr());
         }
@@ -377,11 +382,13 @@ impl MockComponent for Chart {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        if attr == Attribute::Dataset {
-            self.data_from_attr(value);
-            return;
+        if let Some(value) = self.common.set(attr, value) {
+            if attr == Attribute::Dataset {
+                self.data_from_attr(value);
+                return;
+            }
+            self.props.set(attr, value);
         }
-        self.props.set(attr, value);
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
@@ -543,7 +550,7 @@ mod test {
         assert_eq!(component.is_disabled(), false);
         assert_eq!(component.get_tui_data(2).len(), 2);
 
-        let mut comp = Chart::default().data([ChartDataset::default()
+        let comp = Chart::default().data([ChartDataset::default()
             .name("Maximum")
             .graph_type(GraphType::Line)
             .marker(Marker::Dot)
