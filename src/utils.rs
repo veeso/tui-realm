@@ -2,14 +2,9 @@
 //!
 //! Utilities functions to work with components
 
-// deps
-extern crate textwrap;
-extern crate unicode_width;
 use std::borrow::Cow;
 
-// local
 use tuirealm::props::{Borders, Title};
-// ext
 use tuirealm::ratatui::style::{Color, Style};
 use tuirealm::ratatui::text::{Line, Span, Text};
 use tuirealm::ratatui::widgets::{Block, TitlePosition};

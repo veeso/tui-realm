@@ -22,6 +22,8 @@
 )]
 
 mod components;
+pub mod prop_ext;
 pub mod utils;
+
 pub use components::props;
 pub use components::*;
