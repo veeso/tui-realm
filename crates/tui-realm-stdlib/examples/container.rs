@@ -136,7 +136,7 @@ impl Default for MyContainer {
                     Layout::default()
                         .constraints(&[Constraint::Percentage(30), Constraint::Percentage(70)])
                         .direction(LayoutDirection::Horizontal)
-                        .margin(2),
+                        .margin(1),
                 )
                 .children(vec![
                     Box::new(
