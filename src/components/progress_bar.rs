@@ -10,6 +10,8 @@ use tuirealm::props::{
 use tuirealm::ratatui::{layout::Rect, widgets::Gauge};
 use tuirealm::{Frame, MockComponent, State};
 
+use crate::prop_ext::CommonProps;
+
 // -- Component
 
 /// ## ProgressBar
@@ -18,40 +20,62 @@ use tuirealm::{Frame, MockComponent, State};
 #[derive(Default)]
 #[must_use]
 pub struct ProgressBar {
+    common: CommonProps,
     props: Props,
 }
 
 impl ProgressBar {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
-    pub fn borders(mut self, b: Borders) -> Self {
-        self.attr(Attribute::Borders, AttrValue::Borders(b));
-        self
-    }
-
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
         self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set a custom style for the border when the component is unfocused.
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Add a border to the component.
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
+    /// Set a label text for the Bar.
     pub fn label<S: Into<String>>(mut self, s: S) -> Self {
         self.attr(Attribute::Text, AttrValue::String(s.into()));
         self
     }
 
+    /// Set the initial progress value.
     pub fn progress(mut self, p: f64) -> Self {
         Self::assert_progress(p);
         self.attr(
@@ -71,78 +95,58 @@ impl ProgressBar {
 
 impl MockComponent for ProgressBar {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        // Make a Span
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // Text
-            let label = self
-                .props
-                .get_or(Attribute::Text, AttrValue::String(String::default()))
-                .unwrap_string();
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|x| x.as_title());
-            // Get percentage
-            let percentage = self
-                .props
-                .get_or(
-                    Attribute::Value,
-                    AttrValue::Payload(PropPayload::Single(PropValue::F64(0.0))),
-                )
-                .unwrap_payload()
-                .unwrap_single()
-                .unwrap_f64();
-
-            let normal_style = Style::default()
-                .fg(foreground)
-                .bg(background)
-                .add_modifier(modifiers);
-
-            let div = crate::utils::get_block(borders, title, true, None);
-            // Make progress bar
-            render.render_widget(
-                Gauge::default()
-                    .block(div)
-                    .style(normal_style)
-                    .gauge_style(normal_style)
-                    .label(label)
-                    .ratio(percentage)
-                    .use_unicode(true),
-                area,
-            );
+        if !self.common.display {
+            return;
         }
+
+        // Text
+        let label = self
+            .props
+            .get_or(Attribute::Text, AttrValue::String(String::default()))
+            .unwrap_string();
+        // Get percentage
+        let percentage = self
+            .props
+            .get_or(
+                Attribute::Value,
+                AttrValue::Payload(PropPayload::Single(PropValue::F64(0.0))),
+            )
+            .unwrap_payload()
+            .unwrap_single()
+            .unwrap_f64();
+
+        // Make progress bar
+        let mut widget = Gauge::default()
+            .style(self.common.style)
+            .gauge_style(self.common.style)
+            .label(label)
+            .ratio(percentage)
+            .use_unicode(true);
+
+        if let Some(block) = self.common.get_block() {
+            widget = widget.block(block);
+        }
+
+        render.render_widget(widget, area);
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        if let Attribute::Value = attr {
-            if let AttrValue::Payload(p) = value.clone() {
-                Self::assert_progress(p.unwrap_single().unwrap_f64());
+        if let Some(value) = self.common.set(attr, value) {
+            if let Attribute::Value = attr {
+                if let AttrValue::Payload(p) = value.clone() {
+                    Self::assert_progress(p.unwrap_single().unwrap_f64());
+                }
             }
+            self.props.set(attr, value);
         }
-        self.props.set(attr, value);
     }
 
     fn state(&self) -> State {
