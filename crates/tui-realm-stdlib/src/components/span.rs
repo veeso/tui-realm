@@ -1,8 +1,3 @@
-//! ## Span
-//!
-//! `Span` represents a read-only text component without any container, but with the possibility to define multiple text parts.
-//! The main difference with `Label` is that the Span allows different styles inside the same component for the texsts.
-
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
     AttrValue, Attribute, Color, HorizontalAlignment, PropPayload, PropValue, Props, SpanStatic,
@@ -17,11 +12,10 @@ use tuirealm::{Frame, MockComponent, State};
 
 use crate::utils;
 
-// -- Component
-
-/// ## Span
+/// A Span represents single-line, multi-style text, without any container support.
 ///
-/// Represents a read-only, single-line text component without any container, but with multi-style text parts
+/// If single-style text is wanted, use [`Label`](super::Label).
+/// If multi-style, mutli-line, with container support is wanted, use [`Paragraph`](super::Paragraph).
 #[derive(Default)]
 #[must_use]
 pub struct Span {
