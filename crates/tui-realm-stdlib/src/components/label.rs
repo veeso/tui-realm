@@ -5,6 +5,8 @@ use tuirealm::props::{
 use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
 use tuirealm::{Frame, MockComponent, State};
 
+use crate::prop_ext::CommonProps;
+
 /// A Label. It represents a single-line, single-style text without any container support.
 ///
 /// If multi-style text is wanted, use [`Span`](super::Span).
@@ -12,30 +14,44 @@ use tuirealm::{Frame, MockComponent, State};
 #[derive(Default)]
 #[must_use]
 pub struct Label {
+    common: CommonProps,
     props: Props,
 }
 
 impl Label {
+    /// Set the main foreground color.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// Set the main text modifiers.
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
         self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
+    /// Set the main style.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set the Text content.
     pub fn text<S: Into<String>>(mut self, t: S) -> Self {
         self.attr(Attribute::Text, AttrValue::String(t.into()));
         self
     }
 
+    /// Set the horizontal text alignment.
     pub fn alignment_horizontal(mut self, alignment: HorizontalAlignment) -> Self {
         self.attr(
             Attribute::AlignmentHorizontal,
@@ -47,56 +63,43 @@ impl Label {
 
 impl MockComponent for Label {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        // Make a Span
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // Make text
-            let text = self
-                .props
-                .get_ref(Attribute::Text)
-                .and_then(|v| v.as_string())
-                .map_or("", |v| v.as_str());
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let alignment: HorizontalAlignment = self
-                .props
-                .get_or(
-                    Attribute::AlignmentHorizontal,
-                    AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-                )
-                .unwrap_alignment_horizontal();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
-            render.render_widget(
-                Paragraph::new(text)
-                    .style(
-                        Style::default()
-                            .fg(foreground)
-                            .bg(background)
-                            .add_modifier(modifiers),
-                    )
-                    .alignment(alignment),
-                area,
-            );
+        if !self.common.display {
+            return;
         }
+
+        // Make text
+        let text = self
+            .props
+            .get_ref(Attribute::Text)
+            .and_then(|v| v.as_string())
+            .map_or("", |v| v.as_str());
+        let alignment: HorizontalAlignment = self
+            .props
+            .get_or(
+                Attribute::AlignmentHorizontal,
+                AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+            )
+            .unwrap_alignment_horizontal();
+        render.render_widget(
+            Paragraph::new(text)
+                .style(self.common.style)
+                .alignment(alignment),
+            area,
+        );
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value);
+        if let Some(value) = self.common.set(attr, value) {
+            self.props.set(attr, value);
+        }
     }
 
     fn state(&self) -> State {
