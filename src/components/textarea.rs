@@ -1,11 +1,3 @@
-//! ## Textarea
-//!
-//! `Textarea` represents a read-only text component inside a container, the text is wrapped inside the container automatically
-//! using the [textwrap](https://docs.rs/textwrap/0.13.4/textwrap/) crate.
-//! The textarea supports multi-style spans and it is scrollable with arrows.
-
-extern crate unicode_width;
-
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, SpanStatic,
@@ -108,11 +100,12 @@ impl TextareaStates {
     }
 }
 
-// -- Component
-
-/// ## Textarea
+/// A Textarea represents multi-line, multi-style, automatically wrapped text, with container and scroll support.
 ///
-/// represents a read-only text component without any container.
+/// If scroll is not necessary, use [`Paragrapg`](super::Paragraph) instead.
+///
+/// If single-style, single-line text is wanted, use [`Label`](super::Label).
+/// If multi-style, single-line text is wanted, use [`Span`](super::Span).
 #[derive(Default)]
 #[must_use]
 pub struct Textarea {

@@ -1,11 +1,3 @@
-//! ## Paragraph
-//!
-//! `Paragraph` represents a read-only text component inside a container, the text is wrapped inside the container automatically
-//! using the [textwrap](https://docs.rs/textwrap/0.13.4/textwrap/) crate.
-//! The textarea supports multi-style spans.
-//! The component is not scrollable and doesn't handle any input. The text must then fit into the area.
-//! If you want scroll support, use a `Textarea` instead.
-
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, HorizontalAlignment, Props, Style, TextModifiers,
@@ -19,11 +11,12 @@ use tuirealm::{Frame, MockComponent, State};
 
 use crate::utils;
 
-// -- Component
-
-/// ## Paragraph
+/// A Paragraph represents multi-line, multi-style, automatically wrapped text, with container support.
 ///
-/// represents a read-only text component without any container.
+/// This component does not scroll. If scrolling is additionally wanted, use [`Textarea`](super::Textarea).
+///
+/// If single-style, single-line text is wanted, use [`Label`](super::Label).
+/// If multi-style, single-line text is wanted, use [`Span`](super::Span).
 #[derive(Default)]
 #[must_use]
 pub struct Paragraph {

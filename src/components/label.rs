@@ -1,7 +1,3 @@
-//! ## Label
-//!
-//! `Label` represents a read-only text component without any container.
-
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
     AttrValue, Attribute, Color, HorizontalAlignment, Props, Style, TextModifiers,
@@ -9,11 +5,10 @@ use tuirealm::props::{
 use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
 use tuirealm::{Frame, MockComponent, State};
 
-// -- Component
-
-/// ## Label
+/// A Label. It represents a single-line, single-style text without any container support.
 ///
-/// represents a read-only text component without any container.
+/// If multi-style text is wanted, use [`Span`](super::Span).
+/// If multi-style, mutli-line, with container support is wanted, use [`Paragraph`](super::Paragraph).
 #[derive(Default)]
 #[must_use]
 pub struct Label {
