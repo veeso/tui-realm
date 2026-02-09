@@ -4,13 +4,10 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, Props, Style};
-use tuirealm::ratatui::text::Line as Spans;
-use tuirealm::ratatui::{
-    layout::Rect,
-    text::{Span as TuiSpan, Text},
-    widgets::Paragraph,
-};
+use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
 use tuirealm::{Frame, MockComponent, State};
+
+use crate::prop_ext::CommonProps;
 
 // -- states
 
@@ -58,6 +55,7 @@ impl SpinnerStates {
 /// A textual spinner which step changes at each `view()` call
 #[must_use]
 pub struct Spinner {
+    common: CommonProps,
     props: Props,
     pub states: SpinnerStates,
     /// Automatically call [`SpinnerStates::step`] in [`view`](Spinner::view).
@@ -69,30 +67,42 @@ pub struct Spinner {
 impl Default for Spinner {
     fn default() -> Self {
         Self {
-            props: Default::default(),
-            states: Default::default(),
+            common: CommonProps::default(),
+            props: Props::default(),
+            states: SpinnerStates::default(),
             view_auto_step: true,
         }
     }
 }
 
 impl Spinner {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set the sequence of characters to step through.
     pub fn sequence<S: Into<String>>(mut self, s: S) -> Self {
         self.attr(Attribute::Text, AttrValue::String(s.into()));
         self
     }
 
-    /// Dont automatically step the sequence in a [`view`](Self::view) call
+    /// Disable automatically stepping the sequence in a [`view`](Self::view) call.
     pub fn manual_step(mut self) -> Self {
         self.view_auto_step = false;
         self
@@ -101,43 +111,40 @@ impl Spinner {
 
 impl MockComponent for Spinner {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        // Make a Span
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // Make text
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            // Get text
-            let seq_char = if self.view_auto_step {
-                self.states.step()
-            } else {
-                self.states.current_step()
-            };
-            let text: Text = Text::from(Spans::from(TuiSpan::from(seq_char.to_string())));
-            render.render_widget(
-                Paragraph::new(text)
-                    .alignment(HorizontalAlignment::Left)
-                    .style(Style::default().bg(background).fg(foreground)),
-                area,
-            );
+        if !self.common.display {
+            return;
         }
+
+        // Get text
+        let seq_char = if self.view_auto_step {
+            self.states.step()
+        } else {
+            self.states.current_step()
+        };
+        render.render_widget(
+            Paragraph::new(seq_char.to_string())
+                .alignment(HorizontalAlignment::Left)
+                .style(self.common.style),
+            area,
+        );
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        if matches!(attr, Attribute::Text) {
-            // Update sequence
-            self.states.reset(value.unwrap_string().as_str());
-        } else {
-            self.props.set(attr, value);
+        if let Some(value) = self.common.set(attr, value) {
+            if matches!(attr, Attribute::Text) {
+                // Update sequence
+                self.states.reset(value.unwrap_string().as_str());
+            } else {
+                self.props.set(attr, value);
+            }
         }
     }
 
