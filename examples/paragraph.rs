@@ -154,7 +154,7 @@ impl Default for ParagraphAlfa {
                 .foreground(Color::Yellow)
                 .background(Color::Black)
                 .title(Title::from("Lorem ipsum (wrap)").alignment(HorizontalAlignment::Center))
-                .wrap(true)
+                .wrap_trim(true)
                 .text(vec![
                     Line::raw("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
                     Line::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
@@ -191,7 +191,7 @@ impl Default for ParagraphBeta {
                 .foreground(Color::Cyan)
                 .background(Color::Black)
                 .title(Title::from("Lorem ipsum (no wrap)").alignment(HorizontalAlignment::Center))
-                .wrap(false)
+                .wrap_trim(false)
                 .text(vec![
                     Line::raw("Lorem ipsum dolor sit amet,").underlined().fg(Color::Green),
                     Line::from("consectetur adipiscing elit. Praesent mauris est, vehicula et imperdiet sed, tincidunt sed est. Sed sed dui odio. Etiam nunc neque, sodales ut ex nec, tincidunt malesuada eros. Sed quis eros non felis sodales accumsan in ac risus"),
