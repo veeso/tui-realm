@@ -5,8 +5,8 @@
 
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{
-    AttrValue, Attribute, BorderSides, Borders, Color, LineStatic, PropPayload, PropValue, Props,
-    Style, TextModifiers, Title,
+    AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{
@@ -15,6 +15,7 @@ use tuirealm::ratatui::{
 };
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
+use crate::prop_ext::CommonProps;
 use crate::utils::borrow_clone_line;
 
 // -- states
@@ -117,51 +118,70 @@ impl SelectStates {
 #[derive(Default)]
 #[must_use]
 pub struct Select {
+    common: CommonProps,
     props: Props,
     pub states: SelectStates,
 }
 
 impl Select {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
-    pub fn borders(mut self, b: Borders) -> Self {
-        self.attr(Attribute::Borders, AttrValue::Borders(b));
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
         self
     }
 
-    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title(title.into()));
-        self
-    }
-
-    pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
-        self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
-        self
-    }
-
-    pub fn highlighted_color(mut self, c: Color) -> Self {
-        self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
-        self
-    }
-
+    /// Set a custom style for the border when the component is unfocused.
     pub fn inactive(mut self, s: Style) -> Self {
         self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
+    /// Add a border to the component.
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    /// Add a title to the component.
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
+        self
+    }
+
+    /// Set whether wraparound should be possible (down on the last choice wraps around to 0, and the other way around).
     pub fn rewind(mut self, r: bool) -> Self {
         self.attr(Attribute::Rewind, AttrValue::Flag(r));
         self
     }
 
+    /// Set the Symbol and Style for the indicator of the current line.
+    pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
+        self
+    }
+
+    /// Set a custom foreground color for the currently highlighted item.
+    pub fn highlighted_color(mut self, c: Color) -> Self {
+        // TODO: shouldnt this be a highlight style instead?
+        self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
+        self
+    }
+
+    /// Set the choices that should be possible.
     pub fn choices<S: Into<String>>(mut self, choices: impl IntoIterator<Item = S>) -> Self {
         self.attr(
             Attribute::Content,
@@ -175,6 +195,7 @@ impl Select {
         self
     }
 
+    /// Set the initially selected choice.
     pub fn value(mut self, i: usize) -> Self {
         // Set state
         self.attr(
@@ -187,7 +208,7 @@ impl Select {
     /// ### render_open_tab
     ///
     /// Render component when tab is open
-    fn render_open_tab(&mut self, render: &mut Frame, area: Rect) {
+    fn render_open_tab(&mut self, render: &mut Frame, mut area: Rect) {
         // Make choices
         let choices: Vec<ListItem> = self
             .states
@@ -195,69 +216,46 @@ impl Select {
             .iter()
             .map(|x| ListItem::new(Spans::from(x.as_str())))
             .collect();
-        let foreground = self
+
+        let hg = self
             .props
-            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-            .unwrap_color();
-        let background = self
-            .props
-            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-            .unwrap_color();
-        let hg: Color = self
-            .props
-            .get_or(Attribute::HighlightedColor, AttrValue::Color(foreground))
-            .unwrap_color();
+            .get_ref(Attribute::HighlightedColor)
+            .and_then(AttrValue::as_color);
+
+        if let Some(block) = self.common.get_block() {
+            let inner = block.inner(area);
+            render.render_widget(block, area);
+            area = inner;
+        }
+
         // Prepare layout
-        let chunks = Layout::default()
+        let [para_area, list_area] = Layout::default()
             .direction(LayoutDirection::Vertical)
             .margin(0)
             .constraints([Constraint::Length(2), Constraint::Min(1)])
-            .split(area);
+            .areas(area);
         // Render like "closed" tab in chunk 0
         let selected_text: String = match self.states.choices.get(self.states.selected) {
             None => String::default(),
             Some(s) => s.clone(),
         };
-        let focus = self
-            .props
-            .get_or(Attribute::Focus, AttrValue::Flag(false))
-            .unwrap_flag();
-        let inactive_style = self
-            .props
-            .get(Attribute::FocusStyle)
-            .map(|x| x.unwrap_style());
 
-        let normal_style = Style::default().bg(background).fg(foreground);
+        let para = Paragraph::new(selected_text).style(self.common.style);
+        render.render_widget(para, para_area);
 
-        let borders = self
-            .props
-            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-            .unwrap_borders();
-        let title = self
-            .props
-            .get_ref(Attribute::Title)
-            .and_then(|x| x.as_title());
-        let block_a = crate::utils::get_block(borders, title, focus, inactive_style)
-            .borders(BorderSides::LEFT | BorderSides::TOP | BorderSides::RIGHT);
-        let block_b = crate::utils::get_block(borders, None, focus, inactive_style)
-            .borders(BorderSides::LEFT | BorderSides::BOTTOM | BorderSides::RIGHT);
-
-        let p: Paragraph = Paragraph::new(selected_text)
-            .style(normal_style)
-            .block(block_a);
-        render.render_widget(p, chunks[0]);
+        let hg_style = if let Some(color) = hg {
+            Style::new().fg(color)
+        } else {
+            Style::new()
+        }
+        .add_modifier(TextModifiers::REVERSED);
 
         // Render the list of elements in chunks [1]
         // Make list
         let mut list = List::new(choices)
-            .block(block_b)
             .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
-            .style(normal_style)
-            .highlight_style(
-                Style::default()
-                    .fg(hg)
-                    .add_modifier(TextModifiers::REVERSED),
-            );
+            .style(self.common.style)
+            .highlight_style(hg_style);
         // Highlighted symbol
         let hg_str = self
             .props
@@ -268,50 +266,25 @@ impl Select {
         }
         let mut state: ListState = ListState::default();
         state.select(Some(self.states.selected));
-        render.render_stateful_widget(list, chunks[1], &mut state);
+
+        render.render_stateful_widget(list, list_area, &mut state);
     }
 
     /// ### render_closed_tab
     ///
     /// Render component when tab is closed
     fn render_closed_tab(&self, render: &mut Frame, area: Rect) {
-        let foreground = self
-            .props
-            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-            .unwrap_color();
-        let background = self
-            .props
-            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-            .unwrap_color();
-        let inactive_style = self
-            .props
-            .get(Attribute::FocusStyle)
-            .map(|x| x.unwrap_style());
-        let focus = self
-            .props
-            .get_or(Attribute::Focus, AttrValue::Flag(false))
-            .unwrap_flag();
-
-        let normal_style = Style::default().bg(background).fg(foreground);
-
-        let borders = self
-            .props
-            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-            .unwrap_borders();
-        let title = self
-            .props
-            .get_ref(Attribute::Title)
-            .and_then(|x| x.as_title());
-        let block = crate::utils::get_block(borders, title, focus, inactive_style);
-
         let selected_text: String = match self.states.choices.get(self.states.selected) {
             None => String::default(),
             Some(s) => s.clone(),
         };
-        let p: Paragraph = Paragraph::new(selected_text)
-            .style(normal_style)
-            .block(block);
-        render.render_widget(p, area);
+        let mut widget = Paragraph::new(selected_text).style(self.common.style);
+
+        if let Some(block) = self.common.get_block() {
+            widget = widget.block(block);
+        }
+
+        render.render_widget(widget, area);
     }
 
     fn rewindable(&self) -> bool {
@@ -323,43 +296,51 @@ impl Select {
 
 impl MockComponent for Select {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            if self.states.is_tab_open() {
-                self.render_open_tab(render, area);
-            } else {
-                self.render_closed_tab(render, area);
-            }
+        if !self.common.display {
+            return;
+        }
+
+        if self.states.is_tab_open() {
+            self.render_open_tab(render, area);
+        } else {
+            self.render_closed_tab(render, area);
         }
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        match attr {
-            Attribute::Content => {
-                // Reset choices
-                let choices: Vec<String> = value
-                    .unwrap_payload()
-                    .unwrap_vec()
-                    .iter()
-                    .map(|x| x.clone().unwrap_str())
-                    .collect();
-                self.states.set_choices(choices);
-            }
-            Attribute::Value => {
-                self.states
-                    .select(value.unwrap_payload().unwrap_single().unwrap_usize());
-            }
-            Attribute::Focus if self.states.is_tab_open() => {
-                if let AttrValue::Flag(false) = value {
-                    self.states.cancel_tab();
+        if let Some(value) = self.common.set(attr, value) {
+            match attr {
+                Attribute::Content => {
+                    // Reset choices
+                    let choices: Vec<String> = value
+                        .unwrap_payload()
+                        .unwrap_vec()
+                        .iter()
+                        .map(|x| x.clone().unwrap_str())
+                        .collect();
+                    self.states.set_choices(choices);
                 }
-                self.props.set(attr, value);
-            }
-            attr => {
-                self.props.set(attr, value);
+                Attribute::Value => {
+                    self.states
+                        .select(value.unwrap_payload().unwrap_single().unwrap_usize());
+                }
+                Attribute::Focus if self.states.is_tab_open() => {
+                    if let AttrValue::Flag(false) = value {
+                        self.states.cancel_tab();
+                    }
+                    self.props.set(attr, value);
+                }
+                attr => {
+                    self.props.set(attr, value);
+                }
             }
         }
     }
