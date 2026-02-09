@@ -12,6 +12,8 @@ use tuirealm::{Frame, MockComponent, State};
 
 // -- Props
 
+use crate::prop_ext::CommonProps;
+
 use super::props::{
     BAR_CHART_BARS_GAP, BAR_CHART_BARS_STYLE, BAR_CHART_LABEL_STYLE, BAR_CHART_MAX_BARS,
     BAR_CHART_VALUES_STYLE,
@@ -83,42 +85,59 @@ impl BarChartStates {
 #[derive(Default)]
 #[must_use]
 pub struct BarChart {
+    common: CommonProps,
     props: Props,
     pub states: BarChartStates,
 }
 
 impl BarChart {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Add a border to the component.
     pub fn borders(mut self, b: Borders) -> Self {
         self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
+    /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
+    /// Set whether this component should appear "disabled" (or also known as "locked").
     pub fn disabled(mut self, disabled: bool) -> Self {
         self.attr(Attribute::Disabled, AttrValue::Flag(disabled));
         self
     }
 
+    /// Set the inactive style for the whole component
     pub fn inactive(mut self, s: Style) -> Self {
         self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
+    /// Set the initial Dataset
     pub fn data(mut self, data: &[(&str, u64)]) -> Self {
+        // TODO: allow data to be set in "BarGroup" types instead of plain "Vec"
         let mut list: LinkedList<PropPayload> = LinkedList::new();
         for (a, b) in data {
             list.push_back(PropPayload::Pair((
@@ -133,16 +152,19 @@ impl BarChart {
         self
     }
 
+    /// Set a custom gap between bars, see [`BarChart::bar_gap`].
     pub fn bar_gap(mut self, gap: u16) -> Self {
         self.attr(Attribute::Custom(BAR_CHART_BARS_GAP), AttrValue::Size(gap));
         self
     }
 
+    /// Set a custom style for all bars.
     pub fn bar_style(mut self, s: Style) -> Self {
         self.attr(Attribute::Custom(BAR_CHART_BARS_STYLE), AttrValue::Style(s));
         self
     }
 
+    /// Set a custom style for all bar labels.
     pub fn label_style(mut self, s: Style) -> Self {
         self.attr(
             Attribute::Custom(BAR_CHART_LABEL_STYLE),
@@ -151,11 +173,15 @@ impl BarChart {
         self
     }
 
+    /// Set the max amount of bars to display.
+    ///
+    /// By default the data length.
     pub fn max_bars(mut self, l: usize) -> Self {
         self.attr(Attribute::Custom(BAR_CHART_MAX_BARS), AttrValue::Length(l));
         self
     }
 
+    /// Set a custom style for all values.
     pub fn value_style(mut self, s: Style) -> Self {
         self.attr(
             Attribute::Custom(BAR_CHART_VALUES_STYLE),
@@ -164,6 +190,7 @@ impl BarChart {
         self
     }
 
+    /// Set the width of each bar.
     pub fn width(mut self, w: u16) -> Self {
         self.attr(Attribute::Width, AttrValue::Size(w));
         self
@@ -218,89 +245,75 @@ impl BarChart {
 
 impl MockComponent for BarChart {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|x| x.as_title());
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let inactive_style = self
-                .props
-                .get(Attribute::FocusStyle)
-                .map(|x| x.unwrap_style());
-            let active: bool = if self.is_disabled() { true } else { focus };
-            let normal_style = Style::default().bg(background).fg(foreground);
-            let div = crate::utils::get_block(borders, title, active, inactive_style);
-            // Get max elements
-            let data_max_len = self
-                .props
-                .get(Attribute::Custom(BAR_CHART_MAX_BARS))
-                .map_or(self.data_len(), |x| x.unwrap_length());
-            // Get data
-            let data = self.get_data(self.states.cursor, data_max_len);
-            let data_ref: Vec<(&str, u64)> = data.iter().map(|x| (x.0.as_str(), x.1)).collect();
-            // Create widget
-            let mut widget: TuiBarChart = TuiBarChart::default()
-                .style(normal_style)
-                .block(div)
-                .data(data_ref.as_slice());
-            if let Some(gap) = self
-                .props
-                .get(Attribute::Custom(BAR_CHART_BARS_GAP))
-                .map(|x| x.unwrap_size())
-            {
-                widget = widget.bar_gap(gap);
-            }
-            if let Some(width) = self.props.get(Attribute::Width).map(|x| x.unwrap_size()) {
-                widget = widget.bar_width(width);
-            }
-            if let Some(style) = self
-                .props
-                .get(Attribute::Custom(BAR_CHART_BARS_STYLE))
-                .map(|x| x.unwrap_style())
-            {
-                widget = widget.bar_style(style);
-            }
-            if let Some(style) = self
-                .props
-                .get(Attribute::Custom(BAR_CHART_LABEL_STYLE))
-                .map(|x| x.unwrap_style())
-            {
-                widget = widget.label_style(style);
-            }
-            if let Some(style) = self
-                .props
-                .get(Attribute::Custom(BAR_CHART_VALUES_STYLE))
-                .map(|x| x.unwrap_style())
-            {
-                widget = widget.value_style(style);
-            }
-            // Render
-            render.render_widget(widget, area);
+        if !self.common.display {
+            return;
         }
+
+        // Get max elements
+        let data_max_len = self
+            .props
+            .get(Attribute::Custom(BAR_CHART_MAX_BARS))
+            .map_or(self.data_len(), |x| x.unwrap_length());
+        // Get data
+        let data = self.get_data(self.states.cursor, data_max_len);
+        let data_ref: Vec<(&str, u64)> = data.iter().map(|x| (x.0.as_str(), x.1)).collect();
+        // Create widget
+        let mut widget: TuiBarChart = TuiBarChart::default()
+            .style(self.common.style)
+            .data(data_ref.as_slice());
+
+        if let Some(block) = self.common.get_block() {
+            widget = widget.block(block);
+        }
+
+        if let Some(gap) = self
+            .props
+            .get(Attribute::Custom(BAR_CHART_BARS_GAP))
+            .map(|x| x.unwrap_size())
+        {
+            widget = widget.bar_gap(gap);
+        }
+        if let Some(width) = self.props.get(Attribute::Width).map(|x| x.unwrap_size()) {
+            widget = widget.bar_width(width);
+        }
+        if let Some(style) = self
+            .props
+            .get(Attribute::Custom(BAR_CHART_BARS_STYLE))
+            .map(|x| x.unwrap_style())
+        {
+            widget = widget.bar_style(style);
+        }
+        if let Some(style) = self
+            .props
+            .get(Attribute::Custom(BAR_CHART_LABEL_STYLE))
+            .map(|x| x.unwrap_style())
+        {
+            widget = widget.label_style(style);
+        }
+        if let Some(style) = self
+            .props
+            .get(Attribute::Custom(BAR_CHART_VALUES_STYLE))
+            .map(|x| x.unwrap_style())
+        {
+            widget = widget.value_style(style);
+        }
+
+        // Render
+        render.render_widget(widget, area);
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value);
+        if let Some(value) = self.common.set(attr, value) {
+            self.props.set(attr, value);
+        }
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
