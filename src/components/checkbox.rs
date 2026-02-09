@@ -34,6 +34,8 @@ use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{layout::Rect, text::Span, widgets::Tabs};
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
+use crate::prop_ext::CommonProps;
+
 // -- states
 
 /// ## CheckboxStates
@@ -123,41 +125,57 @@ impl CheckboxStates {
 #[derive(Default)]
 #[must_use]
 pub struct Checkbox {
+    common: CommonProps,
     props: Props,
     pub states: CheckboxStates,
 }
 
 impl Checkbox {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
-    pub fn borders(mut self, b: Borders) -> Self {
-        self.attr(Attribute::Borders, AttrValue::Borders(b));
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
         self
     }
 
-    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title(title.into()));
-        self
-    }
-
+    /// Set a custom style for the border when the component is unfocused.
     pub fn inactive(mut self, s: Style) -> Self {
         self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
+    /// Add a border to the component.
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    /// Add a title to the component.
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
+        self
+    }
+
+    /// Set whether wraparound should be possible (down on the last choice wraps around to 0, and the other way around).
     pub fn rewind(mut self, r: bool) -> Self {
         self.attr(Attribute::Rewind, AttrValue::Flag(r));
         self
     }
 
+    /// Set the choices that should be possible.
     pub fn choices<S: Into<String>>(mut self, choices: impl IntoIterator<Item = S>) -> Self {
         self.attr(
             Attribute::Content,
@@ -171,6 +189,7 @@ impl Checkbox {
         self
     }
 
+    /// Set the initially selected choices.
     pub fn values(mut self, selected: &[usize]) -> Self {
         // Set state
         self.attr(
@@ -191,92 +210,76 @@ impl Checkbox {
 
 impl MockComponent for Checkbox {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|x| x.as_title());
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let inactive_style = self
-                .props
-                .get(Attribute::FocusStyle)
-                .map(|x| x.unwrap_style());
-
-            let normal_style = Style::default().fg(foreground).bg(background);
-
-            let div = crate::utils::get_block(borders, title, focus, inactive_style);
-            // Make choices
-            let choices: Vec<Spans> = self
-                .states
-                .choices
-                .iter()
-                .enumerate()
-                .map(|(idx, x)| {
-                    let checkbox: &str = if self.states.has(idx) { "☑ " } else { "☐ " };
-                    // Make spans
-                    Spans::from(vec![Span::raw(checkbox), Span::raw(x.to_string())])
-                })
-                .collect();
-            let checkbox: Tabs = Tabs::new(choices)
-                .block(div)
-                .select(self.states.choice)
-                .style(normal_style)
-                .highlight_style(Style::default().fg(foreground).add_modifier(if focus {
-                    TextModifiers::REVERSED
-                } else {
-                    TextModifiers::empty()
-                }));
-
-            render.render_widget(checkbox, area);
+        if !self.common.display {
+            return;
         }
+
+        // Make choices
+        let choices: Vec<Spans> = self
+            .states
+            .choices
+            .iter()
+            .enumerate()
+            .map(|(idx, x)| {
+                let checkbox: &str = if self.states.has(idx) { "☑ " } else { "☐ " };
+                // Make spans
+                Spans::from(vec![Span::raw(checkbox), Span::raw(x.to_string())])
+            })
+            .collect();
+        let mut widget: Tabs = Tabs::new(choices)
+            .select(self.states.choice)
+            .style(self.common.style)
+            // TODO: highlight style
+            .highlight_style(self.common.style.add_modifier(if self.common.focused {
+                TextModifiers::REVERSED
+            } else {
+                TextModifiers::empty()
+            }));
+
+        if let Some(block) = self.common.get_block() {
+            widget = widget.block(block);
+        }
+
+        render.render_widget(widget, area);
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        match attr {
-            Attribute::Content => {
-                // Reset choices
-                let current_selection = self.states.selection.clone();
-                let choices: Vec<String> = value
-                    .unwrap_payload()
-                    .unwrap_vec()
-                    .iter()
-                    .cloned()
-                    .map(|x| x.unwrap_str())
-                    .collect();
-                self.states.set_choices(choices);
-                // Preserve selection if possible
-                for c in current_selection {
-                    self.states.select(c);
+        if let Some(value) = self.common.set(attr, value) {
+            match attr {
+                Attribute::Content => {
+                    // Reset choices
+                    let current_selection = self.states.selection.clone();
+                    let choices: Vec<String> = value
+                        .unwrap_payload()
+                        .unwrap_vec()
+                        .iter()
+                        .cloned()
+                        .map(|x| x.unwrap_str())
+                        .collect();
+                    self.states.set_choices(choices);
+                    // Preserve selection if possible
+                    for c in current_selection {
+                        self.states.select(c);
+                    }
                 }
-            }
-            Attribute::Value => {
-                // Clear section
-                self.states.selection.clear();
-                for c in value.unwrap_payload().unwrap_vec() {
-                    self.states.select(c.unwrap_usize());
+                Attribute::Value => {
+                    // Clear section
+                    self.states.selection.clear();
+                    for c in value.unwrap_payload().unwrap_vec() {
+                        self.states.select(c.unwrap_usize());
+                    }
                 }
-            }
-            attr => {
-                self.props.set(attr, value);
+                attr => {
+                    self.props.set(attr, value);
+                }
             }
         }
     }
