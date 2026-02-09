@@ -4,6 +4,7 @@
 //! and handles input events related to cursor position, backspace, canc, ...
 
 use super::props::{INPUT_INVALID_STYLE, INPUT_PLACEHOLDER, INPUT_PLACEHOLDER_STYLE};
+use crate::prop_ext::CommonProps;
 use crate::utils::calc_utf8_cursor_position;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
@@ -202,57 +203,83 @@ impl InputStates {
 #[derive(Default)]
 #[must_use]
 pub struct Input {
+    common: CommonProps,
     props: Props,
     pub states: InputStates,
 }
 
 impl Input {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self
+    }
+
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set a custom style for the border when the component is unfocused.
     pub fn inactive(mut self, s: Style) -> Self {
         self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
+    /// Add a border to the component.
     pub fn borders(mut self, b: Borders) -> Self {
         self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
+    /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
+    /// Set the type of input this Input Component is for. Specific types may have different display or validate methods.
     pub fn input_type(mut self, itype: InputType) -> Self {
         self.attr(Attribute::InputType, AttrValue::InputType(itype));
         self
     }
 
+    /// Set the max length of the input.
     pub fn input_len(mut self, ilen: usize) -> Self {
         self.attr(Attribute::InputLength, AttrValue::Length(ilen));
         self
     }
 
+    /// Set the inital value of the Input.
     pub fn value<S: Into<String>>(mut self, s: S) -> Self {
         self.attr(Attribute::Value, AttrValue::String(s.into()));
         self
     }
 
+    /// Set a style for when the input fails validation.
     pub fn invalid_style(mut self, s: Style) -> Self {
         self.attr(Attribute::Custom(INPUT_INVALID_STYLE), AttrValue::Style(s));
         self
     }
 
+    /// Set a placeholder text and stylew for when the Input is empty.
     pub fn placeholder<S: Into<String>>(mut self, placeholder: S, style: Style) -> Self {
+        // TODO: Span / Line?
         self.attr(
             Attribute::Custom(INPUT_PLACEHOLDER),
             AttrValue::String(placeholder.into()),
@@ -287,145 +314,136 @@ impl Input {
 
 impl MockComponent for Input {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let mut foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let mut background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|v| v.as_title());
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let inactive_style = self
-                .props
-                .get(Attribute::FocusStyle)
-                .map(|x| x.unwrap_style());
-            let itype = self.get_input_type();
-            let mut block = crate::utils::get_block(borders, title, focus, inactive_style);
-            // Apply invalid style
-            if focus && !self.is_valid() {
-                if let Some(style) = self
-                    .props
-                    .get(Attribute::Custom(INPUT_INVALID_STYLE))
-                    .map(|x| x.unwrap_style())
-                {
-                    let borders = self
-                        .props
-                        .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                        .unwrap_borders()
-                        .color(style.fg.unwrap_or(Color::Reset));
-                    block = crate::utils::get_block(borders, title, focus, None);
-                    foreground = style.fg.unwrap_or(Color::Reset);
-                    background = style.bg.unwrap_or(Color::Reset);
-                }
-            }
+        if !self.common.display {
+            return;
+        }
 
+        let mut normal_style = self.common.style;
+
+        let itype = self.get_input_type();
+        let mut block = self.common.get_block();
+        // Apply invalid style
+        // TODO: invalid style should likely still be applied even if unfocused
+        if self.common.focused && !self.is_valid() {
+            if let Some(invalid_style) = self
+                .props
+                .get(Attribute::Custom(INPUT_INVALID_STYLE))
+                .map(|x| x.unwrap_style())
+            {
+                if let Some(block) = &mut block {
+                    let border_style = self
+                        .common
+                        .border
+                        .unwrap_or_default()
+                        .style()
+                        .patch(invalid_style);
+                    // i dont like this, but ratatui does not offer a non-self taking method to change the style
+                    *block = std::mem::take(block).border_style(border_style);
+                }
+
+                normal_style = normal_style.patch(invalid_style);
+            }
+        }
+
+        let mut area_for_bounds = area;
+
+        if let Some(block) = &block {
             // Create input's area
             let block_inner_area = block.inner(area);
 
             self.states.update_width(block_inner_area.width);
 
-            let text_to_display = self.states.render_value_offset(self.get_input_type());
+            area_for_bounds = block_inner_area;
+        }
 
-            let show_placeholder = text_to_display.is_empty();
-            // Choose whether to show placeholder; if placeholder is unset, show nothing
-            let text_to_display = if show_placeholder {
-                self.states.cursor = 0;
-                self.props
-                    .get_or(
-                        Attribute::Custom(INPUT_PLACEHOLDER),
-                        AttrValue::String(String::new()),
-                    )
-                    .unwrap_string()
-            } else {
-                text_to_display
-            };
-            // Choose paragraph style based on whether is valid or not and if has focus and if should show placeholder
-            let paragraph_style = if focus {
-                Style::default()
-                    .fg(foreground)
-                    .bg(background)
-                    .add_modifier(modifiers)
-            } else {
-                inactive_style.unwrap_or_default()
-            };
-            let paragraph_style = if show_placeholder {
-                self.props
-                    .get_or(
-                        Attribute::Custom(INPUT_PLACEHOLDER_STYLE),
-                        AttrValue::Style(paragraph_style),
-                    )
-                    .unwrap_style()
-            } else {
-                paragraph_style
-            };
+        let text_to_display = self.states.render_value_offset(self.get_input_type());
 
-            let p: Paragraph = Paragraph::new(text_to_display)
-                .style(paragraph_style)
-                .block(block);
-            render.render_widget(p, area);
+        let show_placeholder = text_to_display.is_empty();
+        // Choose whether to show placeholder; if placeholder is unset, show nothing
+        let text_to_display = if show_placeholder {
+            self.states.cursor = 0;
+            self.props
+                .get_or(
+                    Attribute::Custom(INPUT_PLACEHOLDER),
+                    AttrValue::String(String::new()),
+                )
+                .unwrap_string()
+        } else {
+            text_to_display
+        };
+        // Choose paragraph style based on whether is valid or not and if has focus and if should show placeholder
+        let paragraph_style = if self.common.focused {
+            normal_style
+        } else {
+            // TODO: this should likely be a different property
+            self.common.border_unfocused_style
+        };
+        let paragraph_style = if show_placeholder {
+            self.props
+                .get_or(
+                    Attribute::Custom(INPUT_PLACEHOLDER_STYLE),
+                    AttrValue::Style(paragraph_style),
+                )
+                .unwrap_style()
+        } else {
+            paragraph_style
+        };
 
-            // Set cursor, if focus
-            if focus && !block_inner_area.is_empty() {
-                let x: u16 = block_inner_area.x
-                    + calc_utf8_cursor_position(
-                        &self.states.render_value_chars(itype)[0..self.states.cursor],
-                    )
-                    .saturating_sub(u16::try_from(self.states.display_offset).unwrap_or(u16::MAX));
-                let x = x.min(block_inner_area.x + block_inner_area.width);
-                render.set_cursor_position(tuirealm::ratatui::prelude::Position {
-                    x,
-                    y: block_inner_area.y,
-                });
-            }
+        let mut widget = Paragraph::new(text_to_display).style(paragraph_style);
+
+        if let Some(block) = block {
+            widget = widget.block(block);
+        }
+
+        render.render_widget(widget, area);
+
+        // Set cursor, if focus
+        if self.common.focused && !area_for_bounds.is_empty() {
+            let x: u16 = area_for_bounds.x
+                + calc_utf8_cursor_position(
+                    &self.states.render_value_chars(itype)[0..self.states.cursor],
+                )
+                .saturating_sub(u16::try_from(self.states.display_offset).unwrap_or(u16::MAX));
+            let x = x.min(area_for_bounds.x + area_for_bounds.width);
+            render.set_cursor_position(tuirealm::ratatui::prelude::Position {
+                x,
+                y: area_for_bounds.y,
+            });
         }
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        let sanitize_input = matches!(
-            attr,
-            Attribute::InputLength | Attribute::InputType | Attribute::Value
-        );
-        // Check if new input
-        let new_input = match attr {
-            Attribute::Value => Some(value.clone().unwrap_string()),
-            _ => None,
-        };
-        self.props.set(attr, value);
-        if sanitize_input {
-            let input = match new_input {
-                None => self.states.input.clone(),
-                Some(v) => v.chars().collect(),
+        if let Some(value) = self.common.set(attr, value) {
+            let sanitize_input = matches!(
+                attr,
+                Attribute::InputLength | Attribute::InputType | Attribute::Value
+            );
+            // Check if new input
+            let new_input = match attr {
+                Attribute::Value => Some(value.clone().unwrap_string()),
+                _ => None,
             };
-            self.states.input = Vec::new();
-            self.states.cursor = 0;
-            let itype = self.get_input_type();
-            let max_len = self.get_input_len();
-            for ch in input {
-                self.states.append(ch, &itype, max_len);
+            self.props.set(attr, value);
+            if sanitize_input {
+                let input = match new_input {
+                    None => self.states.input.clone(),
+                    Some(v) => v.chars().collect(),
+                };
+                self.states.input = Vec::new();
+                self.states.cursor = 0;
+                let itype = self.get_input_type();
+                let max_len = self.get_input_len();
+                for ch in input {
+                    self.states.append(ch, &itype, max_len);
+                }
             }
         }
     }
