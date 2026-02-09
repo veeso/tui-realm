@@ -13,6 +13,7 @@ use tuirealm::ratatui::{
 };
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
+use crate::prop_ext::CommonProps;
 use crate::utils::{self, borrow_clone_line};
 
 // -- States
@@ -117,66 +118,88 @@ impl ListStates {
 #[derive(Default)]
 #[must_use]
 pub struct List {
+    common: CommonProps,
     props: Props,
     pub states: ListStates,
 }
 
 impl List {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
         self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
-    pub fn borders(mut self, b: Borders) -> Self {
-        self.attr(Attribute::Borders, AttrValue::Borders(b));
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
         self
     }
 
-    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title(title.into()));
-        self
-    }
-
+    /// Set a custom style for the border when the component is unfocused.
     pub fn inactive(mut self, s: Style) -> Self {
         self.attr(Attribute::FocusStyle, AttrValue::Style(s));
         self
     }
 
+    /// Add a border to the component.
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    /// Add a title to the component.
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
+        self
+    }
+
+    /// Set whether wraparound should be possible (down on the last choice wraps around to 0, and the other way around).
     pub fn rewind(mut self, r: bool) -> Self {
         self.attr(Attribute::Rewind, AttrValue::Flag(r));
         self
     }
 
+    /// Set the scroll stepping to use on `Cmd::Scroll(Direction::Up)` or `Cmd::Scroll(Direction::Down)`.
     pub fn step(mut self, step: usize) -> Self {
         self.attr(Attribute::ScrollStep, AttrValue::Length(step));
         self
     }
 
+    /// Should the list be scrollable or always show only the top (0th) element?
     pub fn scroll(mut self, scrollable: bool) -> Self {
         self.attr(Attribute::Scroll, AttrValue::Flag(scrollable));
         self
     }
 
+    /// Set the Symbol and Style for the indicator of the current line.
     pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
         self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
 
+    /// Set a custom foreground color for the currently highlighted item.
     pub fn highlighted_color(mut self, c: Color) -> Self {
+        // TODO: shouldnt this be a highlight style instead?
         self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
         self
     }
 
+    /// Set the rows of items the list should contain
     pub fn rows<T>(mut self, rows: impl IntoIterator<Item = T>) -> Self
     where
         T: Into<LineStatic>,
@@ -193,8 +216,7 @@ impl List {
         self
     }
 
-    /// Set initial selected line
-    /// This method must be called after `rows` and `scrollable` in order to work
+    /// Set the initially selected line.
     pub fn selected_line(mut self, line: usize) -> Self {
         self.attr(
             Attribute::Value,
@@ -218,123 +240,99 @@ impl List {
 
 impl MockComponent for List {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|v| v.as_title());
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let inactive_style = self
-                .props
-                .get(Attribute::FocusStyle)
-                .map(|x| x.unwrap_style());
-            let active: bool = if self.scrollable() { focus } else { true };
-            let div = crate::utils::get_block(borders, title, active, inactive_style);
-            // Make list entries
-            let payload = self
-                .props
-                .get_ref(Attribute::Text)
-                .and_then(|x| x.as_payload());
-            let list_items: Vec<ListItem> = match payload {
-                Some(PropPayload::Vec(lines)) => {
-                    lines
-                        .iter()
-                        // this will skip any "PropValue" that is not a "TextLine", instead of panicing
-                        .filter_map(|x| x.as_textline())
-                        .map(utils::borrow_clone_line)
-                        .map(ListItem::from)
-                        .collect()
-                }
-                _ => Vec::new(),
-            };
-            let highlighted_color = self
-                .props
-                .get(Attribute::HighlightedColor)
-                .map(|x| x.unwrap_color());
-            let modifiers = if focus {
-                modifiers | TextModifiers::REVERSED
-            } else {
-                modifiers
-            };
-            // Make list
+        if !self.common.display {
+            return;
+        }
 
-            let mut list = TuiList::new(list_items)
-                .block(div)
-                .style(Style::default().fg(foreground).bg(background))
-                .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom);
-            if let Some(highlighted_color) = highlighted_color {
-                list = list.highlight_style(
-                    Style::default()
-                        .fg(highlighted_color)
-                        .add_modifier(modifiers),
-                );
+        // Make list entries
+        let payload = self
+            .props
+            .get_ref(Attribute::Text)
+            .and_then(|x| x.as_payload());
+        let list_items: Vec<ListItem> = match payload {
+            Some(PropPayload::Vec(lines)) => {
+                lines
+                    .iter()
+                    // this will skip any "PropValue" that is not a "TextLine", instead of panicing
+                    .filter_map(|x| x.as_textline())
+                    .map(utils::borrow_clone_line)
+                    .map(ListItem::from)
+                    .collect()
             }
-            // Highlighted symbol
-            let hg_str = self
-                .props
-                .get_ref(Attribute::HighlightedStr)
-                .and_then(|x| x.as_textline());
-            if let Some(hg_str) = hg_str {
-                list = list.highlight_symbol(borrow_clone_line(hg_str));
-            }
-            if self.scrollable() {
-                let mut state: ListState = ListState::default();
-                state.select(Some(self.states.list_index));
-                render.render_stateful_widget(list, area, &mut state);
-            } else {
-                render.render_widget(list, area);
-            }
+            _ => Vec::new(),
+        };
+        let highlighted_color = self
+            .props
+            .get(Attribute::HighlightedColor)
+            .map(|x| x.unwrap_color());
+
+        // Make list
+        let mut widget = TuiList::new(list_items)
+            .style(self.common.style)
+            .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom);
+
+        if let Some(block) = self.common.get_block() {
+            widget = widget.block(block);
+        }
+
+        if let Some(highlighted_color) = highlighted_color {
+            widget = widget.highlight_style(Style::default().fg(highlighted_color).add_modifier(
+                if self.common.focused {
+                    TextModifiers::REVERSED
+                } else {
+                    TextModifiers::empty()
+                },
+            ));
+        }
+        // Highlighted symbol
+        let hg_str = self
+            .props
+            .get_ref(Attribute::HighlightedStr)
+            .and_then(|x| x.as_textline());
+        if let Some(hg_str) = hg_str {
+            widget = widget.highlight_symbol(borrow_clone_line(hg_str));
+        }
+        if self.scrollable() {
+            let mut state: ListState = ListState::default();
+            state.select(Some(self.states.list_index));
+            render.render_stateful_widget(widget, area, &mut state);
+        } else {
+            render.render_widget(widget, area);
         }
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value);
-        if matches!(attr, Attribute::Text) {
-            // Update list len and fix index
-            self.states.set_list_len(
-                match self
+        if let Some(value) = self.common.set(attr, value) {
+            self.props.set(attr, value);
+            if matches!(attr, Attribute::Text) {
+                // Update list len and fix index
+                self.states.set_list_len(
+                    match self
+                        .props
+                        .get_ref(Attribute::Text)
+                        .and_then(AttrValue::as_payload)
+                        .and_then(PropPayload::as_vec)
+                    {
+                        Some(rows) => rows.len(),
+                        _ => 0,
+                    },
+                );
+                self.states.fix_list_index();
+            } else if matches!(attr, Attribute::Value) && self.scrollable() {
+                self.states.list_index = self
                     .props
-                    .get_ref(Attribute::Text)
-                    .and_then(AttrValue::as_payload)
-                    .and_then(PropPayload::as_vec)
-                {
-                    Some(rows) => rows.len(),
-                    _ => 0,
-                },
-            );
-            self.states.fix_list_index();
-        } else if matches!(attr, Attribute::Value) && self.scrollable() {
-            self.states.list_index = self
-                .props
-                .get(Attribute::Value)
-                .map_or(0, |x| x.unwrap_payload().unwrap_single().unwrap_usize());
-            self.states.fix_list_index();
+                    .get(Attribute::Value)
+                    .map_or(0, |x| x.unwrap_payload().unwrap_single().unwrap_usize());
+                self.states.fix_list_index();
+            }
         }
     }
 
