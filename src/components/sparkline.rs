@@ -9,6 +9,8 @@ use tuirealm::props::{
 use tuirealm::ratatui::{layout::Rect, widgets::Sparkline as TuiSparkline};
 use tuirealm::{Frame, MockComponent, State};
 
+use crate::prop_ext::CommonProps;
+
 // -- component
 
 /// ## Sparkline
@@ -17,35 +19,56 @@ use tuirealm::{Frame, MockComponent, State};
 #[derive(Default)]
 #[must_use]
 pub struct Sparkline {
+    common: CommonProps,
     props: Props,
 }
 
 impl Sparkline {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set a custom style for the border when the component is unfocused.
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Add a border to the component.
     pub fn borders(mut self, b: Borders) -> Self {
         self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
+    /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
+    /// Set the max value of the bar.
     pub fn max_entries(mut self, max: usize) -> Self {
         self.attr(Attribute::Width, AttrValue::Length(max));
         self
     }
 
+    /// Set the initial data.
     pub fn data(mut self, data: &[u64]) -> Self {
         self.attr(
             Attribute::Dataset,
@@ -90,46 +113,42 @@ impl Sparkline {
 
 impl MockComponent for Sparkline {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|v| v.as_title());
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let max_entries = self
-                .props
-                .get_or(Attribute::Width, AttrValue::Length(self.data_len()))
-                .unwrap_length();
-            // Get data
-            let data: Vec<u64> = self.get_data(max_entries);
-            // Create widget
-            let widget: TuiSparkline = TuiSparkline::default()
-                .block(crate::utils::get_block(borders, title, false, None))
-                .data(data.as_slice())
-                .max(max_entries as u64)
-                .style(Style::default().fg(foreground).bg(background));
-            // Render
-            render.render_widget(widget, area);
+        if !self.common.display {
+            return;
         }
+
+        let max_entries = self
+            .props
+            .get_or(Attribute::Width, AttrValue::Length(self.data_len()))
+            .unwrap_length();
+        // Get data
+        let data: Vec<u64> = self.get_data(max_entries);
+        // Create widget
+        let mut widget = TuiSparkline::default()
+            .data(data.as_slice())
+            .max(max_entries as u64)
+            .style(self.common.style);
+
+        if let Some(block) = self.common.get_block() {
+            widget = widget.block(block);
+        }
+
+        // Render
+        render.render_widget(widget, area);
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value);
+        if let Some(value) = self.common.set(attr, value) {
+            self.props.set(attr, value);
+        }
     }
 
     fn state(&self) -> State {
