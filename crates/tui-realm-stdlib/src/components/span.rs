@@ -10,6 +10,7 @@ use tuirealm::ratatui::{
 };
 use tuirealm::{Frame, MockComponent, State};
 
+use crate::prop_ext::CommonProps;
 use crate::utils;
 
 /// A Span represents single-line, multi-style text, without any container support.
@@ -19,25 +20,38 @@ use crate::utils;
 #[derive(Default)]
 #[must_use]
 pub struct Span {
+    common: CommonProps,
     props: Props,
 }
 
 impl Span {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
         self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set the horizontal text alignment.
     pub fn alignment_horizontal(mut self, a: HorizontalAlignment) -> Self {
         self.attr(
             Attribute::AlignmentHorizontal,
@@ -46,6 +60,7 @@ impl Span {
         self
     }
 
+    /// Set the Text content.
     pub fn spans<T>(mut self, s: impl IntoIterator<Item = T>) -> Self
     where
         T: Into<SpanStatic>,
@@ -65,57 +80,56 @@ impl Span {
 
 impl MockComponent for Span {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        // Make a Span
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // Make text
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            // binding required as "spans" is a reference and otherwise would not live long enough
-            let payload = self
-                .props
-                .get_ref(Attribute::Text)
-                .and_then(|x| x.as_payload());
-            let text = match payload {
-                Some(PropPayload::Vec(lines)) => {
-                    let lines: Vec<RSpan> = lines
-                        .iter()
-                        // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                        .filter_map(|x| x.as_textspan())
-                        .map(utils::borrow_clone_span)
-                        .collect();
-                    Text::from(Line::from(lines))
-                }
-                _ => Text::default(),
-            };
-            // Text properties
-            let alignment: HorizontalAlignment = self
-                .props
-                .get_or(
-                    Attribute::AlignmentHorizontal,
-                    AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-                )
-                .unwrap_alignment_horizontal();
-            render.render_widget(
-                Paragraph::new(text)
-                    .alignment(alignment)
-                    .style(Style::default().bg(background).fg(foreground)),
-                area,
-            );
+        if !self.common.display {
+            return;
         }
+
+        // Make text
+        // binding required as "spans" is a reference and otherwise would not live long enough
+        let payload = self
+            .props
+            .get_ref(Attribute::Text)
+            .and_then(|x| x.as_payload());
+        let text = match payload {
+            Some(PropPayload::Vec(lines)) => {
+                let lines: Vec<RSpan> = lines
+                    .iter()
+                    // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
+                    .filter_map(|x| x.as_textspan())
+                    .map(utils::borrow_clone_span)
+                    .collect();
+                Text::from(Line::from(lines))
+            }
+            _ => Text::default(),
+        };
+        // Text properties
+        let alignment: HorizontalAlignment = self
+            .props
+            .get_or(
+                Attribute::AlignmentHorizontal,
+                AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+            )
+            .unwrap_alignment_horizontal();
+        render.render_widget(
+            Paragraph::new(text)
+                .alignment(alignment)
+                .style(self.common.style),
+            area,
+        );
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value);
+        if let Some(value) = self.common.set(attr, value) {
+            self.props.set(attr, value);
+        }
     }
 
     fn state(&self) -> State {
