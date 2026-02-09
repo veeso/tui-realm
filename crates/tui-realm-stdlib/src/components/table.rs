@@ -17,6 +17,7 @@ use tuirealm::ratatui::{
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
 use super::props::TABLE_COLUMN_SPACING;
+use crate::prop_ext::CommonProps;
 use crate::utils::{self, borrow_clone_line};
 
 // -- States
@@ -121,72 +122,98 @@ impl TableStates {
 #[derive(Default)]
 #[must_use]
 pub struct Table {
+    common: CommonProps,
     props: Props,
     pub states: TableStates,
 }
 
 impl Table {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
         self
     }
 
+    /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
         self
     }
 
-    pub fn inactive(mut self, s: Style) -> Self {
-        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
-        self
-    }
-
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
     pub fn modifiers(mut self, m: TextModifiers) -> Self {
         self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set a custom style for the border when the component is unfocused.
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Add a border to the component.
     pub fn borders(mut self, b: Borders) -> Self {
         self.attr(Attribute::Borders, AttrValue::Borders(b));
         self
     }
 
+    /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
+    /// Set the scroll stepping to use on `Cmd::Scroll(Direction::Up)` or `Cmd::Scroll(Direction::Down)`.
     pub fn step(mut self, step: usize) -> Self {
         self.attr(Attribute::ScrollStep, AttrValue::Length(step));
         self
     }
 
+    /// Should the list be scrollable or always show only the top (0th) element?
     pub fn scroll(mut self, scrollable: bool) -> Self {
         self.attr(Attribute::Scroll, AttrValue::Flag(scrollable));
         self
     }
 
+    /// Set the Symbol and Style for the indicator of the current line.
     pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
         self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
 
+    /// Set a custom foreground color for the currently highlighted item.
     pub fn highlighted_color(mut self, c: Color) -> Self {
+        // TODO: shouldnt this be a highlight style instead?
         self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
         self
     }
 
+    /// Set custom spacing between columns.
     pub fn column_spacing(mut self, w: u16) -> Self {
         self.attr(Attribute::Custom(TABLE_COLUMN_SPACING), AttrValue::Size(w));
         self
     }
 
+    /// Set a custom height for all rows.
+    ///
+    /// Default: `1`
     pub fn row_height(mut self, h: u16) -> Self {
         self.attr(Attribute::Height, AttrValue::Size(h));
         self
     }
 
+    /// Set the widths of each column.
     pub fn widths(mut self, w: &[u16]) -> Self {
+        // TODO: should this maybe be "Layout"?
         self.attr(
             Attribute::Width,
             AttrValue::Payload(PropPayload::Vec(
@@ -196,6 +223,7 @@ impl Table {
         self
     }
 
+    /// Set headers for columns.
     pub fn headers<S: Into<String>>(mut self, headers: impl IntoIterator<Item = S>) -> Self {
         self.attr(
             Attribute::Text,
@@ -209,18 +237,19 @@ impl Table {
         self
     }
 
+    /// Set the data for the table.
     pub fn table(mut self, t: PropTable) -> Self {
         self.attr(Attribute::Content, AttrValue::Table(t));
         self
     }
 
+    /// Set whether wraparound should be possible (down on the last choice wraps around to 0, and the other way around).
     pub fn rewind(mut self, r: bool) -> Self {
         self.attr(Attribute::Rewind, AttrValue::Flag(r));
         self
     }
 
-    /// Set initial selected line
-    /// This method must be called after `rows` and `scrollable` in order to work
+    /// Set the initially selected line.
     pub fn selected_line(mut self, line: usize) -> Self {
         self.attr(
             Attribute::Value,
@@ -306,137 +335,110 @@ impl Table {
 
 impl MockComponent for Table {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
+        if !self.common.display {
+            return;
+        }
 
-            let normal_style = Style::default()
-                .fg(foreground)
-                .bg(background)
-                .add_modifier(modifiers);
+        let row_height = self
+            .props
+            .get_or(Attribute::Height, AttrValue::Size(1))
+            .unwrap_size();
+        // Make rows
+        let rows: Vec<Row> = self.make_rows(row_height);
+        let widths: Vec<Constraint> = self.layout();
 
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|v| v.as_title());
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let inactive_style = self
-                .props
-                .get(Attribute::FocusStyle)
-                .map(|x| x.unwrap_style());
-            let row_height = self
-                .props
-                .get_or(Attribute::Height, AttrValue::Size(1))
-                .unwrap_size();
-            // Make rows
-            let rows: Vec<Row> = self.make_rows(row_height);
-            let highlighted_color = self
-                .props
-                .get(Attribute::HighlightedColor)
-                .map(|x| x.unwrap_color());
-            let widths: Vec<Constraint> = self.layout();
+        let mut widget = TuiTable::new(rows, &widths).style(self.common.style);
 
-            let mut table =
-                TuiTable::new(rows, &widths)
-                    .style(normal_style)
-                    .block(crate::utils::get_block(
-                        borders,
-                        title,
-                        focus,
-                        inactive_style,
-                    ));
-            if let Some(highlighted_color) = highlighted_color {
-                table =
-                    table.row_highlight_style(Style::default().fg(highlighted_color).add_modifier(
-                        if focus {
-                            modifiers | TextModifiers::REVERSED
-                        } else {
-                            modifiers
-                        },
-                    ));
-            }
-            // Highlighted symbol
-            let hg_str = self
-                .props
-                .get_ref(Attribute::HighlightedStr)
-                .and_then(|x| x.as_textline());
-            if let Some(hg_str) = hg_str {
-                table = table.highlight_symbol(borrow_clone_line(hg_str));
-            }
-            // Col spacing
-            if let Some(spacing) = self
-                .props
-                .get(Attribute::Custom(TABLE_COLUMN_SPACING))
-                .map(|x| x.unwrap_size())
-            {
-                table = table.column_spacing(spacing);
-            }
-            // Header
-            let headers: Vec<&str> = self
-                .props
-                .get_ref(Attribute::Text)
-                .and_then(|v| v.as_payload())
-                .and_then(|v| v.as_vec())
-                .map(|v| {
-                    v.iter()
-                        .filter_map(|v| v.as_str().map(|v| v.as_str()))
-                        .collect()
-                })
-                .unwrap_or_default();
-            if !headers.is_empty() {
-                table = table.header(Row::new(headers).style(normal_style).height(row_height));
-            }
-            if self.is_scrollable() {
-                let mut state: TableState = TableState::default();
-                state.select(Some(self.states.list_index));
-                render.render_stateful_widget(table, area, &mut state);
-            } else {
-                render.render_widget(table, area);
-            }
+        if let Some(block) = self.common.get_block() {
+            widget = widget.block(block);
+        }
+
+        let highlighted_color = self
+            .props
+            .get(Attribute::HighlightedColor)
+            .map(|x| x.unwrap_color());
+
+        if let Some(highlighted_color) = highlighted_color {
+            widget =
+                widget.row_highlight_style(Style::default().fg(highlighted_color).add_modifier(
+                    if self.common.focused {
+                        TextModifiers::REVERSED
+                    } else {
+                        TextModifiers::empty()
+                    },
+                ));
+        }
+        // Highlighted symbol
+        let hg_str = self
+            .props
+            .get_ref(Attribute::HighlightedStr)
+            .and_then(|x| x.as_textline());
+        if let Some(hg_str) = hg_str {
+            widget = widget.highlight_symbol(borrow_clone_line(hg_str));
+        }
+        // Col spacing
+        if let Some(spacing) = self
+            .props
+            .get(Attribute::Custom(TABLE_COLUMN_SPACING))
+            .map(|x| x.unwrap_size())
+        {
+            widget = widget.column_spacing(spacing);
+        }
+        // Header
+        let headers: Vec<&str> = self
+            .props
+            .get_ref(Attribute::Text)
+            .and_then(|v| v.as_payload())
+            .and_then(|v| v.as_vec())
+            .map(|v| {
+                v.iter()
+                    .filter_map(|v| v.as_str().map(|v| v.as_str()))
+                    .collect()
+            })
+            .unwrap_or_default();
+        if !headers.is_empty() {
+            widget = widget.header(
+                Row::new(headers)
+                    .style(self.common.style)
+                    .height(row_height),
+            );
+        }
+        if self.is_scrollable() {
+            let mut state: TableState = TableState::default();
+            state.select(Some(self.states.list_index));
+            render.render_stateful_widget(widget, area, &mut state);
+        } else {
+            render.render_widget(widget, area);
         }
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+        if let Some(value) = self.common.get(attr) {
+            return Some(value);
+        }
+
         self.props.get(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        self.props.set(attr, value);
-        if matches!(attr, Attribute::Content) {
-            // Update list len and fix index
-            self.states.set_list_len(
-                match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
-                    Some(spans) => spans.len(),
-                    _ => 0,
-                },
-            );
-            self.states.fix_list_index();
-        } else if matches!(attr, Attribute::Value) && self.is_scrollable() {
-            self.states.list_index = self
-                .props
-                .get(Attribute::Value)
-                .map_or(0, |x| x.unwrap_payload().unwrap_single().unwrap_usize());
-            self.states.fix_list_index();
+        if let Some(value) = self.common.set(attr, value) {
+            self.props.set(attr, value);
+            if matches!(attr, Attribute::Content) {
+                // Update list len and fix index
+                self.states.set_list_len(
+                    match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
+                        Some(spans) => spans.len(),
+                        _ => 0,
+                    },
+                );
+                self.states.fix_list_index();
+            } else if matches!(attr, Attribute::Value) && self.is_scrollable() {
+                self.states.list_index = self
+                    .props
+                    .get(Attribute::Value)
+                    .map_or(0, |x| x.unwrap_payload().unwrap_single().unwrap_usize());
+                self.states.fix_list_index();
+            }
         }
     }
 
