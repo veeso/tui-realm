@@ -1,3 +1,4 @@
+#![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 //! tui-realm is a **framework** for **[ratatui](https://github.com/ratatui-org/ratatui)**
@@ -25,13 +26,14 @@
 //! Alternatively you can specify the features you want to add:
 //!
 //! ```toml
-//! tuirealm = { version = "3", default-features = false, features = [ "derive", "serialize", "crossterm" ] }
+//! tuirealm = { version = "3", default-features = false, features = [ "std", "derive", "serialize", "crossterm" ] }
 //! ```
 //!
 //! Supported features are:
 //!
+//! - `std` (*default*): enable std library support. Disable for `no_std` environments with `alloc`.
 //! - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
-//! - `async-ports`: add support for async ports
+//! - `async-ports`: add support for async ports (requires `std`)
 //! - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
 //! - `crossterm` (*default*): enable the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend
 //! - `termion`: enable the [termion](https://github.com/redox-os/termion) terminal backend
@@ -59,6 +61,9 @@
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/docs/images/cargo/tui-realm-512.png"
 )]
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 
 #[macro_use]
 extern crate lazy_regex;
