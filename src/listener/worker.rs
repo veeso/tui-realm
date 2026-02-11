@@ -2,7 +2,8 @@
 
 use std::ops::{Add, Sub};
 use std::sync::atomic::AtomicBool;
-use std::sync::{Arc, mpsc};
+use std::sync::mpsc;
+use alloc::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 

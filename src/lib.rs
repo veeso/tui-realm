@@ -62,7 +62,6 @@
     html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/docs/images/cargo/tui-realm-512.png"
 )]
 
-#[cfg(not(feature = "std"))]
 extern crate alloc;
 
 #[macro_use]

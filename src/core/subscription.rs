@@ -2,7 +2,7 @@
 
 use std::hash::Hash;
 use std::ops::Range;
-use std::sync::Arc;
+use alloc::sync::Arc;
 
 use crate::event::{KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
 use crate::{AttrValue, Attribute, Event, State};
