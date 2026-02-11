@@ -1,6 +1,6 @@
 //! This module exposes the component traits
 
-use std::any::Any;
+use core::any::Any;
 
 use ratatui::Frame;
 

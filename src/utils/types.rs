@@ -1,5 +1,9 @@
 //! This module exposes types used by utilities
 
+use alloc::format;
+use alloc::string::String;
+use alloc::string::ToString;
+
 /// Represents a phone number
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub struct PhoneNumber {

@@ -1,7 +1,7 @@
 //! properties injector
 
-use std::hash::Hash;
-
+use core::hash::Hash;
+use alloc::vec::Vec;
 use super::props::{AttrValue, Attribute};
 
 /// An injector is a trait object which can provide properties to inject to a certain component.

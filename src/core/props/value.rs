@@ -1,6 +1,7 @@
 //! This module exposes the prop values
-
-use std::any::Any;
+use alloc::vec::Vec;
+use alloc::string::String;
+use core::any::Any;
 use crate::core::compat::{HashMap, LinkedList};
 
 use super::{

@@ -1,6 +1,6 @@
 //! This module exposes the [`Cmd`] type, which must be used when sending commands to the [`MockComponent`](crate::MockComponent) from the
 //! [`Component`](crate::Component) after an `Event`.
-
+use alloc::vec::Vec;
 use super::State;
 
 // -- Command

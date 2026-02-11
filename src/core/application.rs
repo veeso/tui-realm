@@ -1,9 +1,11 @@
 //! This module exposes the [`Application`], the core of `tui-realm` and its directly related types.
-
-use std::hash::Hash;
-use super::time::{Clock, Duration};
+use alloc::vec;
+use alloc::vec::Vec;
+use alloc::boxed::Box;
+use core::hash::Hash;
+use crate::utils::time::{Clock, Duration};
 #[cfg(feature = "std")]
-use super::time::StdClock;
+use crate::utils::time::StdClock;
 
 use ratatui::Frame;
 use thiserror::Error;
@@ -510,8 +512,8 @@ where
 #[cfg(test)]
 mod test {
 
-    use crate::core::time::Duration;
-    use crate::core::time::Instant;
+    use crate::utils::time::Duration;
+    use crate::utils::time::Instant;
 
     use pretty_assertions::assert_eq;
 

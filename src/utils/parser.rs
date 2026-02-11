@@ -1,6 +1,6 @@
 //! This module exposes parsing utilities
 
-use std::str::FromStr;
+use core::str::FromStr;
 
 use lazy_regex::{Lazy, Regex};
 

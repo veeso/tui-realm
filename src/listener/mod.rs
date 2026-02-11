@@ -10,12 +10,15 @@ mod port;
 mod task_pool;
 mod worker;
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::TryRecvError;
 // -- export
-use std::sync::{Arc, mpsc};
+use std::sync::mpsc;
+use alloc::sync::Arc;
 use std::thread::{self, JoinHandle};
-use std::time::Duration;
+use crate::utils::time::Duration;
 
 use thiserror::Error;
 

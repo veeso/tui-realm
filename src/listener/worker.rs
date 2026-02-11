@@ -1,11 +1,11 @@
 //! This module implements the Sync-worker thread for the event listener
-
-use std::ops::{Add, Sub};
-use std::sync::atomic::AtomicBool;
+use alloc::vec::Vec;
+use core::ops::{Add, Sub};
+use core::sync::atomic::AtomicBool;
 use std::sync::mpsc;
 use alloc::sync::Arc;
 use std::thread;
-use std::time::{Duration, Instant};
+use crate::utils::time::{Duration, Instant};
 
 use super::{ListenerMsg, SyncPort};
 use crate::listener::PortError;
@@ -85,7 +85,7 @@ where
         } else {
             self.next_tick
         };
-        let min_time = std::cmp::min(min_listener_event, next_tick);
+        let min_time = core::cmp::min(min_listener_event, next_tick);
         // If min time is > now, returns diff, otherwise return 0
         if min_time > now {
             min_time.sub(now)
@@ -96,12 +96,12 @@ where
 
     /// Returns whether should keep running
     fn running(&self) -> bool {
-        self.running.load(std::sync::atomic::Ordering::Relaxed)
+        self.running.load(core::sync::atomic::Ordering::Relaxed)
     }
 
     /// Returns whether worker is paused
     fn paused(&self) -> bool {
-        self.paused.load(std::sync::atomic::Ordering::Relaxed)
+        self.paused.load(core::sync::atomic::Ordering::Relaxed)
     }
 
     /// Returns whether it's time to tick.
@@ -213,7 +213,7 @@ where
 #[cfg(test)]
 mod test {
 
-    use std::sync::atomic::Ordering;
+    use core::sync::atomic::Ordering;
 
     use pretty_assertions::assert_eq;
 
@@ -332,7 +332,7 @@ mod test {
         // Now should no more tick and poll
         assert_eq!(worker.should_tick(), false);
         // Stop
-        running.store(false, std::sync::atomic::Ordering::Relaxed);
+        running.store(false, core::sync::atomic::Ordering::Relaxed);
         assert_eq!(worker.running(), false);
         drop(rx);
     }
@@ -364,7 +364,7 @@ mod test {
         // Next event should be in 3 second (poll)
         assert!(worker.next_event() <= Duration::from_secs(3));
         // Stop
-        running.store(false, std::sync::atomic::Ordering::Relaxed);
+        running.store(false, core::sync::atomic::Ordering::Relaxed);
 
         assert_eq!(worker.running(), false);
         drop(rx);
