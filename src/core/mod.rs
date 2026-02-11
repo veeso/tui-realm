@@ -2,6 +2,7 @@
 
 pub mod application;
 pub mod command;
+mod compat;
 mod component;
 pub mod event;
 pub mod injector;

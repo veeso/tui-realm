@@ -1,6 +1,6 @@
 //! This module exposes the View structure, which is the wrapper for all the components in an application.
 
-use std::collections::HashMap;
+use crate::core::compat::HashMap;
 use std::hash::Hash;
 
 use ratatui::Frame;

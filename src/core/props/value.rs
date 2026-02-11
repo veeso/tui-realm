@@ -1,7 +1,7 @@
 //! This module exposes the prop values
 
 use std::any::Any;
-use std::collections::{HashMap, LinkedList};
+use crate::core::compat::{HashMap, LinkedList};
 
 use super::{
     Color, HorizontalAlignment, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic,
@@ -834,7 +834,7 @@ impl PropValue {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use crate::core::compat::HashMap;
 
     use pretty_assertions::{assert_eq, assert_ne};
 

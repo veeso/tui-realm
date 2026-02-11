@@ -22,8 +22,9 @@ async-trait = { version = "0.1", optional = true }
 bitflags = "2"
 dyn-clone = "1"
 futures-util = { version = "0.3", default-features = false, optional = true }
+hashbrown = { version = "0.16", optional = true }
 lazy-regex = "3"
-ratatui = { version = "0.30", default-features = false, features = ["layout-cache"] }
+ratatui = { version = "0.30", default-features = false, features = ["std", "layout-cache"] }
 serde = { version = "1", features = ["derive"], optional = true }
 thiserror = "2"
 tokio = { version = "1", features = [
@@ -48,9 +49,9 @@ toml = "^0.9"
 
 [features]
 default = ["std", "derive", "crossterm"]
-std = ["ratatui/std"]
+std = []
+alloc = ["dep:hashbrown"]
 async-ports = [
-  "std",
   "dep:async-trait",
   "dep:tokio",
   "dep:tokio-util",

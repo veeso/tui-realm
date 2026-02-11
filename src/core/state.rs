@@ -1,6 +1,6 @@
 //! This module exposes the state type and values
 
-use std::collections::{HashMap, LinkedList};
+use crate::core::compat::{HashMap, LinkedList};
 
 use crate::props::{AnyPropBox, Color};
 use crate::utils::{Email, PhoneNumber};
