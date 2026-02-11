@@ -31,13 +31,22 @@
 //!
 //! Supported features are:
 //!
-//! - `std` (*default*): enable std library support. Disable for `no_std` environments with `alloc`.
+//! - `std` (*default*): enable std library support. **Mutually exclusive with `alloc`**.
+//! - `alloc`: enable `no_std` with heap allocation support (for embedded systems). **Mutually exclusive with `std`**. Requires disabling default features.
 //! - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
 //! - `async-ports`: add support for async ports (requires `std`)
 //! - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
 //! - `crossterm` (*default*): enable the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend
 //! - `termion`: enable the [termion](https://github.com/redox-os/termion) terminal backend
 //! - `termwiz`: enable the [termwiz](https://docs.rs/termwiz/latest/termwiz/index.html) terminal backend
+//!
+//! ### For `no_std` environments (e.g., Commodore C64, embedded systems)
+//! 
+//! ```toml
+//! tuirealm = { version = "3", default-features = false, features = ["alloc", "derive", "serialize"] }
+//! ```
+//!
+//! Note: Terminal backends (`crossterm`, `termion`, `termwiz`) and `async-ports` require `std` and cannot be used in `no_std` environments.
 //!
 //! ### Create a tui-realm application 🪂
 //!
@@ -61,6 +70,10 @@
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/docs/images/cargo/tui-realm-512.png"
 )]
+
+// Compile-time check: std and alloc are mutually exclusive
+#[cfg(all(feature = "std", feature = "alloc"))]
+compile_error!("feature \"std\" and feature \"alloc\" cannot be enabled at the same time...");
 
 extern crate alloc;
 
@@ -91,6 +104,8 @@ pub use listener::{EventListenerCfg, ListenerError};
 pub use tuirealm_derive::*;
 
 pub use self::core::application::{self, Application, ApplicationError, PollStrategy};
+#[cfg(feature = "std")]
+pub use self::core::application::StdApplication;
 pub use self::core::event::{self, Event, NoUserEvent};
 pub use self::core::injector::Injector;
 pub use self::core::props::{self, AttrValue, Attribute, Props};

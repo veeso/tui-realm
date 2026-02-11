@@ -172,7 +172,7 @@ where
         let sync_tick_interval = self.tick_interval;
         #[cfg(feature = "async-ports")]
         let sync_tick_interval = self.tick_interval.take_if(|_| !self.async_tick);
-        let mut res: EventListener<UserEvent> = EventListener::<UserEvent>::new();
+        let mut res = EventListener::<UserEvent>::new();
 
         #[cfg(test)]
         res.with_test_barrier(self.barrier);

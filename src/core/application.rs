@@ -17,6 +17,10 @@ use crate::{
     AttrValue, Attribute, Component, Event, Injector, State, Sub, SubEventClause, ViewError,
 };
 
+#[cfg(feature = "std")]
+pub type StdApplication<ComponentId, Msg, UserEvent> =
+    Application<ComponentId, Msg, UserEvent, StdClock>;
+
 /// Result retuned by [`Application`] functions.
 pub type ApplicationResult<T> = Result<T, ApplicationError>;
 
@@ -24,14 +28,21 @@ pub type ApplicationResult<T> = Result<T, ApplicationError>;
 /// It will handle events, subscriptions and the view too.
 /// It provides functions to interact with the view (mount, umount, query, etc), but also
 /// the main function: [`Application::tick`].
-pub struct Application<ComponentId, Msg, UserEvent, C>
+/// 
+/// # Type Parameters
+///
+/// * `ComponentId` - Unique identifier type for components
+/// * `Msg` - Message type for component communication
+/// * `UserEvent` - Custom user event type
+/// * `ClockImpl` - Clock implementation for time tracking (defaults to [`StdClock`] in std environments)
+pub struct Application<ComponentId, Msg, UserEvent, ClockImpl>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
-    C: Clock,
+    ClockImpl: Clock,
 {
-    clock: C,
+    clock: ClockImpl,
     listener: EventListener<UserEvent>,
     subs: Vec<Subscription<ComponentId, UserEvent>>,
     /// If true, subs won't be processed. (Default: False)
@@ -39,18 +50,18 @@ where
     view: View<ComponentId, Msg, UserEvent>,
 }
 
-impl<ComponentId, Msg, UserEvent, C> Application<ComponentId, Msg, UserEvent, C>
+impl<ComponentId, Msg, UserEvent, ClockImpl> Application<ComponentId, Msg, UserEvent, ClockImpl>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq + 'static,
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
-    C: Clock,
+    ClockImpl: Clock,
 {
     /// Initialize a new [`Application`] with a custom clock.
     /// The event listener is immediately created and started.
     ///
     /// For std environments, prefer using [`Application::init`] which uses the standard clock.
-    pub fn with_clock(clock: C, listener_cfg: EventListenerCfg<UserEvent>) -> Self {
+    pub fn with_clock(clock: ClockImpl, listener_cfg: EventListenerCfg<UserEvent>) -> Self {
         // TODO: maybe consider bubbling this up?
         let listener = listener_cfg
             .start()
@@ -526,7 +537,7 @@ mod test {
     use crate::{StateValue, SubClause};    
 
     // Type alias to simplify test signatures
-    type TestApp = Application<MockComponentId, MockMsg, MockEvent, StdClock>;
+    type TestApp = StdApplication<MockComponentId, MockMsg, MockEvent>;
 
     /// Create a common Application with Tick that is configured to only happen once (high interval) and have the lister have a test barrier
     fn create_app_tick_once_barrier()

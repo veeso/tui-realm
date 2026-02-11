@@ -48,10 +48,15 @@ tokio = { version = "1", features = ["full"] }
 toml = "^0.9"
 
 [features]
+# IMPORTANT: "std" and "alloc" are mutually exclusive
+# - Use "std" (default) for standard library environments
+# - Use "alloc" for no_std environments with heap allocation support
+# - These features cannot be enabled simultaneously
 default = ["std", "derive", "crossterm"]
 std = []
 alloc = ["dep:hashbrown"]
 async-ports = [
+  "std",
   "dep:async-trait",
   "dep:tokio",
   "dep:tokio-util",
@@ -61,9 +66,9 @@ async-ports = [
 derive = ["dep:tuirealm_derive"]
 serialize = ["dep:serde", "bitflags/serde"]
 
-crossterm = ["dep:crossterm", "ratatui/crossterm"]
-termion = ["dep:termion", "ratatui/termion"]
-termwiz = ["dep:termwiz", "ratatui/termwiz"]
+crossterm = ["std", "dep:crossterm", "ratatui/crossterm"]
+termion = ["std", "dep:termion", "ratatui/termion"]
+termwiz = ["std", "dep:termwiz", "ratatui/termwiz"]
 
 [[example]]
 name = "async-ports"
