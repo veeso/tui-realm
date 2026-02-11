@@ -3,11 +3,11 @@
 #[cfg(feature = "std")]
 pub use std::collections::{HashMap, LinkedList};
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 pub use alloc::collections::LinkedList;
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 extern crate hashbrown;
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(feature = "alloc", not(feature = "std")))]
 pub use hashbrown::HashMap;

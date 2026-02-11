@@ -5,7 +5,8 @@ use core::sync::atomic::AtomicBool;
 use std::sync::mpsc;
 use alloc::sync::Arc;
 use std::thread;
-use crate::utils::time::{Duration, Instant};
+use core::time::Duration;
+use crate::utils::time::Instant;
 
 use super::{ListenerMsg, SyncPort};
 use crate::listener::PortError;

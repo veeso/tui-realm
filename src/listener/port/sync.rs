@@ -1,6 +1,7 @@
 use core::ops::Add as _;
-use crate::utils::time::{Duration, Instant};
+use core::time::Duration;
 use alloc::boxed::Box;
+use crate::utils::time::Instant;
 
 use crate::Event;
 use crate::listener::{Poll, PortResult};

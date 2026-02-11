@@ -3,11 +3,6 @@
 //! This module provides a `Clock` trait that abstracts time operations,
 //! allowing the application to work in both std and no_std environments.
 
-// Duration is available in core::time since Rust 1.66
-#[cfg(feature = "std")]
-pub use std::time::Duration;
-
-#[cfg(not(feature = "std"))]
 pub use core::time::Duration;
 
 #[cfg(feature = "std")]

@@ -18,7 +18,7 @@ use std::sync::mpsc::TryRecvError;
 use std::sync::mpsc;
 use alloc::sync::Arc;
 use std::thread::{self, JoinHandle};
-use crate::utils::time::Duration;
+use core::time::Duration;
 
 use thiserror::Error;
 

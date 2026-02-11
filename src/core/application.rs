@@ -3,7 +3,8 @@ use alloc::vec;
 use alloc::vec::Vec;
 use alloc::boxed::Box;
 use core::hash::Hash;
-use crate::utils::time::{Clock, Duration};
+use core::time::Duration;
+use crate::utils::time::Clock;
 #[cfg(feature = "std")]
 use crate::utils::time::StdClock;
 

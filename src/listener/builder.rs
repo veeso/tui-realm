@@ -2,13 +2,14 @@
 
 use alloc::vec::Vec;
 use alloc::boxed::Box;
+use core::time::Duration;
 
 #[cfg(feature = "async-ports")]
 use tokio::runtime::Handle;
 
 #[cfg(feature = "async-ports")]
 use super::AsyncPort;
-use super::{Duration, EventListener, ListenerError, Poll, SyncPort};
+use super::{EventListener, ListenerError, Poll, SyncPort};
 
 #[cfg(test)]
 pub mod test_utils {
