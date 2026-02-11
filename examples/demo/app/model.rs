@@ -10,7 +10,7 @@ use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
-    Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause, Update,
+    Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause, Update, StdClock
 };
 
 use super::components::{Clock, DigitCounter, Label, LetterCounter};
@@ -21,7 +21,7 @@ where
     T: TerminalAdapter,
 {
     /// Application
-    pub app: Application<Id, Msg, NoUserEvent>,
+    pub app: Application<Id, Msg, NoUserEvent, StdClock>,
     /// Indicates that the application must quit
     pub quit: bool,
     /// Tells whether to redraw interface
@@ -84,13 +84,13 @@ where
         );
     }
 
-    fn init_app() -> Result<Application<Id, Msg, NoUserEvent>, Box<dyn Error>> {
+    fn init_app() -> Result<Application<Id, Msg, NoUserEvent, StdClock>, Box<dyn Error>> {
         // Setup application
         // NOTE: NoUserEvent is a shorthand to tell tui-realm we're not going to use any custom user event
         // NOTE: the event listener is configured to use the default crossterm input listener and to raise a Tick event each second
         // which we will use to update the clock
 
-        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+        let mut app: Application<Id, Msg, NoUserEvent, StdClock> = Application::init(
             EventListenerCfg::default()
                 .crossterm_input_listener(Duration::from_millis(20), 3)
                 .tick_interval(Duration::from_secs(1)),

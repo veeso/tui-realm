@@ -15,14 +15,14 @@ use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    NoUserEvent, PollStrategy, Props, State, Update,
+    NoUserEvent, PollStrategy, Props, State, Update, StdClock
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let event_listener =
         EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10);
 
-    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(event_listener);
+    let mut app: Application<Id, Msg, NoUserEvent, StdClock> = Application::init(event_listener);
 
     // subscribe component to clause
     app.mount(Id::Label, Box::new(OurLabel::default()), vec![])?;
@@ -79,7 +79,7 @@ pub enum Id {
 
 pub struct Model {
     /// Application
-    pub app: Application<Id, Msg, NoUserEvent>,
+    pub app: Application<Id, Msg, NoUserEvent, StdClock>,
     /// Indicates that the application must quit
     pub quit: bool,
     /// Tells whether to redraw interface
@@ -97,7 +97,7 @@ impl Model {
         Ok(adapter)
     }
 
-    pub fn new(app: Application<Id, Msg, NoUserEvent>) -> TerminalResult<Self> {
+    pub fn new(app: Application<Id, Msg, NoUserEvent, StdClock>) -> TerminalResult<Self> {
         Ok(Self {
             app,
             quit: false,

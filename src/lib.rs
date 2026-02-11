@@ -26,7 +26,7 @@
 //! Alternatively you can specify the features you want to add:
 //!
 //! ```toml
-//! tuirealm = { version = "3", default-features = false, features = [ "std", "derive", "serialize", "crossterm" ] }
+//! tuirealm = { version = "3", default-features = false, features = ["std", "derive", "serialize", "crossterm" ] }
 //! ```
 //!
 //! Supported features are:
@@ -96,5 +96,8 @@ pub use self::core::event::{self, Event, NoUserEvent};
 pub use self::core::injector::Injector;
 pub use self::core::props::{self, AttrValue, Attribute, Props};
 pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
+pub use self::core::time::{self, Clock, Duration};
+#[cfg(feature = "std")]
+pub use self::core::time::StdClock;
 pub use self::core::{Component, MockComponent, State, StateValue, Update, ViewError, command};
 pub use self::ratatui::Frame;

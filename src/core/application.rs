@@ -1,7 +1,9 @@
 //! This module exposes the [`Application`], the core of `tui-realm` and its directly related types.
 
 use std::hash::Hash;
-use std::time::{Duration, Instant};
+use super::time::{Clock, Duration};
+#[cfg(feature = "std")]
+use super::time::StdClock;
 
 use ratatui::Frame;
 use thiserror::Error;
@@ -20,12 +22,14 @@ pub type ApplicationResult<T> = Result<T, ApplicationError>;
 /// It will handle events, subscriptions and the view too.
 /// It provides functions to interact with the view (mount, umount, query, etc), but also
 /// the main function: [`Application::tick`].
-pub struct Application<ComponentId, Msg, UserEvent>
+pub struct Application<ComponentId, Msg, UserEvent, C>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
+    C: Clock,
 {
+    clock: C,
     listener: EventListener<UserEvent>,
     subs: Vec<Subscription<ComponentId, UserEvent>>,
     /// If true, subs won't be processed. (Default: False)
@@ -33,21 +37,25 @@ where
     view: View<ComponentId, Msg, UserEvent>,
 }
 
-impl<ComponentId, Msg, UserEvent> Application<ComponentId, Msg, UserEvent>
+impl<ComponentId, Msg, UserEvent, C> Application<ComponentId, Msg, UserEvent, C>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq + 'static,
     UserEvent: Eq + PartialEq + Clone + Send + 'static,
+    C: Clock,
 {
-    /// Initialize a new [`Application`].
+    /// Initialize a new [`Application`] with a custom clock.
     /// The event listener is immediately created and started.
-    pub fn init(listener_cfg: EventListenerCfg<UserEvent>) -> Self {
+    ///
+    /// For std environments, prefer using [`Application::init`] which uses the standard clock.
+    pub fn with_clock(clock: C, listener_cfg: EventListenerCfg<UserEvent>) -> Self {
         // TODO: maybe consider bubbling this up?
         let listener = listener_cfg
             .start()
             .expect("EventListenerCfg to be configured correctly");
 
         Self {
+            clock,
             listener,
             subs: Vec::new(),
             sub_lock: false,
@@ -379,9 +387,9 @@ where
 
     /// Poll event listener until `timeout` is elapsed
     fn poll_try_for(&mut self, timeout: Duration) -> ApplicationResult<Vec<Event<UserEvent>>> {
-        let started = Instant::now();
+        let started = self.clock.now();
         let mut evs: Vec<Event<UserEvent>> = Vec::new();
-        while started.elapsed() < timeout {
+        while self.clock.elapsed(started) < timeout {
             // TODO: change to use "deadline" when it becomes stable
             match self.poll_listener_timeout(Duration::from_millis(10)) {
                 Err(err) => return Err(err),
@@ -481,10 +489,29 @@ pub enum ApplicationError {
     View(#[from] ViewError),
 }
 
+// Convenience constructor for std environments with StdClock
+#[cfg(feature = "std")]
+impl<ComponentId, Msg, UserEvent> Application<ComponentId, Msg, UserEvent, StdClock>
+where
+    ComponentId: Eq + PartialEq + Clone + Hash,
+    Msg: PartialEq + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
+{
+    /// Initialize a new [`Application`] with the standard clock.
+    /// The event listener is immediately created and started.
+    ///
+    /// This is a convenience constructor for std environments that automatically
+    /// creates a [`StdClock`] instance.
+    pub fn init(listener_cfg: EventListenerCfg<UserEvent>) -> Self {
+        Self::with_clock(StdClock, listener_cfg)
+    }
+}
+
 #[cfg(test)]
 mod test {
 
-    use std::time::Duration;
+    use crate::core::time::Duration;
+    use crate::core::time::Instant;
 
     use pretty_assertions::assert_eq;
 
@@ -494,14 +521,17 @@ mod test {
     use crate::mock::{
         MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg, MockPoll,
     };
-    use crate::{StateValue, SubClause};
+    use crate::{StateValue, SubClause};    
+
+    // Type alias to simplify test signatures
+    type TestApp = Application<MockComponentId, MockMsg, MockEvent, StdClock>;
 
     /// Create a common Application with Tick that is configured to only happen once (high interval) and have the lister have a test barrier
     fn create_app_tick_once_barrier()
-    -> (Application<MockComponentId, MockMsg, MockEvent>, BarrierRx) {
+    -> (TestApp, BarrierRx) {
         let mut listener = listener_config_with_tick(Duration::from_secs(60));
         let barrier_rx = listener.with_test_barrier();
-        let application: Application<MockComponentId, MockMsg, MockEvent> =
+        let application: TestApp =
             Application::init(listener);
 
         (application, barrier_rx)
@@ -509,7 +539,7 @@ mod test {
 
     #[test]
     fn should_initialize_application() {
-        let application: Application<MockComponentId, MockMsg, MockEvent> =
+        let application: TestApp =
             Application::init(listener_config());
         assert!(application.subs.is_empty());
         assert_eq!(application.view.mounted(&MockComponentId::InputFoo), false);
@@ -518,14 +548,14 @@ mod test {
 
     #[test]
     fn should_restart_listener() {
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+        let mut application: TestApp =
             Application::init(listener_config());
         assert!(application.restart_listener(listener_config()).is_ok());
     }
 
     #[test]
     fn should_manipulate_components() {
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+        let mut application: TestApp =
             Application::init(listener_config());
         // Mount
         assert!(
@@ -620,7 +650,7 @@ mod test {
 
     #[test]
     fn should_subscribe_components() {
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+        let mut application: TestApp =
             Application::init(listener_config());
         assert!(
             application
@@ -721,7 +751,7 @@ mod test {
 
     #[test]
     fn should_umount_all() {
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+        let mut application: TestApp =
             Application::init(listener_config());
         assert!(
             application
@@ -850,7 +880,7 @@ mod test {
     fn strategy_upto_nowait_should_work() {
         let mut listener = listener_config_with_tick(Duration::from_secs(60));
         let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+        let mut application: TestApp =
             Application::init(listener);
 
         // Mount foo and bar
@@ -1275,7 +1305,7 @@ mod test {
     fn should_lock_ports() {
         let mut listener = listener_config_with_tick(Duration::from_millis(100));
         let barrier_rx = listener.with_test_barrier();
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+        let mut application: TestApp =
             Application::init(listener);
         // Mount foo and bar
         assert!(
@@ -1352,7 +1382,7 @@ mod test {
 
     #[test]
     fn application_should_add_injectors() {
-        let mut application: Application<MockComponentId, MockMsg, MockEvent> =
+        let mut application: TestApp =
             Application::init(listener_config_with_tick(Duration::from_millis(500)));
         application.add_injector(Box::new(MockInjector));
     }
