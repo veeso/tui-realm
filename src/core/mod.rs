@@ -9,6 +9,7 @@ pub mod injector;
 pub mod props;
 mod state;
 pub mod subscription;
+pub mod time;
 mod view;
 
 // -- export
