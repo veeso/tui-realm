@@ -68,10 +68,10 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Cargo Check
-        run: cargo build --all-features
+        run: cargo build --features async-ports,serialize,derive,termion,termiwiz,crossterm
       - name: Test
         # This tests both crossterm, termion and termwiz
-        run: cargo llvm-cov --no-fail-fast --all-features --workspace --lcov --output-path lcov.info --no-cfg-coverage
+        run: cargo llvm-cov --no-fail-fast --features async-ports,serialize,derive,termion,termiwiz,crossterm --workspace --lcov --output-path lcov.info --no-cfg-coverage
       - name: Coveralls
         uses: coverallsapp/github-action@v2.3.6
         with:
@@ -129,10 +129,10 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Cargo Check
-        run: cargo build --all-features
+        run: cargo build --features async-ports,serialize,derive,termion,termiwiz,crossterm
       - name: Test
         # This tests both crossterm, termion and termwiz
-        run: cargo llvm-cov --no-fail-fast --all-features --workspace --lcov --output-path lcov.info --no-cfg-coverage
+        run: cargo llvm-cov --no-fail-fast --features async-ports,serialize,derive,termion,termiwiz,crossterm --workspace --lcov --output-path lcov.info --no-cfg-coverage
       - name: Coveralls
         uses: coverallsapp/github-action@v2.3.6
         with:
