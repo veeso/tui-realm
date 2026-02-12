@@ -24,7 +24,7 @@ dyn-clone = "1"
 futures-util = { version = "0.3", default-features = false, optional = true }
 hashbrown = { version = "0.16", optional = true }
 lazy-regex = "3"
-ratatui = { version = "0.30", default-features = false, features = ["std", "layout-cache"] }
+ratatui = { version = "0.30", default-features = false, features = ["layout-cache"] }
 serde = { version = "1", features = ["derive"], optional = true }
 thiserror = "2"
 tokio = { version = "1", features = [
@@ -53,7 +53,7 @@ toml = "^0.9"
 # - Use "alloc" for no_std environments with heap allocation support
 # - These features cannot be enabled simultaneously
 default = ["std", "derive", "crossterm"]
-std = []
+std = ["ratatui/std"]
 alloc = ["dep:hashbrown"]
 async-ports = [
   "std",

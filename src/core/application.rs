@@ -19,8 +19,8 @@ use crate::{
 };
 
 #[cfg(feature = "std")]
-pub type StdApplication<ComponentId, Msg, UserEvent> =
-    Application<ComponentId, Msg, UserEvent, StdClock>;
+pub type Application<ComponentId, Msg, UserEvent> =
+    CoreApplication<ComponentId, Msg, UserEvent, StdClock>;
 
 /// Result retuned by [`Application`] functions.
 pub type ApplicationResult<T> = Result<T, ApplicationError>;
@@ -36,7 +36,7 @@ pub type ApplicationResult<T> = Result<T, ApplicationError>;
 /// * `Msg` - Message type for component communication
 /// * `UserEvent` - Custom user event type
 /// * `ClockImpl` - Clock implementation for time tracking (defaults to [`StdClock`] in std environments)
-pub struct Application<ComponentId, Msg, UserEvent, ClockImpl>
+pub struct CoreApplication<ComponentId, Msg, UserEvent, ClockImpl>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
@@ -51,7 +51,7 @@ where
     view: View<ComponentId, Msg, UserEvent>,
 }
 
-impl<ComponentId, Msg, UserEvent, ClockImpl> Application<ComponentId, Msg, UserEvent, ClockImpl>
+impl<ComponentId, Msg, UserEvent, ClockImpl> CoreApplication<ComponentId, Msg, UserEvent, ClockImpl>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq + 'static,
@@ -505,7 +505,7 @@ pub enum ApplicationError {
 
 // Convenience constructor for std environments with StdClock
 #[cfg(feature = "std")]
-impl<ComponentId, Msg, UserEvent> Application<ComponentId, Msg, UserEvent, StdClock>
+impl<ComponentId, Msg, UserEvent> CoreApplication<ComponentId, Msg, UserEvent, StdClock>
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq + 'static,
@@ -538,7 +538,7 @@ mod test {
     use crate::{StateValue, SubClause};    
 
     // Type alias to simplify test signatures
-    type TestApp = StdApplication<MockComponentId, MockMsg, MockEvent>;
+    type TestApp = Application<MockComponentId, MockMsg, MockEvent>;
 
     /// Create a common Application with Tick that is configured to only happen once (high interval) and have the lister have a test barrier
     fn create_app_tick_once_barrier()
