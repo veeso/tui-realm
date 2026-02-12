@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -28,7 +28,11 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - name: Clippy all features
-        run: cargo clippy --all-targets --all-features -- -Dwarnings
+        run: cargo clippy --all-targets --features std,async-ports,derive-serialize,termion,termiwiz  -- -Dwarnings
+      - name: Clippy all features (nostd)
+        run: cargo clippy --all-targets --no-default-features --features derive  -- -Dwarnings
+      - name: Clippy all features (alloc)
+        run: cargo clippy --all-targets --no-default-features --features alloc  -- -Dwarnings
       - name: Clippy default features
         run: cargo clippy --all-targets -- -Dwarnings
 
@@ -51,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [stable, "1.86"]
+        toolchain: [ stable, "1.86" ]
     steps:
       - uses: actions/checkout@v2
       - name: Install Toolchain
@@ -81,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [stable, "1.86"]
+        toolchain: [ stable, "1.86" ]
     steps:
       - uses: actions/checkout@v2
       - name: Install Toolchain
@@ -112,7 +116,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [stable, "1.86"]
+        toolchain: [ stable, "1.86" ]
     steps:
       - uses: actions/checkout@v2
       - name: Install Toolchain
@@ -139,7 +143,7 @@ jobs:
 
   finish-coveralls:
     runs-on: ubuntu-latest
-    needs: [test-linux, test-win, test-mac]
+    needs: [ test-linux, test-win, test-mac ]
     steps:
       - name: Coveralls Finished
         uses: coverallsapp/github-action@v2
