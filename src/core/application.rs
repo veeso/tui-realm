@@ -9,11 +9,11 @@ use ratatui::Frame;
 use thiserror::Error;
 
 use super::{Subscription, View, WrappedComponent};
+use crate::core::clock::Clock;
+#[cfg(feature = "std")]
+use crate::core::clock::StdClock;
 use crate::listener::{EventListener, EventListenerCfg, ListenerError, PollError};
 use crate::ratatui::layout::Rect;
-use crate::utils::time::Clock;
-#[cfg(feature = "std")]
-use crate::utils::time::StdClock;
 use crate::{
     AttrValue, Attribute, Component, Event, Injector, State, Sub, SubEventClause, ViewError,
 };

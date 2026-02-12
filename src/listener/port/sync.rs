@@ -3,8 +3,8 @@ use core::ops::Add as _;
 use core::time::Duration;
 
 use crate::Event;
+use crate::core::clock::Instant;
 use crate::listener::{Poll, PortResult};
-use crate::utils::time::Instant;
 
 /// A port is a wrapper around the [`Poll`] trait object, which also defines a interval, which defines
 /// the amount of time between each [`Poll::poll`] call.

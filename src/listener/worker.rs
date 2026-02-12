@@ -8,8 +8,8 @@ use std::sync::mpsc;
 use std::thread;
 
 use super::{ListenerMsg, SyncPort};
+use crate::core::clock::Instant;
 use crate::listener::PortError;
-use crate::utils::time::Instant;
 
 // -- worker
 
