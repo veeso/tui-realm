@@ -53,7 +53,7 @@ toml = "^0.9"
 # - Use "alloc" for no_std environments with heap allocation support
 # - These features cannot be enabled simultaneously
 default = ["std", "derive", "crossterm"]
-std = ["ratatui/std"]
+std = ["alloc", "ratatui/std"]
 alloc = ["dep:hashbrown"]
 async-ports = [
   "std",

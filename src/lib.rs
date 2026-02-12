@@ -71,10 +71,6 @@
     html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/docs/images/cargo/tui-realm-512.png"
 )]
 
-// Compile-time check: std and alloc are mutually exclusive
-#[cfg(all(feature = "std", feature = "alloc"))]
-compile_error!("feature \"std\" and feature \"alloc\" cannot be enabled at the same time...");
-
 extern crate alloc;
 
 #[macro_use]

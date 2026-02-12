@@ -3,7 +3,7 @@
 //! This module provides a `Clock` trait that abstracts time operations,
 //! allowing the application to work in both std and no_std environments.
 
-pub use core::time::Duration;
+use core::time::Duration;
 #[cfg(feature = "std")]
 pub use std::time::Instant;
 
