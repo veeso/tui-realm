@@ -213,6 +213,7 @@ where
 mod test {
 
     use std::sync::atomic::Ordering;
+    use std::sync::mpsc::TryRecvError;
 
     use pretty_assertions::assert_eq;
 
@@ -419,5 +420,61 @@ mod test {
             PollResult::<Option<_>>::from(rx.recv().unwrap()).unwrap_err(),
             PollError::PortError(PortError::PermanentError("Test".to_string()))
         );
+    }
+
+    #[test]
+    fn should_only_gather_specific_amount() {
+        // this test specifically tests what happens when a Port returns "Ok(None)"
+        #[derive(Debug)]
+        struct TestPoll {
+            slice: &'static [Event<NoUserEvent>],
+        }
+
+        impl Poll<NoUserEvent> for TestPoll {
+            fn poll(&mut self) -> crate::listener::PortResult<Option<Event<NoUserEvent>>> {
+                if let Some(event) = self.slice.iter().next() {
+                    self.slice = &self.slice[1..];
+                    return Ok(Some(event.clone()));
+                }
+
+                Ok(None)
+            }
+        }
+
+        let (tx, rx) = mpsc::channel();
+        let paused = Arc::new(AtomicBool::new(true));
+        let paused_t = Arc::clone(&paused);
+        let running = Arc::new(AtomicBool::new(true));
+        let running_t = Arc::clone(&running);
+        let mut worker = EventListenerWorker::<NoUserEvent>::new(
+            vec![SyncPort::new(
+                Box::new(TestPoll {
+                    slice: &[Event::FocusGained, Event::FocusLost],
+                }),
+                Duration::ZERO,
+                1,
+            )],
+            tx,
+            paused_t,
+            running_t,
+            Some(Duration::from_secs(1)),
+        );
+        assert_eq!(worker.ports.len(), 1);
+        paused.store(false, Ordering::Relaxed);
+
+        // NOTE: "try_recv" is used over "poll" because a event *should* be available after each expected poll,
+        // and when using "recv" it would block infinitely, never telling what the issue is aside from "test is running long".
+        assert!(worker.poll().is_ok());
+        assert_eq!(
+            PollResult::<Event<_>>::from(rx.try_recv().unwrap()).unwrap(),
+            Event::FocusGained
+        );
+        assert!(worker.poll().is_ok());
+        assert_eq!(
+            PollResult::<Event<_>>::from(rx.try_recv().unwrap()).unwrap(),
+            Event::FocusLost
+        );
+        assert!(worker.poll().is_ok());
+        assert_eq!(rx.try_recv().unwrap_err(), TryRecvError::Empty);
     }
 }
