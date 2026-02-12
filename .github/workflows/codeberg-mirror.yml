@@ -5,6 +5,7 @@ on:
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'veeso'
     steps:
       - uses: actions/checkout@v6
         with:
