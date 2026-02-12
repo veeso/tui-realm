@@ -10,7 +10,8 @@ use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
-    Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause, Update, StdClock
+    Application, AttrValue, Attribute, EventListenerCfg, StdClock, Sub, SubClause, SubEventClause,
+    Update,
 };
 
 use super::components::{Clock, DigitCounter, Label, LetterCounter};

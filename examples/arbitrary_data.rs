@@ -15,7 +15,7 @@ use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    NoUserEvent, PollStrategy, Props, State, Update, StdClock
+    NoUserEvent, PollStrategy, Props, State, StdClock, Update,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -1,15 +1,15 @@
 //! This module implements the Sync-worker thread for the event listener
+use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::ops::{Add, Sub};
 use core::sync::atomic::AtomicBool;
-use std::sync::mpsc;
-use alloc::sync::Arc;
-use std::thread;
 use core::time::Duration;
-use crate::utils::time::Instant;
+use std::sync::mpsc;
+use std::thread;
 
 use super::{ListenerMsg, SyncPort};
 use crate::listener::PortError;
+use crate::utils::time::Instant;
 
 // -- worker
 

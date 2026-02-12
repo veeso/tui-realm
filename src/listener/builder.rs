@@ -1,7 +1,7 @@
 //! This module exposes the [`EventListenerCfg`] which is used to build the event listener
 
-use alloc::vec::Vec;
 use alloc::boxed::Box;
+use alloc::vec::Vec;
 use core::time::Duration;
 
 #[cfg(feature = "async-ports")]

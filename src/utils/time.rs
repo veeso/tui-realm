@@ -4,7 +4,6 @@
 //! allowing the application to work in both std and no_std environments.
 
 use core::time::Duration;
-
 #[cfg(feature = "std")]
 pub use std::time::Instant;
 
@@ -66,10 +65,10 @@ mod tests {
     fn test_std_clock() {
         let clock = StdClock;
         let start = clock.now();
-        
+
         // Small delay to ensure time passes
         std::thread::sleep(Duration::from_millis(10));
-        
+
         let elapsed = clock.elapsed(start);
         assert!(elapsed >= Duration::from_millis(10));
         assert!(clock.has_elapsed(start, Duration::from_millis(5)));
@@ -82,7 +81,7 @@ mod tests {
         let instant1 = clock.now();
         std::thread::sleep(Duration::from_millis(1));
         let instant2 = clock.now();
-        
+
         assert!(instant2 > instant1);
     }
 }

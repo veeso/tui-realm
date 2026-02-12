@@ -1,12 +1,9 @@
 //! This module exposes the [`Application`], the core of `tui-realm` and its directly related types.
+use alloc::boxed::Box;
 use alloc::vec;
 use alloc::vec::Vec;
-use alloc::boxed::Box;
 use core::hash::Hash;
 use core::time::Duration;
-use crate::utils::time::Clock;
-#[cfg(feature = "std")]
-use crate::utils::time::StdClock;
 
 use ratatui::Frame;
 use thiserror::Error;
@@ -14,6 +11,9 @@ use thiserror::Error;
 use super::{Subscription, View, WrappedComponent};
 use crate::listener::{EventListener, EventListenerCfg, ListenerError, PollError};
 use crate::ratatui::layout::Rect;
+use crate::utils::time::Clock;
+#[cfg(feature = "std")]
+use crate::utils::time::StdClock;
 use crate::{
     AttrValue, Attribute, Component, Event, Injector, State, Sub, SubEventClause, ViewError,
 };
@@ -29,7 +29,7 @@ pub type ApplicationResult<T> = Result<T, ApplicationError>;
 /// It will handle events, subscriptions and the view too.
 /// It provides functions to interact with the view (mount, umount, query, etc), but also
 /// the main function: [`Application::tick`].
-/// 
+///
 /// # Type Parameters
 ///
 /// * `ComponentId` - Unique identifier type for components
@@ -524,9 +524,6 @@ where
 #[cfg(test)]
 mod test {
 
-    use crate::utils::time::Duration;
-    use crate::utils::time::Instant;
-
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -535,26 +532,24 @@ mod test {
     use crate::mock::{
         MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg, MockPoll,
     };
-    use crate::{StateValue, SubClause};    
+    use crate::utils::time::{Duration, Instant};
+    use crate::{StateValue, SubClause};
 
     // Type alias to simplify test signatures
     type TestApp = Application<MockComponentId, MockMsg, MockEvent>;
 
     /// Create a common Application with Tick that is configured to only happen once (high interval) and have the lister have a test barrier
-    fn create_app_tick_once_barrier()
-    -> (TestApp, BarrierRx) {
+    fn create_app_tick_once_barrier() -> (TestApp, BarrierRx) {
         let mut listener = listener_config_with_tick(Duration::from_secs(60));
         let barrier_rx = listener.with_test_barrier();
-        let application: TestApp =
-            Application::init(listener);
+        let application: TestApp = Application::init(listener);
 
         (application, barrier_rx)
     }
 
     #[test]
     fn should_initialize_application() {
-        let application: TestApp =
-            Application::init(listener_config());
+        let application: TestApp = Application::init(listener_config());
         assert!(application.subs.is_empty());
         assert_eq!(application.view.mounted(&MockComponentId::InputFoo), false);
         assert_eq!(application.sub_lock, false);
@@ -562,15 +557,13 @@ mod test {
 
     #[test]
     fn should_restart_listener() {
-        let mut application: TestApp =
-            Application::init(listener_config());
+        let mut application: TestApp = Application::init(listener_config());
         assert!(application.restart_listener(listener_config()).is_ok());
     }
 
     #[test]
     fn should_manipulate_components() {
-        let mut application: TestApp =
-            Application::init(listener_config());
+        let mut application: TestApp = Application::init(listener_config());
         // Mount
         assert!(
             application
@@ -664,8 +657,7 @@ mod test {
 
     #[test]
     fn should_subscribe_components() {
-        let mut application: TestApp =
-            Application::init(listener_config());
+        let mut application: TestApp = Application::init(listener_config());
         assert!(
             application
                 .mount(
@@ -765,8 +757,7 @@ mod test {
 
     #[test]
     fn should_umount_all() {
-        let mut application: TestApp =
-            Application::init(listener_config());
+        let mut application: TestApp = Application::init(listener_config());
         assert!(
             application
                 .mount(
@@ -894,8 +885,7 @@ mod test {
     fn strategy_upto_nowait_should_work() {
         let mut listener = listener_config_with_tick(Duration::from_secs(60));
         let barrier_rx = listener.with_test_barrier();
-        let mut application: TestApp =
-            Application::init(listener);
+        let mut application: TestApp = Application::init(listener);
 
         // Mount foo and bar
         assert!(
@@ -1319,8 +1309,7 @@ mod test {
     fn should_lock_ports() {
         let mut listener = listener_config_with_tick(Duration::from_millis(100));
         let barrier_rx = listener.with_test_barrier();
-        let mut application: TestApp =
-            Application::init(listener);
+        let mut application: TestApp = Application::init(listener);
         // Mount foo and bar
         assert!(
             application

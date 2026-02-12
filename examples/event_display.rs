@@ -7,7 +7,7 @@ use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    PollStrategy, State, Update, StdClock
+    PollStrategy, State, StdClock, Update,
 };
 
 // /// Enable the crossterm-async event listener.

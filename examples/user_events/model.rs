@@ -4,7 +4,7 @@
 
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
-use tuirealm::{Application, Update, StdClock};
+use tuirealm::{Application, StdClock, Update};
 
 use super::{Id, Msg, UserEvent};
 

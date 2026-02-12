@@ -11,14 +11,14 @@ mod task_pool;
 mod worker;
 
 use alloc::string::String;
+use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::TryRecvError;
+use core::time::Duration;
 // -- export
 use std::sync::mpsc;
-use alloc::sync::Arc;
+use std::sync::mpsc::TryRecvError;
 use std::thread::{self, JoinHandle};
-use core::time::Duration;
 
 use thiserror::Error;
 

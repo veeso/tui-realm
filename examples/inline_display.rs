@@ -9,7 +9,7 @@ use tuirealm::ratatui::{TerminalOptions, Viewport};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    NoUserEvent, PollStrategy, State, Update, StdClock
+    NoUserEvent, PollStrategy, State, StdClock, Update,
 };
 
 /// This Example Showcases tui-realm can be used Inline too

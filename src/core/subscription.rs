@@ -1,9 +1,9 @@
 //! This module defines the model for the Subscriptions
 use alloc::boxed::Box;
+use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::hash::Hash;
 use core::ops::Range;
-use alloc::sync::Arc;
 
 use crate::event::{KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
 use crate::{AttrValue, Attribute, Event, State};

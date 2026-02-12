@@ -41,7 +41,7 @@
 //! - `termwiz`: enable the [termwiz](https://docs.rs/termwiz/latest/termwiz/index.html) terminal backend
 //!
 //! ### For `no_std` environments (e.g., Commodore C64, embedded systems)
-//! 
+//!
 //! ```toml
 //! tuirealm = { version = "3", default-features = false, features = ["alloc", "derive", "serialize"] }
 //! ```
@@ -103,15 +103,15 @@ pub use listener::{EventListenerCfg, ListenerError};
 #[doc(hidden)]
 pub use tuirealm_derive::*;
 
-pub use self::core::application::{self, CoreApplication, ApplicationError, PollStrategy};
 #[cfg(feature = "std")]
 pub use self::core::application::Application;
+pub use self::core::application::{self, ApplicationError, CoreApplication, PollStrategy};
 pub use self::core::event::{self, Event, NoUserEvent};
 pub use self::core::injector::Injector;
 pub use self::core::props::{self, AttrValue, Attribute, Props};
 pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
+pub use self::core::{Component, MockComponent, State, StateValue, Update, ViewError, command};
+pub use self::ratatui::Frame;
 pub use self::utils::time::Clock;
 #[cfg(feature = "std")]
 pub use self::utils::time::StdClock;
-pub use self::core::{Component, MockComponent, State, StateValue, Update, ViewError, command};
-pub use self::ratatui::Frame;

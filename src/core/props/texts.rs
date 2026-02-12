@@ -2,6 +2,7 @@
 //! It also provides some helpers and builders to facilitate the use of builders.
 use alloc::vec;
 use alloc::vec::Vec;
+
 use crate::ratatui::layout::Alignment;
 use crate::ratatui::widgets::TitlePosition;
 

@@ -13,7 +13,7 @@ use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    PollStrategy, Props, State, Sub, SubClause, SubEventClause, Update, StdClock
+    PollStrategy, Props, State, StdClock, Sub, SubClause, SubEventClause, Update,
 };
 
 #[tokio::main]
