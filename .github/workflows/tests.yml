@@ -28,7 +28,7 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - name: Clippy all features
-        run: cargo clippy --all-targets --features std,async-ports,derive-serialize,termion,termiwiz  -- -Dwarnings
+        run: cargo clippy --all-targets --features std,async-ports,derive,serialize,termion,termwiz  -- -Dwarnings
       - name: Clippy all features (nostd)
         run: cargo clippy --all-targets --no-default-features --features derive  -- -Dwarnings
       - name: Clippy all features (alloc)
@@ -68,10 +68,10 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Cargo Check
-        run: cargo build --features async-ports,serialize,derive,termion,termiwiz,crossterm
+        run: cargo build --features async-ports,serialize,derive,termion,termwiz,crossterm
       - name: Test
         # This tests both crossterm, termion and termwiz
-        run: cargo llvm-cov --no-fail-fast --features async-ports,serialize,derive,termion,termiwiz,crossterm --workspace --lcov --output-path lcov.info --no-cfg-coverage
+        run: cargo llvm-cov --no-fail-fast --features async-ports,serialize,derive,termion,termwiz,crossterm --workspace --lcov --output-path lcov.info --no-cfg-coverage
       - name: Coveralls
         uses: coverallsapp/github-action@v2.3.6
         with:
@@ -129,10 +129,10 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Cargo Check
-        run: cargo build --features async-ports,serialize,derive,termion,termiwiz,crossterm
+        run: cargo build --features async-ports,serialize,derive,termion,termwiz,crossterm
       - name: Test
         # This tests both crossterm, termion and termwiz
-        run: cargo llvm-cov --no-fail-fast --features async-ports,serialize,derive,termion,termiwiz,crossterm --workspace --lcov --output-path lcov.info --no-cfg-coverage
+        run: cargo llvm-cov --no-fail-fast --features async-ports,serialize,derive,termion,termwiz,crossterm --workspace --lcov --output-path lcov.info --no-cfg-coverage
       - name: Coveralls
         uses: coverallsapp/github-action@v2.3.6
         with:
