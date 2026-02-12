@@ -527,7 +527,7 @@ mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::core::clock::{Duration, Instant};
+    use crate::core::clock::Instant;
     use crate::event::{Key, KeyEvent};
     use crate::listener::builder::test_utils::BarrierRx;
     use crate::mock::{
