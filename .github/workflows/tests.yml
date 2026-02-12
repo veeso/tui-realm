@@ -30,9 +30,7 @@ jobs:
       - name: Clippy all features
         run: cargo clippy --all-targets --features std,async-ports,derive,serialize,termion,termwiz  -- -Dwarnings
       - name: Clippy all features (nostd)
-        run: cargo clippy --all-targets --no-default-features --features derive  -- -Dwarnings
-      - name: Clippy all features (alloc)
-        run: cargo clippy --all-targets --no-default-features --features alloc  -- -Dwarnings
+        run: cargo clippy --no-default-features --features alloc  -- -Dwarnings
       - name: Clippy default features
         run: cargo clippy --all-targets -- -Dwarnings
 

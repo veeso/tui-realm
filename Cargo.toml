@@ -43,6 +43,7 @@ termwiz = { version = "0.23", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "^1"
+tempfile = "3"
 tokio = { version = "1", features = ["full"] }
 toml = "^0.9"
 

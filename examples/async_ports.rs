@@ -13,7 +13,7 @@ use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    PollStrategy, Props, State, StdClock, Sub, SubClause, SubEventClause, Update,
+    PollStrategy, Props, State, Sub, SubClause, SubEventClause, Update,
 };
 
 #[tokio::main]
@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .async_crossterm_input_listener(Duration::default(), 3)
         .add_async_port(Box::new(AsyncPort::new()), Duration::from_millis(1000), 1);
 
-    let mut app: Application<Id, Msg, UserEvent, StdClock> = Application::init(event_listener);
+    let mut app: Application<Id, Msg, UserEvent> = Application::init(event_listener);
 
     // subscribe component to clause
     app.mount(
@@ -101,7 +101,7 @@ impl PartialEq for UserEvent {
 
 pub struct Model {
     /// Application
-    pub app: Application<Id, Msg, UserEvent, StdClock>,
+    pub app: Application<Id, Msg, UserEvent>,
     /// Indicates that the application must quit
     pub quit: bool,
     /// Tells whether to redraw interface
@@ -119,7 +119,7 @@ impl Model {
         Ok(adapter)
     }
 
-    pub fn new(app: Application<Id, Msg, UserEvent, StdClock>) -> TerminalResult<Self> {
+    pub fn new(app: Application<Id, Msg, UserEvent>) -> TerminalResult<Self> {
         Ok(Self {
             app,
             quit: false,

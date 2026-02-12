@@ -527,12 +527,12 @@ mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
+    use crate::core::clock::{Duration, Instant};
     use crate::event::{Key, KeyEvent};
     use crate::listener::builder::test_utils::BarrierRx;
     use crate::mock::{
         MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg, MockPoll,
     };
-    use crate::utils::time::{Duration, Instant};
     use crate::{StateValue, SubClause};
 
     // Type alias to simplify test signatures
