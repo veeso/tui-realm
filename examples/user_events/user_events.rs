@@ -6,8 +6,7 @@ use std::time::{Duration, SystemTime};
 use components::Label;
 use tuirealm::listener::{Poll, PortResult};
 use tuirealm::{
-    Application, Event, EventListenerCfg, PollStrategy, StdClock, Sub, SubClause, SubEventClause,
-    Update,
+    Application, Event, EventListenerCfg, PollStrategy, Sub, SubClause, SubEventClause, Update,
 };
 
 use crate::model::Model;
@@ -54,7 +53,7 @@ fn main() {
         .crossterm_input_listener(Duration::from_millis(10), 3)
         .add_port(Box::new(UserDataPort), Duration::from_millis(1000), 1);
 
-    let mut app: Application<Id, Msg, UserEvent, StdClock> = Application::init(event_listener);
+    let mut app: Application<Id, Msg, UserEvent> = Application::init(event_listener);
 
     let _clause = tuirealm::subclause_and!(Id::Label, Id::Other);
     let _clause = tuirealm::subclause_or!(Id::Label, Id::Other);

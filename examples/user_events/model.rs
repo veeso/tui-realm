@@ -4,13 +4,13 @@
 
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
-use tuirealm::{Application, StdClock, Update};
+use tuirealm::{Application, Update};
 
 use super::{Id, Msg, UserEvent};
 
 pub struct Model {
     /// Application
-    pub app: Application<Id, Msg, UserEvent, StdClock>,
+    pub app: Application<Id, Msg, UserEvent>,
     /// Indicates that the application must quit
     pub quit: bool,
     /// Tells whether to redraw interface
@@ -28,7 +28,7 @@ impl Model {
         Ok(adapter)
     }
 
-    pub fn new(app: Application<Id, Msg, UserEvent, StdClock>) -> TerminalResult<Self> {
+    pub fn new(app: Application<Id, Msg, UserEvent>) -> TerminalResult<Self> {
         Ok(Self {
             app,
             quit: false,

@@ -9,7 +9,7 @@ use tuirealm::ratatui::{TerminalOptions, Viewport};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    NoUserEvent, PollStrategy, State, StdClock, Update,
+    NoUserEvent, PollStrategy, State, Update,
 };
 
 /// This Example Showcases tui-realm can be used Inline too
@@ -18,7 +18,7 @@ use tuirealm::{
 /// 1. Create the Terminal with options [`Viewport::Inline`]
 /// 2. Dont enter Alternate Screen
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut app: Application<Id, Msg, NoUserEvent, StdClock> = Application::init(
+    let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
         EventListenerCfg::default()
             .crossterm_input_listener(Duration::from_millis(10), 3)
             .tick_interval(Duration::from_millis(500)),
@@ -91,7 +91,7 @@ where
     T: TerminalAdapter,
 {
     /// Application
-    pub app: Application<Id, Msg, NoUserEvent, StdClock>,
+    pub app: Application<Id, Msg, NoUserEvent>,
     /// Indicates that the application must quit
     pub quit: bool,
     /// Tells whether to redraw interface
@@ -104,7 +104,7 @@ impl<T> Model<T>
 where
     T: TerminalAdapter,
 {
-    pub fn new(app: Application<Id, Msg, NoUserEvent, StdClock>, mut adapter: T) -> Self {
+    pub fn new(app: Application<Id, Msg, NoUserEvent>, mut adapter: T) -> Self {
         // Second most important change compared to normal: Dont enter Alternate Screen
         adapter.enable_raw_mode().expect("Enabling rawmode");
         Self {
