@@ -423,6 +423,35 @@ mod test {
     }
 
     #[test]
+    fn worker_run_should_exit_on_channel_error() {
+        let (tx, rx) = mpsc::channel();
+        let paused = Arc::new(AtomicBool::new(true));
+        let paused_t = Arc::clone(&paused);
+        let running = Arc::new(AtomicBool::new(true));
+        let running_t = Arc::clone(&running);
+        let mut worker: EventListenerWorker<NoUserEvent> = EventListenerWorker::<NoUserEvent>::new(
+            vec![SyncPort::new(
+                Box::new(MockPoll::default()),
+                Duration::ZERO,
+                1,
+            )],
+            tx,
+            paused_t,
+            running_t,
+            Some(Duration::from_secs(1)),
+        );
+        assert_eq!(worker.ports.len(), 1);
+        paused.store(false, Ordering::Relaxed);
+
+        drop(rx);
+
+        // verify that "poll" will return a error on channel closure, before potentially infinitely running "run"
+        assert!(worker.poll().is_err());
+
+        worker.run();
+    }
+
+    #[test]
     fn should_only_gather_specific_amount() {
         // this test specifically tests what happens when a Port returns "Ok(None)"
         #[derive(Debug)]
