@@ -1,12 +1,13 @@
 //! This module exposes the prop values
-
-use std::any::Any;
-use std::collections::{HashMap, LinkedList};
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::any::Any;
 
 use super::{
     Color, HorizontalAlignment, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic,
     VerticalAlignment,
 };
+use crate::core::compat::{HashMap, LinkedList};
 use crate::props::AnyPropBox;
 
 // -- Prop value
@@ -834,11 +835,10 @@ impl PropValue {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use pretty_assertions::{assert_eq, assert_ne};
 
     use super::*;
+    use crate::core::compat::HashMap;
     use crate::props::PropBound;
     use crate::ratatui::widgets::canvas::Map;
 

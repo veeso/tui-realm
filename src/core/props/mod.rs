@@ -1,6 +1,7 @@
 //! The `props` module exposes the Properties supported by the components and all the values they can get.
+use alloc::string::String;
 
-use std::collections::HashMap;
+use crate::core::compat::HashMap;
 
 // -- modules
 mod any;

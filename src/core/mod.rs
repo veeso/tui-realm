@@ -1,7 +1,9 @@
 //! Core implements the core functionalities and types for tui-realm
 
 pub mod application;
+pub mod clock;
 pub mod command;
+mod compat;
 mod component;
 pub mod event;
 pub mod injector;

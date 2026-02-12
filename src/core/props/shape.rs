@@ -1,4 +1,6 @@
 //! This module exposes the shape attribute type
+use alloc::string::String;
+use alloc::vec::Vec;
 
 use super::Color;
 use crate::ratatui::widgets::canvas::{Line, Map, Rectangle};

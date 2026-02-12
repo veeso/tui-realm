@@ -1,11 +1,15 @@
 //! This module exposes the [`EventListenerCfg`] which is used to build the event listener
 
+use alloc::boxed::Box;
+use alloc::vec::Vec;
+use core::time::Duration;
+
 #[cfg(feature = "async-ports")]
 use tokio::runtime::Handle;
 
 #[cfg(feature = "async-ports")]
 use super::AsyncPort;
-use super::{Duration, EventListener, ListenerError, Poll, SyncPort};
+use super::{EventListener, ListenerError, Poll, SyncPort};
 
 #[cfg(test)]
 pub mod test_utils {
@@ -169,7 +173,7 @@ where
         let sync_tick_interval = self.tick_interval;
         #[cfg(feature = "async-ports")]
         let sync_tick_interval = self.tick_interval.take_if(|_| !self.async_tick);
-        let mut res = EventListener::new();
+        let mut res = EventListener::<UserEvent>::new();
 
         #[cfg(test)]
         res.with_test_barrier(self.barrier);

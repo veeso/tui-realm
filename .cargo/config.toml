@@ -1,0 +1,3 @@
+[alias]
+lint = "clippy --all-targets --features std,async-ports,derive,serialize,termion,termwiz  -- -Dwarnings"
+lint_nostd = "clippy --no-default-features --features alloc  -- -Dwarnings"

@@ -1,4 +1,5 @@
 //! `events` contains all the types related to [`Event`].
+use alloc::string::String;
 
 use bitflags::bitflags;
 #[cfg(feature = "serialize")]

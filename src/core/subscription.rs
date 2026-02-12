@@ -1,8 +1,9 @@
 //! This module defines the model for the Subscriptions
-
-use std::hash::Hash;
-use std::ops::Range;
-use std::sync::Arc;
+use alloc::boxed::Box;
+use alloc::sync::Arc;
+use alloc::vec::Vec;
+use core::hash::Hash;
+use core::ops::Range;
 
 use crate::event::{KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
 use crate::{AttrValue, Attribute, Event, State};
@@ -164,7 +165,7 @@ where
             EventClause::Tick => ev.as_tick(),
             EventClause::User(u) => Some(u) == ev.as_user(),
             EventClause::Discriminant(u) => {
-                Some(std::mem::discriminant(u)) == ev.as_user().map(|u| std::mem::discriminant(u))
+                Some(core::mem::discriminant(u)) == ev.as_user().map(|u| core::mem::discriminant(u))
             }
         }
     }

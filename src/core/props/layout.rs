@@ -1,4 +1,5 @@
 //! This module exposes the layout type
+use alloc::vec::Vec;
 
 use crate::ratatui::layout::{Constraint, Direction, Layout as TuiLayout, Margin, Rect};
 

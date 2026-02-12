@@ -1,5 +1,5 @@
+use alloc::sync::Arc;
 use std::io::Write;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicU8, Ordering};
 
 use crossterm::event::{DisableMouseCapture, EnableMouseCapture};

@@ -1,7 +1,7 @@
 //! This module exposes the input type
 
-use std::fmt;
-use std::str::FromStr;
+use core::fmt;
+use core::str::FromStr;
 
 use crate::utils::parser::{parse_color, parse_email, parse_phone_number};
 

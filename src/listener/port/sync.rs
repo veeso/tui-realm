@@ -1,7 +1,9 @@
-use std::ops::Add as _;
-use std::time::{Duration, Instant};
+use alloc::boxed::Box;
+use core::ops::Add as _;
+use core::time::Duration;
 
 use crate::Event;
+use crate::core::clock::Instant;
 use crate::listener::{Poll, PortResult};
 
 /// A port is a wrapper around the [`Poll`] trait object, which also defines a interval, which defines

@@ -1,5 +1,6 @@
-use std::any::Any;
-use std::fmt::Debug;
+use alloc::boxed::Box;
+use core::any::Any;
+use core::fmt::Debug;
 
 use dyn_clone::DynClone;
 

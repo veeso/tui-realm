@@ -1,6 +1,7 @@
 //! properties injector
 
-use std::hash::Hash;
+use alloc::vec::Vec;
+use core::hash::Hash;
 
 use super::props::{AttrValue, Attribute};
 
