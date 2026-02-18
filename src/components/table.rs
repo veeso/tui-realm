@@ -1,6 +1,4 @@
-//! ## Table
-//!
-//! `Table` represents a read-only textual table component which can be scrollable through arrows or inactive
+//! `Table` represents a read-only textual table component which can be scrollable through arrows or inactive.
 
 use std::cmp::max;
 
@@ -22,23 +20,22 @@ use crate::utils::{self, borrow_clone_line};
 
 // -- States
 
+/// The state that has to be kept for the [`Table`] component.
 #[derive(Default)]
 pub struct TableStates {
-    pub list_index: usize, // Index of selected item in textarea
-    pub list_len: usize,   // Lines in text area
+    /// Index of selected item in textarea
+    pub list_index: usize,
+    /// Lines in text area
+    pub list_len: usize,
 }
 
 impl TableStates {
-    /// ### set_list_len
-    ///
-    /// Set list length
+    /// Set list length.
     pub fn set_list_len(&mut self, len: usize) {
         self.list_len = len;
     }
 
-    /// ### incr_list_index
-    ///
-    /// Incremenet list index
+    /// Incremenet list index.
     pub fn incr_list_index(&mut self, rewind: bool) {
         // Check if index is at last element
         if self.list_index + 1 < self.list_len {
@@ -48,9 +45,7 @@ impl TableStates {
         }
     }
 
-    /// ### decr_list_index
-    ///
-    /// Decrement list index
+    /// Decrement list index.
     pub fn decr_list_index(&mut self, rewind: bool) {
         // Check if index is bigger than 0
         if self.list_index > 0 {
@@ -60,9 +55,7 @@ impl TableStates {
         }
     }
 
-    /// ### fix_list_index
-    ///
-    /// Keep index if possible, otherwise set to lenght - 1
+    /// Keep index if possible, otherwise set to `lenght - 1`.
     pub fn fix_list_index(&mut self) {
         if self.list_index >= self.list_len && self.list_len > 0 {
             self.list_index = self.list_len - 1;
@@ -71,16 +64,12 @@ impl TableStates {
         }
     }
 
-    /// ### list_index_at_first
-    ///
-    /// Set list index to the first item in the list
+    /// Set list index to the first item in the list.
     pub fn list_index_at_first(&mut self) {
         self.list_index = 0;
     }
 
-    /// ### list_index_at_last
-    ///
-    /// Set list index at the last item of the list
+    /// Set list index at the last item of the list.
     pub fn list_index_at_last(&mut self) {
         if self.list_len > 0 {
             self.list_index = self.list_len - 1;
@@ -89,9 +78,7 @@ impl TableStates {
         }
     }
 
-    /// ### calc_max_step_ahead
-    ///
-    /// Calculate the max step ahead to scroll list
+    /// Calculate the max step ahead to scroll list.
     #[must_use]
     pub fn calc_max_step_ahead(&self, max: usize) -> usize {
         let remaining: usize = match self.list_len {
@@ -101,9 +88,7 @@ impl TableStates {
         if remaining > max { max } else { remaining }
     }
 
-    /// ### calc_max_step_ahead
-    ///
-    /// Calculate the max step ahead to scroll list
+    /// Calculate the max step ahead to scroll list.
     #[must_use]
     pub fn calc_max_step_behind(&self, max: usize) -> usize {
         if self.list_index > max {
@@ -116,9 +101,7 @@ impl TableStates {
 
 // -- Component
 
-/// ## Table
-///
-/// represents a read-only text component without any container.
+/// `Table` represents a read-only textual table component which can be scrollable through arrows or inactive.
 #[derive(Default)]
 #[must_use]
 pub struct Table {
