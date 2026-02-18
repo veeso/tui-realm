@@ -29,7 +29,6 @@ rand = "0.10"
 [features]
 default = ["crossterm"]
 crossterm = ["tuirealm/crossterm"]
-termion = ["tuirealm/termion"]
 
 [[example]]
 name = "bar_chart"
