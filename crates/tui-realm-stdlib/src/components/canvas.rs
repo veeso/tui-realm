@@ -1,6 +1,4 @@
-//! ## Canvas
-//!
-//! A canvas where you can draw more complex figures
+//! A canvas where you can draw more complex figures.
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
@@ -26,9 +24,7 @@ use super::props::{
 
 // -- Component
 
-/// ## Canvas
-///
-/// The Canvas widget may be used to draw more detailed figures using braille patterns (each cell can have a braille character in 8 different positions).
+/// The Canvas component may be used to draw more detailed figures using braille patterns (each cell can have a braille character in 8 different positions).
 #[derive(Default)]
 #[must_use]
 pub struct Canvas {
@@ -89,12 +85,12 @@ impl Canvas {
         self
     }
 
-    /// From <https://github.com/fdehau/tui-rs/issues/286>:
+    /// Those are used to define the viewport of the canvas.
+    /// Only the points whose coordinates are within the viewport are displayed.
+    /// When you render the canvas using Frame::render_widget, you give an area to draw the widget to (a Rect) and
+    /// the crate translates the floating point coordinates to those used by our internal terminal representation.
     ///
-    /// > Those are used to define the viewport of the canvas.
-    /// > Only the points whose coordinates are within the viewport are displayed.
-    /// > When you render the canvas using Frame::render_widget, you give an area to draw the widget to (a Rect) and
-    /// > the crate translates the floating point coordinates to those used by our internal terminal representation.
+    /// From <https://github.com/fdehau/tui-rs/issues/286>, also read [`Canvas::x_bounds`](TuiCanvas::x_bounds).
     pub fn x_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.attr(
             Attribute::Custom(CANVAS_X_BOUNDS),
@@ -106,12 +102,12 @@ impl Canvas {
         self
     }
 
-    /// From <https://github.com/fdehau/tui-rs/issues/286>:
+    /// Those are used to define the viewport of the canvas.
+    /// Only the points whose coordinates are within the viewport are displayed.
+    /// When you render the canvas using Frame::render_widget, you give an area to draw the widget to (a Rect) and
+    /// the crate translates the floating point coordinates to those used by our internal terminal representation.
     ///
-    /// > Those are used to define the viewport of the canvas.
-    /// > Only the points whose coordinates are within the viewport are displayed.
-    /// > When you render the canvas using Frame::render_widget, you give an area to draw the widget to (a Rect) and
-    /// > the crate translates the floating point coordinates to those used by our internal terminal representation.
+    /// From <https://github.com/fdehau/tui-rs/issues/286>, also read [`Canvas::y_bounds`](TuiCanvas::y_bounds).
     pub fn y_bounds(mut self, bounds: (f64, f64)) -> Self {
         self.attr(
             Attribute::Custom(CANVAS_Y_BOUNDS),
@@ -123,7 +119,7 @@ impl Canvas {
         self
     }
 
-    /// Set marker to use to draw on canvas
+    /// Set which kind of [`Marker`] type should be used for a point.
     pub fn marker(mut self, marker: Marker) -> Self {
         self.attr(
             Attribute::Custom(CANVAS_MARKER),
@@ -167,7 +163,7 @@ impl Canvas {
         }
     }
 
-    /// Draw a shape into the canvas `Context`
+    /// Draw a shape into the canvas `Context`.
     fn draw_shape(ctx: &mut Context, shape: &Shape) {
         match shape {
             Shape::Label((x, y, label, color)) => {
