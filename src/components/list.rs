@@ -1,6 +1,4 @@
-//! ## List
-//!
-//! `List` represents a read-only textual list component which can be scrollable through arrows or inactive
+//! `List` represents a read-only textual list component which can be scrollable through arrows or inactive.
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
@@ -18,23 +16,22 @@ use crate::utils::{self, borrow_clone_line};
 
 // -- States
 
+/// The state that needs to be kept for the [`List`] componennt:
 #[derive(Default)]
 pub struct ListStates {
-    pub list_index: usize, // Index of selected item in list
-    pub list_len: usize,   // Lines in text area
+    /// Index of selected item in list
+    pub list_index: usize,
+    /// Lines in text area
+    pub list_len: usize,
 }
 
 impl ListStates {
-    /// ### set_list_len
-    ///
-    /// Set list length
+    /// Set the list length.
     pub fn set_list_len(&mut self, len: usize) {
         self.list_len = len;
     }
 
-    /// ### incr_list_index
-    ///
-    /// Incremenet list index
+    /// Incremenet the list index.
     pub fn incr_list_index(&mut self, rewind: bool) {
         // Check if index is at last element
         if self.list_index + 1 < self.list_len {
@@ -44,9 +41,7 @@ impl ListStates {
         }
     }
 
-    /// ### decr_list_index
-    ///
-    /// Decrement list index
+    /// Decrement the list index.
     pub fn decr_list_index(&mut self, rewind: bool) {
         // Check if index is bigger than 0
         if self.list_index > 0 {
@@ -56,9 +51,7 @@ impl ListStates {
         }
     }
 
-    /// ### fix_list_index
-    ///
-    /// Keep index if possible, otherwise set to lenght - 1
+    /// Keep index if possible, otherwise set to `lenght - 1`.
     pub fn fix_list_index(&mut self) {
         if self.list_index >= self.list_len && self.list_len > 0 {
             self.list_index = self.list_len - 1;
@@ -67,16 +60,12 @@ impl ListStates {
         }
     }
 
-    /// ### list_index_at_first
-    ///
-    /// Set list index to the first item in the list
+    /// Set the list index to the first item in the list.
     pub fn list_index_at_first(&mut self) {
         self.list_index = 0;
     }
 
-    /// ### list_index_at_last
-    ///
-    /// Set list index at the last item of the list
+    /// Set the list index at the last item of the list.
     pub fn list_index_at_last(&mut self) {
         if self.list_len > 0 {
             self.list_index = self.list_len - 1;
@@ -85,9 +74,7 @@ impl ListStates {
         }
     }
 
-    /// ### calc_max_step_ahead
-    ///
-    /// Calculate the max step ahead to scroll list
+    /// Calculate the max step ahead to scroll the list.
     #[must_use]
     pub fn calc_max_step_ahead(&self, max: usize) -> usize {
         let remaining: usize = match self.list_len {
@@ -97,9 +84,7 @@ impl ListStates {
         if remaining > max { max } else { remaining }
     }
 
-    /// ### calc_max_step_ahead
-    ///
-    /// Calculate the max step ahead to scroll list
+    /// Calculate the max step ahead to scroll the list.
     #[must_use]
     pub fn calc_max_step_behind(&self, max: usize) -> usize {
         if self.list_index > max {
@@ -112,9 +97,7 @@ impl ListStates {
 
 // -- Component
 
-/// ## List
-///
-/// represents a read-only text component without any container.
+/// `List` represents a read-only textual list component which can be scrollable through arrows or inactive.
 #[derive(Default)]
 #[must_use]
 pub struct List {
