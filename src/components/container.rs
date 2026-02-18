@@ -1,10 +1,4 @@
-//! ## Container
-//!
 //! `Container` represents an empty container where you can put other components into it.
-//! It will render components based on how you defined the layout.
-//! The way it updates properties is usually assigning the attributes to all the children components, but
-//! when defining the component you can override these behaviours implementing `attr()` by yourself.
-//! By default it will forward `Commands' to all the children and will return a `CmdResult::Batch` with all the results.
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{AttrValue, Attribute, Borders, Color, Layout, Props, Style, Title};
@@ -15,9 +9,12 @@ use crate::prop_ext::CommonProps;
 
 // -- Component
 
-/// ## Container
+/// `Container` represents an empty container where you can put other components into it.
 ///
-/// represents a read-only text component without any container.
+/// It will render components based on how you defined the layout.
+/// The way it updates properties is usually by assigning the attributes to all the children components, but
+/// when defining the component you can override these behaviours by implementing `attr()` yourself and directly accessing `children`'s `attr()`.
+/// By default it will forward `Commands' to all the children and will return a `CmdResult::Batch` with all the results.
 #[must_use]
 pub struct Container {
     common: CommonProps,
