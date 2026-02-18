@@ -1,12 +1,10 @@
-//! ## Dataset
-//!
-//! `Dataset` is a wrapper for tui dataset
-
 use tuirealm::props::{LineStatic, Style};
 use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::widgets::{Dataset as TuiDataset, GraphType};
 
-/// Dataset describes a set of data for a chart
+/// Dataset describes a set of data for a chart.
+///
+/// This mainly exists to map to ratatui's [`Dataset`](TuiDataset), which does not allow owned data.
 #[derive(Clone, Debug)]
 pub struct ChartDataset {
     pub name: LineStatic,
@@ -29,59 +27,63 @@ impl Default for ChartDataset {
 }
 
 impl ChartDataset {
-    /// Set name for dataset
+    /// Set a name for the dataset.
     pub fn name<S: Into<LineStatic>>(mut self, name: S) -> Self {
         self.name = name.into();
         self
     }
 
-    /// Set marker type for dataset
+    /// Set the [`Marker`] type for the dataset.
     pub fn marker(mut self, m: Marker) -> Self {
         self.marker = m;
         self
     }
 
-    /// Set graphtype for dataset
+    /// Set the [`GraphType`] for the dataset.
     pub fn graph_type(mut self, g: GraphType) -> Self {
         self.graph_type = g;
         self
     }
 
-    /// Set style for dataset
+    /// Set Style for the dataset.
+    ///
+    /// This style is used for the data points and the legenend (if not overwritten by the text's style).
+    ///
+    /// Read more in [`Dataset::style`](TuiDataset::style).
     pub fn style(mut self, s: Style) -> Self {
         self.style = s;
         self
     }
 
-    /// Set data for dataset; must be a vec of (f64, f64)
+    /// Set the data for this dataset.
     pub fn data(mut self, data: Vec<(f64, f64)>) -> Self {
         self.data = data;
         self
     }
 
-    /// Push a record to the back of dataset
+    /// Push a new point to the back of this dataset.
     pub fn push(&mut self, point: (f64, f64)) {
         self.data.push(point);
     }
 
-    /// Pop last element of dataset
+    /// Pop the last point from this dataset.
     pub fn pop(&mut self) {
         self.data.pop();
     }
 
-    /// Pop last element of dataset
+    /// Pop the first point in this dataset.
     pub fn pop_front(&mut self) {
         if !self.data.is_empty() {
             self.data.remove(0);
         }
     }
 
-    /// Get a reference to data
+    /// Get a reference to the data.
     pub fn get_data(&self) -> &[(f64, f64)] {
         &self.data
     }
 
-    /// Create [`TuiDataset`] from the current [`ChartDataset`].
+    /// Create ratatui [`Dataset`](TuiDataset) from the current [`ChartDataset`].
     ///
     /// Only elements from `start` are included.
     pub fn as_tuichart<'a>(&'a self, start: usize) -> TuiDataset<'a> {
@@ -103,12 +105,7 @@ impl PartialEq for ChartDataset {
 
 impl<'a> From<&'a ChartDataset> for TuiDataset<'a> {
     fn from(data: &'a ChartDataset) -> TuiDataset<'a> {
-        TuiDataset::default()
-            .name(data.name.clone())
-            .marker(data.marker)
-            .graph_type(data.graph_type)
-            .style(data.style)
-            .data(data.get_data())
+        data.as_tuichart(0)
     }
 }
 

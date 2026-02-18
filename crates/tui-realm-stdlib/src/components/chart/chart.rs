@@ -1,5 +1,3 @@
-//! ## Chart
-//!
 //! A component to plot one or more dataset in a cartesian coordinate system
 
 use std::any::Any;
@@ -24,9 +22,7 @@ use crate::props::{
     CHART_Y_STYLE, CHART_Y_TITLE,
 };
 
-/// ### ChartStates
-///
-/// chart states
+/// The state that needs to be kepts for the [`Chart`] component.
 #[derive(Default)]
 pub struct ChartStates {
     pub cursor: usize,
@@ -34,34 +30,26 @@ pub struct ChartStates {
 }
 
 impl ChartStates {
-    /// ### move_cursor_left
-    ///
-    /// Move cursor to the left
+    /// Move cursor to the left.
     pub fn move_cursor_left(&mut self) {
         if self.cursor > 0 {
             self.cursor -= 1;
         }
     }
 
-    /// ### move_cursor_right
-    ///
-    /// Move cursor to the right
+    /// Move cursor to the right.
     pub fn move_cursor_right(&mut self, data_len: usize) {
         if data_len > 0 && self.cursor + 1 < data_len {
             self.cursor += 1;
         }
     }
 
-    /// ### reset_cursor
-    ///
-    /// Reset cursor to 0
+    /// Reset cursor to 0.
     pub fn reset_cursor(&mut self) {
         self.cursor = 0;
     }
 
-    /// ### cursor_at_end
-    ///
-    /// Move cursor to the end of the chart
+    /// Move cursor to the end of the chart.
     pub fn cursor_at_end(&mut self, data_len: usize) {
         if data_len > 0 {
             self.cursor = data_len - 1;
@@ -73,19 +61,17 @@ impl ChartStates {
 
 // -- component
 
-/// ### Chart
-///
 /// A component to display a chart on a cartesian coordinate system.
 /// The chart can work both in "active" and "disabled" mode.
 ///
-/// #### Disabled mode
+/// ## Disabled mode
 ///
 /// When in disabled mode, the chart won't be interactive, so you won't be able to move through data using keys.
-/// If you have more data than the maximum amount of bars that can be displayed, you'll have to update data to display the remaining entries
+/// If you have more data than the maximum amount of bars that can be displayed, you'll have to update data to display the remaining entries.
 ///
-/// #### Active mode
+/// ## Active mode
 ///
-/// While in active mode (default) you can put as many entries as you wish. You can move with arrows and END/HOME keys
+/// While in active mode (default) you can put as many entries as you wish. You can move with [`Cmd::Move`] or [`Cmd::GoTo`].
 #[derive(Default)]
 #[must_use]
 pub struct Chart {
@@ -227,11 +213,13 @@ impl Chart {
         self
     }
 
+    /// Overwrite the data in this Chart, also applies all resets necessary.
     fn set_data(&mut self, data: Vec<ChartDataset>) {
         self.states.data = data;
         self.states.reset_cursor();
     }
 
+    /// Determine if the [`Attribute::Disabled`] is enabled.
     fn is_disabled(&self) -> bool {
         self.props
             .get_or(Attribute::Disabled, AttrValue::Flag(false))
