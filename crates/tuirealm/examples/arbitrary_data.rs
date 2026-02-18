@@ -15,7 +15,7 @@ use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    NoUserEvent, PollStrategy, Props, State, Update,
+    NoUserEvent, PollStrategy, Props, State,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -129,7 +129,7 @@ impl Model {
 
 // Let's implement Update for model
 
-impl Update<Msg> for Model {
+impl Model {
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         if let Some(msg) = msg {
             // Set redraw

@@ -7,7 +7,7 @@ use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    PollStrategy, State, Update,
+    PollStrategy, State,
 };
 
 // /// Enable the crossterm-async event listener.
@@ -170,7 +170,7 @@ impl Model {
 
 // Let's implement Update for model
 
-impl Update<Msg> for Model {
+impl Model {
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         if let Some(msg) = msg {
             // Set redraw

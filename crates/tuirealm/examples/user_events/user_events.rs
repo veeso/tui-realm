@@ -6,7 +6,7 @@ use std::time::{Duration, SystemTime};
 use components::Label;
 use tuirealm::listener::{Poll, PortResult};
 use tuirealm::{
-    Application, Event, EventListenerCfg, PollStrategy, Sub, SubClause, SubEventClause, Update,
+    Application, Event, EventListenerCfg, PollStrategy, Sub, SubClause, SubEventClause,
 };
 
 use crate::model::Model;

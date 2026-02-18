@@ -2,9 +2,9 @@
 //!
 //! app model
 
+use tuirealm::Application;
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
-use tuirealm::{Application, Update};
 
 use super::{Id, Msg, UserEvent};
 
@@ -62,8 +62,8 @@ impl Model {
 
 // Let's implement Update for model
 
-impl Update<Msg> for Model {
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+impl Model {
+    pub fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         if let Some(msg) = msg {
             // Set redraw
             self.redraw = true;

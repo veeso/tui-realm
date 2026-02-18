@@ -7,7 +7,7 @@ extern crate tuirealm;
 use std::time::Duration;
 
 use tuirealm::application::PollStrategy;
-use tuirealm::{AttrValue, Attribute, Update};
+use tuirealm::{AttrValue, Attribute};
 // -- internal
 mod app;
 mod components;

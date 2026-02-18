@@ -366,18 +366,13 @@ The following table shows how focus works:
 
 The model is a struct which is fully defined by the user implementing a `tui-realm` application. Its only 2 required methods are the **Update routine** and **Draw routine**.
 
-We'll soon see this in detail, when we'll talk about the *application*, but for now, all we need to know is what the **Update routine** does, which is implemented via the `Update` trait:
+We'll soon see this in detail, when we'll talk about the *application*, but for now, all we need to know is what the **Update routine** does, which is implemented via `update` function:
 
 ```rust
-pub trait Update<Msg>
-where
-    Msg: PartialEq,
-{
-    /// update the current state handling a message from the view.
-    /// This function may return a Message,
-    /// so this function has to be intended to be call recursively if necessary
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg>;
-}
+/// Update the current state handling a message from the view.
+/// This function may return a Message,
+/// so this function has to be intended to be call recursively if necessary
+fn update(&mut self, msg: Option<Msg>) -> Option<Msg>;
 ```
 
 The update method, receives a mutable reference to the model(self) and potentially the incoming message from the component, which processed a certain type of event.
