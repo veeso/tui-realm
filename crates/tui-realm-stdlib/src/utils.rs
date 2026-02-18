@@ -1,5 +1,3 @@
-//! ## Utils
-//!
 //! Utilities functions to work with components
 
 use std::borrow::Cow;
@@ -10,8 +8,6 @@ use tuirealm::ratatui::text::{Line, Span, Text};
 use tuirealm::ratatui::widgets::{Block, TitlePosition};
 use unicode_width::UnicodeWidthStr;
 
-/// ### wrap_spans
-///
 /// Given a vector of [`Span`]s, it creates a list of `Spans` which mustn't exceed the provided width parameter.
 /// Each [`Line`] in the returned `Vec` is a line in the text.
 #[must_use]
@@ -62,10 +58,9 @@ pub fn wrap_spans<'a, 'b: 'a>(spans: &[&'b Span<'a>], width: usize) -> Vec<Line<
     res
 }
 
-/// ### get_block
+/// Construct a [`Block`] widget from the given properties.
 ///
-/// Construct a block for widget using block properties.
-/// If focus is true the border color is applied, otherwise inactive_style
+/// If `focus` is `true`, [`Borders::style`] is applied as the Border style, if `false` `inactive_style` is applied, if `Some`.
 #[must_use]
 pub fn get_block(
     props: Borders,
@@ -78,6 +73,7 @@ pub fn get_block(
         .border_style(if focus {
             props.style()
         } else {
+            // TODO: remove the default "Reset"
             inactive_style.unwrap_or_else(|| Style::default().fg(Color::Reset).bg(Color::Reset))
         })
         .border_type(props.modifiers);
@@ -92,9 +88,8 @@ pub fn get_block(
     block
 }
 
-/// ### calc_utf8_cursor_position
+/// Calculate the actual amount of terminal space taken up, taking into account UTF things like multi-width, undrawn and combinatory characters.
 ///
-/// Calculate the UTF8 compliant position for the cursor given the characters preceeding the cursor position.
 /// Use this function to calculate cursor position whenever you want to handle UTF8 texts with cursors
 #[must_use]
 pub fn calc_utf8_cursor_position(chars: &[char]) -> u16 {
@@ -103,7 +98,7 @@ pub fn calc_utf8_cursor_position(chars: &[char]) -> u16 {
 
 /// Convert a `&Span` to a `Span` by using [`Cow::Borrowed`].
 ///
-/// Note that a normal `Span::clone` (and by extension `Cow::clone`) will preserve the `Cow` Variant.
+/// Note that a normal [`Span::clone`] (and by extension `Cow::clone`) will preserve the `Cow` Variant.
 pub fn borrow_clone_span<'a, 'b: 'a>(span: &'b Span<'a>) -> Span<'a> {
     Span {
         style: span.style,
