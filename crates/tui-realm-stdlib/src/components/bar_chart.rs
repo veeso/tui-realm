@@ -3,7 +3,8 @@
 use std::collections::LinkedList;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Title,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
+    Title,
 };
 use tuirealm::ratatui::{layout::Rect, widgets::BarChart as TuiBarChart};
 use tuirealm::{Frame, MockComponent, State};
@@ -86,6 +87,12 @@ impl BarChart {
     /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 

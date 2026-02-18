@@ -1,7 +1,9 @@
 //! `Container` represents an empty container where you can put other components into it.
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::props::{AttrValue, Attribute, Borders, Color, Layout, Props, Style, Title};
+use tuirealm::props::{
+    AttrValue, Attribute, Borders, Color, Layout, Props, Style, TextModifiers, Title,
+};
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::{Frame, MockComponent, State};
 
@@ -46,6 +48,12 @@ impl Container {
     /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 

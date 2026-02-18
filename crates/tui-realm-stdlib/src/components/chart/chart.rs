@@ -4,7 +4,8 @@ use std::any::Any;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Title,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
+    Title,
 };
 use tuirealm::ratatui::text::Line;
 use tuirealm::ratatui::{
@@ -90,6 +91,12 @@ impl Chart {
     /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.props.set(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 
