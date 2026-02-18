@@ -2,9 +2,7 @@
 //!
 //! provides a random data generator Poll impl
 
-extern crate rand;
-
-use rand::{Rng as _, rng};
+use rand::{RngExt as _, rng};
 
 pub struct DataGen<T> {
     max: T,
