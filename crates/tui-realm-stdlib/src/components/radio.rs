@@ -1,6 +1,4 @@
-//! ## Radio
-//!
-//! `Radio` component renders a radio group
+//! `Radio` component renders a radio group.
 
 /**
  * MIT License
@@ -38,18 +36,16 @@ use crate::prop_ext::CommonProps;
 
 // -- states
 
-/// ## RadioStates
-///
-/// RadioStates contains states for this component
+/// The state that needs to be kept for the [`Radio`] component.
 #[derive(Default)]
 pub struct RadioStates {
-    pub choice: usize,        // Selected option
-    pub choices: Vec<String>, // Available choices
+    /// Selected option.
+    pub choice: usize,
+    /// Available choices.
+    pub choices: Vec<String>,
 }
 
 impl RadioStates {
-    /// ### next_choice
-    ///
     /// Move choice index to next choice
     pub fn next_choice(&mut self, rewind: bool) {
         if rewind && self.choice + 1 >= self.choices.len() {
@@ -59,9 +55,7 @@ impl RadioStates {
         }
     }
 
-    /// ### prev_choice
-    ///
-    /// Move choice index to previous choice
+    /// Move choice index to previous choice.
     pub fn prev_choice(&mut self, rewind: bool) {
         if rewind && self.choice == 0 && !self.choices.is_empty() {
             self.choice = self.choices.len() - 1;
@@ -70,11 +64,10 @@ impl RadioStates {
         }
     }
 
-    /// ### set_choices
+    /// Overwrite the choices available with new ones.
     ///
-    /// Set RadioStates choices from a vector of text spans
     /// In addition resets current selection and keep index if possible or set it to the first value
-    /// available
+    /// available.
     pub fn set_choices(&mut self, choices: impl Into<Vec<String>>) {
         self.choices = choices.into();
         // Keep index if possible
@@ -86,6 +79,7 @@ impl RadioStates {
         }
     }
 
+    /// Select a specific choice.
     pub fn select(&mut self, i: usize) {
         if i < self.choices.len() {
             self.choice = i;
@@ -95,9 +89,9 @@ impl RadioStates {
 
 // -- component
 
-/// ## Radio
+/// The radio component is a single-choice selector.
 ///
-/// Radio component represents a group of tabs to select from
+/// Use [`Checkbox`](crate::Checkbox) if a multi-choice selector is wanted.
 #[derive(Default)]
 #[must_use]
 pub struct Radio {
