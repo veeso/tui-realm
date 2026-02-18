@@ -24,7 +24,7 @@ unicode-width = "^0.2"
 
 [dev-dependencies]
 pretty_assertions = "1"
-rand = "0.9"
+rand = "0.10"
 
 [features]
 default = ["crossterm"]
