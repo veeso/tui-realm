@@ -1,7 +1,3 @@
-//! ## LineGauge
-//!
-//! `LineGauge` is a line gauge
-
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, SpanStatic, Style,
@@ -15,9 +11,11 @@ use crate::prop_ext::CommonProps;
 
 // -- Component
 
-/// ## LineGauge
+/// `LineGauge`, also known as progress bars, provides a component which shows a line which is some percent filled.
 ///
-/// provides a component which shows the progress. It is possible to set the style for the progress bar and the text shown above it.
+/// It is possible to set the style for the progress bar and the text shown above it.
+///
+/// Read more in [`LineGauge`](TuiLineGauge).
 #[derive(Default)]
 #[must_use]
 pub struct LineGauge {
