@@ -1,6 +1,4 @@
-//! ## Checkbox
-//!
-//! `Checkbox` component renders a checkbox group
+//! `Checkbox` component renders a checkbox group.
 
 /**
  * MIT License
@@ -38,20 +36,19 @@ use crate::prop_ext::CommonProps;
 
 // -- states
 
-/// ## CheckboxStates
-///
-/// CheckboxStates contains states for this component
+/// The state that needs to be kept for [`Checkbox`].
 #[derive(Default)]
 pub struct CheckboxStates {
-    pub choice: usize,         // Selected option
-    pub choices: Vec<String>,  // Available choices
-    pub selection: Vec<usize>, // Selected options
+    /// Current hover option.
+    pub choice: usize,
+    /// Available choices.
+    pub choices: Vec<String>,
+    /// Enabled options.
+    pub selection: Vec<usize>,
 }
 
 impl CheckboxStates {
-    /// ### next_choice
-    ///
-    /// Move choice index to next choice
+    /// Move choice index to next choice.
     pub fn next_choice(&mut self, rewind: bool) {
         if rewind && self.choice + 1 >= self.choices.len() {
             self.choice = 0;
@@ -60,9 +57,7 @@ impl CheckboxStates {
         }
     }
 
-    /// ### prev_choice
-    ///
-    /// Move choice index to previous choice
+    /// Move choice index to previous choice.
     pub fn prev_choice(&mut self, rewind: bool) {
         if rewind && self.choice == 0 && !self.choices.is_empty() {
             self.choice = self.choices.len() - 1;
@@ -71,9 +66,7 @@ impl CheckboxStates {
         }
     }
 
-    /// ### toggle
-    ///
-    /// Check or uncheck the option
+    /// Check or uncheck the option.
     pub fn toggle(&mut self) {
         let option = self.choice;
         if self.selection.contains(&option) {
@@ -84,25 +77,23 @@ impl CheckboxStates {
         }
     }
 
+    /// Select a specific option.
     pub fn select(&mut self, i: usize) {
         if i < self.choices.len() && !self.selection.contains(&i) {
             self.selection.push(i);
         }
     }
 
-    /// ### has
-    ///
-    /// Returns whether selection contains option
+    /// Determine if `options` is toggeled as selected.
     #[must_use]
     pub fn has(&self, option: usize) -> bool {
         self.selection.contains(&option)
     }
 
-    /// ### set_choices
+    /// Overwrite the choices available with new ones.
     ///
-    /// Set CheckboxStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
-    /// available
+    /// available.
     pub fn set_choices(&mut self, choices: impl Into<Vec<String>>) {
         self.choices = choices.into();
         // Clear selection
@@ -119,9 +110,9 @@ impl CheckboxStates {
 
 // -- component
 
-/// ## Checkbox
+/// The checkbox component is a multi-choice selector.
 ///
-/// Checkbox component represents a group of tabs to select from
+/// Use [`Radio`](crate::Radio) if a single-choice selector is wanted.
 #[derive(Default)]
 #[must_use]
 pub struct Checkbox {
