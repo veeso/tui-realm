@@ -1,7 +1,5 @@
-//! ## Select
-//!
 //! `Select` represents a select field, like in HTML. The size for the component must be 3 (border + selected) + the quantity of rows
-//! you want to display other options when opened (at least 3)
+//! you want to display other options when opened (at least 3).
 
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{
@@ -20,9 +18,7 @@ use crate::utils::borrow_clone_line;
 
 // -- states
 
-/// ## SelectStates
-///
-/// Component states
+/// The states that need to be kept for the [`Select`] component.
 #[derive(Default)]
 pub struct SelectStates {
     /// Available choices
@@ -35,9 +31,7 @@ pub struct SelectStates {
 }
 
 impl SelectStates {
-    /// ### next_choice
-    ///
-    /// Move choice index to next choice
+    /// Move choice index to next choice.
     pub fn next_choice(&mut self, rewind: bool) {
         if self.tab_open {
             if rewind && self.selected + 1 >= self.choices.len() {
@@ -48,9 +42,7 @@ impl SelectStates {
         }
     }
 
-    /// ### prev_choice
-    ///
-    /// Move choice index to previous choice
+    /// Move choice index to previous choice.
     pub fn prev_choice(&mut self, rewind: bool) {
         if self.tab_open {
             if rewind && self.selected == 0 && !self.choices.is_empty() {
@@ -61,11 +53,10 @@ impl SelectStates {
         }
     }
 
-    /// ### set_choices
+    /// Overwrite the choices available with new ones.
     ///
-    /// Set SelectStates choices from a vector of str
     /// In addition resets current selection and keep index if possible or set it to the first value
-    /// available
+    /// available.
     pub fn set_choices(&mut self, choices: impl Into<Vec<String>>) {
         self.choices = choices.into();
         // Keep index if possible
@@ -83,30 +74,24 @@ impl SelectStates {
         }
     }
 
-    /// ### close_tab
-    ///
-    /// Close tab
+    /// Close tab.
     pub fn close_tab(&mut self) {
         self.tab_open = false;
     }
 
-    /// ### open_tab
-    ///
-    /// Open tab
+    /// Open tab.
     pub fn open_tab(&mut self) {
         self.previously_selected = self.selected;
         self.tab_open = true;
     }
 
-    /// Cancel tab open
+    /// Cancel tab open.
     pub fn cancel_tab(&mut self) {
         self.close_tab();
         self.selected = self.previously_selected;
     }
 
-    /// ### is_tab_open
-    ///
-    /// Returns whether the tab is open
+    /// Returns whether the tab is open.
     #[must_use]
     pub fn is_tab_open(&self) -> bool {
         self.tab_open
@@ -115,6 +100,11 @@ impl SelectStates {
 
 // -- component
 
+/// `Select` represents a select field, like in HTML. The size for the component must be 3 (border + selected) + the quantity of rows
+/// you want to display other options when opened (at least 3).
+///
+/// Similar to [`Radio`](crate::Radio), [`Select`] is a single-choice selector, but the difference is that it does not show the selector
+/// unless the "Tab" is open, and only shows the currently selected choice.
 #[derive(Default)]
 #[must_use]
 pub struct Select {
