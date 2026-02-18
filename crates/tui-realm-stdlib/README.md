@@ -85,19 +85,14 @@ It provides several **Mock Components** for your tui-realm applications. Probabl
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
+tui-realm = "3"
 tui-realm-stdlib = "3"
 ```
 
 or if you're not using the default **crossterm backend**, specify another backend in the cargo entry:
 
 ```toml
-tui-realm-stdlib = { version = "3", default-features = false, features = [ "termion" ] }
-```
-
-Latest version of tui-realm-stdlib requires **tui-realm >= 2.0** or higher
-
-```toml
-tuirealm = "3"
+tui-realm = { version = "3", default-features = false, features = [ "termion" ] }
 ```
 
 ---
@@ -146,7 +141,7 @@ Please follow [our contributing guidelines](CONTRIBUTING.md)
 
 ## Changelog ⏳
 
-View tui-realm's changelog [HERE](CHANGELOG.md)
+View tui-realm's [Changelog](CHANGELOG.md).
 
 ---
 
@@ -154,4 +149,4 @@ View tui-realm's changelog [HERE](CHANGELOG.md)
 
 tui-realm-stdlib is licensed under the MIT license.
 
-You can read the entire license [HERE](LICENSE)
+You can read the entire [License](LICENSE).
