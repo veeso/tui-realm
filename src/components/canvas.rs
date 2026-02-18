@@ -2,7 +2,8 @@
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style, Title,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::text::Line as Spans;
@@ -45,6 +46,12 @@ impl Canvas {
     /// Set the main background color. This may get overwritten by individual text styles.
     pub fn background(mut self, bg: Color) -> Self {
         self.attr(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
         self
     }
 

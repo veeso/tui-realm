@@ -113,6 +113,12 @@ impl Radio {
         self
     }
 
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self
+    }
+
     /// Set the main style. This may get overwritten by individual text styles.
     ///
     /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
