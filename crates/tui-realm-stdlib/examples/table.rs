@@ -10,7 +10,7 @@ use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, TableBuil
 use tuirealm::ratatui::text::Line;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
-    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent, Update,
+    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent,
     application::PollStrategy,
     event::{Key, KeyEvent},
 };
@@ -117,7 +117,7 @@ fn main() {
     let _ = terminal.clear_screen();
 }
 
-impl Update<Msg> for Model {
+impl Model {
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         self.redraw = true;
         match msg.unwrap_or(Msg::None) {
