@@ -1,6 +1,4 @@
-//! # Props
-//!
-//! This module exposes components props name
+//! Custom properties for stdlib components.
 
 // -- bar-chart
 

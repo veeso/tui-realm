@@ -1,6 +1,4 @@
-//! # States
-//!
-//! This module exposes component states
+//! This module exposes all `*State` structs for all components.
 
 pub use super::{
     bar_chart::BarChartStates, chart::ChartStates, checkbox::CheckboxStates, input::InputStates,

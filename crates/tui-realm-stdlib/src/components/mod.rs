@@ -1,6 +1,4 @@
-//! ## Components
-//!
-//! `Components` provides a "standard" library of components.
+//! All components and their extra properties and state.
 
 // Modules
 mod bar_chart;
