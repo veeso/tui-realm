@@ -1,3 +1,5 @@
+//! Extra extensions to handle Properties.
+
 use tuirealm::{
     AttrValue, Attribute,
     props::{Borders, Style, Title},
