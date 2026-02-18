@@ -100,3 +100,12 @@ The wrapper `TerminalBridge` has been removed as it did not provide any benefit 
 
 Panic handlers and restore have been implemented on the backends themself now, where necessary & possible.
 For individual notes, see `Restore` and `On Panic` sections on the backends themself.
+
+### Removal of the `Update` trait
+
+To be consistent with other "external" functions like `view`, it has been decided to remove the `Update` trait as it was never actually required as a bounds anywhere.
+
+This makes it consistent with other functions like `view` which did not have a trait previously.
+This allows for customization of how the `update` function is called, for example if you dont ever returns a message for recursive processing, it can now be omitted.
+
+Migration is as simple as changing `impl Update for Model` to `impl Model` and potentially changing the visibility to `pub fn`.

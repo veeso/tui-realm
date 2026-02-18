@@ -9,7 +9,7 @@ use tuirealm::ratatui::{TerminalOptions, Viewport};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    NoUserEvent, PollStrategy, State, Update,
+    NoUserEvent, PollStrategy, State,
 };
 
 /// This Example Showcases tui-realm can be used Inline too
@@ -145,7 +145,7 @@ where
 
 // Let's implement Update for model
 
-impl<T> Update<Msg> for Model<T>
+impl<T> Model<T>
 where
     T: TerminalAdapter,
 {

@@ -10,7 +10,7 @@ use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 use tuirealm::{
-    Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause, Update,
+    Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause,
 };
 
 use super::components::{Clock, DigitCounter, Label, LetterCounter};
@@ -151,11 +151,11 @@ where
 
 // Let's implement Update for model
 
-impl<T> Update<Msg> for Model<T>
+impl<T> Model<T>
 where
     T: TerminalAdapter,
 {
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+    pub fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         if let Some(msg) = msg {
             // Set redraw
             self.redraw = true;
