@@ -1,5 +1,3 @@
-//! ## Input
-//!
 //! `Input` represents a read-write input field. This component supports different input types, input length
 //! and handles input events related to cursor position, backspace, canc, ...
 
@@ -18,6 +16,7 @@ use tuirealm::{Frame, MockComponent, State, StateValue};
 /// The number of characters [`InputStates::display_offset`] will keep in view in a single direction.
 const PREVIEW_DISTANCE: usize = 2;
 
+/// The state that needs to be kept for the [`Input`] component.
 #[derive(Default, Debug)]
 pub struct InputStates {
     /// The current input text
@@ -33,9 +32,7 @@ pub struct InputStates {
 }
 
 impl InputStates {
-    /// ### append
-    ///
-    /// Append, if possible according to input type, the character to the input vec
+    /// Append a character, if possible according to input type.
     pub fn append(&mut self, ch: char, itype: &InputType, max_len: Option<usize>) {
         // Check if max length has been reached
         if self.input.len() < max_len.unwrap_or(usize::MAX) {
@@ -47,9 +44,7 @@ impl InputStates {
         }
     }
 
-    /// ### backspace
-    ///
-    /// Delete element at cursor -1; then decrement cursor by 1
+    /// Delete the element at `cursor - 1`, then decrement cursor by 1.
     pub fn backspace(&mut self) {
         if self.cursor > 0 && !self.input.is_empty() {
             self.input.remove(self.cursor - 1);
@@ -62,18 +57,14 @@ impl InputStates {
         }
     }
 
-    /// ### delete
-    ///
-    /// Delete element at cursor
+    /// Delete element at cursor position.
     pub fn delete(&mut self) {
         if self.cursor < self.input.len() {
             self.input.remove(self.cursor);
         }
     }
 
-    /// ### incr_cursor
-    ///
-    /// Increment cursor value by one if possible
+    /// Increment cursor by one if possible. (also known as moving RIGHT)
     pub fn incr_cursor(&mut self) {
         if self.cursor < self.input.len() {
             self.cursor += 1;
@@ -95,27 +86,7 @@ impl InputStates {
         }
     }
 
-    /// ### cursoro_at_begin
-    ///
-    /// Place cursor at the begin of the input
-    pub fn cursor_at_begin(&mut self) {
-        self.cursor = 0;
-        self.display_offset = 0;
-    }
-
-    /// ### cursor_at_end
-    ///
-    /// Place cursor at the end of the input
-    pub fn cursor_at_end(&mut self) {
-        self.cursor = self.input.len();
-        self.display_offset = self.input.len().saturating_sub(
-            usize::from(self.last_width.unwrap_or_default()).saturating_sub(PREVIEW_DISTANCE),
-        );
-    }
-
-    /// ### decr_cursor
-    ///
-    /// Decrement cursor value by one if possible
+    /// Decrement cursor value by one if possible. (also known as moving LEFT)
     pub fn decr_cursor(&mut self) {
         if self.cursor > 0 {
             self.cursor -= 1;
@@ -126,8 +97,20 @@ impl InputStates {
         }
     }
 
-    /// ### update_width
-    ///
+    /// Move the cursor to the beginning of the input.
+    pub fn cursor_at_begin(&mut self) {
+        self.cursor = 0;
+        self.display_offset = 0;
+    }
+
+    /// Move the cursor the the end of the input.
+    pub fn cursor_at_end(&mut self) {
+        self.cursor = self.input.len();
+        self.display_offset = self.input.len().saturating_sub(
+            usize::from(self.last_width.unwrap_or_default()).saturating_sub(PREVIEW_DISTANCE),
+        );
+    }
+
     /// Update the last width used to display [`InputStates::input`].
     ///
     /// This is necessary to update [`InputStates::display_offset`] correctly and keep it
@@ -154,17 +137,15 @@ impl InputStates {
         }
     }
 
-    /// ### render_value
-    ///
-    /// Get value as string to render
+    /// Get the full text to render in the input, according to the [`InputType`].
     #[must_use]
     pub fn render_value(&self, itype: InputType) -> String {
         self.render_value_chars(itype).iter().collect::<String>()
     }
 
-    /// ### render_value_offset
+    /// Get the partial text to render, according to the [`InputType`].
     ///
-    /// Get value as a string to render, with the [`InputStates::display_offset`] already skipped.
+    /// Unlike [`InputStates::render_value`], this will only collect the actually displayed text in the returned String.
     #[must_use]
     pub fn render_value_offset(&self, itype: InputType) -> String {
         self.render_value_chars(itype)
@@ -173,11 +154,12 @@ impl InputStates {
             .collect()
     }
 
-    /// ### render_value_chars
+    /// Get the characters to render, according to [`InputType`].
     ///
-    /// Render value as a vec of chars
+    /// It is recommended to use [`render_value`](Self::render_value) or [`render_value_offset`](Self::render_value_offset) over this function.
     #[must_use]
     pub fn render_value_chars(&self, itype: InputType) -> Vec<char> {
+        // TODO: can we return a iterator or something to prevent this intermediary Vec?
         match itype {
             InputType::Password(ch) | InputType::CustomPassword(ch, _, _) => {
                 (0..self.input.len()).map(|_| ch).collect()
@@ -186,9 +168,7 @@ impl InputStates {
         }
     }
 
-    /// ### get_value
-    ///
-    /// Get value as string
+    /// Get the current input as a String in full, without any [`InputType`] modifications.
     #[must_use]
     pub fn get_value(&self) -> String {
         self.input.iter().collect()
@@ -197,9 +177,8 @@ impl InputStates {
 
 // -- Component
 
-/// ## Input
-///
-/// Input list component
+/// `Input` represents a read-write input field. This component supports different input types, input length
+/// and handles input events related to cursor position, backspace, canc, ...
 #[derive(Default)]
 #[must_use]
 pub struct Input {
@@ -303,9 +282,7 @@ impl Input {
             .unwrap_input_type()
     }
 
-    /// ### is_valid
-    ///
-    /// Checks whether current input is valid
+    /// Checks whether current input is valid according to the set [`InputType`].
     fn is_valid(&self) -> bool {
         let value = self.states.get_value();
         self.get_input_type().validate(value.as_str())
