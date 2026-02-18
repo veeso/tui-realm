@@ -1,5 +1,3 @@
-//! ## ProgressBar
-//!
 //! `ProgressBar` provides a component which shows the progress. It is possible to set the style for the progress bar and the text shown above it.
 
 use tuirealm::command::{Cmd, CmdResult};
@@ -14,9 +12,9 @@ use crate::prop_ext::CommonProps;
 
 // -- Component
 
-/// ## ProgressBar
-///
-/// provides a component which shows the progress. It is possible to set the style for the progress bar and the text shown above it.
+// TODO: we should remove this component in favor of just "LineGauge", as the implementation and inner workings are literally the same.
+
+/// `ProgressBar` provides a component which shows the progress. It is possible to set the style for the progress bar and the text shown above it.
 #[derive(Default)]
 #[must_use]
 pub struct ProgressBar {
