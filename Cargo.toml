@@ -23,7 +23,6 @@ tuirealm = { version = "3", default-features = false, features = ["derive"], git
 unicode-width = "^0.2"
 
 [dev-dependencies]
-crossterm = "^0.29"
 pretty_assertions = "1"
 rand = "0.9"
 
