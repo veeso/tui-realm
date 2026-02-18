@@ -1,5 +1,3 @@
-//! ## Spinner
-//!
 //! A loading spinner. You can provide the "spinning sequence". At each `view()` call, the sequence step is increased
 
 use tuirealm::command::{Cmd, CmdResult};
@@ -11,6 +9,7 @@ use crate::prop_ext::CommonProps;
 
 // -- states
 
+/// The state that has to be kept for the [`Spinner`] component.
 #[derive(Default)]
 pub struct SpinnerStates {
     pub sequence: Vec<char>,
@@ -18,17 +17,13 @@ pub struct SpinnerStates {
 }
 
 impl SpinnerStates {
-    /// ### reset
-    ///
-    /// Re initialize sequence
+    /// Set a new sequence of characters and reset the stepping to 0.
     pub fn reset(&mut self, sequence: &str) {
         self.sequence = sequence.chars().collect();
         self.step = 0;
     }
 
-    /// ### step
-    ///
-    /// Get current step char and increments step
+    /// Get the current step's characters in the sequence, and increment the stepping.
     pub fn step(&mut self) -> char {
         let ch = self.sequence.get(self.step).copied().unwrap_or(' ');
         // Incr step
@@ -40,7 +35,7 @@ impl SpinnerStates {
         ch
     }
 
-    /// Get the current char to display
+    /// Get the current character to display.
     ///
     /// Unlike [`step`](Self::step), this function does not increment the step.
     pub fn current_step(&self) -> char {
@@ -50,9 +45,7 @@ impl SpinnerStates {
 
 // -- Component
 
-/// ## Spinner
-///
-/// A textual spinner which step changes at each `view()` call
+/// A textual spinner which step changes at each `view()` call (if `manual_step` is disabled).
 #[must_use]
 pub struct Spinner {
     common: CommonProps,
