@@ -1,6 +1,4 @@
-//! ## Sparkline
-//!
-//! A sparkline over more lines
+//! A sparkline over more lines.
 
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
@@ -13,9 +11,11 @@ use crate::prop_ext::CommonProps;
 
 // -- component
 
-/// ## Sparkline
+/// A sparkline over more lines.
 ///
-/// A sparkline over more lines
+/// A sparkline can be interpreted as a dense Vertical Bar Chart, without labels for each line.
+///
+/// This can be used for audio-level visualization or a type of history graph (like bandwidth, cpu usage, etc).
 #[derive(Default)]
 #[must_use]
 pub struct Sparkline {
