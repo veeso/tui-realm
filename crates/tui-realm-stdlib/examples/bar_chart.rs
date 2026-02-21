@@ -1,16 +1,18 @@
+use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::BarChart;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Style, Title};
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::{
-    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent,
+    Component, Event, MockComponent, NoUserEvent,
     application::PollStrategy,
     event::{Key, KeyEvent},
 };
-// tui
-use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+
+mod utils;
+use utils::Model;
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -27,89 +29,32 @@ pub enum Id {
     ChartBeta,
 }
 
-struct Model {
-    app: Application<Id, Msg, NoUserEvent>,
-    quit: bool,   // Becomes true when the user presses <ESC>
-    redraw: bool, // Tells whether to refresh the UI; performance optimization
-}
-
-impl Default for Model {
-    fn default() -> Self {
-        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
-        );
-        assert!(
-            app.mount(Id::ChartAlfa, Box::new(ChartAlfa::default()), vec![])
-                .is_ok()
-        );
-        assert!(
-            app.mount(Id::ChartBeta, Box::new(ChartBeta::default()), vec![])
-                .is_ok()
-        );
-        // We need to give focus to input then
-        assert!(app.active(&Id::ChartAlfa).is_ok());
-        Self {
-            app,
-            quit: false,
-            redraw: true,
-        }
+impl Model<Id, Msg> {
+    /// Draw all components.
+    fn view(&mut self) {
+        self.terminal
+            .raw_mut()
+            .draw(|f| {
+                // Prepare chunks
+                let chunks = Layout::default()
+                    .direction(LayoutDirection::Vertical)
+                    .margin(1)
+                    .constraints(
+                        [
+                            Constraint::Length(10),
+                            Constraint::Length(10),
+                            Constraint::Length(1),
+                        ]
+                        .as_ref(),
+                    )
+                    .split(f.area());
+                self.app.view(&Id::ChartAlfa, f, chunks[0]);
+                self.app.view(&Id::ChartBeta, f, chunks[1]);
+            })
+            .expect("Drawing to the terminal failed");
     }
-}
 
-impl Model {
-    fn view(&mut self, terminal: &mut CrosstermTerminalAdapter) {
-        let _ = terminal.raw_mut().draw(|f| {
-            // Prepare chunks
-            let chunks = Layout::default()
-                .direction(LayoutDirection::Vertical)
-                .margin(1)
-                .constraints(
-                    [
-                        Constraint::Length(10),
-                        Constraint::Length(10),
-                        Constraint::Length(1),
-                    ]
-                    .as_ref(),
-                )
-                .split(f.area());
-            self.app.view(&Id::ChartAlfa, f, chunks[0]);
-            self.app.view(&Id::ChartBeta, f, chunks[1]);
-        });
-    }
-}
-
-fn main() {
-    let mut terminal = CrosstermTerminalAdapter::new().expect("Cannot create terminal bridge");
-    let mut model = Model::default();
-    let _ = terminal.enable_raw_mode();
-    let _ = terminal.enter_alternate_screen();
-    // let's loop until quit is true
-    while !model.quit {
-        // Tick
-        if let Ok(messages) = model
-            .app
-            .tick(PollStrategy::Once(Duration::from_millis(10)))
-        {
-            for msg in messages {
-                let mut msg = Some(msg);
-                while msg.is_some() {
-                    msg = model.update(msg);
-                }
-            }
-        }
-        // Redraw
-        if model.redraw {
-            model.view(&mut terminal);
-            model.redraw = false;
-        }
-    }
-    // Terminate terminal
-    let _ = terminal.leave_alternate_screen();
-    let _ = terminal.disable_raw_mode();
-    let _ = terminal.clear_screen();
-}
-
-impl Model {
+    /// Handle messages
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         self.redraw = true;
         match msg.unwrap_or(Msg::None) {
@@ -126,6 +71,44 @@ impl Model {
                 None
             }
             Msg::None => None,
+        }
+    }
+
+    /// Mount all main components for initial app stage.
+    fn mount_main(&mut self) -> Result<(), Box<dyn Error>> {
+        self.app
+            .mount(Id::ChartAlfa, Box::new(ChartAlfa::default()), vec![])?;
+        self.app
+            .mount(Id::ChartBeta, Box::new(ChartBeta::default()), vec![])?;
+        // We need to give focus to input then
+        self.app.active(&Id::ChartAlfa)?;
+
+        Ok(())
+    }
+}
+
+fn main() {
+    let mut model = Model::new();
+    model.mount_main().expect("Mount all main components");
+
+    // let's loop until quit is true
+    while !model.quit {
+        // Tick
+        if let Ok(messages) = model
+            .app
+            .tick(PollStrategy::Once(Duration::from_millis(10)))
+        {
+            for msg in messages {
+                let mut msg = Some(msg);
+                while msg.is_some() {
+                    msg = model.update(msg);
+                }
+            }
+        }
+        // Redraw
+        if model.redraw {
+            model.view();
+            model.redraw = false;
         }
     }
 }
