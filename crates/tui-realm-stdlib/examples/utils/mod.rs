@@ -6,6 +6,8 @@
 
 mod data_gen;
 mod loader;
+mod model;
 
 pub use data_gen::DataGen;
 pub use loader::Loader;
+pub use model::Model;
