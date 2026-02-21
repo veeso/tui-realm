@@ -1,21 +1,21 @@
-//! ## Demo
-//!
 //! `Demo` shows how to use tui-realm in a real case
 
+use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::Select;
 use tuirealm::State;
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::{
-    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent,
+    Component, Event, MockComponent, NoUserEvent,
     application::PollStrategy,
     event::{Key, KeyEvent},
 };
-// tui
-use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+
+mod utils;
+use utils::Model;
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -32,38 +32,9 @@ pub enum Id {
     SelectBeta,
 }
 
-struct Model {
-    quit: bool,   // Becomes true when the user presses <ESC>
-    redraw: bool, // Tells whether to refresh the UI; performance optimization
-    app: Application<Id, Msg, NoUserEvent>,
-}
-
-impl Default for Model {
-    fn default() -> Self {
-        // Setup app
-        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
-        );
-        assert!(
-            app.mount(Id::SelectAlfa, Box::new(SelectAlfa::default()), vec![])
-                .is_ok()
-        );
-        assert!(
-            app.mount(Id::SelectBeta, Box::new(SelectBeta::default()), vec![])
-                .is_ok()
-        );
-        // We need to give focus to input then
-        assert!(app.active(&Id::SelectAlfa).is_ok());
-        Self {
-            app,
-            quit: false,
-            redraw: true,
-        }
-    }
-}
-
-impl Model {
-    fn view(&mut self, terminal: &mut CrosstermTerminalAdapter) {
+impl Model<Id, Msg> {
+    /// Draw all components.
+    fn view(&mut self) {
         // Calc len
         let select_alfa_len = match self.app.state(&Id::SelectAlfa) {
             Ok(State::Single(_)) => 3,
@@ -73,33 +44,64 @@ impl Model {
             Ok(State::Single(_)) => 3,
             _ => 8,
         };
-        let _ = terminal.raw_mut().draw(|f| {
-            // Prepare chunks
-            let chunks = Layout::default()
-                .direction(LayoutDirection::Vertical)
-                .margin(1)
-                .constraints(
-                    [
-                        Constraint::Length(select_alfa_len),
-                        Constraint::Length(select_beta_len),
-                        Constraint::Length(1),
-                    ]
-                    .as_ref(),
-                )
-                .split(f.area());
-            self.app.view(&Id::SelectAlfa, f, chunks[0]);
-            self.app.view(&Id::SelectBeta, f, chunks[1]);
-        });
+        self.terminal
+            .raw_mut()
+            .draw(|f| {
+                // Prepare chunks
+                let chunks = Layout::default()
+                    .direction(LayoutDirection::Vertical)
+                    .margin(1)
+                    .constraints(
+                        [
+                            Constraint::Length(select_alfa_len),
+                            Constraint::Length(select_beta_len),
+                            Constraint::Length(1),
+                        ]
+                        .as_ref(),
+                    )
+                    .split(f.area());
+                self.app.view(&Id::SelectAlfa, f, chunks[0]);
+                self.app.view(&Id::SelectBeta, f, chunks[1]);
+            })
+            .expect("Drawing to the terminal failed");
+    }
+
+    /// Handle messages
+    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+        self.redraw = true;
+        match msg.unwrap_or(Msg::None) {
+            Msg::AppClose => {
+                self.quit = true;
+                None
+            }
+            Msg::SelectAlfaBlur => {
+                assert!(self.app.active(&Id::SelectBeta).is_ok());
+                None
+            }
+            Msg::SelectBetaBlur => {
+                assert!(self.app.active(&Id::SelectAlfa).is_ok());
+                None
+            }
+            Msg::None => None,
+        }
+    }
+
+    /// Mount all main components for initial app stage.
+    fn mount_main(&mut self) -> Result<(), Box<dyn Error>> {
+        self.app
+            .mount(Id::SelectAlfa, Box::new(SelectAlfa::default()), vec![])?;
+        self.app
+            .mount(Id::SelectBeta, Box::new(SelectBeta::default()), vec![])?;
+        // We need to give focus to input then
+        self.app.active(&Id::SelectAlfa)?;
+
+        Ok(())
     }
 }
 
 fn main() {
-    let mut model = Model::default();
-    let mut terminal = CrosstermTerminalAdapter::new().expect("Cannot create terminal bridge");
-    let _ = terminal.enable_raw_mode();
-    let _ = terminal.enter_alternate_screen();
-
-    // Now we use the Model struct to keep track of some states
+    let mut model = Model::new();
+    model.mount_main().expect("Mount all main components");
 
     // let's loop until quit is true
     while !model.quit {
@@ -117,33 +119,8 @@ fn main() {
         }
         // Redraw
         if model.redraw {
-            model.view(&mut terminal);
+            model.view();
             model.redraw = false;
-        }
-    }
-    // Terminate terminal
-    let _ = terminal.leave_alternate_screen();
-    let _ = terminal.disable_raw_mode();
-    let _ = terminal.clear_screen();
-}
-
-impl Model {
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
-        self.redraw = true;
-        match msg.unwrap_or(Msg::None) {
-            Msg::AppClose => {
-                self.quit = true;
-                None
-            }
-            Msg::SelectAlfaBlur => {
-                assert!(self.app.active(&Id::SelectBeta).is_ok());
-                None
-            }
-            Msg::SelectBetaBlur => {
-                assert!(self.app.active(&Id::SelectAlfa).is_ok());
-                None
-            }
-            Msg::None => None,
         }
     }
 }

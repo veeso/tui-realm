@@ -2,16 +2,18 @@ use std::{error::Error, hash::Hash, time::Duration};
 
 use tuirealm::{
     Application, EventListenerCfg, NoUserEvent,
+    listener::SyncPort,
     terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult},
 };
 
 /// The main model that stores the global state of the application.
-pub struct Model<Id, Msg>
+pub struct Model<Id, Msg, UserEvent = NoUserEvent>
 where
     Id: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
-    pub app: Application<Id, Msg, NoUserEvent>,
+    pub app: Application<Id, Msg, UserEvent>,
     /// Becomes true when the user presses <ESC>
     pub quit: bool,
     /// Tells whether to refresh the UI; performance optimization
@@ -20,10 +22,11 @@ where
     pub terminal: CrosstermTerminalAdapter,
 }
 
-impl<Id, Msg> Model<Id, Msg>
+impl<Id, Msg, UserEvent> Model<Id, Msg, UserEvent>
 where
     Id: Eq + PartialEq + Clone + Hash,
     Msg: PartialEq + 'static,
+    UserEvent: Eq + PartialEq + Clone + Send + 'static,
 {
     /// Initialize the Terminal modes.
     fn init_adapter() -> TerminalResult<CrosstermTerminalAdapter> {
@@ -36,11 +39,23 @@ where
 
     /// Create a new instance of the model, while also initializing the terminal.
     pub fn new() -> Self {
+        Self::new_ports([])
+    }
+
+    /// Create a new instance of the model, while also initializing the terminal.
+    ///
+    /// With extra custom ports.
+    pub fn new_ports(ports: impl IntoIterator<Item = SyncPort<UserEvent>>) -> Self {
         let terminal = Self::init_adapter().expect("Couldnt initialize terminal modes");
 
-        let app = Application::init(
-            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
-        );
+        let mut eventlistener =
+            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10);
+
+        for port in ports {
+            eventlistener = eventlistener.port(port);
+        }
+
+        let app = Application::init(eventlistener);
         Self {
             app,
             quit: false,

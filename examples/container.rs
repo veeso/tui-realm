@@ -1,7 +1,6 @@
-//! ## Demo
-//!
 //! `Demo` shows how to use tui-realm in a real case
 
+use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::{Container, Table};
@@ -9,15 +8,16 @@ use tuirealm::command::CmdResult;
 use tuirealm::props::{
     BorderType, Borders, Color, HorizontalAlignment, Layout, TableBuilder, Title,
 };
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout as TuiLayout};
 use tuirealm::ratatui::text::Line;
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
-    Application, Component, Event, EventListenerCfg, MockComponent, NoUserEvent,
+    Component, Event, MockComponent, NoUserEvent,
     application::PollStrategy,
     event::{Key, KeyEvent},
 };
-// tui
-use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout as TuiLayout};
+
+mod utils;
+use utils::Model;
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -31,52 +31,49 @@ pub enum Id {
     Container,
 }
 
-struct Model {
-    app: Application<Id, Msg, NoUserEvent>,
-    quit: bool,   // Becomes true when the user presses <ESC>
-    redraw: bool, // Tells whether to refresh the UI; performance optimization
-}
+impl Model<Id, Msg> {
+    /// Draw all components.
+    fn view(&mut self) {
+        self.terminal
+            .raw_mut()
+            .draw(|f| {
+                // Prepare chunks
+                let chunks = TuiLayout::default()
+                    .direction(LayoutDirection::Vertical)
+                    .margin(1)
+                    .constraints([Constraint::Percentage(100)].as_ref())
+                    .split(f.area());
+                self.app.view(&Id::Container, f, chunks[0]);
+            })
+            .expect("Drawing to the terminal failed");
+    }
 
-impl Default for Model {
-    fn default() -> Self {
-        // Setup app
-        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
-            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
-        );
-        assert!(
-            app.mount(Id::Container, Box::new(MyContainer::default()), vec![])
-                .is_ok()
-        );
-        // We need to give focus to input then
-        assert!(app.active(&Id::Container).is_ok());
-        Self {
-            app,
-            quit: false,
-            redraw: true,
+    /// Handle messages
+    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+        self.redraw = true;
+        match msg.unwrap_or(Msg::None) {
+            Msg::AppClose => {
+                self.quit = true;
+                None
+            }
+            Msg::None => None,
         }
     }
-}
 
-impl Model {
-    fn view(&mut self, terminal: &mut CrosstermTerminalAdapter) {
-        let _ = terminal.raw_mut().draw(|f| {
-            // Prepare chunks
-            let chunks = TuiLayout::default()
-                .direction(LayoutDirection::Vertical)
-                .margin(1)
-                .constraints([Constraint::Percentage(100)].as_ref())
-                .split(f.area());
-            self.app.view(&Id::Container, f, chunks[0]);
-        });
+    /// Mount all main components for initial app stage.
+    fn mount_main(&mut self) -> Result<(), Box<dyn Error>> {
+        self.app
+            .mount(Id::Container, Box::new(MyContainer::default()), vec![])?;
+        // We need to give focus to input then
+        self.app.active(&Id::Container)?;
+
+        Ok(())
     }
 }
 
 fn main() {
-    let mut model = Model::default();
-    let mut terminal = CrosstermTerminalAdapter::new().expect("Cannot create terminal bridge");
-    let _ = terminal.enable_raw_mode();
-    let _ = terminal.enter_alternate_screen();
-    // Now we use the Model struct to keep track of some states
+    let mut model = Model::new();
+    model.mount_main().expect("Mount all main components");
 
     // let's loop until quit is true
     while !model.quit {
@@ -94,25 +91,8 @@ fn main() {
         }
         // Redraw
         if model.redraw {
-            model.view(&mut terminal);
+            model.view();
             model.redraw = false;
-        }
-    }
-    // Terminate terminal
-    let _ = terminal.leave_alternate_screen();
-    let _ = terminal.disable_raw_mode();
-    let _ = terminal.clear_screen();
-}
-
-impl Model {
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
-        self.redraw = true;
-        match msg.unwrap_or(Msg::None) {
-            Msg::AppClose => {
-                self.quit = true;
-                None
-            }
-            Msg::None => None,
         }
     }
 }
