@@ -70,8 +70,8 @@ name = "paragraph"
 path = "examples/paragraph.rs"
 
 [[example]]
-name = "progress_bar"
-path = "examples/progress_bar.rs"
+name = "gauge"
+path = "examples/gauge.rs"
 
 [[example]]
 name = "radio"

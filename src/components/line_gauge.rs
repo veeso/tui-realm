@@ -16,6 +16,8 @@ use crate::prop_ext::CommonProps;
 /// It is possible to set the style for the progress bar and the text shown above it.
 ///
 /// Read more in [`LineGauge`](TuiLineGauge).
+///
+/// If a multi-line Guage is necessary, use [`Gauge`](crate::Gauge) instead.
 #[derive(Default)]
 #[must_use]
 pub struct LineGauge {

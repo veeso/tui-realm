@@ -5,24 +5,26 @@ use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
 };
-use tuirealm::ratatui::{layout::Rect, widgets::Gauge};
+use tuirealm::ratatui::{layout::Rect, widgets::Gauge as TuiGauge};
 use tuirealm::{Frame, MockComponent, State};
 
 use crate::prop_ext::CommonProps;
 
 // -- Component
 
-// TODO: we should remove this component in favor of just "LineGauge", as the implementation and inner workings are literally the same.
-
-/// `ProgressBar` provides a component which shows the progress. It is possible to set the style for the progress bar and the text shown above it.
+/// `Gauge` provides a multi-line component which shows the progress. It is possible to set the style for the progress bar and the text shown above it.
+///
+/// Read more in [`Gauge`](TuiGauge).
+///
+/// If only a single-line Gauge is necessary, use [`LineGauge`](crate::LineGauge) instead.
 #[derive(Default)]
 #[must_use]
-pub struct ProgressBar {
+pub struct Gauge {
     common: CommonProps,
     props: Props,
 }
 
-impl ProgressBar {
+impl Gauge {
     /// Set the main foreground color. This may get overwritten by individual text styles.
     pub fn foreground(mut self, fg: Color) -> Self {
         self.attr(Attribute::Foreground, AttrValue::Color(fg));
@@ -91,7 +93,7 @@ impl ProgressBar {
     }
 }
 
-impl MockComponent for ProgressBar {
+impl MockComponent for Gauge {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;
@@ -114,7 +116,7 @@ impl MockComponent for ProgressBar {
             .unwrap_f64();
 
         // Make progress bar
-        let mut widget = Gauge::default()
+        let mut widget = TuiGauge::default()
             .style(self.common.style)
             .gauge_style(self.common.style)
             .label(label)
@@ -166,7 +168,7 @@ mod test {
 
     #[test]
     fn test_components_progress_bar() {
-        let component = ProgressBar::default()
+        let component = Gauge::default()
             .background(Color::Red)
             .foreground(Color::White)
             .progress(0.60)
@@ -180,7 +182,7 @@ mod test {
     #[test]
     #[should_panic = "Progress value must be in range [0.0, 1.0]"]
     fn test_components_progress_bar_bad_prog() {
-        let _ = ProgressBar::default()
+        let _ = Gauge::default()
             .background(Color::Red)
             .foreground(Color::White)
             .progress(6.0)
