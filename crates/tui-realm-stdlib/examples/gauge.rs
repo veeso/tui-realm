@@ -7,7 +7,7 @@ use utils::Loader;
 
 use std::time::Duration;
 
-use tui_realm_stdlib::{Label, ProgressBar};
+use tui_realm_stdlib::{Gauge, Label};
 use tuirealm::command::CmdResult;
 use tuirealm::listener::{Poll, PortResult};
 use tuirealm::props::{
@@ -193,13 +193,13 @@ impl Component<Msg, UserEvent> for KeyboardLabel {
 
 #[derive(MockComponent)]
 struct GaugeAlfa {
-    component: ProgressBar,
+    component: Gauge,
 }
 
 impl Default for GaugeAlfa {
     fn default() -> Self {
         Self {
-            component: ProgressBar::default()
+            component: Gauge::default()
                 .borders(
                     Borders::default()
                         .color(Color::Green)
@@ -236,13 +236,13 @@ impl Component<Msg, UserEvent> for GaugeAlfa {
 
 #[derive(MockComponent)]
 struct GaugeBeta {
-    component: ProgressBar,
+    component: Gauge,
 }
 
 impl Default for GaugeBeta {
     fn default() -> Self {
         Self {
-            component: ProgressBar::default()
+            component: Gauge::default()
                 .borders(
                     Borders::default()
                         .color(Color::Yellow)
