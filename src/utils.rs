@@ -3,7 +3,7 @@
 use std::borrow::Cow;
 
 use tuirealm::props::{Borders, Title};
-use tuirealm::ratatui::style::{Color, Style};
+use tuirealm::ratatui::style::Style;
 use tuirealm::ratatui::text::{Line, Span, Text};
 use tuirealm::ratatui::widgets::{Block, TitlePosition};
 use unicode_width::UnicodeWidthStr;
@@ -73,8 +73,7 @@ pub fn get_block(
         .border_style(if focus {
             props.style()
         } else {
-            // TODO: remove the default "Reset"
-            inactive_style.unwrap_or_else(|| Style::default().fg(Color::Reset).bg(Color::Reset))
+            inactive_style.unwrap_or_default()
         })
         .border_type(props.modifiers);
 
@@ -126,7 +125,7 @@ pub fn borrow_clone_text<'a, 'b: 'a>(text: &'b Text<'a>) -> Text<'a> {
 mod test {
 
     use super::*;
-    use tuirealm::props::{BorderSides, BorderType, HorizontalAlignment};
+    use tuirealm::props::{BorderSides, BorderType, Color, HorizontalAlignment};
 
     use pretty_assertions::assert_eq;
 
