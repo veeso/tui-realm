@@ -215,6 +215,7 @@ The developer documentation can be found on Rust Docs at <https://docs.rs/tuirea
 - [csvs](https://github.com/koma-private/csvs)
 - [donmaze](https://github.com/veeso/donmaze)
 - [matrix-rust-sdk](https://github.com/matrix-org/matrix-rust-sdk)
+- [opencode-kanban](https://github.com/qrafty-ai/opencode-kanban)
 - [paat](https://github.com/ebakoba/paat)
 - [termusic](https://github.com/tramhao/termusic)
 - [termscp](https://github.com/veeso/termscp)
