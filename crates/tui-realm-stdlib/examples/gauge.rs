@@ -4,10 +4,9 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::{Gauge, Label};
-use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{Poll, PortResult, SyncPort};
 use tuirealm::props::{
@@ -145,7 +144,7 @@ impl Poll<UserEvent> for Loader {
 
 // -- components
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct KeyboardLabel {
     component: Label,
 }
@@ -158,13 +157,13 @@ impl Default for KeyboardLabel {
     }
 }
 
-impl Component<Msg, UserEvent> for KeyboardLabel {
+impl AppComponent<Msg, UserEvent> for KeyboardLabel {
     fn on(&mut self, _: &Event<UserEvent>) -> Option<Msg> {
         None
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct GaugeAlfa {
     component: Gauge,
 }
@@ -186,7 +185,7 @@ impl Default for GaugeAlfa {
     }
 }
 
-impl Component<Msg, UserEvent> for GaugeAlfa {
+impl AppComponent<Msg, UserEvent> for GaugeAlfa {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::User(UserEvent::Loaded(prog)) => {
@@ -207,7 +206,7 @@ impl Component<Msg, UserEvent> for GaugeAlfa {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct GaugeBeta {
     component: Gauge,
 }
@@ -229,7 +228,7 @@ impl Default for GaugeBeta {
     }
 }
 
-impl Component<Msg, UserEvent> for GaugeBeta {
+impl AppComponent<Msg, UserEvent> for GaugeBeta {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::User(UserEvent::Loaded(_)) => {

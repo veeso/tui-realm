@@ -3,7 +3,7 @@
 use std::any::Any;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
@@ -275,7 +275,7 @@ impl Chart {
     }
 }
 
-impl MockComponent for Chart {
+impl Component for Chart {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

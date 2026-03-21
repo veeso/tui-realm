@@ -1,7 +1,7 @@
 //! A canvas where you can draw more complex figures.
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
     TextModifiers, Title,
@@ -187,7 +187,7 @@ impl Canvas {
     }
 }
 
-impl MockComponent for Canvas {
+impl Component for Canvas {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

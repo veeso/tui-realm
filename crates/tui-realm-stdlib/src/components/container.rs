@@ -1,7 +1,7 @@
 //! `Container` represents an empty container where you can put other components into it.
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, Layout, Props, Style, TextModifiers, Title,
 };
@@ -24,7 +24,7 @@ pub struct Container {
     common: CommonProps,
     props: Props,
     /// Container children
-    pub children: Vec<Box<dyn MockComponent>>,
+    pub children: Vec<Box<dyn Component>>,
 }
 
 impl Default for Container {
@@ -94,13 +94,13 @@ impl Container {
     }
 
     /// Set the children Components this container contains.
-    pub fn children(mut self, children: Vec<Box<dyn MockComponent>>) -> Self {
+    pub fn children(mut self, children: Vec<Box<dyn Component>>) -> Self {
         self.children = children;
         self
     }
 }
 
-impl MockComponent for Container {
+impl Component for Container {
     fn view(&mut self, render: &mut Frame, mut area: Rect) {
         if !self.common.display {
             return;

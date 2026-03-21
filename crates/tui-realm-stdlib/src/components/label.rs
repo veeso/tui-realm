@@ -1,5 +1,5 @@
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Color, HorizontalAlignment, Props, Style, TextModifiers,
 };
@@ -64,7 +64,7 @@ impl Label {
     }
 }
 
-impl MockComponent for Label {
+impl Component for Label {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

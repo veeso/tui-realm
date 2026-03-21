@@ -4,10 +4,9 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Input;
-use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
 use tuirealm::props::{
     AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, InputType, Style, Title,
@@ -159,7 +158,7 @@ fn main() {
 
 // -- components
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct InputText {
     component: Input,
 }
@@ -182,7 +181,7 @@ impl Default for InputText {
     }
 }
 
-impl Component<Msg, NoUserEvent> for InputText {
+impl AppComponent<Msg, NoUserEvent> for InputText {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
@@ -216,7 +215,7 @@ impl Component<Msg, NoUserEvent> for InputText {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct InputEmail {
     component: Input,
 }
@@ -242,7 +241,7 @@ impl Default for InputEmail {
     }
 }
 
-impl Component<Msg, NoUserEvent> for InputEmail {
+impl AppComponent<Msg, NoUserEvent> for InputEmail {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
@@ -276,7 +275,7 @@ impl Component<Msg, NoUserEvent> for InputEmail {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct InputNumber {
     component: Input,
 }
@@ -299,7 +298,7 @@ impl Default for InputNumber {
     }
 }
 
-impl Component<Msg, NoUserEvent> for InputNumber {
+impl AppComponent<Msg, NoUserEvent> for InputNumber {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
@@ -333,7 +332,7 @@ impl Component<Msg, NoUserEvent> for InputNumber {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct InputPassword {
     component: Input,
 }
@@ -355,7 +354,7 @@ impl Default for InputPassword {
     }
 }
 
-impl Component<Msg, NoUserEvent> for InputPassword {
+impl AppComponent<Msg, NoUserEvent> for InputPassword {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
@@ -389,7 +388,7 @@ impl Component<Msg, NoUserEvent> for InputPassword {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct InputPhone {
     component: Input,
 }
@@ -416,7 +415,7 @@ impl Default for InputPhone {
     }
 }
 
-impl Component<Msg, NoUserEvent> for InputPhone {
+impl AppComponent<Msg, NoUserEvent> for InputPhone {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
@@ -450,7 +449,7 @@ impl Component<Msg, NoUserEvent> for InputPhone {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct InputColor {
     component: Input,
 }
@@ -474,7 +473,7 @@ impl Default for InputColor {
     }
 }
 
-impl Component<Msg, NoUserEvent> for InputColor {
+impl AppComponent<Msg, NoUserEvent> for InputColor {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {

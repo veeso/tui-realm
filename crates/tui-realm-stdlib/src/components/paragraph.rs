@@ -1,5 +1,5 @@
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, HorizontalAlignment, Props, Style, TextModifiers,
     TextStatic, Title,
@@ -91,7 +91,7 @@ impl Paragraph {
     }
 }
 
-impl MockComponent for Paragraph {
+impl Component for Paragraph {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

@@ -4,7 +4,6 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Paragraph;
-use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
 use tuirealm::component::Component;
@@ -112,7 +111,7 @@ fn main() {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct ParagraphAlfa {
     component: Paragraph,
 }
@@ -139,7 +138,7 @@ impl Default for ParagraphAlfa {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ParagraphAlfa {
+impl AppComponent<Msg, NoUserEvent> for ParagraphAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
@@ -149,7 +148,7 @@ impl Component<Msg, NoUserEvent> for ParagraphAlfa {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct ParagraphBeta {
     component: Paragraph,
 }
@@ -176,7 +175,7 @@ impl Default for ParagraphBeta {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ParagraphBeta {
+impl AppComponent<Msg, NoUserEvent> for ParagraphBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),

@@ -4,7 +4,6 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Canvas;
-use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::component::Component;
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
@@ -97,7 +96,7 @@ fn main() {
 
 // -- components
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct MyCanvas {
     component: Canvas,
 }
@@ -153,7 +152,7 @@ impl Default for MyCanvas {
     }
 }
 
-impl Component<Msg, NoUserEvent> for MyCanvas {
+impl AppComponent<Msg, NoUserEvent> for MyCanvas {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         if let Event::Keyboard(KeyEvent { code: Key::Esc, .. }) = ev {
             Some(Msg::AppClose)

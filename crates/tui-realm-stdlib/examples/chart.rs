@@ -4,10 +4,9 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::{Chart, ChartDataset};
-use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{Poll, PortResult, SyncPort};
 use tuirealm::props::{
@@ -120,7 +119,7 @@ impl Poll<UserEvent> for DataGen<(f64, f64)> {
 
 // -- components
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct ChartAlfa {
     component: Chart,
 }
@@ -150,7 +149,7 @@ impl Default for ChartAlfa {
     }
 }
 
-impl Component<Msg, UserEvent> for ChartAlfa {
+impl AppComponent<Msg, UserEvent> for ChartAlfa {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {

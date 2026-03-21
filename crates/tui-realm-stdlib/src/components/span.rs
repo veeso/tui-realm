@@ -1,5 +1,5 @@
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Color, HorizontalAlignment, PropPayload, PropValue, Props, SpanStatic,
     Style, TextModifiers,
@@ -78,7 +78,7 @@ impl Span {
     }
 }
 
-impl MockComponent for Span {
+impl Component for Span {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

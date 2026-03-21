@@ -4,7 +4,6 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Span;
-use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
 use tuirealm::component::Component;
@@ -106,7 +105,7 @@ fn main() {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct SpanAlfa {
     component: Span,
 }
@@ -124,7 +123,7 @@ impl Default for SpanAlfa {
     }
 }
 
-impl Component<Msg, NoUserEvent> for SpanAlfa {
+impl AppComponent<Msg, NoUserEvent> for SpanAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
@@ -134,7 +133,7 @@ impl Component<Msg, NoUserEvent> for SpanAlfa {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct SpanBeta {
     component: Span,
 }
@@ -155,7 +154,7 @@ impl Default for SpanBeta {
     }
 }
 
-impl Component<Msg, NoUserEvent> for SpanBeta {
+impl AppComponent<Msg, NoUserEvent> for SpanBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),

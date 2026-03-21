@@ -4,10 +4,9 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Checkbox;
-use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -114,7 +113,7 @@ fn main() {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct CheckboxAlfa {
     component: Checkbox,
 }
@@ -149,7 +148,7 @@ impl Default for CheckboxAlfa {
     }
 }
 
-impl Component<Msg, NoUserEvent> for CheckboxAlfa {
+impl AppComponent<Msg, NoUserEvent> for CheckboxAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
@@ -173,7 +172,7 @@ impl Component<Msg, NoUserEvent> for CheckboxAlfa {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct CheckboxBeta {
     component: Checkbox,
 }
@@ -204,7 +203,7 @@ impl Default for CheckboxBeta {
     }
 }
 
-impl Component<Msg, NoUserEvent> for CheckboxBeta {
+impl AppComponent<Msg, NoUserEvent> for CheckboxBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {

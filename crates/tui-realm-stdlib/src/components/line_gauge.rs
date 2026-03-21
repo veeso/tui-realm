@@ -1,5 +1,5 @@
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, SpanStatic, Style,
     TextModifiers, Title,
@@ -124,7 +124,7 @@ impl LineGauge {
     }
 }
 
-impl MockComponent for LineGauge {
+impl Component for LineGauge {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

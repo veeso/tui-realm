@@ -4,7 +4,6 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::{Container, Table};
-use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
 use tuirealm::component::Component;
@@ -96,7 +95,7 @@ fn main() {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct MyContainer {
     component: Container,
 }
@@ -228,7 +227,7 @@ impl Default for MyContainer {
     }
 }
 
-impl Component<Msg, NoUserEvent> for MyContainer {
+impl AppComponent<Msg, NoUserEvent> for MyContainer {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),

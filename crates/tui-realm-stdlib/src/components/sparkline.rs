@@ -1,7 +1,7 @@
 //! A sparkline over more lines.
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Title,
 };
@@ -114,7 +114,7 @@ impl Sparkline {
     }
 }
 
-impl MockComponent for Sparkline {
+impl Component for Sparkline {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

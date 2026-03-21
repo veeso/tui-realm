@@ -1,5 +1,5 @@
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{AttrValue, Attribute, Props};
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
@@ -15,7 +15,7 @@ pub struct Phantom {
     props: Props,
 }
 
-impl MockComponent for Phantom {
+impl Component for Phantom {
     fn view(&mut self, _render: &mut Frame, _area: Rect) {}
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
