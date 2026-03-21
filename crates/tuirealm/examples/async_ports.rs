@@ -6,7 +6,7 @@ use tokio::io::AsyncWriteExt as _;
 use tokio::runtime::Handle;
 use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{EventListenerCfg, PollAsync, PortResult};
 use tuirealm::props::{
@@ -203,14 +203,14 @@ impl PollAsync<UserEvent> for AsyncPort {
 }
 
 /// Simple label component; just renders a text
-/// NOTE: since I need just one label, I'm not going to use different object; I will directly implement Component for Label.
-/// This is not ideal actually and in a real app you should differentiate Mock Components from Application Components.
+/// NOTE: since I need just one label, I'm not going to use different object; I will directly implement AppComponent for Label.
+/// This is not ideal actually and in a real app you should differentiate Components from Application Components.
 #[derive(Default)]
 pub struct Label {
     props: Props,
 }
 
-impl MockComponent for Label {
+impl Component for Label {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if visible
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
@@ -272,7 +272,7 @@ impl MockComponent for Label {
     }
 }
 
-impl Component<Msg, UserEvent> for Label {
+impl AppComponent<Msg, UserEvent> for Label {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         // Does nothing
         match ev {

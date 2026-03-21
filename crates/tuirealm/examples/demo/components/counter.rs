@@ -2,9 +2,8 @@
 //!
 //! label component
 
-use tuirealm::MockComponent;
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, HorizontalAlignment, LineStatic, Props, Style,
@@ -67,7 +66,7 @@ impl Counter {
     }
 }
 
-impl MockComponent for Counter {
+impl Component for Counter {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if visible
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
@@ -171,7 +170,7 @@ impl OwnStates {
 
 // -- Counter components
 
-#[derive(MockComponent)]
+#[derive(Component)]
 pub struct LetterCounter {
     component: Counter,
 }
@@ -195,7 +194,7 @@ impl LetterCounter {
     }
 }
 
-impl Component<Msg, NoUserEvent> for LetterCounter {
+impl AppComponent<Msg, NoUserEvent> for LetterCounter {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         // Get command
         let cmd = match ev {
@@ -223,7 +222,7 @@ impl Component<Msg, NoUserEvent> for LetterCounter {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 pub struct DigitCounter {
     component: Counter,
 }
@@ -247,7 +246,7 @@ impl DigitCounter {
     }
 }
 
-impl Component<Msg, NoUserEvent> for DigitCounter {
+impl AppComponent<Msg, NoUserEvent> for DigitCounter {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         // Get command
         let cmd = match ev {

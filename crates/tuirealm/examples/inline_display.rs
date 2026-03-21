@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{AttrValue, Attribute};
@@ -172,7 +172,7 @@ where
 #[derive(Default)]
 pub struct Label {}
 
-impl MockComponent for Label {
+impl Component for Label {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Get properties
         let text = "Demo to showcase tui-realm can be used inline too. Press ESCAPE to exit";
@@ -194,7 +194,7 @@ impl MockComponent for Label {
     }
 }
 
-impl Component<Msg, NoUserEvent> for Label {
+impl AppComponent<Msg, NoUserEvent> for Label {
     fn on(&mut self, _ev: &Event<NoUserEvent>) -> Option<Msg> {
         None
     }
@@ -205,7 +205,7 @@ pub struct ProgressBar {
     state: f64,
 }
 
-impl MockComponent for ProgressBar {
+impl Component for ProgressBar {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         let progressbar = LineGauge::default()
             .filled_style(Style::default().fg(Color::Blue))
@@ -231,7 +231,7 @@ impl MockComponent for ProgressBar {
     }
 }
 
-impl Component<Msg, NoUserEvent> for ProgressBar {
+impl AppComponent<Msg, NoUserEvent> for ProgressBar {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         if let Event::Keyboard(KeyEvent {
             code: Key::Esc,

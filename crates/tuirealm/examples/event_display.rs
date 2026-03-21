@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{AttrValue, Attribute};
@@ -195,7 +195,7 @@ impl Model {
 #[derive(Default)]
 pub struct Label {}
 
-impl MockComponent for Label {
+impl Component for Label {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Get properties
         let text = "Demo to display Pressed Keys. Press ESCAPE to exit";
@@ -217,7 +217,7 @@ impl MockComponent for Label {
     }
 }
 
-impl Component<Msg, UserEvent> for Label {
+impl AppComponent<Msg, UserEvent> for Label {
     fn on(&mut self, _ev: &Event<UserEvent>) -> Option<Msg> {
         None
     }
@@ -230,7 +230,7 @@ pub struct EventDisplay {
     is_same: bool,
 }
 
-impl MockComponent for EventDisplay {
+impl Component for EventDisplay {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         let text = format!(
             "Is Same as previous: {}\nEvent: {:#?}",
@@ -255,7 +255,7 @@ impl MockComponent for EventDisplay {
     }
 }
 
-impl Component<Msg, UserEvent> for EventDisplay {
+impl AppComponent<Msg, UserEvent> for EventDisplay {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         if let Event::Keyboard(KeyEvent {
             code: Key::Esc,
