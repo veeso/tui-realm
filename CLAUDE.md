@@ -9,7 +9,7 @@ tui-realm is a monorepo workspace containing the following crates:
 | Crate | Path | Description |
 |-------|------|-------------|
 | `tuirealm` | `crates/tuirealm/` | Core framework — React/Elm-inspired component system for ratatui |
-| `tuirealm_derive` | `crates/tuirealm_derive/` | `#[derive(MockComponent)]` proc macro |
+| `tuirealm_derive` | `crates/tuirealm_derive/` | `#[derive(Component)]` proc macro |
 | `tui-realm-stdlib` | `crates/tui-realm-stdlib/` | Standard components library (input, list, table, etc.) |
 | `tui-realm-textarea` | `crates/extra/tui-realm-textarea/` | Textarea component (based on tui-textarea-2) |
 | `tui-realm-treeview` | `crates/extra/tui-realm-treeview/` | Treeview component (based on orange-trees) |
@@ -51,7 +51,7 @@ MSRV: 1.86. Edition: 2024.
 
 ## Feature Flags (tuirealm core)
 
-- `derive` (default) — `#[derive(MockComponent)]` proc macro
+- `derive` (default) — `#[derive(Component)]` proc macro
 - `crossterm` (default) — crossterm terminal backend
 - `async-ports` — async event ports via tokio
 - `serialize` — serde support for key events
@@ -65,19 +65,19 @@ MSRV: 1.86. Edition: 2024.
 ```
 Application::tick(PollStrategy)
   → polls EventListener for events
-  → forwards events to focused component (Component::on)
+  → forwards events to focused component (AppComponent::on)
   → forwards to subscribed components (based on EventClause + SubClause)
   → returns Vec<Msg>
 
 update(msg) → user processes messages, mutates model
 
-view() → Terminal::draw → each mounted component renders via MockComponent::view
+view() → Terminal::draw → each mounted component renders via Component::view
 ```
 
 ### Key Traits
 
-- **`MockComponent`** — rendering + state + properties + command execution. Methods: `view()`, `query()`, `attr()`, `state()`, `perform(Cmd) -> CmdResult`.
-- **`Component<Msg, UserEvent>`** — extends MockComponent with `on(&Event<UserEvent>) -> Option<Msg>` for event-to-message mapping.
+- **`Component`** — rendering + state + properties + command execution. Methods: `view()`, `query()`, `attr()`, `state()`, `perform(Cmd) -> CmdResult`.
+- **`AppComponent<Msg, UserEvent>`** — extends Component with `on(&Event<UserEvent>) -> Option<Msg>` for event-to-message mapping.
 - **`Poll<UserEvent>`** — synchronous event source port.
 - **`PollAsync<UserEvent>`** — async event source port (requires `async-ports` feature).
 
@@ -88,12 +88,12 @@ view() → Terminal::draw → each mounted component renders via MockComponent::
 - **`EventListener`** — background thread polling ports for events.
 - **`Props`** / **`Attribute`** / **`AttrValue`** — property system with 40+ predefined attributes.
 - **`State`** / **`StateValue`** — component state (Single, Pair, Vec, Map, Linked, Any, None).
-- **`Cmd`** / **`CmdResult`** — commands sent to MockComponent::perform and their results.
+- **`Cmd`** / **`CmdResult`** — commands sent to Component::perform and their results.
 - **`Sub`** / **`EventClause`** / **`SubClause`** — subscription system for non-focused event routing.
 
 ### Module Layout
 
-- `crates/tuirealm/src/core/` — Application, View, Component/MockComponent traits, Props, State, Subscriptions, Events, Commands
+- `crates/tuirealm/src/core/` — Application, View, Component/AppComponent traits, Props, State, Subscriptions, Events, Commands
 - `crates/tuirealm/src/listener/` — EventListener, ports (sync/async), worker thread, builder
 - `crates/tuirealm/src/terminal.rs` — Terminal adapters and backend-specific input listeners
 - `crates/tuirealm/src/mock/` — Mock types for testing (test-only)

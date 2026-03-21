@@ -137,7 +137,7 @@ tuirealm = { version = "3", default-features = false, features = [ "derive", "se
 
 Supported features are:
 
-- `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tui-realm/tree/main/crates/tuirealm_derive).
+- `derive` (*default*): add the `#[derive(Component)]` proc macro to automatically implement `Component` for `AppComponent`. [Read more](https://github.com/veeso/tui-realm/tree/main/crates/tuirealm_derive).
 - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
 - `crossterm`: use the [crossterm](https://github.com/crossterm-rs/crossterm) terminal & input backend
 - `termion`: use the [termion](https://github.com/redox-os/termion) terminal & input backend
