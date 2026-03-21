@@ -1,7 +1,7 @@
 use std::ops::Add as _;
 use std::time::{Duration, Instant};
 
-use crate::Event;
+use crate::event::Event;
 use crate::listener::{PollAsync, PortResult};
 
 /// An async port is a wrapper around the [`PollAsync`] trait object, which also defines a interval, which defines

@@ -33,8 +33,8 @@ where
 {
     /// Create a new Worker.
     ///
-    /// If `tick_interval` is [`None`], no [`Event::Tick`](crate::Event::Tick) will be sent and a fallback interval time will be used.
-    /// If `tick_interval` is [`Some`], [`Event::Tick`](crate::Event::Tick) will be sent and be used as the interval time.
+    /// If `tick_interval` is [`None`], no [`Event::Tick`](crate::event::Event::Tick) will be sent and a fallback interval time will be used.
+    /// If `tick_interval` is [`Some`], [`Event::Tick`](crate::event::Event::Tick) will be sent and be used as the interval time.
     pub(super) fn new(
         ports: Vec<SyncPort<UserEvent>>,
         sender: mpsc::Sender<ListenerMsg<UserEvent>>,
@@ -115,7 +115,8 @@ where
     /// Send tick to listener and calc next tick
     fn send_tick(&mut self) -> Result<(), mpsc::SendError<ListenerMsg<UserEvent>>> {
         // Send tick
-        self.sender.send(ListenerMsg::User(crate::Event::Tick))?;
+        self.sender
+            .send(ListenerMsg::User(crate::event::Event::Tick))?;
         // Calc next tick
         self.calc_next_tick();
         Ok(())
@@ -219,9 +220,9 @@ mod test {
 
     use super::*;
     use crate::core::event::{Key, KeyEvent};
+    use crate::event::{Event, NoUserEvent};
     use crate::listener::{Poll, PollError, PollResult, SyncPort};
     use crate::mock::{MockEvent, MockPoll};
-    use crate::{Event, NoUserEvent};
 
     #[test]
     fn worker_should_poll_multiple_times() {

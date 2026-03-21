@@ -1,12 +1,12 @@
 use crossterm::event::EventStream;
 use futures_util::StreamExt;
 
-use crate::Event;
+use crate::event::Event;
 use crate::listener::{PollAsync, PortResult};
 use crate::terminal::event_listener::io_err_to_port_err;
 
 /// The async input listener for crossterm.
-/// This can be manually added as a async port, or directly via [`EventListenerCfg::async_crossterm_input_listener()`](crate::EventListenerCfg::async_crossterm_input_listener)
+/// This can be manually added as a async port, or directly via [`EventListenerCfg::async_crossterm_input_listener()`](crate::listener::EventListenerCfg::async_crossterm_input_listener)
 // NOTE: This relies on [`From`] implementations in [`super::crossterm`].
 #[doc(alias = "InputEventListener")]
 #[derive(Debug)]

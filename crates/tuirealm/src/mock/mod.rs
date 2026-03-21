@@ -3,8 +3,9 @@
 use std::marker::PhantomData;
 
 use crate::event::{Event, Key, KeyEvent};
+use crate::injector::Injector;
 use crate::listener::{Poll, PortResult};
-use crate::{AttrValue, Attribute, Injector};
+use crate::props::{AttrValue, Attribute};
 
 // -- modules
 mod components;

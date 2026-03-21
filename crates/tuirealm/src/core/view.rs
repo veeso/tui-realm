@@ -6,8 +6,12 @@ use std::hash::Hash;
 use ratatui::Frame;
 use thiserror::Error;
 
+use super::component::Component;
+use super::event::Event;
+use super::injector::Injector;
+use super::props::{AttrValue, Attribute};
+use super::state::State;
 use crate::ratatui::layout::Rect;
-use crate::{AttrValue, Attribute, Component, Event, Injector, State};
 
 /// A boxed component. Shorthand for View components map
 pub(crate) type WrappedComponent<Msg, UserEvent> = Box<dyn Component<Msg, UserEvent>>;
@@ -324,11 +328,11 @@ mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::StateValue;
     use crate::event::{Key, KeyEvent};
     use crate::mock::{
         MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockInput, MockMsg,
     };
+    use crate::state::StateValue;
 
     #[test]
     fn default_view_should_be_empty() {

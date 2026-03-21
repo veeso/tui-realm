@@ -1,10 +1,10 @@
-/// A macro to generate a chain of [`crate::SubClause::AndMany`] from a list of
-/// Ids with the case [`crate::SubClause::IsMounted`] for every id.
+/// A macro to generate a chain of [`crate::subscription::SubClause::AndMany`] from a list of
+/// Ids with the case [`crate::subscription::SubClause::IsMounted`] for every id.
 ///
 /// ### Example
 ///
 /// ```rust
-/// use tuirealm::{SubClause, subclause_and};
+/// use tuirealm::{subscription::SubClause, subclause_and};
 ///
 /// #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 /// pub enum Id {
@@ -40,8 +40,8 @@ macro_rules! subclause_and {
     };
 }
 
-/// A macro to generate a chain of [`crate::SubClause::And`] from a list of
-/// Ids with the case  [`crate::SubClause::Not`] containing [`crate::SubClause::IsMounted`] for every id.
+/// A macro to generate a chain of [`crate::subscription::SubClause::And`] from a list of
+/// Ids with the case  [`crate::subscription::SubClause::Not`] containing [`crate::subscription::SubClause::IsMounted`] for every id.
 ///
 /// Why is this useful?
 /// Well, it happens quite often at least in my application to require a subclause for a "Global Listener" item
@@ -50,7 +50,7 @@ macro_rules! subclause_and {
 /// ### Example
 ///
 /// ```rust
-/// use tuirealm::{SubClause, subclause_and_not};
+/// use tuirealm::{subscription::SubClause, subclause_and_not};
 ///
 /// #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 /// pub enum Id {
@@ -88,13 +88,13 @@ macro_rules! subclause_and_not {
     };
 }
 
-/// A macro to generate a chain of [`crate::SubClause::OrMany`] from a list of
-/// Ids with the case [`crate::SubClause::IsMounted`] for every id.
+/// A macro to generate a chain of [`crate::subscription::SubClause::OrMany`] from a list of
+/// Ids with the case [`crate::subscription::SubClause::IsMounted`] for every id.
 ///
 /// ### Example
 ///
 /// ```rust
-/// use tuirealm::{SubClause, subclause_or};
+/// use tuirealm::{subscription::SubClause, subclause_or};
 ///
 /// #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 /// pub enum Id {
@@ -132,8 +132,8 @@ macro_rules! subclause_or {
 
 #[cfg(test)]
 mod tests {
-    use crate::SubClause;
     use crate::mock::MockComponentId;
+    use crate::subscription::SubClause;
 
     #[test]
     fn subclause_and() {
