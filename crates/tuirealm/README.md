@@ -8,7 +8,7 @@
 <p align="center">
   <a href="docs/en/get-started.md" target="_blank">Get started</a>
   ·
-  <a href="https://github.com/veeso/tui-realm/main/crates/tuirealm-stdlib" target="_blank">Standard Library</a>
+  <a href="https://github.com/veeso/tui-realm/tree/main/crates/tuirealm-stdlib" target="_blank">Standard Library</a>
   ·
   <a href="https://docs.rs/tuirealm" target="_blank">Documentation</a>
 </p>
@@ -44,20 +44,10 @@
   /></a>
 </p>
 <p align="center">
-<a href="https://github.com/veeso/tui-realm/actions/workflows/ratatui_crossterm.yml"
+<a href="https://github.com/veeso/tui-realm/actions/workflows/tests.yml"
     ><img
-      src="https://github.com/veeso/tui-realm/actions/workflows/ratatui_crossterm.yml/badge.svg"
-      alt="Ratatui-Crossterm CI"
-  /></a>
-  <a href="https://github.com/veeso/tui-realm/actions/workflows/ratatui_termion.yml"
-    ><img
-      src="https://github.com/veeso/tui-realm/actions/workflows/ratatui_termion.yml/badge.svg"
-      alt="Ratatui-Termion CI"
-  /></a>
-  <a href="https://github.com/veeso/tui-realm/actions/workflows/crossterm-windows.yml"
-    ><img
-      src="https://github.com/veeso/tui-realm/actions/workflows/crossterm-windows.yml/badge.svg"
-      alt="Crossterm CI (Windows)"
+      src="https://github.com/veeso/tui-realm/actions/workflows/tests.yml/badge.svg"
+      alt="CI"
   /></a>
   <a href="https://coveralls.io/github/veeso/tui-realm"
     ><img

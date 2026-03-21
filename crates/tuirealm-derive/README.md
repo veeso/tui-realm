@@ -1,7 +1,7 @@
 # tuirealm_derive
 
 <p align="center">
-  <img src="https://rawcdn.githack.com/veeso/tui-realm/39c38c3bd905f724403481514adb2cf2b4e69a7b/docs/images/tui-realm.svg" width="256" height="256" alt="logo" />
+  <img src="https://rawcdn.githack.com/veeso/tui-realm/39c38c3bd905f724403481514adb2cf2b4e69a7b/docs/images/cargo/tui-realm-512.png" width="256" height="256" alt="logo" />
 </p>
 
 <p align="center">~ Automatically implements MockComponent ~</p>

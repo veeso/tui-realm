@@ -8,7 +8,7 @@
 <p align="center">
   <a href="docs/en/get-started.md" target="_blank">Get started</a>
   ·
-  <a href="https://github.com/veeso/tui-realm/main/crates/tuirealm-stdlib" target="_blank">Standard Library</a>
+  <a href="https://github.com/veeso/tui-realm/tree/main/crates/tuirealm-stdlib" target="_blank">Standard Library</a>
   ·
   <a href="https://docs.rs/tuirealm" target="_blank">Documentation</a>
 </p>
@@ -41,20 +41,10 @@
   /></a>
 </p>
 <p align="center">
-<a href="https://github.com/veeso/tui-realm/actions/workflows/ratatui_crossterm.yml"
+<a href="https://github.com/veeso/tui-realm/actions/workflows/tests.yml"
     ><img
-      src="https://github.com/veeso/tui-realm/actions/workflows/ratatui_crossterm.yml/badge.svg"
-      alt="Ratatui-Crossterm CI"
-  /></a>
-  <a href="https://github.com/veeso/tui-realm/actions/workflows/ratatui_termion.yml"
-    ><img
-      src="https://github.com/veeso/tui-realm/actions/workflows/ratatui_termion.yml/badge.svg"
-      alt="Ratatui-Termion CI"
-  /></a>
-  <a href="https://github.com/veeso/tui-realm/actions/workflows/crossterm-windows.yml"
-    ><img
-      src="https://github.com/veeso/tui-realm/actions/workflows/crossterm-windows.yml/badge.svg"
-      alt="Crossterm CI (Windows)"
+      src="https://github.com/veeso/tui-realm/actions/workflows/tests.yml/badge.svg"
+      alt="CI"
   /></a>
   <a href="https://coveralls.io/github/veeso/tui-realm"
     ><img
@@ -73,20 +63,8 @@
 - [tui-realm](#tui-realm)
   - [About tui-realm 👑](#about-tui-realm-)
   - [Features 🎁](#features-)
-  - [Get started 🏁](#get-started-)
-    - [Add tui-realm to your Cargo.toml 🦀](#add-tui-realm-to-your-cargotoml-)
-      - [Enabling other backends ⚠️](#enabling-other-backends-️)
-    - [Create a tui-realm application 🪂](#create-a-tui-realm-application-)
-    - [Run examples 🔍](#run-examples-)
-  - [Standard components library 🎨](#standard-components-library-)
-  - [Community components 🏘️](#community-components-️)
-  - [Guides 🎓](#guides-)
-  - [Documentation 📚](#documentation-)
-  - [Apps using tui-realm 🚀](#apps-using-tui-realm-)
-  - [Support the developer ☕](#support-the-developer-)
-  - [Contributing and issues 🤝🏻](#contributing-and-issues-)
-  - [Changelog ⏳](#changelog-)
-  - [License 📃](#license-)
+  - [Get Started](#get-started)
+  - [Changelogs](#changelogs)
 
 ---
 

@@ -39,17 +39,17 @@
 //!
 //! ### Create a tui-realm application 🪂
 //!
-//! You can read the [Get Started guide](https://github.com/veeso/tui-realm/blob/main/docs/en/get-started.md) guide on github.
+//! You can read the [Get Started guide](https://github.com/veeso/tui-realm/blob/main/crates/tuirealm/docs/en/get-started.md) guide on github.
 //!
 //! ### Run examples 🔍
 //!
 //! Still confused about how tui-realm works? Don't worry, try with the examples:
 //!
-//! - [demo](https://github.com/veeso/tui-realm/blob/main/examples/demo/demo.rs): a simple example that shows basic tui-realm usage
-//! - [user-events](https://github.com/veeso/tui-realm/blob/main/examples/user_events/user_events.rs): showcase using custom events
-//! - [inline-display](https://github.com/veeso/tui-realm/blob/main/examples/inline_display.rs): showcase how tui-realm can be used without requiring a alternate screen
-//! - [async-ports](https://github.com/veeso/tui-realm/blob/main/examples/async_ports.rs): showcase usage of async ports
-//! - [arbitrary-data](https://github.com/veeso/tui-realm/blob/main/examples/arbitrary_data.rs): showcase usage of `PropPayload::Any` to send custom data across `query` and `attr`
+//! - [demo](https://github.com/veeso/tui-realm/blob/main/crates/tuirealm/examples/demo/demo.rs): a simple example that shows basic tui-realm usage
+//! - [user-events](https://github.com/veeso/tui-realm/blob/main/crates/tuirealm/examples/user_events/user_events.rs): showcase using custom events
+//! - [inline-display](https://github.com/veeso/tui-realm/blob/main/crates/tuirealm/examples/inline_display.rs): showcase how tui-realm can be used without requiring a alternate screen
+//! - [async-ports](https://github.com/veeso/tui-realm/blob/main/crates/tuirealm/examples/async_ports.rs): showcase usage of async ports
+//! - [arbitrary-data](https://github.com/veeso/tui-realm/blob/main/crates/tuirealm/examples/arbitrary_data.rs): showcase usage of `PropPayload::Any` to send custom data across `query` and `attr`
 //!
 
 #![doc(html_playground_url = "https://play.rust-lang.org")]
