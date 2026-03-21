@@ -1,0 +1,15 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.package]
+version = "4.0.0" # for now this only affects core and stdlib
+authors = [
+  "Christian Visintin <christian.visintin@veeso.dev>",
+  "hasezoey <hasezoey@gmail.com>",
+]
+edition = "2024"
+license = "MIT"
+rust-version = "1.86"
+repository = "https://github.com/veeso/tui-realm"
+homepage = "https://github.com/veeso/tui-realm"

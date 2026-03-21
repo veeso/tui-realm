@@ -1,17 +1,18 @@
 [package]
 name = "tui-realm-treeview"
+authors.workspace =  true
+rust-version.workspace =  true
+license.workspace =  true
+repository.workspace =  true
+homepage.workspace = true
+edition.workspace = true
 version = "3.0.0"
-authors = ["Christian Visintin"]
-edition = "2024"
 categories = ["command-line-utilities"]
 description = "Treeview component for tui-realm"
 documentation = "https://docs.rs/tui-realm-treeview"
-homepage = "https://github.com/veeso/tui-realm-treeview"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 keywords = ["tui", "terminal"]
-license = "MIT"
 readme = "README.md"
-repository = "https://github.com/veeso/tui-realm-treeview"
 
 [dependencies]
 orange-trees = "0.1.0"

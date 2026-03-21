@@ -1,17 +1,18 @@
 [package]
 name = "tui-realm-textarea"
+authors.workspace =  true
+rust-version.workspace =  true
+license.workspace =  true
+repository.workspace =  true
+homepage.workspace = true
 version = "2.1.0"
-authors = ["Christian Visintin"]
-edition = "2021"
+edition = "2021" # TODO: upgrade to match workspace
 categories = ["command-line-utilities"]
 description = "textarea component for tui-realm"
 documentation = "https://docs.rs/tui-realm-textarea"
-homepage = "https://github.com/veeso/tui-realm-textarea"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 keywords = ["tui", "terminal"]
-license = "MIT"
 readme = "README.md"
-repository = "https://github.com/veeso/tui-realm-textarea"
 
 [dependencies]
 cli-clipboard = { version = "^0.4", optional = true }
