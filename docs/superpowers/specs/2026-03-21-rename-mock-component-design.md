@@ -18,6 +18,15 @@ The derive macro changes from `#[derive(MockComponent)]` to `#[derive(Component)
 - `Component` — reusable building block (view, query, attr, state, perform)
 - `AppComponent` — application-level component that wraps a `Component` and handles events
 
+## Rename Ordering
+
+Because the current `Component` name is being reused for the renamed `MockComponent`, the rename must be done in the correct order to avoid collisions:
+
+1. **First**: rename current `Component` → `AppComponent` everywhere
+2. **Second**: rename `MockComponent` → `Component` everywhere
+
+Alternatively, use a temporary placeholder (e.g., `MockComponent` → `__Component`) then do the final rename. Either way, the implementation must not create a state where two traits share the same name.
+
 ## Scope of Changes
 
 ### 1. Core trait definitions (`crates/tuirealm/src/core/component.rs`)
@@ -31,6 +40,7 @@ The derive macro changes from `#[derive(MockComponent)]` to `#[derive(Component)
 
 - Change all `MockComponent` re-exports to `Component`
 - Change all `Component` re-exports to `AppComponent`
+- Update crate-level rustdoc in `lib.rs` (line 33 references `#[derive(MockComponent)]`)
 
 ### 3. Derive macro (`crates/tuirealm_derive/src/lib.rs`)
 
@@ -38,16 +48,20 @@ The derive macro changes from `#[derive(MockComponent)]` to `#[derive(Component)
 - Update generated code: `impl Component for ...` instead of `impl MockComponent for ...`
 - Update `use ::tuirealm::MockComponent` to `use ::tuirealm::Component` in the generated `use` block
 - Update crate-level doc comments
+- Update panic messages (e.g., `"MockComponent must be derived by a Struct"`)
+- Update `crates/tuirealm_derive/Cargo.toml` description field
 
 ### 4. Core crate internal usage (`crates/tuirealm/src/`)
 
-All internal references to `MockComponent` and `Component` must be updated:
+All internal references must be updated. Key clarification: references to the *current* `Component` trait (the one with `on()`) become `AppComponent`; references to `MockComponent` become `Component`.
 
-- `core/application.rs` — `Application` generic bounds, method signatures
+- `core/command.rs` — doc comments reference `MockComponent` and `Component` (lines 1, 10, 63)
+- `core/application.rs` — imports current `Component` (→ `AppComponent`), generic bounds, method signatures
 - `core/subscription.rs` — subscription handling
-- `core/view.rs` — `View` component storage and method signatures
+- `core/view.rs` — the `WrappedComponent` type alias (`Box<dyn Component<Msg, UserEvent>>` → `Box<dyn AppComponent<Msg, UserEvent>>`), `get_component`/`get_component_mut` return types, all method signatures
 - `terminal.rs` — terminal adapter trait bounds
-- `mock/` — test fixture types (the `Mock` prefix on test types like `MockInput`, `MockFooInput` stays — those genuinely are test mocks)
+- `mock/` — test fixtures: the *type names* (`MockInput`, `MockFooInput`, etc.) stay, but their *trait impls* change: `#[derive(MockComponent)]` → `#[derive(Component)]`, `impl Component<..>` → `impl AppComponent<..>`, `impl MockComponent` → `impl Component`
+- Inline test code (e.g., `view.rs` test module creates structs with `#[derive(MockComponent)]` and `impl Component<..>`)
 - All example files under `crates/tuirealm/examples/`
 
 ### 5. Standard library (`crates/tui-realm-stdlib/`)
@@ -62,13 +76,26 @@ All internal references to `MockComponent` and `Component` must be updated:
 ### 7. Documentation
 
 - Update `CLAUDE.md` to reflect new trait names
-- Update any docs under `docs/en/` that reference the old names
+- Update docs under `docs/en/` that reference the old names
+- Update docs under `docs/zh-cn/` that reference the old names
+- Update root `README.md`
+- Update `crates/tuirealm_derive/README.md`
+- CHANGELOGs are historical records and are left as-is
 
 ## Non-Changes
 
-- **Test mock types keep their names**: `MockInput`, `MockFooInput`, `MockBarInput`, `MockEvent`, `MockMsg`, etc. in `crates/tuirealm/src/mock/` are genuine test fixtures — the `Mock` prefix is correct for them.
+- **Test mock type names stay**: `MockInput`, `MockFooInput`, `MockBarInput`, `MockEvent`, `MockMsg`, etc. in `crates/tuirealm/src/mock/` are genuine test fixtures — the `Mock` prefix is correct for them. (Their trait implementations *do* change per section 4.)
 - **Feature flag name**: `derive` feature stays the same.
-- **`#[component = "field"]` attribute**: The attribute name on the derive macro stays `component` since it refers to the inner component field, which is still semantically correct.
+- **`#[component = "field"]` attribute**: The attribute name on the derive macro stays `component` since it refers to the inner component field.
+
+## Verification Strategy
+
+After all changes:
+
+1. `cargo build --workspace --all-features` must succeed
+2. `cargo test --workspace --all-features` must pass
+3. `cargo clippy --workspace --all-targets --all-features -- -Dwarnings` must pass
+4. Grep for `MockComponent` across the workspace — zero occurrences expected outside of CHANGELOGs and this spec
 
 ## Migration Impact
 
