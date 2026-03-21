@@ -94,13 +94,15 @@
 //!
 //! ```rust
 //! use std::{fs, io::{self, BufRead}};
-//! use tuirealm::{
-//!     application::PollStrategy,
-//!     command::{Cmd, CmdResult, Direction, Position},
-//!     event::{Event, Key, KeyEvent, KeyModifiers},
-//!     props::{HorizontalAlignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers},
-//!     Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue,
-//! };
+//! use tuirealm::application::PollStrategy;
+//! use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+//! use tuirealm::component::MockComponent;
+//! use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
+//! use tuirealm::props::{HorizontalAlignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers};
+//! use tuirealm::state::{State, StateValue};
+//! use tuirealm::application::Application;
+//! use tuirealm::listener::EventListenerCfg;
+//! use tuirealm::component::Component;
 //! use tui_realm_textarea::TextArea;
 //!
 //! let textarea = match fs::File::open("README.md") {
@@ -147,13 +149,15 @@ use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use fmt::LineFmt;
 use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, HorizontalAlignment, PropPayload, PropValue, Props, Style,
     TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
 use tuirealm::ratatui::widgets::{Block, Paragraph};
-use tuirealm::{Frame, MockComponent, State, StateValue};
+use tuirealm::state::{State, StateValue};
 
 // -- props
 pub const TEXTAREA_CURSOR_LINE_STYLE: &str = "cursor-line-style";
