@@ -1,22 +1,23 @@
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use tui_realm_stdlib::{Input, Phantom};
+use tui_realm_stdlib::components::{Input, Phantom};
 // treeview
 use tui_realm_treeview::{Node, TREE_CMD_CLOSE, TREE_CMD_OPEN, Tree, TreeView};
-use tuirealm::application::PollStrategy;
+use tuirealm::MockComponent;
+use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
+use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
     AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, InputType, Style,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::state::{State, StateValue};
+use tuirealm::subscription::{EventClause, Sub, SubClause};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
-use tuirealm::{
-    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue, Sub,
-    SubClause, SubEventClause,
-};
 
 const MAX_DEPTH: usize = 3;
 
@@ -73,7 +74,7 @@ impl Model {
                 Id::GlobalListener,
                 Box::new(GlobalListener::default()),
                 vec![Sub::new(
-                    SubEventClause::Keyboard(KeyEvent {
+                    EventClause::Keyboard(KeyEvent {
                         code: Key::Esc,
                         modifiers: KeyModifiers::NONE,
                     }),
