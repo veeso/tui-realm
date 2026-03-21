@@ -153,8 +153,10 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
         let output = quote! {
             const _: () = {
                 use ::tuirealm::command::{Cmd, CmdResult};
-                use ::tuirealm::ratatui::layout::Rect;
-                use ::tuirealm::{Attribute, AttrValue, Frame, MockComponent, State};
+                use ::tuirealm::component::MockComponent;
+                use ::tuirealm::props::{AttrValue, Attribute};
+                use ::tuirealm::ratatui::{layout::Rect, Frame};
+                use ::tuirealm::state::State;
                 impl #generics MockComponent for #ident #generics {
                     fn view(&mut self, frame: &mut Frame, area: Rect) {
                         self.#component_name.view(frame, area);

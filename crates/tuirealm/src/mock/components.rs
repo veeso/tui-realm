@@ -4,8 +4,10 @@ use ratatui::Frame;
 
 use super::{MockEvent, MockMsg};
 use crate::command::{Cmd, CmdResult, Direction};
+use crate::component::{Component, MockComponent};
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
-use crate::{AttrValue, Attribute, Component, MockComponent, Props, State, StateValue};
+use crate::props::{AttrValue, Attribute, Props};
+use crate::state::{State, StateValue};
 
 /// Mocked component implementing `MockComponent`
 pub struct MockInput {

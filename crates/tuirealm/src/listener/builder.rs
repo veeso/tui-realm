@@ -332,7 +332,7 @@ where
         self
     }
 
-    /// Change the way [`Event::Tick`](crate::Event::Tick) is emitted from being on a [`SyncPort`] to be a [`AsyncPort`].
+    /// Change the way [`Event::Tick`](crate::event::Event::Tick) is emitted from being on a [`SyncPort`] to be a [`AsyncPort`].
     #[cfg(feature = "async-ports")]
     #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
     pub fn async_tick(mut self, value: bool) -> Self {
@@ -416,7 +416,7 @@ mod test {
     async fn should_spawn_async_ticker() {
         use tokio::time::sleep;
 
-        use crate::Event;
+        use crate::event::Event;
 
         let builder = EventListenerCfg::<MockEvent>::default()
             .with_handle(Handle::current())

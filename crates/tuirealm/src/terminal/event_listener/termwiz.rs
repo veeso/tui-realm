@@ -17,7 +17,7 @@ use crate::listener::{Poll, PortError, PortResult};
 
 /// The input listener for [`termwiz`].
 /// If [`termwiz`] is enabled, this will already be exported as `InputEventListener` in the `adapter` module
-/// or you can use it directly in the event listener, calling [`EventListenerCfg::termwiz_input_listener()`](crate::EventListenerCfg::termwiz_input_listener)
+/// or you can use it directly in the event listener, calling [`EventListenerCfg::termwiz_input_listener()`](crate::listener::EventListenerCfg::termwiz_input_listener)
 #[doc(alias = "InputEventListener")]
 pub struct TermwizInputListener {
     terminal: BufferedTerminal<SystemTerminal>,

@@ -69,27 +69,25 @@ extern crate self as tuirealm;
 extern crate tuirealm_derive;
 
 mod core;
-pub mod listener;
 mod macros;
-#[cfg(test)]
-pub mod mock;
+
+pub mod listener;
 pub mod ratatui;
 pub mod terminal;
 pub mod utils;
-// export async trait for async-ports
+
+#[cfg(test)]
+pub mod mock;
+
+// Feature re-exports (must stay at root)
 #[cfg(feature = "async-ports")]
 #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
 pub use async_trait::async_trait;
-pub use listener::{EventListenerCfg, ListenerError};
-// -- derive
 #[cfg(feature = "derive")]
 #[doc(hidden)]
 pub use tuirealm_derive::*;
 
-pub use self::core::application::{self, Application, ApplicationError, PollStrategy};
-pub use self::core::event::{self, Event, NoUserEvent};
-pub use self::core::injector::Injector;
-pub use self::core::props::{self, AttrValue, Attribute, Props};
-pub use self::core::subscription::{EventClause as SubEventClause, Sub, SubClause};
-pub use self::core::{Component, MockComponent, State, StateValue, ViewError, command};
-pub use self::ratatui::Frame;
+// Re-export core submodules as top-level modules
+pub use self::core::{
+    application, command, component, event, injector, props, state, subscription, view,
+};

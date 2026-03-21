@@ -16,7 +16,7 @@ use crate::terminal::event_listener::io_err_to_port_err;
 
 /// The input listener for crossterm.
 /// If crossterm is enabled, this will already be exported as `InputEventListener` in the `adapter` module
-/// or you can use it directly in the event listener, calling [`EventListenerCfg::crossterm_input_listener()`](crate::EventListenerCfg::crossterm_input_listener)
+/// or you can use it directly in the event listener, calling [`EventListenerCfg::crossterm_input_listener()`](crate::listener::EventListenerCfg::crossterm_input_listener)
 #[doc(alias = "InputEventListener")]
 pub struct CrosstermInputListener {
     interval: Duration,

@@ -17,7 +17,7 @@ pub use termion::TermionInputListener;
 pub use termwiz::TermwizInputListener;
 
 #[allow(unused_imports)] // used in the event listeners
-use crate::Event;
+use crate::event::Event;
 use crate::listener::PortError;
 
 /// Convert [`io::Error`](std::io::Error) to a [`PortError`], with correct Intermittent & Permanent Mapping
