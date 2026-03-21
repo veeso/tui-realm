@@ -4,12 +4,12 @@ use ratatui::Frame;
 
 use super::{MockEvent, MockMsg};
 use crate::command::{Cmd, CmdResult, Direction};
-use crate::component::{AppComponent, MockComponent};
+use crate::component::{AppComponent, Component};
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
 use crate::props::{AttrValue, Attribute, Props};
 use crate::state::{State, StateValue};
 
-/// Mocked component implementing `MockComponent`
+/// Mocked component implementing `Component`
 pub struct MockInput {
     props: Props,
     states: MockInputStates,
@@ -24,7 +24,7 @@ impl Default for MockInput {
     }
 }
 
-impl MockComponent for MockInput {
+impl Component for MockInput {
     fn view(&mut self, _: &mut Frame, _: crate::ratatui::layout::Rect) {}
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
@@ -92,7 +92,7 @@ impl MockInputStates {
 
 // -- component impl
 
-#[derive(MockComponent, Default)]
+#[derive(Component, Default)]
 pub struct MockFooInput {
     component: MockInput,
 }
@@ -127,7 +127,7 @@ impl AppComponent<MockMsg, MockEvent> for MockFooInput {
     }
 }
 
-#[derive(MockComponent, Default)]
+#[derive(Component, Default)]
 pub struct MockBarInput {
     component: MockInput,
 }

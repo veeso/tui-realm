@@ -781,7 +781,7 @@ mod test {
     #[test]
     fn view_component_should_be_downcastable() {
         /// Some struct we can reference and has "&self" and "&mut self" requirements.
-        #[derive(MockComponent, Default)]
+        #[derive(Component, Default)]
         pub struct OurMockFooInput {
             component: MockInput,
         }
