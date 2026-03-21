@@ -4,26 +4,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-tui-realm (`tuirealm` crate) is a framework for [ratatui](https://github.com/ratatui/ratatui) that provides a React/Elm-inspired component system for building terminal UIs with properties, state management, messages, and event-driven architecture.
+tui-realm is a monorepo workspace containing the following crates:
+
+| Crate | Path | Description |
+|-------|------|-------------|
+| `tuirealm` | `crates/tuirealm/` | Core framework — React/Elm-inspired component system for ratatui |
+| `tuirealm_derive` | `crates/tuirealm_derive/` | `#[derive(MockComponent)]` proc macro |
+| `tui-realm-stdlib` | `crates/tui-realm-stdlib/` | Standard components library (input, list, table, etc.) |
+| `tui-realm-textarea` | `crates/extra/tui-realm-textarea/` | Textarea component (based on tui-textarea-2) |
+| `tui-realm-treeview` | `crates/extra/tui-realm-treeview/` | Treeview component (based on orange-trees) |
 
 ## Commands
 
 ```bash
-# Build (default features: derive + crossterm)
-cargo build
+# Build entire workspace
+cargo build --workspace
 
 # Build with all features
-cargo build --all-features
+cargo build --workspace --all-features
+
+# Build a single crate
+cargo build -p tuirealm
+cargo build -p tui-realm-stdlib
 
 # Run all tests
-cargo test --all-features
+cargo test --workspace --all-features
 
-# Run a single test
-cargo test --all-features <test_name>
+# Run tests for a single crate
+cargo test -p tuirealm --all-features
 
 # Lint
-cargo clippy --all-targets --all-features -- -Dwarnings
-cargo clippy --all-targets -- -Dwarnings
+cargo clippy --workspace --all-targets --all-features -- -Dwarnings
 
 # Format (always use nightly)
 cargo +nightly fmt --all
@@ -31,13 +42,14 @@ cargo +nightly fmt --all
 # Format check (always use nightly)
 cargo +nightly fmt --all -- --check
 
-# Run example
-cargo run --example demo --features crossterm
+# Run example (from a specific crate)
+cargo run -p tuirealm --example demo --features crossterm
+cargo run -p tui-realm-stdlib --example input
 ```
 
 MSRV: 1.86. Edition: 2024.
 
-## Feature Flags
+## Feature Flags (tuirealm core)
 
 - `derive` (default) — `#[derive(MockComponent)]` proc macro
 - `crossterm` (default) — crossterm terminal backend
@@ -81,12 +93,12 @@ view() → Terminal::draw → each mounted component renders via MockComponent::
 
 ### Module Layout
 
-- `src/core/` — Application, View, Component/MockComponent traits, Props, State, Subscriptions, Events, Commands
-- `src/listener/` — EventListener, ports (sync/async), worker thread, builder
-- `src/terminal.rs` — Terminal adapters and backend-specific input listeners
-- `src/mock/` — Mock types for testing (test-only)
-- `src/utils/` — Utility types (Email, PhoneNumber, etc.)
-- `src/macros.rs` — `subclause_and!`, `subclause_or!`, `subclause_and_not!` helper macros
+- `crates/tuirealm/src/core/` — Application, View, Component/MockComponent traits, Props, State, Subscriptions, Events, Commands
+- `crates/tuirealm/src/listener/` — EventListener, ports (sync/async), worker thread, builder
+- `crates/tuirealm/src/terminal.rs` — Terminal adapters and backend-specific input listeners
+- `crates/tuirealm/src/mock/` — Mock types for testing (test-only)
+- `crates/tuirealm/src/utils/` — Utility types (Email, PhoneNumber, etc.)
+- `crates/tuirealm/src/macros.rs` — `subclause_and!`, `subclause_or!`, `subclause_and_not!` helper macros
 
 ## Code Style
 
