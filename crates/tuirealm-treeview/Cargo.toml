@@ -31,6 +31,6 @@ crossterm = ["tuirealm/crossterm"]
 termion = ["tuirealm/termion"]
 
 [[example]]
-name = "demo"
-path = "examples/demo.rs"
+name = "filesystem"
+path = "examples/filesystem.rs"
 required-features = ["crossterm"]
