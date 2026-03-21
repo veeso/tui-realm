@@ -3,15 +3,15 @@ name = "tui-realm-treeview"
 version = "4.0.0"
 edition.workspace = true
 authors.workspace = true
-categories.workspace = true
 description = "Treeview component for tui-realm"
+license.workspace = true
+repository.workspace = true
+categories.workspace = true
 documentation = "https://docs.rs/tui-realm-treeview"
 homepage.workspace = true
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 keywords.workspace = true
-license.workspace = true
 readme = "README.md"
-repository.workspace = true
 rust-version.workspace = true
 
 [features]

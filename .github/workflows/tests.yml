@@ -1,6 +1,9 @@
 name: Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 env:
   CARGO_TERM_COLOR: always
@@ -10,7 +13,7 @@ jobs:
   rustfmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
@@ -21,30 +24,30 @@ jobs:
   clippy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - name: Clippy all features
-        run: cargo clippy --all-targets --all-features -- -Dwarnings
+        run: cargo clippy --workspace --all-targets --all-features -- -Dwarnings
       - name: Clippy default features
-        run: cargo clippy --all-targets -- -Dwarnings
+        run: cargo clippy --workspace --all-targets -- -Dwarnings
 
   # Build examples, ensuring they compile
   # This is for all targets, so no need to run it in each
   build-examples:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Install Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
       - name: Examples
-        run: cargo build --all-targets --examples
+        run: cargo build --workspace --all-targets --all-features --examples
 
   test-linux:
     runs-on: ubuntu-latest
@@ -53,7 +56,7 @@ jobs:
       matrix:
         toolchain: [stable, "1.86"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Install Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -64,7 +67,7 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Cargo Check
-        run: cargo build --all-features
+        run: cargo build --workspace --all-features
       - name: Test
         # This tests both crossterm, termion and termwiz
         run: cargo llvm-cov --no-fail-fast --all-features --workspace --lcov --output-path lcov.info --no-cfg-coverage
@@ -83,7 +86,7 @@ jobs:
       matrix:
         toolchain: [stable, "1.86"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Install Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -94,10 +97,10 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Cargo Check
-        run: cargo build --features async-ports,serialize
+        run: cargo build --workspace --features async-ports,serialize
       - name: Test
         # This tests both crossterm and termwiz
-        # Does NOT run termion, as that is is unix only
+        # Does NOT run termion, as that is unix only
         run: cargo llvm-cov --no-fail-fast --features async-ports,serialize --workspace --lcov --output-path lcov.info --no-cfg-coverage
       - name: Coveralls
         uses: coverallsapp/github-action@v2.3.6
@@ -114,7 +117,7 @@ jobs:
       matrix:
         toolchain: [stable, "1.86"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Install Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -125,7 +128,7 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Cargo Check
-        run: cargo build --all-features
+        run: cargo build --workspace --all-features
       - name: Test
         # This tests both crossterm, termion and termwiz
         run: cargo llvm-cov --no-fail-fast --all-features --workspace --lcov --output-path lcov.info --no-cfg-coverage

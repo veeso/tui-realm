@@ -84,7 +84,7 @@ It is based on the [tui-textarea](https://github.com/rhysd/tui-textarea) compone
 ### Add tui-realm-textarea to your Cargo.toml 🦀
 
 ```toml
-tui-realm-textarea = "2"
+tui-realm-textarea = "4"
 ```
 
 Or if you don't use **Crossterm**, define the backend as you do with tui-realm:
@@ -158,9 +158,9 @@ Press `ESC` to quit
 - `Custom($TEXTAREA_MAX_HISTORY, Payload(One(Usize)))`: Set the history steps to record
 - `Custom($TEXTAREA_CURSOR_STYLE, Style)`: Set the cursor style
 - `Custom($TEXTAREA_CURSOR_LINE_STYLE, Style)`: Set the current line style
-- `Custom($TEXTAREA_FOOTER_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the footer bar
+- `Custom($TEXTAREA_FOOTER_FMT, Payload(Pair(Str, Style)))`: Set the format and the style for the footer bar
 - `Custom($TEXTAREA_LINE_NUMBER_STYLE, Style)`: set the style for the line number
-- `Custom($TEXTAREA_STATUS_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the status bar
+- `Custom($TEXTAREA_STATUS_FMT, Payload(Pair(Str, Style)))`: Set the format and the style for the status bar
 - `Custom($TEXTAREA_SEARCH_PATTERN, String`: Set search pattern
 - `Custom($TEXTAREA_SEARCH_STYLE, Style`: Set search style
 - `Style(Style)`: Set the general style for the textarea

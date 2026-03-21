@@ -3,15 +3,15 @@ name = "tuirealm_derive"
 version = "4.0.0"
 edition.workspace = true
 authors.workspace = true
-categories.workspace = true
 description = "Derive macro which automatically implements the MockComponent trait"
+license.workspace = true
+repository.workspace = true
+categories.workspace = true
 documentation = "https://docs.rs/tuirealm_derive"
 homepage.workspace = true
 include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 keywords.workspace = true
-license.workspace = true
 readme = "README.md"
-repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]

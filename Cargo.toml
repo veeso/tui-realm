@@ -19,45 +19,34 @@ homepage = "https://github.com/veeso/tui-realm"
 keywords = ["tui", "terminal"]
 license = "MIT"
 repository = "https://github.com/veeso/tui-realm"
-rust-version = "1.86"
+rust-version = "1.86.0"
 
 [workspace.dependencies]
-# Workspace crates
-tui-realm-stdlib = { path = "crates/tui-realm-stdlib", version = "4.0.0", default-features = false }
-tuirealm = { path = "crates/tuirealm", version = "4.0.0", default-features = false }
-tuirealm_derive = { path = "crates/tuirealm_derive", version = "4.0.0" }
-
-# Core deps
 async-trait = "0.1"
 bitflags = "2"
+cli-clipboard = "0.4"
+crossterm = "0.29"
 dyn-clone = "1"
 futures-util = { version = "0.3", default-features = false }
 lazy-regex = "3"
+orange-trees = "0.1"
+pretty_assertions = "1"
+proc-macro2 = "1"
+quote = "1"
+rand = "0.10"
 ratatui = { version = "0.30", default-features = false, features = ["std", "layout-cache"] }
 serde = { version = "1", features = ["derive"] }
+syn = "2"
+tempfile = "3"
+termion = "4"
+termwiz = "0.23"
+textwrap = "0.16"
 thiserror = "2"
 tokio = { version = "1", default-features = false }
 tokio-util = { version = "0.7", default-features = false }
-
-# Backend deps
-crossterm = "0.29"
-termion = "4"
-termwiz = "0.23"
-
-# Derive deps
-proc-macro2 = "1"
-quote = "1"
-syn = "2"
-
-# Stdlib/extra deps
-cli-clipboard = "0.4"
-orange-trees = "0.1.0"
-textwrap = "0.16"
-tui-textarea = { package = "tui-textarea-2", version = "0.10", default-features = false, features = ["ratatui"] }
-unicode-width = "0.2"
-
-# Dev deps
-pretty_assertions = "1"
-rand = "0.10"
-tempfile = "3"
 toml = "0.9"
+tui-realm-stdlib = { path = "crates/tui-realm-stdlib", version = "4", default-features = false }
+tui-textarea = { package = "tui-textarea-2", version = "0.10", default-features = false, features = ["ratatui"] }
+tuirealm = { path = "crates/tuirealm", version = "4", default-features = false }
+tuirealm_derive = { path = "crates/tuirealm_derive", version = "4" }
+unicode-width = "0.2"

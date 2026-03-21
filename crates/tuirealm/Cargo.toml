@@ -3,15 +3,15 @@ name = "tuirealm"
 version = "4.0.0"
 edition.workspace = true
 authors.workspace = true
-categories.workspace = true
 description = "A ratatui framework to build tui interfaces, inspired by React and Elm."
+license.workspace = true
+repository.workspace = true
+categories.workspace = true
 documentation = "https://docs.rs/tuirealm"
 homepage.workspace = true
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 keywords.workspace = true
-license.workspace = true
 readme = "README.md"
-repository.workspace = true
 rust-version.workspace = true
 
 [features]
@@ -23,7 +23,7 @@ async-ports = [
     "dep:tokio-util",
 ]
 crossterm = ["dep:crossterm", "ratatui/crossterm"]
-default = ["derive", "crossterm"]
+default = ["crossterm", "derive"]
 derive = ["dep:tuirealm_derive"]
 serialize = ["bitflags/serde", "dep:serde"]
 termion = ["dep:termion", "ratatui/termion"]
@@ -60,6 +60,11 @@ required-features = ["crossterm"]
 name = "async-ports"
 path = "examples/async_ports.rs"
 required-features = ["async-ports", "crossterm"]
+
+[[example]]
+name = "event-display"
+path = "examples/event_display.rs"
+required-features = ["crossterm"]
 
 [[example]]
 name = "demo"

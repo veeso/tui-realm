@@ -44,9 +44,9 @@
   /></a>
 </p>
 <p align="center">
-  <a href="https://github.com/veeso/tuirealm_derive/actions"
+  <a href="https://github.com/veeso/tui-realm/tree/main/crates/tuirealm_derive/actions"
     ><img
-      src="https://github.com/veeso/tuirealm_derive/workflows/Build/badge.svg"
+      src="https://github.com/veeso/tui-realm/tree/main/crates/tuirealm_derive/workflows/Build/badge.svg"
       alt="Build CI"
   /></a>
   <a href="https://docs.rs/tuirealm_derive"

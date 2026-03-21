@@ -1,6 +1,6 @@
 //! # tui-realm-treeview
 //!
-//! [tui-realm-treeview](https://github.com/veeso/tui-realm-treeview) is a
+//! [tui-realm-treeview](https://github.com/veeso/tui-realm/tree/main/crates/extra/tui-realm-treeview) is a
 //! [tui-realm](https://github.com/veeso/tui-realm) implementation of a treeview component.
 //! The tree engine is based on [Orange-trees](https://docs.rs/orange-trees/).
 //!
@@ -9,7 +9,7 @@
 //! ### Adding `tui-realm-treeview` as dependency
 //!
 //! ```toml
-//! tui-realm-treeview = "2"
+//! tui-realm-treeview = "4"
 //! ```
 //!
 //! Or if you don't use **Crossterm**, define the backend as you would do with tui-realm:

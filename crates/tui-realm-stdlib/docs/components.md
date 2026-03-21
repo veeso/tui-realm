@@ -70,7 +70,7 @@ While in active mode (default) you can put as many entries as you wish. You can 
 - `Custom($BAR_CHART_LABEL_STYLE, Style)`: Sets the style for data labels
 - `Custom($BAR_CHART_MAX_BARS, Length)`: maximum amount of bars to display. If not provided, will be the maximum allowed by the area width.
 - `Custom($BAR_CHART_VALUES_STYLE, Style)`: Sets style for values
-- `Dataset(Payload(LinkedList(Tup2(String, U64))))`: set data for chart. Is a vec of tuple of labels and u64
+- `Dataset(Payload(LinkedList(Pair(String, U64))))`: set data for chart. Is a vec of tuple of labels and u64
 - `Disabled(Flag)`: Sets the chart in disabled mode
 - `Foreground(Color)`: foreground color
 - `Title(Title)`: title for chart
@@ -93,8 +93,8 @@ Canvas component can be used to draw shapes on the terminal.
 
 - `Background(Color)`: background color
 - `Borders(Borders)`: set borders properties for component
-- `Custom($CANVAS_X_BOUNDS, Payload(Tup2(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
-- `Custom($CANVAS_Y_BOUNDS, Payload(Tup2(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
+- `Custom($CANVAS_X_BOUNDS, Payload(Pair(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
+- `Custom($CANVAS_Y_BOUNDS, Payload(Pair(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
 - `Foreground(Color)`: foreground color
 - `Shape(Payload(Vec(Shape)))`: set shapes for canvas.
 - `Title(Title)`: title for chart
@@ -128,11 +128,11 @@ While in active mode (default) you can put as many entries as you wish. You can 
 
 - `Background(Color)`: background color
 - `Borders(Borders)`: set borders properties for component
-- `Custom($CHART_X_BOUNDS, Payload(Tup2(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
+- `Custom($CHART_X_BOUNDS, Payload(Pair(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
 - `Custom($CHART_X_LABELS, Payload(Vec(String)))`: Set labels for x axis
 - `Custom($CHART_X_STYLE, Style)`: Set style for x axis
 - `Custom($CHART_X_TITLE, String)`: Set title for x axis
-- `Custom($CHART_Y_BOUNDS, Payload(Tup2(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
+- `Custom($CHART_Y_BOUNDS, Payload(Pair(F64, F64)))`: Something regarding the viewport; view tui-rs documentation (which doesn't exist actually). I don't know how it works actually.
 - `Custom($CHART_Y_LABELS, Payload(Vec(String)))`: Set labels for y axis
 - `Custom($CHART_Y_STYLE, Style)`: Set style for x axis
 - `Custom($CHART_Y_TITLE, String)`: Set title for x axis

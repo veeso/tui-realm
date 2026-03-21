@@ -95,7 +95,7 @@ It uses the [Orange trees](https://github.com/veeso/orange-trees) engine for imp
 ### Add tui-realm-treeview to your Cargo.toml 🦀
 
 ```toml
-tui-realm-treeview = "2"
+tui-realm-treeview = "4"
 ```
 
 Or if you don't use **Crossterm**, define the backend as you do with tui-realm:

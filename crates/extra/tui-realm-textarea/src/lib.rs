@@ -1,6 +1,6 @@
 //! # tui-realm-textarea
 //!
-//! [tui-realm-textarea](https://github.com/veeso/tui-realm-textarea) is a
+//! [tui-realm-textarea](https://github.com/veeso/tui-realm/tree/main/crates/extra/tui-realm-textarea) is a
 //! [tui-realm](https://github.com/veeso/tui-realm) implementation of a textarea component.
 //! The tree engine is based on [Orange-trees](https://docs.rs/orange-trees/).
 //!
@@ -9,7 +9,7 @@
 //! ### Adding `tui-realm-textarea` as dependency
 //!
 //! ```toml
-//! tui-realm-textarea = "2"
+//! tui-realm-textarea = "4"
 //! ```
 //!
 //! Or if you don't use **Crossterm**, define the backend as you would do with tui-realm:
@@ -71,9 +71,9 @@
 //! - `Custom($TEXTAREA_MAX_HISTORY, Payload(One(Usize)))`: Set the history steps to record
 //! - `Custom($TEXTAREA_CURSOR_STYLE, Style)`: Set the cursor style
 //! - `Custom($TEXTAREA_CURSOR_LINE_STYLE, Style)`: Set the current line style
-//! - `Custom($TEXTAREA_FOOTER_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the footer bar
+//! - `Custom($TEXTAREA_FOOTER_FMT, Payload(Pair(Str, Style)))`: Set the format and the style for the footer bar
 //! - `Custom($TEXTAREA_LINE_NUMBER_STYLE, Style)`: set the style for the line number
-//! - `Custom($TEXTAREA_STATUS_FMT, Payload(Tup2(Str, Style)))`: Set the format and the style for the status bar
+//! - `Custom($TEXTAREA_STATUS_FMT, Payload(Pair(Str, Style)))`: Set the format and the style for the status bar
 //! - `Custom($TEXTAREA_SEARCH_PATTERN, String`: Set search pattern
 //! - `Custom($TEXTAREA_SEARCH_STYLE, Style`: Set search style
 //! - `Custom($TEXTAREA_SINGLE_LINE, Style`: Act as single-line input

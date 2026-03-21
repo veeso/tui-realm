@@ -718,7 +718,7 @@ pub enum Id {
 
 We'll have two types of counters, so we'll call them `LetterCounter` and `DigitCounter`. Let's implement them!
 
-First we define the `LetterCounter` with the mock component within. Since we don't need any particular behaviour for the `MockComponent` trait, we can simply derive `MockComponent`, which will automatically pass through all `MockComponent` calls to the underlying `MockComponent`. If you want to read more read see [tuirealm_derive](https://github.com/veeso/tuirealm_derive).
+First we define the `LetterCounter` with the mock component within. Since we don't need any particular behaviour for the `MockComponent` trait, we can simply derive `MockComponent`, which will automatically pass through all `MockComponent` calls to the underlying `MockComponent`. If you want to read more read see [tuirealm_derive](https://github.com/veeso/tui-realm/tree/main/crates/tuirealm_derive).
 
 ```rust
 #[derive(MockComponent)]

@@ -6,7 +6,7 @@
 
 <p align="center">~ A tui-rs framework inspired by Elm and React ~</p>
 <p align="center">
-  <a href="https://github.com/veeso/tuirealm_derive" target="_blank">tui-realm derive</a>
+  <a href="https://github.com/veeso/tui-realm/tree/main/crates/tuirealm_derive" target="_blank">tui-realm derive</a>
   ·
   <a href="https://github.com/veeso/tui-realm" target="_blank">tui-realm</a>
   ·
@@ -85,14 +85,14 @@ It provides several **Mock Components** for your tui-realm applications. Probabl
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
-tui-realm = "3"
-tui-realm-stdlib = "3"
+tuirealm = "4"
+tui-realm-stdlib = "4"
 ```
 
 or if you're not using the default **crossterm backend**, specify another backend in the cargo entry:
 
 ```toml
-tui-realm = { version = "3", default-features = false, features = [ "termion" ] }
+tuirealm = { version = "4", default-features = false, features = [ "termion" ] }
 ```
 
 ---

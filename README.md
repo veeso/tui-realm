@@ -8,7 +8,7 @@
 <p align="center">
   <a href="docs/en/get-started.md" target="_blank">Get started</a>
   ·
-  <a href="https://github.com/veeso/tui-realm-stdlib" target="_blank">Standard Library</a>
+  <a href="https://github.com/veeso/tui-realm/tree/main/crates/tui-realm-stdlib" target="_blank">Standard Library</a>
   ·
   <a href="https://docs.rs/tuirealm" target="_blank">Documentation</a>
 </p>
@@ -126,7 +126,7 @@ See tui-realm in action in the [Example](#run-examples-) or if you want to read 
 If you want the default features, just add tuirealm with version:
 
 ```toml
-tuirealm = "3"
+tuirealm = "4"
 ```
 
 otherwise you can specify the features you want to add:
@@ -137,7 +137,7 @@ tuirealm = { version = "3", default-features = false, features = [ "derive", "se
 
 Supported features are:
 
-- `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tuirealm_derive).
+- `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tui-realm/tree/main/crates/tuirealm_derive).
 - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
 - `crossterm`: use the [crossterm](https://github.com/crossterm-rs/crossterm) terminal & input backend
 - `termion`: use the [termion](https://github.com/redox-os/termion) terminal & input backend
@@ -189,16 +189,16 @@ Interested in how tui-realm works and how the resulting code looks? Try the exam
 
 ## Standard components library 🎨
 
-`tui-realm` has a optional standard library called [`tui-realm-stdlib`](https://github.com/veeso/tui-realm-stdlib),
+`tui-realm` has a optional standard library called [`tui-realm-stdlib`](https://github.com/veeso/tui-realm/tree/main/crates/tui-realm-stdlib),
 which wraps common widgets from `ratatui` for usage in tui-realm.
-If you want to use it, just add the [`tui-realm-stdlib`](https://github.com/veeso/tui-realm-stdlib) to your `Cargo.toml` dependencies.
+If you want to use it, just add the [`tui-realm-stdlib`](https://github.com/veeso/tui-realm/tree/main/crates/tui-realm-stdlib) to your `Cargo.toml` dependencies.
 
 ## Community components 🏘️
 
 These components may not included in tui-realm or the stdlib, but have been developed by other users. I like advertising other's contents, so here you can find a list of components you may find useful for your next tui-realm project 💜.
 
-- [`tui-realm-textarea`](https://github.com/veeso/tui-realm-textarea) A textarea/editor component developed by [@veeso](https://github.com/veeso)
-- [`tui-realm-treeview`](https://github.com/veeso/tui-realm-treeview) A treeview component developed by [@veeso](https://github.com/veeso)
+- [`tui-realm-textarea`](https://github.com/veeso/tui-realm/tree/main/crates/extra/tui-realm-textarea) A textarea/editor component developed by [@veeso](https://github.com/veeso)
+- [`tui-realm-treeview`](https://github.com/veeso/tui-realm/tree/main/crates/extra/tui-realm-treeview) A treeview component developed by [@veeso](https://github.com/veeso)
 - [`tuirealm-orx-tree`](https://github.com/hasezoey/tuirealm-orx-tree) Another treeview component developed by [@hasezoey](https://github.com/hasezoey)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
