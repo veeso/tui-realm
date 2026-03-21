@@ -127,7 +127,7 @@ The following table summarises the key import path changes:
 | `tuirealm::Event` | `tuirealm::event::Event` |
 | `tuirealm::NoUserEvent` | `tuirealm::event::NoUserEvent` |
 | `tuirealm::{AttrValue, Attribute, Props}` | `tuirealm::props::{AttrValue, Attribute, Props}` |
-| `tuirealm::{Component, MockComponent}` | `tuirealm::component::{Component, MockComponent}` |
+| `tuirealm::{Component, MockComponent}` | `tuirealm::component::{AppComponent, Component}` |
 | `tuirealm::{State, StateValue}` | `tuirealm::state::{State, StateValue}` |
 | `tuirealm::{Sub, SubClause, SubEventClause}` | `tuirealm::subscription::{Sub, SubClause, EventClause}` |
 | `tuirealm::Frame` | `tuirealm::ratatui::Frame` |
@@ -139,4 +139,19 @@ The following table summarises the key import path changes:
 | `tui_realm_treeview::TreeState` | `tui_realm_treeview::tree_state::TreeState` |
 | `tui_realm_treeview::TreeWidget` | `tui_realm_treeview::widget::TreeWidget` |
 
-> **Note:** The `#[derive(MockComponent)]` proc macro and `async_trait` remain exported at the crate root level, as they need to be in scope for derive and trait usage.
+> **Note:** The `#[derive(Component)]` proc macro and `async_trait` remain exported at the crate root level, as they need to be in scope for derive and trait usage.
+
+### Rename `MockComponent` to `Component` and `Component` to `AppComponent`
+
+The confusingly named `MockComponent` trait has been renamed to `Component`, since it is the actual base component trait (providing `view()`, `query()`, `attr()`, `state()`, `perform()`).
+
+The previous `Component<Msg, UserEvent>` trait has been renamed to `AppComponent<Msg, UserEvent>`, since it represents the application-level component that extends `Component` with event handling via `on()`.
+
+The derive macro has been renamed accordingly: `#[derive(MockComponent)]` is now `#[derive(Component)]`.
+
+Migration:
+
+1. Replace `impl MockComponent for X` with `impl Component for X`
+2. Replace `impl Component<Msg, UserEvent> for X` with `impl AppComponent<Msg, UserEvent> for X`
+3. Replace `#[derive(MockComponent)]` with `#[derive(Component)]`
+4. Update imports: `MockComponent` becomes `Component`, `Component` becomes `AppComponent`
