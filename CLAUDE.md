@@ -25,11 +25,11 @@ cargo test --all-features <test_name>
 cargo clippy --all-targets --all-features -- -Dwarnings
 cargo clippy --all-targets -- -Dwarnings
 
-# Format
-cargo fmt --all
+# Format (always use nightly)
+cargo +nightly fmt --all
 
-# Format check
-cargo fmt --all -- --check
+# Format check (always use nightly)
+cargo +nightly fmt --all -- --check
 
 # Run example
 cargo run --example demo --features crossterm
