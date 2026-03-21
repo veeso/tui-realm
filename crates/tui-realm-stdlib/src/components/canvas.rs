@@ -1,15 +1,17 @@
 //! A canvas where you can draw more complex figures.
 
 use tuirealm::command::{Cmd, CmdResult};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
     TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::text::{Line as Spans, Span};
 use tuirealm::ratatui::widgets::canvas::{Canvas as TuiCanvas, Context, Points};
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 // -- Props
 use super::props::{

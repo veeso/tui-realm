@@ -3,13 +3,15 @@
 use std::collections::LinkedList;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::widgets::BarChart as TuiBarChart;
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 use super::props::{
     BAR_CHART_BARS_GAP, BAR_CHART_BARS_STYLE, BAR_CHART_LABEL_STYLE, BAR_CHART_MAX_BARS,
