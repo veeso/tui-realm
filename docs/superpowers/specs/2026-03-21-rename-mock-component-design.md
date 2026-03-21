@@ -75,12 +75,28 @@ All internal references must be updated. Key clarification: references to the *c
 
 ### 7. Documentation
 
-- Update `CLAUDE.md` to reflect new trait names
-- Update docs under `docs/en/` that reference the old names
-- Update docs under `docs/zh-cn/` that reference the old names
-- Update root `README.md`
-- Update `crates/tuirealm_derive/README.md`
-- CHANGELOGs are historical records and are left as-is
+All documentation must be updated to use the new trait names. Specific files:
+
+**Project-level:**
+- `CLAUDE.md` — trait names in Architecture section
+- `README.md` — feature description references `#[derive(MockComponent)]`
+
+**English docs (`docs/en/`):**
+- `docs/en/get-started.md` — extensive trait references and code examples
+- `docs/en/advanced.md` — `impl MockComponent` examples
+- `docs/en/migrating-legacy.md` — migration guide with trait references and `#[derive(MockComponent)]`
+
+**Chinese docs (`docs/zh-cn/`):**
+- `docs/zh-cn/get-started.md` — trait references and code examples
+- `docs/zh-cn/advanced.md` — `impl MockComponent` examples
+- `docs/zh-cn/migrating-legacy.md` — migration guide with trait references
+
+**Crate docs:**
+- `crates/tuirealm_derive/README.md` — extensive MockComponent documentation and examples
+- `crates/tuirealm_derive/Cargo.toml` — package `description` field
+
+**Left as-is:**
+- CHANGELOGs are historical records and are not updated
 
 ## Non-Changes
 
