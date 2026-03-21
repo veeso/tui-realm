@@ -101,7 +101,7 @@ And that also explains the reason of the name: **Realm stands for React and Elm*
 
 tui-realm also comes with a standard library of components, which can be added to your dependencies, that you may find very useful. Don't worry, they are optional if you don't want to use them 😉, just follow the guide in [get started](#get-started-) section.
 
-![Demo](/docs/images/demo.gif)
+![Demo](docs/images/demo.gif)
 
 See tui-realm in action in the [Example](#run-examples-) or if you want to read more about tui-realm start reading the official [Get Started Guide](docs/en/get-started.md).
 
