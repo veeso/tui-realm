@@ -3,10 +3,12 @@
 use std::error::Error;
 use std::time::Duration;
 
-use tui_realm_stdlib::{Chart, ChartDataset};
+use tui_realm_stdlib::components::{Chart, ChartDataset};
+use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::event::{Key, KeyEvent};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{Poll, PortResult, SyncPort};
 use tuirealm::props::{
     AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, PropPayload, Style,
@@ -15,7 +17,6 @@ use tuirealm::props::{
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::widgets::GraphType;
-use tuirealm::{Component, Event, MockComponent};
 
 mod utils;
 use utils::{DataGen, Model};
