@@ -1,10 +1,10 @@
-use std::{error::Error, hash::Hash, time::Duration};
+use std::error::Error;
+use std::hash::Hash;
+use std::time::Duration;
 
-use tuirealm::{
-    Application, EventListenerCfg, NoUserEvent,
-    listener::SyncPort,
-    terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult},
-};
+use tuirealm::listener::SyncPort;
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
+use tuirealm::{Application, EventListenerCfg, NoUserEvent};
 
 /// The main model that stores the global state of the application.
 pub struct Model<Id, Msg, UserEvent = NoUserEvent>

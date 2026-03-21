@@ -3,10 +3,8 @@ use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, SpanStatic,
     Style, TextModifiers, Title,
 };
-use tuirealm::ratatui::{
-    layout::Rect,
-    widgets::{List, ListItem, ListState},
-};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::{List, ListItem, ListState};
 use tuirealm::{Frame, MockComponent, State};
 
 use crate::prop_ext::CommonProps;
@@ -280,10 +278,11 @@ impl MockComponent for Textarea {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
-    use tuirealm::{props::HorizontalAlignment, ratatui::text::Span};
+    use tuirealm::props::HorizontalAlignment;
+    use tuirealm::ratatui::text::Span;
+
+    use super::*;
 
     #[test]
     fn test_components_textarea() {

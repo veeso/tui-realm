@@ -1,92 +1,63 @@
-[package]
-name = "tuirealm"
-version = "3.3.0"
-authors = [
-  "Christian Visintin <christian.visintin@veeso.dev>",
-  "hasezoey <hasezoey@gmail.com>",
+[workspace]
+resolver = "3"
+members = [
+    "crates/tuirealm",
+    "crates/tuirealm_derive",
+    "crates/tui-realm-stdlib",
+    "crates/extra/tui-realm-textarea",
+    "crates/extra/tui-realm-treeview",
 ]
-edition = "2024"
-rust-version = "1.86"
+
+[workspace.package]
+authors = [
+    "Christian Visintin <christian.visintin@veeso.dev>",
+    "hasezoey <hasezoey@gmail.com>",
+]
 categories = ["command-line-utilities"]
-description = "A tui-rs framework to build tui interfaces, inspired by React and Elm."
-documentation = "https://docs.rs/tuirealm"
+edition = "2024"
 homepage = "https://github.com/veeso/tui-realm"
-include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 keywords = ["tui", "terminal"]
 license = "MIT"
-readme = "README.md"
 repository = "https://github.com/veeso/tui-realm"
+rust-version = "1.86"
 
-[dependencies]
-async-trait = { version = "0.1", optional = true }
+[workspace.dependencies]
+# Workspace crates
+tui-realm-stdlib = { path = "crates/tui-realm-stdlib", version = "4.0.0", default-features = false }
+tuirealm = { path = "crates/tuirealm", version = "4.0.0", default-features = false }
+tuirealm_derive = { path = "crates/tuirealm_derive", version = "4.0.0" }
+
+# Core deps
+async-trait = "0.1"
 bitflags = "2"
 dyn-clone = "1"
-futures-util = { version = "0.3", default-features = false, optional = true }
+futures-util = { version = "0.3", default-features = false }
 lazy-regex = "3"
 ratatui = { version = "0.30", default-features = false, features = ["std", "layout-cache"] }
-serde = { version = "1", features = ["derive"], optional = true }
+serde = { version = "1", features = ["derive"] }
 thiserror = "2"
-tokio = { version = "1", features = [
-  "rt",
-  "macros",
-  "time",
-], default-features = false, optional = true }
-tokio-util = { version = "0.7", features = [
-  "rt",
-], default-features = false, optional = true }
-tuirealm_derive = { version = "2", optional = true }
+tokio = { version = "1", default-features = false }
+tokio-util = { version = "0.7", default-features = false }
 
-crossterm = { version = "0.29", optional = true }
-termion = { version = "^4", optional = true }
-termwiz = { version = "0.23", optional = true }
+# Backend deps
+crossterm = "0.29"
+termion = "4"
+termwiz = "0.23"
 
-[dev-dependencies]
-pretty_assertions = "^1"
-tempfile = "^3"
-tokio = { version = "1", features = ["full"] }
-toml = "^0.9"
+# Derive deps
+proc-macro2 = "1"
+quote = "1"
+syn = "2"
 
-[features]
-default = ["derive", "crossterm"]
-async-ports = [
-  "dep:async-trait",
-  "dep:tokio",
-  "dep:tokio-util",
-  "crossterm?/event-stream",
-  "dep:futures-util",
-]
-derive = ["dep:tuirealm_derive"]
-serialize = ["dep:serde", "bitflags/serde"]
+# Stdlib/extra deps
+cli-clipboard = "0.4"
+orange-trees = "0.1.0"
+textwrap = "0.16"
+tui-textarea = "0.7"
+unicode-width = "0.2"
 
-crossterm = ["dep:crossterm", "ratatui/crossterm"]
-termion = ["dep:termion", "ratatui/termion"]
-termwiz = ["dep:termwiz", "ratatui/termwiz"]
-
-[[example]]
-name = "async-ports"
-path = "examples/async_ports.rs"
-required-features = ["async-ports", "crossterm"]
-
-[[example]]
-name = "demo"
-path = "examples/demo/demo.rs"
-required-features = ["crossterm"]
-
-[[example]]
-name = "user-events"
-path = "examples/user_events/user_events.rs"
-required-features = ["crossterm"]
-
-[[example]]
-name = "arbitrary-data"
-path = "examples/arbitrary_data.rs"
-required-features = ["crossterm"]
-
-[[example]]
-name = "inline-display"
-path = "examples/inline_display.rs"
-required-features = ["crossterm"]
-
-[package.metadata.docs.rs]
-all-features = true
-rustdoc-args = ["--cfg", "docsrs"]
+# Dev deps
+pretty_assertions = "1"
+rand = "0.10"
+tempfile = "3"
+toml = "0.9"

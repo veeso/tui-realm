@@ -6,11 +6,9 @@ use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
     TextModifiers, Title,
 };
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
 use tuirealm::ratatui::text::Line as Spans;
-use tuirealm::ratatui::{
-    layout::{Constraint, Direction as LayoutDirection, Layout, Rect},
-    widgets::{List, ListItem, ListState, Paragraph},
-};
+use tuirealm::ratatui::widgets::{List, ListItem, ListState, Paragraph};
 use tuirealm::{Frame, MockComponent, State, StateValue};
 
 use crate::prop_ext::CommonProps;
@@ -393,11 +391,10 @@ impl MockComponent for Select {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
-
     use tuirealm::props::{HorizontalAlignment, PropPayload, PropValue};
+
+    use super::*;
 
     #[test]
     fn test_components_select_states() {

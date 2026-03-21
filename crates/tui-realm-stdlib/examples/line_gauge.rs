@@ -4,7 +4,9 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::LineGauge;
+use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
+use tuirealm::event::{Key, KeyEvent};
 use tuirealm::listener::{Poll, PortResult, SyncPort};
 use tuirealm::props::{
     AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, PropPayload, PropValue,
@@ -13,11 +15,7 @@ use tuirealm::props::{
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::symbols::line::{HORIZONTAL, THICK_HORIZONTAL};
 use tuirealm::ratatui::text::Span;
-use tuirealm::{
-    Component, Event, MockComponent,
-    application::PollStrategy,
-    event::{Key, KeyEvent},
-};
+use tuirealm::{Component, Event, MockComponent};
 
 mod utils;
 use utils::{Loader, Model};

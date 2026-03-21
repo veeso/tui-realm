@@ -4,17 +4,14 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::Input;
+use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::event::KeyModifiers;
+use tuirealm::event::{Key, KeyEvent, KeyModifiers};
 use tuirealm::props::{
     AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, InputType, Style, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
-use tuirealm::{
-    Component, Event, MockComponent, NoUserEvent, State, StateValue,
-    application::PollStrategy,
-    event::{Key, KeyEvent},
-};
+use tuirealm::{Component, Event, MockComponent, NoUserEvent, State, StateValue};
 
 mod utils;
 use utils::Model;

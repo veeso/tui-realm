@@ -4,7 +4,8 @@ use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, Title,
 };
-use tuirealm::ratatui::{layout::Rect, widgets::Sparkline as TuiSparkline};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::Sparkline as TuiSparkline;
 use tuirealm::{Frame, MockComponent, State};
 
 use crate::prop_ext::CommonProps;
@@ -163,10 +164,10 @@ impl MockComponent for Sparkline {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
+
+    use super::*;
 
     #[test]
     fn test_components_sparkline() {

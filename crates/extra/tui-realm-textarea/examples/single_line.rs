@@ -4,8 +4,8 @@ use std::time::Duration;
 #[cfg(feature = "clipboard")]
 use tui_realm_textarea::TEXTAREA_CMD_PASTE;
 use tui_realm_textarea::{
-    TextArea, TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
-    TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
+    TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
+    TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO, TextArea,
 };
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
@@ -47,9 +47,10 @@ impl Model {
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
-        assert!(app
-            .mount(Id::Input, Box::new(Input::default()), vec![])
-            .is_ok());
+        assert!(
+            app.mount(Id::Input, Box::new(Input::default()), vec![])
+                .is_ok()
+        );
         assert!(app.active(&Id::Input).is_ok());
         Model {
             app,

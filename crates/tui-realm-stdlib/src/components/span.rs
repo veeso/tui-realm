@@ -3,11 +3,9 @@ use tuirealm::props::{
     AttrValue, Attribute, Color, HorizontalAlignment, PropPayload, PropValue, Props, SpanStatic,
     Style, TextModifiers,
 };
-use tuirealm::ratatui::{
-    layout::Rect,
-    text::{Line, Span as RSpan, Text},
-    widgets::Paragraph,
-};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::text::{Line, Span as RSpan, Text};
+use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::{Frame, MockComponent, State};
 
 use crate::prop_ext::CommonProps;
@@ -144,10 +142,11 @@ impl MockComponent for Span {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
-    use tuirealm::{props::SpanStatic, ratatui::style::Stylize};
+    use tuirealm::props::SpanStatic;
+    use tuirealm::ratatui::style::Stylize;
+
+    use super::*;
 
     #[test]
     fn test_components_span() {

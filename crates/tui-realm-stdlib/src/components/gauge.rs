@@ -5,7 +5,8 @@ use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
 };
-use tuirealm::ratatui::{layout::Rect, widgets::Gauge as TuiGauge};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::Gauge as TuiGauge;
 use tuirealm::{Frame, MockComponent, State};
 
 use crate::prop_ext::CommonProps;
@@ -161,10 +162,10 @@ impl MockComponent for Gauge {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
+
+    use super::*;
 
     #[test]
     fn test_components_progress_bar() {

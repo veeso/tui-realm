@@ -5,16 +5,11 @@ use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
     TextModifiers, Title,
 };
+use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::symbols::Marker;
-use tuirealm::ratatui::text::Line as Spans;
-use tuirealm::ratatui::{
-    layout::Rect,
-    text::Span,
-    widgets::canvas::{Canvas as TuiCanvas, Context, Points},
-};
+use tuirealm::ratatui::text::{Line as Spans, Span};
+use tuirealm::ratatui::widgets::canvas::{Canvas as TuiCanvas, Context, Points};
 use tuirealm::{Frame, MockComponent, State};
-
-use crate::prop_ext::CommonProps;
 
 // -- Props
 use super::props::{
@@ -22,6 +17,7 @@ use super::props::{
     CANVAS_MARKER_DOT, CANVAS_MARKER_HALF_BLOCK, CANVAS_MARKER_OCTANT, CANVAS_MARKER_QUADRANT,
     CANVAS_MARKER_SEXTANT, CANVAS_X_BOUNDS, CANVAS_Y_BOUNDS,
 };
+use crate::prop_ext::CommonProps;
 
 // -- Component
 
@@ -263,13 +259,11 @@ impl MockComponent for Canvas {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
-    use tuirealm::{
-        props::HorizontalAlignment,
-        ratatui::widgets::canvas::{Line, Map, MapResolution, Rectangle},
-    };
+    use tuirealm::props::HorizontalAlignment;
+    use tuirealm::ratatui::widgets::canvas::{Line, Map, MapResolution, Rectangle};
+
+    use super::*;
 
     #[test]
     fn test_component_canvas_with_shapes() {

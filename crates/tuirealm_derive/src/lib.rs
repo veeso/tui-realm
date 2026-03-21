@@ -106,7 +106,7 @@
 
 use proc_macro::{self, TokenStream};
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput, FieldsNamed};
+use syn::{DeriveInput, FieldsNamed, parse_macro_input};
 
 #[proc_macro_derive(MockComponent, attributes(component))]
 pub fn mock_component(input: TokenStream) -> TokenStream {

@@ -10,13 +10,15 @@ use tui_realm_stdlib::Label;
 #[cfg(feature = "clipboard")]
 use tui_realm_textarea::TEXTAREA_CMD_PASTE;
 use tui_realm_textarea::{
-    TextArea, TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
-    TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
+    TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
+    TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO, TextArea,
 };
 #[cfg(feature = "search")]
 use tui_realm_textarea::{
     TEXTAREA_CMD_SEARCH_BACK, TEXTAREA_CMD_SEARCH_FORWARD, TEXTAREA_SEARCH_PATTERN,
 };
+#[cfg(feature = "search")]
+use tuirealm::StateValue;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
@@ -26,8 +28,6 @@ use tuirealm::props::{
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
-#[cfg(feature = "search")]
-use tuirealm::StateValue;
 use tuirealm::{
     Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, Update,
 };
@@ -65,16 +65,19 @@ impl Model {
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
-        assert!(app
-            .mount(Id::Editor, Box::new(Editor::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::Label, Box::new(DummyLabel::default()), vec![])
-            .is_ok());
+        assert!(
+            app.mount(Id::Editor, Box::new(Editor::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::Label, Box::new(DummyLabel::default()), vec![])
+                .is_ok()
+        );
         #[cfg(feature = "search")]
-        assert!(app
-            .mount(Id::Search, Box::new(Search::default()), vec![])
-            .is_ok());
+        assert!(
+            app.mount(Id::Search, Box::new(Search::default()), vec![])
+                .is_ok()
+        );
         assert!(app.active(&Id::Editor).is_ok());
         Model {
             app,
@@ -172,14 +175,15 @@ impl Update<Msg> for Model {
             }
             #[cfg(feature = "search")]
             Msg::Search(pattern) => {
-                assert!(self
-                    .app
-                    .attr(
-                        &Id::Editor,
-                        Attribute::Custom(TEXTAREA_SEARCH_PATTERN),
-                        AttrValue::String(pattern)
-                    )
-                    .is_ok());
+                assert!(
+                    self.app
+                        .attr(
+                            &Id::Editor,
+                            Attribute::Custom(TEXTAREA_SEARCH_PATTERN),
+                            AttrValue::String(pattern)
+                        )
+                        .is_ok()
+                );
                 None
             }
             Msg::None => None,
@@ -500,7 +504,7 @@ impl Component<Msg, NoUserEvent> for Search {
                 CmdResult::None
             }
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => {
-                return Some(Msg::ChangeFocus(Id::Editor))
+                return Some(Msg::ChangeFocus(Id::Editor));
             }
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,

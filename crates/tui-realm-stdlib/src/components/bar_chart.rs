@@ -1,22 +1,22 @@
 //! A chart with bars
 
 use std::collections::LinkedList;
+
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
 };
-use tuirealm::ratatui::{layout::Rect, widgets::BarChart as TuiBarChart};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::BarChart as TuiBarChart;
 use tuirealm::{Frame, MockComponent, State};
-
-// -- Props
-
-use crate::prop_ext::CommonProps;
 
 use super::props::{
     BAR_CHART_BARS_GAP, BAR_CHART_BARS_STYLE, BAR_CHART_LABEL_STYLE, BAR_CHART_MAX_BARS,
     BAR_CHART_VALUES_STYLE,
 };
+// -- Props
+use crate::prop_ext::CommonProps;
 
 // -- states
 
@@ -338,10 +338,10 @@ impl MockComponent for BarChart {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
+
+    use super::*;
 
     #[test]
     fn test_components_bar_chart_states() {

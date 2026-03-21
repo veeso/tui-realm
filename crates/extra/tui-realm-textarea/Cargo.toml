@@ -1,35 +1,36 @@
 [package]
 name = "tui-realm-textarea"
-version = "2.1.0"
-authors = ["Christian Visintin"]
-edition = "2021"
-categories = ["command-line-utilities"]
+version = "4.0.0"
+edition.workspace = true
+authors.workspace = true
+categories.workspace = true
 description = "textarea component for tui-realm"
 documentation = "https://docs.rs/tui-realm-textarea"
-homepage = "https://github.com/veeso/tui-realm-textarea"
+homepage.workspace = true
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
-keywords = ["tui", "terminal"]
-license = "MIT"
+keywords.workspace = true
+license.workspace = true
 readme = "README.md"
-repository = "https://github.com/veeso/tui-realm-textarea"
-
-[dependencies]
-cli-clipboard = { version = "^0.4", optional = true }
-lazy-regex = "^3"
-tuirealm = { version = "2", default-features = false, features = ["derive"] }
-tui-textarea = "^0.7"
-
-[dev-dependencies]
-crossterm = "^0.28"
-pretty_assertions = "1"
-tui-realm-stdlib = "2"
+repository.workspace = true
+rust-version.workspace = true
 
 [features]
-default = ["crossterm"]
-clipboard = ["cli-clipboard"]
-search = ["tui-textarea/search"]
+clipboard = ["dep:cli-clipboard"]
 crossterm = ["tuirealm/crossterm"]
+default = ["crossterm"]
+search = ["tui-textarea/search"]
 termion = ["tuirealm/termion"]
+
+[dependencies]
+cli-clipboard = { workspace = true, optional = true }
+lazy-regex = { workspace = true }
+tui-textarea = { workspace = true }
+tuirealm = { workspace = true, features = ["derive"] }
+
+[dev-dependencies]
+crossterm = { workspace = true }
+pretty_assertions = { workspace = true }
+tui-realm-stdlib = { workspace = true }
 
 [[example]]
 name = "editor"

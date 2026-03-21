@@ -1,32 +1,33 @@
 [package]
 name = "tui-realm-treeview"
-version = "3.0.0"
-authors = ["Christian Visintin"]
-edition = "2024"
-categories = ["command-line-utilities"]
+version = "4.0.0"
+edition.workspace = true
+authors.workspace = true
+categories.workspace = true
 description = "Treeview component for tui-realm"
 documentation = "https://docs.rs/tui-realm-treeview"
-homepage = "https://github.com/veeso/tui-realm-treeview"
+homepage.workspace = true
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
-keywords = ["tui", "terminal"]
-license = "MIT"
+keywords.workspace = true
+license.workspace = true
 readme = "README.md"
-repository = "https://github.com/veeso/tui-realm-treeview"
-
-[dependencies]
-orange-trees = "0.1.0"
-tuirealm = { version = "3", default-features = false, features = ["derive"] }
-unicode-width = "0.2"
-
-[dev-dependencies]
-crossterm = "0.29"
-pretty_assertions = "1"
-tui-realm-stdlib = "3"
+repository.workspace = true
+rust-version.workspace = true
 
 [features]
-default = ["crossterm"]
 crossterm = ["tuirealm/crossterm"]
+default = ["crossterm"]
 termion = ["tuirealm/termion"]
+
+[dependencies]
+orange-trees = { workspace = true }
+tuirealm = { workspace = true, features = ["derive"] }
+unicode-width = { workspace = true }
+
+[dev-dependencies]
+crossterm = { workspace = true }
+pretty_assertions = { workspace = true }
+tui-realm-stdlib = { workspace = true }
 
 [[example]]
 name = "demo"

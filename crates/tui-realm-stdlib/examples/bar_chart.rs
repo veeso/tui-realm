@@ -2,14 +2,12 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::BarChart;
+use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::event::{Key, KeyEvent};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Style, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
-use tuirealm::{
-    Component, Event, MockComponent, NoUserEvent,
-    application::PollStrategy,
-    event::{Key, KeyEvent},
-};
+use tuirealm::{Component, Event, MockComponent, NoUserEvent};
 
 mod utils;
 use utils::Model;

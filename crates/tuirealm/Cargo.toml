@@ -1,0 +1,81 @@
+[package]
+name = "tuirealm"
+version = "4.0.0"
+edition.workspace = true
+authors.workspace = true
+categories.workspace = true
+description = "A ratatui framework to build tui interfaces, inspired by React and Elm."
+documentation = "https://docs.rs/tuirealm"
+homepage.workspace = true
+include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+keywords.workspace = true
+license.workspace = true
+readme = "README.md"
+repository.workspace = true
+rust-version.workspace = true
+
+[features]
+async-ports = [
+    "crossterm?/event-stream",
+    "dep:async-trait",
+    "dep:futures-util",
+    "dep:tokio",
+    "dep:tokio-util",
+]
+crossterm = ["dep:crossterm", "ratatui/crossterm"]
+default = ["derive", "crossterm"]
+derive = ["dep:tuirealm_derive"]
+serialize = ["bitflags/serde", "dep:serde"]
+termion = ["dep:termion", "ratatui/termion"]
+termwiz = ["dep:termwiz", "ratatui/termwiz"]
+
+[dependencies]
+async-trait = { workspace = true, optional = true }
+bitflags = { workspace = true }
+crossterm = { workspace = true, optional = true }
+dyn-clone = { workspace = true }
+futures-util = { workspace = true, optional = true }
+lazy-regex = { workspace = true }
+ratatui = { workspace = true }
+serde = { workspace = true, optional = true }
+termion = { workspace = true, optional = true }
+termwiz = { workspace = true, optional = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["rt", "macros", "time"], optional = true }
+tokio-util = { workspace = true, features = ["rt"], optional = true }
+tuirealm_derive = { workspace = true, optional = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+toml = { workspace = true }
+
+[[example]]
+name = "arbitrary-data"
+path = "examples/arbitrary_data.rs"
+required-features = ["crossterm"]
+
+[[example]]
+name = "async-ports"
+path = "examples/async_ports.rs"
+required-features = ["async-ports", "crossterm"]
+
+[[example]]
+name = "demo"
+path = "examples/demo/demo.rs"
+required-features = ["crossterm"]
+
+[[example]]
+name = "inline-display"
+path = "examples/inline_display.rs"
+required-features = ["crossterm"]
+
+[[example]]
+name = "user-events"
+path = "examples/user_events/user_events.rs"
+required-features = ["crossterm"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

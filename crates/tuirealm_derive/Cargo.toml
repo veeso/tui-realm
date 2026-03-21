@@ -1,27 +1,25 @@
 [package]
 name = "tuirealm_derive"
-version = "2.0.1"
-authors = ["Christian Visintin"]
-edition = "2021"
-categories = ["command-line-utilities"]
+version = "4.0.0"
+edition.workspace = true
+authors.workspace = true
+categories.workspace = true
 description = "Derive macro which automatically implements the MockComponent trait"
 documentation = "https://docs.rs/tuirealm_derive"
-homepage = "https://github.com/veeso/tuirealm_derive"
+homepage.workspace = true
 include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
-keywords = ["tui", "terminal"]
-license = "MIT"
+keywords.workspace = true
+license.workspace = true
 readme = "README.md"
-repository = "https://github.com/veeso/tuirealm_derive"
-rust-version = "1.64"
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+proc-macro2 = { workspace = true }
+quote = { workspace = true }
+syn = { workspace = true }
 
 [lib]
 doctest = false
 name = "tuirealm_derive"
 proc-macro = true
-
-[dependencies]
-proc-macro2 = "1"
-quote = "1"
-syn = "2"
-
-[features]

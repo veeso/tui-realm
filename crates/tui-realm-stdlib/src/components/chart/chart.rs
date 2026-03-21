@@ -7,12 +7,9 @@ use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
 };
-use tuirealm::ratatui::text::Line;
-use tuirealm::ratatui::{
-    layout::Rect,
-    text::Span,
-    widgets::{Axis, Chart as TuiChart, Dataset as TuiDataset},
-};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::text::{Line, Span};
+use tuirealm::ratatui::widgets::{Axis, Chart as TuiChart, Dataset as TuiDataset};
 use tuirealm::{Frame, MockComponent, State};
 
 // -- Props
@@ -415,13 +412,12 @@ impl MockComponent for Chart {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
-    use tuirealm::{
-        props::HorizontalAlignment,
-        ratatui::{symbols::Marker, widgets::GraphType},
-    };
+    use tuirealm::props::HorizontalAlignment;
+    use tuirealm::ratatui::symbols::Marker;
+    use tuirealm::ratatui::widgets::GraphType;
+
+    use super::*;
 
     #[test]
     fn test_components_chart_states() {

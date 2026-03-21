@@ -113,9 +113,9 @@ impl<'a> From<&'a ChartDataset> for TuiDataset<'a> {
 mod test {
 
     use pretty_assertions::assert_eq;
+    use tuirealm::ratatui::style::Color;
 
     use super::*;
-    use tuirealm::ratatui::style::Color;
 
     #[test]
     fn dataset() {

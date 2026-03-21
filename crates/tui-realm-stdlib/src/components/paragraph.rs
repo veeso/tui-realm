@@ -3,10 +3,8 @@ use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, HorizontalAlignment, Props, Style, TextModifiers,
     TextStatic, Title,
 };
-use tuirealm::ratatui::{
-    layout::Rect,
-    widgets::{Paragraph as TuiParagraph, Wrap},
-};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::{Paragraph as TuiParagraph, Wrap};
 use tuirealm::{Frame, MockComponent, State};
 
 use crate::prop_ext::CommonProps;
@@ -157,13 +155,11 @@ impl MockComponent for Paragraph {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
-    use tuirealm::ratatui::{
-        style::Stylize,
-        text::{Line, Text},
-    };
+    use tuirealm::ratatui::style::Stylize;
+    use tuirealm::ratatui::text::{Line, Text};
+
+    use super::*;
 
     #[test]
     fn test_components_paragraph() {

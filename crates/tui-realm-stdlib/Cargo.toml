@@ -1,33 +1,28 @@
 [package]
 name = "tui-realm-stdlib"
-version = "3.1.0"
-authors = [
-  "Christian Visintin <christian.visintin@veeso.dev>",
-  "hasezoey <hasezoey@gmail.com>",
-]
-edition = "2024"
-categories = ["command-line-utilities"]
+version = "4.0.0"
+edition.workspace = true
+authors.workspace = true
+categories.workspace = true
 description = "Standard components library for tui-realm."
 documentation = "https://docs.rs/tui-realm-stdlib"
-homepage = "https://github.com/veeso/tui-realm-stdlib"
+homepage.workspace = true
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
-keywords = ["tui", "terminal"]
-license = "MIT"
+keywords.workspace = true
+license.workspace = true
 readme = "README.md"
-repository = "https://github.com/veeso/tui-realm-stdlib"
-rust-version = "1.86"
+repository.workspace = true
+rust-version.workspace = true
 
 [dependencies]
-textwrap = "^0.16"
-tuirealm = { version = "3", default-features = false, features = ["derive"], git = "https://github.com/veeso/tui-realm.git", rev = "a8bce28cec1b9ba40603b24100a51b8136c4ab1b" }
-unicode-width = "^0.2"
+textwrap = { workspace = true }
+tuirealm = { workspace = true, features = ["derive"] }
+unicode-width = { workspace = true }
 
 [dev-dependencies]
-pretty_assertions = "1"
-rand = "0.10"
-tuirealm = { version = "3", features = ["crossterm"], git = "https://github.com/veeso/tui-realm.git", rev = "a8bce28cec1b9ba40603b24100a51b8136c4ab1b" }
-
-[features]
+pretty_assertions = { workspace = true }
+rand = { workspace = true }
+tuirealm = { workspace = true, features = ["crossterm"] }
 
 [[example]]
 name = "bar_chart"
@@ -50,6 +45,10 @@ name = "container"
 path = "examples/container.rs"
 
 [[example]]
+name = "gauge"
+path = "examples/gauge.rs"
+
+[[example]]
 name = "input"
 path = "examples/input.rs"
 
@@ -68,10 +67,6 @@ path = "examples/list.rs"
 [[example]]
 name = "paragraph"
 path = "examples/paragraph.rs"
-
-[[example]]
-name = "gauge"
-path = "examples/gauge.rs"
 
 [[example]]
 name = "radio"
