@@ -1,0 +1,42 @@
+[package]
+name = "tui-realm-textarea"
+version = "2.1.0"
+authors = ["Christian Visintin"]
+edition = "2021"
+categories = ["command-line-utilities"]
+description = "textarea component for tui-realm"
+documentation = "https://docs.rs/tui-realm-textarea"
+homepage = "https://github.com/veeso/tui-realm-textarea"
+include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+keywords = ["tui", "terminal"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/veeso/tui-realm-textarea"
+
+[dependencies]
+cli-clipboard = { version = "^0.4", optional = true }
+lazy-regex = "^3"
+tuirealm = { version = "2", default-features = false, features = ["derive"] }
+tui-textarea = "^0.7"
+
+[dev-dependencies]
+crossterm = "^0.28"
+pretty_assertions = "1"
+tui-realm-stdlib = "2"
+
+[features]
+default = ["crossterm"]
+clipboard = ["cli-clipboard"]
+search = ["tui-textarea/search"]
+crossterm = ["tuirealm/crossterm"]
+termion = ["tuirealm/termion"]
+
+[[example]]
+name = "editor"
+path = "examples/editor.rs"
+required-features = ["crossterm"]
+
+[[example]]
+name = "single-line"
+path = "examples/single_line.rs"
+required-features = ["crossterm"]
