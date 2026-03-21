@@ -84,12 +84,12 @@ All documentation must be updated to use the new trait names. Specific files:
 **English docs (`docs/en/`):**
 - `docs/en/get-started.md` — extensive trait references and code examples
 - `docs/en/advanced.md` — `impl MockComponent` examples
-- `docs/en/migrating-legacy.md` — migration guide with trait references and `#[derive(MockComponent)]`
+- `docs/en/migrating-legacy.md` — **delete** (obsolete legacy migration guide)
 
 **Chinese docs (`docs/zh-cn/`):**
 - `docs/zh-cn/get-started.md` — trait references and code examples
 - `docs/zh-cn/advanced.md` — `impl MockComponent` examples
-- `docs/zh-cn/migrating-legacy.md` — migration guide with trait references
+- `docs/zh-cn/migrating-legacy.md` — **delete** (obsolete legacy migration guide)
 
 **Crate docs:**
 - `crates/tuirealm_derive/README.md` — extensive MockComponent documentation and examples
