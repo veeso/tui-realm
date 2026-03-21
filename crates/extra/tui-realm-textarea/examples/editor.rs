@@ -17,6 +17,7 @@ use tui_realm_textarea::{
 use tui_realm_textarea::{
     TEXTAREA_CMD_SEARCH_BACK, TEXTAREA_CMD_SEARCH_FORWARD, TEXTAREA_SEARCH_PATTERN,
 };
+use tuirealm::Component;
 use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::{AppComponent, Component};

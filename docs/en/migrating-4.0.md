@@ -155,3 +155,10 @@ Migration:
 2. Replace `impl Component<Msg, UserEvent> for X` with `impl AppComponent<Msg, UserEvent> for X`
 3. Replace `#[derive(MockComponent)]` with `#[derive(Component)]`
 4. Update imports: `MockComponent` becomes `Component`, `Component` becomes `AppComponent`
+
+> **Important:** Because the derive macro and the trait are both named `Component`, files that use `#[derive(Component)]` must bring the derive macro into scope with `use tuirealm::Component;`. If you also need the trait directly (e.g. to call `self.perform()` or `self.query()`), add `use tuirealm::component::Component;` as well — derive macros and traits live in separate namespaces and do not conflict. A typical import block looks like:
+>
+> ```rust
+> use tuirealm::Component; // derive macro
+> use tuirealm::component::{AppComponent, Component}; // traits
+> ```

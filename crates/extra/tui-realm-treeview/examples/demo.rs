@@ -4,6 +4,7 @@ use std::time::Duration;
 use tui_realm_stdlib::components::{Input, Phantom};
 // treeview
 use tui_realm_treeview::{Node, TREE_CMD_CLOSE, TREE_CMD_OPEN, Tree, TreeView};
+use tuirealm::Component;
 use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::{AppComponent, Component};

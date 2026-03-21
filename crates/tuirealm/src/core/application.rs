@@ -6,7 +6,7 @@ use std::time::{Duration, Instant};
 use ratatui::Frame;
 use thiserror::Error;
 
-use super::component::Component;
+use super::component::AppComponent;
 use super::event::Event;
 use super::injector::Injector;
 use super::props::{AttrValue, Attribute};

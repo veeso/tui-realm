@@ -4,9 +4,10 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Paragraph;
+use tuirealm::Component;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
-use tuirealm::component::Component;
+use tuirealm::component::AppComponent;
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};

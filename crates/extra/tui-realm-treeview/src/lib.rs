@@ -78,6 +78,7 @@
 //! ## Setup a tree component
 //!
 //! ```rust
+//! use tuirealm::Component;
 //! use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 //! use tuirealm::component::{AppComponent, Component};
 //! use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
