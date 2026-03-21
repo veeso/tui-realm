@@ -463,7 +463,7 @@ impl Default for Search {
     fn default() -> Self {
         Self {
             component: Input::default()
-                .title("Search text", HorizontalAlignment::Left)
+                .title("Search text")
                 .foreground(Color::LightYellow)
                 .invalid_style(Style::default().fg(Color::Red)),
         }
