@@ -98,10 +98,8 @@
 //!     application::PollStrategy,
 //!     command::{Cmd, CmdResult, Direction, Position},
 //!     event::{Event, Key, KeyEvent, KeyModifiers},
-//!     props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers},
-//!     terminal::TerminalBridge,
+//!     props::{HorizontalAlignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers},
 //!     Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue,
-//!     Update,
 //! };
 //! use tui_realm_textarea::TextArea;
 //!
@@ -135,7 +133,7 @@
 //!         Style::default().add_modifier(TextModifiers::REVERSED),
 //!     )
 //!     .tab_length(4)
-//!     .title("Editing README.md", Alignment::Left);
+//!     .title("Editing README.md", HorizontalAlignment::Left);
 //! ```
 //!
 
@@ -143,19 +141,15 @@
 
 // -- internal
 mod fmt;
-use fmt::LineFmt;
-
 // deps
-
-#[macro_use]
-extern crate lazy_regex;
-
 #[cfg(feature = "clipboard")]
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
+use fmt::LineFmt;
 use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style, TextModifiers,
+    AttrValue, Attribute, Borders, HorizontalAlignment, PropPayload, PropValue, Props, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
 use tuirealm::ratatui::widgets::{Block, Paragraph};
@@ -250,10 +244,10 @@ impl<'a> TextArea<'a> {
     }
 
     /// Set widget title
-    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
+    pub fn title<S: AsRef<str>>(mut self, t: S, a: HorizontalAlignment) -> Self {
         self.attr(
             Attribute::Title,
-            AttrValue::Title((t.as_ref().to_string(), a)),
+            AttrValue::Title(Title::from(t.as_ref().to_string()).alignment(a)),
         );
         self
     }
@@ -268,7 +262,7 @@ impl<'a> TextArea<'a> {
     pub fn max_histories(mut self, max: usize) -> Self {
         self.attr(
             Attribute::Custom(TEXTAREA_MAX_HISTORY),
-            AttrValue::Payload(PropPayload::One(PropValue::Usize(max))),
+            AttrValue::Payload(PropPayload::Single(PropValue::Usize(max))),
         );
         self
     }
@@ -296,7 +290,7 @@ impl<'a> TextArea<'a> {
     pub fn footer_bar(mut self, fmt: &str, style: Style) -> Self {
         self.attr(
             Attribute::Custom(TEXTAREA_FOOTER_FMT),
-            AttrValue::Payload(PropPayload::Tup2((
+            AttrValue::Payload(PropPayload::Pair((
                 PropValue::Str(fmt.to_string()),
                 PropValue::Style(style),
             ))),
@@ -318,7 +312,7 @@ impl<'a> TextArea<'a> {
     pub fn status_bar(mut self, fmt: &str, style: Style) -> Self {
         self.attr(
             Attribute::Custom(TEXTAREA_STATUS_FMT),
-            AttrValue::Payload(PropPayload::Tup2((
+            AttrValue::Payload(PropPayload::Pair((
                 PropValue::Str(fmt.to_string()),
                 PropValue::Style(style),
             ))),
@@ -381,8 +375,8 @@ impl<'a> TextArea<'a> {
     // -- private
     fn get_block(&self) -> Option<Block<'a>> {
         let mut block = Block::default();
-        if let Some(AttrValue::Title((title, alignment))) = self.query(Attribute::Title) {
-            block = block.title(title).title_alignment(alignment);
+        if let Some(AttrValue::Title(title)) = self.query(Attribute::Title) {
+            block = block.title_top(title.content.clone());
         }
         if let Some(AttrValue::Borders(borders)) = self.query(Attribute::Borders) {
             let inactive_style = self
@@ -511,7 +505,7 @@ impl MockComponent for TextArea<'_> {
             }
             (
                 Attribute::Custom(TEXTAREA_FOOTER_FMT),
-                AttrValue::Payload(PropPayload::Tup2((
+                AttrValue::Payload(PropPayload::Pair((
                     PropValue::Str(fmt),
                     PropValue::Style(style),
                 ))),
@@ -520,13 +514,13 @@ impl MockComponent for TextArea<'_> {
             }
             (
                 Attribute::Custom(TEXTAREA_MAX_HISTORY),
-                AttrValue::Payload(PropPayload::One(PropValue::Usize(max))),
+                AttrValue::Payload(PropPayload::Single(PropValue::Usize(max))),
             ) => {
                 self.widget.set_max_histories(max);
             }
             (
                 Attribute::Custom(TEXTAREA_STATUS_FMT),
-                AttrValue::Payload(PropPayload::Tup2((
+                AttrValue::Payload(PropPayload::Pair((
                     PropValue::Str(fmt),
                     PropValue::Style(style),
                 ))),

@@ -53,7 +53,7 @@ syn = "2"
 cli-clipboard = "0.4"
 orange-trees = "0.1.0"
 textwrap = "0.16"
-tui-textarea = "0.7"
+tui-textarea = { package = "tui-textarea-2", version = "0.10", default-features = false, features = ["ratatui"] }
 unicode-width = "0.2"
 
 # Dev deps

@@ -2,7 +2,7 @@
 //!
 //! Module which provides the Editor fmt, which is used to format the status lines of the textarea
 
-use lazy_regex::{Lazy, Regex};
+use lazy_regex::{Lazy, Regex, lazy_regex};
 use tuirealm::props::Style;
 
 use super::TextAreaWidget;

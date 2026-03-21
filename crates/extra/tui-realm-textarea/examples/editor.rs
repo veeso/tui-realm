@@ -23,14 +23,12 @@ use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers,
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, Style, TextModifiers,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
-use tuirealm::{
-    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, Update,
-};
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
+use tuirealm::{Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State};
 
 // -- message
 #[derive(Debug, PartialEq)]
@@ -56,7 +54,7 @@ struct Model {
     app: Application<Id, Msg, NoUserEvent>,
     quit: bool,   // Becomes true when the user presses <ESC>
     redraw: bool, // Tells whether to refresh the UI; performance optimization
-    terminal: TerminalBridge<CrosstermTerminalAdapter>,
+    terminal: CrosstermTerminalAdapter,
 }
 
 impl Model {
@@ -83,12 +81,12 @@ impl Model {
             app,
             quit: false,
             redraw: true,
-            terminal: TerminalBridge::init_crossterm().expect("Could not initialize terminal"),
+            terminal: CrosstermTerminalAdapter::new().expect("Could not initialize terminal"),
         }
     }
 
     fn view(&mut self) {
-        let _ = self.terminal.raw_mut().draw(|f| {
+        let _ = self.terminal.draw(|f| {
             // Prepare chunks
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
@@ -118,7 +116,10 @@ fn main() {
     // let's loop until quit is true
     while !model.quit {
         // Tick
-        if let Ok(messages) = model.app.tick(PollStrategy::Once) {
+        if let Ok(messages) = model
+            .app
+            .tick(PollStrategy::Once(Duration::from_millis(10)))
+        {
             for msg in messages.into_iter() {
                 let mut msg = Some(msg);
                 while msg.is_some() {
@@ -148,7 +149,7 @@ fn main() {
 
 // -- update
 
-impl Update<Msg> for Model {
+impl Model {
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         self.redraw = true;
         match msg.unwrap_or(Msg::None) {
@@ -193,11 +194,11 @@ impl Update<Msg> for Model {
 
 // -- components
 
-pub struct Editor<'a> {
-    component: TextArea<'a>,
+pub struct Editor {
+    component: TextArea<'static>,
 }
 
-impl MockComponent for Editor<'_> {
+impl MockComponent for Editor {
     fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::ratatui::layout::Rect) {
         self.component.view(frame, area);
     }
@@ -219,7 +220,7 @@ impl MockComponent for Editor<'_> {
     }
 }
 
-impl Default for Editor<'_> {
+impl Default for Editor {
     fn default() -> Self {
         let textarea = match fs::File::open("README.md") {
             Ok(reader) => TextArea::new(
@@ -252,13 +253,13 @@ impl Default for Editor<'_> {
                     Style::default().add_modifier(TextModifiers::REVERSED),
                 )
                 .tab_length(4)
-                .title("Editing README.md", Alignment::Left),
+                .title("Editing README.md", HorizontalAlignment::Left),
         }
     }
 }
 
-impl Component<Msg, NoUserEvent> for Editor<'_> {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, NoUserEvent> for Editor {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => Some(Msg::AppClose),
             Event::Keyboard(KeyEvent {
@@ -409,7 +410,7 @@ impl Component<Msg, NoUserEvent> for Editor<'_> {
                 code: Key::Char(ch),
                 ..
             }) => {
-                self.perform(Cmd::Type(ch));
+                self.perform(Cmd::Type(*ch));
                 Some(Msg::None)
             }
             Event::Keyboard(KeyEvent {
@@ -440,7 +441,7 @@ impl Default for DummyLabel {
 }
 
 impl Component<Msg, NoUserEvent> for DummyLabel {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Function(1),
@@ -462,7 +463,7 @@ impl Default for Search {
     fn default() -> Self {
         Self {
             component: Input::default()
-                .title("Search text", Alignment::Left)
+                .title("Search text", HorizontalAlignment::Left)
                 .foreground(Color::LightYellow)
                 .invalid_style(Style::default().fg(Color::Red)),
         }
@@ -471,7 +472,7 @@ impl Default for Search {
 
 #[cfg(feature = "search")]
 impl Component<Msg, NoUserEvent> for Search {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -496,8 +497,8 @@ impl Component<Msg, NoUserEvent> for Search {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
             }) => {
-                if let CmdResult::Changed(State::One(StateValue::String(pattern))) =
-                    self.perform(Cmd::Type(ch))
+                if let CmdResult::Changed(State::Single(StateValue::String(pattern))) =
+                    self.perform(Cmd::Type(*ch))
                 {
                     return Some(Msg::Search(pattern));
                 }
