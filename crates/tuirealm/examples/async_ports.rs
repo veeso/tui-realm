@@ -4,17 +4,20 @@ use std::time::Duration;
 use tempfile::NamedTempFile;
 use tokio::io::AsyncWriteExt as _;
 use tokio::runtime::Handle;
+use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::event::{Key, KeyEvent};
-use tuirealm::listener::{PollAsync, PortResult};
-use tuirealm::props::{Color, HorizontalAlignment, Style, TextModifiers};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent};
+use tuirealm::listener::{EventListenerCfg, PollAsync, PortResult};
+use tuirealm::props::{
+    AttrValue, Attribute, Color, HorizontalAlignment, Props, Style, TextModifiers,
+};
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::widgets::Paragraph;
+use tuirealm::state::State;
+use tuirealm::subscription::{EventClause as SubEventClause, Sub, SubClause};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
-use tuirealm::{
-    Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    PollStrategy, Props, State, Sub, SubClause, SubEventClause,
-};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

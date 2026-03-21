@@ -2,17 +2,18 @@
 //!
 //! label component
 
+use tuirealm::MockComponent;
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::event::{Key, KeyEvent, KeyModifiers};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
 use tuirealm::props::{
-    Borders, Color, HorizontalAlignment, LineStatic, Style, TextModifiers, Title,
+    AttrValue, Attribute, Borders, Color, HorizontalAlignment, LineStatic, Props, Style,
+    TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::widgets::{BorderType, Paragraph};
-use tuirealm::{
-    AttrValue, Attribute, Component, Event, Frame, MockComponent, NoUserEvent, Props, State,
-    StateValue,
-};
+use tuirealm::state::{State, StateValue};
 
 use super::{Msg, get_block};
 

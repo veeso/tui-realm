@@ -5,13 +5,13 @@
 use std::error::Error;
 use std::time::{Duration, SystemTime};
 
+use tuirealm::application::Application;
 use tuirealm::event::NoUserEvent;
-use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
+use tuirealm::listener::EventListenerCfg;
+use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
+use tuirealm::subscription::{EventClause as SubEventClause, Sub, SubClause};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
-use tuirealm::{
-    Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause,
-};
 
 use super::components::{Clock, DigitCounter, Label, LetterCounter};
 use super::{Id, Msg};

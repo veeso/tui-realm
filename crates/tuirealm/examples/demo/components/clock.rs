@@ -6,11 +6,12 @@ use std::ops::Add;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, NoUserEvent};
+use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, TextModifiers};
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
-use tuirealm::{
-    AttrValue, Attribute, Component, Event, Frame, MockComponent, NoUserEvent, State, StateValue,
-};
+use tuirealm::state::{State, StateValue};
 
 use super::{Label, Msg};
 
