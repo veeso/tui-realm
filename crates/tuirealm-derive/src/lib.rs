@@ -1,6 +1,6 @@
 //! # tuirealm_derive
 //!
-//! [tuirealm_derive](https://github.com/veeso/tuirealm_derive) provides the derive macro
+//! [tuirealm_derive](https://github.com/veeso/tui-realm/tree/feature/main/crates/tuirealm_derive) provides the derive macro
 //! which automatically implements `MockComponent` for a [tui-realm](https://github.com/veeso/tui-realm) component.
 //!
 //! tuirealm_derive is a crate which implements the procedural macro `MockComponent` which can be used to automatically implement

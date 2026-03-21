@@ -22,11 +22,6 @@
       src="https://img.shields.io/badge/License-MIT-teal.svg"
       alt="License-MIT"
   /></a>
-  <a href="https://github.com/veeso/tui-realm/stargazers"
-    ><img
-      src="https://img.shields.io/github/stars/veeso/tuirealm_derive.svg?style=badge"
-      alt="Repo stars"
-  /></a>
   <a href="https://crates.io/crates/tuirealm_derive"
     ><img
       src="https://img.shields.io/crates/d/tuirealm_derive.svg"
@@ -41,18 +36,6 @@
     <img
       src="https://img.shields.io/badge/donate-ko--fi-red"
       alt="Ko-fi"
-  /></a>
-</p>
-<p align="center">
-  <a href="https://github.com/veeso/tuirealm_derive/actions"
-    ><img
-      src="https://github.com/veeso/tuirealm_derive/workflows/Build/badge.svg"
-      alt="Build CI"
-  /></a>
-  <a href="https://docs.rs/tuirealm_derive"
-    ><img
-      src="https://docs.rs/tuirealm_derive/badge.svg"
-      alt="Docs"
   /></a>
 </p>
 

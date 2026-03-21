@@ -6,10 +6,6 @@
 
 <p align="center">~ A tui-rs framework inspired by Elm and React ~</p>
 <p align="center">
-  <a href="https://github.com/veeso/tuirealm_derive" target="_blank">tui-realm derive</a>
-  ·
-  <a href="https://github.com/veeso/tui-realm" target="_blank">tui-realm</a>
-  ·
   <a href="https://docs.rs/tui-realm-stdlib" target="_blank">Documentation</a>
 </p>
 
