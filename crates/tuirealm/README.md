@@ -8,7 +8,7 @@
 <p align="center">
   <a href="docs/en/get-started.md" target="_blank">Get started</a>
   ·
-  <a href="https://github.com/veeso/tui-realm-stdlib" target="_blank">Standard Library</a>
+  <a href="https://github.com/veeso/tui-realm/main/crates/tuirealm-stdlib" target="_blank">Standard Library</a>
   ·
   <a href="https://docs.rs/tuirealm" target="_blank">Documentation</a>
 </p>
@@ -189,9 +189,9 @@ Interested in how tui-realm works and how the resulting code looks? Try the exam
 
 ## Standard components library 🎨
 
-`tui-realm` has a optional standard library called [`tui-realm-stdlib`](https://github.com/veeso/tui-realm-stdlib),
+`tui-realm` has a optional standard library called [`tui-realm-stdlib`](../tuirealm-stdlib/),
 which wraps common widgets from `ratatui` for usage in tui-realm.
-If you want to use it, just add the [`tui-realm-stdlib`](https://github.com/veeso/tui-realm-stdlib) to your `Cargo.toml` dependencies.
+If you want to use it, just add the [`tui-realm-stdlib`](../tuirealm-stdlib/) to your `Cargo.toml` dependencies.
 
 ## Community components 🏘️
 

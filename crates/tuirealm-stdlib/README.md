@@ -18,11 +18,6 @@
       src="https://img.shields.io/badge/License-MIT-teal.svg"
       alt="License-MIT"
   /></a>
-  <a href="https://github.com/veeso/tui-realm-stdlib/stargazers"
-    ><img
-      src="https://img.shields.io/github/stars/veeso/tui-realm-stdlib.svg?style=badge"
-      alt="Repo stars"
-  /></a>
   <a href="https://crates.io/crates/tui-realm-stdlib"
     ><img
       src="https://img.shields.io/crates/d/tui-realm-stdlib.svg"
@@ -37,18 +32,6 @@
     <img
       src="https://img.shields.io/badge/donate-ko--fi-red"
       alt="Ko-fi"
-  /></a>
-</p>
-<p align="center">
-  <a href="https://github.com/veeso/tui-realm-stdlib/actions"
-    ><img
-      src="https://github.com/veeso/tui-realm-stdlib/workflows/ratatui/badge.svg"
-      alt="ratatui ci"
-  /></a>
-  <a href="https://docs.rs/tui-realm-stdlib"
-    ><img
-      src="https://docs.rs/tui-realm-stdlib/badge.svg"
-      alt="Docs"
   /></a>
 </p>
 

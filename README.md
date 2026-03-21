@@ -8,7 +8,7 @@
 <p align="center">
   <a href="docs/en/get-started.md" target="_blank">Get started</a>
   ·
-  <a href="https://github.com/veeso/tui-realm-stdlib" target="_blank">Standard Library</a>
+  <a href="https://github.com/veeso/tui-realm/main/crates/tuirealm-stdlib" target="_blank">Standard Library</a>
   ·
   <a href="https://docs.rs/tuirealm" target="_blank">Documentation</a>
 </p>

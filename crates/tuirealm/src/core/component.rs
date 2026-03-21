@@ -50,7 +50,7 @@ pub trait MockComponent {
 /// which is defined in your application as an enum.
 /// In your application you should have a Component for each element on your UI, but the logic to implement
 /// is very tiny, since the most of the work should already be done into the [`MockComponent`]
-/// and many of them are available in the standard library at [`tui-realm-stdlib`](https://github.com/veeso/tui-realm-stdlib).
+/// and many of them are available in the standard library at [`tui-realm-stdlib`](https://github.com/veeso/tui-realm/tree/feature/main/crates/tuirealm-stdlib).
 ///
 /// Don't forget you can find an example in the `examples/` directory and you can discover many more information
 /// about components in the repository documentation.
