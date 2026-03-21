@@ -14,7 +14,7 @@ use super::state::State;
 use crate::ratatui::layout::Rect;
 
 /// A boxed component. Shorthand for View components map
-pub(crate) type WrappedComponent<Msg, UserEvent> = Box<dyn Component<Msg, UserEvent>>;
+pub(crate) type WrappedComponent<Msg, UserEvent> = Box<dyn AppComponent<Msg, UserEvent>>;
 
 /// Result for view methods.
 /// Returns a variable Ok and a ViewError in case of error.
@@ -136,7 +136,7 @@ where
     }
 
     /// Get a reference to the registered component for the given `id`, if there is one.
-    pub fn get_component(&self, id: &ComponentId) -> Option<&dyn Component<Msg, UserEvent>> {
+    pub fn get_component(&self, id: &ComponentId) -> Option<&dyn AppComponent<Msg, UserEvent>> {
         self.components.get(id).map(|v| &**v)
     }
 
@@ -144,7 +144,7 @@ where
     pub fn get_component_mut(
         &mut self,
         id: &ComponentId,
-    ) -> Option<&mut dyn Component<Msg, UserEvent>> {
+    ) -> Option<&mut dyn AppComponent<Msg, UserEvent>> {
         self.components.get_mut(id).map(|v| &mut **v)
     }
 

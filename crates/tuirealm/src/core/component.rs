@@ -45,18 +45,18 @@ pub trait MockComponent {
     fn perform(&mut self, cmd: Cmd) -> CmdResult;
 }
 
-/// The component describes the application level component, which is a wrapper around the [`MockComponent`],
+/// The app component describes the application level component, which is a wrapper around the [`MockComponent`],
 /// which, in addition to all the methods exposed by the mock, it will handle the [`Event`]s coming from the `View`.
 ///
 /// The Event are passed to the `on` method, which will eventually return a `Msg`,
 /// which is defined in your application as an enum.
-/// In your application you should have a Component for each element on your UI, but the logic to implement
+/// In your application you should have an AppComponent for each element on your UI, but the logic to implement
 /// is very tiny, since the most of the work should already be done into the [`MockComponent`]
 /// and many of them are available in the standard library at [`tui-realm-stdlib`](https://github.com/veeso/tui-realm/tree/main/crates/tui-realm-stdlib).
 ///
 /// Don't forget you can find an example in the `examples/` directory and you can discover many more information
 /// about components in the repository documentation.
-pub trait Component<Msg, UserEvent>: MockComponent + Any
+pub trait AppComponent<Msg, UserEvent>: MockComponent + Any
 where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone,
@@ -67,7 +67,7 @@ where
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg>;
 }
 
-impl<Msg, UserEvent> dyn Component<Msg, UserEvent>
+impl<Msg, UserEvent> dyn AppComponent<Msg, UserEvent>
 where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone,
