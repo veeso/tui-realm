@@ -9,7 +9,7 @@ use tui_realm_textarea::{
 };
 use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
 use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
@@ -136,7 +136,7 @@ pub struct Input {
     component: TextArea<'static>,
 }
 
-impl MockComponent for Input {
+impl Component for Input {
     fn view(
         &mut self,
         frame: &mut tuirealm::ratatui::Frame,
@@ -182,7 +182,7 @@ impl Default for Input {
     }
 }
 
-impl Component<Msg, NoUserEvent> for Input {
+impl AppComponent<Msg, NoUserEvent> for Input {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => Some(Msg::AppClose),

@@ -53,7 +53,7 @@
 //!
 //! ### Updating the tree
 //!
-//! The tree in this component is not inside the `props`, but is a member of the `TreeView` mock component structure.
+//! The tree in this component is not inside the `props`, but is a member of the `TreeView` component structure.
 //! In order to update and work with the tree you've got basically two ways to do this.
 //!
 //! #### Remounting the component
@@ -64,7 +64,7 @@
 //! #### Updating the tree from the "on" method
 //!
 //! This method is probably better than remounting, but it is not always possible to use this.
-//! When you implement `Component` for your treeview, you have a mutable reference to the component, and so here you can call these methods to operate on the tree:
+//! When you implement `AppComponent` for your treeview, you have a mutable reference to the component, and so here you can call these methods to operate on the tree:
 //!
 //! - `pub fn tree(&self) -> &Tree`: returns a reference to the tree
 //! - `pub fn tree_mut(&mut self) -> &mut Tree`: returns a mutable reference to the tree; which allows you to operate on it
@@ -78,9 +78,8 @@
 //! ## Setup a tree component
 //!
 //! ```rust
-//! use tuirealm::MockComponent;
 //! use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-//! use tuirealm::component::{Component, MockComponent};
+//! use tuirealm::component::{AppComponent, Component};
 //! use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
 //! use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Style};
 //! use tuirealm::state::{State, StateValue};
@@ -94,7 +93,7 @@
 //!     None,
 //! }
 //!
-//! #[derive(MockComponent)]
+//! #[derive(Component)]
 //! pub struct FsTree {
 //!     component: TreeView<String>,
 //! }
@@ -126,7 +125,7 @@
 //!     }
 //! }
 //!
-//! impl Component<Msg, NoUserEvent> for FsTree {
+//! impl AppComponent<Msg, NoUserEvent> for FsTree {
 //!     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
 //!         let result = match ev {
 //!             Event::Keyboard(KeyEvent {
@@ -184,7 +183,7 @@
 //!
 //! ## Tree widget
 //!
-//! If you want, you can also implement your own version of a tree view mock component using the `TreeWidget`
+//! If you want, you can also implement your own version of a tree view component using the `TreeWidget`
 //! in order to render a tree.
 //! Keep in mind that if you want to create a stateful tree (with highlighted item), you'll need to render it
 //! as a stateful widget, passing to it a `TreeState`, which is provided by this library.
@@ -210,7 +209,7 @@ use std::iter;
 // deps
 pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, HorizontalAlignment, Props, Style, TextModifiers, Title,
 };
@@ -262,7 +261,7 @@ pub const TREE_CMD_CLOSE: &str = "c";
 
 /// ## TreeView
 ///
-/// Tree view Mock component for tui-realm
+/// Tree view component for tui-realm
 pub struct TreeView<V: NodeValue> {
     props: Props,
     states: TreeState,
@@ -430,9 +429,7 @@ impl<V: NodeValue> TreeView<V> {
     }
 }
 
-// -- mock
-
-impl<V: NodeValue> MockComponent for TreeView<V> {
+impl<V: NodeValue> Component for TreeView<V> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let foreground = self

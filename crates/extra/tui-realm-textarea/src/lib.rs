@@ -94,15 +94,13 @@
 //!
 //! ```rust
 //! use std::{fs, io::{self, BufRead}};
-//! use tuirealm::application::PollStrategy;
+//! use tuirealm::application::{Application, PollStrategy};
 //! use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-//! use tuirealm::component::MockComponent;
+//! use tuirealm::component::{AppComponent, Component};
 //! use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
+//! use tuirealm::listener::EventListenerCfg;
 //! use tuirealm::props::{HorizontalAlignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers};
 //! use tuirealm::state::{State, StateValue};
-//! use tuirealm::application::Application;
-//! use tuirealm::listener::EventListenerCfg;
-//! use tuirealm::component::Component;
 //! use tui_realm_textarea::TextArea;
 //!
 //! let textarea = match fs::File::open("README.md") {
@@ -149,7 +147,7 @@ use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use fmt::LineFmt;
 use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, HorizontalAlignment, PropPayload, PropValue, Props, Style,
     TextModifiers, Title,
@@ -426,7 +424,7 @@ impl<'a> TextArea<'a> {
     }
 }
 
-impl MockComponent for TextArea<'_> {
+impl Component for TextArea<'_> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // set block
