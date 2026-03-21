@@ -22,11 +22,6 @@
       src="https://img.shields.io/badge/License-MIT-teal.svg"
       alt="License-MIT"
   /></a>
-  <a href="https://github.com/veeso/tui-realm-treeview/stargazers"
-    ><img
-      src="https://img.shields.io/github/stars/veeso/tui-realm-treeview.svg"
-      alt="Repo stars"
-  /></a>
   <a href="https://crates.io/crates/tui-realm-treeview"
     ><img
       src="https://img.shields.io/crates/d/tui-realm-treeview.svg"
@@ -41,23 +36,6 @@
     <img
       src="https://img.shields.io/badge/donate-ko--fi-red"
       alt="Ko-fi"
-  /></a>
-</p>
-<p align="center">
-  <a href="https://github.com/veeso/tui-realm-treeview/actions"
-    ><img
-      src="https://github.com/veeso/tui-realm-treeview/workflows/Build/badge.svg"
-      alt="CI"
-  /></a>
-  <a href="https://coveralls.io/github/veeso/tui-realm-treeview"
-    ><img
-      src="https://coveralls.io/repos/github/veeso/tui-realm-treeview/badge.svg"
-      alt="Coveralls"
-  /></a>
-  <a href="https://docs.rs/tui-realm-treeview"
-    ><img
-      src="https://docs.rs/tui-realm-treeview/badge.svg"
-      alt="Docs"
   /></a>
 </p>
 

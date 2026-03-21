@@ -1,6 +1,6 @@
 //! # tui-realm-treeview
 //!
-//! [tui-realm-treeview](https://github.com/veeso/tui-realm-treeview) is a
+//! [tui-realm-treeview](https://github.com/veeso/tui-realm/tree/feature/main/crates/tuirealm-treeview) is a
 //! [tui-realm](https://github.com/veeso/tui-realm) implementation of a treeview component.
 //! The tree engine is based on [Orange-trees](https://docs.rs/orange-trees/).
 //!
@@ -191,10 +191,10 @@
 
 #![doc(html_playground_url = "https://play.rust-lang.org")]
 #![doc(
-    html_favicon_url = "https://raw.githubusercontent.com/veeso/tui-realm-treeview/main/docs/images/cargo/tui-realm-treeview-128.png"
+    html_favicon_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/crates/tuirealm-treeview/docs/images/cargo/tui-realm-treeview-128.png"
 )]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm-treeview/main/docs/images/cargo/tui-realm-treeview-512.png"
+    html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/crates/tuirealm-treeview/docs/images/cargo/tui-realm-treeview-128.png"
 )]
 
 // -- mock

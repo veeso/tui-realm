@@ -1,7 +1,7 @@
 //! This Example showcases the use of [`AnyProp`](tuirealm::props::AnyProp) via [`PropPayload`] for use in [`Props`], [`query`](MockComponent::query) and [`attr`](MockComponent::attr).
 //!
 //! The data structs used in this example are very simple and could be done via other values in [`PropPayload`] / [`AttrValue`],
-//! but imagine this for outside sources like [`tuirealm-tree-view`](https://github.com/veeso/tui-realm-treeview)'s Tree data.
+//! but imagine this for outside sources like [`tuirealm-tree-view`](https://github.com/veeso/tui-realm/tree/feature/main/crates/tuirealm-treeview)'s Tree data.
 //!
 //! The main section in this Example is [`StdLabel`] and [`OurLabel`].
 

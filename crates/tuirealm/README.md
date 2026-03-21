@@ -198,7 +198,7 @@ If you want to use it, just add the [`tui-realm-stdlib`](https://github.com/vees
 These components may not included in tui-realm or the stdlib, but have been developed by other users. I like advertising other's contents, so here you can find a list of components you may find useful for your next tui-realm project 💜.
 
 - [`tui-realm-textarea`](../tuirealm-textarea/) A textarea/editor component developed by [@veeso](https://github.com/veeso)
-- [`tui-realm-treeview`](https://github.com/veeso/tui-realm-treeview) A treeview component developed by [@veeso](https://github.com/veeso)
+- [`tui-realm-treeview`](../tuirealm-treeview/) A treeview component developed by [@veeso](https://github.com/veeso)
 - [`tuirealm-orx-tree`](https://github.com/hasezoey/tuirealm-orx-tree) Another treeview component developed by [@hasezoey](https://github.com/hasezoey)
 
 Want to add yours? Open an issue using the `New app/component` template 😄
