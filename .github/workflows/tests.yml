@@ -51,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [stable, "1.86"]
+        toolchain: [stable, "1.88"]
     steps:
       - uses: actions/checkout@v2
       - name: Install Toolchain
@@ -81,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [stable, "1.86"]
+        toolchain: [stable, "1.88"]
     steps:
       - uses: actions/checkout@v2
       - name: Install Toolchain
@@ -112,7 +112,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [stable, "1.86"]
+        toolchain: [stable, "1.88"]
     steps:
       - uses: actions/checkout@v2
       - name: Install Toolchain
