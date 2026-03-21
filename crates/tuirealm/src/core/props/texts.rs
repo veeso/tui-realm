@@ -71,10 +71,10 @@ impl TableBuilder {
     where
         L: Into<LineStatic>,
     {
-        if let Some(table) = self.table.as_mut() {
-            if let Some(row) = table.last_mut() {
-                row.push(line.into());
-            }
+        if let Some(table) = self.table.as_mut()
+            && let Some(row) = table.last_mut()
+        {
+            row.push(line.into());
         }
         self
     }

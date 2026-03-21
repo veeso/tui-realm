@@ -301,25 +301,25 @@ impl MockComponent for Input {
         let mut block = self.common.get_block();
         // Apply invalid style
         // TODO: invalid style should likely still be applied even if unfocused
-        if self.common.focused && !self.is_valid() {
-            if let Some(invalid_style) = self
+        if self.common.focused
+            && !self.is_valid()
+            && let Some(invalid_style) = self
                 .props
                 .get(Attribute::Custom(INPUT_INVALID_STYLE))
                 .map(|x| x.unwrap_style())
-            {
-                if let Some(block) = &mut block {
-                    let border_style = self
-                        .common
-                        .border
-                        .unwrap_or_default()
-                        .style()
-                        .patch(invalid_style);
-                    // i dont like this, but ratatui does not offer a non-self taking method to change the style
-                    *block = std::mem::take(block).border_style(border_style);
-                }
-
-                normal_style = normal_style.patch(invalid_style);
+        {
+            if let Some(block) = &mut block {
+                let border_style = self
+                    .common
+                    .border
+                    .unwrap_or_default()
+                    .style()
+                    .patch(invalid_style);
+                // i dont like this, but ratatui does not offer a non-self taking method to change the style
+                *block = std::mem::take(block).border_style(border_style);
             }
+
+            normal_style = normal_style.patch(invalid_style);
         }
 
         let mut area_for_bounds = area;

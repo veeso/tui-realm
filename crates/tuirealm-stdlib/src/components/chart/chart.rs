@@ -263,10 +263,10 @@ impl Chart {
 
     /// Get our data from a [`AttrValue`].
     fn data_from_attr(&mut self, attr: AttrValue) {
-        if let AttrValue::Payload(PropPayload::Any(val)) = attr {
-            if let Some(data) = Self::try_downcast(val) {
-                self.set_data(data);
-            }
+        if let AttrValue::Payload(PropPayload::Any(val)) = attr
+            && let Some(data) = Self::try_downcast(val)
+        {
+            self.set_data(data);
         }
     }
 

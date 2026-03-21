@@ -187,11 +187,11 @@ fn get_container_attr_value(attrs: &[Attribute]) -> Option<Ident> {
         // get value from attribute
         if attr.path().is_ident("component") {
             // The follow "if" is the best way i had found to parse "#[component = \"field\"]"
-            if let Meta::NameValue(val) = &attr.meta {
-                if let Ok(val) = syn::parse2::<syn::LitStr>(val.value.clone().into_token_stream()) {
-                    component_name = Some(syn::Ident::new(&val.value(), Span::call_site()));
-                    break;
-                }
+            if let Meta::NameValue(val) = &attr.meta
+                && let Ok(val) = syn::parse2::<syn::LitStr>(val.value.clone().into_token_stream())
+            {
+                component_name = Some(syn::Ident::new(&val.value(), Span::call_site()));
+                break;
             }
 
             // The following handles "#[component(\"field\)]"

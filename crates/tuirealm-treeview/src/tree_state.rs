@@ -70,22 +70,21 @@ impl TreeState {
 
     /// Open currently selected `node`. Node can be open only if it is closed and it is NOT a leaf
     pub fn open<V>(&mut self, root: &Node<V>) {
-        if let Some(selected) = self.selected.as_ref() {
-            if let Some(node) = root.query(selected) {
-                self.open_node(root, node);
-            }
+        if let Some(selected) = self.selected.as_ref()
+            && let Some(node) = root.query(selected)
+        {
+            self.open_node(root, node);
         }
     }
 
     /// Close currently selected `node`.
     /// If node has children, then all children are closed recursively
     pub fn close<V>(&mut self, root: &Node<V>) {
-        if let Some(selected) = self.selected.as_ref() {
-            if let Some(node) = root.query(selected) {
-                if self.is_open(node) {
-                    self.close_node(node);
-                }
-            }
+        if let Some(selected) = self.selected.as_ref()
+            && let Some(node) = root.query(selected)
+            && self.is_open(node)
+        {
+            self.close_node(node);
         }
     }
 

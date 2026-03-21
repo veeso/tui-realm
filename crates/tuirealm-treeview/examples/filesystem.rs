@@ -102,16 +102,16 @@ impl Model {
     }
 
     pub fn extend_dir(&mut self, id: &String, p: &Path, depth: usize) {
-        if let Some(node) = self.tree.root_mut().query_mut(id) {
-            if depth > 0 && p.is_dir() {
-                // Clear node
-                node.clear();
-                // Scan dir
-                if let Ok(e) = std::fs::read_dir(p) {
-                    e.flatten().for_each(|x| {
-                        node.add_child(Self::dir_tree(x.path().as_path(), depth - 1))
-                    });
-                }
+        if let Some(node) = self.tree.root_mut().query_mut(id)
+            && depth > 0
+            && p.is_dir()
+        {
+            // Clear node
+            node.clear();
+            // Scan dir
+            if let Ok(e) = std::fs::read_dir(p) {
+                e.flatten()
+                    .for_each(|x| node.add_child(Self::dir_tree(x.path().as_path(), depth - 1)));
             }
         }
     }
@@ -122,11 +122,12 @@ impl Model {
             Some(n) => n.to_string_lossy().into_owned().to_string(),
         };
         let mut node: Node<String> = Node::new(p.to_string_lossy().into_owned(), name);
-        if depth > 0 && p.is_dir() {
-            if let Ok(e) = std::fs::read_dir(p) {
-                e.flatten()
-                    .for_each(|x| node.add_child(Self::dir_tree(x.path().as_path(), depth - 1)));
-            }
+        if depth > 0
+            && p.is_dir()
+            && let Ok(e) = std::fs::read_dir(p)
+        {
+            e.flatten()
+                .for_each(|x| node.add_child(Self::dir_tree(x.path().as_path(), depth - 1)));
         }
         node
     }
