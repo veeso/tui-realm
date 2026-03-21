@@ -3,15 +3,17 @@
 use std::error::Error;
 use std::time::Duration;
 
-use tui_realm_stdlib::{Span, Spinner};
+use tui_realm_stdlib::components::{Span, Spinner};
+use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
-use tuirealm::event::{Key, KeyEvent};
+use tuirealm::component::Component;
+use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::style::Stylize;
 use tuirealm::ratatui::text::Span as RSpan;
-use tuirealm::{Component, Event, MockComponent, NoUserEvent, Sub, SubClause, SubEventClause};
+use tuirealm::subscription::{EventClause, Sub, SubClause};
 
 mod utils;
 use utils::Model;
@@ -89,7 +91,7 @@ impl Model<Id, Msg> {
         self.app.mount(
             Id::SpinnerAlfa,
             Box::new(SpinnerAlfa::default()),
-            vec![Sub::new(SubEventClause::Tick, SubClause::Always)],
+            vec![Sub::new(EventClause::Tick, SubClause::Always)],
         )?;
         self.app
             .mount(Id::SpinnerBeta, Box::new(SpinnerBeta::default()), vec![])?;

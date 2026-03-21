@@ -3,14 +3,15 @@
 use std::error::Error;
 use std::time::Duration;
 
-use tui_realm_stdlib::Canvas;
+use tui_realm_stdlib::components::Canvas;
+use tuirealm::MockComponent;
 use tuirealm::application::PollStrategy;
-use tuirealm::event::{Key, KeyEvent};
+use tuirealm::component::Component;
+use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{Borders, Color, HorizontalAlignment, Shape, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::widgets::canvas::{Line, Map, MapResolution, Rectangle};
-use tuirealm::{Component, Event, MockComponent, NoUserEvent};
 
 mod utils;
 use utils::Model;
