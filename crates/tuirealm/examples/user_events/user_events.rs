@@ -4,10 +4,10 @@ mod model;
 use std::time::{Duration, SystemTime};
 
 use components::Label;
-use tuirealm::listener::{Poll, PortResult};
-use tuirealm::{
-    Application, Event, EventListenerCfg, PollStrategy, Sub, SubClause, SubEventClause,
-};
+use tuirealm::application::{Application, PollStrategy};
+use tuirealm::event::Event;
+use tuirealm::listener::{EventListenerCfg, Poll, PortResult};
+use tuirealm::subscription::{EventClause as SubEventClause, Sub, SubClause};
 
 use crate::model::Model;
 

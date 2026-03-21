@@ -2,7 +2,7 @@
 //!
 //! app model
 
-use tuirealm::Application;
+use tuirealm::application::Application;
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 

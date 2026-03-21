@@ -1,14 +1,16 @@
 use std::time::Duration;
 
+use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::event::{Key, KeyEvent};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent};
+use tuirealm::listener::EventListenerCfg;
+use tuirealm::props::{AttrValue, Attribute};
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::widgets::Paragraph;
+use tuirealm::state::State;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
-use tuirealm::{
-    Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    PollStrategy, State,
-};
 
 // /// Enable the crossterm-async event listener.
 // ///
