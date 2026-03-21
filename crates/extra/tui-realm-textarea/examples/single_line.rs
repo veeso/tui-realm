@@ -7,16 +7,18 @@ use tui_realm_textarea::{
     TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
     TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO, TextArea,
 };
-use tuirealm::application::PollStrategy;
+use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
+use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
     AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, Style, TextModifiers,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::state::State;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
-use tuirealm::{Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State};
 
 // -- message
 #[derive(Debug, PartialEq)]
@@ -135,7 +137,11 @@ pub struct Input {
 }
 
 impl MockComponent for Input {
-    fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::ratatui::layout::Rect) {
+    fn view(
+        &mut self,
+        frame: &mut tuirealm::ratatui::Frame,
+        area: tuirealm::ratatui::layout::Rect,
+    ) {
         self.component.view(frame, area);
     }
 
