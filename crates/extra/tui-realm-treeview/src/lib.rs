@@ -78,13 +78,10 @@
 //! ## Setup a tree component
 //!
 //! ```rust
-//! extern crate tui_realm_treeview;
-//! extern crate tuirealm;
-//!
 //! use tuirealm::{
 //!     command::{Cmd, CmdResult, Direction, Position},
 //!     event::{Event, Key, KeyEvent, KeyModifiers},
-//!     props::{Alignment, BorderType, Borders, Color, Style},
+//!     props::{BorderType, Borders, Color, HorizontalAlignment, Style},
 //!     Component, MockComponent, NoUserEvent, State, StateValue,
 //! };
 //! // treeview
@@ -120,7 +117,7 @@
 //!                 .inactive(Style::default().fg(Color::Gray))
 //!                 .indent_size(3)
 //!                 .scroll_step(6)
-//!                 .title(tree.root().id(), Alignment::Left)
+//!                 .title(tree.root().id(), HorizontalAlignment::Left)
 //!                 .highlighted_color(Color::LightYellow)
 //!                 .highlight_symbol("🦄")
 //!                 .with_tree(tree)
@@ -130,7 +127,7 @@
 //! }
 //!
 //! impl Component<Msg, NoUserEvent> for FsTree {
-//!     fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+//!     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
 //!         let result = match ev {
 //!             Event::Keyboard(KeyEvent {
 //!                 code: Key::Left,
@@ -175,7 +172,7 @@
 //!             _ => return None,
 //!         };
 //!         match result {
-//!             CmdResult::Submit(State::One(StateValue::String(node))) => Some(Msg::ExtendDir(node)),
+//!             CmdResult::Submit(State::Single(StateValue::String(node))) => Some(Msg::ExtendDir(node)),
 //!             _ => Some(Msg::None),
 //!         }
 //!     }
@@ -216,9 +213,10 @@ pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
 pub use tree_state::TreeState;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, Color, Props, Style, TextModifiers, TextSpan,
+    AttrValue, Attribute, Borders, Color, HorizontalAlignment, Props, Style, TextModifiers, Title,
 };
 use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::text::Span;
 use tuirealm::ratatui::widgets::Block;
 use tuirealm::{Frame, MockComponent, State, StateValue};
 pub use widget::TreeWidget;
@@ -236,19 +234,10 @@ impl NodeValue for String {
     }
 }
 
-impl NodeValue for Vec<TextSpan> {
+impl NodeValue for Vec<Span<'static>> {
     fn render_parts_iter(&self) -> impl Iterator<Item = (&str, Option<Style>)> {
-        self.iter().map(|span| {
-            (
-                span.content.as_str(),
-                Some(
-                    Style::new()
-                        .fg(span.fg)
-                        .bg(span.bg)
-                        .add_modifier(span.modifiers),
-                ),
-            )
-        })
+        self.iter()
+            .map(|span| (span.content.as_ref(), Some(span.style)))
     }
 }
 
@@ -322,8 +311,11 @@ impl<V: NodeValue> TreeView<V> {
     }
 
     /// Set widget title
-    pub fn title<S: Into<String>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(Attribute::Title, AttrValue::Title((t.into(), a)));
+    pub fn title<S: Into<String>>(mut self, t: S, a: HorizontalAlignment) -> Self {
+        self.attr(
+            Attribute::Title,
+            AttrValue::Title(Title::from(t.into()).alignment(a)),
+        );
         self
     }
 
@@ -417,20 +409,22 @@ impl<V: NodeValue> TreeView<V> {
 
     fn get_block(
         props: Borders,
-        title: (&str, Alignment),
+        title: Option<&Title>,
         focus: bool,
         inactive_style: Option<Style>,
     ) -> Block<'_> {
-        Block::default()
+        let mut block = Block::default()
             .borders(props.sides)
             .border_style(match focus {
                 true => props.style(),
                 false => inactive_style
                     .unwrap_or_else(|| Style::default().fg(Color::Reset).bg(Color::Reset)),
             })
-            .border_type(props.modifiers)
-            .title(title.0)
-            .title_alignment(title.1)
+            .border_type(props.modifiers);
+        if let Some(title) = title {
+            block = block.title_top(title.content.clone());
+        }
+        block
     }
 }
 
@@ -457,9 +451,7 @@ impl<V: NodeValue> MockComponent for TreeView<V> {
             let title = self
                 .props
                 .get_ref(Attribute::Title)
-                .and_then(|v| v.as_title())
-                .map(|v| (v.0.as_str(), v.1))
-                .unwrap_or(("", Alignment::Center));
+                .and_then(|v| v.as_title());
             let borders = self
                 .props
                 .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
@@ -528,7 +520,7 @@ impl<V: NodeValue> MockComponent for TreeView<V> {
     fn state(&self) -> State {
         match self.states.selected() {
             None => State::None,
-            Some(id) => State::One(StateValue::String(id.to_string())),
+            Some(id) => State::Single(StateValue::String(id.to_string())),
         }
     }
 
@@ -613,7 +605,7 @@ mod test {
             .modifiers(TextModifiers::all())
             .preserve_state(true)
             .scroll_step(4)
-            .title("My tree", Alignment::Center)
+            .title("My tree", HorizontalAlignment::Center)
             .with_tree(mock_tree())
             .initial_node("aB1");
         // Check tree
@@ -634,7 +626,7 @@ mod test {
             .initial_node("aA");
         assert_eq!(
             component.state(),
-            State::One(StateValue::String(String::from("aA")))
+            State::Single(StateValue::String(String::from("aA")))
         );
     }
 
@@ -646,7 +638,7 @@ mod test {
         // GoTo begin (changed)
         assert_eq!(
             component.perform(Cmd::GoTo(Position::Begin)),
-            CmdResult::Changed(State::One(StateValue::String(String::from("bB0"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("bB0"))))
         );
         // GoTo begin (unchanged)
         assert_eq!(
@@ -663,7 +655,7 @@ mod test {
         // GoTo end (changed)
         assert_eq!(
             component.perform(Cmd::GoTo(Position::End)),
-            CmdResult::Changed(State::One(StateValue::String(String::from("bB5"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("bB5"))))
         );
         // GoTo end (unchanged)
         assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
@@ -677,7 +669,7 @@ mod test {
         // Move down (changed)
         assert_eq!(
             component.perform(Cmd::Move(Direction::Down)),
-            CmdResult::Changed(State::One(StateValue::String(String::from("cA2"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("cA2"))))
         );
         // Move down (unchanged)
         assert_eq!(
@@ -692,7 +684,7 @@ mod test {
         // Move up (changed)
         assert_eq!(
             component.perform(Cmd::Move(Direction::Up)),
-            CmdResult::Changed(State::One(StateValue::String(String::from("/"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("/"))))
         );
         // Move up (unchanged)
         assert_eq!(component.perform(Cmd::Move(Direction::Up)), CmdResult::None);
@@ -707,7 +699,7 @@ mod test {
         // Scroll down (changed)
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Down)),
-            CmdResult::Changed(State::One(StateValue::String(String::from("cA2"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("cA2"))))
         );
         // Scroll down (unchanged)
         assert_eq!(
@@ -725,7 +717,7 @@ mod test {
         // Scroll Up (changed)
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Up)),
-            CmdResult::Changed(State::One(StateValue::String(String::from("/"))))
+            CmdResult::Changed(State::Single(StateValue::String(String::from("/"))))
         );
         // Scroll Up (unchanged)
         assert_eq!(
@@ -741,7 +733,7 @@ mod test {
             .initial_node("aA1");
         assert_eq!(
             component.perform(Cmd::Submit),
-            CmdResult::Submit(State::One(StateValue::String(String::from("aA1"))))
+            CmdResult::Submit(State::Single(StateValue::String(String::from("aA1"))))
         );
     }
 

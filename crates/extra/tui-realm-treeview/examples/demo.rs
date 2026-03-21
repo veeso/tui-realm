@@ -8,14 +8,14 @@ use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, InputType, Style,
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, InputType, Style,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
 use tuirealm::{
     Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue, Sub,
-    SubClause, SubEventClause, Update,
+    SubClause, SubEventClause,
 };
 
 const MAX_DEPTH: usize = 3;
@@ -43,10 +43,10 @@ pub enum Id {
 struct Model {
     app: Application<Id, Msg, NoUserEvent>,
     path: PathBuf,
-    tree: Tree<String>, // You can choose a Tree<Vec<TextSpan>> for more flexible rendering
-    quit: bool,         // Becomes true when the user presses <ESC>
-    redraw: bool,       // Tells whether to refresh the UI; performance optimization
-    terminal: TerminalBridge<CrosstermTerminalAdapter>,
+    tree: Tree<String>,
+    quit: bool,
+    redraw: bool,
+    terminal: CrosstermTerminalAdapter,
 }
 
 impl Model {
@@ -90,7 +90,7 @@ impl Model {
             redraw: true,
             tree: Tree::new(Self::dir_tree(p, MAX_DEPTH)),
             path: p.to_path_buf(),
-            terminal: TerminalBridge::init_crossterm().expect("Could not initialize terminal"),
+            terminal: CrosstermTerminalAdapter::new().expect("Could not initialize terminal"),
         }
     }
 
@@ -134,7 +134,7 @@ impl Model {
     }
 
     fn view(&mut self) {
-        let _ = self.terminal.raw_mut().draw(|f| {
+        let _ = self.terminal.draw(|f| {
             // Prepare chunks
             let chunks = Layout::default()
                 .direction(LayoutDirection::Vertical)
@@ -148,7 +148,7 @@ impl Model {
 
     fn reload_tree(&mut self) {
         let current_node = match self.app.state(&Id::FsTree).ok().unwrap() {
-            State::One(StateValue::String(id)) => Some(id),
+            State::Single(StateValue::String(id)) => Some(id),
             _ => None,
         };
         // Remount tree
@@ -174,7 +174,10 @@ fn main() {
     // let's loop until quit is true
     while !model.quit {
         // Tick
-        if let Ok(messages) = model.app.tick(PollStrategy::Once) {
+        if let Ok(messages) = model
+            .app
+            .tick(PollStrategy::Once(Duration::from_millis(10)))
+        {
             for msg in messages.into_iter() {
                 let mut msg = Some(msg);
                 while msg.is_some() {
@@ -194,8 +197,8 @@ fn main() {
 
 // -- update
 
-impl Update<Msg> for Model {
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+impl Model {
+    pub fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         self.redraw = true;
         match msg.unwrap_or(Msg::None) {
             Msg::AppClose => {
@@ -258,7 +261,7 @@ impl FsTree {
                 .inactive(Style::default().fg(Color::Gray))
                 .indent_size(3)
                 .scroll_step(6)
-                .title(tree.root().id(), Alignment::Left)
+                .title(tree.root().id(), HorizontalAlignment::Left)
                 .highlighted_color(Color::LightYellow)
                 .highlight_symbol("🦄")
                 .with_tree(tree)
@@ -268,7 +271,7 @@ impl FsTree {
 }
 
 impl Component<Msg, NoUserEvent> for FsTree {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let result = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left,
@@ -317,7 +320,9 @@ impl Component<Msg, NoUserEvent> for FsTree {
             _ => return None,
         };
         match result {
-            CmdResult::Submit(State::One(StateValue::String(node))) => Some(Msg::ExtendDir(node)),
+            CmdResult::Submit(State::Single(StateValue::String(node))) => {
+                Some(Msg::ExtendDir(node))
+            }
             _ => Some(Msg::None),
         }
     }
@@ -331,7 +336,7 @@ pub struct GlobalListener {
 }
 
 impl Component<Msg, NoUserEvent> for GlobalListener {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Esc,
@@ -364,13 +369,13 @@ impl Default for GoTo {
                     "/foo/bar/buzz",
                     Style::default().fg(Color::Rgb(120, 120, 120)),
                 )
-                .title("Go to...", Alignment::Left),
+                .title("Go to..."),
         }
     }
 }
 
 impl Component<Msg, NoUserEvent> for GoTo {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let result = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Enter,
@@ -384,7 +389,7 @@ impl Component<Msg, NoUserEvent> for GoTo {
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(ch)),
+            }) => self.perform(Cmd::Type(*ch)),
             Event::Keyboard(KeyEvent {
                 code: Key::Left,
                 modifiers: KeyModifiers::NONE,
@@ -416,7 +421,7 @@ impl Component<Msg, NoUserEvent> for GoTo {
             _ => return None,
         };
         match result {
-            CmdResult::Submit(State::One(StateValue::String(path))) => {
+            CmdResult::Submit(State::Single(StateValue::String(path))) => {
                 Some(Msg::GoTo(PathBuf::from(path.as_str())))
             }
             _ => Some(Msg::None),
