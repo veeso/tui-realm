@@ -174,9 +174,9 @@
 
 use proc_macro::{self, TokenStream};
 use proc_macro2::Span;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::{
-    parse_macro_input, Attribute, DeriveInput, Field, FieldsNamed, FieldsUnnamed, Ident, Meta,
+    Attribute, DeriveInput, Field, FieldsNamed, FieldsUnnamed, Ident, Meta, parse_macro_input,
 };
 
 /// Try to find if in the given attributes there is a `#[component]` with ident to the field
@@ -225,7 +225,9 @@ fn find_field_with_attr<'a>(fields: impl Iterator<Item = &'a Field>) -> Option<I
         if let Some(_attr) = field.attrs.iter().find(|v| v.path().is_ident("component")) {
             let attr_ident = field.ident.as_ref().unwrap().clone();
             if let Some(found_ident) = found_ident {
-                panic!("Found attribute `#[component]` more than once! (first: `{found_ident}`, second: `{attr_ident}`)")
+                panic!(
+                    "Found attribute `#[component]` more than once! (first: `{found_ident}`, second: `{attr_ident}`)"
+                )
             }
 
             found_ident = Some(attr_ident);
@@ -244,7 +246,9 @@ fn find_field_with_attr_unnamed<'a>(fields: impl Iterator<Item = &'a Field>) -> 
     for (idx, field) in fields.enumerate() {
         if let Some(_attr) = field.attrs.iter().find(|v| v.path().is_ident("component")) {
             if let Some(found_idx) = found_ident {
-                panic!("Found attribute `#[component]` more than once! (first: `{found_idx}`, second: `{idx}`)")
+                panic!(
+                    "Found attribute `#[component]` more than once! (first: `{found_idx}`, second: `{idx}`)"
+                )
             }
 
             found_ident = Some(idx);

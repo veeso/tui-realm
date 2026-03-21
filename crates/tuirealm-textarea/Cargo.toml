@@ -15,20 +15,21 @@ keywords = ["tui", "terminal"]
 readme = "README.md"
 
 [dependencies]
+tuirealm.workspace = true
 cli-clipboard = { version = "^0.4", optional = true }
 lazy-regex = "^3"
-tuirealm = { version = "2", default-features = false, features = ["derive"] }
-tui-textarea = "^0.7"
+tui-textarea-2 = "^0.10"
 
 [dev-dependencies]
+tuirealm = { workspace = true, features = ["derive"] }
+tui-realm-stdlib.workspace = true
 crossterm = "^0.28"
 pretty_assertions = "1"
-tui-realm-stdlib = "2"
 
 [features]
 default = ["crossterm"]
 clipboard = ["cli-clipboard"]
-search = ["tui-textarea/search"]
+search = ["tui-textarea-2/search"]
 crossterm = ["tuirealm/crossterm"]
 termion = ["tuirealm/termion"]
 

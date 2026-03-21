@@ -93,18 +93,10 @@
 //! ## Example
 //!
 //! ```rust
-//! use std::{fs, io::{self, BufRead}};
-//! use tuirealm::{
-//!     application::PollStrategy,
-//!     command::{Cmd, CmdResult, Direction, Position},
-//!     event::{Event, Key, KeyEvent, KeyModifiers},
-//!     props::{Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers},
-//!     terminal::TerminalBridge,
-//!     Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, StateValue,
-//!     Update,
-//! };
-//! use tui_realm_textarea::TextArea;
-//!
+//! # use std::{fs, io::{self, BufRead}};
+//! # use tuirealm::props::{Title, HorizontalAlignment, BorderType, Borders, Color, Style, TextModifiers};
+//! # use tui_realm_textarea::TextArea;
+//! #
 //! let textarea = match fs::File::open("README.md") {
 //!     Ok(reader) => TextArea::new(
 //!         io::BufReader::new(reader)
@@ -135,7 +127,7 @@
 //!         Style::default().add_modifier(TextModifiers::REVERSED),
 //!     )
 //!     .tab_length(4)
-//!     .title("Editing README.md", Alignment::Left);
+//!     .title(Title::from("Editing README.md").alignment(HorizontalAlignment::Left));
 //! ```
 //!
 
@@ -155,7 +147,7 @@ use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style, TextModifiers,
+    AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style, TextModifiers, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
 use tuirealm::ratatui::widgets::{Block, Paragraph};
@@ -249,12 +241,9 @@ impl<'a> TextArea<'a> {
         self
     }
 
-    /// Set widget title
-    pub fn title<S: AsRef<str>>(mut self, t: S, a: Alignment) -> Self {
-        self.attr(
-            Attribute::Title,
-            AttrValue::Title((t.as_ref().to_string(), a)),
-        );
+    /// Add a title to the component.
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
         self
     }
 
@@ -268,7 +257,7 @@ impl<'a> TextArea<'a> {
     pub fn max_histories(mut self, max: usize) -> Self {
         self.attr(
             Attribute::Custom(TEXTAREA_MAX_HISTORY),
-            AttrValue::Payload(PropPayload::One(PropValue::Usize(max))),
+            AttrValue::Payload(PropPayload::Single(PropValue::Usize(max))),
         );
         self
     }
@@ -296,7 +285,7 @@ impl<'a> TextArea<'a> {
     pub fn footer_bar(mut self, fmt: &str, style: Style) -> Self {
         self.attr(
             Attribute::Custom(TEXTAREA_FOOTER_FMT),
-            AttrValue::Payload(PropPayload::Tup2((
+            AttrValue::Payload(PropPayload::Pair((
                 PropValue::Str(fmt.to_string()),
                 PropValue::Style(style),
             ))),
@@ -318,7 +307,7 @@ impl<'a> TextArea<'a> {
     pub fn status_bar(mut self, fmt: &str, style: Style) -> Self {
         self.attr(
             Attribute::Custom(TEXTAREA_STATUS_FMT),
-            AttrValue::Payload(PropPayload::Tup2((
+            AttrValue::Payload(PropPayload::Pair((
                 PropValue::Str(fmt.to_string()),
                 PropValue::Style(style),
             ))),
@@ -381,8 +370,8 @@ impl<'a> TextArea<'a> {
     // -- private
     fn get_block(&self) -> Option<Block<'a>> {
         let mut block = Block::default();
-        if let Some(AttrValue::Title((title, alignment))) = self.query(Attribute::Title) {
-            block = block.title(title).title_alignment(alignment);
+        if let Some(AttrValue::Title(title)) = self.query(Attribute::Title) {
+            block = block.title(title.content).title_position(title.position);
         }
         if let Some(AttrValue::Borders(borders)) = self.query(Attribute::Borders) {
             let inactive_style = self
@@ -467,7 +456,7 @@ impl MockComponent for TextArea<'_> {
                 .get_or(Attribute::Focus, AttrValue::Flag(false))
                 .unwrap_flag();
             if !focus {
-                self.widget.set_cursor_style(Style::reset());
+                self.widget.set_cursor_style(Style::default());
             } else {
                 let style = self
                     .props
@@ -511,7 +500,7 @@ impl MockComponent for TextArea<'_> {
             }
             (
                 Attribute::Custom(TEXTAREA_FOOTER_FMT),
-                AttrValue::Payload(PropPayload::Tup2((
+                AttrValue::Payload(PropPayload::Pair((
                     PropValue::Str(fmt),
                     PropValue::Style(style),
                 ))),
@@ -520,13 +509,13 @@ impl MockComponent for TextArea<'_> {
             }
             (
                 Attribute::Custom(TEXTAREA_MAX_HISTORY),
-                AttrValue::Payload(PropPayload::One(PropValue::Usize(max))),
+                AttrValue::Payload(PropPayload::Single(PropValue::Usize(max))),
             ) => {
                 self.widget.set_max_histories(max);
             }
             (
                 Attribute::Custom(TEXTAREA_STATUS_FMT),
-                AttrValue::Payload(PropPayload::Tup2((
+                AttrValue::Payload(PropPayload::Pair((
                     PropValue::Str(fmt),
                     PropValue::Style(style),
                 ))),

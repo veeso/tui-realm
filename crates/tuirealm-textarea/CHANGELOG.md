@@ -10,6 +10,10 @@
 
 ---
 
+## next
+
+- Update for tuirealm 4.0
+
 ## 2.1.0
 
 Relased on 23/03/2025

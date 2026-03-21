@@ -1964,17 +1964,6 @@ dependencies = [
 
 [[package]]
 name = "tui-realm-stdlib"
-version = "2.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78a24d06b8403c57b32a3d3fdac795adf4ef8610e5f9650a3629efc8a9d6c0bb"
-dependencies = [
- "textwrap",
- "tuirealm 2.2.0",
- "unicode-width 0.2.0",
-]
-
-[[package]]
-name = "tui-realm-stdlib"
 version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "333d8b8da2b3479a68fdf4bd2621f888fa869501d6c5c72bac940d0eeb19b083"
@@ -2003,9 +1992,9 @@ dependencies = [
  "crossterm 0.28.1",
  "lazy-regex",
  "pretty_assertions",
- "tui-realm-stdlib 2.0.1",
- "tui-textarea",
- "tuirealm 2.2.0",
+ "tui-realm-stdlib 4.0.0",
+ "tui-textarea-2",
+ "tuirealm 4.0.0",
 ]
 
 [[package]]
@@ -2021,30 +2010,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "tui-textarea"
-version = "0.7.0"
+name = "tui-textarea-2"
+version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a5318dd619ed73c52a9417ad19046724effc1287fb75cdcc4eca1d6ac1acbae"
+checksum = "74a31ca0965e3ff6a7ac5ecb02b20a88b4f68ebf138d8ae438e8510b27a1f00f"
 dependencies = [
- "crossterm 0.28.1",
- "ratatui 0.29.0",
- "regex",
- "unicode-width 0.2.0",
-]
-
-[[package]]
-name = "tuirealm"
-version = "2.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a99ea0862c0e946cd4e53ee8b6c9b301cdb740ed243d827f6d1fee2ad4268e25"
-dependencies = [
- "bitflags 2.11.0",
  "crossterm 0.29.0",
- "lazy-regex",
- "ratatui 0.29.0",
- "termion",
- "thiserror 2.0.18",
- "tuirealm_derive 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "portable-atomic",
+ "ratatui-core",
+ "ratatui-widgets",
+ "regex",
+ "unicode-segmentation",
+ "unicode-width 0.2.0",
 ]
 
 [[package]]

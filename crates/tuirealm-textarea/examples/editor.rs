@@ -10,27 +10,26 @@ use tui_realm_stdlib::Label;
 #[cfg(feature = "clipboard")]
 use tui_realm_textarea::TEXTAREA_CMD_PASTE;
 use tui_realm_textarea::{
-    TextArea, TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
-    TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
+    TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
+    TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO, TextArea,
 };
 #[cfg(feature = "search")]
 use tui_realm_textarea::{
     TEXTAREA_CMD_SEARCH_BACK, TEXTAREA_CMD_SEARCH_FORWARD, TEXTAREA_SEARCH_PATTERN,
 };
+#[cfg(feature = "search")]
+use tuirealm::StateValue;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
 use tuirealm::props::{
-    Alignment, AttrValue, Attribute, BorderType, Borders, Color, Style, TextModifiers,
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, Style, TextModifiers,
+    Title,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
-use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalBridge};
-#[cfg(feature = "search")]
-use tuirealm::StateValue;
-use tuirealm::{
-    Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State, Update,
-};
+use tuirealm::terminal::CrosstermTerminalAdapter;
+use tuirealm::{Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State};
 
 // -- message
 #[derive(Debug, PartialEq)]
@@ -56,7 +55,7 @@ struct Model {
     app: Application<Id, Msg, NoUserEvent>,
     quit: bool,   // Becomes true when the user presses <ESC>
     redraw: bool, // Tells whether to refresh the UI; performance optimization
-    terminal: TerminalBridge<CrosstermTerminalAdapter>,
+    terminal: CrosstermTerminalAdapter,
 }
 
 impl Model {
@@ -65,22 +64,25 @@ impl Model {
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
         );
-        assert!(app
-            .mount(Id::Editor, Box::new(Editor::default()), vec![])
-            .is_ok());
-        assert!(app
-            .mount(Id::Label, Box::new(DummyLabel::default()), vec![])
-            .is_ok());
+        assert!(
+            app.mount(Id::Editor, Box::new(Editor::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::Label, Box::new(DummyLabel::default()), vec![])
+                .is_ok()
+        );
         #[cfg(feature = "search")]
-        assert!(app
-            .mount(Id::Search, Box::new(Search::default()), vec![])
-            .is_ok());
+        assert!(
+            app.mount(Id::Search, Box::new(Search::default()), vec![])
+                .is_ok()
+        );
         assert!(app.active(&Id::Editor).is_ok());
         Model {
             app,
             quit: false,
             redraw: true,
-            terminal: TerminalBridge::init_crossterm().expect("Could not initialize terminal"),
+            terminal: CrosstermTerminalAdapter::new().expect("Could not initialize terminal"),
         }
     }
 
@@ -110,17 +112,15 @@ impl Model {
 fn main() {
     // Make model
     let mut model: Model = Model::new();
-    let _ = model.terminal.enable_raw_mode();
-    let _ = model.terminal.enter_alternate_screen();
     // let's loop until quit is true
     while !model.quit {
         // Tick
-        if let Ok(messages) = model.app.tick(PollStrategy::Once) {
+        if let Ok(messages) = model
+            .app
+            .tick(PollStrategy::Once(Duration::from_millis(10)))
+        {
             for msg in messages.into_iter() {
-                let mut msg = Some(msg);
-                while msg.is_some() {
-                    msg = model.update(msg);
-                }
+                model.update(msg);
             }
         }
         // Redraw
@@ -129,10 +129,6 @@ fn main() {
             model.redraw = false;
         }
     }
-    // Terminate terminal
-    let _ = model.terminal.leave_alternate_screen();
-    let _ = model.terminal.disable_raw_mode();
-    let _ = model.terminal.clear_screen();
     // print content
     model
         .app
@@ -145,55 +141,50 @@ fn main() {
 
 // -- update
 
-impl Update<Msg> for Model {
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+impl Model {
+    pub fn update(&mut self, msg: Msg) {
         self.redraw = true;
-        match msg.unwrap_or(Msg::None) {
+        match msg {
             Msg::AppClose => {
                 self.quit = true;
-                None
             }
             Msg::ChangeFocus(Id::Editor) => {
                 let _ = self.app.active(&Id::Editor);
-                None
             }
             Msg::ChangeFocus(Id::Label) => {
                 let _ = self.app.active(&Id::Label);
-                None
             }
             #[cfg(feature = "search")]
             Msg::ChangeFocus(Id::Search) => {
                 let _ = self.app.active(&Id::Search);
-                None
             }
             Msg::Submit(lines) => {
                 println!("Got user text: {:?}", lines);
-                None
             }
             #[cfg(feature = "search")]
             Msg::Search(pattern) => {
-                assert!(self
-                    .app
-                    .attr(
-                        &Id::Editor,
-                        Attribute::Custom(TEXTAREA_SEARCH_PATTERN),
-                        AttrValue::String(pattern)
-                    )
-                    .is_ok());
-                None
+                assert!(
+                    self.app
+                        .attr(
+                            &Id::Editor,
+                            Attribute::Custom(TEXTAREA_SEARCH_PATTERN),
+                            AttrValue::String(pattern)
+                        )
+                        .is_ok()
+                );
             }
-            Msg::None => None,
+            _ => (),
         }
     }
 }
 
 // -- components
 
-pub struct Editor<'a> {
-    component: TextArea<'a>,
+pub struct Editor {
+    component: TextArea<'static>,
 }
 
-impl MockComponent for Editor<'_> {
+impl MockComponent for Editor {
     fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::ratatui::layout::Rect) {
         self.component.view(frame, area);
     }
@@ -215,7 +206,7 @@ impl MockComponent for Editor<'_> {
     }
 }
 
-impl Default for Editor<'_> {
+impl Default for Editor {
     fn default() -> Self {
         let textarea = match fs::File::open("README.md") {
             Ok(reader) => TextArea::new(
@@ -248,13 +239,13 @@ impl Default for Editor<'_> {
                     Style::default().add_modifier(TextModifiers::REVERSED),
                 )
                 .tab_length(4)
-                .title("Editing README.md", Alignment::Left),
+                .title(Title::from("Editing README.md").alignment(HorizontalAlignment::Left)),
         }
     }
 }
 
-impl Component<Msg, NoUserEvent> for Editor<'_> {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+impl Component<Msg, NoUserEvent> for Editor {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => Some(Msg::AppClose),
             Event::Keyboard(KeyEvent {
@@ -405,7 +396,7 @@ impl Component<Msg, NoUserEvent> for Editor<'_> {
                 code: Key::Char(ch),
                 ..
             }) => {
-                self.perform(Cmd::Type(ch));
+                self.perform(Cmd::Type(*ch));
                 Some(Msg::None)
             }
             Event::Keyboard(KeyEvent {
@@ -436,7 +427,7 @@ impl Default for DummyLabel {
 }
 
 impl Component<Msg, NoUserEvent> for DummyLabel {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Function(1),
@@ -458,7 +449,7 @@ impl Default for Search {
     fn default() -> Self {
         Self {
             component: Input::default()
-                .title("Search text", Alignment::Left)
+                .title(Title::from("Search text").alignment(HorizontalAlignment::Left))
                 .foreground(Color::LightYellow)
                 .invalid_style(Style::default().fg(Color::Red)),
         }
@@ -467,7 +458,7 @@ impl Default for Search {
 
 #[cfg(feature = "search")]
 impl Component<Msg, NoUserEvent> for Search {
-    fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
@@ -492,15 +483,15 @@ impl Component<Msg, NoUserEvent> for Search {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
             }) => {
-                if let CmdResult::Changed(State::One(StateValue::String(pattern))) =
-                    self.perform(Cmd::Type(ch))
+                if let CmdResult::Changed(State::Single(StateValue::String(pattern))) =
+                    self.perform(Cmd::Type(*ch))
                 {
                     return Some(Msg::Search(pattern));
                 }
                 CmdResult::None
             }
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => {
-                return Some(Msg::ChangeFocus(Id::Editor))
+                return Some(Msg::ChangeFocus(Id::Editor));
             }
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
