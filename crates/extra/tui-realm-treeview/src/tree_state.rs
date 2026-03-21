@@ -220,7 +220,11 @@ impl TreeState {
     fn get_last_open_heir<'a, V>(&self, node: &'a Node<V>) -> &'a Node<V> {
         if self.is_open(node) {
             // If node is open, get its last child and call this function recursively
-            self.get_last_open_heir(node.iter().last().unwrap())
+            if let Some(child) = node.iter().last() {
+                self.get_last_open_heir(child)
+            } else {
+                node
+            }
         } else {
             // Else return `node`
             node
@@ -594,5 +598,23 @@ mod test {
                 .as_str(),
             "aC0"
         );
+    }
+
+    #[test]
+    fn get_last_open_heir_0_children() {
+        let mut state = TreeState::default();
+        let mut tree = mock_tree();
+
+        state.select(tree.root(), tree.root());
+        state.open(tree.root());
+
+        let node = &tree.root().children()[0];
+        let node_id = node.id().to_string();
+        state.select(tree.root(), node);
+        state.open(tree.root());
+
+        tree.root_mut().query_mut(&node_id).unwrap().clear();
+
+        state.get_last_open_heir(&tree.root().children()[0]);
     }
 }
