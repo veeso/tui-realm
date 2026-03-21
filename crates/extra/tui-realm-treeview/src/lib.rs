@@ -78,12 +78,12 @@
 //! ## Setup a tree component
 //!
 //! ```rust
-//! use tuirealm::{
-//!     command::{Cmd, CmdResult, Direction, Position},
-//!     event::{Event, Key, KeyEvent, KeyModifiers},
-//!     props::{BorderType, Borders, Color, HorizontalAlignment, Style},
-//!     Component, MockComponent, NoUserEvent, State, StateValue,
-//! };
+//! use tuirealm::MockComponent;
+//! use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+//! use tuirealm::component::{Component, MockComponent};
+//! use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
+//! use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Style};
+//! use tuirealm::state::{State, StateValue};
 //! // treeview
 //! use tui_realm_treeview::{Node, Tree, TreeView, TREE_CMD_CLOSE, TREE_CMD_OPEN};
 //!
@@ -202,24 +202,26 @@
 #[cfg(test)]
 pub(crate) mod mock;
 // -- modules
-mod tree_state;
-mod widget;
+pub mod tree_state;
+pub mod widget;
 
 use std::iter;
 
 // deps
 pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
-// internal
-pub use tree_state::TreeState;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, HorizontalAlignment, Props, Style, TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::text::Span;
 use tuirealm::ratatui::widgets::Block;
-use tuirealm::{Frame, MockComponent, State, StateValue};
-pub use widget::TreeWidget;
+use tuirealm::state::{State, StateValue};
+
+use self::tree_state::TreeState;
+use self::widget::TreeWidget;
 
 /// [`Tree`] node value.
 pub trait NodeValue: Default {
