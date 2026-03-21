@@ -1,6 +1,6 @@
 //! # tui-realm-textarea
 //!
-//! [tui-realm-textarea](https://github.com/veeso/tui-realm-textarea) is a
+//! [tui-realm-textarea](https://github.com/veeso/tui-realm/tree/feature/main/crates/tuirealm-textarea) is a
 //! [tui-realm](https://github.com/veeso/tui-realm) implementation of a textarea component.
 //! The tree engine is based on [Orange-trees](https://docs.rs/orange-trees/).
 //!
