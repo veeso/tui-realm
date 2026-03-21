@@ -109,3 +109,34 @@ This makes it consistent with other functions like `view` which did not have a t
 This allows for customization of how the `update` function is called, for example if you dont ever returns a message for recursive processing, it can now be omitted.
 
 Migration is as simple as changing `impl Update for Model` to `impl Model` and potentially changing the visibility to `pub fn`.
+
+### Cleanup of module exports
+
+Root-level re-exports have been removed from all crates. All types must now be imported from their defining module rather than from the crate root. This makes the public API surface explicit and consistent across the workspace.
+
+In addition:
+
+- The `SubEventClause` type alias has been removed. Use `EventClause` from the `subscription` module instead.
+- `Frame` is no longer re-exported at the crate root. Use `tuirealm::ratatui::Frame`.
+
+The following table summarises the key import path changes:
+
+| Old import | New import |
+|---|---|
+| `tuirealm::Application` | `tuirealm::application::Application` |
+| `tuirealm::Event` | `tuirealm::event::Event` |
+| `tuirealm::NoUserEvent` | `tuirealm::event::NoUserEvent` |
+| `tuirealm::{AttrValue, Attribute, Props}` | `tuirealm::props::{AttrValue, Attribute, Props}` |
+| `tuirealm::{Component, MockComponent}` | `tuirealm::component::{Component, MockComponent}` |
+| `tuirealm::{State, StateValue}` | `tuirealm::state::{State, StateValue}` |
+| `tuirealm::{Sub, SubClause, SubEventClause}` | `tuirealm::subscription::{Sub, SubClause, EventClause}` |
+| `tuirealm::Frame` | `tuirealm::ratatui::Frame` |
+| `tuirealm::EventListenerCfg` | `tuirealm::listener::EventListenerCfg` |
+| `tuirealm::PollStrategy` | `tuirealm::application::PollStrategy` |
+| `tuirealm::ViewError` | `tuirealm::view::ViewError` |
+| `tuirealm::Injector` | `tuirealm::injector::Injector` |
+| `tui_realm_stdlib::Input` (etc.) | `tui_realm_stdlib::components::Input` |
+| `tui_realm_treeview::TreeState` | `tui_realm_treeview::tree_state::TreeState` |
+| `tui_realm_treeview::TreeWidget` | `tui_realm_treeview::widget::TreeWidget` |
+
+> **Note:** The `#[derive(MockComponent)]` proc macro and `async_trait` remain exported at the crate root level, as they need to be in scope for derive and trait usage.
