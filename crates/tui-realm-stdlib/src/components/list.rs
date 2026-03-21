@@ -1,13 +1,15 @@
 //! `List` represents a read-only textual list component which can be scrollable through arrows or inactive.
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
     TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::widgets::{List as TuiList, ListItem, ListState};
-use tuirealm::{Frame, MockComponent, State, StateValue};
+use tuirealm::state::{State, StateValue};
 
 use crate::prop_ext::CommonProps;
 use crate::utils::{self, borrow_clone_line};

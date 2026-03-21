@@ -3,22 +3,24 @@
 use std::any::Any;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::text::{Line, Span};
 use tuirealm::ratatui::widgets::{Axis, Chart as TuiChart, Dataset as TuiDataset};
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 // -- Props
 use super::dataset::ChartDataset;
-use crate::prop_ext::CommonProps;
-use crate::props::{
+use crate::components::props::{
     CHART_X_BOUNDS, CHART_X_LABELS, CHART_X_STYLE, CHART_X_TITLE, CHART_Y_BOUNDS, CHART_Y_LABELS,
     CHART_Y_STYLE, CHART_Y_TITLE,
 };
+use crate::prop_ext::CommonProps;
 
 /// The state that needs to be kepts for the [`Chart`] component.
 #[derive(Default)]
