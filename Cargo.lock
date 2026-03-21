@@ -2093,8 +2093,8 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.117",
- "tui-realm-stdlib 3.1.0",
- "tuirealm 3.3.0",
+ "tui-realm-stdlib 4.0.0",
+ "tuirealm 4.0.0",
 ]
 
 [[package]]
