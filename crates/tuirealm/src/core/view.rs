@@ -796,7 +796,7 @@ mod test {
             }
         }
 
-        impl Component<MockMsg, MockEvent> for OurMockFooInput {
+        impl AppComponent<MockMsg, MockEvent> for OurMockFooInput {
             fn on(&mut self, _ev: &Event<MockEvent>) -> Option<MockMsg> {
                 None
             }

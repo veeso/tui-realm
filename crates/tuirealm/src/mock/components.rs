@@ -4,7 +4,7 @@ use ratatui::Frame;
 
 use super::{MockEvent, MockMsg};
 use crate::command::{Cmd, CmdResult, Direction};
-use crate::component::{Component, MockComponent};
+use crate::component::{AppComponent, MockComponent};
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
 use crate::props::{AttrValue, Attribute, Props};
 use crate::state::{State, StateValue};
@@ -97,7 +97,7 @@ pub struct MockFooInput {
     component: MockInput,
 }
 
-impl Component<MockMsg, MockEvent> for MockFooInput {
+impl AppComponent<MockMsg, MockEvent> for MockFooInput {
     fn on(&mut self, ev: &Event<MockEvent>) -> Option<MockMsg> {
         let cmd = match ev {
             Event::Keyboard(KeyEvent {
@@ -132,7 +132,7 @@ pub struct MockBarInput {
     component: MockInput,
 }
 
-impl Component<MockMsg, MockEvent> for MockBarInput {
+impl AppComponent<MockMsg, MockEvent> for MockBarInput {
     fn on(&mut self, ev: &Event<MockEvent>) -> Option<MockMsg> {
         let cmd = match ev {
             Event::Keyboard(KeyEvent {
