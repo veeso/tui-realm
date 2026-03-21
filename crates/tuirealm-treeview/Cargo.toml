@@ -15,14 +15,15 @@ keywords = ["tui", "terminal"]
 readme = "README.md"
 
 [dependencies]
+tuirealm.workspace = true
+tui-realm-stdlib.workspace = true
 orange-trees = "0.1.0"
-tuirealm = { version = "3", default-features = false, features = ["derive"] }
 unicode-width = "0.2"
 
 [dev-dependencies]
+tuirealm = { workspace = true, features = ["derive"] }
 crossterm = "0.29"
 pretty_assertions = "1"
-tui-realm-stdlib = "3"
 
 [features]
 default = ["crossterm"]
