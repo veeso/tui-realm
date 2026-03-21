@@ -13,3 +13,7 @@ license = "MIT"
 rust-version = "1.86"
 repository = "https://github.com/veeso/tui-realm"
 homepage = "https://github.com/veeso/tui-realm"
+
+[workspace.dependencies]
+tuirealm = { path = "./crates/tuirealm", default-features = false }
+# tui-realm-stdlib = { path = "./crates/tuirealm-stdlib" }

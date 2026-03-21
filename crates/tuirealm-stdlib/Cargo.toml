@@ -15,14 +15,14 @@ keywords = ["tui", "terminal"]
 readme = "README.md"
 
 [dependencies]
+tuirealm.workspace = true
 textwrap = "^0.16"
-tuirealm = { version = "3", default-features = false, features = ["derive"], git = "https://github.com/veeso/tui-realm.git", rev = "a8bce28cec1b9ba40603b24100a51b8136c4ab1b" }
 unicode-width = "^0.2"
 
 [dev-dependencies]
 pretty_assertions = "1"
 rand = "0.10"
-tuirealm = { version = "3", features = ["crossterm"], git = "https://github.com/veeso/tui-realm.git", rev = "a8bce28cec1b9ba40603b24100a51b8136c4ab1b" }
+tuirealm = { workspace = true, features = ["crossterm"] }
 
 [features]
 
