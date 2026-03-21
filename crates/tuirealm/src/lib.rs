@@ -30,7 +30,7 @@
 //!
 //! Supported features are:
 //!
-//! - `derive` (*default*): add the `#[derive(MockComponent)]` proc macro to automatically implement `MockComponent` for `Component`. [Read more](https://github.com/veeso/tui-realm/tree/main/crates/tuirealm_derive).
+//! - `derive` (*default*): add the `#[derive(Component)]` proc macro to automatically implement `Component` for `AppComponent`. [Read more](https://github.com/veeso/tui-realm/tree/main/crates/tuirealm_derive).
 //! - `async-ports`: add support for async ports
 //! - `serialize`: add the serialize/deserialize trait implementation for `KeyEvent` and `Key`.
 //! - `crossterm` (*default*): enable the [crossterm](https://github.com/crossterm-rs/crossterm) terminal backend

@@ -10,21 +10,20 @@ use super::state::State;
 use crate::command::{Cmd, CmdResult};
 use crate::ratatui::layout::Rect;
 
-/// A Mock Component represents a component which defines all the properties and states it can handle and represent
-/// and the way it should be rendered. It must also define how to behave in case of a [`Cmd`] (command).
+/// The base component trait. Defines properties, states, rendering, and command handling for a reusable component.
 ///
-/// Despite that, it won't define how to behave after an [`Event`] and it won't send any `Msg`.
-/// The MockComponent is intended to be used as a reusable component to implement your application component.
+/// A `Component` won't define how to behave after an [`Event`] and it won't send any `Msg`.
+/// It is intended to be used as a reusable building block to implement your [`AppComponent`].
 ///
 /// ### In practice
 ///
 /// A real life example would be an Input field.
-/// The mock component is represented by the `Input`, which will define the properties (e.g. max input length, input type, ...)
+/// The component is represented by the `Input`, which will define the properties (e.g. max input length, input type, ...)
 /// and by its behaviour (e.g. when the user types 'a', 'a' char is added to input state).
 ///
-/// In your application though, you may use a `IpAddressInput` which is the [`Component`] using the `Input` mock component.
+/// In your application though, you may use a `IpAddressInput` which is the [`AppComponent`] using the `Input` component.
 /// If you want more example, just dive into the `examples/` folder in the project root.
-pub trait MockComponent {
+pub trait Component {
     /// Based on the current properties and states, renders the component in the provided area frame.
     /// Render can also mutate the component state if this is required
     fn view(&mut self, frame: &mut Frame, area: Rect);
@@ -45,18 +44,18 @@ pub trait MockComponent {
     fn perform(&mut self, cmd: Cmd) -> CmdResult;
 }
 
-/// The app component describes the application level component, which is a wrapper around the [`MockComponent`],
-/// which, in addition to all the methods exposed by the mock, it will handle the [`Event`]s coming from the `View`.
+/// The app component describes the application level component, which is a wrapper around [`Component`],
+/// which, in addition to all the methods exposed by the base component, it will handle the [`Event`]s coming from the `View`.
 ///
 /// The Event are passed to the `on` method, which will eventually return a `Msg`,
 /// which is defined in your application as an enum.
 /// In your application you should have an AppComponent for each element on your UI, but the logic to implement
-/// is very tiny, since the most of the work should already be done into the [`MockComponent`]
+/// is very tiny, since the most of the work should already be done into the [`Component`]
 /// and many of them are available in the standard library at [`tui-realm-stdlib`](https://github.com/veeso/tui-realm/tree/main/crates/tui-realm-stdlib).
 ///
 /// Don't forget you can find an example in the `examples/` directory and you can discover many more information
 /// about components in the repository documentation.
-pub trait AppComponent<Msg, UserEvent>: MockComponent + Any
+pub trait AppComponent<Msg, UserEvent>: Component + Any
 where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone,

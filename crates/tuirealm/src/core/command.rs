@@ -1,4 +1,4 @@
-//! This module exposes the [`Cmd`] type, which must be used when sending commands to the [`MockComponent`](crate::component::MockComponent) from the
+//! This module exposes the [`Cmd`] type, which must be used when sending commands to the [`Component`](crate::component::Component) from the
 //! [`AppComponent`](crate::component::AppComponent) after an `Event`.
 
 use super::state::State;
@@ -7,7 +7,7 @@ use super::state::State;
 
 /// A command defines the "abstract" operation to perform in front of an Event.
 /// The command must be passed in the `on` method of the `AppComponent`
-/// when calling `perform` method of the `MockComponent`.
+/// when calling `perform` method of the `Component`.
 /// There is not a default conversion from `Event -> Cmd`, but it must be implmented by the user in the
 /// `AppComponent` in a match case.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, PartialOrd, Hash)]
@@ -60,7 +60,7 @@ pub enum Position {
 // -- Command result
 
 /// A command result describes the output of a [`Cmd`] performed on a Component.
-/// It reports a "logical" change on the `MockComponent`.
+/// It reports a "logical" change on the `Component`.
 /// The `AppComponent` then, must return a certain user defined `Msg` based on the value of the [`CmdResult`].
 #[derive(Debug, PartialEq, Clone)]
 #[allow(clippy::large_enum_variant)]
