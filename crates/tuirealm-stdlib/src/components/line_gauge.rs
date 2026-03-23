@@ -1,11 +1,13 @@
 use tuirealm::command::{Cmd, CmdResult};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, SpanStatic, Style,
     TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::text::Span;
 use tuirealm::ratatui::{layout::Rect, widgets::LineGauge as TuiLineGauge};
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 use crate::prop_ext::CommonProps;
 
@@ -199,10 +201,8 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::{
-        props::{BorderType, HorizontalAlignment},
-        ratatui::symbols::line::{DOUBLE_HORIZONTAL, HORIZONTAL},
-    };
+    use tuirealm::props::{BorderType, HorizontalAlignment};
+    use tuirealm::ratatui::symbols::line::{DOUBLE_HORIZONTAL, HORIZONTAL};
 
     #[test]
     fn test_components_progress_bar() {

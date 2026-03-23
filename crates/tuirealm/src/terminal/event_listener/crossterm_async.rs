@@ -1,7 +1,7 @@
 use crossterm::event::EventStream;
 use futures_util::StreamExt;
 
-use crate::Event;
+use crate::event::Event;
 use crate::listener::{PollAsync, PortResult};
 use crate::terminal::event_listener::io_err_to_port_err;
 

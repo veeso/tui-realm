@@ -1,14 +1,16 @@
 use tuirealm::command::{Cmd, CmdResult};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Color, HorizontalAlignment, PropPayload, PropValue, Props, SpanStatic,
     Style, TextModifiers,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::{
     layout::Rect,
     text::{Line, Span as RSpan, Text},
     widgets::Paragraph,
 };
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 use crate::prop_ext::CommonProps;
 use crate::utils;
@@ -147,7 +149,8 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::{props::SpanStatic, ratatui::style::Stylize};
+    use tuirealm::props::SpanStatic;
+    use tuirealm::ratatui::style::Stylize;
 
     #[test]
     fn test_components_span() {

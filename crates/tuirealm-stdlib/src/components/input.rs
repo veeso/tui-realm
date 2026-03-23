@@ -5,11 +5,13 @@ use super::props::{INPUT_INVALID_STYLE, INPUT_PLACEHOLDER, INPUT_PLACEHOLDER_STY
 use crate::prop_ext::CommonProps;
 use crate::utils::calc_utf8_cursor_position;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, InputType, Props, Style, TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
-use tuirealm::{Frame, MockComponent, State, StateValue};
+use tuirealm::state::{State, StateValue};
 
 // -- states
 

@@ -7,16 +7,21 @@
 
 use std::time::Duration;
 
+use tuirealm::MockComponent;
+use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::event::{Key, KeyEvent};
-use tuirealm::props::{Color, HorizontalAlignment, PropBound, PropPayload, Style, TextModifiers};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
+use tuirealm::listener::EventListenerCfg;
+use tuirealm::props::{
+    AttrValue, Attribute, Color, HorizontalAlignment, PropBound, PropPayload, Props, Style,
+    TextModifiers,
+};
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::widgets::Paragraph;
+use tuirealm::state::State;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
-use tuirealm::{
-    Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    NoUserEvent, PollStrategy, Props, State,
-};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let event_listener =

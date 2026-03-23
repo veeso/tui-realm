@@ -5,11 +5,15 @@
 use std::time::UNIX_EPOCH;
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::event::{Key, KeyEvent};
-use tuirealm::props::{Color, HorizontalAlignment, Style, TextModifiers};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent};
+use tuirealm::props::{
+    AttrValue, Attribute, Color, HorizontalAlignment, Props, Style, TextModifiers,
+};
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::widgets::Paragraph;
-use tuirealm::{AttrValue, Attribute, Component, Event, Frame, MockComponent, Props, State};
+use tuirealm::state::State;
 
 use super::{Msg, UserEvent};
 

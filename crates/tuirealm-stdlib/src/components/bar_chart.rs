@@ -2,12 +2,14 @@
 
 use std::collections::LinkedList;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::{layout::Rect, widgets::BarChart as TuiBarChart};
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 // -- Props
 

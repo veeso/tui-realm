@@ -5,8 +5,10 @@ use std::any::Any;
 use ratatui::Frame;
 
 use crate::command::{Cmd, CmdResult};
+use crate::event::Event;
+use crate::props::{AttrValue, Attribute};
 use crate::ratatui::layout::Rect;
-use crate::{AttrValue, Attribute, Event, State};
+use crate::state::State;
 
 /// A Mock Component represents a component which defines all the properties and states it can handle and represent
 /// and the way it should be rendered. It must also define how to behave in case of a [`Cmd`] (command).

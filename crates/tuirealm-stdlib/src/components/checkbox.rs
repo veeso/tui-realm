@@ -24,13 +24,15 @@
  * SOFTWARE.
  */
 use tuirealm::command::{Cmd, CmdResult, Direction};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{layout::Rect, text::Span, widgets::Tabs};
-use tuirealm::{Frame, MockComponent, State, StateValue};
+use tuirealm::state::{State, StateValue};
 
 use crate::prop_ext::CommonProps;
 

@@ -4,10 +4,10 @@ mod model;
 use std::time::{Duration, SystemTime};
 
 use components::Label;
-use tuirealm::listener::{Poll, PortResult};
-use tuirealm::{
-    Application, Event, EventListenerCfg, PollStrategy, Sub, SubClause, SubEventClause,
-};
+use tuirealm::application::{Application, PollStrategy};
+use tuirealm::event::Event;
+use tuirealm::listener::{EventListenerCfg, Poll, PortResult};
+use tuirealm::subscription::{EventClause, Sub, SubClause};
 
 use crate::model::Model;
 
@@ -64,7 +64,7 @@ fn main() {
         Id::Label,
         Box::new(Label::default()),
         vec![Sub::new(
-            SubEventClause::User(UserEvent::GotData(SystemTime::UNIX_EPOCH)),
+            EventClause::User(UserEvent::GotData(SystemTime::UNIX_EPOCH)),
             SubClause::Always,
         )],
     )
@@ -73,7 +73,7 @@ fn main() {
         Id::Other,
         Box::new(Label::default()),
         vec![Sub::new(
-            SubEventClause::User(UserEvent::GotData(SystemTime::UNIX_EPOCH)),
+            EventClause::User(UserEvent::GotData(SystemTime::UNIX_EPOCH)),
             SubClause::Always,
         )],
     )

@@ -20,7 +20,7 @@
 //!
 //! ```rust
 //! # use tuirealm_derive::MockComponent;
-//! # use tui_realm_stdlib::Input;
+//! # use tui_realm_stdlib::components::Input;
 //! #
 //! #[derive(MockComponent)]
 //! pub struct IpAddressInput {
@@ -38,7 +38,7 @@
 //! # use tuirealm::command::{Cmd, CmdResult};
 //! # use tuirealm::ratatui::layout::Rect;
 //! # use tuirealm::{Attribute, AttrValue, Frame, MockComponent, State};
-//! # use tui_realm_stdlib::Input;
+//! # use tui_realm_stdlib::components::Input;
 //! #
 //! # pub struct IpAddressInput {
 //! #   component: Input,
@@ -98,7 +98,7 @@
 //!
 //! ```rust
 //! # use tuirealm_derive::MockComponent;
-//! # use tui_realm_stdlib::Radio;
+//! # use tui_realm_stdlib::components::Radio;
 //!
 //! #[derive(MockComponent)]
 //! pub struct MyComponent {
@@ -118,7 +118,7 @@
 //!
 //! ```rust
 //! # use tuirealm_derive::MockComponent;
-//! # use tui_realm_stdlib::Radio;
+//! # use tui_realm_stdlib::components::Radio;
 //! #
 //! #[derive(MockComponent)]
 //! #[component("radio")]
@@ -137,7 +137,7 @@
 //!
 //! ```rust
 //! # use tuirealm_derive::MockComponent;
-//! # use tui_realm_stdlib::Radio;
+//! # use tui_realm_stdlib::components::Radio;
 //! #
 //! #[derive(MockComponent)]
 //! pub struct MyComponent {
@@ -152,7 +152,7 @@
 //!
 //! ```rust
 //! # use tuirealm_derive::MockComponent;
-//! # use tui_realm_stdlib::Radio;
+//! # use tui_realm_stdlib::components::Radio;
 //! #
 //! # pub struct SomeOtherType;
 //! #
@@ -318,7 +318,10 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
             const _: () = {
                 use ::tuirealm::command::{Cmd, CmdResult};
                 use ::tuirealm::ratatui::layout::Rect;
-                use ::tuirealm::{Attribute, AttrValue, Frame, MockComponent, State};
+                use ::tuirealm::props::{AttrValue, Attribute};
+                use ::tuirealm::component::MockComponent;
+                use ::tuirealm::ratatui::Frame;
+                use ::tuirealm::state::State;
                 #[automatically_derived]
                 impl #generics MockComponent for #ident #generics {
                     fn view(&mut self, frame: &mut Frame, area: Rect) {

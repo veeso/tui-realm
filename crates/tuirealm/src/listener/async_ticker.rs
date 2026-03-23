@@ -1,5 +1,5 @@
 use super::PollAsync;
-use crate::Event;
+use crate::event::Event;
 use crate::listener::PortResult;
 
 /// [`PollAsync`] implementation to have a Async-Port for emitting [`Event::Tick`].
@@ -27,8 +27,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::AsyncTicker;
+    use crate::event::{Event, NoUserEvent};
     use crate::listener::PollAsync;
-    use crate::{Event, NoUserEvent};
 
     #[tokio::test]
     async fn should_emit_tick_on_every_poll() {

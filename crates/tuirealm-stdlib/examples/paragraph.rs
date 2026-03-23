@@ -3,17 +3,16 @@
 use std::error::Error;
 use std::time::Duration;
 
-use tui_realm_stdlib::Paragraph;
+use tui_realm_stdlib::components::Paragraph;
+use tuirealm::MockComponent;
+use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
+use tuirealm::component::Component;
+use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::style::Stylize;
 use tuirealm::ratatui::text::Line;
-use tuirealm::{
-    Component, Event, MockComponent, NoUserEvent,
-    application::PollStrategy,
-    event::{Key, KeyEvent},
-};
 
 mod utils;
 use utils::Model;

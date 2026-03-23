@@ -4,8 +4,8 @@ use std::time::Duration;
 
 // label
 #[cfg(feature = "search")]
-use tui_realm_stdlib::Input;
-use tui_realm_stdlib::Label;
+use tui_realm_stdlib::components::Input;
+use tui_realm_stdlib::components::Label;
 // textarea
 #[cfg(feature = "clipboard")]
 use tui_realm_textarea::TEXTAREA_CMD_PASTE;
@@ -17,19 +17,22 @@ use tui_realm_textarea::{
 use tui_realm_textarea::{
     TEXTAREA_CMD_SEARCH_BACK, TEXTAREA_CMD_SEARCH_FORWARD, TEXTAREA_SEARCH_PATTERN,
 };
-#[cfg(feature = "search")]
-use tuirealm::StateValue;
-use tuirealm::application::PollStrategy;
+use tuirealm::MockComponent;
+use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
+use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
     AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, Style, TextModifiers,
     Title,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::state::State;
+#[cfg(feature = "search")]
+use tuirealm::state::StateValue;
 use tuirealm::terminal::CrosstermTerminalAdapter;
-use tuirealm::{Application, Component, EventListenerCfg, MockComponent, NoUserEvent, State};
 
 // -- message
 #[derive(Debug, PartialEq)]
@@ -185,7 +188,11 @@ pub struct Editor {
 }
 
 impl MockComponent for Editor {
-    fn view(&mut self, frame: &mut tuirealm::Frame, area: tuirealm::ratatui::layout::Rect) {
+    fn view(
+        &mut self,
+        frame: &mut tuirealm::ratatui::Frame,
+        area: tuirealm::ratatui::layout::Rect,
+    ) {
         self.component.view(frame, area);
     }
 

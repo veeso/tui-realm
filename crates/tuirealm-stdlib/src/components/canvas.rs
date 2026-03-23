@@ -1,10 +1,12 @@
 //! A canvas where you can draw more complex figures.
 
 use tuirealm::command::{Cmd, CmdResult};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
     TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{
@@ -12,7 +14,7 @@ use tuirealm::ratatui::{
     text::Span,
     widgets::canvas::{Canvas as TuiCanvas, Context, Points},
 };
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 use crate::prop_ext::CommonProps;
 
@@ -266,10 +268,8 @@ mod test {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::{
-        props::HorizontalAlignment,
-        ratatui::widgets::canvas::{Line, Map, MapResolution, Rectangle},
-    };
+    use tuirealm::props::HorizontalAlignment;
+    use tuirealm::ratatui::widgets::canvas::{Line, Map, MapResolution, Rectangle};
 
     #[test]
     fn test_component_canvas_with_shapes() {

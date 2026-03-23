@@ -3,19 +3,18 @@
 use std::error::Error;
 use std::time::Duration;
 
-use tui_realm_stdlib::{Gauge, Label};
+use tui_realm_stdlib::components::{Gauge, Label};
+use tuirealm::MockComponent;
+use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{Poll, PortResult, SyncPort};
 use tuirealm::props::{
     AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, PropPayload, PropValue,
     Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
-use tuirealm::{
-    Component, Event, MockComponent,
-    application::PollStrategy,
-    event::{Key, KeyEvent},
-};
 
 mod utils;
 use utils::{Loader, Model};

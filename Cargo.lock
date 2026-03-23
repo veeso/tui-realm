@@ -1943,7 +1943,7 @@ dependencies = [
  "tokio",
  "tokio-util",
  "toml",
- "tuirealm_derive 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tuirealm_derive",
 ]
 
 [[package]]
@@ -1955,17 +1955,6 @@ dependencies = [
  "syn 2.0.117",
  "tui-realm-stdlib",
  "tuirealm",
-]
-
-[[package]]
-name = "tuirealm_derive"
-version = "2.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bad3c151090da5a036321776209b3d026df637d7f52c0984ff8d45927326ab4f"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.117",
 ]
 
 [[package]]

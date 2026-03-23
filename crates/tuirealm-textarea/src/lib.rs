@@ -146,12 +146,14 @@ extern crate lazy_regex;
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style, TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
 use tuirealm::ratatui::widgets::{Block, Paragraph};
-use tuirealm::{Frame, MockComponent, State, StateValue};
+use tuirealm::state::{State, StateValue};
 
 // -- props
 pub const TEXTAREA_CURSOR_LINE_STYLE: &str = "cursor-line-style";

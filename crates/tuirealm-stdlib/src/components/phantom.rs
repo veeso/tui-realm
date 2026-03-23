@@ -1,7 +1,9 @@
 use tuirealm::command::{Cmd, CmdResult};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{AttrValue, Attribute, Props};
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 /// [`Phantom`] is a component which is not rendered. It's only purpose is to become a global listener in a tui-realm application
 /// for some kind of events using subscriptions.

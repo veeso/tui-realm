@@ -3,15 +3,14 @@
 use std::error::Error;
 use std::time::Duration;
 
-use tui_realm_stdlib::Radio;
+use tui_realm_stdlib::components::Radio;
+use tuirealm::MockComponent;
+use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
-use tuirealm::{
-    Component, Event, MockComponent, NoUserEvent,
-    application::PollStrategy,
-    event::{Key, KeyEvent},
-};
 
 mod utils;
 use utils::Model;

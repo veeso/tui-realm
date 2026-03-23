@@ -416,7 +416,7 @@ mod test {
     async fn should_spawn_async_ticker() {
         use tokio::time::sleep;
 
-        use crate::Event;
+        use crate::event::Event;
 
         let builder = EventListenerCfg::<MockEvent>::default()
             .with_handle(Handle::current())

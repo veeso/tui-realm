@@ -1,16 +1,17 @@
 use std::time::Duration;
 
+use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::event::{Key, KeyEvent};
+use tuirealm::component::{Component, MockComponent};
+use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
+use tuirealm::listener::EventListenerCfg;
+use tuirealm::props::{AttrValue, Attribute};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::style::{Color, Style};
 use tuirealm::ratatui::widgets::{LineGauge, Paragraph};
-use tuirealm::ratatui::{TerminalOptions, Viewport};
+use tuirealm::ratatui::{Frame, TerminalOptions, Viewport};
+use tuirealm::state::State;
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter};
-use tuirealm::{
-    Application, AttrValue, Attribute, Component, Event, EventListenerCfg, Frame, MockComponent,
-    NoUserEvent, PollStrategy, State,
-};
 
 /// This Example Showcases tui-realm can be used Inline too
 ///

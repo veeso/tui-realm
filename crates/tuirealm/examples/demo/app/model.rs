@@ -5,13 +5,13 @@
 use std::error::Error;
 use std::time::{Duration, SystemTime};
 
+use tuirealm::application::Application;
 use tuirealm::event::NoUserEvent;
-use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
+use tuirealm::listener::EventListenerCfg;
+use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout};
+use tuirealm::subscription::{EventClause, Sub, SubClause};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
-use tuirealm::{
-    Application, AttrValue, Attribute, EventListenerCfg, Sub, SubClause, SubEventClause,
-};
 
 use super::components::{Clock, DigitCounter, Label, LetterCounter};
 use super::{Id, Msg};
@@ -130,7 +130,7 @@ where
                     .foreground(Color::Cyan)
                     .modifiers(TextModifiers::BOLD),
             ),
-            vec![Sub::new(SubEventClause::Tick, SubClause::Always)],
+            vec![Sub::new(EventClause::Tick, SubClause::Always)],
         )?;
         // Mount counters
         app.mount(

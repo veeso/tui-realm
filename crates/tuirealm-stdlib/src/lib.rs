@@ -21,9 +21,6 @@
     html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/crates/tuirealm-stdlib/docs/images/cargo/tui-realm-128.png"
 )]
 
-mod components;
+pub mod components;
 pub mod prop_ext;
 pub mod utils;
-
-pub use components::props;
-pub use components::*;

@@ -3,16 +3,18 @@
 use std::cmp::max;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
     Table as PropTable, TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::{
     layout::{Constraint, Rect},
     text::Line,
     widgets::{Cell, Row, Table as TuiTable, TableState},
 };
-use tuirealm::{Frame, MockComponent, State, StateValue};
+use tuirealm::state::{State, StateValue};
 
 use super::props::TABLE_COLUMN_SPACING;
 use crate::prop_ext::CommonProps;

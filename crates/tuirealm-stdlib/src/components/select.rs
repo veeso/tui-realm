@@ -2,16 +2,18 @@
 //! you want to display other options when opened (at least 3).
 
 use tuirealm::command::{Cmd, CmdResult, Direction};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
     TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::{
     layout::{Constraint, Direction as LayoutDirection, Layout, Rect},
     widgets::{List, ListItem, ListState, Paragraph},
 };
-use tuirealm::{Frame, MockComponent, State, StateValue};
+use tuirealm::state::{State, StateValue};
 
 use crate::prop_ext::CommonProps;
 use crate::utils::borrow_clone_line;

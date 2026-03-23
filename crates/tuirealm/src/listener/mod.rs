@@ -28,7 +28,7 @@ pub use self::port::SyncPort;
 #[cfg(feature = "async-ports")]
 use self::task_pool::TaskPool;
 use self::worker::EventListenerWorker;
-use super::Event;
+use crate::event::Event;
 
 /// Result returned by `EventListener`. [`Ok`] value depends on the method, while the
 /// Err value is always [`ListenerError`].

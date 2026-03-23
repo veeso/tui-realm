@@ -1,13 +1,15 @@
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, SpanStatic,
     Style, TextModifiers, Title,
 };
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::{
     layout::Rect,
     widgets::{List, ListItem, ListState},
 };
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 use crate::prop_ext::CommonProps;
 use crate::utils::borrow_clone_line;
@@ -283,7 +285,8 @@ mod tests {
     use super::*;
 
     use pretty_assertions::assert_eq;
-    use tuirealm::{props::HorizontalAlignment, ratatui::text::Span};
+    use tuirealm::props::HorizontalAlignment;
+    use tuirealm::ratatui::text::Span;
 
     #[test]
     fn test_components_textarea() {

@@ -4,7 +4,8 @@
 /// ### Example
 ///
 /// ```rust
-/// use tuirealm::{SubClause, subclause_and};
+/// use tuirealm::subscription::SubClause;
+/// use tuirealm::subclause_and;
 ///
 /// #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 /// pub enum Id {
@@ -50,7 +51,8 @@ macro_rules! subclause_and {
 /// ### Example
 ///
 /// ```rust
-/// use tuirealm::{SubClause, subclause_and_not};
+/// use tuirealm::subscription::SubClause;
+/// use tuirealm::subclause_and_not;
 ///
 /// #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 /// pub enum Id {
@@ -94,7 +96,8 @@ macro_rules! subclause_and_not {
 /// ### Example
 ///
 /// ```rust
-/// use tuirealm::{SubClause, subclause_or};
+/// use tuirealm::subscription::SubClause;
+/// use tuirealm::subclause_or;
 ///
 /// #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 /// pub enum Id {
@@ -132,8 +135,8 @@ macro_rules! subclause_or {
 
 #[cfg(test)]
 mod tests {
-    use crate::SubClause;
     use crate::mock::MockComponentId;
+    use crate::subscription::SubClause;
 
     #[test]
     fn subclause_and() {

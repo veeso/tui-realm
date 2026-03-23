@@ -6,12 +6,16 @@ use std::time::{Duration, Instant};
 use ratatui::Frame;
 use thiserror::Error;
 
-use super::{Subscription, View, WrappedComponent};
+use super::{Subscription, WrappedComponent};
+use crate::component::Component;
+use crate::event::Event;
+use crate::injector::Injector;
 use crate::listener::{EventListener, EventListenerCfg, ListenerError, PollError};
+use crate::props::{AttrValue, Attribute};
 use crate::ratatui::layout::Rect;
-use crate::{
-    AttrValue, Attribute, Component, Event, Injector, State, Sub, SubEventClause, ViewError,
-};
+use crate::state::State;
+use crate::subscription::{EventClause, Sub};
+use crate::view::{View, ViewError};
 
 /// Result retuned by [`Application`] functions.
 pub type ApplicationResult<T> = Result<T, ApplicationError>;
@@ -262,7 +266,7 @@ where
     pub fn unsubscribe(
         &mut self,
         id: &ComponentId,
-        ev: SubEventClause<UserEvent>,
+        ev: EventClause<UserEvent>,
     ) -> ApplicationResult<()> {
         if !self.view.mounted(id) {
             return Err(ViewError::ComponentNotFound.into());
@@ -293,7 +297,7 @@ where
     }
 
     /// Returns whether component `id` is subscribed to event described by `clause`
-    fn subscribed(&self, id: &ComponentId, clause: &SubEventClause<UserEvent>) -> bool {
+    fn subscribed(&self, id: &ComponentId, clause: &EventClause<UserEvent>) -> bool {
         self.subs
             .iter()
             .any(|s| s.target() == id && s.event() == clause)
@@ -494,7 +498,8 @@ mod test {
     use crate::mock::{
         MockBarInput, MockComponentId, MockEvent, MockFooInput, MockInjector, MockMsg, MockPoll,
     };
-    use crate::{StateValue, SubClause};
+    use crate::state::StateValue;
+    use crate::subscription::SubClause;
 
     /// Create a common Application with Tick that is configured to only happen once (high interval) and have the lister have a test barrier
     fn create_app_tick_once_barrier()
@@ -628,9 +633,9 @@ mod test {
                     MockComponentId::InputFoo,
                     Box::new(MockFooInput::default()),
                     vec![
-                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(EventClause::Tick, SubClause::Always),
                         Sub::new(
-                            SubEventClause::Tick,
+                            EventClause::Tick,
                             SubClause::HasAttrValue(
                                 MockComponentId::InputFoo,
                                 Attribute::InputLength,
@@ -638,7 +643,7 @@ mod test {
                             )
                         ), // NOTE: This event will be ignored
                         Sub::new(
-                            SubEventClause::User(MockEvent::Bar),
+                            EventClause::User(MockEvent::Bar),
                             SubClause::HasAttrValue(
                                 MockComponentId::InputFoo,
                                 Attribute::Focus,
@@ -656,7 +661,7 @@ mod test {
                 .subscribe(
                     &MockComponentId::InputFoo,
                     Sub::new(
-                        SubEventClause::User(MockEvent::Foo),
+                        EventClause::User(MockEvent::Foo),
                         SubClause::HasAttrValue(
                             MockComponentId::InputFoo,
                             Attribute::Focus,
@@ -673,7 +678,7 @@ mod test {
                 .subscribe(
                     &MockComponentId::InputFoo,
                     Sub::new(
-                        SubEventClause::User(MockEvent::Foo),
+                        EventClause::User(MockEvent::Foo),
                         SubClause::HasAttrValue(
                             MockComponentId::InputFoo,
                             Attribute::Focus,
@@ -689,7 +694,7 @@ mod test {
                 .subscribe(
                     &MockComponentId::InputBar,
                     Sub::new(
-                        SubEventClause::User(MockEvent::Foo),
+                        EventClause::User(MockEvent::Foo),
                         SubClause::HasAttrValue(
                             MockComponentId::InputBar,
                             Attribute::Focus,
@@ -704,7 +709,7 @@ mod test {
             application
                 .unsubscribe(
                     &MockComponentId::InputFoo,
-                    SubEventClause::User(MockEvent::Foo)
+                    EventClause::User(MockEvent::Foo)
                 )
                 .is_ok()
         );
@@ -713,7 +718,7 @@ mod test {
             application
                 .unsubscribe(
                     &MockComponentId::InputFoo,
-                    SubEventClause::User(MockEvent::Foo)
+                    EventClause::User(MockEvent::Foo)
                 )
                 .is_err()
         );
@@ -729,9 +734,9 @@ mod test {
                     MockComponentId::InputFoo,
                     Box::new(MockFooInput::default()),
                     vec![
-                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(EventClause::Tick, SubClause::Always),
                         Sub::new(
-                            SubEventClause::User(MockEvent::Bar),
+                            EventClause::User(MockEvent::Bar),
                             SubClause::HasAttrValue(
                                 MockComponentId::InputFoo,
                                 Attribute::Focus,
@@ -747,7 +752,7 @@ mod test {
                 .mount(
                     MockComponentId::InputBar,
                     Box::new(MockFooInput::default()),
-                    vec![Sub::new(SubEventClause::Any, SubClause::Always)]
+                    vec![Sub::new(EventClause::Any, SubClause::Always)]
                 )
                 .is_ok()
         );
@@ -779,10 +784,10 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![
-                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(EventClause::Tick, SubClause::Always),
                         Sub::new(
                             // NOTE: won't be thrown, since requires focus
-                            SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
+                            EventClause::Keyboard(KeyEvent::from(Key::Enter)),
                             SubClause::HasAttrValue(
                                 MockComponentId::InputBar,
                                 Attribute::Focus,
@@ -869,10 +874,10 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![
-                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(EventClause::Tick, SubClause::Always),
                         Sub::new(
                             // NOTE: won't be thrown, since requires focus
-                            SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
+                            EventClause::Keyboard(KeyEvent::from(Key::Enter)),
                             SubClause::HasAttrValue(
                                 MockComponentId::InputBar,
                                 Attribute::Focus,
@@ -923,10 +928,10 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![
-                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(EventClause::Tick, SubClause::Always),
                         Sub::new(
                             // NOTE: won't be thrown, since requires focus
-                            SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
+                            EventClause::Keyboard(KeyEvent::from(Key::Enter)),
                             SubClause::HasAttrValue(
                                 MockComponentId::InputBar,
                                 Attribute::Focus,
@@ -977,10 +982,10 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![
-                        Sub::new(SubEventClause::Tick, SubClause::Always),
+                        Sub::new(EventClause::Tick, SubClause::Always),
                         Sub::new(
                             // NOTE: won't be thrown, since requires focus
-                            SubEventClause::Keyboard(KeyEvent::from(Key::Enter)),
+                            EventClause::Keyboard(KeyEvent::from(Key::Enter)),
                             SubClause::HasAttrValue(
                                 MockComponentId::InputBar,
                                 Attribute::Focus,
@@ -1033,7 +1038,7 @@ mod test {
                     Box::new(MockBarInput::default()),
                     vec![Sub::new(
                         // NOTE: won't be thrown, since requires focus
-                        SubEventClause::Tick,
+                        EventClause::Tick,
                         SubClause::HasAttrValue(
                             MockComponentId::InputBar,
                             Attribute::Focus,
@@ -1078,7 +1083,7 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![Sub::new(
-                        SubEventClause::Tick,
+                        EventClause::Tick,
                         SubClause::HasAttrValue(
                             MockComponentId::InputFoo,
                             Attribute::Focus,
@@ -1123,7 +1128,7 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![Sub::new(
-                        SubEventClause::Tick,
+                        EventClause::Tick,
                         SubClause::HasState(MockComponentId::InputFoo, State::None)
                     )]
                 )
@@ -1164,7 +1169,7 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![Sub::new(
-                        SubEventClause::Tick,
+                        EventClause::Tick,
                         SubClause::HasState(
                             MockComponentId::InputFoo,
                             State::Single(StateValue::String(String::new()))
@@ -1209,7 +1214,7 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![Sub::new(
-                        SubEventClause::Tick,
+                        EventClause::Tick,
                         SubClause::IsMounted(MockComponentId::InputOmar)
                     )]
                 )
@@ -1250,7 +1255,7 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![Sub::new(
-                        SubEventClause::Tick,
+                        EventClause::Tick,
                         SubClause::IsMounted(MockComponentId::InputFoo)
                     )]
                 )
@@ -1293,7 +1298,7 @@ mod test {
                     MockComponentId::InputBar,
                     Box::new(MockBarInput::default()),
                     vec![Sub::new(
-                        SubEventClause::Tick,
+                        EventClause::Tick,
                         SubClause::IsMounted(MockComponentId::InputFoo)
                     )]
                 )

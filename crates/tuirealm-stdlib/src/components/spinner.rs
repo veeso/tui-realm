@@ -1,9 +1,11 @@
 //! A loading spinner. You can provide the "spinning sequence". At each `view()` call, the sequence step is increased
 
 use tuirealm::command::{Cmd, CmdResult};
+use tuirealm::component::MockComponent;
 use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, Props, Style};
+use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
-use tuirealm::{Frame, MockComponent, State};
+use tuirealm::state::State;
 
 use crate::prop_ext::CommonProps;
 

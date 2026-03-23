@@ -4,8 +4,9 @@ use std::hash::Hash;
 use std::ops::Range;
 use std::sync::Arc;
 
-use crate::event::{KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
-use crate::{AttrValue, Attribute, Event, State};
+use crate::event::{Event, KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
+use crate::props::{AttrValue, Attribute};
+use crate::state::State;
 
 /// Public type to define a subscription.
 pub struct Sub<ComponentId, UserEvent>(EventClause<UserEvent>, Arc<SubClause<ComponentId>>)
@@ -387,9 +388,10 @@ mod test {
 
     use super::*;
     use crate::command::Cmd;
-    use crate::event::{Key, KeyModifiers, MouseEventKind};
+    use crate::component::MockComponent;
+    use crate::event::{Key, KeyModifiers, MouseEventKind, NoUserEvent};
     use crate::mock::{MockComponentId, MockEvent, MockFooInput};
-    use crate::{MockComponent, NoUserEvent, StateValue};
+    use crate::state::StateValue;
 
     #[test]
     fn subscription_should_forward() {

@@ -1,10 +1,7 @@
 //! Extra extensions to handle Properties.
 
-use tuirealm::{
-    AttrValue, Attribute,
-    props::{Borders, Style, Title},
-    ratatui::widgets::Block,
-};
+use tuirealm::props::{AttrValue, Attribute, Borders, Style, Title};
+use tuirealm::ratatui::widgets::Block;
 
 /// Prop Store for very common props.
 ///
@@ -117,14 +114,11 @@ impl CommonProps {
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
-    use tuirealm::{
-        AttrValue, Attribute,
-        props::{
-            BorderSides, BorderType, Borders, Color, HorizontalAlignment, LineStatic, Style,
-            TextModifiers, Title,
-        },
-        ratatui::widgets::{Block, TitlePosition},
+    use tuirealm::props::{
+        AttrValue, Attribute, BorderSides, BorderType, Borders, Color, HorizontalAlignment,
+        LineStatic, Style, TextModifiers, Title,
     };
+    use tuirealm::ratatui::widgets::{Block, TitlePosition};
 
     use crate::prop_ext::CommonProps;
 
