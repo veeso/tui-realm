@@ -62,6 +62,7 @@
 
 #[macro_use]
 extern crate lazy_regex;
+// alias so that the derive can also be used in this crate directly without error
 extern crate self as tuirealm;
 #[cfg(feature = "derive")]
 #[cfg_attr(test, macro_use)]
@@ -71,7 +72,7 @@ mod core;
 pub mod listener;
 mod macros;
 #[cfg(test)]
-pub mod mock;
+mod mock;
 pub mod ratatui;
 pub mod terminal;
 pub mod utils;
