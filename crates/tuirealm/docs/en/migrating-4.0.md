@@ -109,3 +109,60 @@ This makes it consistent with other functions like `view` which did not have a t
 This allows for customization of how the `update` function is called, for example if you dont ever returns a message for recursive processing, it can now be omitted.
 
 Migration is as simple as changing `impl Update for Model` to `impl Model` and potentially changing the visibility to `pub fn`.
+
+### Export cleanup: module-qualified imports required
+
+Root-level re-exports have been removed from `tuirealm` and `tui-realm-stdlib`. You must now import types through their module paths:
+
+```rust
+// Before (3.x)
+use tuirealm::{Application, Component, MockComponent, Event, State, Frame};
+
+// After (4.0)
+use tuirealm::application::Application;
+use tuirealm::component::{AppComponent, Component};
+use tuirealm::event::Event;
+use tuirealm::state::State;
+use tuirealm::ratatui::Frame;
+```
+
+For `tui-realm-stdlib`, component types are now under `components`:
+
+```rust
+// Before
+use tui_realm_stdlib::Input;
+
+// After
+use tui_realm_stdlib::components::Input;
+```
+
+### `MockComponent` renamed to `Component`
+
+The `MockComponent` trait (rendering, state, props) has been renamed to `Component`.
+The `Component` trait (event handling) has been renamed to `AppComponent`.
+The derive macro `#[derive(MockComponent)]` is now `#[derive(Component)]`.
+
+```rust
+// Before (3.x)
+use tuirealm::{MockComponent, Component};
+
+#[derive(MockComponent)]
+struct MyWidget { component: Input }
+
+impl Component<Msg, UserEvent> for MyWidget {
+    fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> { ... }
+}
+
+// After (4.0)
+use tuirealm::Component;  // derive macro
+use tuirealm::component::{AppComponent, Component};  // traits
+
+#[derive(Component)]
+struct MyWidget { component: Input }
+
+impl AppComponent<Msg, UserEvent> for MyWidget {
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> { ... }
+}
+```
+
+Note: the derive macro and trait share the name `Component` but live in different namespaces. Import both `use tuirealm::Component;` (macro) and `use tuirealm::component::Component;` (trait) — Rust distinguishes them.
