@@ -566,7 +566,7 @@ impl Component for TextArea<'_> {
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
-        let prev_lines: Vec<String> = self.widget.lines().iter().map(|l| l.to_string()).collect();
+        let prev_lines = self.widget.lines().to_vec();
         match cmd {
             Cmd::Cancel => {
                 self.widget.delete_next_char();
@@ -680,12 +680,138 @@ impl Component for TextArea<'_> {
             Cmd::Submit => return CmdResult::Submit(self.state()),
             _ => return CmdResult::None,
         }
-        let current_lines: Vec<String> =
-            self.widget.lines().iter().map(|l| l.to_string()).collect();
-        if prev_lines != current_lines {
+        if prev_lines != self.widget.lines() {
             CmdResult::Changed(self.state())
         } else {
             CmdResult::None
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+
+    use super::*;
+
+    /// Creates a default empty textarea for testing.
+    fn make_textarea() -> TextArea<'static> {
+        TextArea::default()
+    }
+
+    #[test]
+    fn perform_type_char_returns_changed() {
+        let mut textarea = make_textarea();
+        let result = textarea.perform(Cmd::Type('a'));
+        assert!(
+            matches!(result, CmdResult::Changed(_)),
+            "typing a character into an empty textarea should return Changed"
+        );
+    }
+
+    #[test]
+    fn perform_type_multiple_chars_returns_changed() {
+        let mut textarea = make_textarea();
+        textarea.perform(Cmd::Type('h'));
+        let result = textarea.perform(Cmd::Type('i'));
+        assert!(
+            matches!(result, CmdResult::Changed(_)),
+            "typing a second character should return Changed"
+        );
+    }
+
+    #[test]
+    fn perform_delete_on_empty_returns_none() {
+        let mut textarea = make_textarea();
+        let result = textarea.perform(Cmd::Delete);
+        assert!(
+            matches!(result, CmdResult::None),
+            "deleting from an empty textarea should return None"
+        );
+    }
+
+    #[test]
+    fn perform_delete_char_returns_changed() {
+        let mut textarea = make_textarea();
+        textarea.perform(Cmd::Type('x'));
+        let result = textarea.perform(Cmd::Delete);
+        assert!(
+            matches!(result, CmdResult::Changed(_)),
+            "deleting an existing character should return Changed"
+        );
+    }
+
+    #[test]
+    fn perform_cancel_on_empty_returns_none() {
+        let mut textarea = make_textarea();
+        let result = textarea.perform(Cmd::Cancel);
+        assert!(
+            matches!(result, CmdResult::None),
+            "cancel (delete-next) on empty textarea should return None"
+        );
+    }
+
+    #[test]
+    fn perform_submit_returns_submit() {
+        let mut textarea = make_textarea();
+        textarea.perform(Cmd::Type('a'));
+        let result = textarea.perform(Cmd::Submit);
+        assert!(
+            matches!(result, CmdResult::Submit(_)),
+            "submit should return Submit with current state"
+        );
+    }
+
+    #[test]
+    fn perform_move_returns_none() {
+        let mut textarea = make_textarea();
+        textarea.perform(Cmd::Type('a'));
+        let result = textarea.perform(Cmd::Move(Direction::Left));
+        assert!(
+            matches!(result, CmdResult::None),
+            "cursor movement should return None (no content change)"
+        );
+    }
+
+    #[test]
+    fn perform_goto_returns_none() {
+        let mut textarea = make_textarea();
+        textarea.perform(Cmd::Type('a'));
+        textarea.perform(Cmd::Type('b'));
+        let result = textarea.perform(Cmd::GoTo(Position::Begin));
+        assert!(
+            matches!(result, CmdResult::None),
+            "goto should return None (no content change)"
+        );
+    }
+
+    #[test]
+    fn perform_newline_returns_changed() {
+        let mut textarea = make_textarea();
+        let result = textarea.perform(Cmd::Type('\n'));
+        assert!(
+            matches!(result, CmdResult::Changed(_)),
+            "inserting a newline should return Changed"
+        );
+    }
+
+    #[test]
+    fn perform_tab_returns_changed() {
+        let mut textarea = make_textarea();
+        let result = textarea.perform(Cmd::Type('\t'));
+        assert!(
+            matches!(result, CmdResult::Changed(_)),
+            "inserting a tab should return Changed"
+        );
+    }
+
+    #[test]
+    fn perform_unknown_cmd_returns_none() {
+        let mut textarea = make_textarea();
+        let result = textarea.perform(Cmd::Toggle);
+        assert!(
+            matches!(result, CmdResult::None),
+            "unhandled command should return None"
+        );
     }
 }
