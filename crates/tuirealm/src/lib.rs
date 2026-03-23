@@ -64,8 +64,7 @@
 extern crate lazy_regex;
 extern crate self as tuirealm;
 #[cfg(feature = "derive")]
-#[allow(unused_imports)]
-#[macro_use]
+#[cfg_attr(test, macro_use)]
 extern crate tuirealm_derive;
 
 mod core;
@@ -76,14 +75,11 @@ pub mod mock;
 pub mod ratatui;
 pub mod terminal;
 pub mod utils;
+
 // export async trait for async-ports
 #[cfg(feature = "async-ports")]
 #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
 pub use async_trait::async_trait;
-// -- derive
-#[cfg(feature = "derive")]
-#[doc(hidden)]
-pub use tuirealm_derive::*;
 
 pub use self::core::{
     application, command, component, event, injector, props, state, subscription, view,

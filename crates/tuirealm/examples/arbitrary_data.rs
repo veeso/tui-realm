@@ -7,7 +7,6 @@
 
 use std::time::Duration;
 
-use tuirealm::Component;
 use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::{AppComponent, Component};

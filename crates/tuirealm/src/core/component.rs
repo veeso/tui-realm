@@ -3,6 +3,9 @@
 use std::any::Any;
 
 use ratatui::Frame;
+// Despite how it seems, rust allows duplicate names if one is a proc_macro and the other anything else.
+#[cfg(feature = "derive")]
+pub use tuirealm_derive::Component;
 
 use crate::command::{Cmd, CmdResult};
 use crate::event::Event;

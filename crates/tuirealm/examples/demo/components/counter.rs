@@ -2,7 +2,6 @@
 //!
 //! label component
 
-use tuirealm::Component;
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};

@@ -138,9 +138,9 @@ use tui_realm_stdlib::components::Input;
 
 ### `MockComponent` renamed to `Component`
 
-The `MockComponent` trait (rendering, state, props) has been renamed to `Component`.
 The `Component` trait (event handling) has been renamed to `AppComponent`.
-The derive macro `#[derive(MockComponent)]` is now `#[derive(Component)]`.
+The `MockComponent` trait (rendering, state, props) has been renamed to `Component`.
+The derive macro `#[derive(MockComponent)]` is now `#[derive(Component)]` to match the new `Component` name.
 
 ```rust
 // Before (3.x)
@@ -154,7 +154,6 @@ impl Component<Msg, UserEvent> for MyWidget {
 }
 
 // After (4.0)
-use tuirealm::Component;  // derive macro
 use tuirealm::component::{AppComponent, Component};  // traits
 
 #[derive(Component)]
@@ -164,5 +163,3 @@ impl AppComponent<Msg, UserEvent> for MyWidget {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> { ... }
 }
 ```
-
-Note: the derive macro and trait share the name `Component` but live in different namespaces. Import both `use tuirealm::Component;` (macro) and `use tuirealm::component::Component;` (trait) — Rust distinguishes them.

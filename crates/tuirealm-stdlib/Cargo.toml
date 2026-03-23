@@ -22,7 +22,7 @@ unicode-width = "^0.2"
 [dev-dependencies]
 pretty_assertions = "1"
 rand = "0.10"
-tuirealm = { workspace = true, features = ["crossterm"] }
+tuirealm = { workspace = true, features = ["crossterm", "derive"] }
 
 [features]
 

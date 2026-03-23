@@ -78,7 +78,6 @@
 //! ## Setup a tree component
 //!
 //! ```rust
-//! # use tuirealm::Component;
 //! # use tuirealm::{
 //! #     command::{Cmd, CmdResult, Direction, Position},
 //! #     component::{AppComponent, Component},
