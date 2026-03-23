@@ -1,8 +1,5 @@
 use std::time::Duration;
 
-// textarea
-#[cfg(feature = "clipboard")]
-use tui_realm_textarea::TEXTAREA_CMD_PASTE;
 use tui_realm_textarea::{
     TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
     TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO, TextArea,
@@ -278,14 +275,6 @@ impl AppComponent<Msg, NoUserEvent> for Input {
                 self.perform(Cmd::GoTo(Position::Begin));
                 Some(Msg::None)
             }
-            #[cfg(feature = "clipboard")]
-            Event::Keyboard(KeyEvent {
-                code: Key::Char('v'),
-                modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::Custom(TEXTAREA_CMD_PASTE));
-                Some(Msg::None)
-            }
             Event::Keyboard(KeyEvent {
                 code: Key::Char('z'),
                 modifiers: KeyModifiers::CONTROL,
@@ -309,6 +298,10 @@ impl AppComponent<Msg, NoUserEvent> for Input {
                 ..
             }) => {
                 self.perform(Cmd::Type(*ch));
+                Some(Msg::None)
+            }
+            Event::Paste(text) => {
+                self.component.paste(text);
                 Some(Msg::None)
             }
             _ => None,

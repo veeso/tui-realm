@@ -6,9 +6,6 @@ use std::time::Duration;
 #[cfg(feature = "search")]
 use tui_realm_stdlib::components::Input;
 use tui_realm_stdlib::components::Label;
-// textarea
-#[cfg(feature = "clipboard")]
-use tui_realm_textarea::TEXTAREA_CMD_PASTE;
 use tui_realm_textarea::{
     TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
     TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO, TextArea,
@@ -372,14 +369,6 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_FORWARD));
                 Some(Msg::None)
             }
-            #[cfg(feature = "clipboard")]
-            Event::Keyboard(KeyEvent {
-                code: Key::Char('v'),
-                modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::Custom(TEXTAREA_CMD_PASTE));
-                Some(Msg::None)
-            }
             Event::Keyboard(KeyEvent {
                 code: Key::Char('z'),
                 modifiers: KeyModifiers::CONTROL,
@@ -414,6 +403,10 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 code: Key::Function(3),
                 ..
             }) => Some(Msg::ChangeFocus(Id::Search)),
+            Event::Paste(text) => {
+                self.component.paste(text);
+                Some(Msg::None)
+            }
             _ => None,
         }
     }
