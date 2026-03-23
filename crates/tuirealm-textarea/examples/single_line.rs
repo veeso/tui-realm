@@ -16,7 +16,7 @@ use tuirealm::props::{
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::state::State;
-use tuirealm::terminal::CrosstermTerminalAdapter;
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 
 // -- message
 #[derive(Debug, PartialEq)]
@@ -40,6 +40,15 @@ struct Model {
 }
 
 impl Model {
+    /// Initialize the Terminal modes.
+    fn init_adapter() -> TerminalResult<CrosstermTerminalAdapter> {
+        let mut adapter = CrosstermTerminalAdapter::new()?;
+        adapter.enable_raw_mode()?;
+        adapter.enter_alternate_screen()?;
+
+        Ok(adapter)
+    }
+
     fn new() -> Self {
         // Setup app
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
@@ -54,7 +63,7 @@ impl Model {
             app,
             quit: false,
             redraw: true,
-            terminal: CrosstermTerminalAdapter::new().expect("Could not initialize terminal"),
+            terminal: Self::init_adapter().expect("Could not initialize terminal"),
         }
     }
 
