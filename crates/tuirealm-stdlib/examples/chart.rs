@@ -16,6 +16,7 @@ use tuirealm::props::{
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::symbols::Marker;
 use tuirealm::ratatui::widgets::GraphType;
+use tuirealm::terminal::TerminalAdapter;
 
 mod utils;
 use utils::{DataGen, Model};
@@ -43,7 +44,6 @@ impl Model<Id, Msg, UserEvent> {
     /// Draw all components.
     fn view(&mut self) {
         self.terminal
-            .raw_mut()
             .draw(|f| {
                 // Prepare chunks
                 let chunks = Layout::default()

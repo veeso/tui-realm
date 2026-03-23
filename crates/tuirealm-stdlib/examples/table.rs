@@ -11,6 +11,7 @@ use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, TableBuilder, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::text::Line;
+use tuirealm::terminal::TerminalAdapter;
 
 mod utils;
 use utils::Model;
@@ -34,7 +35,6 @@ impl Model<Id, Msg> {
     /// Draw all components.
     fn view(&mut self) {
         self.terminal
-            .raw_mut()
             .draw(|f| {
                 // Prepare chunks
                 let chunks = Layout::default()

@@ -36,33 +36,10 @@ impl TermwizTerminalAdapter {
 
         Ok(Self { terminal })
     }
-
-    /// Access the underlying [`ratatui::backend::TermwizBackend`] immutably.
-    pub fn raw(&self) -> &Terminal<TermwizBackend> {
-        &self.terminal
-    }
-
-    /// Access the underlying [`ratatui::backend::TermwizBackend`] mutably.
-    pub fn raw_mut(&mut self) -> &mut Terminal<TermwizBackend> {
-        &mut self.terminal
-    }
 }
 
 impl TerminalAdapter for TermwizTerminalAdapter {
-    fn draw<F>(&mut self, render_callback: F) -> TerminalResult<ratatui::CompletedFrame<'_>>
-    where
-        F: FnOnce(&mut ratatui::Frame<'_>),
-    {
-        self.raw_mut()
-            .draw(render_callback)
-            .map_err(|_| TerminalError::CannotDrawFrame)
-    }
-
-    fn clear_screen(&mut self) -> TerminalResult<()> {
-        self.terminal
-            .clear()
-            .map_err(|_| TerminalError::CannotClear)
-    }
+    type Backend = TermwizBackend;
 
     fn enable_raw_mode(&mut self) -> TerminalResult<()> {
         self.terminal
@@ -84,7 +61,7 @@ impl TerminalAdapter for TermwizTerminalAdapter {
             .buffered_terminal_mut()
             .terminal()
             .enter_alternate_screen()
-            .map_err(|_| TerminalError::CannotLeaveAlternateMode)
+            .map_err(|_| TerminalError::CannotEnterAlternateMode)
     }
 
     fn leave_alternate_screen(&mut self) -> TerminalResult<()> {
@@ -104,5 +81,13 @@ impl TerminalAdapter for TermwizTerminalAdapter {
     /// UNSUPPORTED in termwiz
     fn disable_mouse_capture(&mut self) -> TerminalResult<()> {
         Err(TerminalError::Unsupported)
+    }
+
+    fn raw_mut(&mut self) -> &mut Terminal<TermwizBackend> {
+        &mut self.terminal
+    }
+
+    fn raw(&self) -> &Terminal<TermwizBackend> {
+        &self.terminal
     }
 }

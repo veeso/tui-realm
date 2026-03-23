@@ -8,13 +8,13 @@ use thiserror::Error;
 #[cfg(feature = "crossterm")]
 #[cfg_attr(docsrs, doc(cfg(feature = "crossterm")))]
 pub use self::adapter::CrosstermTerminalAdapter;
-pub use self::adapter::TerminalAdapter;
 #[cfg(feature = "termion")]
 #[cfg_attr(docsrs, doc(cfg(feature = "termion")))]
 pub use self::adapter::TermionTerminalAdapter;
 #[cfg(feature = "termwiz")]
 #[cfg_attr(docsrs, doc(cfg(feature = "termwiz")))]
 pub use self::adapter::TermwizTerminalAdapter;
+pub use self::adapter::{TerminalAdapter, TestTerminalAdapter};
 #[cfg(all(feature = "crossterm", feature = "async-ports"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "crossterm", feature = "async-ports"))))]
 pub use self::event_listener::CrosstermAsyncStream;

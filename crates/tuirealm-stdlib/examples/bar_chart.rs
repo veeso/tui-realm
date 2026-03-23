@@ -8,6 +8,7 @@ use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Style, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::terminal::TerminalAdapter;
 
 mod utils;
 use utils::Model;
@@ -31,7 +32,6 @@ impl Model<Id, Msg> {
     /// Draw all components.
     fn view(&mut self) {
         self.terminal
-            .raw_mut()
             .draw(|f| {
                 // Prepare chunks
                 let chunks = Layout::default()

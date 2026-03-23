@@ -62,16 +62,6 @@ impl CrosstermTerminalAdapter {
         Ok(Self { terminal, modes })
     }
 
-    /// Access the underlying [`ratatui::backend::CrosstermBackend`] immutably.
-    pub fn raw(&self) -> &Terminal<CrosstermBackend<std::io::Stdout>> {
-        &self.terminal
-    }
-
-    /// Access the underlying [`ratatui::backend::CrosstermBackend`] mutably.
-    pub fn raw_mut(&mut self) -> &mut Terminal<CrosstermBackend<std::io::Stdout>> {
-        &mut self.terminal
-    }
-
     /// Restore the terminal state to pre [`TerminalAdapter`] state.
     ///
     /// This is automatically called on `Drop`.
@@ -144,14 +134,7 @@ impl CrosstermTerminalAdapter {
 }
 
 impl TerminalAdapter for CrosstermTerminalAdapter {
-    fn draw<F>(&mut self, render_callback: F) -> TerminalResult<ratatui::CompletedFrame<'_>>
-    where
-        F: FnOnce(&mut ratatui::Frame<'_>),
-    {
-        self.raw_mut()
-            .draw(render_callback)
-            .map_err(|_| TerminalError::CannotDrawFrame)
-    }
+    type Backend = CrosstermBackend<std::io::Stdout>;
 
     fn clear_screen(&mut self) -> TerminalResult<()> {
         self.terminal
@@ -209,6 +192,14 @@ impl TerminalAdapter for CrosstermTerminalAdapter {
             .inspect(|_| {
                 self.unset_mode(Modes::MOUSE);
             })
+    }
+
+    fn raw_mut(&mut self) -> &mut Terminal<CrosstermBackend<std::io::Stdout>> {
+        &mut self.terminal
+    }
+
+    fn raw(&self) -> &Terminal<CrosstermBackend<std::io::Stdout>> {
+        &self.terminal
     }
 }
 

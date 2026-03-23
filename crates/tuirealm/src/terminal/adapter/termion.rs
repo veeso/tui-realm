@@ -161,33 +161,10 @@ impl TermionTerminalAdapter {
 
         Ok(Self { terminal })
     }
-
-    /// Access the underlying [`ratatui::backend::TermionBackend`] immutably.
-    pub fn raw(&self) -> &TermionBackend {
-        &self.terminal
-    }
-
-    /// Access the underlying [`ratatui::backend::TermionBackend`] mutably.
-    pub fn raw_mut(&mut self) -> &mut TermionBackend {
-        &mut self.terminal
-    }
 }
 
 impl TerminalAdapter for TermionTerminalAdapter {
-    fn draw<F>(&mut self, render_callback: F) -> TerminalResult<ratatui::CompletedFrame<'_>>
-    where
-        F: FnOnce(&mut ratatui::Frame<'_>),
-    {
-        self.raw_mut()
-            .draw(render_callback)
-            .map_err(|_| TerminalError::CannotDrawFrame)
-    }
-
-    fn clear_screen(&mut self) -> TerminalResult<()> {
-        self.terminal
-            .clear()
-            .map_err(|_| TerminalError::CannotClear)
-    }
+    type Backend = backend::TermionBackend<TermionWrapper>;
 
     /// UNSUPPORTED in termion
     ///
@@ -223,5 +200,13 @@ impl TerminalAdapter for TermionTerminalAdapter {
     /// UNSUPPORTED in termion
     fn disable_mouse_capture(&mut self) -> TerminalResult<()> {
         Err(TerminalError::Unsupported)
+    }
+
+    fn raw(&self) -> &TermionBackend {
+        &self.terminal
+    }
+
+    fn raw_mut(&mut self) -> &mut TermionBackend {
+        &mut self.terminal
     }
 }
