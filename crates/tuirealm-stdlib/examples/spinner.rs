@@ -13,6 +13,7 @@ use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout
 use tuirealm::ratatui::style::Stylize;
 use tuirealm::ratatui::text::Span as RSpan;
 use tuirealm::subscription::{EventClause, Sub, SubClause};
+use tuirealm::terminal::TerminalAdapter;
 
 mod utils;
 use utils::Model;
@@ -36,7 +37,6 @@ impl Model<Id, Msg> {
     /// Draw all components.
     fn view(&mut self) {
         self.terminal
-            .raw_mut()
             .draw(|f| {
                 // Prepare chunks
                 let chunks = Layout::default()

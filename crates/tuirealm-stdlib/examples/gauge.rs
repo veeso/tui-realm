@@ -14,6 +14,7 @@ use tuirealm::props::{
     Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::terminal::TerminalAdapter;
 
 mod utils;
 use utils::{Loader, Model};
@@ -45,7 +46,6 @@ impl Model<Id, Msg, UserEvent> {
     /// Draw all components.
     fn view(&mut self) {
         self.terminal
-            .raw_mut()
             .draw(|f| {
                 // Prepare chunks
                 let chunks = Layout::default()
