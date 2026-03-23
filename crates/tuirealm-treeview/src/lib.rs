@@ -78,10 +78,10 @@
 //! ## Setup a tree component
 //!
 //! ```rust
-//! # use tuirealm::MockComponent;
+//! # use tuirealm::Component;
 //! # use tuirealm::{
 //! #     command::{Cmd, CmdResult, Direction, Position},
-//! #     component::{Component, MockComponent},
+//! #     component::{AppComponent, Component},
 //! #     event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent},
 //! #     props::{Title, HorizontalAlignment, BorderType, Borders, Color, Style},
 //! #     state::{State, StateValue},
@@ -95,7 +95,7 @@
 //!     None,
 //! }
 //!
-//! #[derive(MockComponent)]
+//! #[derive(Component)]
 //! pub struct FsTree {
 //!     component: TreeView<String>,
 //! }
@@ -127,7 +127,7 @@
 //!     }
 //! }
 //!
-//! impl Component<Msg, NoUserEvent> for FsTree {
+//! impl AppComponent<Msg, NoUserEvent> for FsTree {
 //!     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
 //!         let result = match ev {
 //!             Event::Keyboard(KeyEvent {
@@ -211,7 +211,7 @@ use std::iter;
 pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
 use tui_realm_stdlib::utils::get_block;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, Props, SpanStatic, Style, TextModifiers, Title,
 };
@@ -408,7 +408,7 @@ impl<V: NodeValue> TreeView<V> {
 
 // -- mock
 
-impl<V: NodeValue> MockComponent for TreeView<V> {
+impl<V: NodeValue> Component for TreeView<V> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             let foreground = self

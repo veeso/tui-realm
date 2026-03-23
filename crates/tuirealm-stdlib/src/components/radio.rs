@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
@@ -184,7 +184,7 @@ impl Radio {
     }
 }
 
-impl MockComponent for Radio {
+impl Component for Radio {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

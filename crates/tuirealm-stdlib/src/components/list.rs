@@ -1,7 +1,7 @@
 //! `List` represents a read-only textual list component which can be scrollable through arrows or inactive.
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
     TextModifiers, Title,
@@ -223,7 +223,7 @@ impl List {
     }
 }
 
-impl MockComponent for List {
+impl Component for List {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

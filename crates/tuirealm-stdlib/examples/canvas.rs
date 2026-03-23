@@ -4,9 +4,9 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Canvas;
-use tuirealm::MockComponent;
+use tuirealm::Component;
 use tuirealm::application::PollStrategy;
-use tuirealm::component::Component;
+use tuirealm::component::AppComponent;
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{Borders, Color, HorizontalAlignment, Shape, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -97,7 +97,7 @@ fn main() {
 
 // -- components
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct MyCanvas {
     component: Canvas,
 }
@@ -153,7 +153,7 @@ impl Default for MyCanvas {
     }
 }
 
-impl Component<Msg, NoUserEvent> for MyCanvas {
+impl AppComponent<Msg, NoUserEvent> for MyCanvas {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         if let Event::Keyboard(KeyEvent { code: Key::Esc, .. }) = ev {
             Some(Msg::AppClose)

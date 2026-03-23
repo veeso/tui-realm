@@ -1,7 +1,7 @@
 //! A loading spinner. You can provide the "spinning sequence". At each `view()` call, the sequence step is increased
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, Props, Style};
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
@@ -104,7 +104,7 @@ impl Spinner {
     }
 }
 
-impl MockComponent for Spinner {
+impl Component for Spinner {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

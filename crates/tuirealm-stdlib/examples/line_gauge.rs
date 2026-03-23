@@ -4,10 +4,10 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::LineGauge;
-use tuirealm::MockComponent;
+use tuirealm::Component;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{Poll, PortResult, SyncPort};
 use tuirealm::props::{
@@ -141,7 +141,7 @@ impl Poll<UserEvent> for Loader {
 
 // -- components
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct GaugeAlfa {
     component: LineGauge,
 }
@@ -164,7 +164,7 @@ impl Default for GaugeAlfa {
     }
 }
 
-impl Component<Msg, UserEvent> for GaugeAlfa {
+impl AppComponent<Msg, UserEvent> for GaugeAlfa {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::User(UserEvent::Loaded(prog)) => {
@@ -185,7 +185,7 @@ impl Component<Msg, UserEvent> for GaugeAlfa {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct GaugeBeta {
     component: LineGauge,
 }
@@ -211,7 +211,7 @@ impl Default for GaugeBeta {
     }
 }
 
-impl Component<Msg, UserEvent> for GaugeBeta {
+impl AppComponent<Msg, UserEvent> for GaugeBeta {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::User(UserEvent::Loaded(prog)) => {

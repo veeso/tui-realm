@@ -4,10 +4,10 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Label;
-use tuirealm::MockComponent;
+use tuirealm::Component;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
-use tuirealm::component::Component;
+use tuirealm::component::AppComponent;
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -104,7 +104,7 @@ fn main() {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct LabelAlfa {
     component: Label,
 }
@@ -121,7 +121,7 @@ impl Default for LabelAlfa {
     }
 }
 
-impl Component<Msg, NoUserEvent> for LabelAlfa {
+impl AppComponent<Msg, NoUserEvent> for LabelAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
@@ -131,7 +131,7 @@ impl Component<Msg, NoUserEvent> for LabelAlfa {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct LabelBeta {
     component: Label,
 }
@@ -149,7 +149,7 @@ impl Default for LabelBeta {
     }
 }
 
-impl Component<Msg, NoUserEvent> for LabelBeta {
+impl AppComponent<Msg, NoUserEvent> for LabelBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),

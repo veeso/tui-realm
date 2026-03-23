@@ -293,7 +293,7 @@ impl Radio {
     // Other builder functions for all the properties...
 }
 
-impl MockComponent for Radio {
+impl Component for Radio {
     // ...
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
@@ -372,10 +372,10 @@ impl RadioState {
 }
 ```
 
-Then we can define the `state()` method of `MockComponent`:
+Then we can define the `state()` method of `Component`:
 
 ```rust
-impl MockComponent for Radio {
+impl Component for Radio {
     // ...
 
     fn state(&self) -> State {
@@ -398,7 +398,7 @@ For this component we'll handle the following commands:
 - When the user submits, the current choice is returned
 
 ```rust
-impl MockComponent for Radio {
+impl Component for Radio {
     // ...
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
@@ -429,10 +429,10 @@ impl MockComponent for Radio {
 
 ### Rendering the component
 
-Finally, we can implement the component `view()` method of `MockComponent` which will render the component:
+Finally, we can implement the component `view()` method of `Component` which will render the component:
 
 ```rust
-impl MockComponent for Radio {
+impl Component for Radio {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // Make choices

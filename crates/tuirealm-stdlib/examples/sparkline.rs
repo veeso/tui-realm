@@ -4,10 +4,10 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Sparkline;
-use tuirealm::MockComponent;
+use tuirealm::Component;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{Poll, PortResult, SyncPort};
 use tuirealm::props::{
@@ -121,7 +121,7 @@ impl Poll<UserEvent> for DataGen<u64> {
 
 // -- components
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct SparklineAlfa {
     component: Sparkline,
 }
@@ -144,7 +144,7 @@ impl Default for SparklineAlfa {
     }
 }
 
-impl Component<Msg, UserEvent> for SparklineAlfa {
+impl AppComponent<Msg, UserEvent> for SparklineAlfa {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),

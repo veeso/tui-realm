@@ -3,7 +3,7 @@
 //! label component
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, NoUserEvent};
 use tuirealm::props::{
     AttrValue, Attribute, Color, HorizontalAlignment, Props, Style, TextModifiers,
@@ -53,7 +53,7 @@ impl Label {
     }
 }
 
-impl MockComponent for Label {
+impl Component for Label {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if visible
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
@@ -115,7 +115,7 @@ impl MockComponent for Label {
     }
 }
 
-impl Component<Msg, NoUserEvent> for Label {
+impl AppComponent<Msg, NoUserEvent> for Label {
     fn on(&mut self, _: &Event<NoUserEvent>) -> Option<Msg> {
         // Does nothing
         None

@@ -5,7 +5,7 @@
 - [快速入门 🏁](#快速入门-)
   - [Realm 简介](#realm-简介)
   - [核心概念](#核心概念)
-  - [原型组件 (MockComponent) 与 组件 (Component)](#原型组件 (MockComponent) 与 组件 (Component))
+  - [原型组件 (Component) 与 组件 (Component)](#原型组件 (Component) 与 组件 (Component))
     - [原型组件](#原型组件)
     - [组件](#组件)
     - [属性 (Properties) 与状态 (States)](#属性 (Properties) 与状态 (States))
@@ -75,7 +75,7 @@ tui-realm 是一个 ratatui **框架**，提供了实现有状态应用的简便
 
 现在让我们看看 tui-realm 的核心概念。在简介中您可能已经读到了一些**粗体**的概念，但现在让我们详细看看它们。核心概念非常重要，幸运的是它们易于理解且数量不多：
 
-- **MockComponent**：原型组件代表一个可复用的 UI 组件，可以具有一些用于渲染或处理命令的**属性**。如果需要，它还可以有自己的**状态**。实际上，它是一个 trait，公开了一些方法来渲染和处理属性、状态和事件。我们将在下一章中详细讨论。
+- **Component**：原型组件代表一个可复用的 UI 组件，可以具有一些用于渲染或处理命令的**属性**。如果需要，它还可以有自己的**状态**。实际上，它是一个 trait，公开了一些方法来渲染和处理属性、状态和事件。我们将在下一章中详细讨论。
 - **Component**：组件是 原型组件的包装器，代表您应用中的单个组件。它直接接收事件并为应用消费者生成消息。在底层，它依赖其 原型组件进行属性/状态管理和渲染。
 - **State**：状态代表组件的当前状态（例如，文本输入框中的当前文本）。状态取决于用户（或其他来源）如何与组件交互（例如，用户按下 'a'，字符被推送到文本输入框）。
 - **Attribute**：属性描述组件中的单个属性。属性不应依赖于组件状态，而应仅在组件初始化时由用户配置。通常，原型组件公开许多要配置的属性，而使用 原型组件 的组件根据用户需求设置它们。
@@ -84,7 +84,7 @@ tui-realm 是一个 ratatui **框架**，提供了实现有状态应用的简便
 
     事件是*原始*的（如按键操作），而消息是面向应用的。消息随后由**更新例程**消费。我认为一个例子可以更好地解释：假设我们有一个弹出窗口组件，当按下 `ESC` 时，它必须报告给应用以隐藏它。那么事件将是 `Key::Esc`，它将消费它，并返回一个 `PopupClose` 消息。消息完全由用户通过模板类型定义，但我们将在本指南后面看到这一点。
 
-- **Command**（通常称为 `Cmd`）：是由**组件**在接收到**事件**时生成的实体。组件使用它来操作其**MockComponent**。我们将在后面看到为什么需要这两个实体。
+- **Command**（通常称为 `Cmd`）：是由**组件**在接收到**事件**时生成的实体。组件使用它来操作其**Component**。我们将在后面看到为什么需要这两个实体。
 - **View**：视图是存储所有组件的地方。视图基本上有三个任务：
   
   - **管理组件的挂载/卸载**：组件在创建时挂载到视图中。视图防止挂载重复的组件，并在您尝试操作不存在的组件时发出警告。
@@ -99,10 +99,10 @@ tui-realm 是一个 ratatui **框架**，提供了实现有状态应用的简便
 
 ---
 
-## 原型组件 (MockComponent) 与 组件 (Component)
+## 原型组件 (Component) 与 组件 (Component)
 
 我们已经大致说过这两个实体是什么，但现在该在实践中看看它们了。
-我们应该记住的第一件事是，它们都是**Traits**，并且根据设计，一个*Component*也是一个*MockComponent*。
+我们应该记住的第一件事是，它们都是**Traits**，并且根据设计，一个*Component*也是一个*Component*。
 让我们详细看看它们的定义：
 
 ### 原型组件
@@ -122,7 +122,7 @@ tui-realm 是一个 ratatui **框架**，提供了实现有状态应用的简便
 实际上，原型组件是一个 trait，需要实现以下方法：
 
 ```rust
-pub trait MockComponent {
+pub trait Component {
     fn view(&mut self, frame: &mut Frame, area: Rect);
     fn query(&self, attr: Attribute) -> Option<AttrValue>;
     fn attr(&mut self, attr: Attribute, value: AttrValue);
@@ -143,20 +143,20 @@ trait 要求您实现：
 
 所以，显然 原型组件定义了我们需要处理属性、状态和渲染的所有内容。那么为什么我们还没有完成，还需要一个组件 trait 呢？
 
-1. MockComponent 必须是**通用的**：原型组件在库中分发（例如 `tui-realm-stdlib`），因此它们不能消费 `Event` 或产生 `Message`。
+1. Component 必须是**通用的**：原型组件在库中分发（例如 `tui-realm-stdlib`），因此它们不能消费 `Event` 或产生 `Message`。
 2. 由于第 1 点，我们需要一个能够产生 `Msg` 并消费 `Event` 的实体。这两个实体完全或部分由用户定义，这意味着它们对于每个 realm 应用都是不同的。这意味着组件必须适应应用。
 3. **不可能满足所有人的需求**：我在 tui-realm 0.x 中尝试过，但这根本不可能。在某个时刻，我只是开始在其他属性中添加属性，但最终我不得不从头开始重新实现 stdlib 组件，只是为了获得一些不同的逻辑。原型组件很好，因为它们通用，但不要太过；它们必须对我们表现得像傻瓜一样。组件正是我们应用想要的。我们想要一个文本输入，但我们希望当我们输入 'a' 时它会改变颜色。您可以使用组件做到这一点，但不能使用 原型组件。哦，我几乎忘记了泛化 原型组件 最糟糕的事情：**键绑定**。
 
 这么说，什么是组件？
 
-组件是 原型组件 的应用特定唯一实现。让我们以表单为例，假设第一个字段是接收用户名的文本输入。如果我们用 HTML 来思考，它肯定是一个 `<input type="text" />` 对吧？您的网页中的许多其他组件也是如此。因此，文本输入将是 tui-realm 中的 `MockComponent`。但*那个*用户名输入字段将是您的**用户名文本输入**。`UsernameInput` 将包装一个 `Input` 原型组件，但基于传入事件，它将以不同方式操作 原型组件，并且如果与例如 `EmailInput` 相比，将产生不同的**消息**。
+组件是 原型组件 的应用特定唯一实现。让我们以表单为例，假设第一个字段是接收用户名的文本输入。如果我们用 HTML 来思考，它肯定是一个 `<input type="text" />` 对吧？您的网页中的许多其他组件也是如此。因此，文本输入将是 tui-realm 中的 `Component`。但*那个*用户名输入字段将是您的**用户名文本输入**。`UsernameInput` 将包装一个 `Input` 原型组件，但基于传入事件，它将以不同方式操作 原型组件，并且如果与例如 `EmailInput` 相比，将产生不同的**消息**。
 
 所以，让我说明从现在开始您必须记住的最重要的事情：**组件是唯一的 ❗** 在您的应用中。您**永远不应多次使用相同的组件**。
 
 现在让我们看看组件在实践中是什么：
 
 ```rust
-pub trait Component<Msg, UserEvent>: MockComponent
+pub trait Component<Msg, UserEvent>: Component
 where
     Msg: PartialEq,
     UserEvent: Eq + PartialEq + Clone,
@@ -165,11 +165,11 @@ where
 }
 ```
 
-相当简单吧？是的，我的意图是让它们尽可能轻量，因为您必须为视图中的每个组件实现一个。正如您可能注意到的，Component 需要实现 `MockComponent`，所以实际上我们也会有类似这样的东西：
+相当简单吧？是的，我的意图是让它们尽可能轻量，因为您必须为视图中的每个组件实现一个。正如您可能注意到的，Component 需要实现 `Component`，所以实际上我们也会有类似这样的东西：
 
 ```rust
 pub struct UsernameInput {
-    component: Input, // 其中 Input 实现了 `MockComponent`
+    component: Input, // 其中 Input 实现了 `Component`
 }
 
 impl Component for UsernameInput { ... }
@@ -235,7 +235,7 @@ impl Component for UsernameInput { ... }
 fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg>;
 ```
 
-并且我们知道 `Component::on()` 将调用其**MockComponent** 的 `perform()` 方法，以更新其状态。perform 方法具有以下签名：
+并且我们知道 `Component::on()` 将调用其**Component** 的 `perform()` 方法，以更新其状态。perform 方法具有以下签名：
 
 ```rust
 fn perform(&mut self, cmd: Cmd) -> CmdResult;
@@ -413,7 +413,7 @@ impl Counter {
     }
 }
 
-impl Component<Msg, NoUserEvent> for Counter {
+impl AppComponent<Msg, NoUserEvent> for Counter {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent { code: KeyCode::Char('+'), .. }) => {
@@ -436,7 +436,7 @@ impl Component<Msg, NoUserEvent> for Counter {
     }
 }
 
-impl MockComponent for Counter {
+impl Component for Counter {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         self.component.view(frame, area);
     }

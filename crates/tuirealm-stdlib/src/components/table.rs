@@ -3,7 +3,7 @@
 use std::cmp::max;
 
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
     Table as PropTable, TextModifiers, Title,
@@ -318,7 +318,7 @@ impl Table {
     }
 }
 
-impl MockComponent for Table {
+impl Component for Table {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

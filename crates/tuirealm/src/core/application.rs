@@ -7,7 +7,7 @@ use ratatui::Frame;
 use thiserror::Error;
 
 use super::{Subscription, WrappedComponent};
-use crate::component::Component;
+use crate::component::AppComponent;
 use crate::event::Event;
 use crate::injector::Injector;
 use crate::listener::{EventListener, EventListenerCfg, ListenerError, PollError};
@@ -229,7 +229,7 @@ where
     }
 
     /// Get a reference to the registered component for the given `id`, if there is one.
-    pub fn get_component(&self, id: &ComponentId) -> Option<&dyn Component<Msg, UserEvent>> {
+    pub fn get_component(&self, id: &ComponentId) -> Option<&dyn AppComponent<Msg, UserEvent>> {
         self.view.get_component(id)
     }
 
@@ -237,7 +237,7 @@ where
     pub fn get_component_mut(
         &mut self,
         id: &ComponentId,
-    ) -> Option<&mut dyn Component<Msg, UserEvent>> {
+    ) -> Option<&mut dyn AppComponent<Msg, UserEvent>> {
         self.view.get_component_mut(id)
     }
 

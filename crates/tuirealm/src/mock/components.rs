@@ -4,12 +4,12 @@ use ratatui::Frame;
 
 use super::{MockEvent, MockMsg};
 use crate::command::{Cmd, CmdResult, Direction};
-use crate::component::{Component, MockComponent};
+use crate::component::{AppComponent, Component};
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
 use crate::props::{AttrValue, Attribute, Props};
 use crate::state::{State, StateValue};
 
-/// Mocked component implementing `MockComponent`
+/// Mocked component implementing `Component`
 pub struct MockInput {
     props: Props,
     states: MockInputStates,
@@ -24,7 +24,7 @@ impl Default for MockInput {
     }
 }
 
-impl MockComponent for MockInput {
+impl Component for MockInput {
     fn view(&mut self, _: &mut Frame, _: crate::ratatui::layout::Rect) {}
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
@@ -92,12 +92,12 @@ impl MockInputStates {
 
 // -- component impl
 
-#[derive(MockComponent, Default)]
+#[derive(Component, Default)]
 pub struct MockFooInput {
     component: MockInput,
 }
 
-impl Component<MockMsg, MockEvent> for MockFooInput {
+impl AppComponent<MockMsg, MockEvent> for MockFooInput {
     fn on(&mut self, ev: &Event<MockEvent>) -> Option<MockMsg> {
         let cmd = match ev {
             Event::Keyboard(KeyEvent {
@@ -127,12 +127,12 @@ impl Component<MockMsg, MockEvent> for MockFooInput {
     }
 }
 
-#[derive(MockComponent, Default)]
+#[derive(Component, Default)]
 pub struct MockBarInput {
     component: MockInput,
 }
 
-impl Component<MockMsg, MockEvent> for MockBarInput {
+impl AppComponent<MockMsg, MockEvent> for MockBarInput {
     fn on(&mut self, ev: &Event<MockEvent>) -> Option<MockMsg> {
         let cmd = match ev {
             Event::Keyboard(KeyEvent {

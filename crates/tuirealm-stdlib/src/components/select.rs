@@ -2,7 +2,7 @@
 //! you want to display other options when opened (at least 3).
 
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, Style,
     TextModifiers, Title,
@@ -292,7 +292,7 @@ impl Select {
     }
 }
 
-impl MockComponent for Select {
+impl Component for Select {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

@@ -1,4 +1,4 @@
-//! This Example showcases the use of [`AnyProp`](tuirealm::props::AnyProp) via [`PropPayload`] for use in [`Props`], [`query`](MockComponent::query) and [`attr`](MockComponent::attr).
+//! This Example showcases the use of [`AnyProp`](tuirealm::props::AnyProp) via [`PropPayload`] for use in [`Props`], [`query`](Component::query) and [`attr`](Component::attr).
 //!
 //! The data structs used in this example are very simple and could be done via other values in [`PropPayload`] / [`AttrValue`],
 //! but imagine this for outside sources like [`tuirealm-tree-view`](https://github.com/veeso/tui-realm/tree/feature/main/crates/tuirealm-treeview)'s Tree data.
@@ -7,10 +7,10 @@
 
 use std::time::Duration;
 
-use tuirealm::MockComponent;
+use tuirealm::Component;
 use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
@@ -153,7 +153,7 @@ impl Model {
     }
 }
 
-/// This is our custom data we want to store on [`Props`] and communicate via [`query`](MockComponent::query) and [`attr`](MockComponent::attr).
+/// This is our custom data we want to store on [`Props`] and communicate via [`query`](Component::query) and [`attr`](Component::attr).
 #[derive(Debug, Clone, PartialEq)]
 struct CustomState {
     text: String,
@@ -186,7 +186,7 @@ impl Default for StdLabel {
     }
 }
 
-impl MockComponent for StdLabel {
+impl Component for StdLabel {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if visible
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
@@ -264,12 +264,12 @@ impl MockComponent for StdLabel {
     }
 }
 
-#[derive(Debug, MockComponent, Default)]
+#[derive(Debug, Component, Default)]
 struct OurLabel {
     component: StdLabel,
 }
 
-impl Component<Msg, NoUserEvent> for OurLabel {
+impl AppComponent<Msg, NoUserEvent> for OurLabel {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         // Does nothing
         match ev {

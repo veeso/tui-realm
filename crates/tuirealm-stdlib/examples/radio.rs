@@ -4,10 +4,10 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Radio;
-use tuirealm::MockComponent;
+use tuirealm::Component;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -114,7 +114,7 @@ fn main() {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct RadioAlfa {
     component: Radio,
 }
@@ -148,7 +148,7 @@ impl Default for RadioAlfa {
     }
 }
 
-impl Component<Msg, NoUserEvent> for RadioAlfa {
+impl AppComponent<Msg, NoUserEvent> for RadioAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
@@ -168,7 +168,7 @@ impl Component<Msg, NoUserEvent> for RadioAlfa {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct RadioBeta {
     component: Radio,
 }
@@ -196,7 +196,7 @@ impl Default for RadioBeta {
     }
 }
 
-impl Component<Msg, NoUserEvent> for RadioBeta {
+impl AppComponent<Msg, NoUserEvent> for RadioBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {

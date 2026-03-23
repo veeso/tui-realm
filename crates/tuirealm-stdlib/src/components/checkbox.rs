@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 use tuirealm::command::{Cmd, CmdResult, Direction};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
@@ -207,7 +207,7 @@ impl Checkbox {
     }
 }
 
-impl MockComponent for Checkbox {
+impl Component for Checkbox {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

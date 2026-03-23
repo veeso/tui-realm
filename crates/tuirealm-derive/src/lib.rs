@@ -1,34 +1,34 @@
 //! # tuirealm_derive
 //!
 //! [tuirealm_derive](https://github.com/veeso/tui-realm/tree/feature/main/crates/tuirealm_derive) provides the derive macro
-//! which automatically implements `MockComponent` for a [tui-realm](https://github.com/veeso/tui-realm) component.
+//! which automatically implements `Component` for a [tui-realm](https://github.com/veeso/tui-realm) component.
 //!
-//! tuirealm_derive is a crate which implements the procedural macro `MockComponent` which can be used to automatically implement
-//! the `MockComponent` trait for a tui-realm `Component`.
+//! tuirealm_derive is a crate which implements the procedural macro `Component` which can be used to automatically implement
+//! the `Component` trait for a tui-realm `AppComponent`.
 //! Indeed, as you already know if you're a tui-realm user, you've got two kind of component entities:
 //!
-//! - MockComponent: generic graphic component which is not bridged to the application and is "reusable"
-//! - Component: which uses a MockComponent as "backend" and is bridged to the application using the **Event -> Msg** system.
+//! - Component: generic graphic component which is not bridged to the application and is "reusable"
+//! - AppComponent: which uses a Component as "backend" and is bridged to the application using the **Event -> Msg** system.
 //!
-//! The Component wraps the MockComponent along with additional states.
-//! Since `Component` **MUST** implement `MockComponent`, we need to implement the mock component trait too,
-//! which in most of the cases it will just call the MockComponet methods on the inner `component` field.
+//! The AppComponent wraps the Component along with additional states.
+//! Since `AppComponent` **MUST** implement `Component`, we need to implement the Component trait too,
+//! which in most of the cases it will just call the Component methods on the inner `component` field.
 //! This is obviously kinda annoying to do for each component.
 //! That's why I implemented this procedural macro, which will automatically implement this logic on your component.
 //!
-//! So basically instead of implementing `MockComponent` for your components, you can just do as follows:
+//! So basically instead of implementing `Component` for your components, you can just do as follows:
 //!
 //! ```rust
-//! # use tuirealm_derive::MockComponent;
+//! # use tuirealm_derive::Component;
 //! # use tui_realm_stdlib::components::Input;
 //! #
-//! #[derive(MockComponent)]
+//! #[derive(Component)]
 //! pub struct IpAddressInput {
 //!   component: Input,
 //! }
 //! ```
 //!
-//! With the directive `#[derive(MockComponent)]` we **don't have to** implement the mock component trait.
+//! With the directive `#[derive(Component)]` we **don't have to** implement the mock component trait.
 //!
 //! > ❗ In order to work, the procedural macro requires you to name the "inner" mock component as `component` as I did in the example.
 //!
@@ -37,14 +37,14 @@
 //! ```rust
 //! # use tuirealm::command::{Cmd, CmdResult};
 //! # use tuirealm::ratatui::layout::Rect;
-//! # use tuirealm::{Attribute, AttrValue, Frame, MockComponent, State};
+//! # use tuirealm::{Attribute, AttrValue, Frame, Component, State};
 //! # use tui_realm_stdlib::components::Input;
 //! #
 //! # pub struct IpAddressInput {
 //! #   component: Input,
 //! # }
 //! #
-//! impl MockComponent for IpAddressInput {
+//! impl Component for IpAddressInput {
 //!     fn view(&mut self, frame: &mut Frame, area: Rect) {
 //!         self.component.view(frame, area);
 //!     }
@@ -94,13 +94,13 @@
 //! extern crate tuirealm;
 //! ```
 //!
-//! and finally derive `MockComponent` on your components:
+//! and finally derive `Component` on your components:
 //!
 //! ```rust
-//! # use tuirealm_derive::MockComponent;
+//! # use tuirealm_derive::Component;
 //! # use tui_realm_stdlib::components::Radio;
 //!
-//! #[derive(MockComponent)]
+//! #[derive(Component)]
 //! pub struct MyComponent {
 //!   component: Radio,
 //! }
@@ -117,16 +117,16 @@
 //! First option is to use a container-level attribute:
 //!
 //! ```rust
-//! # use tuirealm_derive::MockComponent;
+//! # use tuirealm_derive::Component;
 //! # use tui_realm_stdlib::components::Radio;
 //! #
-//! #[derive(MockComponent)]
+//! #[derive(Component)]
 //! #[component("radio")]
 //! pub struct MyComponent1 {
 //!   radio: Radio,
 //! }
 //!
-//! #[derive(MockComponent)]
+//! #[derive(Component)]
 //! #[component = "radio"]
 //! pub struct MyComponent2 {
 //!   radio: Radio,
@@ -136,10 +136,10 @@
 //! Or field-level attribute:
 //!
 //! ```rust
-//! # use tuirealm_derive::MockComponent;
+//! # use tuirealm_derive::Component;
 //! # use tui_realm_stdlib::components::Radio;
 //! #
-//! #[derive(MockComponent)]
+//! #[derive(Component)]
 //! pub struct MyComponent {
 //!   #[component]
 //!   radio: Radio,
@@ -151,15 +151,15 @@
 //! Tuple Structs are also supported:
 //!
 //! ```rust
-//! # use tuirealm_derive::MockComponent;
+//! # use tuirealm_derive::Component;
 //! # use tui_realm_stdlib::components::Radio;
 //! #
 //! # pub struct SomeOtherType;
 //! #
-//! #[derive(MockComponent)]
+//! #[derive(Component)]
 //! pub struct MyComponent1(Radio, SomeOtherType);
 //!
-//! #[derive(MockComponent)]
+//! #[derive(Component)]
 //! pub struct MyComponent2(SomeOtherType, #[component] Radio);
 //! ```
 //!
@@ -269,7 +269,7 @@ fn find_default_field<'a>(fields: impl Iterator<Item = &'a Field>) -> Option<Ide
     None
 }
 
-#[proc_macro_derive(MockComponent, attributes(component))]
+#[proc_macro_derive(Component, attributes(component))]
 pub fn mock_component(input: TokenStream) -> TokenStream {
     let DeriveInput {
         ident,
@@ -313,17 +313,17 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
             _ => panic!("Only Named And Tuple structs are supported"),
         };
 
-        // Implement MockComponent for type
+        // Implement Component for type
         let output = quote! {
             const _: () = {
                 use ::tuirealm::command::{Cmd, CmdResult};
                 use ::tuirealm::ratatui::layout::Rect;
                 use ::tuirealm::props::{AttrValue, Attribute};
-                use ::tuirealm::component::MockComponent;
+                use ::tuirealm::component::Component;
                 use ::tuirealm::ratatui::Frame;
                 use ::tuirealm::state::State;
                 #[automatically_derived]
-                impl #generics MockComponent for #ident #generics {
+                impl #generics Component for #ident #generics {
                     fn view(&mut self, frame: &mut Frame, area: Rect) {
                         self.#component_field.view(frame, area);
                     }
@@ -349,6 +349,6 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
 
         output.into()
     } else {
-        panic!("MockComponent must be derived by a `Struct`")
+        panic!("Component must be derived by a `Struct`")
     }
 }

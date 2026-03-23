@@ -1,7 +1,7 @@
 //! `ProgressBar` provides a component which shows the progress. It is possible to set the style for the progress bar and the text shown above it.
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Style, TextModifiers,
     Title,
@@ -95,7 +95,7 @@ impl Gauge {
     }
 }
 
-impl MockComponent for Gauge {
+impl Component for Gauge {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

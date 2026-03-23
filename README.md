@@ -98,7 +98,7 @@ This is a monorepo of the following crates:
 
 - [tuirealm](crates/tuirealm/): The core crate containing all basic functionality
 - [tui-realm-stdlib](crates/tuirealm-stdlib/): The standard library, which provides convenience wrappers for standard ratatui widgets
-- [tuirealm_derive](crates/tuirealm-derive/): A helper derive library to derive `MockComponent` for components which just pass those functions to a underlying component
+- [tuirealm_derive](crates/tuirealm-derive/): A helper derive library to derive `Component` for components which just pass those functions to a underlying component
 - [tui-realm-treeview](crates/tuirealm-treeview/): A Tree Component implementation
 - [tui-realm-textarea](crates/tuirealm-textarea/): A Text Area Component implementation
 

@@ -5,7 +5,7 @@ use super::props::{INPUT_INVALID_STYLE, INPUT_PLACEHOLDER, INPUT_PLACEHOLDER_STY
 use crate::prop_ext::CommonProps;
 use crate::utils::calc_utf8_cursor_position;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, InputType, Props, Style, TextModifiers, Title,
 };
@@ -291,7 +291,7 @@ impl Input {
     }
 }
 
-impl MockComponent for Input {
+impl Component for Input {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if !self.common.display {
             return;

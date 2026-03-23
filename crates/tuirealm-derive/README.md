@@ -4,7 +4,7 @@
   <img src="https://rawcdn.githack.com/veeso/tui-realm/39c38c3bd905f724403481514adb2cf2b4e69a7b/docs/images/cargo/tui-realm-512.png" width="256" height="256" alt="logo" />
 </p>
 
-<p align="center">~ Automatically implements MockComponent ~</p>
+<p align="center">~ Automatically implements Component ~</p>
 <p align="center">
   <a href="#get-started-">Get started</a>
   ·
@@ -50,21 +50,21 @@
 
 ## About tuirealm_derive 👑
 
-tuirealm_derive is a crate which implements the procedural macro `MockComponent` which can be used to automatically implement
-the `MockComponent` trait for a tui-realm `Component`.
+tuirealm_derive is a crate which implements the procedural macro `Component` which can be used to automatically implement
+the `Component` trait for a tui-realm `Component`.
 Indeed, as you already know if you're a tui-realm user, you've got two kind of component entities:
 
-- MockComponent: generic graphic component which is not bridged to the application and is "reusable"
-- Component: which uses a MockComponent as "backend" and is bridged to the application using the **Event -> Msg** system.
+- Component: generic graphic component which is not bridged to the application and is "reusable"
+- Component: which uses a Component as "backend" and is bridged to the application using the **Event -> Msg** system.
 
-The Component wraps the MockComponent along with additional states. Such as:
+The Component wraps the Component along with additional states. Such as:
 
 ```rust
 pub struct IpAddressInput {
   component: Input,
 }
 
-impl MockComponent for IpAddressInput {
+impl Component for IpAddressInput {
   
   ...
 
@@ -76,7 +76,7 @@ impl MockComponent for IpAddressInput {
 
 }
 
-impl Component<Msg, UserEvent> for IpAddressInput {
+impl AppComponent<Msg, UserEvent> for IpAddressInput {
 
   fn on(&mut self, ev: Event<UserEvent>) -> Option<Msg> {
     let cmd: Cmd = match ev {
@@ -90,29 +90,29 @@ impl Component<Msg, UserEvent> for IpAddressInput {
 }
 ```
 
-Since `Component` **MUST** implement `MockComponent`, we need to implement the mock component trait too, which in most of the case it will just call the MockComponent methods on the inner `component` field. This is obviously kinda annoying to do for each component. That's why I implemented this procedural macro, which will automatically implement this logic on your component.
+Since `Component` **MUST** implement `Component`, we need to implement the mock component trait too, which in most of the case it will just call the Component methods on the inner `component` field. This is obviously kinda annoying to do for each component. That's why I implemented this procedural macro, which will automatically implement this logic on your component.
 
-So basically instead of implementing `MockComponent` for your components, you can just do as follows:
+So basically instead of implementing `Component` for your components, you can just do as follows:
 
 ```rust
-#[derive(MockComponent)]
+#[derive(Component)]
 pub struct IpAddressInput {
   component: Input,
 }
 
-impl Component<Msg, UserEvent> for IpAddressInput {
+impl AppComponent<Msg, UserEvent> for IpAddressInput {
   ...
 }
 ```
 
-With the directive `#[derive(MockComponent)]` we **don't have to** implement the mock component trait.
+With the directive `#[derive(Component)]` we **don't have to** implement the mock component trait.
 
 > ❗ In order to work, the procedural macro requires you to name the "inner" mock component as `component` as I did in the example.
 
 If we give a deeper look at the macro, we'll see that what it does is:
 
 ```rust
-impl MockComponent for IpAddressInput {
+impl Component for IpAddressInput {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         self.component.view(frame, area);
     }
@@ -166,12 +166,12 @@ Then you need to include tuirealm in your project using the `macro use` directiv
 extern crate tuirealm;
 ```
 
-and finally derive `MockComponent` on your components:
+and finally derive `Component` on your components:
 
 ```rust
-#[derive(MockComponent)]
+#[derive(Component)]
 pub struct MyComponent {
-  component: MyMockComponentImpl,
+  component: MyComponentImpl,
 }
 ```
 
@@ -186,13 +186,13 @@ By default a field of name `component` will be used as can be seen in the earlie
 First option is to use a container-level attribute:
 
 ```rust
-#[derive(MockComponent)]
+#[derive(Component)]
 #[component("radio")]
 pub struct MyComponent1 {
   radio: Radio,
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 #[component = "radio"]
 pub struct MyComponent2 {
   radio: Radio,
@@ -202,7 +202,7 @@ pub struct MyComponent2 {
 Or field-level attribute:
 
 ```rust
-#[derive(MockComponent)]
+#[derive(Component)]
 pub struct MyComponent {
   #[component]
   radio: Radio,
@@ -214,10 +214,10 @@ pub struct MyComponent {
 Tuple Structs are also supported:
 
 ```rust
-#[derive(MockComponent)]
+#[derive(Component)]
 pub struct MyComponent(Radio, SomeOtherType);
 
-#[derive(MockComponent)]
+#[derive(Component)]
 pub struct MyComponent(SomeOtherType, #[component] Radio);
 ```
 

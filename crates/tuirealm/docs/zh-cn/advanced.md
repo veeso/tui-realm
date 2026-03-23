@@ -260,7 +260,7 @@ Tick 事件的目的是基于某个间隔调度操作。
 
 在 tui-realm 中实现新组件实际上相当简单，但要求您至少对**tui-rs widgets**有基本的了解。
 
-除了 tui-rs 知识，您还应该记住*MockComponent*和*Component*之间的区别，以免实现糟糕的组件。
+除了 tui-rs 知识，您还应该记住*Component*和*Component*之间的区别，以免实现糟糕的组件。
 
 说了这些，让我们看看如何实现一个组件。对于这个示例，我将实现 stdlib 中 `Radio` 组件的简化版本。
 
@@ -299,7 +299,7 @@ impl Radio {
     // ...
 }
 
-impl MockComponent for Radio {
+impl Component for Radio {
 
     // ...
 
@@ -387,7 +387,7 @@ impl OwnStates {
 然后我们可以定义 `state()` 方法
 
 ```rust
-impl MockComponent for Radio {
+impl Component for Radio {
 
     // ...
 
@@ -411,7 +411,7 @@ impl MockComponent for Radio {
 - 当用户提交时，返回当前选择
 
 ```rust
-impl MockComponent for Radio {
+impl Component for Radio {
 
     // ...
 
@@ -447,7 +447,7 @@ impl MockComponent for Radio {
 最后，我们可以实现组件 `view()` 方法，该方法将渲染组件：
 
 ```rust
-impl MockComponent for Radio {
+impl Component for Radio {
     fn view(&mut self, render: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // 创建选择

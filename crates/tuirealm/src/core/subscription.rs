@@ -388,7 +388,7 @@ mod test {
 
     use super::*;
     use crate::command::Cmd;
-    use crate::component::MockComponent;
+    use crate::component::Component;
     use crate::event::{Key, KeyModifiers, MouseEventKind, NoUserEvent};
     use crate::mock::{MockComponentId, MockEvent, MockFooInput};
     use crate::state::StateValue;

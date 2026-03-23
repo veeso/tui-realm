@@ -6,7 +6,7 @@ use std::ops::Add;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, NoUserEvent};
 use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, TextModifiers};
 use tuirealm::ratatui::Frame;
@@ -69,7 +69,7 @@ impl Clock {
     }
 }
 
-impl MockComponent for Clock {
+impl Component for Clock {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Render
         self.component.view(frame, area);
@@ -93,7 +93,7 @@ impl MockComponent for Clock {
     }
 }
 
-impl Component<Msg, NoUserEvent> for Clock {
+impl AppComponent<Msg, NoUserEvent> for Clock {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         if let Event::Tick = ev {
             self.states.tick();

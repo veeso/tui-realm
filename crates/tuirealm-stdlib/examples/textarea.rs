@@ -4,10 +4,10 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::Textarea;
-use tuirealm::MockComponent;
+use tuirealm::Component;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -116,7 +116,7 @@ fn main() {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct TextareaAlfa {
     component: Textarea,
 }
@@ -157,7 +157,7 @@ impl Default for TextareaAlfa {
     }
 }
 
-impl Component<Msg, NoUserEvent> for TextareaAlfa {
+impl AppComponent<Msg, NoUserEvent> for TextareaAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {
@@ -187,7 +187,7 @@ impl Component<Msg, NoUserEvent> for TextareaAlfa {
     }
 }
 
-#[derive(MockComponent)]
+#[derive(Component)]
 struct TextareaBeta {
     component: Textarea,
 }
@@ -223,7 +223,7 @@ impl Default for TextareaBeta {
     }
 }
 
-impl Component<Msg, NoUserEvent> for TextareaBeta {
+impl AppComponent<Msg, NoUserEvent> for TextareaBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let _ = match ev {
             Event::Keyboard(KeyEvent {

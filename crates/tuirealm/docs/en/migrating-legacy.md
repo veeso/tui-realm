@@ -62,7 +62,7 @@ If you've read the previous guides, you'll have already seen what's the entities
 - Crossterm is no more mandatory, you can finally use termion and whatever you like (actually only termion is implemented, but you can implement the other backends supported by tui. But really, is there anyone using rustbox out there?)
 - View has been partially replaced by application. I mean, there is still a view, you you hold an application in your program to work with the view.
 - The **update trait** is now mandatory (:feelsgood) in order to call the `tick()` method on the application.
-- Component has been replaced by MockComponent (and method names have been changed).
+- Component has been replaced by Component (and method names have been changed).
 - You need to implement a Component for all the elements in your UI.
 
 ---
@@ -191,7 +191,7 @@ Now let's see step-by-step how to perform the migration:
 6. Implement a Component trait for each component you're going to use
 
     Take your time to do this, it'll take a long time. Basically you need to implement a `Component` for all the components in your application.
-    The component will always have `component: impl MockComponent` as attribute, which will use a Mock component implemented by you or by the stdlib. If you're using a stdlib component, remember to use the command api to match event and results. Remember that you don't have to implement `MockComponent` for your component (unless you need to specify alternative behaviours), there is a magic `#[derive(MockComponent)]` procedural macro.
+    The component will always have `component: impl Component` as attribute, which will use a Mock component implemented by you or by the stdlib. If you're using a stdlib component, remember to use the command api to match event and results. Remember that you don't have to implement `Component` for your component (unless you need to specify alternative behaviours), there is a magic `#[derive(Component)]` procedural macro.
     In the constructor of your component, you'll specify everything you used to set in the props builder before:
 
     Then:
@@ -209,7 +209,7 @@ Now let's see step-by-step how to perform the migration:
     ```rust
     use tui_realm_stdlib::Input;
 
-    #[derive(MockComponent)]
+    #[derive(Component)]
     pub struct AddressInput {
         component: Input,
     }
@@ -234,7 +234,7 @@ Now let's see step-by-step how to perform the migration:
         }
     }
 
-    impl Component<Msg, NoUserEvent> for AddressInput {
+    impl AppComponent<Msg, NoUserEvent> for AddressInput {
         fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
             let result = match ev {
                 Event::Keyboard(KeyEvent {

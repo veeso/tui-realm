@@ -146,7 +146,7 @@ extern crate lazy_regex;
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::MockComponent;
+use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style, TextModifiers, Title,
 };
@@ -419,7 +419,7 @@ impl<'a> TextArea<'a> {
     }
 }
 
-impl MockComponent for TextArea<'_> {
+impl Component for TextArea<'_> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
             // set block

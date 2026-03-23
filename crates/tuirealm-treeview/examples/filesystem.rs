@@ -3,10 +3,10 @@ use std::time::Duration;
 
 use tui_realm_stdlib::components::{Input, Phantom};
 use tui_realm_treeview::{Node, TREE_CMD_CLOSE, TREE_CMD_OPEN, Tree, TreeView};
-use tuirealm::MockComponent;
+use tuirealm::Component;
 use tuirealm::application::{Application, PollStrategy};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
-use tuirealm::component::{Component, MockComponent};
+use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
 use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
@@ -227,7 +227,7 @@ impl Model {
 
 // -- components
 
-#[derive(MockComponent)]
+#[derive(Component)]
 pub struct FsTree {
     component: TreeView<String>,
 }
@@ -261,7 +261,7 @@ impl FsTree {
     }
 }
 
-impl Component<Msg, NoUserEvent> for FsTree {
+impl AppComponent<Msg, NoUserEvent> for FsTree {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let result = match ev {
             Event::Keyboard(KeyEvent {
@@ -321,12 +321,12 @@ impl Component<Msg, NoUserEvent> for FsTree {
 
 // -- global listener
 
-#[derive(Default, MockComponent)]
+#[derive(Default, Component)]
 pub struct GlobalListener {
     component: Phantom,
 }
 
-impl Component<Msg, NoUserEvent> for GlobalListener {
+impl AppComponent<Msg, NoUserEvent> for GlobalListener {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         match ev {
             Event::Keyboard(KeyEvent {
@@ -340,7 +340,7 @@ impl Component<Msg, NoUserEvent> for GlobalListener {
 
 // -- goto input
 
-#[derive(MockComponent)]
+#[derive(Component)]
 pub struct GoTo {
     component: Input,
 }
@@ -365,7 +365,7 @@ impl Default for GoTo {
     }
 }
 
-impl Component<Msg, NoUserEvent> for GoTo {
+impl AppComponent<Msg, NoUserEvent> for GoTo {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let result = match ev {
             Event::Keyboard(KeyEvent {
