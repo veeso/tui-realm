@@ -63,6 +63,7 @@ impl Model {
         let mut adapter = CrosstermTerminalAdapter::new()?;
         adapter.enable_raw_mode()?;
         adapter.enter_alternate_screen()?;
+        adapter.enable_bracketed_paste()?;
 
         Ok(adapter)
     }

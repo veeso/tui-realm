@@ -2,7 +2,7 @@ use std::io::Write;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
+use crossterm::event::{DisableMouseCapture, EnableBracketedPaste, EnableMouseCapture};
 use crossterm::terminal::{
     EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
 };
@@ -93,6 +93,12 @@ impl CrosstermTerminalAdapter {
         }
 
         writer.flush()
+    }
+
+    /// Enable bracketed paste to enable mapping paste to [`Event::Paste`](crate::event::Event::Paste) instead of treating it as individual characters.
+    pub fn enable_bracketed_paste(&mut self) -> TerminalResult<()> {
+        execute!(self.terminal.backend_mut(), EnableBracketedPaste)
+            .map_err(|_| TerminalError::Other("Cannot enable Bracketed Paste"))
     }
 
     /// Set the panic handler restore.
