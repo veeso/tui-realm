@@ -14,7 +14,7 @@ use tuirealm::props::{
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::state::{State, StateValue};
 use tuirealm::subscription::{EventClause as SubEventClause, Sub, SubClause};
-use tuirealm::terminal::CrosstermTerminalAdapter;
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
 
 const MAX_DEPTH: usize = 3;
 
@@ -48,6 +48,15 @@ struct Model {
 }
 
 impl Model {
+    /// Initialize the Terminal modes.
+    fn init_adapter() -> TerminalResult<CrosstermTerminalAdapter> {
+        let mut adapter = CrosstermTerminalAdapter::new()?;
+        adapter.enable_raw_mode()?;
+        adapter.enter_alternate_screen()?;
+
+        Ok(adapter)
+    }
+
     fn new(p: &Path) -> Self {
         // Setup app
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
@@ -88,7 +97,7 @@ impl Model {
             redraw: true,
             tree: Tree::new(Self::dir_tree(p, MAX_DEPTH)),
             path: p.to_path_buf(),
-            terminal: CrosstermTerminalAdapter::new().expect("Could not initialize terminal"),
+            terminal: Self::init_adapter().expect("Could not initialize terminal"),
         }
     }
 

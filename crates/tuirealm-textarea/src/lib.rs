@@ -22,7 +22,6 @@
 
 //! These features can be enabled in tui-realm-textarea:
 //!
-//! - `clipboard` enables system clipboard support
 //! - `search` enables the string search in the textarea
 //!
 //! ## Component API
@@ -44,7 +43,6 @@
 //! | `Custom($TEXTAREA_CMD_MOVE_BOTTOM)`            | `None`         | Move to the end of the file             |
 //! | `Custom($TEXTAREA_CMD_UNDO)`                   | `None`         | Undo last change                        |
 //! | `Custom($TEXTAREA_CMD_REDO)`                   | `None`         | Redo last change                        |
-//! | `Custom($TEXTAREA_CMD_PASTE)`                  | `None`         | Paste the current content of the buffer |
 //! | `Custom($TEXTAREA_CMD_SEARCH_BACK)`            | `None`         | Go to the previous search match         |
 //! | `Custom($TEXTAREA_CMD_SEARCH_FORWARD)`         | `None`         | Go to the next search match             |
 //! | `Cancel`                                       | `None`         | Delete next char                        |
@@ -59,8 +57,6 @@
 //! | `Scroll(Down)`                                 | `None`         | Move by scroll_step lines down          |
 //! | `Type(ch)`                                     | `None`         | Type a char in the editor               |
 //! | `Submit`                                       | `Submit`       | Get current lines                       |
-//!
-//! > ❗ Paste command is supported only if the `clipboard` feature is enabled
 //!
 //! **State**: the state returned is a `Vec(String)` containing the lines in the text area.
 //!
@@ -142,8 +138,6 @@ use fmt::LineFmt;
 #[macro_use]
 extern crate lazy_regex;
 
-#[cfg(feature = "clipboard")]
-use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
@@ -185,8 +179,6 @@ pub const TEXTAREA_CMD_MOVE_TOP: &str = "9";
 pub const TEXTAREA_CMD_MOVE_BOTTOM: &str = "a";
 pub const TEXTAREA_CMD_UNDO: &str = "b";
 pub const TEXTAREA_CMD_REDO: &str = "c";
-#[cfg(feature = "clipboard")]
-pub const TEXTAREA_CMD_PASTE: &str = "d";
 #[cfg(feature = "search")]
 pub const TEXTAREA_CMD_SEARCH_FORWARD: &str = "e";
 #[cfg(feature = "search")]
@@ -369,6 +361,11 @@ impl<'a> TextArea<'a> {
         self
     }
 
+    /// Paste multiple characters at once, for example if a whole string needs to be added or on a [`Event::Paste`](tuirealm::event::Event::Paste).
+    pub fn paste(&mut self, text: &str) {
+        self.widget.insert_str(text);
+    }
+
     // -- private
     fn get_block(&self) -> Option<Block<'a>> {
         let mut block = Block::default();
@@ -397,25 +394,6 @@ impl<'a> TextArea<'a> {
         }
 
         None
-    }
-
-    #[cfg(feature = "clipboard")]
-    fn paste(&mut self) {
-        // get content from context
-        if let Ok(Ok(yank)) = ClipboardContext::new().map(|mut ctx| ctx.get_contents()) {
-            // TODO: It's desired to set and paste yanked text, but pasting new lines as part of the yanked
-            // text is currently not supported by the textarea widget. Therefor, each line is inserted
-            // separately. The disadvantage of this workaround is, that each newly inserted line is a
-            // separate entry in the history and therefor a separate undo step.
-            if self.single_line {
-                self.widget.insert_str(yank);
-            } else {
-                for line in yank.lines() {
-                    self.widget.insert_str(line);
-                    self.widget.insert_newline();
-                }
-            }
-        }
     }
 }
 
@@ -604,10 +582,6 @@ impl Component for TextArea<'_> {
                 if !self.single_line {
                     self.widget.move_cursor(CursorMove::Top);
                 }
-            }
-            #[cfg(feature = "clipboard")]
-            Cmd::Custom(TEXTAREA_CMD_PASTE) => {
-                self.paste();
             }
             Cmd::Custom(TEXTAREA_CMD_REDO) => {
                 self.widget.redo();

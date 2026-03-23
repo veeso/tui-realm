@@ -13,6 +13,8 @@
 ## next
 
 - Update for tuirealm 4.0
+- Remove feature `clipboard`
+- Introduce new function `paste` to add multiple characters (text) at once, for example from a `Event::Paste` event
 
 ## 2.1.0
 

@@ -50,4 +50,7 @@ pub enum TerminalError {
     Unsupported,
     #[error("cannot activate / deactivate mouse capture")]
     CannotToggleMouseCapture,
+
+    #[error("{0}")]
+    Other(&'static str),
 }

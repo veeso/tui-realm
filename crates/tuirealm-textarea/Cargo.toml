@@ -16,7 +16,6 @@ readme = "README.md"
 
 [dependencies]
 tuirealm.workspace = true
-cli-clipboard = { version = "^0.4", optional = true }
 lazy-regex = "^3"
 tui-textarea-2 = "^0.10"
 
@@ -28,7 +27,6 @@ pretty_assertions = "1"
 
 [features]
 default = ["crossterm"]
-clipboard = ["cli-clipboard"]
 search = ["tui-textarea-2/search"]
 crossterm = ["tuirealm/crossterm"]
 termion = ["tuirealm/termion"]
