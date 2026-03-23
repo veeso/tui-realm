@@ -9,7 +9,7 @@ use tuirealm::ratatui::{
     layout::Rect,
     widgets::{List, ListItem, ListState},
 };
-use tuirealm::state::State;
+use tuirealm::state::{State, StateValue};
 
 use crate::prop_ext::CommonProps;
 use crate::utils::borrow_clone_line;
@@ -240,10 +240,11 @@ impl Component for Textarea {
     }
 
     fn state(&self) -> State {
-        State::None
+        State::Single(StateValue::Usize(self.states.list_index))
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        let prev = self.states.list_index;
         match cmd {
             Cmd::Move(Direction::Down) => {
                 self.states.incr_list_index();
@@ -275,7 +276,11 @@ impl Component for Textarea {
             }
             _ => {}
         }
-        CmdResult::None
+        if prev != self.states.list_index {
+            CmdResult::Changed(self.state())
+        } else {
+            CmdResult::None
+        }
     }
 }
 
@@ -287,6 +292,7 @@ mod tests {
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
     use tuirealm::ratatui::text::Span;
+    use tuirealm::state::StateValue;
 
     #[test]
     fn test_components_textarea() {
@@ -316,43 +322,54 @@ mod tests {
         assert_eq!(component.states.list_index, 1); // Kept
         assert_eq!(component.states.list_len, 3);
         // get value
-        assert_eq!(component.state(), State::None);
+        assert_eq!(component.state(), State::Single(StateValue::Usize(1)));
         // Render
         assert_eq!(component.states.list_index, 1);
         // Handle inputs
         assert_eq!(
             component.perform(Cmd::Move(Direction::Down)),
-            CmdResult::None
+            CmdResult::Changed(State::Single(StateValue::Usize(2)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be decremented
-        assert_eq!(component.perform(Cmd::Move(Direction::Up)), CmdResult::None);
-        // Index should be incremented
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Up)),
+            CmdResult::Changed(State::Single(StateValue::Usize(1)))
+        );
+        // Index should be decremented
         assert_eq!(component.states.list_index, 1);
         // Index should be 2
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Down)),
-            CmdResult::None
+            CmdResult::Changed(State::Single(StateValue::Usize(2)))
         );
         // Index should be incremented
         assert_eq!(component.states.list_index, 2);
         // Index should be 0
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Up)),
-            CmdResult::None
+            CmdResult::Changed(State::Single(StateValue::Usize(0)))
         );
+        assert_eq!(component.states.list_index, 0);
         // End
-        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::End)),
+            CmdResult::Changed(State::Single(StateValue::Usize(2)))
+        );
         assert_eq!(component.states.list_index, 2);
         // Home
         assert_eq!(
             component.perform(Cmd::GoTo(Position::Begin)),
+            CmdResult::Changed(State::Single(StateValue::Usize(0)))
+        );
+        assert_eq!(component.states.list_index, 0);
+        // No-op when already at beginning
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::Begin)),
             CmdResult::None
         );
-        // Index should be incremented
-        assert_eq!(component.states.list_index, 0);
-        // On key
+        // Unhandled command
         assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
     }
 

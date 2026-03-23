@@ -566,109 +566,87 @@ impl Component for TextArea<'_> {
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        let prev_lines: Vec<String> = self.widget.lines().iter().map(|l| l.to_string()).collect();
         match cmd {
             Cmd::Cancel => {
                 self.widget.delete_next_char();
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_DEL_LINE_BY_END) => {
                 self.widget.delete_line_by_end();
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_DEL_LINE_BY_HEAD) => {
                 self.widget.delete_line_by_head();
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_DEL_NEXT_WORD) => {
                 self.widget.delete_next_word();
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_DEL_WORD) => {
                 self.widget.delete_word();
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_PARAGRAPH_BACK) => {
                 self.widget.move_cursor(CursorMove::ParagraphBack);
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_PARAGRAPH_FORWARD) => {
                 self.widget.move_cursor(CursorMove::ParagraphForward);
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_BACK) => {
                 self.widget.move_cursor(CursorMove::WordBack);
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_FORWARD) => {
                 self.widget.move_cursor(CursorMove::WordForward);
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_BOTTOM) => {
                 if !self.single_line {
                     self.widget.move_cursor(CursorMove::Bottom);
                 }
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_TOP) => {
                 if !self.single_line {
                     self.widget.move_cursor(CursorMove::Top);
                 }
-                CmdResult::None
             }
             #[cfg(feature = "clipboard")]
             Cmd::Custom(TEXTAREA_CMD_PASTE) => {
                 self.paste();
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_REDO) => {
                 self.widget.redo();
-                CmdResult::None
             }
             #[cfg(feature = "search")]
             Cmd::Custom(TEXTAREA_CMD_SEARCH_BACK) => {
                 self.widget.search_back(true);
-                CmdResult::None
             }
             #[cfg(feature = "search")]
             Cmd::Custom(TEXTAREA_CMD_SEARCH_FORWARD) => {
                 self.widget.search_forward(true);
-                CmdResult::None
             }
             Cmd::Custom(TEXTAREA_CMD_UNDO) => {
                 self.widget.undo();
-                CmdResult::None
             }
             Cmd::Delete => {
                 self.widget.delete_char();
-                CmdResult::None
             }
             Cmd::GoTo(Position::Begin) => {
                 self.widget.move_cursor(CursorMove::Head);
-                CmdResult::None
             }
             Cmd::GoTo(Position::End) => {
                 self.widget.move_cursor(CursorMove::End);
-                CmdResult::None
             }
             Cmd::Move(Direction::Down) => {
                 if !self.single_line {
                     self.widget.move_cursor(CursorMove::Down);
                 }
-                CmdResult::None
             }
             Cmd::Move(Direction::Left) => {
                 self.widget.move_cursor(CursorMove::Back);
-                CmdResult::None
             }
             Cmd::Move(Direction::Right) => {
                 self.widget.move_cursor(CursorMove::Forward);
-                CmdResult::None
             }
             Cmd::Move(Direction::Up) => {
                 if !self.single_line {
                     self.widget.move_cursor(CursorMove::Up);
                 }
-                CmdResult::None
             }
             Cmd::Scroll(Direction::Down) => {
                 if !self.single_line {
@@ -678,7 +656,6 @@ impl Component for TextArea<'_> {
                         .unwrap_length();
                     (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Down));
                 }
-                CmdResult::None
             }
             Cmd::Scroll(Direction::Up) => {
                 if !self.single_line {
@@ -688,24 +665,27 @@ impl Component for TextArea<'_> {
                         .unwrap_length();
                     (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Up));
                 }
-                CmdResult::None
             }
             Cmd::Type('\t') => {
                 self.widget.insert_tab();
-                CmdResult::None
             }
             Cmd::Type('\n') | Cmd::Custom(TEXTAREA_CMD_NEWLINE) => {
                 if !self.single_line {
                     self.widget.insert_newline();
                 }
-                CmdResult::None
             }
             Cmd::Type(ch) => {
                 self.widget.insert_char(ch);
-                CmdResult::None
             }
-            Cmd::Submit => CmdResult::Submit(self.state()),
-            _ => CmdResult::None,
+            Cmd::Submit => return CmdResult::Submit(self.state()),
+            _ => return CmdResult::None,
+        }
+        let current_lines: Vec<String> =
+            self.widget.lines().iter().map(|l| l.to_string()).collect();
+        if prev_lines != current_lines {
+            CmdResult::Changed(self.state())
+        } else {
+            CmdResult::None
         }
     }
 }
