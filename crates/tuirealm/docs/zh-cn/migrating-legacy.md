@@ -62,7 +62,7 @@
 - Crossterm 不再是强制性的，您终于可以使用 termion 和任何您喜欢的东西（实际上只实现了 termion，但您可以实现 tui 支持的其他后端。但是真的，还有人在使用 rustbox 吗？）
 - View 已被应用部分取代。我的意思是，仍然有一个视图，但您在程序中持有一个应用来处理视图。
 - **更新 trait** 现在是强制性的 (:feelsgood) 以便在应用上调用 `tick()` 方法。
-- Component 已被 Component 取代（并且方法名称已更改）。
+- Component 已被 MockComponent 取代（并且方法名称已更改）。
 - 您需要为 UI 中的所有元素实现一个 Component。
 
 ---
@@ -190,7 +190,7 @@
 6. 为您要使用的每个组件实现 Component trait
 
     花时间做这件事，这将需要很长时间。基本上，您需要为应用中的所有组件实现一个 `Component`。
-    组件将始终具有 `component: impl Component` 作为属性，它将使用由您或 stdlib 实现的原型组件。如果您使用 stdlib 组件，请记住使用命令 api 来匹配事件和结果。请记住，您不必为组件实现 `Component`（除非您需要指定替代行为），有一个神奇的 `#[derive(Component)]` 过程宏。
+    组件将始终具有 `component: impl MockComponent` 作为属性，它将使用由您或 stdlib 实现的原型组件。如果您使用 stdlib 组件，请记住使用命令 api 来匹配事件和结果。请记住，您不必为组件实现 `MockComponent`（除非您需要指定替代行为），有一个神奇的 `#[derive(MockComponent)]` 过程宏。
     在组件的构造函数中，您将指定以前在属性构建器中设置的所有内容：
 
     然后：
@@ -208,7 +208,7 @@
     ```rust
     use tui_realm_stdlib::Input;
 
-    #[derive(Component)]
+    #[derive(MockComponent)]
     pub struct AddressInput {
         component: Input,
     }
@@ -233,7 +233,7 @@
         }
     }
 
-    impl AppComponent<Msg, NoUserEvent> for AddressInput {
+    impl Component<Msg, NoUserEvent> for AddressInput {
         fn on(&mut self, ev: Event<NoUserEvent>) -> Option<Msg> {
             let result = match ev {
                 Event::Keyboard(KeyEvent {

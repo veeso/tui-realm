@@ -15,14 +15,20 @@ keywords = ["tui", "terminal"]
 readme = "README.md"
 
 [dependencies]
-async-trait = { version = "0.1", optional = true }
+# base dependencies
 bitflags = "2"
 dyn-clone = "1"
-futures-util = { version = "0.3", default-features = false, optional = true }
 lazy-regex = "3"
 ratatui = { version = "0.30", default-features = false, features = ["std", "layout-cache"] }
 serde = { version = "1", features = ["derive"], optional = true }
 thiserror = "2"
+
+# derive
+tuirealm_derive = { workspace = true, optional = true }
+
+# async ports dependencies
+async-trait = { version = "0.1", optional = true }
+futures-util = { version = "0.3", default-features = false, optional = true }
 tokio = { version = "1", features = [
   "rt",
   "macros",
@@ -31,8 +37,8 @@ tokio = { version = "1", features = [
 tokio-util = { version = "0.7", features = [
   "rt",
 ], default-features = false, optional = true }
-tuirealm_derive = { path = "../tuirealm-derive", version = "2", optional = true }
 
+# backend dependencies
 crossterm = { version = "0.29", optional = true }
 termion = { version = "^4", optional = true }
 termwiz = { version = "0.23", optional = true }

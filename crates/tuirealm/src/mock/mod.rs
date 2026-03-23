@@ -16,7 +16,6 @@ pub use components::{MockBarInput, MockFooInput, MockInput};
 /// Mock UserEvent type
 #[derive(Debug, Eq, PartialEq, Clone, PartialOrd)]
 pub enum MockEvent {
-    None,
     Foo,
     Bar,
     Hello(String),

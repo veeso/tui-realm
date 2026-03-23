@@ -17,3 +17,4 @@ homepage = "https://github.com/veeso/tui-realm"
 [workspace.dependencies]
 tuirealm = { path = "./crates/tuirealm", default-features = false }
 tui-realm-stdlib = { path = "./crates/tuirealm-stdlib" }
+tuirealm_derive = { path = "./crates/tuirealm-derive" }

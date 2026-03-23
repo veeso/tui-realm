@@ -4,7 +4,6 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::LineGauge;
-use tuirealm::Component;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::CmdResult;
 use tuirealm::component::{AppComponent, Component};

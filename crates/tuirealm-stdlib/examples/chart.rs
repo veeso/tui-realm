@@ -4,7 +4,6 @@ use std::error::Error;
 use std::time::Duration;
 
 use tui_realm_stdlib::components::{Chart, ChartDataset};
-use tuirealm::Component;
 use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::{AppComponent, Component};
