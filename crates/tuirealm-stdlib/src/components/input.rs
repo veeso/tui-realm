@@ -141,7 +141,7 @@ impl InputStates {
 
     /// Get the full text to render in the input, according to the [`InputType`].
     #[must_use]
-    pub fn render_value(&self, itype: InputType) -> String {
+    pub fn render_value(&self, itype: &InputType) -> String {
         self.render_value_chars(itype).iter().collect::<String>()
     }
 
@@ -149,7 +149,7 @@ impl InputStates {
     ///
     /// Unlike [`InputStates::render_value`], this will only collect the actually displayed text in the returned String.
     #[must_use]
-    pub fn render_value_offset(&self, itype: InputType) -> String {
+    pub fn render_value_offset(&self, itype: &InputType) -> String {
         self.render_value_chars(itype)
             .iter()
             .skip(self.display_offset)
@@ -160,11 +160,11 @@ impl InputStates {
     ///
     /// It is recommended to use [`render_value`](Self::render_value) or [`render_value_offset`](Self::render_value_offset) over this function.
     #[must_use]
-    pub fn render_value_chars(&self, itype: InputType) -> Vec<char> {
+    pub fn render_value_chars(&self, itype: &InputType) -> Vec<char> {
         // TODO: can we return a iterator or something to prevent this intermediary Vec?
         match itype {
             InputType::Password(ch) | InputType::CustomPassword(ch, _, _) => {
-                (0..self.input.len()).map(|_| ch).collect()
+                (0..self.input.len()).map(|_| *ch).collect()
             }
             _ => self.input.clone(),
         }
@@ -278,12 +278,11 @@ impl Input {
             .and_then(AttrValue::as_length)
     }
 
-    fn get_input_type(&self) -> InputType {
+    fn get_input_type(&self) -> &InputType {
         self.props
             .get_ref(Attribute::InputType)
             .and_then(AttrValue::as_input_type)
-            .cloned() // TODO: can this clone be removed?
-            .unwrap_or(InputType::Text)
+            .unwrap_or(&InputType::Text)
     }
 
     /// Checks whether current input is valid according to the set [`InputType`].
@@ -301,7 +300,6 @@ impl Component for Input {
 
         let mut normal_style = self.common.style;
 
-        let itype = self.get_input_type();
         let mut block = self.common.get_block();
         // Apply invalid style
         // TODO: invalid style should likely still be applied even if unfocused
@@ -379,7 +377,7 @@ impl Component for Input {
         if self.common.focused && !area_for_bounds.is_empty() {
             let x: u16 = area_for_bounds.x
                 + calc_utf8_cursor_position(
-                    &self.states.render_value_chars(itype)[0..self.states.cursor],
+                    &self.states.render_value_chars(self.get_input_type())[0..self.states.cursor],
                 )
                 .saturating_sub(u16::try_from(self.states.display_offset).unwrap_or(u16::MAX));
             let x = x.min(area_for_bounds.x + area_for_bounds.width);
@@ -417,7 +415,7 @@ impl Component for Input {
                 };
                 self.states.input = Vec::new();
                 self.states.cursor = 0;
-                let itype = self.get_input_type();
+                let itype = self.get_input_type().clone();
                 let max_len = self.get_input_len();
                 for ch in input {
                     self.states.append(ch, &itype, max_len);
@@ -478,7 +476,7 @@ impl Component for Input {
                 // Push char to input
                 let prev_input = self.states.input.clone();
                 self.states
-                    .append(ch, &self.get_input_type(), self.get_input_len());
+                    .append(ch, &self.get_input_type().clone(), self.get_input_len());
                 // Message on change
                 if prev_input == self.states.input {
                     CmdResult::None
@@ -531,9 +529,9 @@ mod tests {
         states.incr_cursor();
         assert_eq!(states.cursor, 3);
         // Render value
-        assert_eq!(states.render_value(InputType::Text).as_str(), "abc");
+        assert_eq!(states.render_value(&InputType::Text).as_str(), "abc");
         assert_eq!(
-            states.render_value(InputType::Password('*')).as_str(),
+            states.render_value(&InputType::Password('*')).as_str(),
             "***"
         );
     }
@@ -716,14 +714,14 @@ mod tests {
         // at first, without any "width" set, both functions should return the same
         assert_eq!(states.cursor, text.len());
         assert_eq!(
-            states.render_value(InputType::Text),
-            states.render_value_offset(InputType::Text)
+            states.render_value(&InputType::Text),
+            states.render_value_offset(&InputType::Text)
         );
 
         states.update_width(10);
 
         assert_eq!(
-            states.render_value_offset(InputType::Text),
+            states.render_value_offset(&InputType::Text),
             text[text.len() - 10..]
         );
 
@@ -731,7 +729,7 @@ mod tests {
         for i in 1..8 {
             states.decr_cursor();
             assert_eq!(states.cursor, text.len() - i);
-            let val = states.render_value_offset(InputType::Text);
+            let val = states.render_value_offset(&InputType::Text);
             assert_eq!(val, text[text.len() - 10..]);
         }
 
@@ -739,58 +737,58 @@ mod tests {
         states.decr_cursor();
         assert_eq!(states.cursor, text.len() - 8);
         assert_eq!(
-            states.render_value_offset(InputType::Text),
+            states.render_value_offset(&InputType::Text),
             text[text.len() - 10..]
         );
 
         states.decr_cursor();
         assert_eq!(states.cursor, text.len() - 9);
         assert_eq!(
-            states.render_value_offset(InputType::Text),
+            states.render_value_offset(&InputType::Text),
             text[text.len() - 11..]
         );
 
         states.decr_cursor();
         assert_eq!(states.cursor, text.len() - 10);
         assert_eq!(
-            states.render_value_offset(InputType::Text),
+            states.render_value_offset(&InputType::Text),
             text[text.len() - 12..]
         );
 
         states.cursor_at_begin();
         assert_eq!(states.cursor, 0);
-        assert_eq!(states.render_value(InputType::Text), text);
+        assert_eq!(states.render_value(&InputType::Text), text);
 
         // the displayed text should not change until being in PREVIEW_STEP
         for i in 1..9 {
             states.incr_cursor();
             assert_eq!(states.cursor, i);
-            let val = states.render_value_offset(InputType::Text);
+            let val = states.render_value_offset(&InputType::Text);
             assert_eq!(val, text);
         }
 
         states.incr_cursor();
         assert_eq!(states.cursor, 9);
-        assert_eq!(states.render_value_offset(InputType::Text), text[1..]);
+        assert_eq!(states.render_value_offset(&InputType::Text), text[1..]);
 
         states.incr_cursor();
         assert_eq!(states.cursor, 10);
-        assert_eq!(states.render_value_offset(InputType::Text), text[2..]);
+        assert_eq!(states.render_value_offset(&InputType::Text), text[2..]);
 
         // increasing width should not change display_offset
         states.update_width(30);
         assert_eq!(states.cursor, 10);
-        assert_eq!(states.render_value_offset(InputType::Text), text[2..]);
+        assert_eq!(states.render_value_offset(&InputType::Text), text[2..]);
 
         // reset to 10, should also not change
         states.update_width(10);
         assert_eq!(states.cursor, 10);
-        assert_eq!(states.render_value_offset(InputType::Text), text[2..]);
+        assert_eq!(states.render_value_offset(&InputType::Text), text[2..]);
 
         // should change display_offset by 1
         states.update_width(9);
         assert_eq!(states.cursor, 10);
-        assert_eq!(states.render_value_offset(InputType::Text), text[3..]);
+        assert_eq!(states.render_value_offset(&InputType::Text), text[3..]);
 
         // reset to end
         states.update_width(10);
@@ -800,7 +798,7 @@ mod tests {
         for i in 1..=4 {
             states.decr_cursor();
             assert_eq!(states.cursor, text.len() - i);
-            let val = states.render_value_offset(InputType::Text);
+            let val = states.render_value_offset(&InputType::Text);
             assert_eq!(val, text[text.len() - 8..]);
         }
 
@@ -808,7 +806,7 @@ mod tests {
         states.incr_cursor();
         assert_eq!(states.cursor, text.len() - 3);
         assert_eq!(
-            states.render_value_offset(InputType::Text),
+            states.render_value_offset(&InputType::Text),
             text[text.len() - 8..]
         );
 
