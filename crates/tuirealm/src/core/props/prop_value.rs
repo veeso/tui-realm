@@ -372,6 +372,15 @@ impl PropValue {
         }
     }
 
+    /// Unwrap PropValue as Color.
+    /// Panics otherwise
+    pub fn unwrap_color(self) -> Color {
+        match self {
+            PropValue::Color(v) => v,
+            _ => panic!("Called `unwrap_color` on a bad value"),
+        }
+    }
+
     /// Unwrap PropValue as InputType.
     /// Panics otherwise
     pub fn unwrap_input_type(self) -> InputType {
@@ -396,6 +405,15 @@ impl PropValue {
         match self {
             PropValue::Style(v) => v,
             _ => panic!("Called `unwrap_style` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Table.
+    /// Panics otherwise
+    pub fn unwrap_table(self) -> Table {
+        match self {
+            PropValue::Table(v) => v,
+            _ => panic!("Called `unwrap_table` on a bad value"),
         }
     }
 
@@ -589,6 +607,15 @@ impl PropValue {
         }
     }
 
+    /// Get a Color value from PropValue, or None
+    pub fn as_color(&self) -> Option<Color> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::Color(v) => Some(*v),
+            _ => None,
+        }
+    }
+
     /// Get a InputType value from PropValue, or None
     pub fn as_input_type(&self) -> Option<&InputType> {
         match self {
@@ -609,6 +636,14 @@ impl PropValue {
     pub fn as_style(&self) -> Option<&Style> {
         match self {
             PropValue::Style(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Table value from PropValue, or None
+    pub fn as_table(&self) -> Option<&Table> {
+        match self {
+            PropValue::Table(v) => Some(v),
             _ => None,
         }
     }
@@ -783,6 +818,14 @@ impl PropValue {
         }
     }
 
+    /// Get a Color value from PropValue, or None
+    pub fn as_color_mut(&mut self) -> Option<&mut Color> {
+        match self {
+            PropValue::Color(v) => Some(v),
+            _ => None,
+        }
+    }
+
     /// Get a InputType value from PropValue, or None
     pub fn as_input_type_mut(&mut self) -> Option<&mut InputType> {
         match self {
@@ -803,6 +846,14 @@ impl PropValue {
     pub fn as_style_mut(&mut self) -> Option<&mut Style> {
         match self {
             PropValue::Style(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Table value from PropValue, or None
+    pub fn as_table_mut(&mut self) -> Option<&mut Table> {
+        match self {
+            PropValue::Table(v) => Some(v),
             _ => None,
         }
     }
@@ -853,6 +904,7 @@ mod tests {
             PropValue::U64(3),
             PropValue::U128(4),
         ]);
+
         let mut map: HashMap<String, PropValue> = HashMap::new();
         map.insert(String::from("a"), PropValue::I8(4));
         assert_eq!(*map.get("a").unwrap(), PropValue::I8(4));
@@ -941,6 +993,7 @@ mod tests {
             PropValue::AlignmentVertical(VerticalAlignment::Top).unwrap_alignment_vertical(),
             VerticalAlignment::Top
         );
+        assert_eq!(PropValue::Color(Color::Black).unwrap_color(), Color::Black);
         assert!(PropValue::Bool(true).unwrap_bool());
         assert_eq!(PropValue::F32(0.32).unwrap_f32(), 0.32);
         assert_eq!(PropValue::F64(0.32).unwrap_f64(), 0.32);
@@ -968,6 +1021,10 @@ mod tests {
         assert_eq!(
             PropValue::Style(Style::default()).unwrap_style(),
             Style::default()
+        );
+        assert_eq!(
+            PropValue::Table(vec![vec![LineStatic::from("test")]]).unwrap_table(),
+            vec![vec![LineStatic::from("test")]]
         );
         assert_eq!(
             PropValue::TextSpan(SpanStatic::from("ciao")).unwrap_textspan(),
@@ -1049,6 +1106,12 @@ mod tests {
         assert_eq!(PropValue::Bool(true).as_alignment_vertical(), None);
 
         assert_eq!(
+            PropValue::Color(Color::Black).as_color(),
+            Some(Color::Black)
+        );
+        assert_eq!(PropValue::Bool(true).as_color(), None);
+
+        assert_eq!(
             PropValue::InputType(InputType::Color).as_input_type(),
             Some(&InputType::Color)
         );
@@ -1065,6 +1128,12 @@ mod tests {
             Some(&Style::new())
         );
         assert_eq!(PropValue::Bool(true).as_style(), None);
+
+        assert_eq!(
+            PropValue::Table(Table::new()).as_table(),
+            Some(&Table::new())
+        );
+        assert_eq!(PropValue::Bool(true).as_table(), None);
 
         assert_eq!(
             PropValue::TextSpan(SpanStatic::from("hello")).as_textspan(),
@@ -1152,6 +1221,12 @@ mod tests {
         assert_eq!(PropValue::Bool(true).as_alignment_vertical_mut(), None);
 
         assert_eq!(
+            PropValue::Color(Color::Black).as_color_mut(),
+            Some(&mut Color::Black)
+        );
+        assert_eq!(PropValue::Bool(true).as_color_mut(), None);
+
+        assert_eq!(
             PropValue::InputType(InputType::Color).as_input_type_mut(),
             Some(&mut InputType::Color)
         );
@@ -1168,6 +1243,12 @@ mod tests {
             Some(&mut Style::new())
         );
         assert_eq!(PropValue::Bool(true).as_style_mut(), None);
+
+        assert_eq!(
+            PropValue::Table(Table::new()).as_table_mut(),
+            Some(&mut Table::new())
+        );
+        assert_eq!(PropValue::Bool(true).as_table_mut(), None);
 
         assert_eq!(
             PropValue::TextSpan(SpanStatic::from("hello")).as_textspan_mut(),
