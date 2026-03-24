@@ -30,8 +30,9 @@ use tuirealm::props::{
     Title,
 };
 use tuirealm::ratatui::Frame;
+use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::text::Line as Spans;
-use tuirealm::ratatui::{layout::Rect, widgets::Tabs};
+use tuirealm::ratatui::widgets::Tabs;
 use tuirealm::state::{State, StateValue};
 
 use crate::prop_ext::CommonProps;
@@ -277,10 +278,10 @@ impl Component for Radio {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::{HorizontalAlignment, PropPayload, PropValue};
+
+    use super::*;
 
     #[test]
     fn test_components_radio_states() {

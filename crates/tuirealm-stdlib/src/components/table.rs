@@ -9,11 +9,9 @@ use tuirealm::props::{
     Table as PropTable, TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
-use tuirealm::ratatui::{
-    layout::{Constraint, Rect},
-    text::Line,
-    widgets::{Cell, Row, Table as TuiTable, TableState},
-};
+use tuirealm::ratatui::layout::{Constraint, Rect};
+use tuirealm::ratatui::text::Line;
+use tuirealm::ratatui::widgets::{Cell, Row, Table as TuiTable, TableState};
 use tuirealm::state::{State, StateValue};
 
 use super::props::TABLE_COLUMN_SPACING;
@@ -522,9 +520,10 @@ impl Component for Table {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
     use pretty_assertions::assert_eq;
     use tuirealm::props::{HorizontalAlignment, TableBuilder};
+
+    use super::*;
 
     #[test]
     fn table_states() {

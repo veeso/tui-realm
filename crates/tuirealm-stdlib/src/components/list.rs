@@ -7,10 +7,8 @@ use tuirealm::props::{
     TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
-use tuirealm::ratatui::{
-    layout::Rect,
-    widgets::{List as TuiList, ListItem, ListState},
-};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::{List as TuiList, ListItem, ListState};
 use tuirealm::state::{State, StateValue};
 
 use crate::prop_ext::CommonProps;
@@ -407,10 +405,11 @@ impl Component for List {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
     use tuirealm::ratatui::text::{Line, Span};
+
+    use super::*;
 
     #[test]
     fn list_states() {

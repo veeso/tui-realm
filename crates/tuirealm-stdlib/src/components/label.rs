@@ -4,7 +4,8 @@ use tuirealm::props::{
     AttrValue, Attribute, Color, HorizontalAlignment, Props, Style, TextModifiers,
 };
 use tuirealm::ratatui::Frame;
-use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::state::State;
 
 use crate::prop_ext::CommonProps;
@@ -114,9 +115,9 @@ impl Component for Label {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
+
+    use super::*;
 
     #[test]
     fn test_components_label() {

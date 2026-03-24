@@ -124,10 +124,10 @@ pub fn borrow_clone_text<'a, 'b: 'a>(text: &'b Text<'a>) -> Text<'a> {
 #[cfg(test)]
 mod test {
 
-    use super::*;
+    use pretty_assertions::assert_eq;
     use tuirealm::props::{BorderSides, BorderType, Color, HorizontalAlignment};
 
-    use pretty_assertions::assert_eq;
+    use super::*;
 
     #[test]
     fn test_components_utils_wrap_spans() {

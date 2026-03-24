@@ -1,4 +1,6 @@
-use std::{error::Error, hash::Hash, time::Duration};
+use std::error::Error;
+use std::hash::Hash;
+use std::time::Duration;
 
 use tuirealm::application::Application;
 use tuirealm::event::NoUserEvent;

@@ -30,8 +30,9 @@ use tuirealm::props::{
     Title,
 };
 use tuirealm::ratatui::Frame;
-use tuirealm::ratatui::text::Line as Spans;
-use tuirealm::ratatui::{layout::Rect, text::Span, widgets::Tabs};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::text::{Line as Spans, Span};
+use tuirealm::ratatui::widgets::Tabs;
 use tuirealm::state::{State, StateValue};
 
 use crate::prop_ext::CommonProps;
@@ -326,10 +327,10 @@ impl Component for Checkbox {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::{assert_eq, assert_ne};
     use tuirealm::props::{HorizontalAlignment, PropPayload, PropValue};
+
+    use super::*;
 
     #[test]
     fn test_components_checkbox_states() {

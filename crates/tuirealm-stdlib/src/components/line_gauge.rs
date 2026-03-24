@@ -5,8 +5,9 @@ use tuirealm::props::{
     TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
+use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::text::Span;
-use tuirealm::ratatui::{layout::Rect, widgets::LineGauge as TuiLineGauge};
+use tuirealm::ratatui::widgets::LineGauge as TuiLineGauge;
 use tuirealm::state::State;
 
 use crate::prop_ext::CommonProps;
@@ -198,11 +199,11 @@ impl Component for LineGauge {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::{BorderType, HorizontalAlignment};
     use tuirealm::ratatui::symbols::line::{DOUBLE_HORIZONTAL, HORIZONTAL};
+
+    use super::*;
 
     #[test]
     fn test_components_progress_bar() {

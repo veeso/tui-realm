@@ -5,10 +5,8 @@ use tuirealm::props::{
     Style, TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
-use tuirealm::ratatui::{
-    layout::Rect,
-    widgets::{List, ListItem, ListState},
-};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::{List, ListItem, ListState};
 use tuirealm::state::{State, StateValue};
 
 use crate::prop_ext::CommonProps;
@@ -291,12 +289,12 @@ impl Component for Textarea {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
     use tuirealm::ratatui::text::Span;
     use tuirealm::state::StateValue;
+
+    use super::*;
 
     #[test]
     fn test_components_textarea() {

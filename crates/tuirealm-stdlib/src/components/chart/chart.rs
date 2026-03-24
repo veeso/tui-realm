@@ -9,12 +9,9 @@ use tuirealm::props::{
     Title,
 };
 use tuirealm::ratatui::Frame;
-use tuirealm::ratatui::text::Line;
-use tuirealm::ratatui::{
-    layout::Rect,
-    text::Span,
-    widgets::{Axis, Chart as TuiChart, Dataset as TuiDataset},
-};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::text::{Line, Span};
+use tuirealm::ratatui::widgets::{Axis, Chart as TuiChart, Dataset as TuiDataset};
 use tuirealm::state::State;
 
 // -- Props
@@ -422,11 +419,12 @@ impl Component for Chart {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
-    use tuirealm::ratatui::{symbols::Marker, widgets::GraphType};
+    use tuirealm::ratatui::symbols::Marker;
+    use tuirealm::ratatui::widgets::GraphType;
+
+    use super::*;
 
     #[test]
     fn test_components_chart_states() {

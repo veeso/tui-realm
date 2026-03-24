@@ -7,7 +7,8 @@ use tuirealm::props::{
     Title,
 };
 use tuirealm::ratatui::Frame;
-use tuirealm::ratatui::{layout::Rect, widgets::Gauge as TuiGauge};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::Gauge as TuiGauge;
 use tuirealm::state::State;
 
 use crate::prop_ext::CommonProps;
@@ -163,10 +164,10 @@ impl Component for Gauge {
 #[cfg(test)]
 mod test {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
+
+    use super::*;
 
     #[test]
     fn test_components_progress_bar() {

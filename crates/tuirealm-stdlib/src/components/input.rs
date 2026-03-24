@@ -1,17 +1,19 @@
 //! `Input` represents a read-write input field. This component supports different input types, input length
 //! and handles input events related to cursor position, backspace, canc, ...
 
-use super::props::{INPUT_INVALID_STYLE, INPUT_PLACEHOLDER, INPUT_PLACEHOLDER_STYLE};
-use crate::prop_ext::CommonProps;
-use crate::utils::calc_utf8_cursor_position;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{
     AttrValue, Attribute, Borders, Color, InputType, Props, Style, TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
-use tuirealm::ratatui::{layout::Rect, widgets::Paragraph};
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::state::{State, StateValue};
+
+use super::props::{INPUT_INVALID_STYLE, INPUT_PLACEHOLDER, INPUT_PLACEHOLDER_STYLE};
+use crate::prop_ext::CommonProps;
+use crate::utils::calc_utf8_cursor_position;
 
 // -- states
 
@@ -492,10 +494,10 @@ impl Component for Input {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
+
+    use super::*;
 
     #[test]
     fn test_components_input_states() {

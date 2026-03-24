@@ -170,10 +170,10 @@ impl Component for Container {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
-
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
+
+    use super::*;
 
     #[test]
     fn test_components_paragraph() {
