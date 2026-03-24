@@ -213,8 +213,10 @@ pub struct Label {
 impl Component for Label {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if visible
-        if !(self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true))
-        {
+        if matches!(
+            self.props.get_ref(Attribute::Display),
+            Some(AttrValue::Flag(false))
+        ) {
             return;
         }
 

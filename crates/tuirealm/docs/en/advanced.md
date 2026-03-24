@@ -434,7 +434,7 @@ Finally, we can implement the component `view()` method of `Component` which wil
 ```rust
 impl Component for Radio {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if !(self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true)) {
+        if matches!(self.props.get_ref(Attribute::Display), Some(AttrValue::Flag(false))) {
             return;
         }
 
