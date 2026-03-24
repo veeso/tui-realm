@@ -97,6 +97,34 @@ In addition to the process described for the PRs, I've also decided to introduce
    1. What's obvious for me, might not be for the others.
    2. Our capacity to work on a code depends mostly on **time and experience**, not on complexity: I'm not denying complexity matter, but the most decisive factor when working on code is the experience we've acquired working on it and the time we've spent. As the author of the project, I know the project like the back of my hands, but if I didn't work on it for a year, then I would probably have some problems in working on it again as the same speed as before. And do you know what's really time-saving in these cases? Comments.
 
+### Commit Messages
+
+Tui-realm makes use of conventional commits, which simply has the format of `TYPE(SCOPE): MESSAGE`
+
+Types available to use:
+- `feat`: Feature work, which includes breaking changes
+- `fix`: Patching some thing that are non-breaking and are not new features
+- `refactor`: Changing some internals that are non-breaking
+- `perf`: Performance improvements that are non-breaking
+- `doc`: Documentation was only updated (like `*.md` files)
+- `style`: Style changes inside the code that are non-breaking (like applying clippy suggestions)
+- `test`: Changes to the tests and nothing else
+- `ci`: Github Actions / CI related changes, without code or otherwise changes (ex updating actions versions)
+- `chore`: Anything else that does not modify the code (ex. updating LICENSE, CONTRIBUTING)
+
+`SCOPE` refers to the general scope of the change, in tui-realm this refers to the crate and or file and module.
+
+Note that any PR which does not conform to this style will either not get merged, or if small enough will be squashed instead.
+You will be notified of wrong style via a bot comment.
+
+#### Merges
+
+Merge commits should be avoided where possible.
+If it is a PR with conflicts to the target branch, the PR should rebase.
+If it is a Merge / PR from a major feature branch (ex `feature/4.0`) into the main brain, a merge commit is allowed.
+
+PR Merges are either done by squashing or fast-forwarding.
+
 ---
 
 Thank you for any contribution!  
