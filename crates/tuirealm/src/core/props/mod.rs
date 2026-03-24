@@ -9,9 +9,9 @@ mod borders;
 mod direction;
 mod input_type;
 mod layout;
+mod prop_value;
 mod shape;
 mod texts;
-mod value;
 
 // -- exports
 pub use any::{AnyPropBox, PropBound};
@@ -20,9 +20,9 @@ pub use borders::{BorderSides, BorderType, Borders};
 pub use direction::Direction;
 pub use input_type::InputType;
 pub use layout::Layout;
+pub use prop_value::{PropPayload, PropValue};
 pub use shape::Shape;
 pub use texts::{LineStatic, SpanStatic, Table, TableBuilder, TextStatic, Title};
-pub use value::{PropPayload, PropValue};
 
 pub use crate::ratatui::layout::{HorizontalAlignment, VerticalAlignment};
 pub use crate::ratatui::style::{Color, Modifier as TextModifiers, Style};
