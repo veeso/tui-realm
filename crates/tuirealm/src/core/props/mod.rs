@@ -1,7 +1,5 @@
 //! The `props` module exposes the Properties supported by the components and all the values they can get.
 
-use std::collections::HashMap;
-
 // -- modules
 mod any;
 mod attr_value;
@@ -10,6 +8,7 @@ mod direction;
 mod input_type;
 mod layout;
 mod prop_value;
+mod props_store;
 mod shape;
 mod texts;
 
@@ -21,49 +20,12 @@ pub use direction::Direction;
 pub use input_type::InputType;
 pub use layout::Layout;
 pub use prop_value::{PropPayload, PropValue};
+pub use props_store::Props;
 pub use shape::Shape;
 pub use texts::{LineStatic, SpanStatic, Table, TableBuilder, TextStatic, Title};
 
 pub use crate::ratatui::layout::{HorizontalAlignment, VerticalAlignment};
 pub use crate::ratatui::style::{Color, Modifier as TextModifiers, Style};
-
-/// The props struct holds all the attributes associated to the component.
-/// Properties have been designed to be versatile for all kind of components, but without introducing
-/// too many attributes at the same time.
-#[derive(Debug, Default, PartialEq, Clone)]
-pub struct Props {
-    attrs: HashMap<Attribute, AttrValue>,
-}
-
-impl Props {
-    /// Get, if any, the attribute associated to the selector.
-    ///
-    /// This function clones the returned value.
-    pub fn get(&self, query: Attribute) -> Option<AttrValue> {
-        self.attrs.get(&query).cloned()
-    }
-
-    /// Get, if any, the attribute associated to the selector
-    /// or return the fallback value `default`
-    pub fn get_or(&self, query: Attribute, default: AttrValue) -> AttrValue {
-        self.get(query).unwrap_or(default)
-    }
-
-    /// Get, if any, the attribute associated to the selector by reference.
-    pub fn get_ref(&self, query: Attribute) -> Option<&AttrValue> {
-        self.attrs.get(&query)
-    }
-
-    /// Get, if any, the attribute associated to the selector by mutable reference.
-    pub fn get_mut(&mut self, query: Attribute) -> Option<&mut AttrValue> {
-        self.attrs.get_mut(&query)
-    }
-
-    /// Set a new attribute into Properties
-    pub fn set(&mut self, query: Attribute, value: AttrValue) {
-        self.attrs.insert(query, value);
-    }
-}
 
 /// Describes a "selector" to query a attribute on props.
 ///
@@ -144,58 +106,4 @@ pub enum Attribute {
     Width,
     /// A user defined property
     Custom(&'static str),
-}
-
-#[cfg(test)]
-mod test {
-    use pretty_assertions::assert_eq;
-
-    use super::*;
-
-    #[test]
-    fn should_set_get_props() {
-        let mut props = Props::default();
-        assert_eq!(props.get(Attribute::AlignmentHorizontal), None);
-        assert_eq!(
-            props.get_or(
-                Attribute::AlignmentHorizontal,
-                AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
-            ),
-            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
-        );
-        assert_eq!(props.get_ref(Attribute::AlignmentHorizontal), None);
-
-        props.set(
-            Attribute::AlignmentHorizontal,
-            AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-        );
-        assert_eq!(
-            props.get(Attribute::AlignmentHorizontal),
-            Some(AttrValue::AlignmentHorizontal(HorizontalAlignment::Left))
-        );
-        assert_eq!(
-            props.get_or(
-                Attribute::AlignmentHorizontal,
-                AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
-            ),
-            AttrValue::AlignmentHorizontal(HorizontalAlignment::Left)
-        );
-        assert_eq!(
-            props.get_ref(Attribute::AlignmentHorizontal),
-            Some(&AttrValue::AlignmentHorizontal(HorizontalAlignment::Left))
-        );
-
-        let val = props.get_mut(Attribute::AlignmentHorizontal).unwrap();
-        assert_eq!(
-            val,
-            &AttrValue::AlignmentHorizontal(HorizontalAlignment::Left)
-        );
-        let v = val.as_alignment_horizontal_mut().unwrap();
-        *v = HorizontalAlignment::Center;
-
-        assert_eq!(
-            props.get_ref(Attribute::AlignmentHorizontal).unwrap(),
-            &AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
-        );
-    }
 }
