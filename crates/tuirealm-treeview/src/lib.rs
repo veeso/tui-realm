@@ -437,7 +437,6 @@ impl<V: NodeValue> Component for TreeView<V> {
             .props
             .get_ref(Attribute::Borders)
             .and_then(AttrValue::as_borders)
-            .cloned()
             .unwrap_or_default();
         let focus = self
             .props

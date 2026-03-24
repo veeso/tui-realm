@@ -226,9 +226,10 @@ impl AttrValue {
     }
 
     /// Get a Borders value from AttrValue, or None
-    pub fn as_borders(&self) -> Option<&Borders> {
+    pub fn as_borders(&self) -> Option<Borders> {
         match self {
-            AttrValue::Borders(v) => Some(v),
+            // cheap copy, so no reference
+            AttrValue::Borders(v) => Some(*v),
             _ => None,
         }
     }
@@ -654,7 +655,7 @@ mod tests {
 
         assert_eq!(
             AttrValue::Borders(Borders::default()).as_borders(),
-            Some(&Borders::default())
+            Some(Borders::default())
         );
         assert_eq!(
             AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_borders(),

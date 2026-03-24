@@ -108,8 +108,7 @@ impl Component for Counter {
             .props
             .get_ref(Attribute::Borders)
             .and_then(AttrValue::as_borders)
-            .cloned()
-            .unwrap_or(Borders::default());
+            .unwrap_or_default();
         let focus = self
             .props
             .get_ref(Attribute::Focus)
