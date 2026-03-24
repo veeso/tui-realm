@@ -156,6 +156,41 @@ impl<'a> PropPayloadRef<'a> {
     }
 }
 
+impl<'a> PartialEq<PropPayload> for PropPayloadRef<'a> {
+    fn eq(&self, other: &PropPayload) -> bool {
+        match (other, self) {
+            (PropPayload::Single(a), Self::Single(b)) => return *a == *b,
+            (PropPayload::Pair((a1, a2)), Self::Pair((b1, b2))) => return a1 == b1 && a2 == b2,
+            _ => (),
+        }
+
+        match other {
+            PropPayload::Single(_) | PropPayload::Pair(_) => false,
+            // PropPayload::Single(prop_value) => Some(prop_value) == self.as_single(),
+            // PropPayload::Pair((a, b)) => Some((a, b)) == self.as_pair(),
+            PropPayload::Vec(prop_values) => Some(prop_values.as_slice()) == self.as_vec(),
+            PropPayload::Map(hash_map) => Some(hash_map) == self.as_map(),
+            PropPayload::Linked(prop_payloads) => Some(prop_payloads) == self.as_linked(),
+            PropPayload::Any(prop_bound) => {
+                if let Self::Any(any) = self {
+                    &prop_bound == any
+                } else {
+                    false
+                }
+            }
+            PropPayload::None => *self == Self::None,
+        }
+    }
+}
+
+// reverse impl to not have position-dependent implementations
+// ex. allow `PropPayload == PropPayloadRef` AND `PropPayloadRef == PropPayload`, without this, it would only allow one of them
+impl<'a> PartialEq<PropPayloadRef<'a>> for PropPayload {
+    fn eq(&self, other: &PropPayloadRef<'a>) -> bool {
+        *other == *self
+    }
+}
+
 impl<'a> PropValueRef<'a> {
     // -- unwrappers
 
@@ -321,6 +356,15 @@ impl<'a> PropValueRef<'a> {
         }
     }
 
+    /// Unwrap PropValue as Color.
+    /// Panics otherwise
+    pub fn unwrap_color(self) -> Color {
+        match self {
+            PropValueRef::Color(v) => v,
+            _ => panic!("Called `unwrap_color` on a bad value"),
+        }
+    }
+
     /// Unwrap PropValue as InputType.
     /// Panics otherwise
     pub fn unwrap_input_type(self) -> &'a InputType {
@@ -345,6 +389,15 @@ impl<'a> PropValueRef<'a> {
         match self {
             PropValueRef::Style(v) => v,
             _ => panic!("Called `unwrap_style` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Table.
+    /// Panics otherwise
+    pub fn unwrap_table(self) -> &'a Table {
+        match self {
+            PropValueRef::Table(v) => v,
+            _ => panic!("Called `unwrap_table` on a bad value"),
         }
     }
 
@@ -538,6 +591,15 @@ impl<'a> PropValueRef<'a> {
         }
     }
 
+    /// Get a Color value from PropValue, or None
+    pub fn as_color(&self) -> Option<Color> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::Color(v) => Some(*v),
+            _ => None,
+        }
+    }
+
     /// Get a InputType value from PropValue, or None
     pub fn as_input_type(&self) -> Option<&'a InputType> {
         match self {
@@ -558,6 +620,14 @@ impl<'a> PropValueRef<'a> {
     pub fn as_style(&self) -> Option<Style> {
         match self {
             PropValueRef::Style(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Table value from PropValue, or None
+    pub fn as_table(&self) -> Option<&Table> {
+        match self {
+            PropValueRef::Table(v) => Some(v),
             _ => None,
         }
     }
@@ -584,6 +654,51 @@ impl<'a> PropValueRef<'a> {
             PropValueRef::Text(v) => Some(v),
             _ => None,
         }
+    }
+}
+
+impl<'a> PartialEq<PropValue> for PropValueRef<'a> {
+    fn eq(&self, other: &PropValue) -> bool {
+        match other {
+            PropValue::Bool(bool) => Some(*bool) == self.as_bool(),
+            PropValue::U8(num) => Some(*num) == self.as_u8(),
+            PropValue::U16(num) => Some(*num) == self.as_u16(),
+            PropValue::U32(num) => Some(*num) == self.as_u32(),
+            PropValue::U64(num) => Some(*num) == self.as_u64(),
+            PropValue::U128(num) => Some(*num) == self.as_u128(),
+            PropValue::Usize(num) => Some(*num) == self.as_usize(),
+            PropValue::I8(num) => Some(*num) == self.as_i8(),
+            PropValue::I16(num) => Some(*num) == self.as_i16(),
+            PropValue::I32(num) => Some(*num) == self.as_i32(),
+            PropValue::I64(num) => Some(*num) == self.as_i64(),
+            PropValue::I128(num) => Some(*num) == self.as_i128(),
+            PropValue::Isize(num) => Some(*num) == self.as_isize(),
+            PropValue::F64(num) => Some(*num) == self.as_f64(),
+            PropValue::F32(num) => Some(*num) == self.as_f32(),
+            PropValue::Str(string) => Some(string.as_str()) == self.as_str(),
+            PropValue::AlignmentHorizontal(horizontal_alignment) => {
+                Some(*horizontal_alignment) == self.as_alignment_horizontal()
+            }
+            PropValue::AlignmentVertical(vertical_alignment) => {
+                Some(*vertical_alignment) == self.as_alignment_vertical()
+            }
+            PropValue::Color(color) => Some(*color) == self.as_color(),
+            PropValue::InputType(input_type) => Some(input_type) == self.as_input_type(),
+            PropValue::Shape(shape) => Some(shape) == self.as_shape(),
+            PropValue::Style(style) => Some(*style) == self.as_style(),
+            PropValue::Table(items) => Some(items) == self.as_table(),
+            PropValue::TextSpan(span) => Some(span) == self.as_textspan(),
+            PropValue::TextLine(line) => Some(line) == self.as_textline(),
+            PropValue::Text(text) => Some(text) == self.as_text(),
+        }
+    }
+}
+
+// reverse impl to not have position-dependent implementations
+// ex. allow `PropValue == PropValueRef` AND `PropValueRef == PropValue`, without this, it would only allow one of them
+impl<'a> PartialEq<PropValueRef<'a>> for PropValue {
+    fn eq(&self, other: &PropValueRef<'a>) -> bool {
+        *other == *self
     }
 }
 
@@ -689,6 +804,7 @@ mod tests {
             PropValueRef::AlignmentVertical(VerticalAlignment::Top).unwrap_alignment_vertical(),
             VerticalAlignment::Top
         );
+        assert_eq!(PropValue::Color(Color::Black).unwrap_color(), Color::Black);
         assert!(PropValueRef::Bool(true).unwrap_bool());
         assert_eq!(PropValueRef::F32(0.32).unwrap_f32(), 0.32);
         assert_eq!(PropValueRef::F64(0.32).unwrap_f64(), 0.32);
@@ -719,6 +835,10 @@ mod tests {
         assert_eq!(
             PropValueRef::Style(Style::default()).unwrap_style(),
             Style::default()
+        );
+        assert_eq!(
+            PropValue::Table(vec![vec![LineStatic::from("test")]]).unwrap_table(),
+            vec![vec![LineStatic::from("test")]]
         );
         assert_eq!(
             PropValueRef::TextSpan(&SpanStatic::from("ciao")).unwrap_textspan(),
@@ -798,6 +918,12 @@ mod tests {
         assert_eq!(PropValueRef::Bool(true).as_alignment_vertical(), None);
 
         assert_eq!(
+            PropValue::Color(Color::Black).as_color(),
+            Some(Color::Black)
+        );
+        assert_eq!(PropValue::Bool(true).as_color(), None);
+
+        assert_eq!(
             PropValueRef::InputType(&InputType::Color).as_input_type(),
             Some(&InputType::Color)
         );
@@ -814,6 +940,12 @@ mod tests {
             Some(Style::new())
         );
         assert_eq!(PropValueRef::Bool(true).as_style(), None);
+
+        assert_eq!(
+            PropValue::Table(Table::new()).as_table(),
+            Some(&Table::new())
+        );
+        assert_eq!(PropValue::Bool(true).as_table(), None);
 
         assert_eq!(
             PropValueRef::TextSpan(&SpanStatic::from("hello")).as_textspan(),
@@ -964,5 +1096,174 @@ mod tests {
             input_downcasted.field1.as_ptr(),
             copied_downcasted.field1.as_ptr()
         );
+    }
+
+    #[test]
+    fn eq_nonref_proppayload() {
+        assert!(
+            PropPayloadRef::Single(PropValueRef::Bool(true))
+                == PropPayload::Single(PropValue::Bool(true))
+        );
+        assert!(!(PropPayloadRef::Single(PropValueRef::Bool(true)) == PropPayload::None));
+
+        assert!(
+            PropPayloadRef::Pair((PropValueRef::Bool(true), PropValueRef::Bool(true)))
+                == PropPayload::Pair((PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert!(
+            !(PropPayloadRef::Pair((PropValueRef::Bool(true), PropValueRef::Bool(true)))
+                == PropPayload::None)
+        );
+
+        assert!(
+            PropPayloadRef::Vec(&[PropValue::Bool(true)])
+                == PropPayload::Vec(vec![PropValue::Bool(true)])
+        );
+        assert!(!(PropPayloadRef::Vec(&[PropValue::Bool(true)]) == PropPayload::None));
+
+        assert!(
+            PropPayloadRef::Map(&HashMap::from([("key".to_string(), PropValue::Bool(true))]))
+                == PropPayload::Map(HashMap::from([("key".to_string(), PropValue::Bool(true))]))
+        );
+        assert!(
+            !(PropPayloadRef::Map(&HashMap::from([("key".to_string(), PropValue::Bool(true))]))
+                == PropPayload::None)
+        );
+
+        assert!(
+            PropPayloadRef::Linked(&LinkedList::new()) == PropPayload::Linked(LinkedList::new())
+        );
+        assert!(!(PropPayloadRef::Linked(&LinkedList::new()) == PropPayload::None));
+
+        #[derive(Debug, Clone, PartialEq)]
+        struct CloneableType {
+            field1: String,
+        }
+
+        assert!(
+            PropPayloadRef::Any(
+                &CloneableType {
+                    field1: "Hello".to_string(),
+                }
+                .to_any_prop()
+            ) == PropPayload::Any(
+                CloneableType {
+                    field1: "Hello".to_string(),
+                }
+                .to_any_prop()
+            )
+        );
+        assert!(
+            !(PropPayloadRef::Any(
+                &CloneableType {
+                    field1: "Hello".to_string(),
+                }
+                .to_any_prop()
+            ) == PropPayload::None)
+        );
+    }
+
+    #[test]
+    fn eq_nonref_propvalue() {
+        assert!(PropValueRef::Bool(true) == PropValue::Bool(true));
+        assert!(PropValueRef::Bool(false) == PropValue::Bool(false));
+        assert!(!(PropValueRef::Bool(true) == PropValue::U8(0)));
+
+        assert!(PropValueRef::U8(1) == PropValue::U8(1));
+        assert!(!(PropValueRef::U8(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::U16(1) == PropValue::U16(1));
+        assert!(!(PropValueRef::U16(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::U32(1) == PropValue::U32(1));
+        assert!(!(PropValueRef::U32(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::U64(1) == PropValue::U64(1));
+        assert!(!(PropValueRef::U64(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::U128(1) == PropValue::U128(1));
+        assert!(!(PropValueRef::U128(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::Usize(1) == PropValue::Usize(1));
+        assert!(!(PropValueRef::Usize(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::I8(1) == PropValue::I8(1));
+        assert!(!(PropValueRef::I8(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::I16(1) == PropValue::I16(1));
+        assert!(!(PropValueRef::I16(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::I32(1) == PropValue::I32(1));
+        assert!(!(PropValueRef::I32(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::I64(1) == PropValue::I64(1));
+        assert!(!(PropValueRef::I64(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::I128(1) == PropValue::I128(1));
+        assert!(!(PropValueRef::I128(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::Isize(1) == PropValue::Isize(1));
+        assert!(!(PropValueRef::Isize(1) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::F32(1.0) == PropValue::F32(1.0));
+        assert!(!(PropValueRef::F32(1.0) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::F64(1.0) == PropValue::F64(1.0));
+        assert!(!(PropValueRef::F64(1.0) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::Str("hello") == PropValue::Str("hello".to_string()));
+        assert!(!(PropValueRef::Str("hello") == PropValue::Bool(false)));
+
+        assert!(
+            PropValueRef::AlignmentHorizontal(HorizontalAlignment::Center)
+                == PropValue::AlignmentHorizontal(HorizontalAlignment::Center)
+        );
+        assert!(
+            !(PropValueRef::AlignmentHorizontal(HorizontalAlignment::Center)
+                == PropValue::Bool(false))
+        );
+
+        assert!(
+            PropValueRef::AlignmentVertical(VerticalAlignment::Bottom)
+                == PropValue::AlignmentVertical(VerticalAlignment::Bottom)
+        );
+        assert!(
+            !(PropValueRef::AlignmentVertical(VerticalAlignment::Bottom) == PropValue::Bool(false))
+        );
+
+        assert!(PropValueRef::Color(Color::Black) == PropValue::Color(Color::Black));
+        assert!(!(PropValueRef::Color(Color::Black) == PropValue::Bool(false)));
+
+        assert!(
+            PropValueRef::InputType(&InputType::Color) == PropValue::InputType(InputType::Color)
+        );
+        assert!(!(PropValueRef::InputType(&InputType::Color) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::Shape(&Shape::Layer) == PropValue::Shape(Shape::Layer));
+        assert!(!(PropValueRef::Shape(&Shape::Layer) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::Style(Style::default()) == PropValue::Style(Style::default()));
+        assert!(!(PropValueRef::Style(Style::default()) == PropValue::Bool(false)));
+
+        assert!(PropValueRef::Table(&Table::new()) == PropValue::Table(Table::new()));
+        assert!(!(PropValueRef::Table(&Table::new()) == PropValue::Bool(false)));
+
+        assert!(
+            PropValueRef::TextSpan(&SpanStatic::from("hello"))
+                == PropValue::TextSpan(SpanStatic::from("hello"))
+        );
+        assert!(!(PropValueRef::TextSpan(&SpanStatic::from("hello")) == PropValue::Bool(false)));
+
+        assert!(
+            PropValueRef::TextLine(&LineStatic::from("hello"))
+                == PropValue::TextLine(LineStatic::from("hello"))
+        );
+        assert!(!(PropValueRef::TextLine(&LineStatic::from("hello")) == PropValue::Bool(false)));
+
+        assert!(
+            PropValueRef::Text(&TextStatic::from("hello"))
+                == PropValue::Text(TextStatic::from("hello"))
+        );
+        assert!(!(PropValueRef::Text(&TextStatic::from("hello")) == PropValue::Bool(false)));
     }
 }

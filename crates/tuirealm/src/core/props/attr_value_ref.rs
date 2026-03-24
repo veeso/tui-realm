@@ -3,7 +3,7 @@ use ratatui::style::{Color, Modifier as TextModifiers, Style};
 use ratatui::text::{Line, Span, Text};
 
 use crate::props::prop_value_ref::PropPayloadRef;
-use crate::props::{Borders, Direction, InputType, Layout, Shape, Table, Title};
+use crate::props::{AttrValue, Borders, Direction, InputType, Layout, Shape, Table, Title};
 
 /// Describes a single attribute in the component properties as a reference.
 #[derive(Debug, PartialEq, Clone)]
@@ -436,12 +436,55 @@ impl<'a> AttrValueRef<'a> {
     }
 }
 
+impl<'a> PartialEq<AttrValue> for AttrValueRef<'a> {
+    fn eq(&self, other: &AttrValue) -> bool {
+        match other {
+            AttrValue::AlignmentHorizontal(horizontal_alignment) => {
+                Some(*horizontal_alignment) == self.as_alignment_horizontal()
+            }
+            AttrValue::AlignmentVertical(vertical_alignment) => {
+                Some(*vertical_alignment) == self.as_alignment_vertical()
+            }
+            AttrValue::Borders(borders) => Some(*borders) == self.as_borders(),
+            AttrValue::Color(color) => Some(*color) == self.as_color(),
+            AttrValue::Direction(direction) => Some(*direction) == self.as_direction(),
+            AttrValue::Flag(flag) => Some(*flag) == self.as_flag(),
+            AttrValue::InputType(input_type) => Some(input_type) == self.as_input_type(),
+            AttrValue::Layout(layout) => Some(layout) == self.as_layout(),
+            AttrValue::Length(length) => Some(*length) == self.as_length(),
+            AttrValue::Number(number) => Some(*number) == self.as_number(),
+            AttrValue::Shape(shape) => Some(shape) == self.as_shape(),
+            AttrValue::Size(size) => Some(*size) == self.as_size(),
+            AttrValue::String(string) => Some(string.as_str()) == self.as_string(),
+            AttrValue::Style(style) => Some(*style) == self.as_style(),
+            AttrValue::Table(items) => Some(items) == self.as_table(),
+            AttrValue::TextSpan(span) => Some(span) == self.as_textspan(),
+            AttrValue::TextLine(line) => Some(line) == self.as_textline(),
+            AttrValue::Text(text) => Some(text) == self.as_text(),
+            AttrValue::TextModifiers(modifier) => Some(*modifier) == self.as_text_modifiers(),
+            AttrValue::Title(title) => Some(title) == self.as_title(),
+            AttrValue::Payload(prop_payload) => self
+                .as_payload()
+                .map(|p| p == *prop_payload)
+                .unwrap_or_default(),
+        }
+    }
+}
+
+// reverse impl to not have position-dependent implementations
+// ex. allow `AttrValue == AttrValueRef` AND `AttrValueRef == AttrValue`, without this, it would only allow one of them
+impl<'a> PartialEq<AttrValueRef<'a>> for AttrValue {
+    fn eq(&self, other: &AttrValueRef<'a>) -> bool {
+        *other == *self
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::props::{LineStatic, SpanStatic, TextStatic};
+    use crate::props::{LineStatic, PropPayload, SpanStatic, TextStatic};
 
     #[test]
     fn unwrapping_should_unwrap() {
@@ -686,6 +729,101 @@ mod tests {
             AttrValueRef::AlignmentHorizontal(HorizontalAlignment::Center).as_payload(),
             None
         );
+    }
+
+    #[test]
+    fn eq_nonref_attrvalue() {
+        assert!(AttrValueRef::Flag(true) == AttrValue::Flag(true));
+        assert!(!(AttrValueRef::Flag(true) == AttrValue::Size(1)));
+
+        assert!(AttrValueRef::Size(1) == AttrValue::Size(1));
+        assert!(!(AttrValueRef::Size(1) == AttrValue::Flag(false)));
+
+        assert!(
+            AttrValueRef::AlignmentHorizontal(HorizontalAlignment::Center)
+                == AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
+        );
+        assert!(
+            !(AttrValueRef::AlignmentHorizontal(HorizontalAlignment::Center)
+                == AttrValue::Flag(false))
+        );
+
+        assert!(
+            AttrValueRef::AlignmentVertical(VerticalAlignment::Bottom)
+                == AttrValue::AlignmentVertical(VerticalAlignment::Bottom)
+        );
+        assert!(
+            !(AttrValueRef::AlignmentVertical(VerticalAlignment::Bottom) == AttrValue::Flag(false))
+        );
+
+        assert!(
+            AttrValueRef::Borders(Borders::default()) == AttrValue::Borders(Borders::default())
+        );
+        assert!(!(AttrValueRef::Borders(Borders::default()) == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::Color(Color::Black) == AttrValue::Color(Color::Black));
+        assert!(!(AttrValueRef::Color(Color::Black) == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::Direction(Direction::Down) == AttrValue::Direction(Direction::Down));
+        assert!(!(AttrValueRef::Direction(Direction::Down) == AttrValue::Flag(false)));
+
+        assert!(
+            AttrValueRef::InputType(&InputType::Color) == AttrValue::InputType(InputType::Color)
+        );
+        assert!(!(AttrValueRef::InputType(&InputType::Color) == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::Layout(&Layout::default()) == AttrValue::Layout(Layout::default()));
+        assert!(!(AttrValueRef::Layout(&Layout::default()) == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::Length(1) == AttrValue::Length(1));
+        assert!(!(AttrValueRef::Length(1) == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::Number(1) == AttrValue::Number(1));
+        assert!(!(AttrValueRef::Number(1) == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::Shape(&Shape::Layer) == AttrValue::Shape(Shape::Layer));
+        assert!(!(AttrValueRef::Shape(&Shape::Layer) == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::String("hello") == AttrValue::String("hello".to_string()));
+        assert!(!(AttrValueRef::String("hello") == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::Style(Style::default()) == AttrValue::Style(Style::default()));
+        assert!(!(AttrValueRef::Style(Style::default()) == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::Table(&Table::new()) == AttrValue::Table(Table::new()));
+        assert!(!(AttrValueRef::Table(&Table::new()) == AttrValue::Flag(false)));
+
+        assert!(
+            AttrValueRef::TextSpan(&SpanStatic::from("hello"))
+                == AttrValue::TextSpan(SpanStatic::from("hello"))
+        );
+        assert!(!(AttrValueRef::TextSpan(&SpanStatic::from("hello")) == AttrValue::Flag(false)));
+
+        assert!(
+            AttrValueRef::TextLine(&LineStatic::from("hello"))
+                == AttrValue::TextLine(LineStatic::from("hello"))
+        );
+        assert!(!(AttrValueRef::TextLine(&LineStatic::from("hello")) == AttrValue::Flag(false)));
+
+        assert!(
+            AttrValueRef::Text(&TextStatic::from("hello"))
+                == AttrValue::Text(TextStatic::from("hello"))
+        );
+        assert!(!(AttrValueRef::Text(&TextStatic::from("hello")) == AttrValue::Flag(false)));
+
+        assert!(
+            AttrValueRef::TextModifiers(TextModifiers::default())
+                == AttrValue::TextModifiers(TextModifiers::default())
+        );
+        assert!(!(AttrValueRef::TextModifiers(TextModifiers::default()) == AttrValue::Flag(false)));
+
+        assert!(AttrValueRef::Title(&Title::default()) == AttrValue::Title(Title::default()));
+        assert!(!(AttrValueRef::Title(&Title::default()) == AttrValue::Flag(false)));
+
+        assert!(
+            AttrValueRef::Payload(PropPayloadRef::None) == AttrValue::Payload(PropPayload::None)
+        );
+        assert!(!(AttrValueRef::Payload(PropPayloadRef::None) == AttrValue::Flag(false)));
     }
 
     #[test]
