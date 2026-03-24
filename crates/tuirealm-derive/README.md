@@ -90,9 +90,9 @@ impl AppComponent<Msg, UserEvent> for IpAddressInput {
 }
 ```
 
-Since `Component` **MUST** implement `Component`, we need to implement the mock component trait too, which in most of the case it will just call the Component methods on the inner `component` field. This is obviously kinda annoying to do for each component. That's why I implemented this procedural macro, which will automatically implement this logic on your component.
+Since `AppComponent` **MUST** implement `Component`, we need to implement the Component trait too, which in most of the case it will just call the Component methods on the inner `component` field. This is obviously kinda annoying to do for each component. That's why I implemented this procedural macro, which will automatically implement this logic on your component.
 
-So basically instead of implementing `Component` for your components, you can just do as follows:
+So basically instead of implementing `Component` for your app components, you can just do as follows:
 
 ```rust
 #[derive(Component)]
@@ -105,9 +105,9 @@ impl AppComponent<Msg, UserEvent> for IpAddressInput {
 }
 ```
 
-With the directive `#[derive(Component)]` we **don't have to** implement the mock component trait.
+With the directive `#[derive(Component)]` we **don't have to** implement the Component trait.
 
-> ❗ In order to work, the procedural macro requires you to name the "inner" mock component as `component` as I did in the example.
+> ❗ In order to work, the procedural macro requires you to name the "inner" Component as `component` as I did in the example.
 
 If we give a deeper look at the macro, we'll see that what it does is:
 
@@ -175,7 +175,7 @@ pub struct MyComponent {
 }
 ```
 
-> ❗ In order to work, the procedural macro requires you to name the "inner" mock component as `component` as I did in the example.
+> ❗ In order to work, the procedural macro requires you to name the "inner" component as `component` as I did in the example.
 
 And ta-dah, you're ready to go 🎉
 

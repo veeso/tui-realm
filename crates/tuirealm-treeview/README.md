@@ -145,7 +145,7 @@ In this library there is a consistent use of recursion, and since rust is not fu
 
 ### Updating the tree
 
-The tree in this component is not inside the `props`, but is a member of the `TreeView` mock component structure.
+The tree in this component is not inside the `props`, but is a member of the `TreeView` component structure.
 In order to update and work with the tree you've got basically two ways to do this.
 
 #### Remounting the component

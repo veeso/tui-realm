@@ -53,7 +53,7 @@
 //!
 //! ### Updating the tree
 //!
-//! The tree in this component is not inside the `props`, but is a member of the `TreeView` mock component structure.
+//! The tree in this component is not inside the `props`, but is a member of the `TreeView` component structure.
 //! In order to update and work with the tree you've got basically two ways to do this.
 //!
 //! #### Remounting the component
@@ -184,7 +184,7 @@
 //!
 //! ## Tree widget
 //!
-//! If you want, you can also implement your own version of a tree view mock component using the `TreeWidget`
+//! If you want, you can also implement your own version of a tree view component using the `TreeWidget`
 //! in order to render a tree.
 //! Keep in mind that if you want to create a stateful tree (with highlighted item), you'll need to render it
 //! as a stateful widget, passing to it a `TreeState`, which is provided by this library.
@@ -198,10 +198,8 @@
     html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/crates/tuirealm-treeview/docs/images/cargo/tui-realm-treeview-128.png"
 )]
 
-// -- mock
 #[cfg(test)]
 pub(crate) mod mock;
-// -- modules
 pub mod tree_state;
 pub mod widget;
 
@@ -260,7 +258,7 @@ pub const TREE_CMD_CLOSE: &str = "c";
 
 /// ## TreeView
 ///
-/// Tree view Mock component for tui-realm
+/// Tree view component for tui-realm
 pub struct TreeView<V: NodeValue> {
     props: Props,
     states: TreeState,
@@ -402,8 +400,6 @@ impl<V: NodeValue> TreeView<V> {
         }
     }
 }
-
-// -- mock
 
 impl<V: NodeValue> Component for TreeView<V> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {

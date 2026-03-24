@@ -55,7 +55,7 @@
 
 tui-realm-stdlib is the standard component library for [tui-realm](https://github.com/veeso/tui-realm).
 
-It provides several **Mock Components** for your tui-realm applications. Probably all the components you need are here 😉
+It provides several **Components** for your tui-realm applications. Probably all the components you need are here 😉
 
 ---
 

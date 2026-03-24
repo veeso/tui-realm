@@ -252,9 +252,9 @@ If your application already makes use of async, it is recommended you use async 
 
 ## Implementing new components
 
-Implementing components is quite simple in tui-realm. This example will implement a more complex Component that what was shown in [Get Started](get-started.md#the-mock-component) and requires the knowledge of the difference between *Mock Component* and *Component* and at least a little knowledge about *ratatui widgets*.
+Implementing components is quite simple in tui-realm. This example will implement a more complex Component that what was shown in [Get Started](get-started.md#the-component) and requires the knowledge of the difference between *Component* and *AppComponent* and at least a little knowledge about *ratatui widgets*.
 
-That said, let's see how to implement a more complex component. For this example I will implement a simplified version of the `Radio` component of the stdlib.
+That said, let's see how to implement a more complex component. For this example we will implement a simplified version of the `Radio` component of the stdlib.
 
 ### What the component should look like
 

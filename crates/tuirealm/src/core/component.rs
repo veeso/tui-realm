@@ -48,8 +48,8 @@ pub trait Component {
     fn perform(&mut self, cmd: Cmd) -> CmdResult;
 }
 
-/// The component describes the application level component, which is a wrapper around the [`Component`],
-/// which, in addition to all the methods exposed by the mock, it will handle the [`Event`]s coming from the `View`.
+/// The app component describes the application level component, which is a wrapper around the [`Component`],
+/// which, in addition to all the methods exposed by the base component, it will handle the [`Event`]s coming from the `View`.
 ///
 /// The Event are passed to the `on` method, which will eventually return a `Msg`,
 /// which is defined in your application as an enum.

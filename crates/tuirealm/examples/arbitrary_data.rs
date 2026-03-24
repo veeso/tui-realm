@@ -167,7 +167,7 @@ impl Default for CustomState {
 
 /// Simple label component; just renders a text
 /// NOTE: since I need just one label, I'm not going to use different object; I will directly implement Component for Label.
-/// This is not ideal actually and in a real app you should differentiate Mock Components from Application Components.
+/// This is not ideal actually and in a real app you should differentiate Components from Application Components.
 #[derive(Debug)]
 pub struct StdLabel {
     props: Props,

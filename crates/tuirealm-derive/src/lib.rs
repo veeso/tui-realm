@@ -28,9 +28,9 @@
 //! }
 //! ```
 //!
-//! With the directive `#[derive(Component)]` we **don't have to** implement the mock component trait.
+//! With the directive `#[derive(Component)]` we **don't have to** implement the component trait.
 //!
-//! > ❗ In order to work, the procedural macro requires you to name the "inner" mock component as `component` as I did in the example.
+//! > ❗ In order to work, the procedural macro requires you to name the "inner" component as `component` as I did in the example.
 //!
 //! If we give a deeper look at the macro, we'll see that what it does is:
 //!
@@ -106,7 +106,7 @@
 //! }
 //! ```
 //!
-//! > ❗ In order to work, the procedural macro requires you to name the "inner" mock component as `component` as I did in the example.
+//! > ❗ In order to work, the procedural macro requires you to name the "inner" component as `component` as I did in the example.
 //!
 //! And ta-dah, you're ready to go 🎉
 //!
