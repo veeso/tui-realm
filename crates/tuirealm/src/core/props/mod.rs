@@ -3,11 +3,13 @@
 // -- modules
 mod any;
 mod attr_value;
+mod attr_value_ref;
 mod borders;
 mod direction;
 mod input_type;
 mod layout;
 mod prop_value;
+mod prop_value_ref;
 mod props_store;
 mod shape;
 mod texts;
@@ -15,11 +17,13 @@ mod texts;
 // -- exports
 pub use any::{AnyPropBox, PropBound};
 pub use attr_value::AttrValue;
+pub use attr_value_ref::AttrValueRef;
 pub use borders::{BorderSides, BorderType, Borders};
 pub use direction::Direction;
 pub use input_type::InputType;
 pub use layout::Layout;
 pub use prop_value::{PropPayload, PropValue};
+pub use prop_value_ref::{PropPayloadRef, PropValueRef};
 pub use props_store::Props;
 pub use shape::Shape;
 pub use texts::{LineStatic, SpanStatic, Table, TableBuilder, TextStatic, Title};

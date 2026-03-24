@@ -1,0 +1,968 @@
+//! This module exposes the prop values
+
+use std::any::Any;
+use std::collections::{HashMap, LinkedList};
+
+use ratatui::text::{Line, Span, Text};
+
+use super::{Color, HorizontalAlignment, InputType, Shape, Style, Table, VerticalAlignment};
+use crate::props::{AnyPropBox, PropPayload, PropValue};
+
+// -- Prop value
+
+/// The payload contains the actual value for user defined properties
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum PropPayloadRef<'a> {
+    Single(PropValueRef<'a>),
+    Pair((PropValueRef<'a>, PropValueRef<'a>)),
+    Vec(&'a [PropValue]),
+    Map(&'a HashMap<String, PropValue>),
+    Linked(&'a LinkedList<PropPayload>),
+    Any(&'a AnyPropBox),
+    None,
+}
+
+/// Value describes the value contained in a `PropPayload`
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum PropValueRef<'a> {
+    Bool(bool),
+    U8(u8),
+    U16(u16),
+    U32(u32),
+    U64(u64),
+    U128(u128),
+    Usize(usize),
+    I8(i8),
+    I16(i16),
+    I32(i32),
+    I64(i64),
+    I128(i128),
+    Isize(isize),
+    F64(f64),
+    F32(f32),
+    Str(&'a str),
+    // -- tui props
+    AlignmentHorizontal(HorizontalAlignment),
+    AlignmentVertical(VerticalAlignment),
+    Color(Color),
+    InputType(&'a InputType),
+    Shape(&'a Shape),
+    Style(Style),
+    Table(&'a Table),
+    TextSpan(&'a Span<'a>),
+    TextLine(&'a Line<'a>),
+    Text(&'a Text<'a>),
+}
+
+impl<'a> PropPayloadRef<'a> {
+    // -- unwrappers
+
+    /// Unwrap a Single value from PropPayload
+    pub fn unwrap_single(self) -> PropValueRef<'a> {
+        match self {
+            PropPayloadRef::Single(v) => v,
+            _ => panic!("Called `unwrap_single` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Pair value from PropPayload
+    pub fn unwrap_pair(self) -> (PropValueRef<'a>, PropValueRef<'a>) {
+        match self {
+            PropPayloadRef::Pair(v) => v,
+            _ => panic!("Called `unwrap_pair` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Vec value from PropPayload
+    pub fn unwrap_vec(self) -> &'a [PropValue] {
+        match self {
+            PropPayloadRef::Vec(v) => v,
+            _ => panic!("Called `unwrap_vec` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Map value from PropPayload
+    pub fn unwrap_map(self) -> &'a HashMap<String, PropValue> {
+        match self {
+            PropPayloadRef::Map(v) => v,
+            _ => panic!("Called `unwrap_map` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Linked list from PropPayload
+    pub fn unwrap_linked(self) -> &'a LinkedList<PropPayload> {
+        match self {
+            PropPayloadRef::Linked(v) => v,
+            _ => panic!("Called `unwrap_linked` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Any from PropPayload
+    pub fn unwrap_any(self) -> &'a AnyPropBox {
+        match self {
+            PropPayloadRef::Any(v) => v,
+            _ => panic!("Called `unwrap_any` on a bad value"),
+        }
+    }
+
+    // -- as reference
+
+    /// Get a Single value from PropPayload, or None
+    pub fn as_single(&self) -> Option<PropValueRef<'a>> {
+        match self {
+            PropPayloadRef::Single(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Pair value from PropPayload, or None
+    pub fn as_pair(&self) -> Option<(PropValueRef<'a>, PropValueRef<'a>)> {
+        match self {
+            PropPayloadRef::Pair(v) => Some((v.0, v.1)),
+            _ => None,
+        }
+    }
+
+    /// Get a Vec value from PropPayload, or None
+    pub fn as_vec(&self) -> Option<&'a [PropValue]> {
+        match self {
+            PropPayloadRef::Vec(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Map value from PropPayload, or None
+    pub fn as_map(&self) -> Option<&'a HashMap<String, PropValue>> {
+        match self {
+            PropPayloadRef::Map(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Linked value from PropPayload, or None
+    pub fn as_linked(&self) -> Option<&'a LinkedList<PropPayload>> {
+        match self {
+            PropPayloadRef::Linked(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Any value from PropPayload, or None
+    pub fn as_any(&self) -> Option<&dyn Any> {
+        match self {
+            PropPayloadRef::Any(v) => Some(v.as_ref()),
+            _ => None,
+        }
+    }
+}
+
+impl<'a> PropValueRef<'a> {
+    // -- unwrappers
+
+    /// Unwrap PropValue as Bool.
+    /// Panics otherwise
+    pub fn unwrap_bool(self) -> bool {
+        match self {
+            PropValueRef::Bool(v) => v,
+            _ => panic!("Called `unwrap_bool` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as u8.
+    /// Panics otherwise
+    pub fn unwrap_u8(self) -> u8 {
+        match self {
+            PropValueRef::U8(v) => v,
+            _ => panic!("Called `unwrap_u8` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as u16.
+    /// Panics otherwise
+    pub fn unwrap_u16(self) -> u16 {
+        match self {
+            PropValueRef::U16(v) => v,
+            _ => panic!("Called `unwrap_u16` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Bool.
+    /// Panics otherwise
+    pub fn unwrap_u32(self) -> u32 {
+        match self {
+            PropValueRef::U32(v) => v,
+            _ => panic!("Called `unwrap_u32` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as u64.
+    /// Panics otherwise
+    pub fn unwrap_u64(self) -> u64 {
+        match self {
+            PropValueRef::U64(v) => v,
+            _ => panic!("Called `unwrap_u64` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as u128.
+    /// Panics otherwise
+    pub fn unwrap_u128(self) -> u128 {
+        match self {
+            PropValueRef::U128(v) => v,
+            _ => panic!("Called `unwrap_u128` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as usize.
+    /// Panics otherwise
+    pub fn unwrap_usize(self) -> usize {
+        match self {
+            PropValueRef::Usize(v) => v,
+            _ => panic!("Called `unwrap_usize` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i8.
+    /// Panics otherwise
+    pub fn unwrap_i8(self) -> i8 {
+        match self {
+            PropValueRef::I8(v) => v,
+            _ => panic!("Called `unwrap_i8` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i16.
+    /// Panics otherwise
+    pub fn unwrap_i16(self) -> i16 {
+        match self {
+            PropValueRef::I16(v) => v,
+            _ => panic!("Called `unwrap_i16` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i32.
+    /// Panics otherwise
+    pub fn unwrap_i32(self) -> i32 {
+        match self {
+            PropValueRef::I32(v) => v,
+            _ => panic!("Called `unwrap_i32` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i64.
+    /// Panics otherwise
+    pub fn unwrap_i64(self) -> i64 {
+        match self {
+            PropValueRef::I64(v) => v,
+            _ => panic!("Called `unwrap_i64` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i128.
+    /// Panics otherwise
+    pub fn unwrap_i128(self) -> i128 {
+        match self {
+            PropValueRef::I128(v) => v,
+            _ => panic!("Called `unwrap_i128` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as isize.
+    /// Panics otherwise
+    pub fn unwrap_isize(self) -> isize {
+        match self {
+            PropValueRef::Isize(v) => v,
+            _ => panic!("Called `unwrap_isize` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as f32.
+    /// Panics otherwise
+    pub fn unwrap_f32(self) -> f32 {
+        match self {
+            PropValueRef::F32(v) => v,
+            _ => panic!("Called `unwrap_f32` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as f64.
+    /// Panics otherwise
+    pub fn unwrap_f64(self) -> f64 {
+        match self {
+            PropValueRef::F64(v) => v,
+            _ => panic!("Called `unwrap_f64` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as String.
+    /// Panics otherwise
+    pub fn unwrap_str(self) -> &'a str {
+        match self {
+            PropValueRef::Str(v) => v,
+            _ => panic!("Called `unwrap_str` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Horizontal Alignment.
+    /// Panics otherwise
+    pub fn unwrap_alignment_horizontal(self) -> HorizontalAlignment {
+        match self {
+            PropValueRef::AlignmentHorizontal(v) => v,
+            _ => panic!("Called `unwrap_alignment_horizontal` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Vertical Alignment.
+    /// Panics otherwise
+    pub fn unwrap_alignment_vertical(self) -> VerticalAlignment {
+        match self {
+            PropValueRef::AlignmentVertical(v) => v,
+            _ => panic!("Called `unwrap_alignment_vertical` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as InputType.
+    /// Panics otherwise
+    pub fn unwrap_input_type(self) -> &'a InputType {
+        match self {
+            PropValueRef::InputType(v) => v,
+            _ => panic!("Called `unwrap_input_type` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Shape.
+    /// Panics otherwise
+    pub fn unwrap_shape(self) -> &'a Shape {
+        match self {
+            PropValueRef::Shape(v) => v,
+            _ => panic!("Called `unwrap_shape` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Style.
+    /// Panics otherwise
+    pub fn unwrap_style(self) -> Style {
+        match self {
+            PropValueRef::Style(v) => v,
+            _ => panic!("Called `unwrap_style` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as [`SpanStatic`].
+    /// Panics otherwise
+    pub fn unwrap_textspan(self) -> &'a Span<'a> {
+        match self {
+            PropValueRef::TextSpan(v) => v,
+            _ => panic!("Called `unwrap_textspan` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as [`LineStatic`].
+    /// Panics otherwise
+    pub fn unwrap_textline(self) -> &'a Line<'a> {
+        match self {
+            PropValueRef::TextLine(b) => b,
+            _ => panic!("Called `unwrap_textline` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as [`TextStatic`].
+    /// Panics otherwise
+    pub fn unwrap_text(self) -> &'a Text<'a> {
+        match self {
+            PropValueRef::Text(v) => v,
+            _ => panic!("Called `unwrap_text` on a bad value"),
+        }
+    }
+
+    // -- as reference
+
+    /// Get a Bool value from PropValue, or None
+    pub fn as_bool(&self) -> Option<bool> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::Bool(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u8 value from PropValue, or None
+    pub fn as_u8(&self) -> Option<u8> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::U8(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u16 value from PropValue, or None
+    pub fn as_u16(&self) -> Option<u16> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::U16(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u32 value from PropValue, or None
+    pub fn as_u32(&self) -> Option<u32> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::U32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u64 value from PropValue, or None
+    pub fn as_u64(&self) -> Option<u64> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::U64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u128 value from PropValue, or None
+    pub fn as_u128(&self) -> Option<u128> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::U128(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a usize value from PropValue, or None
+    pub fn as_usize(&self) -> Option<usize> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::Usize(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i8 value from PropValue, or None
+    pub fn as_i8(&self) -> Option<i8> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::I8(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i16 value from PropValue, or None
+    pub fn as_i16(&self) -> Option<i16> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::I16(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i32 value from PropValue, or None
+    pub fn as_i32(&self) -> Option<i32> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::I32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i64 value from PropValue, or None
+    pub fn as_i64(&self) -> Option<i64> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::I64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i128 value from PropValue, or None
+    pub fn as_i128(&self) -> Option<i128> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::I128(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a isize value from PropValue, or None
+    pub fn as_isize(&self) -> Option<isize> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::Isize(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a f32 value from PropValue, or None
+    pub fn as_f32(&self) -> Option<f32> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::F32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a f64 value from PropValue, or None
+    pub fn as_f64(&self) -> Option<f64> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::F64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a String value from PropValue, or None
+    pub fn as_str(&self) -> Option<&'a str> {
+        match self {
+            PropValueRef::Str(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Horizontal Alignment value from PropValue, or None
+    pub fn as_alignment_horizontal(&self) -> Option<HorizontalAlignment> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::AlignmentHorizontal(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vertical Alignment value from PropValue, or None
+    pub fn as_alignment_vertical(&self) -> Option<VerticalAlignment> {
+        match self {
+            // cheap copy, so no reference
+            PropValueRef::AlignmentVertical(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a InputType value from PropValue, or None
+    pub fn as_input_type(&self) -> Option<&'a InputType> {
+        match self {
+            PropValueRef::InputType(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Shape value from PropValue, or None
+    pub fn as_shape(&self) -> Option<&'a Shape> {
+        match self {
+            PropValueRef::Shape(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Style value from PropValue, or None
+    pub fn as_style(&self) -> Option<Style> {
+        match self {
+            PropValueRef::Style(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`SpanStatic`] value from PropValue, or None
+    pub fn as_textspan(&self) -> Option<&'a Span<'a>> {
+        match self {
+            PropValueRef::TextSpan(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`LineStatic`] value from PropValue, or None
+    pub fn as_textline(&self) -> Option<&'a Line<'a>> {
+        match self {
+            PropValueRef::TextLine(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`TextStatic`] value from PropValue, or None
+    pub fn as_text(&self) -> Option<&'a Text<'a>> {
+        match self {
+            PropValueRef::Text(v) => Some(v),
+            _ => None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use pretty_assertions::{assert_eq, assert_ne};
+
+    use super::*;
+    use crate::props::{LineStatic, PropBound, SpanStatic, TextStatic};
+    use crate::ratatui::widgets::canvas::Map;
+
+    #[test]
+    fn prop_values() {
+        // test that values can be created without compile errors
+        let _ = PropPayloadRef::Single(PropValueRef::Usize(2));
+        let _ = PropPayloadRef::Pair((PropValueRef::Bool(true), PropValueRef::Usize(128)));
+        let _ = PropPayloadRef::Vec(&[
+            PropValue::U16(1),
+            PropValue::U32(2),
+            PropValue::U64(3),
+            PropValue::U128(4),
+        ]);
+        let mut map: HashMap<String, PropValue> = HashMap::new();
+        map.insert(String::from("a"), PropValue::I8(4));
+        assert_eq!(*map.get("a").unwrap(), PropValue::I8(4));
+        map.insert(String::from("b"), PropValue::I16(-8));
+        assert_eq!(*map.get("b").unwrap(), PropValue::I16(-8));
+        map.insert(String::from("c"), PropValue::I32(16));
+        assert_eq!(*map.get("c").unwrap(), PropValue::I32(16));
+        map.insert(String::from("d"), PropValue::I64(-32));
+        assert_eq!(*map.get("d").unwrap(), PropValue::I64(-32));
+        map.insert(String::from("e"), PropValue::I128(64));
+        assert_eq!(*map.get("e").unwrap(), PropValue::I128(64));
+        map.insert(String::from("g"), PropValue::InputType(InputType::Number));
+        assert_eq!(
+            *map.get("g").unwrap(),
+            PropValue::InputType(InputType::Number)
+        );
+        map.insert(String::from("h"), PropValue::U8(0));
+        assert_eq!(*map.get("h").unwrap(), PropValue::U8(0));
+        map.insert(String::from("i"), PropValue::Bool(true));
+        assert_eq!(*map.get("i").unwrap(), PropValue::Bool(true));
+        map.insert(String::from("j"), PropValue::U16(256));
+        assert_eq!(*map.get("j").unwrap(), PropValue::U16(256));
+        map.insert(String::from("k"), PropValue::U32(65536));
+        assert_eq!(*map.get("k").unwrap(), PropValue::U32(65536));
+        map.insert(String::from("l"), PropValue::U64(10000000000));
+        assert_eq!(*map.get("l").unwrap(), PropValue::U64(10000000000));
+        map.insert(String::from("m"), PropValue::Isize(200));
+        assert_eq!(*map.get("m").unwrap(), PropValue::Isize(200));
+        map.insert(String::from("n"), PropValue::F32(0.23));
+        assert_eq!(*map.get("n").unwrap(), PropValue::F32(0.23));
+        map.insert(
+            String::from("p"),
+            PropValue::Style(Style::default().fg(Color::Red)),
+        );
+        assert_eq!(
+            *map.get("p").unwrap(),
+            PropValue::Style(Style::default().fg(Color::Red))
+        );
+        map.insert(String::from("s"), PropValue::InputType(InputType::Number));
+        assert_eq!(
+            *map.get("s").unwrap(),
+            PropValue::InputType(InputType::Number)
+        );
+        map.insert(
+            String::from("t"),
+            PropValue::Shape(Shape::Map(Map::default())),
+        );
+        assert_eq!(
+            *map.get("t").unwrap(),
+            PropValue::Shape(Shape::Map(Map::default()))
+        );
+        map.insert(
+            String::from("u"),
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center),
+        );
+        assert_eq!(
+            *map.get("u").unwrap(),
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center)
+        );
+
+        let _ = PropPayloadRef::Map(&map);
+        let mut link: LinkedList<PropPayload> = LinkedList::new();
+        link.push_back(PropPayload::Single(PropValue::Usize(1)));
+        link.push_back(PropPayload::Pair((
+            PropValue::Usize(2),
+            PropValue::Usize(4),
+        )));
+        let _ = PropPayloadRef::Linked(&link);
+    }
+
+    #[test]
+    fn unwrap_prop_values() {
+        assert_eq!(
+            PropValueRef::AlignmentHorizontal(HorizontalAlignment::Center)
+                .unwrap_alignment_horizontal(),
+            HorizontalAlignment::Center
+        );
+        assert_eq!(
+            PropValueRef::AlignmentVertical(VerticalAlignment::Top).unwrap_alignment_vertical(),
+            VerticalAlignment::Top
+        );
+        assert!(PropValueRef::Bool(true).unwrap_bool());
+        assert_eq!(PropValueRef::F32(0.32).unwrap_f32(), 0.32);
+        assert_eq!(PropValueRef::F64(0.32).unwrap_f64(), 0.32);
+        assert_eq!(PropValueRef::I128(5).unwrap_i128(), 5);
+        assert_eq!(PropValueRef::I64(5).unwrap_i64(), 5);
+        assert_eq!(PropValueRef::I32(5).unwrap_i32(), 5);
+        assert_eq!(PropValueRef::I16(5).unwrap_i16(), 5);
+        assert_eq!(PropValueRef::I8(5).unwrap_i8(), 5);
+        assert_eq!(PropValueRef::Isize(5).unwrap_isize(), 5);
+        assert_eq!(PropValueRef::U128(5).unwrap_u128(), 5);
+        assert_eq!(PropValueRef::U64(5).unwrap_u64(), 5);
+        assert_eq!(PropValueRef::U32(5).unwrap_u32(), 5);
+        assert_eq!(PropValueRef::U16(5).unwrap_u16(), 5);
+        assert_eq!(PropValueRef::U8(5).unwrap_u8(), 5);
+        assert_eq!(PropValueRef::Usize(5).unwrap_usize(), 5);
+        assert_eq!(
+            PropValueRef::InputType(&InputType::Number).unwrap_input_type(),
+            &InputType::Number
+        );
+        assert_eq!(
+            PropValueRef::Shape(&Shape::Layer).unwrap_shape(),
+            &Shape::Layer
+        );
+        assert_eq!(
+            PropValueRef::Str(&String::from("ciao")).unwrap_str(),
+            "ciao".to_string()
+        );
+        assert_eq!(
+            PropValueRef::Style(Style::default()).unwrap_style(),
+            Style::default()
+        );
+        assert_eq!(
+            PropValueRef::TextSpan(&SpanStatic::from("ciao")).unwrap_textspan(),
+            &SpanStatic::from("ciao")
+        );
+        assert_eq!(
+            PropValueRef::TextLine(&LineStatic::from("ciao")).unwrap_textline(),
+            &LineStatic::from("ciao")
+        );
+        assert_eq!(
+            PropValueRef::Text(&TextStatic::from("ciao")).unwrap_text(),
+            &TextStatic::from("ciao")
+        );
+    }
+
+    #[test]
+    fn as_prop_value() {
+        assert_eq!(PropValueRef::Bool(true).as_bool(), Some(true));
+        assert_eq!(PropValueRef::U8(0).as_bool(), None);
+
+        assert_eq!(PropValueRef::U8(1).as_u8(), Some(1));
+        assert_eq!(PropValueRef::Bool(true).as_u8(), None);
+
+        assert_eq!(PropValueRef::U16(1).as_u16(), Some(1));
+        assert_eq!(PropValueRef::Bool(true).as_u16(), None);
+
+        assert_eq!(PropValueRef::U32(1).as_u32(), Some(1));
+        assert_eq!(PropValueRef::Bool(true).as_u32(), None);
+
+        assert_eq!(PropValueRef::U64(1).as_u64(), Some(1));
+        assert_eq!(PropValueRef::Bool(true).as_u64(), None);
+
+        assert_eq!(PropValueRef::U128(1).as_u128(), Some(1));
+        assert_eq!(PropValueRef::Bool(true).as_u128(), None);
+
+        assert_eq!(PropValueRef::Usize(1).as_usize(), Some(1));
+        assert_eq!(PropValueRef::Bool(true).as_usize(), None);
+
+        assert_eq!(PropValueRef::I8(-1).as_i8(), Some(-1));
+        assert_eq!(PropValueRef::Bool(true).as_i8(), None);
+
+        assert_eq!(PropValueRef::I16(-1).as_i16(), Some(-1));
+        assert_eq!(PropValueRef::Bool(true).as_i16(), None);
+
+        assert_eq!(PropValueRef::I32(-1).as_i32(), Some(-1));
+        assert_eq!(PropValueRef::Bool(true).as_i32(), None);
+
+        assert_eq!(PropValueRef::I64(-1).as_i64(), Some(-1));
+        assert_eq!(PropValueRef::Bool(true).as_i64(), None);
+
+        assert_eq!(PropValueRef::I128(-1).as_i128(), Some(-1));
+        assert_eq!(PropValueRef::Bool(true).as_i128(), None);
+
+        assert_eq!(PropValueRef::Isize(-1).as_isize(), Some(-1));
+        assert_eq!(PropValueRef::Bool(true).as_isize(), None);
+
+        assert_eq!(PropValueRef::F32(1.1).as_f32(), Some(1.1));
+        assert_eq!(PropValueRef::Bool(true).as_f32(), None);
+
+        assert_eq!(PropValueRef::F64(1.1).as_f64(), Some(1.1));
+        assert_eq!(PropValueRef::Bool(true).as_f64(), None);
+
+        assert_eq!(PropValueRef::Str("hello").as_str(), Some("hello"));
+        assert_eq!(PropValueRef::Bool(true).as_str(), None);
+
+        assert_eq!(
+            PropValueRef::AlignmentHorizontal(HorizontalAlignment::Center)
+                .as_alignment_horizontal(),
+            Some(HorizontalAlignment::Center)
+        );
+        assert_eq!(PropValueRef::Bool(true).as_alignment_horizontal(), None);
+
+        assert_eq!(
+            PropValueRef::AlignmentVertical(VerticalAlignment::Top).as_alignment_vertical(),
+            Some(VerticalAlignment::Top)
+        );
+        assert_eq!(PropValueRef::Bool(true).as_alignment_vertical(), None);
+
+        assert_eq!(
+            PropValueRef::InputType(&InputType::Color).as_input_type(),
+            Some(&InputType::Color)
+        );
+        assert_eq!(PropValueRef::Bool(true).as_input_type(), None);
+
+        assert_eq!(
+            PropValueRef::Shape(&Shape::Layer).as_shape(),
+            Some(&Shape::Layer)
+        );
+        assert_eq!(PropValueRef::Bool(true).as_shape(), None);
+
+        assert_eq!(
+            PropValueRef::Style(Style::new()).as_style(),
+            Some(Style::new())
+        );
+        assert_eq!(PropValueRef::Bool(true).as_style(), None);
+
+        assert_eq!(
+            PropValueRef::TextSpan(&SpanStatic::from("hello")).as_textspan(),
+            Some(&SpanStatic::from("hello"))
+        );
+        assert_eq!(PropValueRef::Bool(true).as_textspan(), None);
+
+        assert_eq!(
+            PropValueRef::TextLine(&LineStatic::from("hello")).as_textline(),
+            Some(&LineStatic::from("hello"))
+        );
+        assert_eq!(PropValueRef::Bool(true).as_textline(), None);
+
+        assert_eq!(
+            PropValueRef::Text(&TextStatic::from("hello")).as_text(),
+            Some(&TextStatic::from("hello"))
+        );
+        assert_eq!(PropValueRef::Bool(true).as_text(), None);
+    }
+
+    #[test]
+    fn unwrap_prop_payloads() {
+        assert!(
+            !PropPayloadRef::Single(PropValueRef::Bool(false))
+                .unwrap_single()
+                .unwrap_bool(),
+        );
+        assert_eq!(
+            PropPayloadRef::Pair((PropValueRef::Bool(false), PropValueRef::Bool(false)))
+                .unwrap_pair(),
+            (PropValueRef::Bool(false), PropValueRef::Bool(false))
+        );
+        assert_eq!(
+            PropPayloadRef::Vec(&[PropValue::Bool(false), PropValue::Bool(false)]).unwrap_vec(),
+            &[PropValue::Bool(false), PropValue::Bool(false)]
+        );
+    }
+
+    #[test]
+    fn as_prop_payloads() {
+        assert_eq!(
+            PropPayloadRef::Single(PropValueRef::Bool(true)).as_single(),
+            Some(PropValueRef::Bool(true))
+        );
+        assert_eq!(PropPayloadRef::None.as_single(), None);
+
+        assert_eq!(
+            PropPayloadRef::Pair((PropValueRef::Bool(true), PropValueRef::Bool(true))).as_pair(),
+            Some((PropValueRef::Bool(true), PropValueRef::Bool(true)))
+        );
+        assert_eq!(PropPayloadRef::None.as_pair(), None);
+
+        assert_eq!(
+            PropPayloadRef::Vec(&[PropValue::Bool(true)]).as_vec(),
+            Some([PropValue::Bool(true)].as_slice())
+        );
+        assert_eq!(PropPayloadRef::None.as_vec(), None);
+
+        assert_eq!(
+            PropPayloadRef::Map(&HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+            .as_map(),
+            Some(&HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+        );
+        assert_eq!(PropPayloadRef::None.as_map(), None);
+
+        assert_eq!(
+            PropPayloadRef::Linked(&LinkedList::new()).as_linked(),
+            Some(&LinkedList::new())
+        );
+        assert_eq!(PropPayloadRef::None.as_linked(), None);
+    }
+
+    #[test]
+    fn any() {
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        struct SomeCustomType {
+            field1: bool,
+            field2: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        struct SomeDifferentCustomType {
+            field1: bool,
+        }
+
+        let input = SomeCustomType {
+            field1: true,
+            field2: false,
+        };
+        let any_data = input.to_any_prop();
+        let single_value = PropPayloadRef::Any(&any_data);
+
+        assert_eq!(
+            single_value,
+            PropPayloadRef::Any(
+                &SomeCustomType {
+                    field1: true,
+                    field2: false
+                }
+                .to_any_prop()
+            )
+        );
+        assert_ne!(
+            single_value,
+            PropPayloadRef::Any(
+                &SomeCustomType {
+                    field1: false,
+                    field2: true
+                }
+                .to_any_prop()
+            )
+        );
+
+        assert_ne!(
+            single_value,
+            PropPayloadRef::Any(&SomeDifferentCustomType { field1: true }.to_any_prop())
+        );
+
+        #[derive(Debug, Clone, PartialEq)]
+        struct CloneableType {
+            field1: String,
+        }
+
+        let any_data = CloneableType {
+            field1: "Hello".to_string(),
+        }
+        .to_any_prop();
+        let input = PropPayloadRef::Any(&any_data);
+
+        let input_downcasted = input
+            .as_any()
+            .unwrap()
+            .downcast_ref::<CloneableType>()
+            .expect("Erased type should be CloneableType");
+        let copied_downcasted = input
+            .as_any()
+            .unwrap()
+            .downcast_ref::<CloneableType>()
+            .expect("Erased type should be CloneableType");
+        // should be copied and so have the same memory pointer
+        assert_eq!(
+            input_downcasted.field1.as_ptr(),
+            copied_downcasted.field1.as_ptr()
+        );
+    }
+}
