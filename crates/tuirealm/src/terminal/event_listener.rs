@@ -1,3 +1,5 @@
+#[cfg(feature = "async-ports")]
+mod async_test;
 #[cfg(feature = "crossterm")]
 mod crossterm;
 #[cfg(all(feature = "crossterm", feature = "async-ports"))]
@@ -6,7 +8,10 @@ mod crossterm_async;
 mod termion;
 #[cfg(feature = "termwiz")]
 mod termwiz;
+mod test;
 
+#[cfg(feature = "async-ports")]
+pub use async_test::AsyncTestEventListener;
 #[cfg(feature = "crossterm")]
 pub use crossterm::CrosstermInputListener;
 #[cfg(all(feature = "crossterm", feature = "async-ports"))]
@@ -15,6 +20,7 @@ pub use crossterm_async::CrosstermAsyncStream;
 pub use termion::TermionInputListener;
 #[cfg(feature = "termwiz")]
 pub use termwiz::TermwizInputListener;
+pub use test::TestEventListener;
 
 #[allow(unused_imports)] // used in the event listeners
 use crate::event::Event;

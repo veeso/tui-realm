@@ -15,6 +15,9 @@ pub use self::adapter::TermionTerminalAdapter;
 #[cfg_attr(docsrs, doc(cfg(feature = "termwiz")))]
 pub use self::adapter::TermwizTerminalAdapter;
 pub use self::adapter::{TerminalAdapter, TestTerminalAdapter};
+#[cfg(feature = "async-ports")]
+#[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
+pub use self::event_listener::AsyncTestEventListener;
 #[cfg(all(feature = "crossterm", feature = "async-ports"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "crossterm", feature = "async-ports"))))]
 pub use self::event_listener::CrosstermAsyncStream;
@@ -27,6 +30,7 @@ pub use self::event_listener::TermionInputListener;
 #[cfg(feature = "termwiz")]
 #[cfg_attr(docsrs, doc(cfg(feature = "termwiz")))]
 pub use self::event_listener::TermwizInputListener;
+pub use self::event_listener::TestEventListener;
 
 /// TerminalResult is a type alias for a Result that uses [`TerminalError`] as the error type.
 pub type TerminalResult<T> = Result<T, TerminalError>;
