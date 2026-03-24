@@ -410,15 +410,13 @@ impl Component for TextArea<'_> {
         if let Some(block) = self.get_block() {
             self.widget.set_block(block);
         }
-        let margin_prop = self
-            .props
-            .get_or(
-                Attribute::Custom(TEXTAREA_LAYOUT_MARGIN),
-                AttrValue::Size(1),
-            )
-            .unwrap_size();
         let margin = if self.get_block().is_some() {
-            margin_prop
+            self.props
+                .get_or(
+                    Attribute::Custom(TEXTAREA_LAYOUT_MARGIN),
+                    AttrValue::Size(1),
+                )
+                .unwrap_size()
         } else {
             0
         };
