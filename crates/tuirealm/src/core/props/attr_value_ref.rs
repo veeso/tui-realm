@@ -479,6 +479,38 @@ impl<'a> PartialEq<AttrValueRef<'a>> for AttrValue {
     }
 }
 
+impl<'a> From<&'a AttrValue> for AttrValueRef<'a> {
+    fn from(value: &'a AttrValue) -> Self {
+        match value {
+            AttrValue::AlignmentHorizontal(horizontal_alignment) => {
+                Self::AlignmentHorizontal(*horizontal_alignment)
+            }
+            AttrValue::AlignmentVertical(vertical_alignment) => {
+                Self::AlignmentVertical(*vertical_alignment)
+            }
+            AttrValue::Borders(borders) => Self::Borders(*borders),
+            AttrValue::Color(color) => Self::Color(*color),
+            AttrValue::Direction(direction) => Self::Direction(*direction),
+            AttrValue::Flag(flag) => Self::Flag(*flag),
+            AttrValue::InputType(input_type) => Self::InputType(input_type),
+            AttrValue::Layout(layout) => Self::Layout(layout),
+            AttrValue::Length(length) => Self::Length(*length),
+            AttrValue::Number(number) => Self::Number(*number),
+            AttrValue::Shape(shape) => Self::Shape(shape),
+            AttrValue::Size(size) => Self::Size(*size),
+            AttrValue::String(string) => Self::String(string),
+            AttrValue::Style(style) => Self::Style(*style),
+            AttrValue::Table(items) => Self::Table(items),
+            AttrValue::TextSpan(span) => Self::TextSpan(span),
+            AttrValue::TextLine(line) => Self::TextLine(line),
+            AttrValue::Text(text) => Self::Text(text),
+            AttrValue::TextModifiers(modifier) => Self::TextModifiers(*modifier),
+            AttrValue::Title(title) => Self::Title(title),
+            AttrValue::Payload(prop_payload) => Self::Payload(prop_payload.into()),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
@@ -824,6 +856,94 @@ mod tests {
             AttrValueRef::Payload(PropPayloadRef::None) == AttrValue::Payload(PropPayload::None)
         );
         assert!(!(AttrValueRef::Payload(PropPayloadRef::None) == AttrValue::Flag(false)));
+    }
+
+    #[test]
+    fn from_nonref_attrvalue() {
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Flag(true)),
+            AttrValueRef::Flag(true)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Size(1)),
+            AttrValueRef::Size(1)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)),
+            AttrValueRef::AlignmentHorizontal(HorizontalAlignment::Center)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::AlignmentVertical(VerticalAlignment::Bottom)),
+            AttrValueRef::AlignmentVertical(VerticalAlignment::Bottom)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Borders(Borders::default())),
+            AttrValueRef::Borders(Borders::default())
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Color(Color::Black)),
+            AttrValueRef::Color(Color::Black)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Direction(Direction::Down)),
+            AttrValueRef::Direction(Direction::Down)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::InputType(InputType::Color)),
+            AttrValueRef::InputType(&InputType::Color)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Layout(Layout::default())),
+            AttrValueRef::Layout(&Layout::default())
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Length(1)),
+            AttrValueRef::Length(1)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Number(1)),
+            AttrValueRef::Number(1)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Shape(Shape::Layer)),
+            AttrValueRef::Shape(&Shape::Layer)
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::String("hello".to_string())),
+            AttrValueRef::String("hello")
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Style(Style::default())),
+            AttrValueRef::Style(Style::default())
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Table(Table::new())),
+            AttrValueRef::Table(&Table::new())
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::TextSpan(SpanStatic::from("hello"))),
+            AttrValueRef::TextSpan(&SpanStatic::from("hello"))
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::TextLine(LineStatic::from("hello"))),
+            AttrValueRef::TextLine(&LineStatic::from("hello"))
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Text(TextStatic::from("hello"))),
+            AttrValueRef::Text(&TextStatic::from("hello"))
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::TextModifiers(TextModifiers::default())),
+            AttrValueRef::TextModifiers(TextModifiers::default())
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Title(Title::default())),
+            AttrValueRef::Title(&Title::default())
+        );
+        assert_eq!(
+            AttrValueRef::from(&AttrValue::Payload(PropPayload::None)),
+            AttrValueRef::Payload(PropPayloadRef::None)
+        );
     }
 
     #[test]

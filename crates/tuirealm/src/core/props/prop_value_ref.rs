@@ -191,6 +191,20 @@ impl<'a> PartialEq<PropPayloadRef<'a>> for PropPayload {
     }
 }
 
+impl<'a> From<&'a PropPayload> for PropPayloadRef<'a> {
+    fn from(value: &'a PropPayload) -> Self {
+        match value {
+            PropPayload::Single(prop_value) => Self::Single(prop_value.into()),
+            PropPayload::Pair((a, b)) => Self::Pair((a.into(), b.into())),
+            PropPayload::Vec(prop_values) => Self::Vec(prop_values.as_slice()),
+            PropPayload::Map(hash_map) => Self::Map(hash_map),
+            PropPayload::Linked(prop_payloads) => Self::Linked(prop_payloads),
+            PropPayload::Any(prop_bound) => Self::Any(prop_bound),
+            PropPayload::None => Self::None,
+        }
+    }
+}
+
 impl<'a> PropValueRef<'a> {
     // -- unwrappers
 
@@ -699,6 +713,43 @@ impl<'a> PartialEq<PropValue> for PropValueRef<'a> {
 impl<'a> PartialEq<PropValueRef<'a>> for PropValue {
     fn eq(&self, other: &PropValueRef<'a>) -> bool {
         *other == *self
+    }
+}
+
+impl<'a> From<&'a PropValue> for PropValueRef<'a> {
+    fn from(value: &'a PropValue) -> Self {
+        match value {
+            PropValue::Bool(flag) => Self::Bool(*flag),
+            PropValue::U8(num) => Self::U8(*num),
+            PropValue::U16(num) => Self::U16(*num),
+            PropValue::U32(num) => Self::U32(*num),
+            PropValue::U64(num) => Self::U64(*num),
+            PropValue::U128(num) => Self::U128(*num),
+            PropValue::Usize(num) => Self::Usize(*num),
+            PropValue::I8(num) => Self::I8(*num),
+            PropValue::I16(num) => Self::I16(*num),
+            PropValue::I32(num) => Self::I32(*num),
+            PropValue::I64(num) => Self::I64(*num),
+            PropValue::I128(num) => Self::I128(*num),
+            PropValue::Isize(num) => Self::Isize(*num),
+            PropValue::F64(num) => Self::F64(*num),
+            PropValue::F32(num) => Self::F32(*num),
+            PropValue::Str(str) => Self::Str(str),
+            PropValue::AlignmentHorizontal(horizontal_alignment) => {
+                Self::AlignmentHorizontal(*horizontal_alignment)
+            }
+            PropValue::AlignmentVertical(vertical_alignment) => {
+                Self::AlignmentVertical(*vertical_alignment)
+            }
+            PropValue::Color(color) => Self::Color(*color),
+            PropValue::InputType(input_type) => Self::InputType(input_type),
+            PropValue::Shape(shape) => Self::Shape(shape),
+            PropValue::Style(style) => Self::Style(*style),
+            PropValue::Table(items) => Self::Table(items),
+            PropValue::TextSpan(span) => Self::TextSpan(span),
+            PropValue::TextLine(line) => Self::TextLine(line),
+            PropValue::Text(text) => Self::Text(text),
+        }
     }
 }
 
@@ -1265,5 +1316,152 @@ mod tests {
                 == PropValue::Text(TextStatic::from("hello"))
         );
         assert!(!(PropValueRef::Text(&TextStatic::from("hello")) == PropValue::Bool(false)));
+    }
+
+    #[test]
+    fn from_nonref_proppayload() {
+        assert_eq!(
+            PropPayloadRef::from(&PropPayload::Single(PropValue::Bool(true))),
+            PropPayloadRef::Single(PropValueRef::Bool(true))
+        );
+        assert_eq!(
+            PropPayloadRef::from(&PropPayload::Pair((
+                PropValue::Bool(true),
+                PropValue::Bool(true)
+            ))),
+            PropPayloadRef::Pair((PropValueRef::Bool(true), PropValueRef::Bool(true)))
+        );
+        assert_eq!(
+            PropPayloadRef::from(&PropPayload::Vec(vec![PropValue::Bool(true)])),
+            PropPayloadRef::Vec([PropValue::Bool(true)].as_slice())
+        );
+        assert_eq!(
+            PropPayloadRef::from(&PropPayload::Map(HashMap::from([(
+                "key".to_string(),
+                PropValue::Bool(true)
+            )]))),
+            PropPayloadRef::Map(&HashMap::from([("key".to_string(), PropValue::Bool(true))]))
+        );
+        assert_eq!(
+            PropPayloadRef::from(&PropPayload::Linked(LinkedList::new())),
+            PropPayloadRef::Linked(&LinkedList::new())
+        );
+        assert_eq!(
+            PropPayloadRef::from(&PropPayload::None),
+            PropPayloadRef::None
+        );
+
+        #[derive(Debug, Clone, PartialEq)]
+        struct CloneableType {
+            field1: String,
+        }
+
+        assert_eq!(
+            PropPayloadRef::from(&PropPayload::Any(
+                CloneableType {
+                    field1: "Hello".to_string(),
+                }
+                .to_any_prop()
+            )),
+            PropPayloadRef::Any(
+                &CloneableType {
+                    field1: "Hello".to_string(),
+                }
+                .to_any_prop()
+            )
+        );
+    }
+
+    #[test]
+    fn from_nonref_propvalue() {
+        assert_eq!(
+            PropValueRef::from(&PropValue::Bool(true)),
+            PropValue::Bool(true)
+        );
+
+        assert_eq!(PropValueRef::from(&PropValue::U8(1)), PropValueRef::U8(1));
+        assert_eq!(PropValueRef::from(&PropValue::U16(1)), PropValueRef::U16(1));
+        assert_eq!(PropValueRef::from(&PropValue::U32(1)), PropValueRef::U32(1));
+        assert_eq!(PropValueRef::from(&PropValue::U64(1)), PropValueRef::U64(1));
+        assert_eq!(
+            PropValueRef::from(&PropValue::U128(1)),
+            PropValueRef::U128(1)
+        );
+        assert_eq!(
+            PropValueRef::from(&PropValue::Usize(1)),
+            PropValueRef::Usize(1)
+        );
+        assert_eq!(PropValueRef::from(&PropValue::I8(1)), PropValueRef::I8(1));
+        assert_eq!(PropValueRef::from(&PropValue::I16(1)), PropValueRef::I16(1));
+        assert_eq!(PropValueRef::from(&PropValue::I32(1)), PropValueRef::I32(1));
+        assert_eq!(PropValueRef::from(&PropValue::I64(1)), PropValueRef::I64(1));
+        assert_eq!(
+            PropValueRef::from(&PropValue::I128(1)),
+            PropValueRef::I128(1)
+        );
+        assert_eq!(
+            PropValueRef::from(&PropValue::Isize(1)),
+            PropValueRef::Isize(1)
+        );
+        assert_eq!(
+            PropValueRef::from(&PropValue::F32(1.0)),
+            PropValueRef::F32(1.0)
+        );
+        assert_eq!(
+            PropValueRef::from(&PropValue::F64(1.0)),
+            PropValueRef::F64(1.0)
+        );
+
+        assert_eq!(
+            PropValueRef::from(&PropValue::Str("hello".to_string())),
+            PropValueRef::Str("hello")
+        );
+
+        assert_eq!(
+            PropValueRef::from(&PropValue::AlignmentHorizontal(HorizontalAlignment::Center)),
+            PropValueRef::AlignmentHorizontal(HorizontalAlignment::Center)
+        );
+        assert_eq!(
+            PropValueRef::from(&PropValue::AlignmentVertical(VerticalAlignment::Bottom)),
+            PropValueRef::AlignmentVertical(VerticalAlignment::Bottom)
+        );
+
+        assert_eq!(
+            PropValueRef::from(&PropValue::Color(Color::Black)),
+            PropValueRef::Color(Color::Black)
+        );
+
+        assert_eq!(
+            PropValueRef::from(&PropValue::InputType(InputType::Color)),
+            PropValueRef::InputType(&InputType::Color)
+        );
+
+        assert_eq!(
+            PropValueRef::from(&PropValue::Shape(Shape::Layer)),
+            PropValueRef::Shape(&Shape::Layer)
+        );
+
+        assert_eq!(
+            PropValueRef::from(&PropValue::Style(Style::default())),
+            PropValueRef::Style(Style::default())
+        );
+
+        assert_eq!(
+            PropValueRef::from(&PropValue::Table(Table::new())),
+            PropValueRef::Table(&Table::new())
+        );
+
+        assert_eq!(
+            PropValueRef::from(&PropValue::TextSpan(SpanStatic::from("hello"))),
+            PropValueRef::TextSpan(&SpanStatic::from("hello"))
+        );
+        assert_eq!(
+            PropValueRef::from(&PropValue::TextLine(LineStatic::from("hello"))),
+            PropValueRef::TextLine(&LineStatic::from("hello"))
+        );
+        assert_eq!(
+            PropValueRef::from(&PropValue::Text(TextStatic::from("hello"))),
+            PropValueRef::Text(&TextStatic::from("hello"))
+        );
     }
 }
