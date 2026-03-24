@@ -7,7 +7,7 @@ use super::{
     Color, HorizontalAlignment, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic,
     VerticalAlignment,
 };
-use crate::props::AnyPropBox;
+use crate::props::{AnyPropBox, PropPayloadRef, PropValueRef};
 
 // -- Prop value
 
@@ -56,6 +56,12 @@ pub enum PropValue {
 }
 
 impl PropPayload {
+    /// Create a [`PropPayloadRef`] from the current value.
+    #[inline]
+    pub fn as_payload_ref<'a>(&'a self) -> PropPayloadRef<'a> {
+        self.into()
+    }
+
     // -- unwrappers
 
     /// Unwrap a Single value from PropPayload
@@ -208,6 +214,12 @@ impl PropPayload {
 }
 
 impl PropValue {
+    /// Create a [`PropValueRef`] from the current value.
+    #[inline]
+    pub fn as_value_ref<'a>(&'a self) -> PropValueRef<'a> {
+        self.into()
+    }
+
     // -- unwrappers
 
     /// Unwrap PropValue as Bool.

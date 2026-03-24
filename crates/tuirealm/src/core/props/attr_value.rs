@@ -2,8 +2,8 @@ use ratatui::layout::{HorizontalAlignment, VerticalAlignment};
 use ratatui::style::{Color, Modifier as TextModifiers, Style};
 
 use crate::props::{
-    Borders, Direction, InputType, Layout, LineStatic, PropPayload, Shape, SpanStatic, Table,
-    TextStatic, Title,
+    AttrValueRef, Borders, Direction, InputType, Layout, LineStatic, PropPayload, Shape,
+    SpanStatic, Table, TextStatic, Title,
 };
 
 /// Describes a single attribute in the component properties.
@@ -35,6 +35,12 @@ pub enum AttrValue {
 }
 
 impl AttrValue {
+    /// Create a [`AttrValueRef`] from the current value.
+    #[inline]
+    pub fn as_attr_ref<'a>(&'a self) -> AttrValueRef<'a> {
+        self.into()
+    }
+
     // -- unwrappers
 
     /// Get the inner Horizontal Alignment value from AttrValue, or panic.
