@@ -80,44 +80,44 @@ impl Component for Counter {
         let text = self.states.counter.to_string();
         let alignment = self
             .props
-            .get_or(
-                Attribute::TextAlign,
-                AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-            )
-            .unwrap_alignment_horizontal();
+            .get_ref(Attribute::TextAlign)
+            .and_then(AttrValue::as_alignment_horizontal)
+            .unwrap_or(HorizontalAlignment::Left);
         let foreground = self
             .props
-            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Foreground)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Background)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let modifiers = self
             .props
-            .get_or(
-                Attribute::TextProps,
-                AttrValue::TextModifiers(TextModifiers::empty()),
-            )
-            .unwrap_text_modifiers();
+            .get_ref(Attribute::TextProps)
+            .and_then(AttrValue::as_text_modifiers)
+            .unwrap_or(TextModifiers::empty());
         let title = self
             .props
-            .get_or(
-                Attribute::Title,
-                AttrValue::Title(Title::default().alignment(HorizontalAlignment::Center)),
-            )
-            .unwrap_title();
+            .get_ref(Attribute::Title)
+            .and_then(AttrValue::as_title)
+            .cloned()
+            .unwrap_or(Title::default().alignment(HorizontalAlignment::Center));
         let borders = self
             .props
-            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-            .unwrap_borders();
+            .get_ref(Attribute::Borders)
+            .and_then(AttrValue::as_borders)
+            .cloned()
+            .unwrap_or(Borders::default());
         let focus = self
             .props
-            .get_or(Attribute::Focus, AttrValue::Flag(false))
-            .unwrap_flag();
+            .get_ref(Attribute::Focus)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or(false);
         frame.render_widget(
             Paragraph::new(text)
-                .block(get_block(borders, title, focus))
+                .block(get_block(borders, title.clone(), focus))
                 .style(
                     Style::default()
                         .fg(foreground)
@@ -134,7 +134,7 @@ impl Component for Counter {
             return Some(AttrValue::Number(self.states.counter));
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

@@ -104,18 +104,18 @@ impl Component for Gauge {
         // Text
         let label = self
             .props
-            .get_or(Attribute::Text, AttrValue::String(String::default()))
-            .unwrap_string();
+            .get_ref(Attribute::Text)
+            .and_then(AttrValue::as_string)
+            .map(String::as_str)
+            .unwrap_or_default();
         // Get percentage
         let percentage = self
             .props
-            .get_or(
-                Attribute::Value,
-                AttrValue::Payload(PropPayload::Single(PropValue::F64(0.0))),
-            )
-            .unwrap_payload()
-            .unwrap_single()
-            .unwrap_f64();
+            .get_ref(Attribute::Value)
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_single)
+            .and_then(PropValue::as_f64)
+            .unwrap_or_default();
 
         // Make progress bar
         let mut widget = TuiGauge::default()
@@ -137,7 +137,7 @@ impl Component for Gauge {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

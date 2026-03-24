@@ -212,14 +212,16 @@ impl List {
 
     fn scrollable(&self) -> bool {
         self.props
-            .get_or(Attribute::Scroll, AttrValue::Flag(false))
-            .unwrap_flag()
+            .get_ref(Attribute::Scroll)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or_default()
     }
 
     fn rewindable(&self) -> bool {
         self.props
-            .get_or(Attribute::Rewind, AttrValue::Flag(false))
-            .unwrap_flag()
+            .get_ref(Attribute::Rewind)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or_default()
     }
 }
 
@@ -248,8 +250,8 @@ impl Component for List {
         };
         let highlighted_color = self
             .props
-            .get(Attribute::HighlightedColor)
-            .map(|x| x.unwrap_color());
+            .get_ref(Attribute::HighlightedColor)
+            .and_then(AttrValue::as_color);
 
         // Make list
         let mut widget = TuiList::new(list_items)
@@ -291,7 +293,7 @@ impl Component for List {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -314,8 +316,11 @@ impl Component for List {
             } else if matches!(attr, Attribute::Value) && self.scrollable() {
                 self.states.list_index = self
                     .props
-                    .get(Attribute::Value)
-                    .map_or(0, |x| x.unwrap_payload().unwrap_single().unwrap_usize());
+                    .get_ref(Attribute::Value)
+                    .and_then(AttrValue::as_payload)
+                    .and_then(PropPayload::as_single)
+                    .and_then(PropValue::as_usize)
+                    .unwrap_or_default();
                 self.states.fix_list_index();
             }
         }
@@ -353,8 +358,9 @@ impl Component for List {
                 let prev = self.states.list_index;
                 let step = self
                     .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
+                    .get_ref(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
                 let step: usize = self.states.calc_max_step_ahead(step);
                 (0..step).for_each(|_| self.states.incr_list_index(false));
                 if prev == self.states.list_index {
@@ -367,8 +373,9 @@ impl Component for List {
                 let prev = self.states.list_index;
                 let step = self
                     .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
+                    .get_ref(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
                 let step: usize = self.states.calc_max_step_behind(step);
                 (0..step).for_each(|_| self.states.decr_list_index(false));
                 if prev == self.states.list_index {

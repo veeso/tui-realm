@@ -129,7 +129,7 @@ impl Component for Spinner {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

@@ -11,19 +11,6 @@ pub struct Props {
 }
 
 impl Props {
-    /// Get, if any, the attribute associated to the selector.
-    ///
-    /// This function clones the returned value.
-    pub fn get(&self, query: Attribute) -> Option<AttrValue> {
-        self.attrs.get(&query).cloned()
-    }
-
-    /// Get, if any, the attribute associated to the selector
-    /// or return the fallback value `default`
-    pub fn get_or(&self, query: Attribute, default: AttrValue) -> AttrValue {
-        self.get(query).unwrap_or(default)
-    }
-
     /// Get, if any, the attribute associated to the selector by reference.
     pub fn get_ref(&self, query: Attribute) -> Option<&AttrValue> {
         self.attrs.get(&query)
@@ -50,14 +37,7 @@ mod test {
     #[test]
     fn should_set_get_props() {
         let mut props = Props::default();
-        assert_eq!(props.get(Attribute::AlignmentHorizontal), None);
-        assert_eq!(
-            props.get_or(
-                Attribute::AlignmentHorizontal,
-                AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
-            ),
-            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
-        );
+        assert_eq!(props.get_ref(Attribute::AlignmentHorizontal), None);
         assert_eq!(props.get_ref(Attribute::AlignmentHorizontal), None);
 
         props.set(
@@ -65,15 +45,8 @@ mod test {
             AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
         );
         assert_eq!(
-            props.get(Attribute::AlignmentHorizontal),
-            Some(AttrValue::AlignmentHorizontal(HorizontalAlignment::Left))
-        );
-        assert_eq!(
-            props.get_or(
-                Attribute::AlignmentHorizontal,
-                AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
-            ),
-            AttrValue::AlignmentHorizontal(HorizontalAlignment::Left)
+            props.get_ref(Attribute::AlignmentHorizontal),
+            Some(&AttrValue::AlignmentHorizontal(HorizontalAlignment::Left))
         );
         assert_eq!(
             props.get_ref(Attribute::AlignmentHorizontal),

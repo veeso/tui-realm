@@ -222,7 +222,7 @@ impl Component for Textarea {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -230,10 +230,11 @@ impl Component for Textarea {
             self.props.set(attr, value);
             // Update list len and fix index
             self.states.set_list_len(
-                match self.props.get(Attribute::Text).map(|x| x.unwrap_payload()) {
-                    Some(PropPayload::Vec(spans)) => spans.len(),
-                    _ => 0,
-                },
+                self.props
+                    .get_ref(Attribute::Text)
+                    .and_then(AttrValue::as_payload)
+                    .and_then(PropPayload::as_vec)
+                    .map_or(0, |spans| spans.len()),
             );
             self.states.fix_list_index();
         }
@@ -255,16 +256,18 @@ impl Component for Textarea {
             Cmd::Scroll(Direction::Down) => {
                 let step = self
                     .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
+                    .get_ref(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
                 let step = self.states.calc_max_step_ahead(step);
                 (0..step).for_each(|_| self.states.incr_list_index());
             }
             Cmd::Scroll(Direction::Up) => {
                 let step = self
                     .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
+                    .get_ref(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
                 let step = self.states.calc_max_step_behind(step);
                 (0..step).for_each(|_| self.states.decr_list_index());
             }

@@ -86,30 +86,27 @@ impl Sparkline {
     /// Retrieve current data len from properties
     fn data_len(&self) -> usize {
         self.props
-            .get(Attribute::Dataset)
-            .map_or(0, |x| x.unwrap_payload().unwrap_vec().len())
+            .get_ref(Attribute::Dataset)
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_vec)
+            .map_or(0, |v| v.len())
     }
 
     /// ### data
     ///
     /// Get data to be displayed, starting from provided index at `start` with a max length of `len`
     fn get_data(&self, max: usize) -> Vec<u64> {
-        match self
-            .props
-            .get(Attribute::Dataset)
-            .map(|x| x.unwrap_payload())
-        {
-            Some(PropPayload::Vec(list)) => {
-                let mut data: Vec<u64> = Vec::with_capacity(max);
+        self.props
+            .get_ref(Attribute::Dataset)
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_vec)
+            .map(|list| {
                 list.iter()
                     .take(max)
-                    .cloned()
-                    .map(|x| x.unwrap_u64())
-                    .for_each(|x| data.push(x));
-                data
-            }
-            _ => Vec::new(),
-        }
+                    .filter_map(PropValue::as_u64)
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 }
 
@@ -121,8 +118,9 @@ impl Component for Sparkline {
 
         let max_entries = self
             .props
-            .get_or(Attribute::Width, AttrValue::Length(self.data_len()))
-            .unwrap_length();
+            .get_ref(Attribute::Width)
+            .and_then(AttrValue::as_length)
+            .unwrap_or(self.data_len());
         // Get data
         let data: Vec<u64> = self.get_data(max_entries);
         // Create widget
@@ -144,7 +142,7 @@ impl Component for Sparkline {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

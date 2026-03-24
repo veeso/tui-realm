@@ -248,14 +248,16 @@ impl Table {
     /// returns the value of the scrollable flag; by default is false
     fn is_scrollable(&self) -> bool {
         self.props
-            .get_or(Attribute::Scroll, AttrValue::Flag(false))
-            .unwrap_flag()
+            .get_ref(Attribute::Scroll)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or_default()
     }
 
     fn rewindable(&self) -> bool {
         self.props
-            .get_or(Attribute::Rewind, AttrValue::Flag(false))
-            .unwrap_flag()
+            .get_ref(Attribute::Rewind)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or_default()
     }
 
     /// ### layout
@@ -263,8 +265,11 @@ impl Table {
     /// Returns layout based on properties.
     /// If layout is not set in properties, they'll be divided by rows number
     fn layout(&self) -> Vec<Constraint> {
-        if let Some(PropPayload::Vec(widths)) =
-            self.props.get(Attribute::Width).map(|x| x.unwrap_payload())
+        if let Some(widths) = self
+            .props
+            .get_ref(Attribute::Width)
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_vec)
         {
             widths
                 .iter()
@@ -274,11 +279,12 @@ impl Table {
                 .collect()
         } else {
             // Get amount of columns (maximum len of row elements)
-            let columns: usize = match self.props.get(Attribute::Content).map(|x| x.unwrap_table())
-            {
-                Some(rows) => rows.iter().map(|col| col.len()).max().unwrap_or(1),
-                _ => 1,
-            };
+            let columns: usize = self
+                .props
+                .get_ref(Attribute::Content)
+                .and_then(AttrValue::as_table)
+                .and_then(|rows| rows.iter().map(|col| col.len()).max())
+                .unwrap_or(1);
             // Calc width in equal way, make sure not to divide by zero (this can happen when rows is [[]])
             let width: u16 = (100 / max(columns, 1)) as u16;
             (0..columns)
@@ -326,8 +332,9 @@ impl Component for Table {
 
         let row_height = self
             .props
-            .get_or(Attribute::Height, AttrValue::Size(1))
-            .unwrap_size();
+            .get_ref(Attribute::Height)
+            .and_then(AttrValue::as_size)
+            .unwrap_or(1);
         // Make rows
         let rows: Vec<Row> = self.make_rows(row_height);
         let widths: Vec<Constraint> = self.layout();
@@ -340,8 +347,8 @@ impl Component for Table {
 
         let highlighted_color = self
             .props
-            .get(Attribute::HighlightedColor)
-            .map(|x| x.unwrap_color());
+            .get_ref(Attribute::HighlightedColor)
+            .and_then(AttrValue::as_color);
 
         if let Some(highlighted_color) = highlighted_color {
             widget =
@@ -364,8 +371,8 @@ impl Component for Table {
         // Col spacing
         if let Some(spacing) = self
             .props
-            .get(Attribute::Custom(TABLE_COLUMN_SPACING))
-            .map(|x| x.unwrap_size())
+            .get_ref(Attribute::Custom(TABLE_COLUMN_SPACING))
+            .and_then(AttrValue::as_size)
         {
             widget = widget.column_spacing(spacing);
         }
@@ -402,7 +409,7 @@ impl Component for Table {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -411,17 +418,21 @@ impl Component for Table {
             if matches!(attr, Attribute::Content) {
                 // Update list len and fix index
                 self.states.set_list_len(
-                    match self.props.get(Attribute::Content).map(|x| x.unwrap_table()) {
-                        Some(spans) => spans.len(),
-                        _ => 0,
-                    },
+                    self.props
+                        .get_ref(Attribute::Content)
+                        .and_then(AttrValue::as_table)
+                        .map(|spans| spans.len())
+                        .unwrap_or_default(),
                 );
                 self.states.fix_list_index();
             } else if matches!(attr, Attribute::Value) && self.is_scrollable() {
                 self.states.list_index = self
                     .props
-                    .get(Attribute::Value)
-                    .map_or(0, |x| x.unwrap_payload().unwrap_single().unwrap_usize());
+                    .get_ref(Attribute::Value)
+                    .and_then(AttrValue::as_payload)
+                    .and_then(PropPayload::as_single)
+                    .and_then(PropValue::as_usize)
+                    .unwrap_or_default();
                 self.states.fix_list_index();
             }
         }
@@ -459,8 +470,9 @@ impl Component for Table {
                 let prev = self.states.list_index;
                 let step = self
                     .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
+                    .get_ref(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
                 let step: usize = self.states.calc_max_step_ahead(step);
                 (0..step).for_each(|_| self.states.incr_list_index(false));
                 if prev == self.states.list_index {
@@ -473,8 +485,9 @@ impl Component for Table {
                 let prev = self.states.list_index;
                 let step = self
                     .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
+                    .get_ref(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
                 let step: usize = self.states.calc_max_step_behind(step);
                 (0..step).for_each(|_| self.states.decr_list_index(false));
                 if prev == self.states.list_index {

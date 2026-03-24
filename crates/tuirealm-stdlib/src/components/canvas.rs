@@ -154,11 +154,9 @@ impl Canvas {
     fn prop_to_marker(&self) -> Marker {
         match self
             .props
-            .get_or(
-                Attribute::Custom(CANVAS_MARKER),
-                AttrValue::Number(CANVAS_MARKER_BRAILLE),
-            )
-            .unwrap_number()
+            .get_ref(Attribute::Custom(CANVAS_MARKER))
+            .and_then(AttrValue::as_number)
+            .unwrap_or(CANVAS_MARKER_BRAILLE)
         {
             CANVAS_MARKER_BLOCK => Marker::Block,
             CANVAS_MARKER_DOT => Marker::Dot,
@@ -200,26 +198,25 @@ impl Component for Canvas {
         // Get properties
         let x_bounds: [f64; 2] = self
             .props
-            .get(Attribute::Custom(CANVAS_X_BOUNDS))
-            .map(|x| x.unwrap_payload().unwrap_pair())
-            .map_or([0.0, 0.0], |(a, b)| [a.unwrap_f64(), b.unwrap_f64()]);
+            .get_ref(Attribute::Custom(CANVAS_X_BOUNDS))
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_pair)
+            .and_then(|(a, b)| Some([a.as_f64()?, b.as_f64()?]))
+            .unwrap_or_default();
         let y_bounds: [f64; 2] = self
             .props
-            .get(Attribute::Custom(CANVAS_Y_BOUNDS))
-            .map(|x| x.unwrap_payload().unwrap_pair())
-            .map_or([0.0, 0.0], |(a, b)| [a.unwrap_f64(), b.unwrap_f64()]);
+            .get_ref(Attribute::Custom(CANVAS_Y_BOUNDS))
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_pair)
+            .and_then(|(a, b)| Some([a.as_f64()?, b.as_f64()?]))
+            .unwrap_or_default();
         // Get shapes
         let shapes: Vec<Shape> = self
             .props
-            .get(Attribute::Shape)
-            .map(|x| {
-                x.unwrap_payload()
-                    .unwrap_vec()
-                    .iter()
-                    .cloned()
-                    .map(|x| x.unwrap_shape())
-                    .collect()
-            })
+            .get_ref(Attribute::Shape)
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_vec)
+            .map(|v| v.iter().filter_map(PropValue::as_shape).cloned().collect())
             .unwrap_or_default();
         // Make canvas
         let mut widget = TuiCanvas::default()
@@ -244,7 +241,7 @@ impl Component for Canvas {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

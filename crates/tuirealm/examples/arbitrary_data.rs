@@ -14,7 +14,6 @@ use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
     AttrValue, Attribute, Color, HorizontalAlignment, PropBound, PropPayload, Props, Style,
-    TextModifiers,
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
@@ -206,26 +205,24 @@ impl Component for StdLabel {
             .unwrap_or("Unavailable; this is a bug");
         let alignment = self
             .props
-            .get_or(
-                Attribute::TextAlign,
-                AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-            )
-            .unwrap_alignment_horizontal();
+            .get_ref(Attribute::TextAlign)
+            .and_then(AttrValue::as_alignment_horizontal)
+            .unwrap_or(HorizontalAlignment::Left);
         let foreground = self
             .props
-            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Foreground)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Background)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let modifiers = self
             .props
-            .get_or(
-                Attribute::TextProps,
-                AttrValue::TextModifiers(TextModifiers::empty()),
-            )
-            .unwrap_text_modifiers();
+            .get_ref(Attribute::TextProps)
+            .and_then(AttrValue::as_text_modifiers)
+            .unwrap_or_default();
 
         let [chunk1, chunk2] = Layout::new(
             Direction::Vertical,
@@ -252,7 +249,7 @@ impl Component for StdLabel {
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

@@ -382,11 +382,9 @@ impl<V: NodeValue> TreeView<V> {
         self.states.tree_changed(
             self.tree.root(),
             self.props
-                .get_or(
-                    Attribute::Custom(TREE_PRESERVE_STATE),
-                    AttrValue::Flag(false),
-                )
-                .unwrap_flag(),
+                .get_ref(Attribute::Custom(TREE_PRESERVE_STATE))
+                .and_then(AttrValue::as_flag)
+                .unwrap_or_default(),
         );
     }
 
@@ -418,43 +416,48 @@ impl<V: NodeValue> Component for TreeView<V> {
 
         let foreground = self
             .props
-            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Foreground)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Background)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let modifiers = self
             .props
-            .get_or(
-                Attribute::TextProps,
-                AttrValue::TextModifiers(TextModifiers::empty()),
-            )
-            .unwrap_text_modifiers();
+            .get_ref(Attribute::TextProps)
+            .and_then(AttrValue::as_text_modifiers)
+            .unwrap_or_default();
         let title = self
             .props
             .get_ref(Attribute::Title)
             .and_then(|v| v.as_title());
         let borders = self
             .props
-            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-            .unwrap_borders();
+            .get_ref(Attribute::Borders)
+            .and_then(AttrValue::as_borders)
+            .cloned()
+            .unwrap_or_default();
         let focus = self
             .props
-            .get_or(Attribute::Focus, AttrValue::Flag(false))
-            .unwrap_flag();
+            .get_ref(Attribute::Focus)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or_default();
         let inactive_style = self
             .props
-            .get(Attribute::FocusStyle)
-            .map(|x| x.unwrap_style());
+            .get_ref(Attribute::FocusStyle)
+            .and_then(AttrValue::as_style);
         let indent_size = self
             .props
-            .get_or(Attribute::Custom(TREE_INDENT_SIZE), AttrValue::Size(4))
-            .unwrap_size();
+            .get_ref(Attribute::Custom(TREE_INDENT_SIZE))
+            .and_then(AttrValue::as_size)
+            .unwrap_or(4);
         let hg_color = self
             .props
-            .get_or(Attribute::HighlightedColor, AttrValue::Color(foreground))
-            .unwrap_color();
+            .get_ref(Attribute::HighlightedColor)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(foreground);
         let hg_style = match focus {
             true => Style::default().bg(hg_color).fg(Color::Black),
             false => Style::default().fg(hg_color),
@@ -484,7 +487,7 @@ impl<V: NodeValue> Component for TreeView<V> {
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -538,8 +541,9 @@ impl<V: NodeValue> Component for TreeView<V> {
                 let prev = self.states.selected().map(|x| x.to_string());
                 let step = self
                     .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
+                    .get_ref(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
                 (0..step).for_each(|_| self.states.move_down(self.tree.root()));
                 self.changed(prev.as_deref())
             }
@@ -547,8 +551,9 @@ impl<V: NodeValue> Component for TreeView<V> {
                 let prev = self.states.selected().map(|x| x.to_string());
                 let step = self
                     .props
-                    .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                    .unwrap_length();
+                    .get_ref(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
                 (0..step).for_each(|_| self.states.move_up(self.tree.root()));
                 self.changed(prev.as_deref())
             }

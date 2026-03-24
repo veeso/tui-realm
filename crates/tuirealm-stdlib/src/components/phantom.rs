@@ -19,7 +19,7 @@ impl Component for Phantom {
     fn view(&mut self, _render: &mut Frame, _area: Rect) {}
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

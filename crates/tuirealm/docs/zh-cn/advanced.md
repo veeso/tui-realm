@@ -304,7 +304,7 @@ impl Component for Radio {
     // ...
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -462,21 +462,25 @@ impl Component for Radio {
             .collect();
         let foreground = self
             .props
-            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Foreground)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Background)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let borders = self
             .props
-            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-            .unwrap_borders();
+            .get_ref(Attribute::Borders)
+            .and_then(AttrValue::as_borders)
+            .unwrap_or_default();
         let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
         let focus = self
             .props
-            .get_or(Attribute::Focus, AttrValue::Flag(false))
-            .unwrap_flag();
+            .get_ref(Attribute::Focus)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or_default();
         let div = crate::utils::get_block(borders, title, focus, None);
         // 创建颜色
         let (bg, fg, block_color): (Color, Color, Color) = match focus {

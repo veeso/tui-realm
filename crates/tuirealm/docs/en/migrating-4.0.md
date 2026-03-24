@@ -49,6 +49,13 @@ and adds a new attribute named `AlignmentVertical` for `VerticalAlignment`.
 `Dataset` is practically only required for `tui_realm_stdlib::components::Chart`, and even then does not need to be stored in `Props`, so it can be easily
 moved to be carried over `PropPayload::Any`.
 
+### Removal of `Props::get`(old) and `Props::get_or`
+
+`Props::get` has been removed in favor of `Props::get_ref`, to align with STD types like `Vec::get`'s return type.
+This also makes cloning explicit to the user.
+
+`Props::get_or` has been removed as it relied on `Props::get` and couldnt reasonably be converted to use `Props::get_ref`.
+
 ### `Component::on` parameter `Event` is now a reference
 
 With 4.0, `Component::on`'s `Event` parameter is now a reference. This allowed us to remove clones in-between that had always been done

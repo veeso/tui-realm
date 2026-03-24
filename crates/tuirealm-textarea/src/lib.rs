@@ -379,8 +379,9 @@ impl<'a> TextArea<'a> {
                 .unwrap_style();
             let focus = self
                 .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
+                .get_ref(Attribute::Focus)
+                .and_then(AttrValue::as_flag)
+                .unwrap_or(false);
 
             return Some(
                 block
@@ -412,11 +413,9 @@ impl Component for TextArea<'_> {
         }
         let margin = if self.get_block().is_some() {
             self.props
-                .get_or(
-                    Attribute::Custom(TEXTAREA_LAYOUT_MARGIN),
-                    AttrValue::Size(1),
-                )
-                .unwrap_size()
+                .get_ref(Attribute::Custom(TEXTAREA_LAYOUT_MARGIN))
+                .and_then(AttrValue::as_size)
+                .unwrap_or(1)
         } else {
             0
         };
@@ -437,18 +436,17 @@ impl Component for TextArea<'_> {
         // Remove cursor if not in focus
         let focus = self
             .props
-            .get_or(Attribute::Focus, AttrValue::Flag(false))
-            .unwrap_flag();
+            .get_ref(Attribute::Focus)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or(false);
         if !focus {
             self.widget.set_cursor_style(Style::default());
         } else {
             let style = self
                 .props
-                .get_or(
-                    Attribute::Custom(TEXTAREA_CURSOR_STYLE),
-                    AttrValue::Style(Style::default().add_modifier(TextModifiers::REVERSED)),
-                )
-                .unwrap_style();
+                .get_ref(Attribute::Custom(TEXTAREA_CURSOR_STYLE))
+                .and_then(AttrValue::as_style)
+                .unwrap_or(Style::default().add_modifier(TextModifiers::REVERSED));
             self.widget.set_cursor_style(style);
         }
 
@@ -469,7 +467,7 @@ impl Component for TextArea<'_> {
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -629,8 +627,9 @@ impl Component for TextArea<'_> {
                 if !self.single_line {
                     let step = self
                         .props
-                        .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                        .unwrap_length();
+                        .get_ref(Attribute::ScrollStep)
+                        .and_then(AttrValue::as_length)
+                        .unwrap_or(8);
                     (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Down));
                 }
             }
@@ -638,8 +637,9 @@ impl Component for TextArea<'_> {
                 if !self.single_line {
                     let step = self
                         .props
-                        .get_or(Attribute::ScrollStep, AttrValue::Length(8))
-                        .unwrap_length();
+                        .get_ref(Attribute::ScrollStep)
+                        .and_then(AttrValue::as_length)
+                        .unwrap_or(8);
                     (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Up));
                 }
             }

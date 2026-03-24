@@ -231,8 +231,9 @@ impl Chart {
     /// Determine if the [`Attribute::Disabled`] is enabled.
     fn is_disabled(&self) -> bool {
         self.props
-            .get_or(Attribute::Disabled, AttrValue::Flag(false))
-            .unwrap_flag()
+            .get_ref(Attribute::Disabled)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or_default()
     }
 
     /// Get the maximum len among the datasets
@@ -291,30 +292,32 @@ impl Component for Chart {
         let mut x_axis: Axis = Axis::default();
         if let Some((PropValue::F64(floor), PropValue::F64(ceil))) = self
             .props
-            .get(Attribute::Custom(CHART_X_BOUNDS))
-            .map(|x| x.unwrap_payload().unwrap_pair())
+            .get_ref(Attribute::Custom(CHART_X_BOUNDS))
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_pair)
         {
-            let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
+            let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [*floor, *ceil];
             x_axis = x_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);
         }
-        if let Some(PropPayload::Vec(labels)) = self
+        if let Some(labels) = self
             .props
-            .get(Attribute::Custom(CHART_X_LABELS))
-            .map(|x| x.unwrap_payload())
+            .get_ref(Attribute::Custom(CHART_X_LABELS))
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_vec)
         {
             x_axis = x_axis.labels(labels.iter().cloned().map(|x| Line::from(x.unwrap_str())));
         }
         if let Some(s) = self
             .props
-            .get(Attribute::Custom(CHART_X_STYLE))
-            .map(|x| x.unwrap_style())
+            .get_ref(Attribute::Custom(CHART_X_STYLE))
+            .and_then(AttrValue::as_style)
         {
             x_axis = x_axis.style(s);
         }
         if let Some(title) = self
             .props
-            .get(Attribute::Custom(CHART_X_TITLE))
-            .map(|x| x.unwrap_string())
+            .get_ref(Attribute::Custom(CHART_X_TITLE))
+            .and_then(AttrValue::as_string)
         {
             x_axis = x_axis.title(Span::styled(title, normal_style));
         }
@@ -322,30 +325,32 @@ impl Component for Chart {
         let mut y_axis: Axis = Axis::default();
         if let Some((PropValue::F64(floor), PropValue::F64(ceil))) = self
             .props
-            .get(Attribute::Custom(CHART_Y_BOUNDS))
-            .map(|x| x.unwrap_payload().unwrap_pair())
+            .get_ref(Attribute::Custom(CHART_Y_BOUNDS))
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_pair)
         {
-            let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [floor, ceil];
+            let why_using_vecs_when_you_can_use_useless_arrays: [f64; 2] = [*floor, *ceil];
             y_axis = y_axis.bounds(why_using_vecs_when_you_can_use_useless_arrays);
         }
-        if let Some(PropPayload::Vec(labels)) = self
+        if let Some(labels) = self
             .props
-            .get(Attribute::Custom(CHART_Y_LABELS))
-            .map(|x| x.unwrap_payload())
+            .get_ref(Attribute::Custom(CHART_Y_LABELS))
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_vec)
         {
             y_axis = y_axis.labels(labels.iter().cloned().map(|x| Line::from(x.unwrap_str())));
         }
         if let Some(s) = self
             .props
-            .get(Attribute::Custom(CHART_Y_STYLE))
-            .map(|x| x.unwrap_style())
+            .get_ref(Attribute::Custom(CHART_Y_STYLE))
+            .and_then(AttrValue::as_style)
         {
             y_axis = y_axis.style(s);
         }
         if let Some(title) = self
             .props
-            .get(Attribute::Custom(CHART_Y_TITLE))
-            .map(|x| x.unwrap_string())
+            .get_ref(Attribute::Custom(CHART_Y_TITLE))
+            .and_then(AttrValue::as_string)
         {
             y_axis = y_axis.title(Span::styled(title, normal_style));
         }
@@ -375,7 +380,7 @@ impl Component for Chart {
             return Some(self.data_to_attr());
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

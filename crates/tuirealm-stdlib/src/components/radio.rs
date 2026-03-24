@@ -179,8 +179,9 @@ impl Radio {
 
     fn is_rewind(&self) -> bool {
         self.props
-            .get_or(Attribute::Rewind, AttrValue::Flag(false))
-            .unwrap_flag()
+            .get_ref(Attribute::Rewind)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or_default()
     }
 }
 
@@ -219,7 +220,7 @@ impl Component for Radio {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

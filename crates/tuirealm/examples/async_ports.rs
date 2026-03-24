@@ -9,9 +9,7 @@ use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{EventListenerCfg, PollAsync, PortResult};
-use tuirealm::props::{
-    AttrValue, Attribute, Color, HorizontalAlignment, Props, Style, TextModifiers,
-};
+use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, Props, Style};
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::widgets::Paragraph;
@@ -223,30 +221,30 @@ impl Component for Label {
         // Get properties
         let text = self
             .props
-            .get_or(Attribute::Text, AttrValue::String(String::default()))
-            .unwrap_string();
+            .get_ref(Attribute::Text)
+            .and_then(AttrValue::as_string)
+            .map(String::as_str)
+            .unwrap_or_default();
         let alignment = self
             .props
-            .get_or(
-                Attribute::TextAlign,
-                AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-            )
-            .unwrap_alignment_horizontal();
+            .get_ref(Attribute::TextAlign)
+            .and_then(AttrValue::as_alignment_horizontal)
+            .unwrap_or(HorizontalAlignment::Left);
         let foreground = self
             .props
-            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Foreground)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get_ref(Attribute::Background)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let modifiers = self
             .props
-            .get_or(
-                Attribute::TextProps,
-                AttrValue::TextModifiers(TextModifiers::empty()),
-            )
-            .unwrap_text_modifiers();
+            .get_ref(Attribute::TextProps)
+            .and_then(AttrValue::as_text_modifiers)
+            .unwrap_or_default();
         frame.render_widget(
             Paragraph::new(text)
                 .style(
@@ -261,7 +259,7 @@ impl Component for Label {
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

@@ -77,11 +77,9 @@ impl Component for Label {
             .map_or("", |v| v.as_str());
         let alignment: HorizontalAlignment = self
             .props
-            .get_or(
-                Attribute::AlignmentHorizontal,
-                AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-            )
-            .unwrap_alignment_horizontal();
+            .get_ref(Attribute::AlignmentHorizontal)
+            .and_then(AttrValue::as_alignment_horizontal)
+            .unwrap_or(HorizontalAlignment::Left);
         render.render_widget(
             Paragraph::new(text)
                 .style(self.common.style)
@@ -95,7 +93,7 @@ impl Component for Label {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

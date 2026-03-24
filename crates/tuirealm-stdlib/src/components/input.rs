@@ -274,14 +274,16 @@ impl Input {
 
     fn get_input_len(&self) -> Option<usize> {
         self.props
-            .get(Attribute::InputLength)
-            .map(|x| x.unwrap_length())
+            .get_ref(Attribute::InputLength)
+            .and_then(AttrValue::as_length)
     }
 
     fn get_input_type(&self) -> InputType {
         self.props
-            .get_or(Attribute::InputType, AttrValue::InputType(InputType::Text))
-            .unwrap_input_type()
+            .get_ref(Attribute::InputType)
+            .and_then(AttrValue::as_input_type)
+            .cloned() // TODO: can this clone be removed?
+            .unwrap_or(InputType::Text)
     }
 
     /// Checks whether current input is valid according to the set [`InputType`].
@@ -307,8 +309,8 @@ impl Component for Input {
             && !self.is_valid()
             && let Some(invalid_style) = self
                 .props
-                .get(Attribute::Custom(INPUT_INVALID_STYLE))
-                .map(|x| x.unwrap_style())
+                .get_ref(Attribute::Custom(INPUT_INVALID_STYLE))
+                .and_then(AttrValue::as_style)
         {
             if let Some(block) = &mut block {
                 let border_style = self
@@ -342,13 +344,12 @@ impl Component for Input {
         let text_to_display = if show_placeholder {
             self.states.cursor = 0;
             self.props
-                .get_or(
-                    Attribute::Custom(INPUT_PLACEHOLDER),
-                    AttrValue::String(String::new()),
-                )
-                .unwrap_string()
+                .get_ref(Attribute::Custom(INPUT_PLACEHOLDER))
+                .and_then(AttrValue::as_string)
+                .map(String::as_str)
+                .unwrap_or_default()
         } else {
-            text_to_display
+            &text_to_display
         };
         // Choose paragraph style based on whether is valid or not and if has focus and if should show placeholder
         let paragraph_style = if self.common.focused {
@@ -359,11 +360,9 @@ impl Component for Input {
         };
         let paragraph_style = if show_placeholder {
             self.props
-                .get_or(
-                    Attribute::Custom(INPUT_PLACEHOLDER_STYLE),
-                    AttrValue::Style(paragraph_style),
-                )
-                .unwrap_style()
+                .get_ref(Attribute::Custom(INPUT_PLACEHOLDER_STYLE))
+                .and_then(AttrValue::as_style)
+                .unwrap_or(paragraph_style)
         } else {
             paragraph_style
         };
@@ -396,7 +395,7 @@ impl Component for Input {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

@@ -110,16 +110,15 @@ impl Component for Paragraph {
         // Text properties
         let alignment: HorizontalAlignment = self
             .props
-            .get_or(
-                Attribute::AlignmentHorizontal,
-                AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-            )
-            .unwrap_alignment_horizontal();
+            .get_ref(Attribute::AlignmentHorizontal)
+            .and_then(AttrValue::as_alignment_horizontal)
+            .unwrap_or(HorizontalAlignment::Left);
         // Wrap
         let trim = self
             .props
-            .get_or(Attribute::TextWrap, AttrValue::Flag(false))
-            .unwrap_flag();
+            .get_ref(Attribute::TextWrap)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or_default();
 
         let mut paragraph = TuiParagraph::new(text)
             .style(self.common.style)
@@ -138,7 +137,7 @@ impl Component for Paragraph {
             return Some(value);
         }
 
-        self.props.get(attr)
+        self.props.get_ref(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
