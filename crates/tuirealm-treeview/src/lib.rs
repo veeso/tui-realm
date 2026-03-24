@@ -409,73 +409,76 @@ impl<V: NodeValue> TreeView<V> {
 
 impl<V: NodeValue> Component for TreeView<V> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
-            let title = self
-                .props
-                .get_ref(Attribute::Title)
-                .and_then(|v| v.as_title());
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let inactive_style = self
-                .props
-                .get(Attribute::FocusStyle)
-                .map(|x| x.unwrap_style());
-            let indent_size = self
-                .props
-                .get_or(Attribute::Custom(TREE_INDENT_SIZE), AttrValue::Size(4))
-                .unwrap_size();
-            let hg_color = self
-                .props
-                .get_or(Attribute::HighlightedColor, AttrValue::Color(foreground))
-                .unwrap_color();
-            let hg_style = match focus {
-                true => Style::default().bg(hg_color).fg(Color::Black),
-                false => Style::default().fg(hg_color),
-            }
-            .add_modifier(modifiers);
-            let hg_str = self
-                .props
-                .get_ref(Attribute::HighlightedStr)
-                .and_then(|x| x.as_string());
-            let div = get_block(borders, title, focus, inactive_style);
-            // Make widget
-            let mut tree = TreeWidget::new(self.tree())
-                .block(div)
-                .highlight_style(hg_style)
-                .indent_size(indent_size.into())
-                .style(
-                    Style::default()
-                        .fg(foreground)
-                        .bg(background)
-                        .add_modifier(modifiers),
-                );
-            if let Some(hg_str) = hg_str {
-                tree = tree.highlight_symbol(hg_str.as_str());
-            }
-            let mut state = self.states.clone();
-            frame.render_stateful_widget(tree, area, &mut state);
+        if !(self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true))
+        {
+            return;
         }
+
+        let foreground = self
+            .props
+            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let background = self
+            .props
+            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let modifiers = self
+            .props
+            .get_or(
+                Attribute::TextProps,
+                AttrValue::TextModifiers(TextModifiers::empty()),
+            )
+            .unwrap_text_modifiers();
+        let title = self
+            .props
+            .get_ref(Attribute::Title)
+            .and_then(|v| v.as_title());
+        let borders = self
+            .props
+            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+            .unwrap_borders();
+        let focus = self
+            .props
+            .get_or(Attribute::Focus, AttrValue::Flag(false))
+            .unwrap_flag();
+        let inactive_style = self
+            .props
+            .get(Attribute::FocusStyle)
+            .map(|x| x.unwrap_style());
+        let indent_size = self
+            .props
+            .get_or(Attribute::Custom(TREE_INDENT_SIZE), AttrValue::Size(4))
+            .unwrap_size();
+        let hg_color = self
+            .props
+            .get_or(Attribute::HighlightedColor, AttrValue::Color(foreground))
+            .unwrap_color();
+        let hg_style = match focus {
+            true => Style::default().bg(hg_color).fg(Color::Black),
+            false => Style::default().fg(hg_color),
+        }
+        .add_modifier(modifiers);
+        let hg_str = self
+            .props
+            .get_ref(Attribute::HighlightedStr)
+            .and_then(|x| x.as_string());
+        let div = get_block(borders, title, focus, inactive_style);
+        // Make widget
+        let mut tree = TreeWidget::new(self.tree())
+            .block(div)
+            .highlight_style(hg_style)
+            .indent_size(indent_size.into())
+            .style(
+                Style::default()
+                    .fg(foreground)
+                    .bg(background)
+                    .add_modifier(modifiers),
+            );
+        if let Some(hg_str) = hg_str {
+            tree = tree.highlight_symbol(hg_str.as_str());
+        }
+        let mut state = self.states.clone();
+        frame.render_stateful_widget(tree, area, &mut state);
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {

@@ -69,59 +69,62 @@ impl Counter {
 impl Component for Counter {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if visible
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // Get properties
-            let text = self.states.counter.to_string();
-            let alignment = self
-                .props
-                .get_or(
-                    Attribute::TextAlign,
-                    AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-                )
-                .unwrap_alignment_horizontal();
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
-            let title = self
-                .props
-                .get_or(
-                    Attribute::Title,
-                    AttrValue::Title(Title::default().alignment(HorizontalAlignment::Center)),
-                )
-                .unwrap_title();
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            frame.render_widget(
-                Paragraph::new(text)
-                    .block(get_block(borders, title, focus))
-                    .style(
-                        Style::default()
-                            .fg(foreground)
-                            .bg(background)
-                            .add_modifier(modifiers),
-                    )
-                    .alignment(alignment),
-                area,
-            );
+        if !(self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true))
+        {
+            return;
         }
+
+        // Get properties
+        let text = self.states.counter.to_string();
+        let alignment = self
+            .props
+            .get_or(
+                Attribute::TextAlign,
+                AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+            )
+            .unwrap_alignment_horizontal();
+        let foreground = self
+            .props
+            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let background = self
+            .props
+            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let modifiers = self
+            .props
+            .get_or(
+                Attribute::TextProps,
+                AttrValue::TextModifiers(TextModifiers::empty()),
+            )
+            .unwrap_text_modifiers();
+        let title = self
+            .props
+            .get_or(
+                Attribute::Title,
+                AttrValue::Title(Title::default().alignment(HorizontalAlignment::Center)),
+            )
+            .unwrap_title();
+        let borders = self
+            .props
+            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+            .unwrap_borders();
+        let focus = self
+            .props
+            .get_or(Attribute::Focus, AttrValue::Flag(false))
+            .unwrap_flag();
+        frame.render_widget(
+            Paragraph::new(text)
+                .block(get_block(borders, title, focus))
+                .style(
+                    Style::default()
+                        .fg(foreground)
+                        .bg(background)
+                        .add_modifier(modifiers),
+                )
+                .alignment(alignment),
+            area,
+        );
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {

@@ -434,59 +434,61 @@ Finally, we can implement the component `view()` method of `Component` which wil
 ```rust
 impl Component for Radio {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // Make choices
-            let choices: Vec<Spans> = self
-                .state
-                .choices
-                .iter()
-                .map(|x| Spans::from(x))
-                .collect();
-
-            // Fetch all other style properties
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let highlight_bg = self
-                .props
-                .get_or(Attribute::HighlightedColor, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-
-            let normal_style = Style::default()
-                .fg(foreground)
-                .bg(background);
-
-            let highlight_style = style.patch(Style::default().bg(highlight_bg));
-
-            // assemble the Block (borders)
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-
-            let block = Block::default()
-                .title_top(title.content)
-                .borders(borders.sides)
-                .border_style(if focus { borders.style() } else { Style::default().fg(Color::DarkGrey) });
-
-            // Finally, use a ratatui widget to draw the contents
-            let tabs = Tabs::new(choices)
-                .block(block)
-                .select(self.state.choice)
-                .style(style)
-                .highlight_style(highlight_style);
-            render.render_widget(tabs, area);
+        if !(self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true)) {
+            return;
         }
+
+        // Make choices
+        let choices: Vec<Spans> = self
+            .state
+            .choices
+            .iter()
+            .map(|x| Spans::from(x))
+            .collect();
+
+        // Fetch all other style properties
+        let foreground = self
+            .props
+            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let background = self
+            .props
+            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let highlight_bg = self
+            .props
+            .get_or(Attribute::HighlightedColor, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+
+        let normal_style = Style::default()
+            .fg(foreground)
+            .bg(background);
+
+        let highlight_style = style.patch(Style::default().bg(highlight_bg));
+
+        // assemble the Block (borders)
+        let borders = self
+            .props
+            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+            .unwrap_borders();
+        let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+        let focus = self
+            .props
+            .get_or(Attribute::Focus, AttrValue::Flag(false))
+            .unwrap_flag();
+
+        let block = Block::default()
+            .title_top(title.content)
+            .borders(borders.sides)
+            .border_style(if focus { borders.style() } else { Style::default().fg(Color::DarkGrey) });
+
+        // Finally, use a ratatui widget to draw the contents
+        let tabs = Tabs::new(choices)
+            .block(block)
+            .select(self.state.choice)
+            .style(style)
+            .highlight_style(highlight_style);
+        render.render_widget(tabs, area);
     }
 
     // ...

@@ -449,44 +449,46 @@ impl Component for Radio {
 ```rust
 impl Component for Radio {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // 创建选择
-            let choices: Vec<Spans> = self
-                .states
-                .choices
-                .iter()
-                .map(|x| Spans::from(x.clone()))
-                .collect();
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let borders = self
-                .props
-                .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-                .unwrap_borders();
-            let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            let div = crate::utils::get_block(borders, title, focus, None);
-            // 创建颜色
-            let (bg, fg, block_color): (Color, Color, Color) = match focus {
-                true => (foreground, background, foreground),
-                false => (Color::Reset, foreground, Color::Reset),
-            };
-            let radio: Tabs = Tabs::new(choices)
-                .block(div)
-                .select(self.states.choice)
-                .style(Style::default().fg(block_color))
-                .highlight_style(Style::default().fg(fg).bg(bg));
-            render.render_widget(radio, area);
+        if !(self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true)) {
+            return;
         }
+
+        // 创建选择
+        let choices: Vec<Spans> = self
+            .states
+            .choices
+            .iter()
+            .map(|x| Spans::from(x.clone()))
+            .collect();
+        let foreground = self
+            .props
+            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let background = self
+            .props
+            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let borders = self
+            .props
+            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
+            .unwrap_borders();
+        let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+        let focus = self
+            .props
+            .get_or(Attribute::Focus, AttrValue::Flag(false))
+            .unwrap_flag();
+        let div = crate::utils::get_block(borders, title, focus, None);
+        // 创建颜色
+        let (bg, fg, block_color): (Color, Color, Color) = match focus {
+            true => (foreground, background, foreground),
+            false => (Color::Reset, foreground, Color::Reset),
+        };
+        let radio: Tabs = Tabs::new(choices)
+            .block(div)
+            .select(self.states.choice)
+            .style(Style::default().fg(block_color))
+            .highlight_style(Style::default().fg(fg).bg(bg));
+        render.render_widget(radio, area);
     }
 
     // ...

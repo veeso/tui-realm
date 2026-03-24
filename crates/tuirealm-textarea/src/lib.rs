@@ -399,69 +399,72 @@ impl<'a> TextArea<'a> {
 
 impl Component for TextArea<'_> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // set block
-            if let Some(block) = self.get_block() {
-                self.widget.set_block(block);
-            }
-            let margin_prop = self
+        if !(self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true))
+        {
+            return;
+        }
+
+        // set block
+        if let Some(block) = self.get_block() {
+            self.widget.set_block(block);
+        }
+        let margin_prop = self
+            .props
+            .get_or(
+                Attribute::Custom(TEXTAREA_LAYOUT_MARGIN),
+                AttrValue::Size(1),
+            )
+            .unwrap_size();
+        let margin = if self.get_block().is_some() {
+            margin_prop
+        } else {
+            0
+        };
+        // make chunks
+        let chunks = Layout::default()
+            .direction(LayoutDirection::Vertical)
+            .margin(margin)
+            .constraints(
+                [
+                    Constraint::Min(1),
+                    Constraint::Length(if self.status_fmt.is_some() { 1 } else { 0 }),
+                    Constraint::Length(if self.footer_fmt.is_some() { 1 } else { 0 }),
+                ]
+                .as_ref(),
+            )
+            .split(area);
+
+        // Remove cursor if not in focus
+        let focus = self
+            .props
+            .get_or(Attribute::Focus, AttrValue::Flag(false))
+            .unwrap_flag();
+        if !focus {
+            self.widget.set_cursor_style(Style::default());
+        } else {
+            let style = self
                 .props
                 .get_or(
-                    Attribute::Custom(TEXTAREA_LAYOUT_MARGIN),
-                    AttrValue::Size(1),
+                    Attribute::Custom(TEXTAREA_CURSOR_STYLE),
+                    AttrValue::Style(Style::default().add_modifier(TextModifiers::REVERSED)),
                 )
-                .unwrap_size();
-            let margin = if self.get_block().is_some() {
-                margin_prop
-            } else {
-                0
-            };
-            // make chunks
-            let chunks = Layout::default()
-                .direction(LayoutDirection::Vertical)
-                .margin(margin)
-                .constraints(
-                    [
-                        Constraint::Min(1),
-                        Constraint::Length(if self.status_fmt.is_some() { 1 } else { 0 }),
-                        Constraint::Length(if self.footer_fmt.is_some() { 1 } else { 0 }),
-                    ]
-                    .as_ref(),
-                )
-                .split(area);
+                .unwrap_style();
+            self.widget.set_cursor_style(style);
+        }
 
-            // Remove cursor if not in focus
-            let focus = self
-                .props
-                .get_or(Attribute::Focus, AttrValue::Flag(false))
-                .unwrap_flag();
-            if !focus {
-                self.widget.set_cursor_style(Style::default());
-            } else {
-                let style = self
-                    .props
-                    .get_or(
-                        Attribute::Custom(TEXTAREA_CURSOR_STYLE),
-                        AttrValue::Style(Style::default().add_modifier(TextModifiers::REVERSED)),
-                    )
-                    .unwrap_style();
-                self.widget.set_cursor_style(style);
-            }
-
-            // render widget
-            frame.render_widget(&self.widget, chunks[0]);
-            if let Some(fmt) = self.status_fmt.as_ref() {
-                frame.render_widget(
-                    Paragraph::new(fmt.fmt(&self.widget)).style(fmt.style()),
-                    chunks[1],
-                );
-            }
-            if let Some(fmt) = self.footer_fmt.as_ref() {
-                frame.render_widget(
-                    Paragraph::new(fmt.fmt(&self.widget)).style(fmt.style()),
-                    chunks[2],
-                );
-            }
+        // render widget
+        frame.render_widget(&self.widget, chunks[0]);
+        if let Some(fmt) = self.status_fmt.as_ref() {
+            frame.render_widget(
+                Paragraph::new(fmt.fmt(&self.widget)).style(fmt.style()),
+                chunks[1],
+            );
+        }
+        if let Some(fmt) = self.footer_fmt.as_ref() {
+            frame.render_widget(
+                Paragraph::new(fmt.fmt(&self.widget)).style(fmt.style()),
+                chunks[2],
+            );
         }
     }
 

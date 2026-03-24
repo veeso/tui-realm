@@ -188,62 +188,65 @@ impl Default for StdLabel {
 impl Component for StdLabel {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if visible
-        if self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true) {
-            // Get properties
-            let text = self
-                .props
-                .get_ref(Attribute::Value)
-                .and_then(AttrValue::as_payload)
-                .and_then(PropPayload::as_any)
-                .and_then(|v| v.downcast_ref::<CustomState>())
-                .map(|v| v.text.as_str())
-                .unwrap_or("Unavailable; this is a bug");
-            let alignment = self
-                .props
-                .get_or(
-                    Attribute::TextAlign,
-                    AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
-                )
-                .unwrap_alignment_horizontal();
-            let foreground = self
-                .props
-                .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let background = self
-                .props
-                .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-                .unwrap_color();
-            let modifiers = self
-                .props
-                .get_or(
-                    Attribute::TextProps,
-                    AttrValue::TextModifiers(TextModifiers::empty()),
-                )
-                .unwrap_text_modifiers();
-
-            let [chunk1, chunk2] = Layout::new(
-                Direction::Vertical,
-                [Constraint::Length(1), Constraint::Min(1)],
-            )
-            .areas(area);
-
-            frame.render_widget(
-                Paragraph::new("The following text should be changing when pressing <TAB>:"),
-                chunk1,
-            );
-
-            frame.render_widget(
-                Paragraph::new(text)
-                    .style(
-                        Style::default()
-                            .fg(foreground)
-                            .bg(background)
-                            .add_modifier(modifiers),
-                    )
-                    .alignment(alignment),
-                chunk2,
-            );
+        if !(self.props.get_or(Attribute::Display, AttrValue::Flag(true)) == AttrValue::Flag(true))
+        {
+            return;
         }
+
+        // Get properties
+        let text = self
+            .props
+            .get_ref(Attribute::Value)
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_any)
+            .and_then(|v| v.downcast_ref::<CustomState>())
+            .map(|v| v.text.as_str())
+            .unwrap_or("Unavailable; this is a bug");
+        let alignment = self
+            .props
+            .get_or(
+                Attribute::TextAlign,
+                AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
+            )
+            .unwrap_alignment_horizontal();
+        let foreground = self
+            .props
+            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let background = self
+            .props
+            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
+            .unwrap_color();
+        let modifiers = self
+            .props
+            .get_or(
+                Attribute::TextProps,
+                AttrValue::TextModifiers(TextModifiers::empty()),
+            )
+            .unwrap_text_modifiers();
+
+        let [chunk1, chunk2] = Layout::new(
+            Direction::Vertical,
+            [Constraint::Length(1), Constraint::Min(1)],
+        )
+        .areas(area);
+
+        frame.render_widget(
+            Paragraph::new("The following text should be changing when pressing <TAB>:"),
+            chunk1,
+        );
+
+        frame.render_widget(
+            Paragraph::new(text)
+                .style(
+                    Style::default()
+                        .fg(foreground)
+                        .bg(background)
+                        .add_modifier(modifiers),
+                )
+                .alignment(alignment),
+            chunk2,
+        );
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
