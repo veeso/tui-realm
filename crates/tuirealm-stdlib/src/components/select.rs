@@ -217,7 +217,7 @@ impl Select {
 
         let hg = self
             .props
-            .get_ref(Attribute::HighlightedColor)
+            .get(Attribute::HighlightedColor)
             .and_then(AttrValue::as_color);
 
         if let Some(block) = self.common.get_block() {
@@ -257,7 +257,7 @@ impl Select {
         // Highlighted symbol
         let hg_str = self
             .props
-            .get_ref(Attribute::HighlightedStr)
+            .get(Attribute::HighlightedStr)
             .and_then(|x| x.as_textline());
         if let Some(hg_str) = hg_str {
             list = list.highlight_symbol(borrow_clone_line(hg_str));
@@ -287,7 +287,7 @@ impl Select {
 
     fn rewindable(&self) -> bool {
         self.props
-            .get_ref(Attribute::Rewind)
+            .get(Attribute::Rewind)
             .and_then(AttrValue::as_flag)
             .unwrap_or_default()
     }
@@ -311,7 +311,7 @@ impl Component for Select {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

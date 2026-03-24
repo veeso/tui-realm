@@ -179,25 +179,26 @@ impl Component for Textarea {
         // Highlighted symbol
         let hg_str = self
             .props
-            .get_ref(Attribute::HighlightedStr)
+            .get(Attribute::HighlightedStr)
             .and_then(|x| x.as_textline());
         // NOTE: wrap width is width of area minus 2 (block) minus width of highlighting string
         let wrap_width = (area.width as usize) - hg_str.as_ref().map_or(0, |x| x.width()) - 2;
         // TODO: refactor to use "Text"?
-        let lines: Vec<ListItem> = match self
+        let lines: Vec<ListItem> = self
             .props
-            .get_ref(Attribute::Text)
-            .and_then(|x| x.as_payload())
-        {
-            Some(PropPayload::Vec(spans)) => spans
-                .iter()
-                // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                .filter_map(|x| x.as_textspan())
-                .map(|x| crate::utils::wrap_spans(&[x], wrap_width))
-                .map(ListItem::new)
-                .collect(),
-            _ => Vec::new(),
-        };
+            .get(Attribute::Text)
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_vec)
+            .map(|spans| {
+                spans
+                    .iter()
+                    // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
+                    .filter_map(|x| x.as_textspan())
+                    .map(|x| crate::utils::wrap_spans(&[x], wrap_width))
+                    .map(ListItem::new)
+                    .collect()
+            })
+            .unwrap_or_default();
 
         let mut state: ListState = ListState::default();
         state.select(Some(self.states.list_index));
@@ -222,7 +223,7 @@ impl Component for Textarea {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -231,7 +232,7 @@ impl Component for Textarea {
             // Update list len and fix index
             self.states.set_list_len(
                 self.props
-                    .get_ref(Attribute::Text)
+                    .get(Attribute::Text)
                     .and_then(AttrValue::as_payload)
                     .and_then(PropPayload::as_vec)
                     .map_or(0, |spans| spans.len()),
@@ -256,7 +257,7 @@ impl Component for Textarea {
             Cmd::Scroll(Direction::Down) => {
                 let step = self
                     .props
-                    .get_ref(Attribute::ScrollStep)
+                    .get(Attribute::ScrollStep)
                     .and_then(AttrValue::as_length)
                     .unwrap_or(8);
                 let step = self.states.calc_max_step_ahead(step);
@@ -265,7 +266,7 @@ impl Component for Textarea {
             Cmd::Scroll(Direction::Up) => {
                 let step = self
                     .props
-                    .get_ref(Attribute::ScrollStep)
+                    .get(Attribute::ScrollStep)
                     .and_then(AttrValue::as_length)
                     .unwrap_or(8);
                 let step = self.states.calc_max_step_behind(step);

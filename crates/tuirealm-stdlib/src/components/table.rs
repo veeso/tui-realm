@@ -248,14 +248,14 @@ impl Table {
     /// returns the value of the scrollable flag; by default is false
     fn is_scrollable(&self) -> bool {
         self.props
-            .get_ref(Attribute::Scroll)
+            .get(Attribute::Scroll)
             .and_then(AttrValue::as_flag)
             .unwrap_or_default()
     }
 
     fn rewindable(&self) -> bool {
         self.props
-            .get_ref(Attribute::Rewind)
+            .get(Attribute::Rewind)
             .and_then(AttrValue::as_flag)
             .unwrap_or_default()
     }
@@ -267,7 +267,7 @@ impl Table {
     fn layout(&self) -> Vec<Constraint> {
         if let Some(widths) = self
             .props
-            .get_ref(Attribute::Width)
+            .get(Attribute::Width)
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_vec)
         {
@@ -281,7 +281,7 @@ impl Table {
             // Get amount of columns (maximum len of row elements)
             let columns: usize = self
                 .props
-                .get_ref(Attribute::Content)
+                .get(Attribute::Content)
                 .and_then(AttrValue::as_table)
                 .and_then(|rows| rows.iter().map(|col| col.len()).max())
                 .unwrap_or(1);
@@ -297,7 +297,7 @@ impl Table {
     fn make_rows(&self, row_height: u16) -> Vec<Row<'_>> {
         let Some(table) = self
             .props
-            .get_ref(Attribute::Content)
+            .get(Attribute::Content)
             .and_then(|x| x.as_table())
         else {
             return Vec::new();
@@ -332,7 +332,7 @@ impl Component for Table {
 
         let row_height = self
             .props
-            .get_ref(Attribute::Height)
+            .get(Attribute::Height)
             .and_then(AttrValue::as_size)
             .unwrap_or(1);
         // Make rows
@@ -347,7 +347,7 @@ impl Component for Table {
 
         let highlighted_color = self
             .props
-            .get_ref(Attribute::HighlightedColor)
+            .get(Attribute::HighlightedColor)
             .and_then(AttrValue::as_color);
 
         if let Some(highlighted_color) = highlighted_color {
@@ -363,7 +363,7 @@ impl Component for Table {
         // Highlighted symbol
         let hg_str = self
             .props
-            .get_ref(Attribute::HighlightedStr)
+            .get(Attribute::HighlightedStr)
             .and_then(|x| x.as_textline());
         if let Some(hg_str) = hg_str {
             widget = widget.highlight_symbol(borrow_clone_line(hg_str));
@@ -371,7 +371,7 @@ impl Component for Table {
         // Col spacing
         if let Some(spacing) = self
             .props
-            .get_ref(Attribute::Custom(TABLE_COLUMN_SPACING))
+            .get(Attribute::Custom(TABLE_COLUMN_SPACING))
             .and_then(AttrValue::as_size)
         {
             widget = widget.column_spacing(spacing);
@@ -379,7 +379,7 @@ impl Component for Table {
         // Header
         let headers: Vec<&str> = self
             .props
-            .get_ref(Attribute::Text)
+            .get(Attribute::Text)
             .and_then(|v| v.as_payload())
             .and_then(|v| v.as_vec())
             .map(|v| {
@@ -409,7 +409,7 @@ impl Component for Table {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -419,7 +419,7 @@ impl Component for Table {
                 // Update list len and fix index
                 self.states.set_list_len(
                     self.props
-                        .get_ref(Attribute::Content)
+                        .get(Attribute::Content)
                         .and_then(AttrValue::as_table)
                         .map(|spans| spans.len())
                         .unwrap_or_default(),
@@ -428,7 +428,7 @@ impl Component for Table {
             } else if matches!(attr, Attribute::Value) && self.is_scrollable() {
                 self.states.list_index = self
                     .props
-                    .get_ref(Attribute::Value)
+                    .get(Attribute::Value)
                     .and_then(AttrValue::as_payload)
                     .and_then(PropPayload::as_single)
                     .and_then(PropValue::as_usize)
@@ -470,7 +470,7 @@ impl Component for Table {
                 let prev = self.states.list_index;
                 let step = self
                     .props
-                    .get_ref(Attribute::ScrollStep)
+                    .get(Attribute::ScrollStep)
                     .and_then(AttrValue::as_length)
                     .unwrap_or(8);
                 let step: usize = self.states.calc_max_step_ahead(step);
@@ -485,7 +485,7 @@ impl Component for Table {
                 let prev = self.states.list_index;
                 let step = self
                     .props
-                    .get_ref(Attribute::ScrollStep)
+                    .get(Attribute::ScrollStep)
                     .and_then(AttrValue::as_length)
                     .unwrap_or(8);
                 let step: usize = self.states.calc_max_step_behind(step);

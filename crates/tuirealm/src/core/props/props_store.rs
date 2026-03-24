@@ -12,7 +12,7 @@ pub struct Props {
 
 impl Props {
     /// Get, if any, the attribute associated to the selector by reference.
-    pub fn get_ref(&self, query: Attribute) -> Option<&AttrValue> {
+    pub fn get(&self, query: Attribute) -> Option<&AttrValue> {
         self.attrs.get(&query)
     }
 
@@ -37,19 +37,19 @@ mod test {
     #[test]
     fn should_set_get_props() {
         let mut props = Props::default();
-        assert_eq!(props.get_ref(Attribute::AlignmentHorizontal), None);
-        assert_eq!(props.get_ref(Attribute::AlignmentHorizontal), None);
+        assert_eq!(props.get(Attribute::AlignmentHorizontal), None);
+        assert_eq!(props.get(Attribute::AlignmentHorizontal), None);
 
         props.set(
             Attribute::AlignmentHorizontal,
             AttrValue::AlignmentHorizontal(HorizontalAlignment::Left),
         );
         assert_eq!(
-            props.get_ref(Attribute::AlignmentHorizontal),
+            props.get(Attribute::AlignmentHorizontal),
             Some(&AttrValue::AlignmentHorizontal(HorizontalAlignment::Left))
         );
         assert_eq!(
-            props.get_ref(Attribute::AlignmentHorizontal),
+            props.get(Attribute::AlignmentHorizontal),
             Some(&AttrValue::AlignmentHorizontal(HorizontalAlignment::Left))
         );
 
@@ -62,7 +62,7 @@ mod test {
         *v = HorizontalAlignment::Center;
 
         assert_eq!(
-            props.get_ref(Attribute::AlignmentHorizontal).unwrap(),
+            props.get(Attribute::AlignmentHorizontal).unwrap(),
             &AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
         );
     }

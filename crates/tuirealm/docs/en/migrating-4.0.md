@@ -56,6 +56,10 @@ This also makes cloning explicit to the user.
 
 `Props::get_or` has been removed as it relied on `Props::get` and couldnt reasonably be converted to use `Props::get_ref`.
 
+### Rename of `Props::get_ref` to `Props::get`
+
+Due to `Props::get`(old) having been removed and to better align with STD types like `Vec::get`, `::get_ref` has been renamed to just `::get`.
+
 ### `Component::on` parameter `Event` is now a reference
 
 With 4.0, `Component::on`'s `Event` parameter is now a reference. This allowed us to remove clones in-between that had always been done

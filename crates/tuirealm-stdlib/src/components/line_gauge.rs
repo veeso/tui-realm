@@ -109,7 +109,7 @@ impl LineGauge {
 
     fn get_line_style(&self) -> Option<(&Span<'_>, &Span<'_>)> {
         self.props
-            .get_ref(Attribute::HighlightedStr)
+            .get(Attribute::HighlightedStr)
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_pair)
             .and_then(|pair| Some((pair.0.as_textspan()?, pair.1.as_textspan()?)))
@@ -132,14 +132,14 @@ impl Component for LineGauge {
         // Text
         let label = self
             .props
-            .get_ref(Attribute::Text)
+            .get(Attribute::Text)
             .and_then(AttrValue::as_string)
             .map(String::as_str)
             .unwrap_or_default();
         // Get percentage
         let percentage = self
             .props
-            .get_ref(Attribute::Value)
+            .get(Attribute::Value)
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_single)
             .and_then(PropValue::as_f64)
@@ -172,7 +172,7 @@ impl Component for LineGauge {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

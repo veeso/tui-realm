@@ -274,13 +274,13 @@ impl Input {
 
     fn get_input_len(&self) -> Option<usize> {
         self.props
-            .get_ref(Attribute::InputLength)
+            .get(Attribute::InputLength)
             .and_then(AttrValue::as_length)
     }
 
     fn get_input_type(&self) -> &InputType {
         self.props
-            .get_ref(Attribute::InputType)
+            .get(Attribute::InputType)
             .and_then(AttrValue::as_input_type)
             .unwrap_or(&InputType::Text)
     }
@@ -307,7 +307,7 @@ impl Component for Input {
             && !self.is_valid()
             && let Some(invalid_style) = self
                 .props
-                .get_ref(Attribute::Custom(INPUT_INVALID_STYLE))
+                .get(Attribute::Custom(INPUT_INVALID_STYLE))
                 .and_then(AttrValue::as_style)
         {
             if let Some(block) = &mut block {
@@ -342,7 +342,7 @@ impl Component for Input {
         let text_to_display = if show_placeholder {
             self.states.cursor = 0;
             self.props
-                .get_ref(Attribute::Custom(INPUT_PLACEHOLDER))
+                .get(Attribute::Custom(INPUT_PLACEHOLDER))
                 .and_then(AttrValue::as_string)
                 .map(String::as_str)
                 .unwrap_or_default()
@@ -358,7 +358,7 @@ impl Component for Input {
         };
         let paragraph_style = if show_placeholder {
             self.props
-                .get_ref(Attribute::Custom(INPUT_PLACEHOLDER_STYLE))
+                .get(Attribute::Custom(INPUT_PLACEHOLDER_STYLE))
                 .and_then(AttrValue::as_style)
                 .unwrap_or(paragraph_style)
         } else {
@@ -393,7 +393,7 @@ impl Component for Input {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

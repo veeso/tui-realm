@@ -193,7 +193,7 @@ impl BarChart {
 
     fn is_disabled(&self) -> bool {
         self.props
-            .get_ref(Attribute::Disabled)
+            .get(Attribute::Disabled)
             .and_then(AttrValue::as_flag)
             .unwrap_or_default()
     }
@@ -203,7 +203,7 @@ impl BarChart {
     /// Retrieve current data len from properties
     fn data_len(&self) -> usize {
         self.props
-            .get_ref(Attribute::Dataset)
+            .get(Attribute::Dataset)
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_linked)
             .map_or(0, |x| x.len())
@@ -212,7 +212,7 @@ impl BarChart {
     fn get_data(&self, start: usize, len: usize) -> Vec<(String, u64)> {
         if let Some(PropPayload::Linked(list)) = self
             .props
-            .get_ref(Attribute::Dataset)
+            .get(Attribute::Dataset)
             .and_then(AttrValue::as_payload)
         {
             // Recalc len
@@ -250,7 +250,7 @@ impl Component for BarChart {
         // Get max elements
         let data_max_len = self
             .props
-            .get_ref(Attribute::Custom(BAR_CHART_MAX_BARS))
+            .get(Attribute::Custom(BAR_CHART_MAX_BARS))
             .and_then(AttrValue::as_length)
             .unwrap_or(self.data_len());
         // Get data
@@ -267,35 +267,35 @@ impl Component for BarChart {
 
         if let Some(gap) = self
             .props
-            .get_ref(Attribute::Custom(BAR_CHART_BARS_GAP))
+            .get(Attribute::Custom(BAR_CHART_BARS_GAP))
             .and_then(AttrValue::as_size)
         {
             widget = widget.bar_gap(gap);
         }
         if let Some(width) = self
             .props
-            .get_ref(Attribute::Width)
+            .get(Attribute::Width)
             .and_then(AttrValue::as_size)
         {
             widget = widget.bar_width(width);
         }
         if let Some(style) = self
             .props
-            .get_ref(Attribute::Custom(BAR_CHART_BARS_STYLE))
+            .get(Attribute::Custom(BAR_CHART_BARS_STYLE))
             .and_then(AttrValue::as_style)
         {
             widget = widget.bar_style(style);
         }
         if let Some(style) = self
             .props
-            .get_ref(Attribute::Custom(BAR_CHART_LABEL_STYLE))
+            .get(Attribute::Custom(BAR_CHART_LABEL_STYLE))
             .and_then(AttrValue::as_style)
         {
             widget = widget.label_style(style);
         }
         if let Some(style) = self
             .props
-            .get_ref(Attribute::Custom(BAR_CHART_VALUES_STYLE))
+            .get(Attribute::Custom(BAR_CHART_VALUES_STYLE))
             .and_then(AttrValue::as_style)
         {
             widget = widget.value_style(style);
@@ -310,7 +310,7 @@ impl Component for BarChart {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

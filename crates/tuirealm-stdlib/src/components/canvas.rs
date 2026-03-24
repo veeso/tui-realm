@@ -154,7 +154,7 @@ impl Canvas {
     fn prop_to_marker(&self) -> Marker {
         match self
             .props
-            .get_ref(Attribute::Custom(CANVAS_MARKER))
+            .get(Attribute::Custom(CANVAS_MARKER))
             .and_then(AttrValue::as_number)
             .unwrap_or(CANVAS_MARKER_BRAILLE)
         {
@@ -198,14 +198,14 @@ impl Component for Canvas {
         // Get properties
         let x_bounds: [f64; 2] = self
             .props
-            .get_ref(Attribute::Custom(CANVAS_X_BOUNDS))
+            .get(Attribute::Custom(CANVAS_X_BOUNDS))
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_pair)
             .and_then(|(a, b)| Some([a.as_f64()?, b.as_f64()?]))
             .unwrap_or_default();
         let y_bounds: [f64; 2] = self
             .props
-            .get_ref(Attribute::Custom(CANVAS_Y_BOUNDS))
+            .get(Attribute::Custom(CANVAS_Y_BOUNDS))
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_pair)
             .and_then(|(a, b)| Some([a.as_f64()?, b.as_f64()?]))
@@ -213,7 +213,7 @@ impl Component for Canvas {
         // Get shapes
         let shapes: Vec<Shape> = self
             .props
-            .get_ref(Attribute::Shape)
+            .get(Attribute::Shape)
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_vec)
             .map(|v| v.iter().filter_map(PropValue::as_shape).cloned().collect())
@@ -241,7 +241,7 @@ impl Component for Canvas {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

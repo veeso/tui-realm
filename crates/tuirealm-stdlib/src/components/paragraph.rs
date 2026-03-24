@@ -102,7 +102,7 @@ impl Component for Paragraph {
         // Make text items
         let text = self
             .props
-            .get_ref(Attribute::Text)
+            .get(Attribute::Text)
             .and_then(AttrValue::as_text)
             .map(utils::borrow_clone_text)
             .unwrap_or_default();
@@ -110,13 +110,13 @@ impl Component for Paragraph {
         // Text properties
         let alignment: HorizontalAlignment = self
             .props
-            .get_ref(Attribute::AlignmentHorizontal)
+            .get(Attribute::AlignmentHorizontal)
             .and_then(AttrValue::as_alignment_horizontal)
             .unwrap_or(HorizontalAlignment::Left);
         // Wrap
         let trim = self
             .props
-            .get_ref(Attribute::TextWrap)
+            .get(Attribute::TextWrap)
             .and_then(AttrValue::as_flag)
             .unwrap_or_default();
 
@@ -137,7 +137,7 @@ impl Component for Paragraph {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

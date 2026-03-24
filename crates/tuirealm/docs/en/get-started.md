@@ -648,7 +648,7 @@ impl Component for Counter {
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

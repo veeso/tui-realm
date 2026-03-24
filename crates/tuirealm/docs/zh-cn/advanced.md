@@ -304,7 +304,7 @@ impl Component for Radio {
     // ...
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -449,7 +449,7 @@ impl Component for Radio {
 ```rust
 impl Component for Radio {
     fn view(&mut self, render: &mut Frame, area: Rect) {
-        if matches!(self.props.get_ref(Attribute::Display), Some(AttrValue::Flag(false))) {
+        if matches!(self.props.get(Attribute::Display), Some(AttrValue::Flag(false))) {
             return;
         }
 
@@ -462,23 +462,23 @@ impl Component for Radio {
             .collect();
         let foreground = self
             .props
-            .get_ref(Attribute::Foreground)
+            .get(Attribute::Foreground)
             .and_then(AttrValue::as_color)
             .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_ref(Attribute::Background)
+            .get(Attribute::Background)
             .and_then(AttrValue::as_color)
             .unwrap_or(Color::Reset);
         let borders = self
             .props
-            .get_ref(Attribute::Borders)
+            .get(Attribute::Borders)
             .and_then(AttrValue::as_borders)
             .unwrap_or_default();
         let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
         let focus = self
             .props
-            .get_ref(Attribute::Focus)
+            .get(Attribute::Focus)
             .and_then(AttrValue::as_flag)
             .unwrap_or_default();
         let div = crate::utils::get_block(borders, title, focus, None);

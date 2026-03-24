@@ -212,14 +212,14 @@ impl List {
 
     fn scrollable(&self) -> bool {
         self.props
-            .get_ref(Attribute::Scroll)
+            .get(Attribute::Scroll)
             .and_then(AttrValue::as_flag)
             .unwrap_or_default()
     }
 
     fn rewindable(&self) -> bool {
         self.props
-            .get_ref(Attribute::Rewind)
+            .get(Attribute::Rewind)
             .and_then(AttrValue::as_flag)
             .unwrap_or_default()
     }
@@ -232,10 +232,7 @@ impl Component for List {
         }
 
         // Make list entries
-        let payload = self
-            .props
-            .get_ref(Attribute::Text)
-            .and_then(|x| x.as_payload());
+        let payload = self.props.get(Attribute::Text).and_then(|x| x.as_payload());
         let list_items: Vec<ListItem> = match payload {
             Some(PropPayload::Vec(lines)) => {
                 lines
@@ -250,7 +247,7 @@ impl Component for List {
         };
         let highlighted_color = self
             .props
-            .get_ref(Attribute::HighlightedColor)
+            .get(Attribute::HighlightedColor)
             .and_then(AttrValue::as_color);
 
         // Make list
@@ -274,7 +271,7 @@ impl Component for List {
         // Highlighted symbol
         let hg_str = self
             .props
-            .get_ref(Attribute::HighlightedStr)
+            .get(Attribute::HighlightedStr)
             .and_then(|x| x.as_textline());
         if let Some(hg_str) = hg_str {
             widget = widget.highlight_symbol(borrow_clone_line(hg_str));
@@ -293,7 +290,7 @@ impl Component for List {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -304,7 +301,7 @@ impl Component for List {
                 self.states.set_list_len(
                     match self
                         .props
-                        .get_ref(Attribute::Text)
+                        .get(Attribute::Text)
                         .and_then(AttrValue::as_payload)
                         .and_then(PropPayload::as_vec)
                     {
@@ -316,7 +313,7 @@ impl Component for List {
             } else if matches!(attr, Attribute::Value) && self.scrollable() {
                 self.states.list_index = self
                     .props
-                    .get_ref(Attribute::Value)
+                    .get(Attribute::Value)
                     .and_then(AttrValue::as_payload)
                     .and_then(PropPayload::as_single)
                     .and_then(PropValue::as_usize)
@@ -358,7 +355,7 @@ impl Component for List {
                 let prev = self.states.list_index;
                 let step = self
                     .props
-                    .get_ref(Attribute::ScrollStep)
+                    .get(Attribute::ScrollStep)
                     .and_then(AttrValue::as_length)
                     .unwrap_or(8);
                 let step: usize = self.states.calc_max_step_ahead(step);
@@ -373,7 +370,7 @@ impl Component for List {
                 let prev = self.states.list_index;
                 let step = self
                     .props
-                    .get_ref(Attribute::ScrollStep)
+                    .get(Attribute::ScrollStep)
                     .and_then(AttrValue::as_length)
                     .unwrap_or(8);
                 let step: usize = self.states.calc_max_step_behind(step);

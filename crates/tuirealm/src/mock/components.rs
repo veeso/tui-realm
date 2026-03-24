@@ -28,7 +28,7 @@ impl Component for MockInput {
     fn view(&mut self, _: &mut Frame, _: crate::ratatui::layout::Rect) {}
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, query: Attribute, attr: AttrValue) {

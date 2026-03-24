@@ -70,7 +70,7 @@ impl Component for Counter {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if visible
         if matches!(
-            self.props.get_ref(Attribute::Display),
+            self.props.get(Attribute::Display),
             Some(AttrValue::Flag(false))
         ) {
             return;
@@ -80,38 +80,38 @@ impl Component for Counter {
         let text = self.states.counter.to_string();
         let alignment = self
             .props
-            .get_ref(Attribute::TextAlign)
+            .get(Attribute::TextAlign)
             .and_then(AttrValue::as_alignment_horizontal)
             .unwrap_or(HorizontalAlignment::Left);
         let foreground = self
             .props
-            .get_ref(Attribute::Foreground)
+            .get(Attribute::Foreground)
             .and_then(AttrValue::as_color)
             .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_ref(Attribute::Background)
+            .get(Attribute::Background)
             .and_then(AttrValue::as_color)
             .unwrap_or(Color::Reset);
         let modifiers = self
             .props
-            .get_ref(Attribute::TextProps)
+            .get(Attribute::TextProps)
             .and_then(AttrValue::as_text_modifiers)
             .unwrap_or(TextModifiers::empty());
         let title = self
             .props
-            .get_ref(Attribute::Title)
+            .get(Attribute::Title)
             .and_then(AttrValue::as_title)
             .cloned()
             .unwrap_or(Title::default().alignment(HorizontalAlignment::Center));
         let borders = self
             .props
-            .get_ref(Attribute::Borders)
+            .get(Attribute::Borders)
             .and_then(AttrValue::as_borders)
             .unwrap_or_default();
         let focus = self
             .props
-            .get_ref(Attribute::Focus)
+            .get(Attribute::Focus)
             .and_then(AttrValue::as_flag)
             .unwrap_or(false);
         frame.render_widget(
@@ -133,7 +133,7 @@ impl Component for Counter {
             return Some(AttrValue::Number(self.states.counter));
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

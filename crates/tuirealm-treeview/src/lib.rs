@@ -382,7 +382,7 @@ impl<V: NodeValue> TreeView<V> {
         self.states.tree_changed(
             self.tree.root(),
             self.props
-                .get_ref(Attribute::Custom(TREE_PRESERVE_STATE))
+                .get(Attribute::Custom(TREE_PRESERVE_STATE))
                 .and_then(AttrValue::as_flag)
                 .unwrap_or_default(),
         );
@@ -408,7 +408,7 @@ impl<V: NodeValue> TreeView<V> {
 impl<V: NodeValue> Component for TreeView<V> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         if matches!(
-            self.props.get_ref(Attribute::Display),
+            self.props.get(Attribute::Display),
             Some(AttrValue::Flag(false))
         ) {
             return;
@@ -416,45 +416,42 @@ impl<V: NodeValue> Component for TreeView<V> {
 
         let foreground = self
             .props
-            .get_ref(Attribute::Foreground)
+            .get(Attribute::Foreground)
             .and_then(AttrValue::as_color)
             .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_ref(Attribute::Background)
+            .get(Attribute::Background)
             .and_then(AttrValue::as_color)
             .unwrap_or(Color::Reset);
         let modifiers = self
             .props
-            .get_ref(Attribute::TextProps)
+            .get(Attribute::TextProps)
             .and_then(AttrValue::as_text_modifiers)
             .unwrap_or_default();
-        let title = self
-            .props
-            .get_ref(Attribute::Title)
-            .and_then(|v| v.as_title());
+        let title = self.props.get(Attribute::Title).and_then(|v| v.as_title());
         let borders = self
             .props
-            .get_ref(Attribute::Borders)
+            .get(Attribute::Borders)
             .and_then(AttrValue::as_borders)
             .unwrap_or_default();
         let focus = self
             .props
-            .get_ref(Attribute::Focus)
+            .get(Attribute::Focus)
             .and_then(AttrValue::as_flag)
             .unwrap_or_default();
         let inactive_style = self
             .props
-            .get_ref(Attribute::FocusStyle)
+            .get(Attribute::FocusStyle)
             .and_then(AttrValue::as_style);
         let indent_size = self
             .props
-            .get_ref(Attribute::Custom(TREE_INDENT_SIZE))
+            .get(Attribute::Custom(TREE_INDENT_SIZE))
             .and_then(AttrValue::as_size)
             .unwrap_or(4);
         let hg_color = self
             .props
-            .get_ref(Attribute::HighlightedColor)
+            .get(Attribute::HighlightedColor)
             .and_then(AttrValue::as_color)
             .unwrap_or(foreground);
         let hg_style = match focus {
@@ -464,7 +461,7 @@ impl<V: NodeValue> Component for TreeView<V> {
         .add_modifier(modifiers);
         let hg_str = self
             .props
-            .get_ref(Attribute::HighlightedStr)
+            .get(Attribute::HighlightedStr)
             .and_then(|x| x.as_string());
         let div = get_block(borders, title, focus, inactive_style);
         // Make widget
@@ -486,7 +483,7 @@ impl<V: NodeValue> Component for TreeView<V> {
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -540,7 +537,7 @@ impl<V: NodeValue> Component for TreeView<V> {
                 let prev = self.states.selected().map(|x| x.to_string());
                 let step = self
                     .props
-                    .get_ref(Attribute::ScrollStep)
+                    .get(Attribute::ScrollStep)
                     .and_then(AttrValue::as_length)
                     .unwrap_or(8);
                 (0..step).for_each(|_| self.states.move_down(self.tree.root()));
@@ -550,7 +547,7 @@ impl<V: NodeValue> Component for TreeView<V> {
                 let prev = self.states.selected().map(|x| x.to_string());
                 let step = self
                     .props
-                    .get_ref(Attribute::ScrollStep)
+                    .get(Attribute::ScrollStep)
                     .and_then(AttrValue::as_length)
                     .unwrap_or(8);
                 (0..step).for_each(|_| self.states.move_up(self.tree.root()));

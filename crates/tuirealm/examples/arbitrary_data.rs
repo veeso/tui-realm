@@ -188,7 +188,7 @@ impl Component for StdLabel {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if visible
         if matches!(
-            self.props.get_ref(Attribute::Display),
+            self.props.get(Attribute::Display),
             Some(AttrValue::Flag(false))
         ) {
             return;
@@ -197,7 +197,7 @@ impl Component for StdLabel {
         // Get properties
         let text = self
             .props
-            .get_ref(Attribute::Value)
+            .get(Attribute::Value)
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_any)
             .and_then(|v| v.downcast_ref::<CustomState>())
@@ -205,22 +205,22 @@ impl Component for StdLabel {
             .unwrap_or("Unavailable; this is a bug");
         let alignment = self
             .props
-            .get_ref(Attribute::TextAlign)
+            .get(Attribute::TextAlign)
             .and_then(AttrValue::as_alignment_horizontal)
             .unwrap_or(HorizontalAlignment::Left);
         let foreground = self
             .props
-            .get_ref(Attribute::Foreground)
+            .get(Attribute::Foreground)
             .and_then(AttrValue::as_color)
             .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_ref(Attribute::Background)
+            .get(Attribute::Background)
             .and_then(AttrValue::as_color)
             .unwrap_or(Color::Reset);
         let modifiers = self
             .props
-            .get_ref(Attribute::TextProps)
+            .get(Attribute::TextProps)
             .and_then(AttrValue::as_text_modifiers)
             .unwrap_or_default();
 
@@ -249,7 +249,7 @@ impl Component for StdLabel {
     }
 
     fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

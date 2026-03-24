@@ -116,7 +116,7 @@ impl Component for Container {
         // Render children
         if let Some(layout) = self
             .props
-            .get_ref(Attribute::Layout)
+            .get(Attribute::Layout)
             .and_then(AttrValue::as_layout)
         {
             // make chunks
@@ -135,7 +135,7 @@ impl Component for Container {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

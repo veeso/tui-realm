@@ -72,12 +72,12 @@ impl Component for Label {
         // Make text
         let text = self
             .props
-            .get_ref(Attribute::Text)
+            .get(Attribute::Text)
             .and_then(|v| v.as_string())
             .map_or("", |v| v.as_str());
         let alignment: HorizontalAlignment = self
             .props
-            .get_ref(Attribute::AlignmentHorizontal)
+            .get(Attribute::AlignmentHorizontal)
             .and_then(AttrValue::as_alignment_horizontal)
             .unwrap_or(HorizontalAlignment::Left);
         render.render_widget(
@@ -93,7 +93,7 @@ impl Component for Label {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

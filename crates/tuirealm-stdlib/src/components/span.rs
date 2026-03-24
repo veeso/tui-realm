@@ -88,10 +88,7 @@ impl Component for Span {
 
         // Make text
         // binding required as "spans" is a reference and otherwise would not live long enough
-        let payload = self
-            .props
-            .get_ref(Attribute::Text)
-            .and_then(|x| x.as_payload());
+        let payload = self.props.get(Attribute::Text).and_then(|x| x.as_payload());
         let text = match payload {
             Some(PropPayload::Vec(lines)) => {
                 let lines: Vec<RSpan> = lines
@@ -107,7 +104,7 @@ impl Component for Span {
         // Text properties
         let alignment: HorizontalAlignment = self
             .props
-            .get_ref(Attribute::AlignmentHorizontal)
+            .get(Attribute::AlignmentHorizontal)
             .and_then(AttrValue::as_alignment_horizontal)
             .unwrap_or(HorizontalAlignment::Left);
         render.render_widget(
@@ -123,7 +120,7 @@ impl Component for Span {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

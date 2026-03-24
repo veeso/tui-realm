@@ -86,7 +86,7 @@ impl Sparkline {
     /// Retrieve current data len from properties
     fn data_len(&self) -> usize {
         self.props
-            .get_ref(Attribute::Dataset)
+            .get(Attribute::Dataset)
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_vec)
             .map_or(0, |v| v.len())
@@ -97,7 +97,7 @@ impl Sparkline {
     /// Get data to be displayed, starting from provided index at `start` with a max length of `len`
     fn get_data(&self, max: usize) -> Vec<u64> {
         self.props
-            .get_ref(Attribute::Dataset)
+            .get(Attribute::Dataset)
             .and_then(AttrValue::as_payload)
             .and_then(PropPayload::as_vec)
             .map(|list| {
@@ -118,7 +118,7 @@ impl Component for Sparkline {
 
         let max_entries = self
             .props
-            .get_ref(Attribute::Width)
+            .get(Attribute::Width)
             .and_then(AttrValue::as_length)
             .unwrap_or(self.data_len());
         // Get data
@@ -142,7 +142,7 @@ impl Component for Sparkline {
             return Some(value);
         }
 
-        self.props.get_ref(attr).cloned()
+        self.props.get(attr).cloned()
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
