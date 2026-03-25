@@ -1,6 +1,8 @@
 .claude/
 .vscode/
 
+Cargo.lock
+
 # Rust
 target/
 
