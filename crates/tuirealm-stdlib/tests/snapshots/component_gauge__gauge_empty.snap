@@ -3,5 +3,5 @@ source: crates/tuirealm-stdlib/tests/component_gauge.rs
 expression: rendered
 ---
 ┌──────────────────────────────────────┐
-│                                      │
+│                  0%                  │
 └──────────────────────────────────────┘

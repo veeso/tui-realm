@@ -26,5 +26,5 @@ fn test_spinner_snapshot_default() {
         .foreground(Color::Cyan)
         .sequence("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏");
     let rendered = common::render_to_string(&mut component, 10, 1);
-    insta::assert_snapshot!("spinner_default", rendered);
+    insta::assert_snapshot!(rendered, @"⠋");
 }

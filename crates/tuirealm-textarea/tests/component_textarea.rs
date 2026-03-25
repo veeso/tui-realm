@@ -46,6 +46,33 @@ fn test_textarea_type_multiple_chars() {
 }
 
 #[test]
+fn test_textarea_paste() {
+    let mut component = TextArea::default();
+    component.paste("Hello, World!");
+    let state = component.state();
+    if let State::Vec(lines) = state {
+        assert_eq!(lines[0], StateValue::String("Hello, World!".to_string()));
+    } else {
+        panic!("Expected State::Vec");
+    }
+}
+
+#[test]
+fn test_textarea_paste_multiline() {
+    let mut component = TextArea::default();
+    component.paste("Line 1\nLine 2\nLine 3");
+    let state = component.state();
+    if let State::Vec(lines) = state {
+        assert_eq!(lines.len(), 3);
+        assert_eq!(lines[0], StateValue::String("Line 1".to_string()));
+        assert_eq!(lines[1], StateValue::String("Line 2".to_string()));
+        assert_eq!(lines[2], StateValue::String("Line 3".to_string()));
+    } else {
+        panic!("Expected State::Vec");
+    }
+}
+
+#[test]
 fn test_textarea_newline() {
     let mut component = TextArea::default();
     component.perform(Cmd::Type('A'));
@@ -123,9 +150,10 @@ fn test_textarea_vertical_movement() {
 fn test_textarea_undo_redo() {
     let mut component = TextArea::default();
     component.perform(Cmd::Type('A'));
-    let result = component.perform(Cmd::Custom(TEXTAREA_CMD_UNDO));
-    assert!(matches!(result, CmdResult::Changed(_) | CmdResult::None));
-    component.perform(Cmd::Custom(TEXTAREA_CMD_REDO));
+    let undo_result = component.perform(Cmd::Custom(TEXTAREA_CMD_UNDO));
+    assert!(matches!(undo_result, CmdResult::Changed(_)));
+    let redo_result = component.perform(Cmd::Custom(TEXTAREA_CMD_REDO));
+    assert!(matches!(redo_result, CmdResult::Changed(_)));
 }
 
 #[test]
@@ -237,7 +265,7 @@ fn test_textarea_unhandled_cmd() {
 // Snapshot tests
 
 #[test]
-fn test_textarea_snapshot_default() {
+fn test_textarea_snapshot_singleline() {
     let mut component = TextArea::default()
         .borders(Borders::default())
         .title(Title::from("Editor"))
@@ -246,7 +274,7 @@ fn test_textarea_snapshot_default() {
         component.perform(Cmd::Type(ch));
     }
     let rendered = common::render_to_string(&mut component, 40, 8);
-    insta::assert_snapshot!("textarea_crate_default", rendered);
+    insta::assert_snapshot!("textarea_crate_singleline", rendered);
 }
 
 #[test]
