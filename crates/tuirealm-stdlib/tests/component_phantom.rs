@@ -14,5 +14,10 @@ fn test_phantom_state_is_none() {
 fn test_phantom_snapshot_default() {
     let mut component = Phantom::default();
     let rendered = common::render_to_string(&mut component, 40, 5);
-    insta::assert_snapshot!("phantom_default", rendered);
+    insta::assert_snapshot!(rendered, @r"
+
+
+
+
+");
 }

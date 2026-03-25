@@ -75,6 +75,7 @@ mod macros;
 mod mock;
 pub mod ratatui;
 pub mod terminal;
+pub mod testing;
 pub mod utils;
 
 // export async trait for async-ports

@@ -106,9 +106,7 @@ impl Component for Gauge {
         let label = self
             .props
             .get(Attribute::Text)
-            .and_then(AttrValue::as_string)
-            .map(String::as_str)
-            .unwrap_or_default();
+            .and_then(AttrValue::as_string);
         // Get percentage
         let percentage = self
             .props
@@ -122,9 +120,12 @@ impl Component for Gauge {
         let mut widget = TuiGauge::default()
             .style(self.common.style)
             .gauge_style(self.common.style)
-            .label(label)
             .ratio(percentage)
             .use_unicode(true);
+
+        if let Some(label) = label {
+            widget = widget.label(label.as_str());
+        }
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);
