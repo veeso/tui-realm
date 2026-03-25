@@ -20,6 +20,7 @@ textwrap = "^0.16"
 unicode-width = "^0.2"
 
 [dev-dependencies]
+insta = "1"
 pretty_assertions = "1"
 rand = "0.10"
 tuirealm = { workspace = true, features = ["crossterm", "derive"] }

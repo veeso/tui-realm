@@ -23,6 +23,7 @@ unicode-width = "0.2"
 [dev-dependencies]
 tuirealm = { workspace = true, features = ["derive"] }
 crossterm = "0.29"
+insta = "1"
 pretty_assertions = "1"
 
 [features]

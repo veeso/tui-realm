@@ -198,8 +198,8 @@
     html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/crates/tuirealm-treeview/docs/images/cargo/tui-realm-treeview-128.png"
 )]
 
-#[cfg(test)]
-pub(crate) mod mock;
+#[doc(hidden)]
+pub mod mock;
 pub mod tree_state;
 pub mod widget;
 
