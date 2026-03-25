@@ -1,0 +1,9 @@
+---
+source: crates/tuirealm-stdlib/tests/component_sparkline.rs
+expression: rendered
+---
+┌──────────────────────────────────────┐
+│                                      │
+│                                      │
+│                                      │
+└──────────────────────────────────────┘
