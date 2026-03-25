@@ -1,0 +1,5 @@
+---
+source: crates/tuirealm-stdlib/tests/component_paragraph.rs
+expression: rendered
+---
+                Centered
