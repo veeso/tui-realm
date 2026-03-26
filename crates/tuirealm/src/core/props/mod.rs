@@ -11,6 +11,7 @@ mod layout;
 mod prop_value;
 mod prop_value_ref;
 mod props_store;
+mod queryresult;
 mod shape;
 mod texts;
 
@@ -25,6 +26,7 @@ pub use layout::Layout;
 pub use prop_value::{PropPayload, PropValue};
 pub use prop_value_ref::{PropPayloadRef, PropValueRef};
 pub use props_store::Props;
+pub use queryresult::QueryResult;
 pub use shape::Shape;
 pub use texts::{LineStatic, SpanStatic, Table, TableBuilder, TextStatic, Title};
 
