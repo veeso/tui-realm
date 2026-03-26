@@ -48,6 +48,7 @@ pretty_assertions = "^1"
 tempfile = "^3"
 tokio = { version = "1", features = ["full"] }
 toml = "^0.9"
+insta = "1"
 
 [features]
 default = ["derive", "crossterm"]

@@ -159,6 +159,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "console"
+version = "0.15.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "054ccb5b10f9f2cbf51eb355ca1d05c2d279ce1804688d0db74b4733a5aeafd8"
+dependencies = [
+ "encode_unicode",
+ "libc",
+ "once_cell",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
 name = "convert_case"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -356,6 +368,12 @@ name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
+
+[[package]]
+name = "encode_unicode"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34aa73646ffb006b8f5147f3dc182bd4bcb190227ce861fc4a4844bf8e3cb2c0"
 
 [[package]]
 name = "equivalent"
@@ -580,6 +598,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "79cf5c93f93228cf8efb3ba362535fb11199ac548a09ce117c9b1adc3030d706"
 dependencies = [
  "rustversion",
+]
+
+[[package]]
+name = "insta"
+version = "1.46.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e82db8c87c7f1ccecb34ce0c24399b8a73081427f3c7c50a5d597925356115e4"
+dependencies = [
+ "console",
+ "once_cell",
+ "similar",
+ "tempfile",
 ]
 
 [[package]]
@@ -1359,6 +1389,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "similar"
+version = "2.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbbb5d9659141646ae647b42fe094daf6c6192d1620870b449d9557f748b2daa"
+
+[[package]]
 name = "siphasher"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1690,6 +1726,7 @@ checksum = "f17aaa1c6e3dc22b1da4b6bba97d066e354c7945cac2f7852d4e4e7ca7a6b56d"
 name = "tui-realm-stdlib"
 version = "4.0.0"
 dependencies = [
+ "insta",
  "pretty_assertions",
  "rand 0.10.0",
  "textwrap",
@@ -1702,6 +1739,7 @@ name = "tui-realm-textarea"
 version = "2.1.0"
 dependencies = [
  "crossterm 0.28.1",
+ "insta",
  "lazy-regex",
  "pretty_assertions",
  "tui-realm-stdlib",
@@ -1714,6 +1752,7 @@ name = "tui-realm-treeview"
 version = "3.0.0"
 dependencies = [
  "crossterm 0.29.0",
+ "insta",
  "orange-trees",
  "pretty_assertions",
  "tui-realm-stdlib",
@@ -1745,6 +1784,7 @@ dependencies = [
  "crossterm 0.29.0",
  "dyn-clone",
  "futures-util",
+ "insta",
  "lazy-regex",
  "pretty_assertions",
  "ratatui",
