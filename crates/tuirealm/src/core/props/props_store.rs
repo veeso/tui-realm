@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::props::{AttrValue, Attribute};
+use crate::props::{AttrValue, Attribute, QueryResult};
 
 /// The props struct holds all the attributes associated to the component.
 /// Properties have been designed to be versatile for all kind of components, but without introducing
@@ -19,6 +19,11 @@ impl Props {
     /// Get, if any, the attribute associated to the selector by mutable reference.
     pub fn get_mut(&mut self, query: Attribute) -> Option<&mut AttrValue> {
         self.attrs.get_mut(&query)
+    }
+
+    /// Get, if any, the attribute associated to the selector by reference and return as a type compatible with [`Component::query`](crate::component::Component::query).
+    pub fn get_for_query<'a>(&'a self, query: Attribute) -> Option<QueryResult<'a>> {
+        self.get(query).map(QueryResult::from)
     }
 
     /// Set a new attribute into Properties

@@ -10,8 +10,8 @@ use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{Poll, PortResult, SyncPort};
 use tuirealm::props::{
-    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, PropPayload, PropValue,
-    Title,
+    AttrValue, AttrValueRef, Attribute, BorderType, Borders, Color, HorizontalAlignment,
+    PropPayload, PropPayloadRef, PropValue, PropValueRef, QueryResult, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::terminal::TerminalAdapter;
@@ -235,9 +235,10 @@ impl AppComponent<Msg, UserEvent> for GaugeBeta {
                 let mut prog = self
                     .query(Attribute::Value)
                     .as_ref()
-                    .and_then(AttrValue::as_payload)
-                    .and_then(PropPayload::as_single)
-                    .and_then(PropValue::as_f64)
+                    .map(QueryResult::as_ref)
+                    .and_then(AttrValueRef::as_payload)
+                    .and_then(PropPayloadRef::as_single)
+                    .and_then(PropValueRef::as_f64)
                     .unwrap_or_default();
                 prog += 0.001f64;
 

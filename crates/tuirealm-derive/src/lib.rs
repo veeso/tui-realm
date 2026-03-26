@@ -49,7 +49,7 @@
 //!         self.component.view(frame, area);
 //!     }
 //!
-//!     fn query(&self, attr: Attribute) -> Option<AttrValue> {
+//!     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
 //!         self.component.query(attr)
 //!     }
 //!
@@ -318,7 +318,7 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
             const _: () = {
                 use ::tuirealm::command::{Cmd, CmdResult};
                 use ::tuirealm::ratatui::layout::Rect;
-                use ::tuirealm::props::{AttrValue, Attribute};
+                use ::tuirealm::props::{AttrValue, Attribute, QueryResult};
                 use ::tuirealm::component::Component;
                 use ::tuirealm::ratatui::Frame;
                 use ::tuirealm::state::State;
@@ -328,7 +328,7 @@ pub fn mock_component(input: TokenStream) -> TokenStream {
                         self.#component_field.view(frame, area);
                     }
 
-                    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+                    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
                         self.#component_field.query(attr)
                     }
 

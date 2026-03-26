@@ -6,7 +6,7 @@ use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, NoUserEvent};
 use tuirealm::props::{
-    AttrValue, Attribute, Color, HorizontalAlignment, Props, Style, TextModifiers,
+    AttrValue, Attribute, Color, HorizontalAlignment, Props, QueryResult, Style, TextModifiers,
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
@@ -103,8 +103,8 @@ impl Component for Label {
         );
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr).cloned()
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

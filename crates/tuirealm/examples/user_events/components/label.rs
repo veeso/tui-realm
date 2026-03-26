@@ -7,7 +7,9 @@ use std::time::UNIX_EPOCH;
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
-use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, Props, Style};
+use tuirealm::props::{
+    AttrValue, Attribute, Color, HorizontalAlignment, Props, QueryResult, Style,
+};
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::widgets::Paragraph;
@@ -73,8 +75,8 @@ impl Component for Label {
         );
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr).cloned()
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

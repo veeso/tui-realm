@@ -13,7 +13,8 @@ use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
-    AttrValue, Attribute, Color, HorizontalAlignment, PropBound, PropPayload, Props, Style,
+    AttrValue, Attribute, Color, HorizontalAlignment, PropBound, PropPayload, Props, QueryResult,
+    Style,
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
@@ -248,8 +249,8 @@ impl Component for StdLabel {
         );
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr).cloned()
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -276,9 +277,10 @@ impl AppComponent<Msg, NoUserEvent> for OurLabel {
         match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => Some(Msg::AppClose),
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => {
-                let mut existing_attr = self.query(Attribute::Value).unwrap_or_else(|| {
-                    AttrValue::Payload(PropPayload::Any(CustomState::default().to_any_prop()))
-                });
+                let mut existing_attr = self.query(Attribute::Value).map_or_else(
+                    || AttrValue::Payload(PropPayload::Any(CustomState::default().to_any_prop())),
+                    QueryResult::into_attr,
+                );
                 let tmp = existing_attr
                     .as_payload_mut()
                     .and_then(|v| v.as_any_mut())

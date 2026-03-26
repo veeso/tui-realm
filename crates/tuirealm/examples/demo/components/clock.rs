@@ -8,7 +8,9 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, NoUserEvent};
-use tuirealm::props::{AttrValue, Attribute, Color, HorizontalAlignment, TextModifiers};
+use tuirealm::props::{
+    AttrValue, Attribute, Color, HorizontalAlignment, QueryResult, TextModifiers,
+};
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::state::{State, StateValue};
@@ -75,7 +77,7 @@ impl Component for Clock {
         self.component.view(frame, area);
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
         self.component.query(attr)
     }
 

@@ -9,7 +9,7 @@ use thiserror::Error;
 use crate::component::AppComponent;
 use crate::event::Event;
 use crate::injector::Injector;
-use crate::props::{AttrValue, Attribute};
+use crate::props::{AttrValue, Attribute, QueryResult};
 use crate::ratatui::layout::Rect;
 use crate::state::State;
 
@@ -176,7 +176,11 @@ where
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
-    pub fn query(&self, id: &ComponentId, query: Attribute) -> ViewResult<Option<AttrValue>> {
+    pub fn query<'a>(
+        &'a self,
+        id: &ComponentId,
+        query: Attribute,
+    ) -> ViewResult<Option<QueryResult<'a>>> {
         match self.components.get(id) {
             None => Err(ViewError::ComponentNotFound),
             Some(c) => Ok(c.query(query)),
@@ -403,8 +407,9 @@ mod test {
         assert_eq!(
             view.query(&MockComponentId::InputFoo, Attribute::Focus)
                 .ok()
-                .flatten(),
-            Some(AttrValue::Flag(true))
+                .flatten()
+                .unwrap(),
+            AttrValue::Flag(true)
         );
         // mount another component
         assert!(
@@ -418,14 +423,16 @@ mod test {
         assert_eq!(
             view.query(&MockComponentId::InputFoo, Attribute::Focus)
                 .ok()
-                .flatten(),
-            Some(AttrValue::Flag(false))
+                .flatten()
+                .unwrap(),
+            AttrValue::Flag(false)
         );
         assert_eq!(
             view.query(&MockComponentId::InputBar, Attribute::Focus)
                 .ok()
-                .flatten(),
-            Some(AttrValue::Flag(true))
+                .flatten()
+                .unwrap(),
+            AttrValue::Flag(true)
         );
         // Remount foo
         assert!(
@@ -444,8 +451,9 @@ mod test {
         assert_eq!(
             view.query(&MockComponentId::InputBar, Attribute::Focus)
                 .ok()
-                .flatten(),
-            Some(AttrValue::Flag(true))
+                .flatten()
+                .unwrap(),
+            AttrValue::Flag(true)
         );
         // Blur bar
         assert!(view.blur().is_ok());
@@ -454,14 +462,16 @@ mod test {
         assert_eq!(
             view.query(&MockComponentId::InputFoo, Attribute::Focus)
                 .ok()
-                .flatten(),
-            Some(AttrValue::Flag(true))
+                .flatten()
+                .unwrap(),
+            AttrValue::Flag(true)
         );
         assert_eq!(
             view.query(&MockComponentId::InputBar, Attribute::Focus)
                 .ok()
-                .flatten(),
-            Some(AttrValue::Flag(false))
+                .flatten()
+                .unwrap(),
+            AttrValue::Flag(false)
         );
     }
 
@@ -490,8 +500,9 @@ mod test {
         assert_eq!(
             view.query(&MockComponentId::InputFoo, Attribute::Focus)
                 .ok()
-                .flatten(),
-            Some(AttrValue::Flag(true))
+                .flatten()
+                .unwrap(),
+            AttrValue::Flag(true)
         );
         assert_eq!(
             view.query(&MockComponentId::InputBar, Attribute::Focus)
@@ -515,8 +526,9 @@ mod test {
         assert_eq!(
             view.query(&MockComponentId::InputFoo, Attribute::Focus)
                 .ok()
-                .flatten(),
-            Some(AttrValue::Flag(true))
+                .flatten()
+                .unwrap(),
+            AttrValue::Flag(true)
         );
         assert_eq!(
             view.query(&MockComponentId::InputBar, Attribute::Focus)
@@ -735,8 +747,9 @@ mod test {
         assert_eq!(
             view.query(&MockComponentId::InputFoo, Attribute::Focus)
                 .ok()
+                .flatten()
                 .unwrap(),
-            Some(AttrValue::Flag(true))
+            AttrValue::Flag(true)
         );
     }
 

@@ -6,8 +6,8 @@ use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, HorizontalAlignment, LineStatic, Props, Style,
-    TextModifiers, Title,
+    AttrValue, AttrValueRef, Attribute, Borders, Color, HorizontalAlignment, LineStatic, Props,
+    QueryResult, Style, TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
@@ -128,12 +128,12 @@ impl Component for Counter {
         );
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
         if attr == Attribute::Value {
-            return Some(AttrValue::Number(self.states.counter));
+            return Some(AttrValueRef::Number(self.states.counter).into());
         }
 
-        self.props.get(attr).cloned()
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

@@ -9,7 +9,7 @@ pub use tuirealm_derive::Component;
 
 use crate::command::{Cmd, CmdResult};
 use crate::event::Event;
-use crate::props::{AttrValue, Attribute};
+use crate::props::{AttrValue, Attribute, QueryResult};
 use crate::ratatui::layout::Rect;
 use crate::state::State;
 
@@ -33,7 +33,13 @@ pub trait Component {
     fn view(&mut self, frame: &mut Frame, area: Rect);
 
     /// Query attribute of component properties.
-    fn query(&self, attr: Attribute) -> Option<AttrValue>;
+    ///
+    /// The result should always be [`QueryResult::Borrowed`] unless absolutely necessary.
+    /// In practice, [`QueryResult::Owned`] should only be used for when [`PropPayload::Any`](crate::props::PropPayload::Any) is required to be send.
+    ///
+    /// For handling both [`QueryResult`] cases *readonly*, [`as_ref`](QueryResult::as_ref) can be used.
+    /// For handling both [`QueryResult`] cases *mutably*, [`into_attr`](QueryResult::into_attr) can be used.
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>>;
 
     /// Set attribute to properties.
     /// `query` describes the name, while `attr` the value it'll take

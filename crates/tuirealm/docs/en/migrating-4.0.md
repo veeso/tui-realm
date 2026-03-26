@@ -174,3 +174,8 @@ impl AppComponent<Msg, UserEvent> for MyWidget {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> { ... }
 }
 ```
+
+### Change `Component::query` to return Borrowed content
+
+`Component::query` has been changed to allow for and prefer borrowed content, but still allow owned content to be returned.
+This allowed the consumer to decide when a clone is actually necessary, for practically anything other than `PropPayload::Any`.

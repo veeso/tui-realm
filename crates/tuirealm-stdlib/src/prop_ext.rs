@@ -1,6 +1,6 @@
 //! Extra extensions to handle Properties.
 
-use tuirealm::props::{AttrValue, Attribute, Borders, Style, Title};
+use tuirealm::props::{AttrValue, AttrValueRef, Attribute, Borders, QueryResult, Style, Title};
 use tuirealm::ratatui::widgets::Block;
 
 /// Prop Store for very common props.
@@ -91,6 +91,30 @@ impl CommonProps {
             // other
             _ => None,
         }
+    }
+
+    /// Try to get a given [`Attribute`] as a type compatible with [`Component::query`](tuirealm::component::Component::query).
+    pub fn get_for_query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        match attr {
+            // handle style attributes
+            Attribute::Style => Some(AttrValueRef::Style(self.style)),
+            Attribute::Foreground => self.style.fg.map(AttrValueRef::Color),
+            Attribute::Background => self.style.bg.map(AttrValueRef::Color),
+            Attribute::FocusStyle => Some(AttrValueRef::Style(self.border_unfocused_style)),
+            Attribute::TextProps => Some(AttrValueRef::TextModifiers(self.style.add_modifier)),
+
+            // handle flags
+            Attribute::Display => Some(AttrValueRef::Flag(self.display)),
+            Attribute::Focus => Some(AttrValueRef::Flag(self.focused)),
+
+            // handle borders & titles
+            Attribute::Borders => self.border.map(AttrValueRef::Borders),
+            Attribute::Title => self.title.as_ref().map(AttrValueRef::Title),
+
+            // other
+            _ => None,
+        }
+        .map(QueryResult::Borrowed)
     }
 
     /// Get a [`Block`] with the configuration from the common props, if `borders` are defined.

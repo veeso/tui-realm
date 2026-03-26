@@ -100,8 +100,8 @@ pub fn calc_utf8_cursor_position(chars: &[char]) -> u16 {
 /// Note that a normal [`Span::clone`] (and by extension `Cow::clone`) will preserve the `Cow` Variant.
 pub fn borrow_clone_span<'a, 'b: 'a>(span: &'b Span<'a>) -> Span<'a> {
     Span {
-        style: span.style,
         content: Cow::Borrowed(&*span.content),
+        ..*span
     }
 }
 

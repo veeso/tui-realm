@@ -1,6 +1,6 @@
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::Component;
-use tuirealm::props::{AttrValue, Attribute, Props};
+use tuirealm::props::{AttrValue, Attribute, Props, QueryResult};
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::state::State;
@@ -18,8 +18,8 @@ pub struct Phantom {
 impl Component for Phantom {
     fn view(&mut self, _render: &mut Frame, _area: Rect) {}
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr).cloned()
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

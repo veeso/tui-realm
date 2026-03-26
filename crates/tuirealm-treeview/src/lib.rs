@@ -210,7 +210,8 @@ use tui_realm_stdlib::utils::get_block;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, Props, SpanStatic, Style, TextModifiers, Title,
+    AttrValue, Attribute, Borders, Color, Props, QueryResult, SpanStatic, Style, TextModifiers,
+    Title,
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
@@ -478,8 +479,8 @@ impl<V: NodeValue> Component for TreeView<V> {
         frame.render_stateful_widget(tree, area, &mut state);
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr).cloned()
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

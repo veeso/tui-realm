@@ -11,7 +11,7 @@ use crate::component::AppComponent;
 use crate::event::Event;
 use crate::injector::Injector;
 use crate::listener::{EventListener, EventListenerCfg, ListenerError, PollError};
-use crate::props::{AttrValue, Attribute};
+use crate::props::{AttrValue, Attribute, QueryResult};
 use crate::ratatui::layout::Rect;
 use crate::state::State;
 use crate::subscription::{EventClause, Sub};
@@ -176,11 +176,11 @@ where
     /// Query view component for a certain `AttrValue`
     /// Returns error if the component doesn't exist
     /// Returns None if the attribute doesn't exist.
-    pub fn query(
-        &self,
+    pub fn query<'a>(
+        &'a self,
         id: &ComponentId,
         query: Attribute,
-    ) -> ApplicationResult<Option<AttrValue>> {
+    ) -> ApplicationResult<Option<QueryResult<'a>>> {
         self.view.query(id, query).map_err(ApplicationError::from)
     }
 

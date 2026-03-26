@@ -5,7 +5,7 @@ use std::ops::Range;
 use std::sync::Arc;
 
 use crate::event::{Event, KeyEvent, KeyModifiers, MouseEvent, MouseEventKind};
-use crate::props::{AttrValue, Attribute};
+use crate::props::{AttrValue, Attribute, QueryResult};
 use crate::state::State;
 
 /// Public type to define a subscription.
@@ -82,7 +82,7 @@ where
 
     /// Returns whether to forward event to component
     #[must_use]
-    pub(crate) fn forward<HasAttrFn, GetStateFn, MountedFn>(
+    pub(crate) fn forward<'a, HasAttrFn, GetStateFn, MountedFn>(
         &self,
         ev: &Event<UserEvent>,
         has_attr_fn: HasAttrFn,
@@ -90,7 +90,7 @@ where
         mounted_fn: MountedFn,
     ) -> bool
     where
-        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<QueryResult<'a>>,
         GetStateFn: Fn(&ComponentId) -> Option<State>,
         MountedFn: Fn(&ComponentId) -> bool,
     {
@@ -237,14 +237,14 @@ where
 
     /// Returns whether the subscription clause is satisfied
     #[must_use]
-    pub(crate) fn forward<HasAttrFn, GetStateFn, MountedFn>(
+    pub(crate) fn forward<'a, HasAttrFn, GetStateFn, MountedFn>(
         &self,
         has_attr_fn: HasAttrFn,
         get_state_fn: GetStateFn,
         mounted_fn: MountedFn,
     ) -> bool
     where
-        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<QueryResult<'a>>,
         GetStateFn: Fn(&ComponentId) -> Option<State>,
         MountedFn: Fn(&ComponentId) -> bool,
     {
@@ -254,14 +254,14 @@ where
 
     /// Function to recursively check forwarding.
     #[must_use]
-    fn check_forwarding<HasAttrFn, GetStateFn, MountedFn>(
+    fn check_forwarding<'a, HasAttrFn, GetStateFn, MountedFn>(
         &self,
         has_attr_fn: HasAttrFn,
         get_state_fn: GetStateFn,
         mounted_fn: MountedFn,
     ) -> (bool, HasAttrFn, GetStateFn, MountedFn)
     where
-        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<QueryResult<'a>>,
         GetStateFn: Fn(&ComponentId) -> Option<State>,
         MountedFn: Fn(&ComponentId) -> bool,
     {
@@ -337,14 +337,14 @@ where
     // -- privates
 
     #[must_use]
-    fn has_attribute<HasAttrFn>(
+    fn has_attribute<'a, HasAttrFn>(
         id: &ComponentId,
         query: &Attribute,
         value: &AttrValue,
         has_attr_fn: HasAttrFn,
     ) -> (bool, HasAttrFn)
     where
-        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<AttrValue>,
+        HasAttrFn: Fn(&ComponentId, Attribute) -> Option<QueryResult<'a>>,
     {
         (
             match has_attr_fn(id, *query) {

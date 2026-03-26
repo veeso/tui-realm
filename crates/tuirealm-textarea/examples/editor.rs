@@ -20,8 +20,8 @@ use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
 use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
-    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, Style, TextModifiers,
-    Title,
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, QueryResult, Style,
+    TextModifiers, Title,
 };
 // tui
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
@@ -202,7 +202,7 @@ impl Component for Editor {
         self.component.view(frame, area);
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
         self.component.query(attr)
     }
 

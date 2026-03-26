@@ -131,6 +131,8 @@
 
 // -- internal
 mod fmt;
+use std::borrow::Cow;
+
 use fmt::LineFmt;
 
 // deps
@@ -142,10 +144,12 @@ use tui_textarea::{CursorMove, TextArea as TextAreaWidget};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, PropPayload, PropValue, Props, Style, TextModifiers, Title,
+    AttrValue, AttrValueRef, Attribute, Borders, PropPayload, PropValue, Props, QueryResult, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
+use tuirealm::ratatui::text::{Line, Span};
 use tuirealm::ratatui::widgets::{Block, Paragraph};
 use tuirealm::state::{State, StateValue};
 
@@ -367,16 +371,26 @@ impl<'a> TextArea<'a> {
     }
 
     // -- private
-    fn get_block(&self) -> Option<Block<'a>> {
+    fn get_block(&self) -> Option<Block<'static>> {
         let mut block = Block::default();
-        if let Some(AttrValue::Title(title)) = self.query(Attribute::Title) {
-            block = block.title(title.content).title_position(title.position);
+        if let Some(QueryResult::Borrowed(AttrValueRef::Title(title))) =
+            self.query(Attribute::Title)
+        {
+            block = block
+                .title(title.content.clone())
+                .title_position(title.position);
         }
-        if let Some(AttrValue::Borders(borders)) = self.query(Attribute::Borders) {
+        if let Some(
+            QueryResult::Borrowed(AttrValueRef::Borders(borders))
+            | QueryResult::Owned(AttrValue::Borders(borders)),
+        ) = self.query(Attribute::Borders)
+        {
             let inactive_style = self
                 .query(Attribute::FocusStyle)
-                .unwrap_or_else(|| AttrValue::Style(Style::default()))
-                .unwrap_style();
+                .as_ref()
+                .map(QueryResult::as_ref)
+                .and_then(AttrValueRef::as_style)
+                .unwrap_or_default();
             let focus = self
                 .props
                 .get(Attribute::Focus)
@@ -466,8 +480,8 @@ impl Component for TextArea<'_> {
         }
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr).cloned()
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -662,6 +676,24 @@ impl Component for TextArea<'_> {
         } else {
             CmdResult::None
         }
+    }
+}
+
+/// Convert a `&Span` to a `Span` by using [`Cow::Borrowed`].
+///
+/// Note that a normal [`Span::clone`] (and by extension `Cow::clone`) will preserve the `Cow` Variant.
+pub fn borrow_clone_span<'a, 'b: 'a>(span: &'b Span<'a>) -> Span<'a> {
+    Span {
+        style: span.style,
+        content: Cow::Borrowed(&*span.content),
+    }
+}
+
+/// Convert a `&Line` to a `Line` by using [`Cow::Borrowed`].
+pub fn borrow_clone_line<'a, 'b: 'a>(line: &'b Line<'a>) -> Line<'a> {
+    Line {
+        spans: line.spans.iter().map(borrow_clone_span).collect(),
+        ..*line
     }
 }
 

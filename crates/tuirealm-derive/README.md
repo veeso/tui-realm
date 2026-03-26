@@ -117,7 +117,7 @@ impl Component for IpAddressInput {
         self.component.view(frame, area);
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
         self.component.query(attr)
     }
 

@@ -6,7 +6,7 @@ use super::{MockEvent, MockMsg};
 use crate::command::{Cmd, CmdResult, Direction};
 use crate::component::{AppComponent, Component};
 use crate::event::{Event, Key, KeyEvent, KeyModifiers};
-use crate::props::{AttrValue, Attribute, Props};
+use crate::props::{AttrValue, Attribute, Props, QueryResult};
 use crate::state::{State, StateValue};
 
 /// Mocked component implementing `Component`
@@ -27,8 +27,8 @@ impl Default for MockInput {
 impl Component for MockInput {
     fn view(&mut self, _: &mut Frame, _: crate::ratatui::layout::Rect) {}
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr).cloned()
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, query: Attribute, attr: AttrValue) {

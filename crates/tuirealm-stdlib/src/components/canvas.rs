@@ -3,7 +3,7 @@
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::Component;
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, Shape, Style,
+    AttrValue, Attribute, Borders, Color, PropPayload, PropValue, Props, QueryResult, Shape, Style,
     TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
@@ -232,12 +232,12 @@ impl Component for Canvas {
         render.render_widget(widget, area);
     }
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        if let Some(value) = self.common.get(attr) {
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        if let Some(value) = self.common.get_for_query(attr) {
             return Some(value);
         }
 
-        self.props.get(attr).cloned()
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {

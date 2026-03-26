@@ -5,7 +5,7 @@ use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::EventListenerCfg;
-use tuirealm::props::{AttrValue, Attribute};
+use tuirealm::props::{AttrValue, Attribute, QueryResult};
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction, Layout, Rect};
 use tuirealm::ratatui::widgets::Paragraph;
@@ -202,7 +202,7 @@ impl Component for Label {
         frame.render_widget(Paragraph::new(text), area);
     }
 
-    fn query(&self, _attr: Attribute) -> Option<AttrValue> {
+    fn query<'a>(&'a self, _attr: Attribute) -> Option<QueryResult<'a>> {
         None
     }
 
@@ -240,7 +240,7 @@ impl Component for EventDisplay {
         frame.render_widget(Paragraph::new(text), area);
     }
 
-    fn query(&self, _attr: Attribute) -> Option<AttrValue> {
+    fn query<'a>(&'a self, _attr: Attribute) -> Option<QueryResult<'a>> {
         None
     }
 

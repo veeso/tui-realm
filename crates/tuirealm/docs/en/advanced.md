@@ -296,8 +296,8 @@ impl Radio {
 impl Component for Radio {
     // ...
 
-    fn query(&self, attr: Attribute) -> Option<AttrValue> {
-        self.props.get(attr).cloned()
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.props.get_as_ref(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
