@@ -4,6 +4,7 @@ use ratatui::text::{Line, Span, Text};
 
 use crate::props::prop_value_ref::PropPayloadRef;
 use crate::props::{AttrValue, Borders, Direction, InputType, Layout, Shape, Table, Title};
+use crate::utils::{clone_line, clone_span, clone_text};
 
 /// Describes a single attribute in the component properties as a reference.
 #[derive(Debug, PartialEq, Clone)]
@@ -511,6 +512,38 @@ impl<'a> From<&'a AttrValue> for AttrValueRef<'a> {
     }
 }
 
+impl<'a> From<AttrValueRef<'a>> for AttrValue {
+    fn from(value: AttrValueRef<'a>) -> Self {
+        match value {
+            AttrValueRef::AlignmentHorizontal(horizontal_alignment) => {
+                Self::AlignmentHorizontal(horizontal_alignment)
+            }
+            AttrValueRef::AlignmentVertical(vertical_alignment) => {
+                Self::AlignmentVertical(vertical_alignment)
+            }
+            AttrValueRef::Borders(borders) => Self::Borders(borders),
+            AttrValueRef::Color(color) => Self::Color(color),
+            AttrValueRef::Direction(direction) => Self::Direction(direction),
+            AttrValueRef::Flag(flag) => Self::Flag(flag),
+            AttrValueRef::InputType(input_type) => Self::InputType(input_type.to_owned()),
+            AttrValueRef::Layout(layout) => Self::Layout(layout.to_owned()),
+            AttrValueRef::Length(length) => Self::Length(length),
+            AttrValueRef::Number(number) => Self::Number(number),
+            AttrValueRef::Shape(shape) => Self::Shape(shape.to_owned()),
+            AttrValueRef::Size(size) => Self::Size(size),
+            AttrValueRef::String(string) => Self::String(string.to_owned()),
+            AttrValueRef::Style(style) => Self::Style(style),
+            AttrValueRef::Table(items) => Self::Table(items.to_owned()),
+            AttrValueRef::TextSpan(span) => Self::TextSpan(clone_span(span)),
+            AttrValueRef::TextLine(line) => Self::TextLine(clone_line(line)),
+            AttrValueRef::Text(text) => Self::Text(clone_text(text)),
+            AttrValueRef::TextModifiers(modifier) => Self::TextModifiers(modifier),
+            AttrValueRef::Title(title) => Self::Title(title.to_owned()),
+            AttrValueRef::Payload(prop_payload) => Self::Payload(prop_payload.into()),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
@@ -943,6 +976,93 @@ mod tests {
         assert_eq!(
             AttrValueRef::from(&AttrValue::Payload(PropPayload::None)),
             AttrValueRef::Payload(PropPayloadRef::None)
+        );
+    }
+
+    #[test]
+    fn into_nonref_attrvalue() {
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Flag(true)),
+            AttrValue::Flag(true)
+        );
+        assert_eq!(AttrValue::from(AttrValueRef::Size(1)), AttrValue::Size(1));
+        assert_eq!(
+            AttrValue::from(AttrValueRef::AlignmentHorizontal(
+                HorizontalAlignment::Center
+            )),
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center)
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::AlignmentVertical(VerticalAlignment::Bottom)),
+            AttrValue::AlignmentVertical(VerticalAlignment::Bottom)
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Borders(Borders::default())),
+            AttrValue::Borders(Borders::default())
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Color(Color::Black)),
+            AttrValue::Color(Color::Black)
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Direction(Direction::Down)),
+            AttrValue::Direction(Direction::Down)
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::InputType(&InputType::Color)),
+            AttrValue::InputType(InputType::Color)
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Layout(&Layout::default())),
+            AttrValue::Layout(Layout::default())
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Length(1)),
+            AttrValue::Length(1)
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Number(1)),
+            AttrValue::Number(1)
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Shape(&Shape::Layer)),
+            AttrValue::Shape(Shape::Layer)
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::String("hello")),
+            AttrValue::String("hello".to_string())
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Style(Style::default())),
+            AttrValue::Style(Style::default())
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Table(&Table::new())),
+            AttrValue::Table(Table::new())
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::TextSpan(&SpanStatic::from("hello"))),
+            AttrValue::TextSpan(SpanStatic::from("hello"))
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::TextLine(&LineStatic::from("hello"))),
+            AttrValue::TextLine(LineStatic::from("hello"))
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Text(&TextStatic::from("hello"))),
+            AttrValue::Text(TextStatic::from("hello"))
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::TextModifiers(TextModifiers::default())),
+            AttrValue::TextModifiers(TextModifiers::default())
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Title(&Title::default())),
+            AttrValue::Title(Title::default())
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Payload(PropPayloadRef::None)),
+            AttrValue::Payload(PropPayload::None)
         );
     }
 

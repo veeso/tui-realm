@@ -7,6 +7,7 @@ use ratatui::text::{Line, Span, Text};
 
 use super::{Color, HorizontalAlignment, InputType, Shape, Style, Table, VerticalAlignment};
 use crate::props::{AnyPropBox, PropPayload, PropValue};
+use crate::utils::{clone_line, clone_span, clone_text};
 
 // -- Prop value
 
@@ -201,6 +202,20 @@ impl<'a> From<&'a PropPayload> for PropPayloadRef<'a> {
             PropPayload::Linked(prop_payloads) => Self::Linked(prop_payloads),
             PropPayload::Any(prop_bound) => Self::Any(prop_bound),
             PropPayload::None => Self::None,
+        }
+    }
+}
+
+impl<'a> From<PropPayloadRef<'a>> for PropPayload {
+    fn from(value: PropPayloadRef) -> Self {
+        match value {
+            PropPayloadRef::Single(prop_value) => Self::Single(prop_value.into()),
+            PropPayloadRef::Pair((a, b)) => Self::Pair((a.into(), b.into())),
+            PropPayloadRef::Vec(prop_values) => Self::Vec(prop_values.to_owned()),
+            PropPayloadRef::Map(hash_map) => Self::Map(hash_map.to_owned()),
+            PropPayloadRef::Linked(prop_payloads) => Self::Linked(prop_payloads.to_owned()),
+            PropPayloadRef::Any(prop_bound) => Self::Any((*prop_bound).clone()),
+            PropPayloadRef::None => Self::None,
         }
     }
 }
@@ -749,6 +764,43 @@ impl<'a> From<&'a PropValue> for PropValueRef<'a> {
             PropValue::TextSpan(span) => Self::TextSpan(span),
             PropValue::TextLine(line) => Self::TextLine(line),
             PropValue::Text(text) => Self::Text(text),
+        }
+    }
+}
+
+impl<'a> From<PropValueRef<'a>> for PropValue {
+    fn from(value: PropValueRef<'a>) -> Self {
+        match value {
+            PropValueRef::Bool(flag) => Self::Bool(flag),
+            PropValueRef::U8(num) => Self::U8(num),
+            PropValueRef::U16(num) => Self::U16(num),
+            PropValueRef::U32(num) => Self::U32(num),
+            PropValueRef::U64(num) => Self::U64(num),
+            PropValueRef::U128(num) => Self::U128(num),
+            PropValueRef::Usize(num) => Self::Usize(num),
+            PropValueRef::I8(num) => Self::I8(num),
+            PropValueRef::I16(num) => Self::I16(num),
+            PropValueRef::I32(num) => Self::I32(num),
+            PropValueRef::I64(num) => Self::I64(num),
+            PropValueRef::I128(num) => Self::I128(num),
+            PropValueRef::Isize(num) => Self::Isize(num),
+            PropValueRef::F64(num) => Self::F64(num),
+            PropValueRef::F32(num) => Self::F32(num),
+            PropValueRef::Str(str) => Self::Str(str.to_owned()),
+            PropValueRef::AlignmentHorizontal(horizontal_alignment) => {
+                Self::AlignmentHorizontal(horizontal_alignment)
+            }
+            PropValueRef::AlignmentVertical(vertical_alignment) => {
+                Self::AlignmentVertical(vertical_alignment)
+            }
+            PropValueRef::Color(color) => Self::Color(color),
+            PropValueRef::InputType(input_type) => Self::InputType(input_type.to_owned()),
+            PropValueRef::Shape(shape) => Self::Shape(shape.to_owned()),
+            PropValueRef::Style(style) => Self::Style(style),
+            PropValueRef::Table(items) => Self::Table(items.to_owned()),
+            PropValueRef::TextSpan(span) => Self::TextSpan(clone_span(span)),
+            PropValueRef::TextLine(line) => Self::TextLine(clone_line(line)),
+            PropValueRef::Text(text) => Self::Text(clone_text(text)),
         }
     }
 }
@@ -1373,6 +1425,57 @@ mod tests {
     }
 
     #[test]
+    fn into_nonref_proppayload() {
+        assert_eq!(
+            PropPayload::from(PropPayloadRef::Single(PropValueRef::Bool(true))),
+            PropPayload::Single(PropValue::Bool(true))
+        );
+        assert_eq!(
+            PropPayload::from(PropPayloadRef::Pair((
+                PropValueRef::Bool(true),
+                PropValueRef::Bool(true)
+            ))),
+            PropPayload::Pair((PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert_eq!(
+            PropPayload::from(PropPayloadRef::Vec([PropValue::Bool(true)].as_slice())),
+            PropPayload::Vec(vec![PropValue::Bool(true)])
+        );
+        assert_eq!(
+            PropPayload::from(PropPayloadRef::Map(&HashMap::from([(
+                "key".to_string(),
+                PropValue::Bool(true)
+            )]))),
+            PropPayload::Map(HashMap::from([("key".to_string(), PropValue::Bool(true))]))
+        );
+        assert_eq!(
+            PropPayload::from(PropPayloadRef::Linked(&LinkedList::new())),
+            PropPayload::Linked(LinkedList::new())
+        );
+        assert_eq!(PropPayload::from(PropPayloadRef::None), PropPayload::None);
+
+        #[derive(Debug, Clone, PartialEq)]
+        struct CloneableType {
+            field1: String,
+        }
+
+        assert_eq!(
+            PropPayload::from(PropPayloadRef::Any(
+                &CloneableType {
+                    field1: "Hello".to_string(),
+                }
+                .to_any_prop()
+            )),
+            PropPayload::Any(
+                CloneableType {
+                    field1: "Hello".to_string(),
+                }
+                .to_any_prop()
+            )
+        );
+    }
+
+    #[test]
     fn from_nonref_propvalue() {
         assert_eq!(
             PropValueRef::from(&PropValue::Bool(true)),
@@ -1462,6 +1565,83 @@ mod tests {
         assert_eq!(
             PropValueRef::from(&PropValue::Text(TextStatic::from("hello"))),
             PropValueRef::Text(&TextStatic::from("hello"))
+        );
+    }
+
+    #[test]
+    fn into_nonref_propvalue() {
+        assert_eq!(
+            PropValue::from(PropValueRef::Bool(true)),
+            PropValue::Bool(true)
+        );
+
+        assert_eq!(PropValue::from(PropValueRef::U8(1)), PropValueRef::U8(1));
+        assert_eq!(PropValue::from(PropValueRef::U16(1)), PropValue::U16(1));
+        assert_eq!(PropValue::from(PropValueRef::U32(1)), PropValue::U32(1));
+        assert_eq!(PropValue::from(PropValueRef::U64(1)), PropValue::U64(1));
+        assert_eq!(PropValue::from(PropValueRef::U128(1)), PropValue::U128(1));
+        assert_eq!(PropValue::from(PropValueRef::Usize(1)), PropValue::Usize(1));
+        assert_eq!(PropValue::from(PropValueRef::I8(1)), PropValueRef::I8(1));
+        assert_eq!(PropValue::from(PropValueRef::I16(1)), PropValue::I16(1));
+        assert_eq!(PropValue::from(PropValueRef::I32(1)), PropValue::I32(1));
+        assert_eq!(PropValue::from(PropValueRef::I64(1)), PropValue::I64(1));
+        assert_eq!(PropValue::from(PropValueRef::I128(1)), PropValue::I128(1));
+        assert_eq!(PropValue::from(PropValueRef::Isize(1)), PropValue::Isize(1));
+        assert_eq!(PropValue::from(PropValueRef::F32(1.0)), PropValue::F32(1.0));
+        assert_eq!(PropValue::from(PropValueRef::F64(1.0)), PropValue::F64(1.0));
+
+        assert_eq!(
+            PropValue::from(PropValueRef::Str("hello")),
+            PropValue::Str("hello".to_string())
+        );
+
+        assert_eq!(
+            PropValue::from(PropValueRef::AlignmentHorizontal(
+                HorizontalAlignment::Center
+            )),
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center)
+        );
+        assert_eq!(
+            PropValue::from(PropValueRef::AlignmentVertical(VerticalAlignment::Bottom)),
+            PropValue::AlignmentVertical(VerticalAlignment::Bottom)
+        );
+
+        assert_eq!(
+            PropValue::from(PropValueRef::Color(Color::Black)),
+            PropValue::Color(Color::Black)
+        );
+
+        assert_eq!(
+            PropValue::from(PropValueRef::InputType(&InputType::Color)),
+            PropValue::InputType(InputType::Color)
+        );
+
+        assert_eq!(
+            PropValue::from(PropValueRef::Shape(&Shape::Layer)),
+            PropValue::Shape(Shape::Layer)
+        );
+
+        assert_eq!(
+            PropValue::from(PropValueRef::Style(Style::default())),
+            PropValue::Style(Style::default())
+        );
+
+        assert_eq!(
+            PropValue::from(PropValueRef::Table(&Table::new())),
+            PropValue::Table(Table::new())
+        );
+
+        assert_eq!(
+            PropValue::from(PropValueRef::TextSpan(&SpanStatic::from("hello"))),
+            PropValue::TextSpan(SpanStatic::from("hello"))
+        );
+        assert_eq!(
+            PropValue::from(PropValueRef::TextLine(&LineStatic::from("hello"))),
+            PropValue::TextLine(LineStatic::from("hello"))
+        );
+        assert_eq!(
+            PropValue::from(PropValueRef::Text(&TextStatic::from("hello"))),
+            PropValue::Text(TextStatic::from("hello"))
         );
     }
 }
