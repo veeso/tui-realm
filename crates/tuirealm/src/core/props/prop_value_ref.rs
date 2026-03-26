@@ -109,23 +109,23 @@ impl<'a> PropPayloadRef<'a> {
     // -- as reference
 
     /// Get a Single value from PropPayload, or None
-    pub fn as_single(&self) -> Option<PropValueRef<'a>> {
+    pub fn as_single(self) -> Option<PropValueRef<'a>> {
         match self {
-            PropPayloadRef::Single(v) => Some(*v),
+            PropPayloadRef::Single(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Pair value from PropPayload, or None
-    pub fn as_pair(&self) -> Option<(PropValueRef<'a>, PropValueRef<'a>)> {
+    pub fn as_pair(self) -> Option<(PropValueRef<'a>, PropValueRef<'a>)> {
         match self {
-            PropPayloadRef::Pair(v) => Some((v.0, v.1)),
+            PropPayloadRef::Pair(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Vec value from PropPayload, or None
-    pub fn as_vec(&self) -> Option<&'a [PropValue]> {
+    pub fn as_vec(self) -> Option<&'a [PropValue]> {
         match self {
             PropPayloadRef::Vec(v) => Some(v),
             _ => None,
@@ -133,7 +133,7 @@ impl<'a> PropPayloadRef<'a> {
     }
 
     /// Get a Map value from PropPayload, or None
-    pub fn as_map(&self) -> Option<&'a HashMap<String, PropValue>> {
+    pub fn as_map(self) -> Option<&'a HashMap<String, PropValue>> {
         match self {
             PropPayloadRef::Map(v) => Some(v),
             _ => None,
@@ -141,7 +141,7 @@ impl<'a> PropPayloadRef<'a> {
     }
 
     /// Get a Linked value from PropPayload, or None
-    pub fn as_linked(&self) -> Option<&'a LinkedList<PropPayload>> {
+    pub fn as_linked(self) -> Option<&'a LinkedList<PropPayload>> {
         match self {
             PropPayloadRef::Linked(v) => Some(v),
             _ => None,
@@ -149,7 +149,7 @@ impl<'a> PropPayloadRef<'a> {
     }
 
     /// Get a Any value from PropPayload, or None
-    pub fn as_any(&self) -> Option<&dyn Any> {
+    pub fn as_any(self) -> Option<&'a dyn Any> {
         match self {
             PropPayloadRef::Any(v) => Some(v.as_ref()),
             _ => None,
@@ -460,142 +460,127 @@ impl<'a> PropValueRef<'a> {
     // -- as reference
 
     /// Get a Bool value from PropValue, or None
-    pub fn as_bool(&self) -> Option<bool> {
+    pub fn as_bool(self) -> Option<bool> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::Bool(v) => Some(*v),
+            PropValueRef::Bool(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a u8 value from PropValue, or None
-    pub fn as_u8(&self) -> Option<u8> {
+    pub fn as_u8(self) -> Option<u8> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::U8(v) => Some(*v),
+            PropValueRef::U8(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a u16 value from PropValue, or None
-    pub fn as_u16(&self) -> Option<u16> {
+    pub fn as_u16(self) -> Option<u16> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::U16(v) => Some(*v),
+            PropValueRef::U16(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a u32 value from PropValue, or None
-    pub fn as_u32(&self) -> Option<u32> {
+    pub fn as_u32(self) -> Option<u32> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::U32(v) => Some(*v),
+            PropValueRef::U32(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a u64 value from PropValue, or None
-    pub fn as_u64(&self) -> Option<u64> {
+    pub fn as_u64(self) -> Option<u64> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::U64(v) => Some(*v),
+            PropValueRef::U64(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a u128 value from PropValue, or None
-    pub fn as_u128(&self) -> Option<u128> {
+    pub fn as_u128(self) -> Option<u128> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::U128(v) => Some(*v),
+            PropValueRef::U128(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a usize value from PropValue, or None
-    pub fn as_usize(&self) -> Option<usize> {
+    pub fn as_usize(self) -> Option<usize> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::Usize(v) => Some(*v),
+            PropValueRef::Usize(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a i8 value from PropValue, or None
-    pub fn as_i8(&self) -> Option<i8> {
+    pub fn as_i8(self) -> Option<i8> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::I8(v) => Some(*v),
+            PropValueRef::I8(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a i16 value from PropValue, or None
-    pub fn as_i16(&self) -> Option<i16> {
+    pub fn as_i16(self) -> Option<i16> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::I16(v) => Some(*v),
+            PropValueRef::I16(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a i32 value from PropValue, or None
-    pub fn as_i32(&self) -> Option<i32> {
+    pub fn as_i32(self) -> Option<i32> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::I32(v) => Some(*v),
+            PropValueRef::I32(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a i64 value from PropValue, or None
-    pub fn as_i64(&self) -> Option<i64> {
+    pub fn as_i64(self) -> Option<i64> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::I64(v) => Some(*v),
+            PropValueRef::I64(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a i128 value from PropValue, or None
-    pub fn as_i128(&self) -> Option<i128> {
+    pub fn as_i128(self) -> Option<i128> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::I128(v) => Some(*v),
+            PropValueRef::I128(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a isize value from PropValue, or None
-    pub fn as_isize(&self) -> Option<isize> {
+    pub fn as_isize(self) -> Option<isize> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::Isize(v) => Some(*v),
+            PropValueRef::Isize(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a f32 value from PropValue, or None
-    pub fn as_f32(&self) -> Option<f32> {
+    pub fn as_f32(self) -> Option<f32> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::F32(v) => Some(*v),
+            PropValueRef::F32(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a f64 value from PropValue, or None
-    pub fn as_f64(&self) -> Option<f64> {
+    pub fn as_f64(self) -> Option<f64> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::F64(v) => Some(*v),
+            PropValueRef::F64(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a String value from PropValue, or None
-    pub fn as_str(&self) -> Option<&'a str> {
+    pub fn as_str(self) -> Option<&'a str> {
         match self {
             PropValueRef::Str(v) => Some(v),
             _ => None,
@@ -603,34 +588,31 @@ impl<'a> PropValueRef<'a> {
     }
 
     /// Get a Horizontal Alignment value from PropValue, or None
-    pub fn as_alignment_horizontal(&self) -> Option<HorizontalAlignment> {
+    pub fn as_alignment_horizontal(self) -> Option<HorizontalAlignment> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::AlignmentHorizontal(v) => Some(*v),
+            PropValueRef::AlignmentHorizontal(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Vertical Alignment value from PropValue, or None
-    pub fn as_alignment_vertical(&self) -> Option<VerticalAlignment> {
+    pub fn as_alignment_vertical(self) -> Option<VerticalAlignment> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::AlignmentVertical(v) => Some(*v),
+            PropValueRef::AlignmentVertical(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Color value from PropValue, or None
-    pub fn as_color(&self) -> Option<Color> {
+    pub fn as_color(self) -> Option<Color> {
         match self {
-            // cheap copy, so no reference
-            PropValueRef::Color(v) => Some(*v),
+            PropValueRef::Color(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a InputType value from PropValue, or None
-    pub fn as_input_type(&self) -> Option<&'a InputType> {
+    pub fn as_input_type(self) -> Option<&'a InputType> {
         match self {
             PropValueRef::InputType(v) => Some(v),
             _ => None,
@@ -638,7 +620,7 @@ impl<'a> PropValueRef<'a> {
     }
 
     /// Get a Shape value from PropValue, or None
-    pub fn as_shape(&self) -> Option<&'a Shape> {
+    pub fn as_shape(self) -> Option<&'a Shape> {
         match self {
             PropValueRef::Shape(v) => Some(v),
             _ => None,
@@ -646,15 +628,15 @@ impl<'a> PropValueRef<'a> {
     }
 
     /// Get a Style value from PropValue, or None
-    pub fn as_style(&self) -> Option<Style> {
+    pub fn as_style(self) -> Option<Style> {
         match self {
-            PropValueRef::Style(v) => Some(*v),
+            PropValueRef::Style(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Table value from PropValue, or None
-    pub fn as_table(&self) -> Option<&Table> {
+    pub fn as_table(self) -> Option<&'a Table> {
         match self {
             PropValueRef::Table(v) => Some(v),
             _ => None,
@@ -662,7 +644,7 @@ impl<'a> PropValueRef<'a> {
     }
 
     /// Get a [`SpanStatic`] value from PropValue, or None
-    pub fn as_textspan(&self) -> Option<&'a Span<'a>> {
+    pub fn as_textspan(self) -> Option<&'a Span<'a>> {
         match self {
             PropValueRef::TextSpan(v) => Some(v),
             _ => None,
@@ -670,7 +652,7 @@ impl<'a> PropValueRef<'a> {
     }
 
     /// Get a [`LineStatic`] value from PropValue, or None
-    pub fn as_textline(&self) -> Option<&'a Line<'a>> {
+    pub fn as_textline(self) -> Option<&'a Line<'a>> {
         match self {
             PropValueRef::TextLine(v) => Some(v),
             _ => None,
@@ -678,7 +660,7 @@ impl<'a> PropValueRef<'a> {
     }
 
     /// Get a [`TextStatic`] value from PropValue, or None
-    pub fn as_text(&self) -> Option<&'a Text<'a>> {
+    pub fn as_text(self) -> Option<&'a Text<'a>> {
         match self {
             PropValueRef::Text(v) => Some(v),
             _ => None,

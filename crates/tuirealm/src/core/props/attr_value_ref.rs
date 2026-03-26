@@ -7,7 +7,7 @@ use crate::props::{AttrValue, Borders, Direction, InputType, Layout, Shape, Tabl
 use crate::utils::{clone_line, clone_span, clone_text};
 
 /// Describes a single attribute in the component properties as a reference.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 #[allow(clippy::large_enum_variant)]
 pub enum AttrValueRef<'a> {
     AlignmentHorizontal(HorizontalAlignment),
@@ -208,61 +208,55 @@ impl<'a> AttrValueRef<'a> {
     // -- as reference
 
     /// Get a Horizontal Alignment value from AttrValue, or None
-    pub fn as_alignment_horizontal(&self) -> Option<HorizontalAlignment> {
+    pub fn as_alignment_horizontal(self) -> Option<HorizontalAlignment> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::AlignmentHorizontal(v) => Some(*v),
+            AttrValueRef::AlignmentHorizontal(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Vertical Alignment value from AttrValue, or None
-    pub fn as_alignment_vertical(&self) -> Option<VerticalAlignment> {
+    pub fn as_alignment_vertical(self) -> Option<VerticalAlignment> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::AlignmentVertical(v) => Some(*v),
+            AttrValueRef::AlignmentVertical(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Borders value from AttrValue, or None
-    pub fn as_borders(&self) -> Option<Borders> {
+    pub fn as_borders(self) -> Option<Borders> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::Borders(v) => Some(*v),
+            AttrValueRef::Borders(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Color value from AttrValue, or None
-    pub fn as_color(&self) -> Option<Color> {
+    pub fn as_color(self) -> Option<Color> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::Color(v) => Some(*v),
+            AttrValueRef::Color(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Direction value from AttrValue, or None
-    pub fn as_direction(&self) -> Option<Direction> {
+    pub fn as_direction(self) -> Option<Direction> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::Direction(v) => Some(*v),
+            AttrValueRef::Direction(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Flag value from AttrValue, or None
-    pub fn as_flag(&self) -> Option<bool> {
+    pub fn as_flag(self) -> Option<bool> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::Flag(v) => Some(*v),
+            AttrValueRef::Flag(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a InputType value from AttrValue, or None
-    pub fn as_input_type(&self) -> Option<&'a InputType> {
+    pub fn as_input_type(self) -> Option<&'a InputType> {
         match self {
             AttrValueRef::InputType(v) => Some(v),
             _ => None,
@@ -270,7 +264,7 @@ impl<'a> AttrValueRef<'a> {
     }
 
     /// Get a Layout value from AttrValue, or None
-    pub fn as_layout(&self) -> Option<&'a Layout> {
+    pub fn as_layout(self) -> Option<&'a Layout> {
         match self {
             AttrValueRef::Layout(v) => Some(v),
             _ => None,
@@ -278,25 +272,23 @@ impl<'a> AttrValueRef<'a> {
     }
 
     /// Get a Length value from AttrValue, or None
-    pub fn as_length(&self) -> Option<usize> {
+    pub fn as_length(self) -> Option<usize> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::Length(v) => Some(*v),
+            AttrValueRef::Length(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Number value from AttrValue, or None
-    pub fn as_number(&self) -> Option<isize> {
+    pub fn as_number(self) -> Option<isize> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::Number(v) => Some(*v),
+            AttrValueRef::Number(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Shape value from AttrValue, or None
-    pub fn as_shape(&self) -> Option<&'a Shape> {
+    pub fn as_shape(self) -> Option<&'a Shape> {
         match self {
             AttrValueRef::Shape(v) => Some(v),
             _ => None,
@@ -304,16 +296,15 @@ impl<'a> AttrValueRef<'a> {
     }
 
     /// Get a Size value from AttrValue, or None
-    pub fn as_size(&self) -> Option<u16> {
+    pub fn as_size(self) -> Option<u16> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::Size(v) => Some(*v),
+            AttrValueRef::Size(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a String value from AttrValue, or None
-    pub fn as_string(&self) -> Option<&'a str> {
+    pub fn as_string(self) -> Option<&'a str> {
         match self {
             AttrValueRef::String(v) => Some(v),
             _ => None,
@@ -321,16 +312,15 @@ impl<'a> AttrValueRef<'a> {
     }
 
     /// Get a Style value from AttrValue, or None
-    pub fn as_style(&self) -> Option<Style> {
+    pub fn as_style(self) -> Option<Style> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::Style(v) => Some(*v),
+            AttrValueRef::Style(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a Table value from AttrValue, or None
-    pub fn as_table(&self) -> Option<&'a Table> {
+    pub fn as_table(self) -> Option<&'a Table> {
         match self {
             AttrValueRef::Table(v) => Some(v),
             _ => None,
@@ -338,7 +328,7 @@ impl<'a> AttrValueRef<'a> {
     }
 
     /// Get a [`SpanStatic`] value from AttrValue, or None
-    pub fn as_textspan(&self) -> Option<&'a Span<'a>> {
+    pub fn as_textspan(self) -> Option<&'a Span<'a>> {
         match self {
             AttrValueRef::TextSpan(v) => Some(v),
             _ => None,
@@ -346,7 +336,7 @@ impl<'a> AttrValueRef<'a> {
     }
 
     /// Get a [`LineStatic`] value from AttrValue, or None
-    pub fn as_textline(&self) -> Option<&'a Line<'a>> {
+    pub fn as_textline(self) -> Option<&'a Line<'a>> {
         match self {
             AttrValueRef::TextLine(v) => Some(v),
             _ => None,
@@ -354,7 +344,7 @@ impl<'a> AttrValueRef<'a> {
     }
 
     /// Get a [`TextStatic`] value from AttrValue, or None
-    pub fn as_text(&self) -> Option<&'a Text<'a>> {
+    pub fn as_text(self) -> Option<&'a Text<'a>> {
         match self {
             AttrValueRef::Text(v) => Some(v),
             _ => None,
@@ -362,16 +352,15 @@ impl<'a> AttrValueRef<'a> {
     }
 
     /// Get a TextModifiers value from AttrValue, or None
-    pub fn as_text_modifiers(&self) -> Option<TextModifiers> {
+    pub fn as_text_modifiers(self) -> Option<TextModifiers> {
         match self {
-            // cheap copy, so no reference
-            AttrValueRef::TextModifiers(v) => Some(*v),
+            AttrValueRef::TextModifiers(v) => Some(v),
             _ => None,
         }
     }
 
     /// Get a [`Title`] value from AttrValue, or None
-    pub fn as_title(&self) -> Option<&Title> {
+    pub fn as_title(self) -> Option<&'a Title> {
         match self {
             AttrValueRef::Title(v) => Some(v),
             _ => None,
@@ -379,9 +368,9 @@ impl<'a> AttrValueRef<'a> {
     }
 
     /// Get a Payload value from AttrValue, or None
-    pub fn as_payload(&self) -> Option<PropPayloadRef<'a>> {
+    pub fn as_payload(self) -> Option<PropPayloadRef<'a>> {
         match self {
-            AttrValueRef::Payload(v) => Some(*v),
+            AttrValueRef::Payload(v) => Some(v),
             _ => None,
         }
     }
