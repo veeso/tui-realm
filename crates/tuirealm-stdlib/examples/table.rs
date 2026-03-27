@@ -242,7 +242,7 @@ impl Default for TableBeta {
                         .add_row()
                         .add_col(Line::from("KeyCode::PageUp"))
                         .add_col(Line::from("OnKey"))
-                        .add_col(Line::from("ove cursor up by 8"))
+                        .add_col(Line::from("Move cursor up by 8"))
                         .add_row()
                         .add_col(Line::from("KeyCode::End"))
                         .add_col(Line::from("OnKey"))
