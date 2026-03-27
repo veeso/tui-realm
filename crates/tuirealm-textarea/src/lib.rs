@@ -410,6 +410,17 @@ impl<'a> TextArea<'a> {
 
         None
     }
+
+    /// Move the cursor to a specific position, and return the appropriate [`CmdResult`].
+    fn move_cursor(&mut self, to: CursorMove) -> CmdResult {
+        let prev = self.widget.cursor();
+        self.widget.move_cursor(to);
+        if prev == self.widget.cursor() {
+            CmdResult::None
+        } else {
+            CmdResult::Visual
+        }
+    }
 }
 
 impl Component for TextArea<'_> {
@@ -577,25 +588,25 @@ impl Component for TextArea<'_> {
                 self.widget.delete_word();
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_PARAGRAPH_BACK) => {
-                self.widget.move_cursor(CursorMove::ParagraphBack);
+                return self.move_cursor(CursorMove::ParagraphBack);
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_PARAGRAPH_FORWARD) => {
-                self.widget.move_cursor(CursorMove::ParagraphForward);
+                return self.move_cursor(CursorMove::ParagraphForward);
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_BACK) => {
-                self.widget.move_cursor(CursorMove::WordBack);
+                return self.move_cursor(CursorMove::WordBack);
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_FORWARD) => {
-                self.widget.move_cursor(CursorMove::WordForward);
+                return self.move_cursor(CursorMove::WordForward);
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_BOTTOM) => {
                 if !self.single_line {
-                    self.widget.move_cursor(CursorMove::Bottom);
+                    return self.move_cursor(CursorMove::Bottom);
                 }
             }
             Cmd::Custom(TEXTAREA_CMD_MOVE_TOP) => {
                 if !self.single_line {
-                    self.widget.move_cursor(CursorMove::Top);
+                    return self.move_cursor(CursorMove::Top);
                 }
             }
             Cmd::Custom(TEXTAREA_CMD_REDO) => {
@@ -616,25 +627,25 @@ impl Component for TextArea<'_> {
                 self.widget.delete_char();
             }
             Cmd::GoTo(Position::Begin) => {
-                self.widget.move_cursor(CursorMove::Head);
+                return self.move_cursor(CursorMove::Head);
             }
             Cmd::GoTo(Position::End) => {
-                self.widget.move_cursor(CursorMove::End);
+                return self.move_cursor(CursorMove::End);
             }
             Cmd::Move(Direction::Down) => {
                 if !self.single_line {
-                    self.widget.move_cursor(CursorMove::Down);
+                    return self.move_cursor(CursorMove::Down);
                 }
             }
             Cmd::Move(Direction::Left) => {
-                self.widget.move_cursor(CursorMove::Back);
+                return self.move_cursor(CursorMove::Back);
             }
             Cmd::Move(Direction::Right) => {
-                self.widget.move_cursor(CursorMove::Forward);
+                return self.move_cursor(CursorMove::Forward);
             }
             Cmd::Move(Direction::Up) => {
                 if !self.single_line {
-                    self.widget.move_cursor(CursorMove::Up);
+                    return self.move_cursor(CursorMove::Up);
                 }
             }
             Cmd::Scroll(Direction::Down) => {
@@ -644,7 +655,12 @@ impl Component for TextArea<'_> {
                         .get(Attribute::ScrollStep)
                         .and_then(AttrValue::as_length)
                         .unwrap_or(8);
-                    (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Down));
+                    let mut res = CmdResult::None;
+                    (0..step).for_each(|_| match self.move_cursor(CursorMove::Down) {
+                        CmdResult::None => (),
+                        v => res = v,
+                    });
+                    return res;
                 }
             }
             Cmd::Scroll(Direction::Up) => {
@@ -654,7 +670,12 @@ impl Component for TextArea<'_> {
                         .get(Attribute::ScrollStep)
                         .and_then(AttrValue::as_length)
                         .unwrap_or(8);
-                    (0..step).for_each(|_| self.widget.move_cursor(CursorMove::Up));
+                    let mut res = CmdResult::None;
+                    (0..step).for_each(|_| match self.move_cursor(CursorMove::Up) {
+                        CmdResult::None => (),
+                        v => res = v,
+                    });
+                    return res;
                 }
             }
             Cmd::Type('\t') => {
@@ -777,8 +798,8 @@ mod tests {
         textarea.perform(Cmd::Type('a'));
         let result = textarea.perform(Cmd::Move(Direction::Left));
         assert!(
-            matches!(result, CmdResult::None),
-            "cursor movement should return None (no content change)"
+            matches!(result, CmdResult::Visual),
+            "cursor movement should return Visual (no content change)"
         );
     }
 
@@ -789,8 +810,8 @@ mod tests {
         textarea.perform(Cmd::Type('b'));
         let result = textarea.perform(Cmd::GoTo(Position::Begin));
         assert!(
-            matches!(result, CmdResult::None),
-            "goto should return None (no content change)"
+            matches!(result, CmdResult::Visual),
+            "goto should return Visual (no content change)"
         );
     }
 

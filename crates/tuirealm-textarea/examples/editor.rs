@@ -259,8 +259,8 @@ impl Default for Editor {
 
 impl AppComponent<Msg, NoUserEvent> for Editor {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => Some(Msg::AppClose),
+        let result = match ev {
+            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             Event::Keyboard(KeyEvent {
                 code: Key::Backspace,
                 ..
@@ -268,16 +268,10 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
             | Event::Keyboard(KeyEvent {
                 code: Key::Char('h'),
                 modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::Delete);
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Delete),
             Event::Keyboard(KeyEvent {
                 code: Key::Delete, ..
-            }) => {
-                self.perform(Cmd::Cancel);
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Cancel),
             Event::Keyboard(KeyEvent {
                 code: Key::PageDown,
                 ..
@@ -285,139 +279,96 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
             | Event::Keyboard(KeyEvent {
                 code: Key::Down,
                 modifiers: KeyModifiers::SHIFT,
-            }) => {
-                self.perform(Cmd::Scroll(Direction::Down));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Scroll(Direction::Down)),
             Event::Keyboard(KeyEvent {
                 code: Key::PageUp, ..
             })
             | Event::Keyboard(KeyEvent {
                 code: Key::Up,
                 modifiers: KeyModifiers::SHIFT,
-            }) => {
-                self.perform(Cmd::Scroll(Direction::Up));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Scroll(Direction::Up)),
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
-            }) => {
-                self.perform(Cmd::Move(Direction::Down));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Move(Direction::Down)),
             Event::Keyboard(KeyEvent {
                 code: Key::Left,
                 modifiers: KeyModifiers::SHIFT,
-            }) => {
-                self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_BACK));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_BACK)),
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
-            }) => {
-                self.perform(Cmd::Move(Direction::Left));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Move(Direction::Left)),
             Event::Keyboard(KeyEvent {
                 code: Key::Right,
                 modifiers: KeyModifiers::SHIFT,
-            }) => {
-                self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_FORWARD));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_FORWARD)),
             Event::Keyboard(KeyEvent {
                 code: Key::Right, ..
-            }) => {
-                self.perform(Cmd::Move(Direction::Right));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Move(Direction::Right)),
             Event::Keyboard(KeyEvent { code: Key::Up, .. }) => {
-                self.perform(Cmd::Move(Direction::Up));
-                Some(Msg::Redraw)
+                self.perform(Cmd::Move(Direction::Up))
             }
             Event::Keyboard(KeyEvent { code: Key::End, .. })
             | Event::Keyboard(KeyEvent {
                 code: Key::Char('e'),
                 modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::GoTo(Position::End));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::GoTo(Position::End)),
             Event::Keyboard(KeyEvent {
                 code: Key::Enter, ..
             })
             | Event::Keyboard(KeyEvent {
                 code: Key::Char('m'),
                 modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::Custom(TEXTAREA_CMD_NEWLINE));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_NEWLINE)),
             Event::Keyboard(KeyEvent {
                 code: Key::Home, ..
             })
             | Event::Keyboard(KeyEvent {
                 code: Key::Char('a'),
                 modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::GoTo(Position::Begin));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::GoTo(Position::Begin)),
             #[cfg(feature = "search")]
             Event::Keyboard(KeyEvent {
                 code: Key::Char('s'),
                 modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_BACK));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_BACK)),
             #[cfg(feature = "search")]
             Event::Keyboard(KeyEvent {
                 code: Key::Char('d'),
                 modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_FORWARD));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_FORWARD)),
             Event::Keyboard(KeyEvent {
                 code: Key::Char('z'),
                 modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::Custom(TEXTAREA_CMD_UNDO));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_UNDO)),
             Event::Keyboard(KeyEvent {
                 code: Key::Char('y'),
                 modifiers: KeyModifiers::CONTROL,
-            }) => {
-                self.perform(Cmd::Custom(TEXTAREA_CMD_REDO));
-                Some(Msg::Redraw)
-            }
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => {
-                self.perform(Cmd::Type('\t'));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_REDO)),
+            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => self.perform(Cmd::Type('\t')),
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 ..
-            }) => {
-                self.perform(Cmd::Type(*ch));
-                Some(Msg::Redraw)
-            }
+            }) => self.perform(Cmd::Type(*ch)),
             Event::Keyboard(KeyEvent {
                 code: Key::Function(2),
                 ..
-            }) => Some(Msg::ChangeFocus(Id::Label)),
+            }) => return Some(Msg::ChangeFocus(Id::Label)),
             #[cfg(feature = "search")]
             Event::Keyboard(KeyEvent {
                 code: Key::Function(3),
                 ..
-            }) => Some(Msg::ChangeFocus(Id::Search)),
+            }) => return Some(Msg::ChangeFocus(Id::Search)),
             Event::Paste(text) => {
                 self.component.paste(text);
-                Some(Msg::Redraw)
+                CmdResult::Changed(State::None)
             }
-            _ => None,
+            _ => return None,
+        };
+
+        if matches!(result, CmdResult::None | CmdResult::Invalid(_)) {
+            None
+        } else {
+            Some(Msg::Redraw)
         }
     }
 }

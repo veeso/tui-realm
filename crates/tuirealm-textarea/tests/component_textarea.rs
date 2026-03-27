@@ -120,17 +120,20 @@ fn test_textarea_cursor_movement() {
     component.perform(Cmd::Type('B'));
     assert_eq!(
         component.perform(Cmd::Move(Direction::Left)),
-        CmdResult::None
+        CmdResult::Visual
     );
     assert_eq!(
         component.perform(Cmd::Move(Direction::Right)),
-        CmdResult::None
+        CmdResult::Visual
     );
     assert_eq!(
         component.perform(Cmd::GoTo(Position::Begin)),
-        CmdResult::None
+        CmdResult::Visual
     );
-    assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::GoTo(Position::End)),
+        CmdResult::Visual
+    );
 }
 
 #[test]
@@ -139,10 +142,13 @@ fn test_textarea_vertical_movement() {
     component.perform(Cmd::Type('A'));
     component.perform(Cmd::Custom(TEXTAREA_CMD_NEWLINE));
     component.perform(Cmd::Type('B'));
-    assert_eq!(component.perform(Cmd::Move(Direction::Up)), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Move(Direction::Up)),
+        CmdResult::Visual
+    );
     assert_eq!(
         component.perform(Cmd::Move(Direction::Down)),
-        CmdResult::None
+        CmdResult::Visual
     );
 }
 
@@ -164,11 +170,11 @@ fn test_textarea_word_movement() {
     }
     assert_eq!(
         component.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_BACK)),
-        CmdResult::None
+        CmdResult::Visual
     );
     assert_eq!(
         component.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_FORWARD)),
-        CmdResult::None
+        CmdResult::Visual
     );
 }
 
@@ -222,11 +228,11 @@ fn test_textarea_move_top_bottom() {
     component.perform(Cmd::Type('C'));
     assert_eq!(
         component.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_TOP)),
-        CmdResult::None
+        CmdResult::Visual
     );
     assert_eq!(
         component.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_BOTTOM)),
-        CmdResult::None
+        CmdResult::Visual
     );
 }
 
@@ -248,11 +254,11 @@ fn test_textarea_scroll() {
     component.perform(Cmd::Type('C'));
     assert_eq!(
         component.perform(Cmd::Scroll(Direction::Up)),
-        CmdResult::None
+        CmdResult::Visual
     );
     assert_eq!(
         component.perform(Cmd::Scroll(Direction::Down)),
-        CmdResult::None
+        CmdResult::Visual
     );
 }
 
