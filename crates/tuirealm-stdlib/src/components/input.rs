@@ -487,7 +487,7 @@ impl Component for Input {
                     CmdResult::Changed(self.state())
                 }
             }
-            _ => CmdResult::None,
+            _ => CmdResult::Invalid(cmd),
         }
     }
 }

@@ -15,9 +15,12 @@ fn test_span_state_is_none() {
 }
 
 #[test]
-fn test_span_perform_returns_none() {
+fn test_span_unhandled_cmd() {
     let mut component = Span::default().spans([RatatuiSpan::raw("hello")]);
-    assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Submit),
+        CmdResult::Invalid(Cmd::Submit)
+    );
 }
 
 #[test]

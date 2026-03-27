@@ -94,8 +94,14 @@ fn test_list_scroll_down() {
 #[test]
 fn test_list_unhandled_cmd() {
     let mut component = List::default().scroll(true).rows(vec![Line::from("A")]);
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
-    assert_eq!(component.perform(Cmd::Type('a')), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
+    assert_eq!(
+        component.perform(Cmd::Type('a')),
+        CmdResult::Invalid(Cmd::Type('a'))
+    );
 }
 
 #[test]

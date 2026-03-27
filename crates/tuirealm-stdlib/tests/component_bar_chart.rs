@@ -50,8 +50,14 @@ fn test_bar_chart_disabled() {
 #[test]
 fn test_bar_chart_unhandled_cmd() {
     let mut component = BarChart::default().data(&[("Q1", 100)]);
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
-    assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
+    assert_eq!(
+        component.perform(Cmd::Submit),
+        CmdResult::Invalid(Cmd::Submit)
+    );
 }
 
 #[test]

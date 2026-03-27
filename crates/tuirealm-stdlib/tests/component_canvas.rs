@@ -17,7 +17,10 @@ fn test_canvas_state_is_none() {
 #[test]
 fn test_canvas_perform_returns_none() {
     let mut component = Canvas::default();
-    assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Submit),
+        CmdResult::Invalid(Cmd::Submit)
+    );
 }
 
 #[test]

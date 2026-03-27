@@ -119,10 +119,13 @@ fn test_input_with_max_length() {
 #[test]
 fn test_input_unhandled_cmd() {
     let mut component = Input::default().input_type(InputType::Text);
-    assert_eq!(component.perform(Cmd::Toggle), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Toggle),
+        CmdResult::Invalid(Cmd::Toggle)
+    );
     assert_eq!(
         component.perform(Cmd::Scroll(Direction::Down)),
-        CmdResult::None
+        CmdResult::Invalid(Cmd::Scroll(Direction::Down))
     );
 }
 

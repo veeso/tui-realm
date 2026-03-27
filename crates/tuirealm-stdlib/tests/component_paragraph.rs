@@ -15,9 +15,12 @@ fn test_paragraph_state_is_none() {
 }
 
 #[test]
-fn test_paragraph_perform_returns_none() {
+fn test_paragraph_unhandled_cmd() {
     let mut component = Paragraph::default().text(vec![Line::from("hello")]);
-    assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Submit),
+        CmdResult::Invalid(Cmd::Submit)
+    );
 }
 
 #[test]

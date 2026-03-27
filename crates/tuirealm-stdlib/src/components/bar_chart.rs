@@ -334,7 +334,7 @@ impl Component for BarChart {
                 Cmd::GoTo(Position::End) => {
                     self.states.cursor_at_end(self.data_len());
                 }
-                _ => {}
+                _ => return CmdResult::Invalid(cmd),
             }
         }
         CmdResult::None

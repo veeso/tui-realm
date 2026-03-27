@@ -14,9 +14,12 @@ fn test_gauge_state_is_none() {
 }
 
 #[test]
-fn test_gauge_perform_returns_none() {
+fn test_gauge_perform_unhandled_cmd() {
     let mut component = Gauge::default().progress(0.5);
-    assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Submit),
+        CmdResult::Invalid(Cmd::Submit)
+    );
 }
 
 #[test]

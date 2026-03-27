@@ -191,8 +191,8 @@ impl Component for LineGauge {
         State::None
     }
 
-    fn perform(&mut self, _cmd: Cmd) -> CmdResult {
-        CmdResult::None
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        CmdResult::Invalid(cmd)
     }
 }
 

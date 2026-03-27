@@ -669,7 +669,7 @@ impl Component for TextArea<'_> {
                 self.widget.insert_char(ch);
             }
             Cmd::Submit => return CmdResult::Submit(self.state()),
-            _ => return CmdResult::None,
+            _ => return CmdResult::Invalid(cmd),
         }
         if prev_lines != self.widget.lines() {
             CmdResult::Changed(self.state())
@@ -819,8 +819,8 @@ mod tests {
         let mut textarea = make_textarea();
         let result = textarea.perform(Cmd::Toggle);
         assert!(
-            matches!(result, CmdResult::None),
-            "unhandled command should return None"
+            matches!(result, CmdResult::Invalid(Cmd::Toggle)),
+            "unhandled command should return Invalid"
         );
     }
 }

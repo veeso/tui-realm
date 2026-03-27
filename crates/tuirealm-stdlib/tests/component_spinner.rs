@@ -14,10 +14,16 @@ fn test_spinner_state_is_none() {
 }
 
 #[test]
-fn test_spinner_perform_returns_none() {
+fn test_spinner_unhandled_cmd() {
     let mut component = Spinner::default().sequence("⠋⠙⠹⠸");
-    assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Submit),
+        CmdResult::Invalid(Cmd::Submit)
+    );
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
 }
 
 #[test]

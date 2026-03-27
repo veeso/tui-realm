@@ -667,7 +667,7 @@ impl Component for Counter {
                 self.states.incr();
                 CmdResult::Changed(self.state())
             }
-            _ => CmdResult::None,
+            _ => CmdResult::Invalid(cmd),
         }
     }
 }

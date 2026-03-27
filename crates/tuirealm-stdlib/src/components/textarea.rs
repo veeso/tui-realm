@@ -276,7 +276,7 @@ impl Component for Textarea {
             Cmd::GoTo(Position::End) => {
                 self.states.list_index_at_last();
             }
-            _ => {}
+            _ => return CmdResult::Invalid(cmd),
         }
         if prev != self.states.list_index {
             CmdResult::Changed(self.state())
@@ -372,7 +372,10 @@ mod tests {
             CmdResult::None
         );
         // Unhandled command
-        assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Delete),
+            CmdResult::Invalid(Cmd::Delete)
+        );
     }
 
     #[test]

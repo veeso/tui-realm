@@ -561,7 +561,7 @@ impl<V: NodeValue> Component for TreeView<V> {
                 self.states.open(self.tree.root());
                 CmdResult::None
             }
-            _ => CmdResult::None,
+            _ => CmdResult::Invalid(cmd),
         }
     }
 }

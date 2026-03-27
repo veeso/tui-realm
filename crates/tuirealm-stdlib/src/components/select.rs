@@ -386,7 +386,7 @@ impl Component for Select {
                     CmdResult::None
                 }
             }
-            _ => CmdResult::None,
+            _ => CmdResult::Invalid(cmd),
         }
     }
 }

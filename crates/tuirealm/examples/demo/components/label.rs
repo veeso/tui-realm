@@ -115,8 +115,8 @@ impl Component for Label {
         State::None
     }
 
-    fn perform(&mut self, _: Cmd) -> CmdResult {
-        CmdResult::None
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        CmdResult::Invalid(cmd)
     }
 }
 

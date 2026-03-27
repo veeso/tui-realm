@@ -72,8 +72,14 @@ fn test_radio_submit() {
 #[test]
 fn test_radio_unhandled_cmd() {
     let mut component = Radio::default().choices(["A", "B"]);
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
-    assert_eq!(component.perform(Cmd::Toggle), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
+    assert_eq!(
+        component.perform(Cmd::Toggle),
+        CmdResult::Invalid(Cmd::Toggle)
+    );
 }
 
 #[test]

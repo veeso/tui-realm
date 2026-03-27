@@ -46,8 +46,14 @@ fn test_select_cancel_closes_tab() {
 #[test]
 fn test_select_unhandled_cmd() {
     let mut component = Select::default().choices(["A", "B"]);
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
-    assert_eq!(component.perform(Cmd::Toggle), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
+    assert_eq!(
+        component.perform(Cmd::Toggle),
+        CmdResult::Invalid(Cmd::Toggle)
+    );
 }
 
 #[test]

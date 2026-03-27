@@ -14,9 +14,12 @@ fn test_sparkline_state_is_none() {
 }
 
 #[test]
-fn test_sparkline_perform_returns_none() {
+fn test_sparkline_unhandled_cmd() {
     let mut component = Sparkline::default().data(&[1, 5, 3]);
-    assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Submit),
+        CmdResult::Invalid(Cmd::Submit)
+    );
 }
 
 #[test]

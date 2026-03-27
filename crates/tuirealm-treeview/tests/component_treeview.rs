@@ -93,8 +93,14 @@ fn test_treeview_unhandled_cmd() {
         .borders(Borders::default())
         .with_tree(mock_tree())
         .initial_node("/");
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
-    assert_eq!(component.perform(Cmd::Type('a')), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
+    assert_eq!(
+        component.perform(Cmd::Type('a')),
+        CmdResult::Invalid(Cmd::Type('a'))
+    );
 }
 
 // Snapshot tests

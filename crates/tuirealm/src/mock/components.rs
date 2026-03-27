@@ -53,7 +53,7 @@ impl Component for MockInput {
                 self.states.input(ch);
                 CmdResult::Changed(self.state())
             }
-            _ => CmdResult::None,
+            _ => CmdResult::Invalid(cmd),
         }
     }
 }

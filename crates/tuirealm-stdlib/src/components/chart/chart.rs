@@ -405,7 +405,7 @@ impl Component for Chart {
                 Cmd::GoTo(Position::End) => {
                     self.states.cursor_at_end(self.max_dataset_len());
                 }
-                _ => {}
+                _ => return CmdResult::Invalid(cmd),
             }
         }
         CmdResult::None

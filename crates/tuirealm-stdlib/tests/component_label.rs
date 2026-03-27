@@ -16,9 +16,18 @@ fn test_label_state_is_none() {
 #[test]
 fn test_label_perform_returns_none() {
     let mut component = Label::default().text("hello");
-    assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
-    assert_eq!(component.perform(Cmd::Type('a')), CmdResult::None);
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Submit),
+        CmdResult::Invalid(Cmd::Submit)
+    );
+    assert_eq!(
+        component.perform(Cmd::Type('a')),
+        CmdResult::Invalid(Cmd::Type('a'))
+    );
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
 }
 
 #[test]

@@ -259,7 +259,10 @@ fn test_textarea_scroll() {
 #[test]
 fn test_textarea_unhandled_cmd() {
     let mut component = TextArea::default();
-    assert_eq!(component.perform(Cmd::Toggle), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Toggle),
+        CmdResult::Invalid(Cmd::Toggle)
+    );
 }
 
 // Snapshot tests

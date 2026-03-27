@@ -59,7 +59,10 @@ fn test_checkbox_submit() {
 #[test]
 fn test_checkbox_unhandled_cmd() {
     let mut component = Checkbox::default().choices(["A", "B"]);
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
 }
 
 #[test]

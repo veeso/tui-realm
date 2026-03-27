@@ -270,7 +270,7 @@ impl Component for Radio {
                 // Return Submit
                 CmdResult::Submit(self.state())
             }
-            _ => CmdResult::None,
+            _ => CmdResult::Invalid(cmd),
         }
     }
 }

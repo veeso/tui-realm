@@ -94,7 +94,10 @@ fn test_table_scroll() {
 #[test]
 fn test_table_unhandled_cmd() {
     let mut component = Table::default().scroll(true).table(make_table_data());
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
 }
 
 #[test]

@@ -55,7 +55,10 @@ fn test_chart_disabled() {
 #[test]
 fn test_chart_unhandled_cmd() {
     let mut component = Chart::default().data([make_dataset()]);
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
 }
 
 #[test]

@@ -79,8 +79,14 @@ fn test_textarea_scroll() {
 #[test]
 fn test_textarea_unhandled_cmd() {
     let mut component = Textarea::default().text_rows([Span::from("A")]);
-    assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
-    assert_eq!(component.perform(Cmd::Type('a')), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::Delete),
+        CmdResult::Invalid(Cmd::Delete)
+    );
+    assert_eq!(
+        component.perform(Cmd::Type('a')),
+        CmdResult::Invalid(Cmd::Type('a'))
+    );
 }
 
 #[test]

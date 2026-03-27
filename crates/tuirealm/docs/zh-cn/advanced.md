@@ -433,7 +433,7 @@ impl Component for Radio {
                 // 返回提交
                 CmdResult::Submit(self.state())
             }
-            _ => CmdResult::None,
+            _ => CmdResult::Invalid(cmd),
         }
     }
 

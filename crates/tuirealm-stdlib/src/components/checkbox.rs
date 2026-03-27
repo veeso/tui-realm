@@ -319,7 +319,7 @@ impl Component for Checkbox {
                 // Return Submit
                 CmdResult::Submit(self.state())
             }
-            _ => CmdResult::None,
+            _ => CmdResult::Invalid(cmd),
         }
     }
 }

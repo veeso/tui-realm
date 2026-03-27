@@ -512,7 +512,7 @@ impl Component for Table {
                     CmdResult::Changed(self.state())
                 }
             }
-            _ => CmdResult::None,
+            _ => CmdResult::Invalid(cmd),
         }
     }
 }
