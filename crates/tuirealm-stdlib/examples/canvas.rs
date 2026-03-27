@@ -19,7 +19,7 @@ use utils::Model;
 #[derive(Debug, PartialEq)]
 pub enum Msg {
     AppClose,
-    None,
+    Redraw,
 }
 
 // Let's define the component ids for our application
@@ -47,12 +47,12 @@ impl Model<Id, Msg> {
     /// Handle messages
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         self.redraw = true;
-        match msg.unwrap_or(Msg::None) {
+        match msg.unwrap_or(Msg::Redraw) {
             Msg::AppClose => {
                 self.quit = true;
                 None
             }
-            Msg::None => None,
+            Msg::Redraw => None,
         }
     }
 

@@ -109,7 +109,7 @@ impl AppComponent<Msg, UserEvent> for Label {
                     ),
                 );
 
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             _ => None,
         }

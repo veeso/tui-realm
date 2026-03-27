@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[derive(Debug, PartialEq)]
 pub enum Msg {
     AppClose,
-    ForceRedraw,
+    Redraw,
 }
 
 // Let's define the component ids for our application
@@ -144,7 +144,7 @@ impl Model {
                     self.quit = true; // Terminate
                     None
                 }
-                Msg::ForceRedraw => None,
+                Msg::Redraw => None,
             }
         } else {
             None
@@ -292,7 +292,7 @@ impl AppComponent<Msg, NoUserEvent> for OurLabel {
                     _ => CustomState::default().text,
                 };
                 self.attr(Attribute::Value, existing_attr);
-                Some(Msg::ForceRedraw)
+                Some(Msg::Redraw)
             }
             _ => None,
         }

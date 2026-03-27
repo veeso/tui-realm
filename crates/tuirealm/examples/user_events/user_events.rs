@@ -14,7 +14,7 @@ use crate::model::Model;
 #[derive(Debug, PartialEq)]
 pub enum Msg {
     AppClose,
-    None,
+    Redraw,
 }
 
 // Let's define the component ids for our application

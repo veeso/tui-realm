@@ -21,7 +21,7 @@ pub enum Msg {
     AppClose,
     SelectAlfaBlur,
     SelectBetaBlur,
-    None,
+    Redraw,
 }
 
 // Let's define the component ids for our application
@@ -67,7 +67,7 @@ impl Model<Id, Msg> {
     /// Handle messages
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         self.redraw = true;
-        match msg.unwrap_or(Msg::None) {
+        match msg.unwrap_or(Msg::Redraw) {
             Msg::AppClose => {
                 self.quit = true;
                 None
@@ -80,7 +80,7 @@ impl Model<Id, Msg> {
                 assert!(self.app.active(&Id::SelectAlfa).is_ok());
                 None
             }
-            Msg::None => None,
+            Msg::Redraw => None,
         }
     }
 
@@ -179,7 +179,7 @@ impl AppComponent<Msg, NoUserEvent> for SelectAlfa {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }
 
@@ -233,6 +233,6 @@ impl AppComponent<Msg, NoUserEvent> for SelectBeta {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }

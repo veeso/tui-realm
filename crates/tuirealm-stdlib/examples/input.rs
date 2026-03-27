@@ -27,7 +27,7 @@ pub enum Msg {
     PasswordBlur,
     PhoneBlur,
     TextBlur,
-    None,
+    Redraw,
 }
 
 // Let's define the component ids for our application
@@ -76,7 +76,7 @@ impl Model<Id, Msg> {
     /// Handle messages
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         self.redraw = true;
-        match msg.unwrap_or(Msg::None) {
+        match msg.unwrap_or(Msg::Redraw) {
             Msg::AppClose => {
                 self.quit = true;
                 None
@@ -105,7 +105,7 @@ impl Model<Id, Msg> {
                 assert!(self.app.active(&Id::Text).is_ok());
                 None
             }
-            Msg::None => None,
+            Msg::Redraw => None,
         }
     }
 
@@ -211,7 +211,7 @@ impl AppComponent<Msg, NoUserEvent> for InputText {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }
 
@@ -271,7 +271,7 @@ impl AppComponent<Msg, NoUserEvent> for InputEmail {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }
 
@@ -328,7 +328,7 @@ impl AppComponent<Msg, NoUserEvent> for InputNumber {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }
 
@@ -384,7 +384,7 @@ impl AppComponent<Msg, NoUserEvent> for InputPassword {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }
 
@@ -445,7 +445,7 @@ impl AppComponent<Msg, NoUserEvent> for InputPhone {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }
 
@@ -519,6 +519,6 @@ impl AppComponent<Msg, NoUserEvent> for InputColor {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }

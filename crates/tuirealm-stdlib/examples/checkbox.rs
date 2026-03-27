@@ -20,7 +20,7 @@ pub enum Msg {
     AppClose,
     CheckboxAlfaBlur,
     CheckboxBetaBlur,
-    None,
+    Redraw,
 }
 
 // Let's define the component ids for our application
@@ -57,7 +57,7 @@ impl Model<Id, Msg> {
     /// Handle messages
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         self.redraw = true;
-        match msg.unwrap_or(Msg::None) {
+        match msg.unwrap_or(Msg::Redraw) {
             Msg::AppClose => {
                 self.quit = true;
                 None
@@ -70,7 +70,7 @@ impl Model<Id, Msg> {
                 assert!(self.app.active(&Id::CheckboxAlfa).is_ok());
                 None
             }
-            Msg::None => None,
+            Msg::Redraw => None,
         }
     }
 
@@ -150,7 +150,7 @@ impl Default for CheckboxAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for CheckboxAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),
@@ -168,7 +168,7 @@ impl AppComponent<Msg, NoUserEvent> for CheckboxAlfa {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }
 
@@ -223,6 +223,6 @@ impl AppComponent<Msg, NoUserEvent> for CheckboxBeta {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }

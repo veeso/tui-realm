@@ -73,7 +73,7 @@ impl Model {
                     self.quit = true; // Terminate
                     None
                 }
-                Msg::None => None,
+                Msg::Redraw => None,
             }
         } else {
             None

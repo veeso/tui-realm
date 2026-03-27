@@ -38,7 +38,7 @@ pub enum Msg {
     ChangeFocus(Id),
     #[cfg(feature = "search")]
     Search(String),
-    None,
+    Redraw,
 }
 
 // Let's define the component ids for our application
@@ -270,13 +270,13 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 modifiers: KeyModifiers::CONTROL,
             }) => {
                 self.perform(Cmd::Delete);
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Delete, ..
             }) => {
                 self.perform(Cmd::Cancel);
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::PageDown,
@@ -287,7 +287,7 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 modifiers: KeyModifiers::SHIFT,
             }) => {
                 self.perform(Cmd::Scroll(Direction::Down));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::PageUp, ..
@@ -297,43 +297,43 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 modifiers: KeyModifiers::SHIFT,
             }) => {
                 self.perform(Cmd::Scroll(Direction::Up));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
             }) => {
                 self.perform(Cmd::Move(Direction::Down));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Left,
                 modifiers: KeyModifiers::SHIFT,
             }) => {
                 self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_BACK));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => {
                 self.perform(Cmd::Move(Direction::Left));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Right,
                 modifiers: KeyModifiers::SHIFT,
             }) => {
                 self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_FORWARD));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Right, ..
             }) => {
                 self.perform(Cmd::Move(Direction::Right));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent { code: Key::Up, .. }) => {
                 self.perform(Cmd::Move(Direction::Up));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent { code: Key::End, .. })
             | Event::Keyboard(KeyEvent {
@@ -341,7 +341,7 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 modifiers: KeyModifiers::CONTROL,
             }) => {
                 self.perform(Cmd::GoTo(Position::End));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Enter, ..
@@ -351,7 +351,7 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 modifiers: KeyModifiers::CONTROL,
             }) => {
                 self.perform(Cmd::Custom(TEXTAREA_CMD_NEWLINE));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Home, ..
@@ -361,7 +361,7 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 modifiers: KeyModifiers::CONTROL,
             }) => {
                 self.perform(Cmd::GoTo(Position::Begin));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             #[cfg(feature = "search")]
             Event::Keyboard(KeyEvent {
@@ -369,7 +369,7 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 modifiers: KeyModifiers::CONTROL,
             }) => {
                 self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_BACK));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             #[cfg(feature = "search")]
             Event::Keyboard(KeyEvent {
@@ -377,32 +377,32 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 modifiers: KeyModifiers::CONTROL,
             }) => {
                 self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_FORWARD));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Char('z'),
                 modifiers: KeyModifiers::CONTROL,
             }) => {
                 self.perform(Cmd::Custom(TEXTAREA_CMD_UNDO));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Char('y'),
                 modifiers: KeyModifiers::CONTROL,
             }) => {
                 self.perform(Cmd::Custom(TEXTAREA_CMD_REDO));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => {
                 self.perform(Cmd::Type('\t'));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
                 ..
             }) => {
                 self.perform(Cmd::Type(*ch));
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             Event::Keyboard(KeyEvent {
                 code: Key::Function(2),
@@ -415,7 +415,7 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
             }) => Some(Msg::ChangeFocus(Id::Search)),
             Event::Paste(text) => {
                 self.component.paste(text);
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             _ => None,
         }
@@ -505,6 +505,6 @@ impl AppComponent<Msg, NoUserEvent> for Search {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }

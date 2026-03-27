@@ -81,7 +81,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[derive(Debug, PartialEq)]
 pub enum Msg {
     AppClose,
-    None,
+    Redraw,
 }
 
 // Let's define the component ids for our application
@@ -165,7 +165,7 @@ impl Model {
                     self.quit = true; // Terminate
                     None
                 }
-                Msg::None => None,
+                Msg::Redraw => None,
             }
         } else {
             None
@@ -289,7 +289,7 @@ impl AppComponent<Msg, UserEvent> for Label {
                     AttrValue::String(format!("file wrote in {} nanos", duration.as_nanos())),
                 );
 
-                Some(Msg::None)
+                Some(Msg::Redraw)
             }
             _ => None,
         }

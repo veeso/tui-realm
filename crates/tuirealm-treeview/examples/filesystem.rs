@@ -27,7 +27,7 @@ pub enum Msg {
     GoToBlur,
     GoTo(PathBuf),
     GoToUpperDir,
-    None,
+    Redraw,
 }
 
 // Let's define the component ids for our application
@@ -322,7 +322,7 @@ impl AppComponent<Msg, NoUserEvent> for FsTree {
             CmdResult::Submit(State::Single(StateValue::String(node))) => {
                 Some(Msg::ExtendDir(node))
             }
-            _ => Some(Msg::None),
+            _ => Some(Msg::Redraw),
         }
     }
 }
@@ -423,7 +423,7 @@ impl AppComponent<Msg, NoUserEvent> for GoTo {
             CmdResult::Submit(State::Single(StateValue::String(path))) => {
                 Some(Msg::GoTo(PathBuf::from(path.as_str())))
             }
-            _ => Some(Msg::None),
+            _ => Some(Msg::Redraw),
         }
     }
 }

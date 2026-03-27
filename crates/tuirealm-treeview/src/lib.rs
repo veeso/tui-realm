@@ -91,7 +91,7 @@
 //! pub enum Msg {
 //!     ExtendDir(String),
 //!     GoToUpperDir,
-//!     None,
+//!     Redraw,
 //! }
 //!
 //! #[derive(Component)]
@@ -173,7 +173,7 @@
 //!         };
 //!         match result {
 //!             CmdResult::Submit(State::Single(StateValue::String(node))) => Some(Msg::ExtendDir(node)),
-//!             _ => Some(Msg::None),
+//!             _ => Some(Msg::Redraw),
 //!         }
 //!     }
 //! }

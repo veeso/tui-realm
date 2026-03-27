@@ -26,7 +26,7 @@ pub enum Msg {
     AppClose,
     GaugeAlfaBlur,
     GaugeBetaBlur,
-    None,
+    Redraw,
 }
 
 // Let's define the component ids for our application
@@ -70,7 +70,7 @@ impl Model<Id, Msg, UserEvent> {
     /// Handle messages
     fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
         self.redraw = true;
-        match msg.unwrap_or(Msg::None) {
+        match msg.unwrap_or(Msg::Redraw) {
             Msg::AppClose => {
                 self.quit = true;
                 None
@@ -83,7 +83,7 @@ impl Model<Id, Msg, UserEvent> {
                 assert!(self.app.active(&Id::GaugeAlfa).is_ok());
                 None
             }
-            Msg::None => None,
+            Msg::Redraw => None,
         }
     }
 
@@ -180,7 +180,7 @@ impl AppComponent<Msg, UserEvent> for GaugeAlfa {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }
 
@@ -227,6 +227,6 @@ impl AppComponent<Msg, UserEvent> for GaugeBeta {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
-        Some(Msg::None)
+        Some(Msg::Redraw)
     }
 }
