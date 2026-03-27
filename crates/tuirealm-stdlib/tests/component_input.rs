@@ -73,11 +73,11 @@ fn test_input_move_cursor() {
     let mut component = Input::default().input_type(InputType::Text).value("abc");
     assert_eq!(
         component.perform(Cmd::Move(Direction::Left)),
-        CmdResult::None
+        CmdResult::Visual
     );
     assert_eq!(
         component.perform(Cmd::Move(Direction::Right)),
-        CmdResult::None
+        CmdResult::Visual
     );
 }
 
@@ -86,9 +86,12 @@ fn test_input_goto_begin_end() {
     let mut component = Input::default().input_type(InputType::Text).value("hello");
     assert_eq!(
         component.perform(Cmd::GoTo(Position::Begin)),
-        CmdResult::None
+        CmdResult::Visual
     );
-    assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::GoTo(Position::End)),
+        CmdResult::Visual
+    );
 }
 
 #[test]

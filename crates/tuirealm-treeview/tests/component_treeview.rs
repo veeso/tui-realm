@@ -48,11 +48,11 @@ fn test_treeview_open_close_node() {
         .initial_node("/");
     assert_eq!(
         component.perform(Cmd::Custom(TREE_CMD_CLOSE)),
-        CmdResult::None
+        CmdResult::Visual
     );
     assert_eq!(
         component.perform(Cmd::Custom(TREE_CMD_OPEN)),
-        CmdResult::None
+        CmdResult::Visual
     );
 }
 

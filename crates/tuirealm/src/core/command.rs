@@ -79,6 +79,10 @@ pub enum CmdResult {
     Custom(&'static str, State),
     /// An array of Command results.
     Batch(Vec<CmdResult>),
+    /// The component visually changed, but the state did not change.
+    ///
+    /// If state *did* change, always use [`Changed`](CmdResult::Changed) instead.
+    Visual,
     /// Nothing changed, nothing needs to be done.
     None,
 }

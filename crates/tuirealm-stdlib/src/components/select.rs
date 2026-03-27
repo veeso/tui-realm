@@ -383,7 +383,7 @@ impl Component for Select {
                     CmdResult::Submit(self.state())
                 } else {
                     self.states.open_tab();
-                    CmdResult::None
+                    CmdResult::Visual
                 }
             }
             _ => CmdResult::Invalid(cmd),
@@ -543,7 +543,7 @@ mod test {
         // Tab should be closed
         assert_eq!(component.states.is_tab_open(), false);
         // Re open
-        assert_eq!(component.perform(Cmd::Submit), CmdResult::None);
+        assert_eq!(component.perform(Cmd::Submit), CmdResult::Visual);
         assert_eq!(component.states.is_tab_open(), true);
         // Move arrows
         assert_eq!(

@@ -304,12 +304,12 @@ impl Component for Checkbox {
             Cmd::Move(Direction::Right) => {
                 // Increment choice
                 self.states.next_choice(self.rewindable());
-                CmdResult::None
+                CmdResult::Visual
             }
             Cmd::Move(Direction::Left) => {
                 // Decrement choice
                 self.states.prev_choice(self.rewindable());
-                CmdResult::None
+                CmdResult::Visual
             }
             Cmd::Toggle => {
                 self.states.toggle();
@@ -440,7 +440,7 @@ mod test {
         // Handle events
         assert_eq!(
             component.perform(Cmd::Move(Direction::Left)),
-            CmdResult::None,
+            CmdResult::Visual,
         );
         assert_eq!(component.state(), State::Vec(vec![StateValue::Usize(1)]));
         // Toggle
@@ -451,13 +451,13 @@ mod test {
         // Left again
         assert_eq!(
             component.perform(Cmd::Move(Direction::Left)),
-            CmdResult::None,
+            CmdResult::Visual,
         );
         assert_eq!(component.states.choice, 0);
         // Right
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::None,
+            CmdResult::Visual,
         );
         // Toggle
         assert_eq!(
@@ -467,31 +467,31 @@ mod test {
         // Right again
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::None,
+            CmdResult::Visual,
         );
         assert_eq!(component.states.choice, 2);
         // Right again
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::None,
+            CmdResult::Visual,
         );
         assert_eq!(component.states.choice, 3);
         // Right again
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::None,
+            CmdResult::Visual,
         );
         assert_eq!(component.states.choice, 4);
         // Right again
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::None,
+            CmdResult::Visual,
         );
         assert_eq!(component.states.choice, 5);
         // Right again
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::None,
+            CmdResult::Visual,
         );
         assert_eq!(component.states.choice, 5);
         // Submit

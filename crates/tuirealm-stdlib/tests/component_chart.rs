@@ -25,11 +25,11 @@ fn test_chart_move_cursor() {
     let mut component = Chart::default().data([make_dataset()]);
     assert_eq!(
         component.perform(Cmd::Move(Direction::Right)),
-        CmdResult::None
+        CmdResult::Visual
     );
     assert_eq!(
         component.perform(Cmd::Move(Direction::Left)),
-        CmdResult::None
+        CmdResult::Visual
     );
 }
 
@@ -38,9 +38,12 @@ fn test_chart_goto() {
     let mut component = Chart::default().data([make_dataset()]);
     assert_eq!(
         component.perform(Cmd::GoTo(Position::Begin)),
-        CmdResult::None
+        CmdResult::Visual
     );
-    assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::GoTo(Position::End)),
+        CmdResult::Visual
+    );
 }
 
 #[test]

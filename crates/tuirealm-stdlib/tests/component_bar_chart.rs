@@ -18,11 +18,11 @@ fn test_bar_chart_move_cursor() {
     let mut component = BarChart::default().data(&[("Q1", 100), ("Q2", 200), ("Q3", 300)]);
     assert_eq!(
         component.perform(Cmd::Move(Direction::Right)),
-        CmdResult::None
+        CmdResult::Visual
     );
     assert_eq!(
         component.perform(Cmd::Move(Direction::Left)),
-        CmdResult::None
+        CmdResult::Visual
     );
 }
 
@@ -31,9 +31,12 @@ fn test_bar_chart_goto() {
     let mut component = BarChart::default().data(&[("Q1", 100), ("Q2", 200), ("Q3", 300)]);
     assert_eq!(
         component.perform(Cmd::GoTo(Position::Begin)),
-        CmdResult::None
+        CmdResult::Visual
     );
-    assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+    assert_eq!(
+        component.perform(Cmd::GoTo(Position::End)),
+        CmdResult::Visual
+    );
 }
 
 #[test]

@@ -336,6 +336,7 @@ impl Component for BarChart {
                 }
                 _ => return CmdResult::Invalid(cmd),
             }
+            return CmdResult::Visual;
         }
         CmdResult::None
     }
@@ -407,22 +408,25 @@ mod test {
         // -> Right
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)),
-            CmdResult::None
+            CmdResult::Visual
         );
         assert_eq!(component.states.cursor, 1);
         // <- Left
         assert_eq!(
             component.perform(Cmd::Move(Direction::Left)),
-            CmdResult::None
+            CmdResult::Visual
         );
         assert_eq!(component.states.cursor, 0);
         // End
-        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::End)),
+            CmdResult::Visual
+        );
         assert_eq!(component.states.cursor, 11);
         // Home
         assert_eq!(
             component.perform(Cmd::GoTo(Position::Begin)),
-            CmdResult::None
+            CmdResult::Visual
         );
         assert_eq!(component.states.cursor, 0);
     }

@@ -461,19 +461,19 @@ impl Component for Input {
             Cmd::Submit => CmdResult::Submit(self.state()),
             Cmd::Move(Direction::Left) => {
                 self.states.decr_cursor();
-                CmdResult::None
+                CmdResult::Visual
             }
             Cmd::Move(Direction::Right) => {
                 self.states.incr_cursor();
-                CmdResult::None
+                CmdResult::Visual
             }
             Cmd::GoTo(Position::Begin) => {
                 self.states.cursor_at_begin();
-                CmdResult::None
+                CmdResult::Visual
             }
             Cmd::GoTo(Position::End) => {
                 self.states.cursor_at_end();
-                CmdResult::None
+                CmdResult::Visual
             }
             Cmd::Type(ch) => {
                 // Push char to input
@@ -643,7 +643,7 @@ mod tests {
         component.states.cursor = 1;
         assert_eq!(
             component.perform(Cmd::Move(Direction::Right)), // between 'e' and 'l'
-            CmdResult::None
+            CmdResult::Visual
         );
         assert_eq!(component.states.cursor, 2);
         // Put a character here
@@ -659,34 +659,40 @@ mod tests {
         // Move left
         assert_eq!(
             component.perform(Cmd::Move(Direction::Left)),
-            CmdResult::None
+            CmdResult::Visual
         );
         assert_eq!(component.states.cursor, 2);
         // Go at the end
         component.states.cursor = 6;
         // Move right
-        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::End)),
+            CmdResult::Visual
+        );
         assert_eq!(component.states.cursor, 6);
         // Move left
         assert_eq!(
             component.perform(Cmd::Move(Direction::Left)),
-            CmdResult::None
+            CmdResult::Visual
         );
         assert_eq!(component.states.cursor, 5);
         // Go at the beginning
         component.states.cursor = 0;
         assert_eq!(
             component.perform(Cmd::Move(Direction::Left)),
-            CmdResult::None
+            CmdResult::Visual
         );
         //assert_eq!(component.render().unwrap().cursor, 0); // Should stay
         assert_eq!(component.states.cursor, 0);
         // End - begin
-        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::End)),
+            CmdResult::Visual
+        );
         assert_eq!(component.states.cursor, 6);
         assert_eq!(
             component.perform(Cmd::GoTo(Position::Begin)),
-            CmdResult::None
+            CmdResult::Visual
         );
         assert_eq!(component.states.cursor, 0);
         // Update value

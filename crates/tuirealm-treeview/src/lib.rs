@@ -554,12 +554,12 @@ impl<V: NodeValue> Component for TreeView<V> {
             Cmd::Custom(TREE_CMD_CLOSE) => {
                 // close selected node
                 self.states.close(self.tree.root());
-                CmdResult::None
+                CmdResult::Visual
             }
             Cmd::Custom(TREE_CMD_OPEN) => {
                 // close selected node
                 self.states.open(self.tree.root());
-                CmdResult::None
+                CmdResult::Visual
             }
             _ => CmdResult::Invalid(cmd),
         }
@@ -726,7 +726,7 @@ mod test {
         component.states.open(component.tree.root());
         assert_eq!(
             component.perform(Cmd::Custom(TREE_CMD_CLOSE)),
-            CmdResult::None
+            CmdResult::Visual
         );
         assert!(
             component
@@ -742,7 +742,7 @@ mod test {
             .initial_node("aA");
         assert_eq!(
             component.perform(Cmd::Custom(TREE_CMD_OPEN)),
-            CmdResult::None
+            CmdResult::Visual
         );
         assert!(
             component

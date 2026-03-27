@@ -17,7 +17,7 @@ fn test_select_initial_state() {
 fn test_select_open_tab() {
     let mut component = Select::default().choices(["A", "B", "C"]).value(0);
     let result = component.perform(Cmd::Submit);
-    assert_eq!(result, CmdResult::None);
+    assert_eq!(result, CmdResult::Visual);
     assert_eq!(component.state(), State::None);
 }
 
