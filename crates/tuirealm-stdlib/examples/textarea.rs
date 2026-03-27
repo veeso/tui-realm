@@ -152,7 +152,7 @@ impl Default for TextareaAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for TextareaAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
             }) => self.perform(Cmd::Move(Direction::Down)),
@@ -218,7 +218,7 @@ impl Default for TextareaBeta {
 
 impl AppComponent<Msg, NoUserEvent> for TextareaBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
             }) => self.perform(Cmd::Move(Direction::Down)),

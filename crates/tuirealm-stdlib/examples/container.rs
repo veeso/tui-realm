@@ -225,7 +225,7 @@ impl Default for MyContainer {
 
 impl AppComponent<Msg, NoUserEvent> for MyContainer {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };

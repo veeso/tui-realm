@@ -145,7 +145,7 @@ impl Default for ChartAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for ChartAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),
@@ -210,7 +210,7 @@ impl Default for ChartBeta {
 
 impl AppComponent<Msg, NoUserEvent> for ChartBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),

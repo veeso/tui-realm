@@ -136,7 +136,7 @@ impl Default for ParagraphAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for ParagraphAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
@@ -173,7 +173,7 @@ impl Default for ParagraphBeta {
 
 impl AppComponent<Msg, NoUserEvent> for ParagraphBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };

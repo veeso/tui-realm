@@ -468,7 +468,7 @@ impl Default for Search {
 #[cfg(feature = "search")]
 impl AppComponent<Msg, NoUserEvent> for Search {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),

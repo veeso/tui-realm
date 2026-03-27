@@ -199,7 +199,7 @@ impl Default for CheckboxBeta {
 
 impl AppComponent<Msg, NoUserEvent> for CheckboxBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),

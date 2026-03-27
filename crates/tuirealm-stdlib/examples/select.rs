@@ -155,7 +155,7 @@ impl Default for SelectAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for SelectAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
             }) => self.perform(Cmd::Move(Direction::Down)),
@@ -209,7 +209,7 @@ impl Default for SelectBeta {
 
 impl AppComponent<Msg, NoUserEvent> for SelectBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Down, ..
             }) => self.perform(Cmd::Move(Direction::Down)),

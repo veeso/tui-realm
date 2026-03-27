@@ -141,7 +141,7 @@ impl Default for SparklineAlfa {
 
 impl AppComponent<Msg, UserEvent> for SparklineAlfa {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             Event::User(UserEvent::DataGenerated(data)) => {
                 let data: Vec<PropValue> = data.iter().copied().map(PropValue::U64).collect();

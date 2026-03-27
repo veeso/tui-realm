@@ -181,7 +181,7 @@ impl Default for GaugeAlfa {
 
 impl AppComponent<Msg, UserEvent> for GaugeAlfa {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::User(UserEvent::Loaded(prog)) => {
                 // Update
                 let label = format!("{:02}%", (prog * 100.0) as usize);
@@ -224,7 +224,7 @@ impl Default for GaugeBeta {
 
 impl AppComponent<Msg, UserEvent> for GaugeBeta {
     fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::User(UserEvent::Loaded(_)) => {
                 let mut prog = self
                     .query(Attribute::Value)

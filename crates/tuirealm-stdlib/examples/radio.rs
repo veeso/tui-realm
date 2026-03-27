@@ -143,7 +143,7 @@ impl Default for RadioAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for RadioAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),
@@ -191,7 +191,7 @@ impl Default for RadioBeta {
 
 impl AppComponent<Msg, NoUserEvent> for RadioBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),

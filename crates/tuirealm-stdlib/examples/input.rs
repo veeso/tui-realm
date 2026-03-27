@@ -173,7 +173,7 @@ impl Default for InputText {
 
 impl AppComponent<Msg, NoUserEvent> for InputText {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),
@@ -233,7 +233,7 @@ impl Default for InputEmail {
 
 impl AppComponent<Msg, NoUserEvent> for InputEmail {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),
@@ -290,7 +290,7 @@ impl Default for InputNumber {
 
 impl AppComponent<Msg, NoUserEvent> for InputNumber {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),
@@ -346,7 +346,7 @@ impl Default for InputPassword {
 
 impl AppComponent<Msg, NoUserEvent> for InputPassword {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),
@@ -407,7 +407,7 @@ impl Default for InputPhone {
 
 impl AppComponent<Msg, NoUserEvent> for InputPhone {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),
@@ -465,7 +465,7 @@ impl Default for InputColor {
 
 impl AppComponent<Msg, NoUserEvent> for InputColor {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let _ = match ev {
+        match ev {
             Event::Keyboard(KeyEvent {
                 code: Key::Left, ..
             }) => self.perform(Cmd::Move(Direction::Left)),
