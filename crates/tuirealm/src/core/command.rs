@@ -61,21 +61,24 @@ pub enum Position {
 
 /// A command result describes the output of a [`Cmd`] performed on a Component.
 /// It reports a "logical" change on the `Component`.
-/// The `AppComponent` then, must return a certain user defined `Msg` based on the value of the [`CmdResult`].
+/// The [`AppComponent`](crate::component::AppComponent) then needs to handle this result and return a user defined `Msg` based on the value of the [`CmdResult`].
 #[derive(Debug, PartialEq, Clone)]
 #[allow(clippy::large_enum_variant)]
 pub enum CmdResult {
     /// The component has changed state. The new state is reported.
-    /// Box is used to reduce size
+    ///
+    /// This implies the component has visually changes and needs to be redrawn.
     Changed(State),
-    /// Value submit result
+    /// Command resulted in a submit action, this contains the submitted state.
     Submit(State),
-    /// The command could not be applied. Useful to report errors
+    /// The command issues is unsupported for this component.
+    ///
+    /// This should basically be treated the same as [`None`](CmdResult::None), but may be useful for debugging.
     Invalid(Cmd),
-    /// Custom cmd result
+    /// Custom result with a name and a state attached.
     Custom(&'static str, State),
-    /// An array of Command result
+    /// An array of Command results.
     Batch(Vec<CmdResult>),
-    /// No result to report
+    /// Nothing changed, nothing needs to be done.
     None,
 }
