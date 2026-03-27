@@ -45,14 +45,13 @@ impl Model<Id, Msg> {
     }
 
     /// Handle messages
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+    fn update(&mut self, msg: Msg) {
         self.redraw = true;
-        match msg.unwrap_or(Msg::Redraw) {
+        match msg {
             Msg::AppClose => {
                 self.quit = true;
-                None
             }
-            Msg::Redraw => None,
+            Msg::Redraw => (),
         }
     }
 
@@ -80,10 +79,7 @@ fn main() {
         {
             for msg in messages {
                 model.redraw = true;
-                let mut msg = Some(msg);
-                while msg.is_some() {
-                    msg = model.update(msg);
-                }
+                model.update(msg);
             }
         }
         // Redraw

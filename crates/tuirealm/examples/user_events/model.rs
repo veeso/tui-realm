@@ -63,20 +63,15 @@ impl Model {
 // Let's implement Update for model
 
 impl Model {
-    pub fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
-        if let Some(msg) = msg {
-            // Set redraw
-            self.redraw = true;
-            // Match message
-            match msg {
-                Msg::AppClose => {
-                    self.quit = true; // Terminate
-                    None
-                }
-                Msg::Redraw => None,
+    pub fn update(&mut self, msg: Msg) {
+        // Set redraw
+        self.redraw = true;
+        // Match message
+        match msg {
+            Msg::AppClose => {
+                self.quit = true; // Terminate
             }
-        } else {
-            None
+            Msg::Redraw => (),
         }
     }
 }

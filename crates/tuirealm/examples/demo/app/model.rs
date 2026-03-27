@@ -155,56 +155,47 @@ impl<T> Model<T>
 where
     T: TerminalAdapter,
 {
-    pub fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
-        if let Some(msg) = msg {
-            // Set redraw
-            self.redraw = true;
-            // Match message
-            match msg {
-                Msg::AppClose => {
-                    self.quit = true; // Terminate
-                    None
-                }
-                Msg::Clock => None,
-                Msg::DigitCounterBlur => {
-                    // Give focus to letter counter
-                    assert!(self.app.active(&Id::LetterCounter).is_ok());
-                    None
-                }
-                Msg::DigitCounterChanged(v) => {
-                    // Update label
-                    assert!(
-                        self.app
-                            .attr(
-                                &Id::Label,
-                                Attribute::Text,
-                                AttrValue::String(format!("DigitCounter has now value: {v}"))
-                            )
-                            .is_ok()
-                    );
-                    None
-                }
-                Msg::LetterCounterBlur => {
-                    // Give focus to digit counter
-                    assert!(self.app.active(&Id::DigitCounter).is_ok());
-                    None
-                }
-                Msg::LetterCounterChanged(v) => {
-                    // Update label
-                    assert!(
-                        self.app
-                            .attr(
-                                &Id::Label,
-                                Attribute::Text,
-                                AttrValue::String(format!("LetterCounter has now value: {v}"))
-                            )
-                            .is_ok()
-                    );
-                    None
-                }
+    pub fn update(&mut self, msg: Msg) {
+        // Set redraw
+        self.redraw = true;
+        // Match message
+        match msg {
+            Msg::AppClose => {
+                self.quit = true; // Terminate
             }
-        } else {
-            None
+            Msg::Clock => (),
+            Msg::DigitCounterBlur => {
+                // Give focus to letter counter
+                assert!(self.app.active(&Id::LetterCounter).is_ok());
+            }
+            Msg::DigitCounterChanged(v) => {
+                // Update label
+                assert!(
+                    self.app
+                        .attr(
+                            &Id::Label,
+                            Attribute::Text,
+                            AttrValue::String(format!("DigitCounter has now value: {v}"))
+                        )
+                        .is_ok()
+                );
+            }
+            Msg::LetterCounterBlur => {
+                // Give focus to digit counter
+                assert!(self.app.active(&Id::DigitCounter).is_ok());
+            }
+            Msg::LetterCounterChanged(v) => {
+                // Update label
+                assert!(
+                    self.app
+                        .attr(
+                            &Id::Label,
+                            Attribute::Text,
+                            AttrValue::String(format!("LetterCounter has now value: {v}"))
+                        )
+                        .is_ok()
+                );
+            }
         }
     }
 }

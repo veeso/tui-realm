@@ -57,22 +57,19 @@ impl Model<Id, Msg> {
     }
 
     /// Handle messages
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
+    fn update(&mut self, msg: Msg) {
         self.redraw = true;
-        match msg.unwrap_or(Msg::Redraw) {
+        match msg {
             Msg::AppClose => {
                 self.quit = true;
-                None
             }
             Msg::TextareaAlfaBlur => {
                 assert!(self.app.active(&Id::TextareaBeta).is_ok());
-                None
             }
             Msg::TextareaBetaBlur => {
                 assert!(self.app.active(&Id::TextareaAlfa).is_ok());
-                None
             }
-            Msg::Redraw => None,
+            Msg::Redraw => (),
         }
     }
 
@@ -101,10 +98,7 @@ fn main() {
             .tick(PollStrategy::Once(Duration::from_millis(10)))
         {
             for msg in messages {
-                let mut msg = Some(msg);
-                while msg.is_some() {
-                    msg = model.update(msg);
-                }
+                model.update(msg);
             }
         }
         // Redraw

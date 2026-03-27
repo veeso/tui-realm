@@ -73,13 +73,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     panic!("application error {err}");
                 }
                 Ok(messages) if !messages.is_empty() => {
-                    // NOTE: redraw if at least one msg has been processed
-                    model.redraw = true;
                     for msg in messages {
-                        let mut msg = Some(msg);
-                        while msg.is_some() {
-                            msg = model.update(msg);
-                        }
+                        model.update(msg);
                     }
                 }
                 _ => {}
@@ -173,20 +168,15 @@ impl Model {
 // Let's implement Update for model
 
 impl Model {
-    fn update(&mut self, msg: Option<Msg>) -> Option<Msg> {
-        if let Some(msg) = msg {
-            // Set redraw
-            self.redraw = true;
-            // Match message
-            match msg {
-                Msg::AppClose => {
-                    self.quit = true; // Terminate
-                    None
-                }
-                Msg::Redraw => None,
+    fn update(&mut self, msg: Msg) {
+        // Set redraw
+        self.redraw = true;
+        // Match message
+        match msg {
+            Msg::AppClose => {
+                self.quit = true; // Terminate
             }
-        } else {
-            None
+            Msg::Redraw => (),
         }
     }
 }
