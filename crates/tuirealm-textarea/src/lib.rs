@@ -131,7 +131,6 @@
 
 // -- internal
 mod fmt;
-use std::borrow::Cow;
 
 use fmt::LineFmt;
 
@@ -149,7 +148,6 @@ use tuirealm::props::{
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
-use tuirealm::ratatui::text::{Line, Span};
 use tuirealm::ratatui::widgets::{Block, Paragraph};
 use tuirealm::state::{State, StateValue};
 
@@ -697,24 +695,6 @@ impl Component for TextArea<'_> {
         } else {
             CmdResult::None
         }
-    }
-}
-
-/// Convert a `&Span` to a `Span` by using [`Cow::Borrowed`].
-///
-/// Note that a normal [`Span::clone`] (and by extension `Cow::clone`) will preserve the `Cow` Variant.
-pub fn borrow_clone_span<'a, 'b: 'a>(span: &'b Span<'a>) -> Span<'a> {
-    Span {
-        style: span.style,
-        content: Cow::Borrowed(&*span.content),
-    }
-}
-
-/// Convert a `&Line` to a `Line` by using [`Cow::Borrowed`].
-pub fn borrow_clone_line<'a, 'b: 'a>(line: &'b Line<'a>) -> Line<'a> {
-    Line {
-        spans: line.spans.iter().map(borrow_clone_span).collect(),
-        ..*line
     }
 }
 
