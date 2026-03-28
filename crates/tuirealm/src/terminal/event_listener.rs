@@ -42,3 +42,56 @@ fn io_err_to_port_err(err: std::io::Error) -> PortError {
         _ => PortError::PermanentError(err.to_string()),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::io::{Error as ioError, ErrorKind};
+
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+
+    #[test]
+    fn should_map_to_intermittend() {
+        assert_eq!(
+            io_err_to_port_err(ioError::new(ErrorKind::Interrupted, "test")),
+            PortError::IntermittentError("test".to_string())
+        );
+        assert_eq!(
+            io_err_to_port_err(ioError::new(ErrorKind::NetworkDown, "test")),
+            PortError::IntermittentError("test".to_string())
+        );
+        assert_eq!(
+            io_err_to_port_err(ioError::new(ErrorKind::ResourceBusy, "test")),
+            PortError::IntermittentError("test".to_string())
+        );
+        assert_eq!(
+            io_err_to_port_err(ioError::new(ErrorKind::ConnectionReset, "test")),
+            PortError::IntermittentError("test".to_string())
+        );
+        assert_eq!(
+            io_err_to_port_err(ioError::new(ErrorKind::TimedOut, "test")),
+            PortError::IntermittentError("test".to_string())
+        );
+        assert_eq!(
+            io_err_to_port_err(ioError::new(ErrorKind::QuotaExceeded, "test")),
+            PortError::IntermittentError("test".to_string())
+        );
+        assert_eq!(
+            io_err_to_port_err(ioError::new(ErrorKind::StorageFull, "test")),
+            PortError::IntermittentError("test".to_string())
+        );
+        assert_eq!(
+            io_err_to_port_err(ioError::new(ErrorKind::WouldBlock, "test")),
+            PortError::IntermittentError("test".to_string())
+        );
+    }
+
+    #[test]
+    fn should_map_to_permanent() {
+        assert_eq!(
+            io_err_to_port_err(ioError::new(ErrorKind::BrokenPipe, "test")),
+            PortError::PermanentError("test".to_string())
+        );
+    }
+}
