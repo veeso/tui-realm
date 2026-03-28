@@ -271,51 +271,51 @@ impl FsTree {
 
 impl AppComponent<Msg, NoUserEvent> for FsTree {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let result = match ev {
-            Event::Keyboard(KeyEvent {
+        let result = match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Custom(TREE_CMD_CLOSE)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Custom(TREE_CMD_CLOSE)),
+            KeyEvent {
                 code: Key::Right,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Custom(TREE_CMD_OPEN)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Custom(TREE_CMD_OPEN)),
+            KeyEvent {
                 code: Key::PageDown,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Scroll(Direction::Down)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Scroll(Direction::Down)),
+            KeyEvent {
                 code: Key::PageUp,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Scroll(Direction::Up)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Scroll(Direction::Up)),
+            KeyEvent {
                 code: Key::Down,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Move(Direction::Down)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Down)),
+            KeyEvent {
                 code: Key::Up,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Move(Direction::Up)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Up)),
+            KeyEvent {
                 code: Key::Home,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent {
                 code: Key::End,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::GoTo(Position::End)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
                 code: Key::Enter,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Submit),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Submit),
+            KeyEvent {
                 code: Key::Backspace,
                 modifiers: KeyModifiers::NONE,
-            }) => return Some(Msg::GoToUpperDir),
-            Event::Keyboard(KeyEvent {
+            } => return Some(Msg::GoToUpperDir),
+            KeyEvent {
                 code: Key::Tab,
                 modifiers: KeyModifiers::NONE,
-            }) => return Some(Msg::FsTreeBlur),
+            } => return Some(Msg::FsTreeBlur),
             _ => return None,
         };
         match result {
@@ -375,48 +375,48 @@ impl Default for GoTo {
 
 impl AppComponent<Msg, NoUserEvent> for GoTo {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        let result = match ev {
-            Event::Keyboard(KeyEvent {
+        let result = match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Enter,
                 modifiers: KeyModifiers::NONE,
-            }) => {
+            } => {
                 let res = self.perform(Cmd::Submit);
                 // Clear value
                 self.attr(Attribute::Value, AttrValue::String(String::new()));
                 res
             }
-            Event::Keyboard(KeyEvent {
+            KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(*ch)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Type(*ch)),
+            KeyEvent {
                 code: Key::Left,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Home,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent {
                 code: Key::End,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::GoTo(Position::End)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
                 code: Key::Delete,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Cancel),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Cancel),
+            KeyEvent {
                 code: Key::Backspace,
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Delete),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Delete),
+            KeyEvent {
                 code: Key::Tab,
                 modifiers: KeyModifiers::NONE,
-            }) => return Some(Msg::GoToBlur),
+            } => return Some(Msg::GoToBlur),
             _ => return None,
         };
         match result {

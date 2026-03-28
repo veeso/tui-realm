@@ -144,22 +144,22 @@ impl Default for CheckboxAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for CheckboxAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Enter, ..
-            }) => self.perform(Cmd::Submit),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Submit),
+            KeyEvent {
                 code: Key::Char(' '),
                 ..
-            }) => self.perform(Cmd::Toggle),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::CheckboxAlfaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Toggle),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::CheckboxAlfaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -199,22 +199,22 @@ impl Default for CheckboxBeta {
 
 impl AppComponent<Msg, NoUserEvent> for CheckboxBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Enter, ..
-            }) => self.perform(Cmd::Submit),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Submit),
+            KeyEvent {
                 code: Key::Char(' '),
                 ..
-            }) => self.perform(Cmd::Toggle),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::CheckboxBetaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Toggle),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::CheckboxBetaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)

@@ -155,22 +155,20 @@ impl Default for SelectAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for SelectAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Down, ..
-            }) => self.perform(Cmd::Move(Direction::Down)),
-            Event::Keyboard(KeyEvent { code: Key::Up, .. }) => {
-                self.perform(Cmd::Move(Direction::Up))
-            }
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Down)),
+            KeyEvent { code: Key::Up, .. } => self.perform(Cmd::Move(Direction::Up)),
+            KeyEvent {
                 code: Key::Enter, ..
-            }) => self.perform(Cmd::Submit),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Submit),
+            KeyEvent {
                 code: Key::Delete | Key::Backspace,
                 ..
-            }) => self.perform(Cmd::Cancel),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::SelectAlfaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Cancel),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::SelectAlfaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -209,22 +207,20 @@ impl Default for SelectBeta {
 
 impl AppComponent<Msg, NoUserEvent> for SelectBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Down, ..
-            }) => self.perform(Cmd::Move(Direction::Down)),
-            Event::Keyboard(KeyEvent { code: Key::Up, .. }) => {
-                self.perform(Cmd::Move(Direction::Up))
-            }
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Down)),
+            KeyEvent { code: Key::Up, .. } => self.perform(Cmd::Move(Direction::Up)),
+            KeyEvent {
                 code: Key::Enter, ..
-            }) => self.perform(Cmd::Submit),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Submit),
+            KeyEvent {
                 code: Key::Delete | Key::Backspace,
                 ..
-            }) => self.perform(Cmd::Cancel),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::SelectBetaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Cancel),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::SelectBetaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)

@@ -173,32 +173,30 @@ impl Default for InputText {
 
 impl AppComponent<Msg, NoUserEvent> for InputText {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Home, ..
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
-                self.perform(Cmd::GoTo(Position::End))
-            }
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
                 code: Key::Delete, ..
-            }) => self.perform(Cmd::Cancel),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Cancel),
+            KeyEvent {
                 code: Key::Backspace,
                 ..
-            }) => self.perform(Cmd::Delete),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Delete),
+            KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(*ch)),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::TextBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Type(*ch)),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::TextBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -233,32 +231,30 @@ impl Default for InputEmail {
 
 impl AppComponent<Msg, NoUserEvent> for InputEmail {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Home, ..
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
-                self.perform(Cmd::GoTo(Position::End))
-            }
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
                 code: Key::Delete, ..
-            }) => self.perform(Cmd::Cancel),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Cancel),
+            KeyEvent {
                 code: Key::Backspace,
                 ..
-            }) => self.perform(Cmd::Delete),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Delete),
+            KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(*ch)),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::EmailBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Type(*ch)),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::EmailBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -290,32 +286,30 @@ impl Default for InputNumber {
 
 impl AppComponent<Msg, NoUserEvent> for InputNumber {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Home, ..
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
-                self.perform(Cmd::GoTo(Position::End))
-            }
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
                 code: Key::Delete, ..
-            }) => self.perform(Cmd::Cancel),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Cancel),
+            KeyEvent {
                 code: Key::Backspace,
                 ..
-            }) => self.perform(Cmd::Delete),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Delete),
+            KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(*ch)),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::NumberBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Type(*ch)),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::NumberBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -346,32 +340,30 @@ impl Default for InputPassword {
 
 impl AppComponent<Msg, NoUserEvent> for InputPassword {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Home, ..
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
-                self.perform(Cmd::GoTo(Position::End))
-            }
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
                 code: Key::Delete, ..
-            }) => self.perform(Cmd::Cancel),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Cancel),
+            KeyEvent {
                 code: Key::Backspace,
                 ..
-            }) => self.perform(Cmd::Delete),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Delete),
+            KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(*ch)),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::PasswordBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Type(*ch)),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::PasswordBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -407,32 +399,30 @@ impl Default for InputPhone {
 
 impl AppComponent<Msg, NoUserEvent> for InputPhone {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Home, ..
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
-                self.perform(Cmd::GoTo(Position::End))
-            }
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
                 code: Key::Delete, ..
-            }) => self.perform(Cmd::Cancel),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Cancel),
+            KeyEvent {
                 code: Key::Backspace,
                 ..
-            }) => self.perform(Cmd::Delete),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Delete),
+            KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => self.perform(Cmd::Type(*ch)),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::PhoneBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Type(*ch)),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::PhoneBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -465,30 +455,28 @@ impl Default for InputColor {
 
 impl AppComponent<Msg, NoUserEvent> for InputColor {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Home, ..
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
-                self.perform(Cmd::GoTo(Position::End))
-            }
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
                 code: Key::Delete, ..
-            }) => self.perform(Cmd::Cancel),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Cancel),
+            KeyEvent {
                 code: Key::Backspace,
                 ..
-            }) => self.perform(Cmd::Delete),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Delete),
+            KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) => {
+            } => {
                 if let CmdResult::Changed(State::Single(StateValue::String(color))) =
                     self.perform(Cmd::Type(*ch))
                 {
@@ -505,8 +493,8 @@ impl AppComponent<Msg, NoUserEvent> for InputColor {
                 }
                 CmdResult::None
             }
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::ColorBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::ColorBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)

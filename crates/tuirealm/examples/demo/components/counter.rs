@@ -201,19 +201,19 @@ impl LetterCounter {
 impl AppComponent<Msg, NoUserEvent> for LetterCounter {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         // Get command
-        let cmd = match ev {
-            Event::Keyboard(KeyEvent {
+        let cmd = match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) if ch.is_alphabetic() => Cmd::Submit,
-            Event::Keyboard(KeyEvent {
+            } if ch.is_alphabetic() => Cmd::Submit,
+            KeyEvent {
                 code: Key::Tab,
                 modifiers: KeyModifiers::NONE,
-            }) => return Some(Msg::LetterCounterBlur), // Return focus lost
-            Event::Keyboard(KeyEvent {
+            } => return Some(Msg::LetterCounterBlur), // Return focus lost
+            KeyEvent {
                 code: Key::Esc,
                 modifiers: KeyModifiers::NONE,
-            }) => return Some(Msg::AppClose),
+            } => return Some(Msg::AppClose),
             _ => Cmd::None,
         };
         // perform
@@ -253,19 +253,19 @@ impl DigitCounter {
 impl AppComponent<Msg, NoUserEvent> for DigitCounter {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         // Get command
-        let cmd = match ev {
-            Event::Keyboard(KeyEvent {
+        let cmd = match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Char(ch),
                 modifiers: KeyModifiers::NONE,
-            }) if ch.is_ascii_digit() => Cmd::Submit,
-            Event::Keyboard(KeyEvent {
+            } if ch.is_ascii_digit() => Cmd::Submit,
+            KeyEvent {
                 code: Key::Tab,
                 modifiers: KeyModifiers::NONE,
-            }) => return Some(Msg::DigitCounterBlur), // Return focus lost
-            Event::Keyboard(KeyEvent {
+            } => return Some(Msg::DigitCounterBlur), // Return focus lost
+            KeyEvent {
                 code: Key::Esc,
                 modifiers: KeyModifiers::NONE,
-            }) => return Some(Msg::AppClose),
+            } => return Some(Msg::AppClose),
             _ => Cmd::None,
         };
         // perform

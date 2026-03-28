@@ -145,21 +145,19 @@ impl Default for ChartAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for ChartAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Home, ..
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
-                self.perform(Cmd::GoTo(Position::End))
-            }
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::ChartAlfaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::ChartAlfaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -210,21 +208,19 @@ impl Default for ChartBeta {
 
 impl AppComponent<Msg, NoUserEvent> for ChartBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Home, ..
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
-                self.perform(Cmd::GoTo(Position::End))
-            }
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::ChartBetaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::ChartBetaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)

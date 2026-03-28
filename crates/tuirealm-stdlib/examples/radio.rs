@@ -143,18 +143,18 @@ impl Default for RadioAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for RadioAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Enter, ..
-            }) => self.perform(Cmd::Submit),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::RadioAlfaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Submit),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::RadioAlfaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -191,18 +191,18 @@ impl Default for RadioBeta {
 
 impl AppComponent<Msg, NoUserEvent> for RadioBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Left, ..
-            }) => self.perform(Cmd::Move(Direction::Left)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
                 code: Key::Right, ..
-            }) => self.perform(Cmd::Move(Direction::Right)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
                 code: Key::Enter, ..
-            }) => self.perform(Cmd::Submit),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::RadioBetaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::Submit),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::RadioBetaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)

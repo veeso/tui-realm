@@ -171,28 +171,24 @@ impl Default for TableAlfa {
 
 impl AppComponent<Msg, NoUserEvent> for TableAlfa {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent {
+        match ev.as_keyboard()? {
+            KeyEvent {
                 code: Key::Down, ..
-            }) => self.perform(Cmd::Move(Direction::Down)),
-            Event::Keyboard(KeyEvent { code: Key::Up, .. }) => {
-                self.perform(Cmd::Move(Direction::Up))
-            }
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Move(Direction::Down)),
+            KeyEvent { code: Key::Up, .. } => self.perform(Cmd::Move(Direction::Up)),
+            KeyEvent {
                 code: Key::PageDown,
                 ..
-            }) => self.perform(Cmd::Scroll(Direction::Down)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Scroll(Direction::Down)),
+            KeyEvent {
                 code: Key::PageUp, ..
-            }) => self.perform(Cmd::Scroll(Direction::Up)),
-            Event::Keyboard(KeyEvent {
+            } => self.perform(Cmd::Scroll(Direction::Up)),
+            KeyEvent {
                 code: Key::Home, ..
-            }) => self.perform(Cmd::GoTo(Position::Begin)),
-            Event::Keyboard(KeyEvent { code: Key::End, .. }) => {
-                self.perform(Cmd::GoTo(Position::End))
-            }
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::TableAlfaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::TableAlfaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
@@ -263,9 +259,9 @@ impl Default for TableBeta {
 
 impl AppComponent<Msg, NoUserEvent> for TableBeta {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
-        match ev {
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::TableBetaBlur),
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+        match ev.as_keyboard()? {
+            KeyEvent { code: Key::Tab, .. } => return Some(Msg::TableBetaBlur),
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
