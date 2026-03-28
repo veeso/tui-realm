@@ -3,9 +3,10 @@ mod common;
 use pretty_assertions::assert_eq;
 use tui_realm_textarea::{
     TEXTAREA_CMD_DEL_LINE_BY_END, TEXTAREA_CMD_DEL_LINE_BY_HEAD, TEXTAREA_CMD_DEL_NEXT_WORD,
-    TEXTAREA_CMD_DEL_WORD, TEXTAREA_CMD_MOVE_BOTTOM, TEXTAREA_CMD_MOVE_TOP,
-    TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
-    TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO, TextArea,
+    TEXTAREA_CMD_DEL_WORD, TEXTAREA_CMD_MOVE_BOTTOM, TEXTAREA_CMD_MOVE_PARAGRAPH_BACK,
+    TEXTAREA_CMD_MOVE_PARAGRAPH_FORWARD, TEXTAREA_CMD_MOVE_TOP, TEXTAREA_CMD_MOVE_WORD_BACK,
+    TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE, TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
+    TextArea,
 };
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
@@ -174,6 +175,21 @@ fn test_textarea_word_movement() {
     );
     assert_eq!(
         component.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_FORWARD)),
+        CmdResult::Visual
+    );
+}
+
+#[test]
+fn test_textarea_paragraph_movement() {
+    let mut component = TextArea::default();
+    component.paste("line 1\nline 2\nline 3");
+
+    assert_eq!(
+        component.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_PARAGRAPH_BACK)),
+        CmdResult::Visual
+    );
+    assert_eq!(
+        component.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_PARAGRAPH_FORWARD)),
         CmdResult::Visual
     );
 }
