@@ -260,18 +260,7 @@ impl Default for Editor {
 impl AppComponent<Msg, NoUserEvent> for Editor {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let result = match ev {
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
-            Event::Keyboard(KeyEvent {
-                code: Key::Backspace,
-                ..
-            })
-            | Event::Keyboard(KeyEvent {
-                code: Key::Char('h'),
-                modifiers: KeyModifiers::CONTROL,
-            }) => self.perform(Cmd::Delete),
-            Event::Keyboard(KeyEvent {
-                code: Key::Delete, ..
-            }) => self.perform(Cmd::Cancel),
+            // Movement
             Event::Keyboard(KeyEvent {
                 code: Key::PageDown,
                 ..
@@ -313,19 +302,24 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 modifiers: KeyModifiers::CONTROL,
             }) => self.perform(Cmd::GoTo(Position::End)),
             Event::Keyboard(KeyEvent {
-                code: Key::Enter, ..
-            })
-            | Event::Keyboard(KeyEvent {
-                code: Key::Char('m'),
-                modifiers: KeyModifiers::CONTROL,
-            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_NEWLINE)),
-            Event::Keyboard(KeyEvent {
                 code: Key::Home, ..
             })
             | Event::Keyboard(KeyEvent {
                 code: Key::Char('a'),
                 modifiers: KeyModifiers::CONTROL,
             }) => self.perform(Cmd::GoTo(Position::Begin)),
+
+            // undo redo
+            Event::Keyboard(KeyEvent {
+                code: Key::Char('z'),
+                modifiers: KeyModifiers::CONTROL,
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_UNDO)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Char('y'),
+                modifiers: KeyModifiers::CONTROL,
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_REDO)),
+
+            // search
             #[cfg(feature = "search")]
             Event::Keyboard(KeyEvent {
                 code: Key::Char('s'),
@@ -336,19 +330,9 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 code: Key::Char('d'),
                 modifiers: KeyModifiers::CONTROL,
             }) => self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_FORWARD)),
-            Event::Keyboard(KeyEvent {
-                code: Key::Char('z'),
-                modifiers: KeyModifiers::CONTROL,
-            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_UNDO)),
-            Event::Keyboard(KeyEvent {
-                code: Key::Char('y'),
-                modifiers: KeyModifiers::CONTROL,
-            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_REDO)),
-            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => self.perform(Cmd::Type('\t')),
-            Event::Keyboard(KeyEvent {
-                code: Key::Char(ch),
-                ..
-            }) => self.perform(Cmd::Type(*ch)),
+
+            // other
+            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
             Event::Keyboard(KeyEvent {
                 code: Key::Function(2),
                 ..
@@ -358,10 +342,35 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
                 code: Key::Function(3),
                 ..
             }) => return Some(Msg::ChangeFocus(Id::Search)),
+
+            // Typing
+            Event::Keyboard(KeyEvent {
+                code: Key::Backspace,
+                ..
+            })
+            | Event::Keyboard(KeyEvent {
+                code: Key::Char('h'),
+                modifiers: KeyModifiers::CONTROL,
+            }) => self.perform(Cmd::Delete),
+            Event::Keyboard(KeyEvent {
+                code: Key::Delete, ..
+            }) => self.perform(Cmd::Cancel),
+            Event::Keyboard(KeyEvent {
+                code: Key::Enter, ..
+            })
+            | Event::Keyboard(KeyEvent {
+                code: Key::Char('m'),
+                modifiers: KeyModifiers::CONTROL,
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_NEWLINE)),
+            Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => self.perform(Cmd::Type('\t')),
             Event::Paste(text) => {
                 self.component.paste(text);
                 CmdResult::Changed(State::None)
             }
+            Event::Keyboard(KeyEvent {
+                code: Key::Char(ch),
+                ..
+            }) => self.perform(Cmd::Type(*ch)),
             _ => return None,
         };
 

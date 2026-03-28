@@ -182,18 +182,7 @@ impl Default for Input {
 impl AppComponent<Msg, NoUserEvent> for Input {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
         let result = match ev {
-            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
-            Event::Keyboard(KeyEvent {
-                code: Key::Backspace,
-                ..
-            })
-            | Event::Keyboard(KeyEvent {
-                code: Key::Char('h'),
-                modifiers: KeyModifiers::CONTROL,
-            }) => self.perform(Cmd::Delete),
-            Event::Keyboard(KeyEvent {
-                code: Key::Delete, ..
-            }) => self.perform(Cmd::Cancel),
+            // Movement
             Event::Keyboard(KeyEvent {
                 code: Key::PageDown,
                 ..
@@ -235,19 +224,14 @@ impl AppComponent<Msg, NoUserEvent> for Input {
                 modifiers: KeyModifiers::CONTROL,
             }) => self.perform(Cmd::GoTo(Position::End)),
             Event::Keyboard(KeyEvent {
-                code: Key::Enter, ..
-            })
-            | Event::Keyboard(KeyEvent {
-                code: Key::Char('m'),
-                modifiers: KeyModifiers::CONTROL,
-            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_NEWLINE)),
-            Event::Keyboard(KeyEvent {
                 code: Key::Home, ..
             })
             | Event::Keyboard(KeyEvent {
                 code: Key::Char('a'),
                 modifiers: KeyModifiers::CONTROL,
             }) => self.perform(Cmd::GoTo(Position::Begin)),
+
+            // undo redo
             Event::Keyboard(KeyEvent {
                 code: Key::Char('z'),
                 modifiers: KeyModifiers::CONTROL,
@@ -256,6 +240,30 @@ impl AppComponent<Msg, NoUserEvent> for Input {
                 code: Key::Char('y'),
                 modifiers: KeyModifiers::CONTROL,
             }) => self.perform(Cmd::Custom(TEXTAREA_CMD_REDO)),
+
+            // other
+            Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
+
+            // Typing
+            Event::Keyboard(KeyEvent {
+                code: Key::Backspace,
+                ..
+            })
+            | Event::Keyboard(KeyEvent {
+                code: Key::Char('h'),
+                modifiers: KeyModifiers::CONTROL,
+            }) => self.perform(Cmd::Delete),
+            Event::Keyboard(KeyEvent {
+                code: Key::Delete, ..
+            }) => self.perform(Cmd::Cancel),
+
+            Event::Keyboard(KeyEvent {
+                code: Key::Enter, ..
+            })
+            | Event::Keyboard(KeyEvent {
+                code: Key::Char('m'),
+                modifiers: KeyModifiers::CONTROL,
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_NEWLINE)),
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => self.perform(Cmd::Type('\t')),
             Event::Keyboard(KeyEvent {
                 code: Key::Char(ch),
