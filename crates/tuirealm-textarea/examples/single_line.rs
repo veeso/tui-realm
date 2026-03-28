@@ -181,6 +181,10 @@ impl Default for Input {
 
 impl AppComponent<Msg, NoUserEvent> for Input {
     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
+        if let Event::WindowResize(_, _) = ev {
+            return Some(Msg::Redraw);
+        }
+
         let result = match ev {
             // Movement
             Event::Keyboard(KeyEvent {
