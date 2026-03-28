@@ -39,7 +39,8 @@ impl<UserEvent> Event<UserEvent>
 where
     UserEvent: Eq + PartialEq + Clone,
 {
-    pub(crate) fn as_keyboard(&self) -> Option<&KeyEvent> {
+    /// Get the inner [`Keyboard`](Self::Keyboard) event as `Some`, otherwise `None`.
+    pub fn as_keyboard(&self) -> Option<&KeyEvent> {
         if let Event::Keyboard(k) = self {
             Some(k)
         } else {
@@ -47,7 +48,8 @@ where
         }
     }
 
-    pub(crate) fn as_mouse(&self) -> Option<&MouseEvent> {
+    /// Get the inner [`Mouse`](Self::Mouse) event as `Some`, otherwise `None`.
+    pub fn as_mouse(&self) -> Option<&MouseEvent> {
         if let Event::Mouse(m) = self {
             Some(m)
         } else {
@@ -63,7 +65,8 @@ where
         matches!(self, Self::Tick)
     }
 
-    pub(crate) fn as_user(&self) -> Option<&UserEvent> {
+    /// Get the inner [`User`](Self::User) event as `Some`, otherwise `None`.
+    pub fn as_user(&self) -> Option<&UserEvent> {
         if let Event::User(u) = self {
             Some(u)
         } else {
