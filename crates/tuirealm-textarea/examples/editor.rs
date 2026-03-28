@@ -7,8 +7,9 @@ use std::time::Duration;
 use tui_realm_stdlib::components::Input;
 use tui_realm_stdlib::components::Label;
 use tui_realm_textarea::{
-    TEXTAREA_CMD_MOVE_WORD_BACK, TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE,
-    TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO, TextArea,
+    TEXTAREA_CMD_MOVE_BOTTOM, TEXTAREA_CMD_MOVE_TOP, TEXTAREA_CMD_MOVE_WORD_BACK,
+    TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE, TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
+    TextArea,
 };
 #[cfg(feature = "search")]
 use tui_realm_textarea::{
@@ -300,18 +301,30 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
             Event::Keyboard(KeyEvent { code: Key::Up, .. }) => {
                 self.perform(Cmd::Move(Direction::Up))
             }
-            Event::Keyboard(KeyEvent { code: Key::End, .. })
+            Event::Keyboard(KeyEvent {
+                code: Key::End,
+                modifiers: KeyModifiers::NONE,
+            })
             | Event::Keyboard(KeyEvent {
                 code: Key::Char('e'),
                 modifiers: KeyModifiers::CONTROL,
             }) => self.perform(Cmd::GoTo(Position::End)),
             Event::Keyboard(KeyEvent {
-                code: Key::Home, ..
+                code: Key::Home,
+                modifiers: KeyModifiers::NONE,
             })
             | Event::Keyboard(KeyEvent {
                 code: Key::Char('a'),
                 modifiers: KeyModifiers::CONTROL,
             }) => self.perform(Cmd::GoTo(Position::Begin)),
+            Event::Keyboard(KeyEvent {
+                code: Key::End,
+                modifiers: KeyModifiers::CONTROL,
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_BOTTOM)),
+            Event::Keyboard(KeyEvent {
+                code: Key::Home,
+                modifiers: KeyModifiers::CONTROL,
+            }) => self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_TOP)),
 
             // undo redo
             Event::Keyboard(KeyEvent {
