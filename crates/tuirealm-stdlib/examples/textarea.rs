@@ -8,10 +8,9 @@ use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
-use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
+use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Style, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
-use tuirealm::ratatui::style::Stylize;
-use tuirealm::ratatui::text::Span;
+use tuirealm::ratatui::text::{Line, Span};
 use tuirealm::terminal::TerminalAdapter;
 
 mod utils;
@@ -130,21 +129,27 @@ impl Default for TextareaAlfa {
                 .step(4)
                 .highlighted_str("🎵")
                 .text_rows([
-                    Span::raw("I was a little too tall, could've used a few pounds,")
-                        .underlined()
-                        .fg(Color::Green),
-                    Span::from("Tight pants points, hardly renowned"),
-                    Span::from("She was a black-haired beauty with big dark eyes"),
-                    Span::from("And points of her own, sittin' way up high"),
-                    Span::from("Way up firm and high"),
-                    Span::from("Out past the cornfields where the woods got heavy"),
-                    Span::from("Out in the back seat of my '60 Chevy"),
-                    Span::from("Workin' on mysteries without any clues"),
-                    Span::from("Workin' on our night moves"),
-                    Span::from("Tryin' to make some front page drive-in news"),
-                    Span::from("Workin' on our night moves"),
-                    Span::from("In the summertime"),
-                    Span::from("Umm, in the sweet summertime"),
+                    Line::from(Span::styled(
+                        "I was a little too tall, could've used a few pounds,",
+                        Style::new().underlined().fg(Color::Green),
+                    )),
+                    Line::from_iter([
+                        Span::raw("Tight"),
+                        Span::styled(" pants ", Style::new().italic()),
+                        Span::styled("points,", Style::new().crossed_out()),
+                        Span::raw(" hardly renowned"),
+                    ]),
+                    Line::from("She was a black-haired beauty with big dark eyes"),
+                    Line::from("And points of her own, sittin' way up high"),
+                    Line::from("Way up firm and high"),
+                    Line::from("Out past the cornfields where the woods got heavy"),
+                    Line::from("Out in the back seat of my '60 Chevy"),
+                    Line::from("Workin' on mysteries without any clues"),
+                    Line::from("Workin' on our night moves"),
+                    Line::from("Tryin' to make some front page drive-in news"),
+                    Line::from("Workin' on our night moves"),
+                    Line::from("In the summertime"),
+                    Line::from("Umm, in the sweet summertime"),
                 ]),
         }
     }
@@ -195,18 +200,21 @@ impl Default for TextareaBeta {
                 .step(4)
                 .highlighted_str("🎵")
                 .text_rows([
-                    Span::raw("Roxanne").underlined().fg(Color::Red),
-                    Span::from("You don't have to put on the red light"),
-                    Span::from("Those days are over"),
-                    Span::from("You don't have to sell your body to the night"),
-                    Span::from("Roxanne"),
-                    Span::from("You don't have to wear that dress tonight"),
-                    Span::from("Walk the streets for money"),
-                    Span::from("You don't care if it's wrong or if it's right"),
-                    Span::from("Roxanne"),
-                    Span::from("You don't have to put on the red light"),
-                    Span::from("Roxanne"),
-                    Span::from("You don't have to put on the red light"),
+                    Line::from(Span::styled(
+                        "Roxanne",
+                        Style::new().underlined().fg(Color::Red),
+                    )),
+                    Line::from("You don't have to put on the red light"),
+                    Line::from("Those days are over"),
+                    Line::from("You don't have to sell your body to the night"),
+                    Line::from("Roxanne"),
+                    Line::from("You don't have to wear that dress tonight"),
+                    Line::from("Walk the streets for money"),
+                    Line::from("You don't care if it's wrong or if it's right"),
+                    Line::from("Roxanne"),
+                    Line::from("You don't have to put on the red light"),
+                    Line::from("Roxanne"),
+                    Line::from("You don't have to put on the red light"),
                 ]),
         }
     }

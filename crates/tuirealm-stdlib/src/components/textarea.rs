@@ -1,8 +1,8 @@
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, LineStatic, PropPayload, PropValue, Props, QueryResult,
-    SpanStatic, Style, TextModifiers, Title,
+    AttrValue, Attribute, Borders, Color, LineStatic, Props, QueryResult, Style, TextModifiers,
+    TextStatic, Title,
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
@@ -159,11 +159,43 @@ impl Textarea {
         self
     }
 
-    /// Set the Text content.
-    pub fn text_rows(mut self, s: impl IntoIterator<Item = SpanStatic>) -> Self {
-        let rows: Vec<PropValue> = s.into_iter().map(PropValue::TextSpan).collect();
-        self.states.set_list_len(rows.len());
-        self.attr(Attribute::Text, AttrValue::Payload(PropPayload::Vec(rows)));
+    /// Set the Text content via a array or iterator.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use tui_realm_stdlib::components::Textarea;
+    /// # use tuirealm::ratatui::text::Line;
+    /// Textarea::default()
+    ///     .text_rows([
+    ///         Line::raw("line1"),
+    ///         Line::raw("line2")
+    ///     ]);
+    /// ```
+    pub fn text_rows<T>(self, text: impl IntoIterator<Item = T>) -> Self
+    where
+        T: Into<LineStatic>,
+    {
+        let text = TextStatic::from_iter(text);
+        self.text(text)
+    }
+
+    /// Set the Text content via a single struct.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use tui_realm_stdlib::components::Textarea;
+    /// # use tuirealm::ratatui::text::{Line, Text};
+    /// Textarea::default()
+    ///     .text(Line::raw("line"));
+    /// Textarea::default()
+    ///     .text(Text::raw("another line"));
+    /// ```
+    pub fn text(mut self, text: impl Into<TextStatic>) -> Self {
+        let text = text.into();
+        self.states.set_list_len(text.lines.len());
+        self.attr(Attribute::Text, AttrValue::Text(text));
         self
     }
 }
@@ -185,14 +217,10 @@ impl Component for Textarea {
         let lines: Vec<ListItem> = self
             .props
             .get(Attribute::Text)
-            .and_then(AttrValue::as_payload)
-            .and_then(PropPayload::as_vec)
-            .map(|spans| {
-                spans
-                    .iter()
-                    // this will skip any "PropValue" that is not a "TextSpan", instead of panicing
-                    .filter_map(|x| x.as_textspan())
-                    .map(|x| crate::utils::wrap_spans(&[x], wrap_width))
+            .and_then(AttrValue::as_text)
+            .map(|text| {
+                text.iter()
+                    .map(|x| crate::utils::wrap_lines(&[x], wrap_width))
                     .map(ListItem::new)
                     .collect()
             })
@@ -231,9 +259,8 @@ impl Component for Textarea {
             self.states.set_list_len(
                 self.props
                     .get(Attribute::Text)
-                    .and_then(AttrValue::as_payload)
-                    .and_then(PropPayload::as_vec)
-                    .map_or(0, |spans| spans.len()),
+                    .and_then(AttrValue::as_text)
+                    .map_or(0, |text| text.lines.len()),
             );
             self.states.fix_list_index();
         }
@@ -291,7 +318,7 @@ mod tests {
 
     use pretty_assertions::assert_eq;
     use tuirealm::props::HorizontalAlignment;
-    use tuirealm::ratatui::text::Span;
+    use tuirealm::ratatui::text::{Line, Span, Text};
     use tuirealm::state::StateValue;
 
     use super::*;
@@ -307,17 +334,17 @@ mod tests {
             .highlighted_str("🚀")
             .step(4)
             .title(Title::from("textarea").alignment(HorizontalAlignment::Center))
-            .text_rows([Span::from("welcome to "), Span::from("tui-realm")]);
+            .text_rows([Line::from("welcome to "), Line::from("tui-realm")]);
         // Increment list index
         component.states.list_index += 1;
         assert_eq!(component.states.list_index, 1);
         // Add one row
         component.attr(
             Attribute::Text,
-            AttrValue::Payload(PropPayload::Vec(vec![
-                PropValue::TextSpan(Span::from("welcome")),
-                PropValue::TextSpan(Span::from("to")),
-                PropValue::TextSpan(Span::from("tui-realm")),
+            AttrValue::Text(TextStatic::from_iter([
+                Line::from("welcome"),
+                Line::from("to"),
+                Line::from("tui-realm"),
             ])),
         );
         // Verify states
@@ -388,5 +415,28 @@ mod tests {
         let _ = Textarea::default().text_rows(vec![Span::raw("hello")].into_boxed_slice());
         // already a iterator
         let _ = Textarea::default().text_rows(["Hello"].map(Span::raw));
+
+        // Vec
+        let _ = Textarea::default().text_rows(vec![Line::raw("hello")]);
+        // static array
+        let _ = Textarea::default().text_rows([Line::raw("hello")]);
+        // boxed array
+        let _ = Textarea::default().text_rows(vec![Line::raw("hello")].into_boxed_slice());
+        // already a iterator
+        let _ = Textarea::default().text_rows(["Hello"].map(Line::raw));
+    }
+
+    #[test]
+    fn various_text_types() {
+        // Line
+        let _ = Textarea::default().text(Text::raw("hello"));
+        // Line
+        let _ = Textarea::default().text(Line::raw("hello"));
+        // Span
+        let _ = Textarea::default().text(Span::raw("hello"));
+        // str
+        let _ = Textarea::default().text("hello");
+        // String
+        let _ = Textarea::default().text("hello".to_string());
     }
 }
