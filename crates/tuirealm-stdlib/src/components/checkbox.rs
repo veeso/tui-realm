@@ -201,6 +201,12 @@ impl Checkbox {
         self
     }
 
+    /// Set the current component to be always active (show highligh even if unfocused)
+    pub fn always_active(mut self) -> Self {
+        self.attr(Attribute::AlwaysActive, AttrValue::Flag(true));
+        self
+    }
+
     fn rewindable(&self) -> bool {
         self.props
             .get(Attribute::Rewind)
@@ -231,7 +237,7 @@ impl Component for Checkbox {
             .select(self.states.choice)
             .style(self.common.style)
             // TODO: highlight style
-            .highlight_style(self.common.style.add_modifier(if self.common.focused {
+            .highlight_style(self.common.style.add_modifier(if self.common.is_active() {
                 TextModifiers::REVERSED
             } else {
                 TextModifiers::empty()

@@ -306,7 +306,7 @@ impl Component for Input {
         let mut block = self.common.get_block();
         // Apply invalid style
         // TODO: invalid style should likely still be applied even if unfocused
-        if self.common.focused
+        if self.common.is_active()
             && !self.is_valid()
             && let Some(invalid_style) = self
                 .props
@@ -353,7 +353,7 @@ impl Component for Input {
             &text_to_display
         };
         // Choose paragraph style based on whether is valid or not and if has focus and if should show placeholder
-        let paragraph_style = if self.common.focused {
+        let paragraph_style = if self.common.is_active() {
             normal_style
         } else {
             // TODO: this should likely be a different property
@@ -377,6 +377,7 @@ impl Component for Input {
         render.render_widget(widget, area);
 
         // Set cursor, if focus
+        // not using "common.is_active" here as cursor position should *only* be set for the actually focused component (as there can only be one cursor position)
         if self.common.focused && !area_for_bounds.is_empty() {
             let x: u16 = area_for_bounds.x
                 + calc_utf8_cursor_position(

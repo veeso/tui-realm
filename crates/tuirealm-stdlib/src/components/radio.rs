@@ -178,6 +178,12 @@ impl Radio {
         self
     }
 
+    /// Set the current component to be always active (show highligh even if unfocused)
+    pub fn always_active(mut self) -> Self {
+        self.attr(Attribute::AlwaysActive, AttrValue::Flag(true));
+        self
+    }
+
     fn is_rewind(&self) -> bool {
         self.props
             .get(Attribute::Rewind)
@@ -203,7 +209,7 @@ impl Component for Radio {
         let mut widget = Tabs::new(choices)
             .select(self.states.choice)
             .style(self.common.style)
-            .highlight_style(Style::default().add_modifier(if self.common.focused {
+            .highlight_style(Style::default().add_modifier(if self.common.is_active() {
                 TextModifiers::REVERSED
             } else {
                 TextModifiers::empty()

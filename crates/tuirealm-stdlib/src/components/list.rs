@@ -208,6 +208,12 @@ impl List {
         self
     }
 
+    /// Set the current component to be always active (show highligh even if unfocused)
+    pub fn always_active(mut self) -> Self {
+        self.attr(Attribute::AlwaysActive, AttrValue::Flag(true));
+        self
+    }
+
     fn scrollable(&self) -> bool {
         self.props
             .get(Attribute::Scroll)
@@ -259,7 +265,7 @@ impl Component for List {
 
         if let Some(highlighted_color) = highlighted_color {
             widget = widget.highlight_style(Style::default().fg(highlighted_color).add_modifier(
-                if self.common.focused {
+                if self.common.is_active() {
                     TextModifiers::REVERSED
                 } else {
                     TextModifiers::empty()

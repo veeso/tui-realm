@@ -28,6 +28,7 @@ pub enum Msg {
 pub enum Id {
     RadioAlfa,
     RadioBeta,
+    RadioCeta,
 }
 
 impl Model<Id, Msg> {
@@ -43,6 +44,7 @@ impl Model<Id, Msg> {
                         [
                             Constraint::Length(3),
                             Constraint::Length(3),
+                            Constraint::Length(3),
                             Constraint::Length(1),
                         ]
                         .as_ref(),
@@ -50,6 +52,7 @@ impl Model<Id, Msg> {
                     .split(f.area());
                 self.app.view(&Id::RadioAlfa, f, chunks[0]);
                 self.app.view(&Id::RadioBeta, f, chunks[1]);
+                self.app.view(&Id::RadioCeta, f, chunks[2]);
             })
             .expect("Drawing to the terminal failed");
     }
@@ -67,6 +70,7 @@ impl Model<Id, Msg> {
             Msg::RadioBetaBlur => {
                 assert!(self.app.active(&Id::RadioAlfa).is_ok());
             }
+            // Ceta is not focusable
             Msg::Redraw => (),
         }
     }
@@ -77,6 +81,8 @@ impl Model<Id, Msg> {
             .mount(Id::RadioAlfa, Box::new(RadioAlfa::default()), vec![])?;
         self.app
             .mount(Id::RadioBeta, Box::new(RadioBeta::default()), vec![])?;
+        self.app
+            .mount(Id::RadioCeta, Box::new(RadioCeta::default()), vec![])?;
         // We need to give focus to input then
         self.app.active(&Id::RadioAlfa)?;
 
@@ -206,5 +212,41 @@ impl AppComponent<Msg, NoUserEvent> for RadioBeta {
             _ => CmdResult::None,
         };
         Some(Msg::Redraw)
+    }
+}
+
+#[derive(Component)]
+struct RadioCeta {
+    component: Radio,
+}
+
+impl Default for RadioCeta {
+    fn default() -> Self {
+        Self {
+            component: Radio::default()
+                .borders(
+                    Borders::default()
+                        .modifiers(BorderType::Rounded)
+                        .color(Color::LightYellow),
+                )
+                .foreground(Color::LightYellow)
+                .title(Title::from("Choice of the day").alignment(HorizontalAlignment::Center))
+                .rewind(false)
+                .choices([
+                    "hazelnuts",
+                    "chocolate",
+                    "maple cyrup",
+                    "smarties",
+                    "raspberries",
+                ])
+                .value(3)
+                .always_active(),
+        }
+    }
+}
+
+impl AppComponent<Msg, NoUserEvent> for RadioCeta {
+    fn on(&mut self, _ev: &Event<NoUserEvent>) -> Option<Msg> {
+        None
     }
 }

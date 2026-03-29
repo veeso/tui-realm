@@ -241,6 +241,12 @@ impl Table {
         self
     }
 
+    /// Set the current component to be always active (show highligh even if unfocused)
+    pub fn always_active(mut self) -> Self {
+        self.attr(Attribute::AlwaysActive, AttrValue::Flag(true));
+        self
+    }
+
     /// ### scrollable
     ///
     /// returns the value of the scrollable flag; by default is false
@@ -351,7 +357,7 @@ impl Component for Table {
         if let Some(highlighted_color) = highlighted_color {
             widget =
                 widget.row_highlight_style(Style::default().fg(highlighted_color).add_modifier(
-                    if self.common.focused {
+                    if self.common.is_active() {
                         TextModifiers::REVERSED
                     } else {
                         TextModifiers::empty()
