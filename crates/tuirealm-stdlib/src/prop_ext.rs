@@ -27,6 +27,9 @@ pub struct CommonProps {
     pub display: bool,
     /// Determines if the current component is focused or not.
     pub focused: bool,
+
+    /// Determines if the current component should always use the "active" style, regardless if it is focused or not.
+    pub always_active: bool,
 }
 
 impl Default for CommonProps {
@@ -38,6 +41,7 @@ impl Default for CommonProps {
             title: Option::default(),
             display: true,
             focused: false,
+            always_active: false,
         }
     }
 }
@@ -58,6 +62,7 @@ impl CommonProps {
             // handle flags
             (Attribute::Display, AttrValue::Flag(val)) => self.display = val,
             (Attribute::Focus, AttrValue::Flag(val)) => self.focused = val,
+            (Attribute::AlwaysActive, AttrValue::Flag(val)) => self.always_active = val,
 
             // handle borders & titles
             (Attribute::Borders, AttrValue::Borders(val)) => self.border = Some(val),
@@ -83,6 +88,7 @@ impl CommonProps {
             // handle flags
             Attribute::Display => Some(AttrValue::Flag(self.display)),
             Attribute::Focus => Some(AttrValue::Flag(self.focused)),
+            Attribute::AlwaysActive => Some(AttrValue::Flag(self.always_active)),
 
             // handle borders & titles
             Attribute::Borders => self.border.map(AttrValue::Borders),
@@ -106,6 +112,7 @@ impl CommonProps {
             // handle flags
             Attribute::Display => Some(AttrValueRef::Flag(self.display)),
             Attribute::Focus => Some(AttrValueRef::Flag(self.focused)),
+            Attribute::AlwaysActive => Some(AttrValueRef::Flag(self.always_active)),
 
             // handle borders & titles
             Attribute::Borders => self.border.map(AttrValueRef::Borders),
@@ -127,11 +134,16 @@ impl CommonProps {
         let block = crate::utils::get_block(
             borders,
             title,
-            self.focused,
+            self.always_active || self.focused,
             Some(self.border_unfocused_style),
         );
 
         Some(block)
+    }
+
+    /// Get if the current component is determined to be "active", either by having "Always active" active or being focused.
+    pub fn is_active(&self) -> bool {
+        self.always_active || self.focused
     }
 }
 
@@ -171,6 +183,7 @@ mod tests {
 
         assert!(props.get(Attribute::Display).unwrap().unwrap_flag());
         assert!(!props.get(Attribute::Focus).unwrap().unwrap_flag());
+        assert!(!props.get(Attribute::AlwaysActive).unwrap().unwrap_flag());
 
         assert!(props.get(Attribute::Borders).is_none());
         assert!(props.get(Attribute::Title).is_none());
@@ -260,9 +273,11 @@ mod tests {
 
         props.set(Attribute::Display, AttrValue::Flag(false));
         props.set(Attribute::Focus, AttrValue::Flag(true));
+        props.set(Attribute::AlwaysActive, AttrValue::Flag(true));
 
         assert!(!props.get(Attribute::Display).unwrap().unwrap_flag());
         assert!(props.get(Attribute::Focus).unwrap().unwrap_flag());
+        assert!(props.get(Attribute::AlwaysActive).unwrap().unwrap_flag());
 
         // border & title
 
@@ -326,11 +341,60 @@ mod tests {
             ),
         );
 
+        // unfocused, no set inactive style
+        let block = props.get_block().unwrap();
+        assert_eq!(
+            block,
+            Block::new()
+                .title_bottom(LineStatic::from("Hello").centered())
+                .borders(BorderSides::TOP)
+                .border_type(BorderType::Double)
+        );
+
+        // focused, no set inactive style
+        props.set(Attribute::Focus, AttrValue::Flag(true));
+
+        let block = props.get_block().unwrap();
+        assert_eq!(
+            block,
+            Block::new()
+                .border_style(Style::new().black())
+                .title_bottom(LineStatic::from("Hello").centered())
+                .borders(BorderSides::TOP)
+                .border_type(BorderType::Double)
+        );
+    }
+
+    #[test]
+    fn block_should_be_active_with_alwaysactive() {
+        let mut props = CommonProps::default();
+        props.set(
+            Attribute::Borders,
+            AttrValue::Borders(
+                Borders::default()
+                    .color(Color::Black)
+                    .modifiers(BorderType::Double)
+                    .sides(BorderSides::TOP),
+            ),
+        );
+        props.set(
+            Attribute::Title,
+            AttrValue::Title(
+                Title::default()
+                    .content("Hello".into())
+                    .alignment(HorizontalAlignment::Center)
+                    .position(TitlePosition::Bottom),
+            ),
+        );
+        props.set(Attribute::FocusStyle, AttrValue::Style(Style::new().gray()));
+        props.set(Attribute::AlwaysActive, AttrValue::Flag(true));
+
         let block = props.get_block().unwrap();
 
         assert_eq!(
             block,
             Block::new()
+                .border_style(Style::new().black())
                 .title_bottom(LineStatic::from("Hello").centered())
                 .borders(BorderSides::TOP)
                 .border_type(BorderType::Double)

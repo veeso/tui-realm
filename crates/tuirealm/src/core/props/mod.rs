@@ -45,6 +45,8 @@ pub enum Attribute {
     AlignmentHorizontal,
     /// Vertical Layout Alignment
     AlignmentVertical,
+    /// Should be used to indicate if a component should always be regarded as "active" (for styling), regardless of if it has [`Focus`](Self::Focus) or not.
+    AlwaysActive,
     /// Background color or style
     Background,
     /// Borders styles
