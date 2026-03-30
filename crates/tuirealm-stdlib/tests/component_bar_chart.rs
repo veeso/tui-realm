@@ -46,7 +46,7 @@ fn test_bar_chart_disabled() {
         .data(&[("Q1", 100), ("Q2", 200)]);
     assert_eq!(
         component.perform(Cmd::Move(Direction::Right)),
-        CmdResult::None
+        CmdResult::NoChange
     );
 }
 

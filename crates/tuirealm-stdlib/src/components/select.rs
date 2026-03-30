@@ -359,7 +359,7 @@ impl Component for Select {
                 if self.states.is_tab_open() {
                     CmdResult::Changed(State::Single(StateValue::Usize(self.states.selected)))
                 } else {
-                    CmdResult::None
+                    CmdResult::NoChange
                 }
             }
             Cmd::Move(Direction::Up) => {
@@ -369,7 +369,7 @@ impl Component for Select {
                 if self.states.is_tab_open() {
                     CmdResult::Changed(State::Single(StateValue::Usize(self.states.selected)))
                 } else {
-                    CmdResult::None
+                    CmdResult::NoChange
                 }
             }
             Cmd::Cancel => {
@@ -553,9 +553,12 @@ mod test {
         assert_eq!(component.states.is_tab_open(), false);
         assert_eq!(
             component.perform(Cmd::Move(Direction::Down)),
-            CmdResult::None
+            CmdResult::NoChange
         );
-        assert_eq!(component.perform(Cmd::Move(Direction::Up)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Up)),
+            CmdResult::NoChange
+        );
     }
 
     #[test]

@@ -341,7 +341,7 @@ impl Component for List {
                 let prev = self.states.list_index;
                 self.states.incr_list_index(self.rewindable());
                 if prev == self.states.list_index {
-                    CmdResult::None
+                    CmdResult::NoChange
                 } else {
                     CmdResult::Changed(self.state())
                 }
@@ -350,7 +350,7 @@ impl Component for List {
                 let prev = self.states.list_index;
                 self.states.decr_list_index(self.rewindable());
                 if prev == self.states.list_index {
-                    CmdResult::None
+                    CmdResult::NoChange
                 } else {
                     CmdResult::Changed(self.state())
                 }
@@ -365,7 +365,7 @@ impl Component for List {
                 let step: usize = self.states.calc_max_step_ahead(step);
                 (0..step).for_each(|_| self.states.incr_list_index(false));
                 if prev == self.states.list_index {
-                    CmdResult::None
+                    CmdResult::NoChange
                 } else {
                     CmdResult::Changed(self.state())
                 }
@@ -380,7 +380,7 @@ impl Component for List {
                 let step: usize = self.states.calc_max_step_behind(step);
                 (0..step).for_each(|_| self.states.decr_list_index(false));
                 if prev == self.states.list_index {
-                    CmdResult::None
+                    CmdResult::NoChange
                 } else {
                     CmdResult::Changed(self.state())
                 }
@@ -389,7 +389,7 @@ impl Component for List {
                 let prev = self.states.list_index;
                 self.states.list_index_at_first();
                 if prev == self.states.list_index {
-                    CmdResult::None
+                    CmdResult::NoChange
                 } else {
                     CmdResult::Changed(self.state())
                 }
@@ -398,7 +398,7 @@ impl Component for List {
                 let prev = self.states.list_index;
                 self.states.list_index_at_last();
                 if prev == self.states.list_index {
-                    CmdResult::None
+                    CmdResult::NoChange
                 } else {
                     CmdResult::Changed(self.state())
                 }

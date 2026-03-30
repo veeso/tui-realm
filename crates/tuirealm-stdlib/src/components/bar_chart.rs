@@ -338,7 +338,7 @@ impl Component for BarChart {
             }
             return CmdResult::Visual;
         }
-        CmdResult::None
+        CmdResult::NoChange
     }
 
     fn state(&self) -> State {

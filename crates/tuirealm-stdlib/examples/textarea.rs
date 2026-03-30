@@ -175,7 +175,7 @@ impl AppComponent<Msg, NoUserEvent> for TextareaAlfa {
             KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::TextareaAlfaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -240,7 +240,7 @@ impl AppComponent<Msg, NoUserEvent> for TextareaBeta {
             KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::TextareaBetaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

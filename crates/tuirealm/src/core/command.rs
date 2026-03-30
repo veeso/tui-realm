@@ -73,7 +73,7 @@ pub enum CmdResult {
     Submit(State),
     /// The command issues is unsupported for this component.
     ///
-    /// This should basically be treated the same as [`None`](CmdResult::None), but may be useful for debugging.
+    /// This should basically be treated the same as [`NoChange`](CmdResult::NoChange), but may be useful for debugging.
     Invalid(Cmd),
     /// Custom result with a name and a state attached.
     Custom(&'static str, State),
@@ -84,5 +84,5 @@ pub enum CmdResult {
     /// If state *did* change, always use [`Changed`](CmdResult::Changed) instead.
     Visual,
     /// Nothing changed, nothing needs to be done.
-    None,
+    NoChange,
 }

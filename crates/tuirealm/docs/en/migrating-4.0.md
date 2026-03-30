@@ -179,3 +179,7 @@ impl AppComponent<Msg, UserEvent> for MyWidget {
 
 `Component::query` has been changed to allow for and prefer borrowed content, but still allow owned content to be returned.
 This allowed the consumer to decide when a clone is actually necessary, for practically anything other than `PropPayload::Any`.
+
+### Rename `CmdResult::None` to `CmdResult::NoChange`
+
+`CmdResult` variant `None` has been renamed to `NoChange` to better represent what this variant does on a glance.

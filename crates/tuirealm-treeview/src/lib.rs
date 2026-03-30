@@ -395,9 +395,9 @@ impl<V: NodeValue> TreeView<V> {
     /// Returns whether selectd node has changed
     fn changed(&self, prev: Option<&str>) -> CmdResult {
         match self.states.selected() {
-            None => CmdResult::None,
+            None => CmdResult::NoChange,
             id if id != prev => CmdResult::Changed(self.state()),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         }
     }
 }
@@ -624,7 +624,7 @@ mod test {
         // GoTo begin (unchanged)
         assert_eq!(
             component.perform(Cmd::GoTo(Position::Begin)),
-            CmdResult::None
+            CmdResult::NoChange
         );
     }
 
@@ -639,7 +639,10 @@ mod test {
             CmdResult::Changed(State::Single(StateValue::String(String::from("bB5"))))
         );
         // GoTo end (unchanged)
-        assert_eq!(component.perform(Cmd::GoTo(Position::End)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::End)),
+            CmdResult::NoChange
+        );
     }
 
     #[test]
@@ -655,7 +658,7 @@ mod test {
         // Move down (unchanged)
         assert_eq!(
             component.perform(Cmd::Move(Direction::Down)),
-            CmdResult::None
+            CmdResult::NoChange
         );
     }
 
@@ -668,7 +671,10 @@ mod test {
             CmdResult::Changed(State::Single(StateValue::String(String::from("/"))))
         );
         // Move up (unchanged)
-        assert_eq!(component.perform(Cmd::Move(Direction::Up)), CmdResult::None);
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Up)),
+            CmdResult::NoChange
+        );
     }
 
     #[test]
@@ -685,7 +691,7 @@ mod test {
         // Scroll down (unchanged)
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Down)),
-            CmdResult::None
+            CmdResult::NoChange
         );
     }
 
@@ -703,7 +709,7 @@ mod test {
         // Scroll Up (unchanged)
         assert_eq!(
             component.perform(Cmd::Scroll(Direction::Up)),
-            CmdResult::None
+            CmdResult::NoChange
         );
     }
 

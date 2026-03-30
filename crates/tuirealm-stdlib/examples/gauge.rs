@@ -190,11 +190,11 @@ impl AppComponent<Msg, UserEvent> for GaugeAlfa {
                     AttrValue::Payload(PropPayload::Single(PropValue::F64(*prog))),
                 );
                 self.attr(Attribute::Text, AttrValue::String(label));
-                CmdResult::None
+                CmdResult::NoChange
             }
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::GaugeAlfaBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -243,11 +243,11 @@ impl AppComponent<Msg, UserEvent> for GaugeBeta {
                     AttrValue::Payload(PropPayload::Single(PropValue::F64(prog))),
                 );
                 self.attr(Attribute::Text, AttrValue::String(label));
-                CmdResult::None
+                CmdResult::NoChange
             }
             Event::Keyboard(KeyEvent { code: Key::Tab, .. }) => return Some(Msg::GaugeBetaBlur),
             Event::Keyboard(KeyEvent { code: Key::Esc, .. }) => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

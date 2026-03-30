@@ -57,7 +57,7 @@ fn test_input_delete_backspace() {
 fn test_input_delete_on_empty() {
     let mut component = Input::default().input_type(InputType::Text);
     let result = component.perform(Cmd::Delete);
-    assert_eq!(result, CmdResult::None);
+    assert_eq!(result, CmdResult::NoChange);
 }
 
 #[test]
@@ -112,7 +112,7 @@ fn test_input_with_max_length() {
         .value("ab");
     component.perform(Cmd::Type('c'));
     let result = component.perform(Cmd::Type('d'));
-    assert_eq!(result, CmdResult::None);
+    assert_eq!(result, CmdResult::NoChange);
     assert_eq!(
         component.state(),
         State::Single(StateValue::String("abc".to_string()))

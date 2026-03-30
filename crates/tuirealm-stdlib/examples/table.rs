@@ -189,7 +189,7 @@ impl AppComponent<Msg, NoUserEvent> for TableAlfa {
             KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::TableAlfaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -262,7 +262,7 @@ impl AppComponent<Msg, NoUserEvent> for TableBeta {
         match ev.as_keyboard()? {
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::TableBetaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

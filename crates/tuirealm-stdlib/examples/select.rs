@@ -169,7 +169,7 @@ impl AppComponent<Msg, NoUserEvent> for SelectAlfa {
             } => self.perform(Cmd::Cancel),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::SelectAlfaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -221,7 +221,7 @@ impl AppComponent<Msg, NoUserEvent> for SelectBeta {
             } => self.perform(Cmd::Cancel),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::SelectBetaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

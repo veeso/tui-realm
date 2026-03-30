@@ -308,7 +308,7 @@ impl Component for Textarea {
         if prev != self.states.list_index {
             CmdResult::Changed(self.state())
         } else {
-            CmdResult::None
+            CmdResult::NoChange
         }
     }
 }
@@ -396,7 +396,7 @@ mod tests {
         // No-op when already at beginning
         assert_eq!(
             component.perform(Cmd::GoTo(Position::Begin)),
-            CmdResult::None
+            CmdResult::NoChange
         );
         // Unhandled command
         assert_eq!(

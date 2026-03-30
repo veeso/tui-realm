@@ -390,7 +390,7 @@ impl AppComponent<Msg, NoUserEvent> for Editor {
             _ => return None,
         };
 
-        if matches!(result, CmdResult::None | CmdResult::Invalid(_)) {
+        if matches!(result, CmdResult::NoChange | CmdResult::Invalid(_)) {
             None
         } else {
             Some(Msg::Redraw)
@@ -471,13 +471,13 @@ impl AppComponent<Msg, NoUserEvent> for Search {
                 {
                     return Some(Msg::Search(pattern));
                 }
-                CmdResult::None
+                CmdResult::NoChange
             }
             KeyEvent { code: Key::Tab, .. } => {
                 return Some(Msg::ChangeFocus(Id::Editor));
             }
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

@@ -149,9 +149,9 @@ impl AppComponent<Msg, UserEvent> for SparklineAlfa {
                     Attribute::Dataset,
                     AttrValue::Payload(PropPayload::Vec(data)),
                 );
-                CmdResult::None
+                CmdResult::NoChange
             }
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

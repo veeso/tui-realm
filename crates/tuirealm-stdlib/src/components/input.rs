@@ -444,7 +444,7 @@ impl Component for Input {
                 let prev_input = self.states.input.clone();
                 self.states.backspace();
                 if prev_input == self.states.input {
-                    CmdResult::None
+                    CmdResult::NoChange
                 } else {
                     CmdResult::Changed(self.state())
                 }
@@ -454,7 +454,7 @@ impl Component for Input {
                 let prev_input = self.states.input.clone();
                 self.states.delete();
                 if prev_input == self.states.input {
-                    CmdResult::None
+                    CmdResult::NoChange
                 } else {
                     CmdResult::Changed(self.state())
                 }
@@ -483,7 +483,7 @@ impl Component for Input {
                     .append(ch, &self.get_input_type().clone(), self.get_input_len());
                 // Message on change
                 if prev_input == self.states.input {
-                    CmdResult::None
+                    CmdResult::NoChange
                 } else {
                     CmdResult::Changed(self.state())
                 }
@@ -571,7 +571,7 @@ mod tests {
         );
         assert_eq!(component.states.cursor, 5);
         // Verify max length (shouldn't push any character)
-        assert_eq!(component.perform(Cmd::Type('a')), CmdResult::None);
+        assert_eq!(component.perform(Cmd::Type('a')), CmdResult::NoChange);
         assert_eq!(
             component.state(),
             State::Single(StateValue::String(String::from("home/")))
@@ -605,14 +605,14 @@ mod tests {
         );
         assert_eq!(component.states.cursor, 0);
         // Another one...
-        assert_eq!(component.perform(Cmd::Delete), CmdResult::None);
+        assert_eq!(component.perform(Cmd::Delete), CmdResult::NoChange);
         assert_eq!(
             component.state(),
             State::Single(StateValue::String(String::new()))
         );
         assert_eq!(component.states.cursor, 0);
         // See del behaviour here
-        assert_eq!(component.perform(Cmd::Cancel), CmdResult::None);
+        assert_eq!(component.perform(Cmd::Cancel), CmdResult::NoChange);
         assert_eq!(
             component.state(),
             State::Single(StateValue::String(String::new()))
@@ -631,7 +631,7 @@ mod tests {
         );
         assert_eq!(component.states.cursor, 1);
         // Another one (should do nothing)
-        assert_eq!(component.perform(Cmd::Cancel), CmdResult::None);
+        assert_eq!(component.perform(Cmd::Cancel), CmdResult::NoChange);
         assert_eq!(
             component.state(),
             State::Single(StateValue::String(String::from("h")))

@@ -37,7 +37,7 @@ fn test_treeview_move_up_at_root() {
         .with_tree(mock_tree())
         .initial_node("/");
     let result = component.perform(Cmd::Move(Direction::Up));
-    assert_eq!(result, CmdResult::None);
+    assert_eq!(result, CmdResult::NoChange);
 }
 
 #[test]

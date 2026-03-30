@@ -161,7 +161,7 @@ impl AppComponent<Msg, NoUserEvent> for RadioAlfa {
             } => self.perform(Cmd::Submit),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::RadioAlfaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -209,7 +209,7 @@ impl AppComponent<Msg, NoUserEvent> for RadioBeta {
             } => self.perform(Cmd::Submit),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::RadioBetaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

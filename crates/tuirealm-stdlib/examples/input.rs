@@ -197,7 +197,7 @@ impl AppComponent<Msg, NoUserEvent> for InputText {
             } => self.perform(Cmd::Type(*ch)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::TextBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -255,7 +255,7 @@ impl AppComponent<Msg, NoUserEvent> for InputEmail {
             } => self.perform(Cmd::Type(*ch)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::EmailBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -310,7 +310,7 @@ impl AppComponent<Msg, NoUserEvent> for InputNumber {
             } => self.perform(Cmd::Type(*ch)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::NumberBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -364,7 +364,7 @@ impl AppComponent<Msg, NoUserEvent> for InputPassword {
             } => self.perform(Cmd::Type(*ch)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::PasswordBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -423,7 +423,7 @@ impl AppComponent<Msg, NoUserEvent> for InputPhone {
             } => self.perform(Cmd::Type(*ch)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::PhoneBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -491,11 +491,11 @@ impl AppComponent<Msg, NoUserEvent> for InputColor {
                         ),
                     );
                 }
-                CmdResult::None
+                CmdResult::NoChange
             }
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::ColorBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

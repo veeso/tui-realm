@@ -158,7 +158,7 @@ impl AppComponent<Msg, NoUserEvent> for ChartAlfa {
             KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::ChartAlfaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -221,7 +221,7 @@ impl AppComponent<Msg, NoUserEvent> for ChartBeta {
             KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::ChartBetaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

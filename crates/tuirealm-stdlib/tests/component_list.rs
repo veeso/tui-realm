@@ -43,7 +43,7 @@ fn test_list_move_up_at_top() {
         .rewind(false)
         .rows(vec![Line::from("A"), Line::from("B")]);
     let result = component.perform(Cmd::Move(Direction::Up));
-    assert_eq!(result, CmdResult::None);
+    assert_eq!(result, CmdResult::NoChange);
 }
 
 #[test]
@@ -54,7 +54,7 @@ fn test_list_move_down_at_bottom_no_rewind() {
         .rows(vec![Line::from("A"), Line::from("B")])
         .selected_line(1);
     let result = component.perform(Cmd::Move(Direction::Down));
-    assert_eq!(result, CmdResult::None);
+    assert_eq!(result, CmdResult::NoChange);
 }
 
 #[test]

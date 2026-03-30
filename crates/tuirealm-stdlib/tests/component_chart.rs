@@ -51,7 +51,7 @@ fn test_chart_disabled() {
     let mut component = Chart::default().disabled(true).data([make_dataset()]);
     assert_eq!(
         component.perform(Cmd::Move(Direction::Right)),
-        CmdResult::None
+        CmdResult::NoChange
     );
 }
 

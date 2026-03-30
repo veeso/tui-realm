@@ -279,7 +279,7 @@ impl AppComponent<Msg, NoUserEvent> for Input {
             _ => return None,
         };
 
-        if matches!(result, CmdResult::None | CmdResult::Invalid(_)) {
+        if matches!(result, CmdResult::NoChange | CmdResult::Invalid(_)) {
             None
         } else {
             Some(Msg::Redraw)

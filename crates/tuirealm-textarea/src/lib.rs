@@ -414,7 +414,7 @@ impl<'a> TextArea<'a> {
         let prev = self.widget.cursor();
         self.widget.move_cursor(to);
         if prev == self.widget.cursor() {
-            CmdResult::None
+            CmdResult::NoChange
         } else {
             CmdResult::Visual
         }
@@ -653,9 +653,9 @@ impl Component for TextArea<'_> {
                         .get(Attribute::ScrollStep)
                         .and_then(AttrValue::as_length)
                         .unwrap_or(8);
-                    let mut res = CmdResult::None;
+                    let mut res = CmdResult::NoChange;
                     (0..step).for_each(|_| match self.move_cursor(CursorMove::Down) {
-                        CmdResult::None => (),
+                        CmdResult::NoChange => (),
                         v => res = v,
                     });
                     return res;
@@ -668,9 +668,9 @@ impl Component for TextArea<'_> {
                         .get(Attribute::ScrollStep)
                         .and_then(AttrValue::as_length)
                         .unwrap_or(8);
-                    let mut res = CmdResult::None;
+                    let mut res = CmdResult::NoChange;
                     (0..step).for_each(|_| match self.move_cursor(CursorMove::Up) {
-                        CmdResult::None => (),
+                        CmdResult::NoChange => (),
                         v => res = v,
                     });
                     return res;
@@ -693,7 +693,7 @@ impl Component for TextArea<'_> {
         if prev_lines != self.widget.lines() {
             CmdResult::Changed(self.state())
         } else {
-            CmdResult::None
+            CmdResult::NoChange
         }
     }
 }
@@ -735,7 +735,7 @@ mod tests {
         let mut textarea = make_textarea();
         let result = textarea.perform(Cmd::Delete);
         assert!(
-            matches!(result, CmdResult::None),
+            matches!(result, CmdResult::NoChange),
             "deleting from an empty textarea should return None"
         );
     }
@@ -756,7 +756,7 @@ mod tests {
         let mut textarea = make_textarea();
         let result = textarea.perform(Cmd::Cancel);
         assert!(
-            matches!(result, CmdResult::None),
+            matches!(result, CmdResult::NoChange),
             "cancel (delete-next) on empty textarea should return None"
         );
     }

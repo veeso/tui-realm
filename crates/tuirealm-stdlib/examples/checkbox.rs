@@ -160,7 +160,7 @@ impl AppComponent<Msg, NoUserEvent> for CheckboxAlfa {
             } => self.perform(Cmd::Toggle),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::CheckboxAlfaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }
@@ -215,7 +215,7 @@ impl AppComponent<Msg, NoUserEvent> for CheckboxBeta {
             } => self.perform(Cmd::Toggle),
             KeyEvent { code: Key::Tab, .. } => return Some(Msg::CheckboxBetaBlur),
             KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

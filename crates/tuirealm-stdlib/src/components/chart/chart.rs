@@ -409,7 +409,7 @@ impl Component for Chart {
             }
             return CmdResult::Visual;
         }
-        CmdResult::None
+        CmdResult::NoChange
     }
 
     fn state(&self) -> State {

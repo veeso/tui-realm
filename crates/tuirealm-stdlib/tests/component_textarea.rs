@@ -33,7 +33,7 @@ fn test_textarea_move_down() {
 fn test_textarea_move_up_at_top() {
     let mut component = Textarea::default().text_rows([Span::from("A"), Span::from("B")]);
     let result = component.perform(Cmd::Move(Direction::Up));
-    assert_eq!(result, CmdResult::None);
+    assert_eq!(result, CmdResult::NoChange);
 }
 
 #[test]
@@ -41,7 +41,7 @@ fn test_textarea_move_down_at_bottom() {
     let mut component = Textarea::default().text_rows([Span::from("A"), Span::from("B")]);
     component.perform(Cmd::Move(Direction::Down));
     let result = component.perform(Cmd::Move(Direction::Down));
-    assert_eq!(result, CmdResult::None);
+    assert_eq!(result, CmdResult::NoChange);
 }
 
 #[test]

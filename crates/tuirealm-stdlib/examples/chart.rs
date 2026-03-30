@@ -173,9 +173,9 @@ impl AppComponent<Msg, UserEvent> for ChartAlfa {
                     Attribute::Dataset,
                     AttrValue::Payload(PropPayload::Any(Box::new(vec![dataset]))),
                 );
-                CmdResult::None
+                CmdResult::NoChange
             }
-            _ => CmdResult::None,
+            _ => CmdResult::NoChange,
         };
         Some(Msg::Redraw)
     }

@@ -54,7 +54,7 @@ fn test_table_move_up_at_top() {
         .widths(&[20, 10])
         .table(make_table_data());
     let result = component.perform(Cmd::Move(Direction::Up));
-    assert_eq!(result, CmdResult::None);
+    assert_eq!(result, CmdResult::NoChange);
 }
 
 #[test]
