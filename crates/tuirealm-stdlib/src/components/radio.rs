@@ -132,7 +132,7 @@ impl Radio {
 
     /// Set a custom style for the border when the component is unfocused.
     pub fn inactive(mut self, s: Style) -> Self {
-        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::UnfocusedBorderStyle, AttrValue::Style(s));
         self
     }
 

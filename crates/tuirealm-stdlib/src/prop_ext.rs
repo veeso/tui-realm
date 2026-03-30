@@ -54,7 +54,9 @@ impl CommonProps {
             (Attribute::Style, AttrValue::Style(val)) => self.style = val,
             (Attribute::Foreground, AttrValue::Color(val)) => self.style = self.style.fg(val),
             (Attribute::Background, AttrValue::Color(val)) => self.style = self.style.bg(val),
-            (Attribute::FocusStyle, AttrValue::Style(val)) => self.border_unfocused_style = val,
+            (Attribute::UnfocusedBorderStyle, AttrValue::Style(val)) => {
+                self.border_unfocused_style = val
+            }
             (Attribute::TextProps, AttrValue::TextModifiers(val)) => {
                 self.style = self.style.add_modifier(val)
             }
@@ -82,7 +84,7 @@ impl CommonProps {
             Attribute::Style => Some(AttrValue::Style(self.style)),
             Attribute::Foreground => self.style.fg.map(AttrValue::Color),
             Attribute::Background => self.style.bg.map(AttrValue::Color),
-            Attribute::FocusStyle => Some(AttrValue::Style(self.border_unfocused_style)),
+            Attribute::UnfocusedBorderStyle => Some(AttrValue::Style(self.border_unfocused_style)),
             Attribute::TextProps => Some(AttrValue::TextModifiers(self.style.add_modifier)),
 
             // handle flags
@@ -106,7 +108,9 @@ impl CommonProps {
             Attribute::Style => Some(AttrValueRef::Style(self.style)),
             Attribute::Foreground => self.style.fg.map(AttrValueRef::Color),
             Attribute::Background => self.style.bg.map(AttrValueRef::Color),
-            Attribute::FocusStyle => Some(AttrValueRef::Style(self.border_unfocused_style)),
+            Attribute::UnfocusedBorderStyle => {
+                Some(AttrValueRef::Style(self.border_unfocused_style))
+            }
             Attribute::TextProps => Some(AttrValueRef::TextModifiers(self.style.add_modifier)),
 
             // handle flags
@@ -168,7 +172,10 @@ mod tests {
             Style::new()
         );
         assert_eq!(
-            props.get(Attribute::FocusStyle).unwrap().unwrap_style(),
+            props
+                .get(Attribute::UnfocusedBorderStyle)
+                .unwrap()
+                .unwrap_style(),
             Style::new()
         );
         assert!(props.get(Attribute::Foreground).is_none());
@@ -260,12 +267,15 @@ mod tests {
 
         // focus style
         props.set(
-            Attribute::FocusStyle,
+            Attribute::UnfocusedBorderStyle,
             AttrValue::Style(Style::new().add_modifier(TextModifiers::REVERSED)),
         );
 
         assert_eq!(
-            props.get(Attribute::FocusStyle).unwrap().unwrap_style(),
+            props
+                .get(Attribute::UnfocusedBorderStyle)
+                .unwrap()
+                .unwrap_style(),
             Style::new().add_modifier(TextModifiers::REVERSED)
         );
 
@@ -386,7 +396,10 @@ mod tests {
                     .position(TitlePosition::Bottom),
             ),
         );
-        props.set(Attribute::FocusStyle, AttrValue::Style(Style::new().gray()));
+        props.set(
+            Attribute::UnfocusedBorderStyle,
+            AttrValue::Style(Style::new().gray()),
+        );
         props.set(Attribute::AlwaysActive, AttrValue::Flag(true));
 
         let block = props.get_block().unwrap();

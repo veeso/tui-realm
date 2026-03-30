@@ -70,8 +70,8 @@ pub enum Attribute {
     /// view/application. When implementing a component, its value should be read-only.
     /// The value is always `AttrValue::Flag`
     Focus,
-    /// Should be used to use a different style from default when component is not enabled.
-    FocusStyle,
+    /// Recommended to be used as a style patch on top of [`Style`](Self::Style) to apply when the component is unfocused.
+    UnfocusedBorderStyle,
     /// Foreground color or style
     Foreground,
     /// Height size. Useful when building layouts or containers

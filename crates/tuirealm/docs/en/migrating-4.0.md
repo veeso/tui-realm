@@ -183,3 +183,7 @@ This allowed the consumer to decide when a clone is actually necessary, for prac
 ### Rename `CmdResult::None` to `CmdResult::NoChange`
 
 `CmdResult` variant `None` has been renamed to `NoChange` to better represent what this variant does on a glance.
+
+### Rename `Attribute::FocusStyle` to `Attribute::UnfocusedBorderStyle`
+
+`Attribute` variant `FocusStyle` has been renamed to `UnfocusedBorderStyle` as that better represents what this attribute is doing on a glance.

@@ -125,9 +125,10 @@ impl Chart {
         self
     }
 
-    /// Set the inactive style for the whole component
+    /// Set a custom style for the border when the component is unfocused.
     pub fn inactive(mut self, s: Style) -> Self {
-        self.props.set(Attribute::FocusStyle, AttrValue::Style(s));
+        self.props
+            .set(Attribute::UnfocusedBorderStyle, AttrValue::Style(s));
         self
     }
 

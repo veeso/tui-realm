@@ -225,9 +225,9 @@ impl<'a> TextArea<'a> {
         }
     }
 
-    /// Set another style from default to use when component is inactive
+    /// Set a custom style for the border when the component is unfocused.
     pub fn inactive(mut self, s: Style) -> Self {
-        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::UnfocusedBorderStyle, AttrValue::Style(s));
         self
     }
 
@@ -384,7 +384,7 @@ impl<'a> TextArea<'a> {
         ) = self.query(Attribute::Borders)
         {
             let inactive_style = self
-                .query(Attribute::FocusStyle)
+                .query(Attribute::UnfocusedBorderStyle)
                 .as_ref()
                 .map(QueryResult::as_ref)
                 .and_then(AttrValueRef::as_style)

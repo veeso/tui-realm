@@ -291,9 +291,9 @@ impl<V: NodeValue> TreeView<V> {
         self
     }
 
-    /// Set another style from default to use when component is inactive
+    /// Set a custom style for the border when the component is unfocused.
     pub fn inactive(mut self, s: Style) -> Self {
-        self.attr(Attribute::FocusStyle, AttrValue::Style(s));
+        self.attr(Attribute::UnfocusedBorderStyle, AttrValue::Style(s));
         self
     }
 
@@ -439,7 +439,7 @@ impl<V: NodeValue> Component for TreeView<V> {
             .unwrap_or_default();
         let inactive_style = self
             .props
-            .get(Attribute::FocusStyle)
+            .get(Attribute::UnfocusedBorderStyle)
             .and_then(AttrValue::as_style);
         let indent_size = self
             .props
