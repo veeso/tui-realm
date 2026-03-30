@@ -60,6 +60,10 @@ This also makes cloning explicit to the user.
 
 Due to `Props::get`(old) having been removed and to better align with STD types like `Vec::get`, `::get_ref` has been renamed to just `::get`.
 
+### Change `CommonProps::get` to return a reference
+
+To align with [`Props::get`](#rename-of-propsget_ref-to-propsget), `CommonProps::get` now also returns a reference.
+
 ### `Component::on` parameter `Event` is now a reference
 
 With 4.0, `Component::on`'s `Event` parameter is now a reference. This allowed us to remove clones in-between that had always been done

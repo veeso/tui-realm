@@ -78,31 +78,7 @@ impl CommonProps {
     }
 
     /// Try to get a given [`Attribute`].
-    pub fn get(&self, attr: Attribute) -> Option<AttrValue> {
-        match attr {
-            // handle style attributes
-            Attribute::Style => Some(AttrValue::Style(self.style)),
-            Attribute::Foreground => self.style.fg.map(AttrValue::Color),
-            Attribute::Background => self.style.bg.map(AttrValue::Color),
-            Attribute::UnfocusedBorderStyle => Some(AttrValue::Style(self.border_unfocused_style)),
-            Attribute::TextProps => Some(AttrValue::TextModifiers(self.style.add_modifier)),
-
-            // handle flags
-            Attribute::Display => Some(AttrValue::Flag(self.display)),
-            Attribute::Focus => Some(AttrValue::Flag(self.focused)),
-            Attribute::AlwaysActive => Some(AttrValue::Flag(self.always_active)),
-
-            // handle borders & titles
-            Attribute::Borders => self.border.map(AttrValue::Borders),
-            Attribute::Title => self.title.clone().map(AttrValue::Title),
-
-            // other
-            _ => None,
-        }
-    }
-
-    /// Try to get a given [`Attribute`] as a type compatible with [`Component::query`](tuirealm::component::Component::query).
-    pub fn get_for_query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+    pub fn get<'a>(&'a self, attr: Attribute) -> Option<AttrValueRef<'a>> {
         match attr {
             // handle style attributes
             Attribute::Style => Some(AttrValueRef::Style(self.style)),
@@ -125,7 +101,12 @@ impl CommonProps {
             // other
             _ => None,
         }
-        .map(QueryResult::Borrowed)
+    }
+
+    /// Try to get a given [`Attribute`] as a type compatible with [`Component::query`](tuirealm::component::Component::query).
+    #[inline]
+    pub fn get_for_query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.get(attr).map(QueryResult::Borrowed)
     }
 
     /// Get a [`Block`] with the configuration from the common props, if `borders` are defined.
@@ -319,7 +300,7 @@ mod tests {
         );
         assert_eq!(
             props.get(Attribute::Title).unwrap().unwrap_title(),
-            Title::default()
+            &Title::default()
                 .content("Hello".into())
                 .alignment(HorizontalAlignment::Center)
                 .position(TitlePosition::Bottom)
