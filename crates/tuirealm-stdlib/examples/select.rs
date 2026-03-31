@@ -8,7 +8,9 @@ use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
-use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
+use tuirealm::props::{
+    BorderType, Borders, Color, HorizontalAlignment, Style, TextModifiers, Title,
+};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::state::State;
 use tuirealm::terminal::TerminalAdapter;
@@ -137,7 +139,8 @@ impl Default for SelectAlfa {
                         .alignment(HorizontalAlignment::Center),
                 )
                 .rewind(true)
-                .highlighted_color(Color::LightGreen)
+                // No need to set highlight style as the default is "REVERSED"
+                // .highlight_style(Style::new().add_modifier(TextModifiers::REVERSED))
                 .highlighted_str(">> ")
                 .choices([
                     "vanilla",
@@ -192,7 +195,8 @@ impl Default for SelectBeta {
                 .foreground(Color::LightYellow)
                 .title(Title::from("Select your topping 🧁").alignment(HorizontalAlignment::Center))
                 .rewind(false)
-                .highlighted_color(Color::LightYellow)
+                // Overwrite the default "REVERSED" style to be underlined instead
+                .highlight_style(Style::new().add_modifier(TextModifiers::UNDERLINED))
                 .highlighted_str(">> ")
                 .choices([
                     "hazelnuts",

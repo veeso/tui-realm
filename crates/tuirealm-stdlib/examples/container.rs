@@ -9,7 +9,7 @@ use tuirealm::command::CmdResult;
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{
-    BorderType, Borders, Color, HorizontalAlignment, Layout, TableBuilder, Title,
+    BorderType, Borders, Color, HorizontalAlignment, Layout, Style, TableBuilder, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout as TuiLayout};
 use tuirealm::ratatui::text::Line;
@@ -126,7 +126,7 @@ impl Default for MyContainer {
                                 Title::from("Keybindings").alignment(HorizontalAlignment::Center),
                             )
                             .scroll(true)
-                            .highlighted_color(Color::LightYellow)
+                            .highlight_style(Style::new().fg(Color::LightYellow))
                             .highlighted_str("🚀")
                             .rewind(true)
                             .step(4)
@@ -180,7 +180,6 @@ impl Default for MyContainer {
                                     .alignment(HorizontalAlignment::Center),
                             )
                             .scroll(false)
-                            .highlighted_color(Color::Green)
                             .highlighted_str(">> ")
                             .row_height(1)
                             .headers(["Key", "Msg", "Description"])

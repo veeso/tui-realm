@@ -118,8 +118,8 @@
 //!                 .indent_size(3)
 //!                 .scroll_step(6)
 //!                 .title(Title::from(tree.root().id().to_string()).alignment(HorizontalAlignment::Left))
-//!                 .highlighted_color(Color::LightYellow)
-//!                 .highlight_symbol("🦄")
+//!                 .highlight_style(Style::new().fg(Color::LightYellow))
+//!                 .highlight_str("🦄")
 //!                 .with_tree(tree)
 //!                 .initial_node(initial_node),
 //!         }
@@ -206,12 +206,12 @@ pub mod widget;
 use std::iter;
 
 pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
-use tui_realm_stdlib::prop_ext::CommonProps;
+use tui_realm_stdlib::prop_ext::{CommonHighlight, CommonProps};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, Props, QueryResult, SpanStatic, Style, TextModifiers,
-    Title,
+    AttrValue, Attribute, Borders, Color, LineStatic, Props, QueryResult, SpanStatic, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
@@ -262,6 +262,7 @@ pub const TREE_CMD_CLOSE: &str = "c";
 /// Tree view component for tui-realm
 pub struct TreeView<V: NodeValue> {
     common: CommonProps,
+    common_hg: CommonHighlight,
     props: Props,
     states: TreeState,
     /// The actual Tree data structure. You can access this from your Component to operate on it
@@ -273,6 +274,7 @@ impl<V: NodeValue> Default for TreeView<V> {
     fn default() -> Self {
         Self {
             common: CommonProps::default(),
+            common_hg: CommonHighlight::default(),
             props: Props::default(),
             states: TreeState::default(),
             tree: Tree::new(Node::new(String::new(), V::default())),
@@ -325,15 +327,17 @@ impl<V: NodeValue> TreeView<V> {
         self
     }
 
-    /// Set symbol to prepend to highlighted node
-    pub fn highlight_symbol<S: Into<String>>(mut self, symbol: S) -> Self {
-        self.attr(Attribute::HighlightedStr, AttrValue::String(symbol.into()));
+    /// Set the Symbol and Style for the indicator of the current line.
+    pub fn highlight_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
 
-    /// Set color to apply to highlighted item
-    pub fn highlighted_color(mut self, color: Color) -> Self {
-        self.attr(Attribute::HighlightedColor, AttrValue::Color(color));
+    /// Set a custom highlight style that is patched ontop of the normal style.
+    ///
+    /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
+    pub fn highlight_style(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
         self
     }
 
@@ -423,33 +427,20 @@ impl<V: NodeValue> Component for TreeView<V> {
             .get(Attribute::Custom(TREE_INDENT_SIZE))
             .and_then(AttrValue::as_size)
             .unwrap_or(4);
-        let hg_color = self
-            .props
-            .get(Attribute::HighlightedColor)
-            .and_then(AttrValue::as_color);
-        let hg_str = self
-            .props
-            .get(Attribute::HighlightedStr)
-            .and_then(AttrValue::as_string);
+
         let block = self.common.get_block();
 
         // Make widget
         let mut tree = TreeWidget::new(self.tree())
             .indent_size(indent_size.into())
-            .style(self.common.style);
+            .style(self.common.style)
+            .highlight_style(self.common_hg.get_style(self.common.style));
 
-        if let Some(hg_color) = hg_color {
-            let hg_style = match self.common.is_active() {
-                true => Style::default().bg(hg_color).fg(Color::Black),
-                false => Style::default().fg(hg_color),
-            };
-            tree = tree.highlight_style(hg_style);
-        }
         if let Some(block) = block {
             tree = tree.block(block);
         }
-        if let Some(hg_str) = hg_str {
-            tree = tree.highlight_symbol(hg_str.as_str());
+        if let Some(symbol) = self.common_hg.get_symbol() {
+            tree = tree.highlight_str(symbol);
         }
 
         let mut state = self.states.clone();
@@ -457,7 +448,11 @@ impl<V: NodeValue> Component for TreeView<V> {
     }
 
     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
-        if let Some(value) = self.common.get_for_query(attr) {
+        if let Some(value) = self
+            .common
+            .get_for_query(attr)
+            .or_else(|| self.common_hg.get_for_query(attr))
+        {
             return Some(value);
         }
 
@@ -471,7 +466,11 @@ impl<V: NodeValue> Component for TreeView<V> {
             if let Some(node) = self.tree.root().query(&value.unwrap_string()) {
                 self.states.select(self.tree.root(), node);
             }
-        } else if let Some(value) = self.common.set(attr, value) {
+        } else if let Some(value) = self
+            .common
+            .set(attr, value)
+            .and_then(|value| self.common_hg.set(attr, value))
+        {
             self.props.set(attr, value);
         }
     }

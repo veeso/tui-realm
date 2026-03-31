@@ -187,3 +187,8 @@ This allowed the consumer to decide when a clone is actually necessary, for prac
 ### Rename `Attribute::FocusStyle` to `Attribute::UnfocusedBorderStyle`
 
 `Attribute` variant `FocusStyle` has been renamed to `UnfocusedBorderStyle` as that better represents what this attribute is doing on a glance.
+
+### Rename `Attribute::HighlightColor` to `Attribute::HighlightStyle`
+
+`Attribute` variant `HighlightColor` has been removed and instead variant `HighlightStyle` has been added to fully configure the style (including modifiers)
+instead of just the color.

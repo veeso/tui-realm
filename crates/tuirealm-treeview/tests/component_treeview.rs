@@ -5,7 +5,7 @@ use tui_realm_treeview::mock::mock_tree;
 use tui_realm_treeview::{TREE_CMD_CLOSE, TREE_CMD_OPEN, TreeView};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
-use tuirealm::props::{Borders, Color, Title};
+use tuirealm::props::{Borders, Color, Style, Title};
 use tuirealm::state::{State, StateValue};
 
 #[test]
@@ -111,7 +111,7 @@ fn test_treeview_snapshot_default() {
         .borders(Borders::default())
         .title(Title::from("Files"))
         .foreground(Color::White)
-        .highlighted_color(Color::Yellow)
+        .highlight_style(Style::new().fg(Color::Yellow))
         .indent_size(3)
         .with_tree(mock_tree())
         .initial_node("/");

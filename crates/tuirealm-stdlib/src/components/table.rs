@@ -15,8 +15,8 @@ use tuirealm::ratatui::widgets::{Cell, Row, Table as TuiTable, TableState};
 use tuirealm::state::{State, StateValue};
 
 use super::props::TABLE_COLUMN_SPACING;
-use crate::prop_ext::CommonProps;
-use crate::utils::{self, borrow_clone_line};
+use crate::prop_ext::{CommonHighlight, CommonProps};
+use crate::utils;
 
 // -- States
 
@@ -106,6 +106,7 @@ impl TableStates {
 #[must_use]
 pub struct Table {
     common: CommonProps,
+    common_hg: CommonHighlight,
     props: Props,
     pub states: TableStates,
 }
@@ -173,10 +174,11 @@ impl Table {
         self
     }
 
-    /// Set a custom foreground color for the currently highlighted item.
-    pub fn highlighted_color(mut self, c: Color) -> Self {
-        // TODO: shouldnt this be a highlight style instead?
-        self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
+    /// Set a custom highlight style that is patched ontop of the normal style.
+    ///
+    /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
+    pub fn highlight_style(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
         self
     }
 
@@ -343,35 +345,19 @@ impl Component for Table {
         let rows: Vec<Row> = self.make_rows(row_height);
         let widths: Vec<Constraint> = self.layout();
 
-        let mut widget = TuiTable::new(rows, &widths).style(self.common.style);
+        let mut widget = TuiTable::new(rows, &widths)
+            .style(self.common.style)
+            .row_highlight_style(self.common_hg.get_style(self.common.style));
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);
         }
 
-        let highlighted_color = self
-            .props
-            .get(Attribute::HighlightedColor)
-            .and_then(AttrValue::as_color);
-
-        if let Some(highlighted_color) = highlighted_color {
-            widget =
-                widget.row_highlight_style(Style::default().fg(highlighted_color).add_modifier(
-                    if self.common.is_active() {
-                        TextModifiers::REVERSED
-                    } else {
-                        TextModifiers::empty()
-                    },
-                ));
-        }
         // Highlighted symbol
-        let hg_str = self
-            .props
-            .get(Attribute::HighlightedStr)
-            .and_then(|x| x.as_textline());
-        if let Some(hg_str) = hg_str {
-            widget = widget.highlight_symbol(borrow_clone_line(hg_str));
+        if let Some(symbol) = self.common_hg.get_symbol() {
+            widget = widget.highlight_symbol(symbol);
         }
+
         // Col spacing
         if let Some(spacing) = self
             .props
@@ -409,7 +395,11 @@ impl Component for Table {
     }
 
     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
-        if let Some(value) = self.common.get_for_query(attr) {
+        if let Some(value) = self
+            .common
+            .get_for_query(attr)
+            .or_else(|| self.common_hg.get_for_query(attr))
+        {
             return Some(value);
         }
 
@@ -417,7 +407,11 @@ impl Component for Table {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        if let Some(value) = self.common.set(attr, value) {
+        if let Some(value) = self
+            .common
+            .set(attr, value)
+            .and_then(|value| self.common_hg.set(attr, value))
+        {
             self.props.set(attr, value);
             if matches!(attr, Attribute::Content) {
                 // Update list len and fix index
@@ -571,7 +565,7 @@ mod tests {
         let mut component = Table::default()
             .foreground(Color::Red)
             .background(Color::Blue)
-            .highlighted_color(Color::Yellow)
+            .highlight_style(Style::new().fg(Color::Yellow))
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .scroll(true)
@@ -706,7 +700,7 @@ mod tests {
         let component = Table::default()
             .foreground(Color::Red)
             .background(Color::Blue)
-            .highlighted_color(Color::Yellow)
+            .highlight_style(Style::new().fg(Color::Yellow))
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
@@ -755,7 +749,7 @@ mod tests {
         let mut component = Table::default()
             .foreground(Color::Red)
             .background(Color::Blue)
-            .highlighted_color(Color::Yellow)
+            .highlight_style(Style::new().fg(Color::Yellow))
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())

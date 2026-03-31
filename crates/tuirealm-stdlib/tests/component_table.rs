@@ -4,7 +4,7 @@ use pretty_assertions::assert_eq;
 use tui_realm_stdlib::components::Table;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
-use tuirealm::props::{Borders, Color, TableBuilder, Title};
+use tuirealm::props::{Borders, Color, Style, TableBuilder, Title};
 use tuirealm::ratatui::text::Line;
 use tuirealm::state::{State, StateValue};
 
@@ -107,7 +107,7 @@ fn test_table_snapshot_default() {
         .title(Title::from("Users"))
         .foreground(Color::White)
         .scroll(true)
-        .highlighted_color(Color::Yellow)
+        .highlight_style(Style::new().fg(Color::Yellow))
         .headers(["Name", "Age"])
         .widths(&[20, 10])
         .table(make_table_data());

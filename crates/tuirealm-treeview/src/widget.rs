@@ -5,8 +5,8 @@
 use tuirealm::ratatui::buffer::Buffer;
 use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::style::Style;
+use tuirealm::ratatui::text::Line;
 use tuirealm::ratatui::widgets::{Block, StatefulWidget, Widget};
-use unicode_width::UnicodeWidthStr;
 
 use super::{Node, NodeValue, Tree, TreeState};
 
@@ -19,7 +19,7 @@ pub struct TreeWidget<'a, V: NodeValue> {
     /// Highlight style
     highlight_style: Style,
     /// Symbol to display on the side of the current highlighted
-    highlight_symbol: Option<&'a str>,
+    highlight_symbol: Option<Line<'a>>,
     /// Spaces to use for indentation
     indent_size: usize,
     /// [`Tree`] to render
@@ -58,8 +58,8 @@ impl<'a, V: NodeValue> TreeWidget<'a, V> {
     }
 
     /// Set symbol to prepend to highlighted entry
-    pub fn highlight_symbol(mut self, s: &'a str) -> Self {
-        self.highlight_symbol = Some(s);
+    pub fn highlight_str<S: Into<Line<'a>>>(mut self, s: S) -> Self {
+        self.highlight_symbol = Some(s.into());
         self
     }
 
@@ -151,7 +151,7 @@ impl<V: NodeValue> TreeWidget<'_, V> {
             return area;
         }
         let highlight_symbol = match state.is_selected(node) {
-            true => Some(self.highlight_symbol.unwrap_or_default()),
+            true => self.highlight_symbol.as_ref(),
             false => None,
         };
         // Get area for current node
@@ -187,7 +187,14 @@ impl<V: NodeValue> TreeWidget<'_, V> {
         );
         // Write highlight symbol
         let (start_x, start_y) = highlight_symbol
-            .map(|x| buf.set_stringn(start_x, start_y, x, width - start_x as usize, style))
+            .map(|x| {
+                buf.set_line(
+                    start_x,
+                    start_y,
+                    x,
+                    u16::try_from(width - start_x as usize).unwrap_or(u16::MAX),
+                )
+            })
             .map(|(x, y)| buf.set_stringn(x, y, " ", width - start_x as usize, style))
             .unwrap_or((start_x, start_y));
 
@@ -296,13 +303,13 @@ mod test {
         let widget = TreeWidget::new(&tree)
             .block(Block::default())
             .highlight_style(Style::default().fg(Color::Red))
-            .highlight_symbol(">")
+            .highlight_str(">")
             .indent_size(8)
             .style(Style::default().fg(Color::LightRed));
         assert!(widget.block.is_some());
         assert_eq!(widget.highlight_style.fg.unwrap(), Color::Red);
         assert_eq!(widget.indent_size, 8);
-        assert_eq!(widget.highlight_symbol.unwrap(), ">");
+        assert_eq!(widget.highlight_symbol.unwrap(), Line::raw(">"));
         assert_eq!(widget.style.fg.unwrap(), Color::LightRed);
     }
 

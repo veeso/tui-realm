@@ -159,7 +159,7 @@ impl Component for Spinner {
 mod tests {
 
     use pretty_assertions::assert_eq;
-    use tuirealm::ratatui::{self};
+    use tuirealm::ratatui;
 
     use super::*;
 

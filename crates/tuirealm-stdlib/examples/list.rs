@@ -8,7 +8,7 @@ use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
-use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
+use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Style, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::style::Stylize;
 use tuirealm::ratatui::text::Span;
@@ -125,7 +125,7 @@ impl Default for ListAlfa {
                 )
                 .title(Title::from("Lorem ipsum (scrollable)").alignment(HorizontalAlignment::Center))
                 .scroll(true)
-                .highlighted_color(Color::LightYellow)
+                .highlight_style(Style::new().fg(Color::LightYellow))
                 .highlighted_str("🚀")
                 .rewind(true)
                 .step(4)

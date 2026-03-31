@@ -8,7 +8,9 @@ use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
-use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, TableBuilder, Title};
+use tuirealm::props::{
+    BorderType, Borders, Color, HorizontalAlignment, Style, TableBuilder, Title,
+};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::text::Line;
 use tuirealm::terminal::TerminalAdapter;
@@ -126,7 +128,7 @@ impl Default for TableAlfa {
                 .background(Color::Black)
                 .title(Title::from("Keybindings").alignment(HorizontalAlignment::Center))
                 .scroll(true)
-                .highlighted_color(Color::LightYellow)
+                .highlight_style(Style::new().fg(Color::LightYellow))
                 .highlighted_str("🚀")
                 .rewind(true)
                 .step(4)
@@ -150,7 +152,7 @@ impl Default for TableAlfa {
                         .add_row()
                         .add_col(Line::from("KeyCode::PageUp"))
                         .add_col(Line::from("OnKey"))
-                        .add_col(Line::from("ove cursor up by 8"))
+                        .add_col(Line::from("Move cursor up by 8"))
                         .add_row()
                         .add_col(Line::from("KeyCode::End"))
                         .add_col(Line::from("OnKey"))
@@ -216,7 +218,6 @@ impl Default for TableBeta {
                         .alignment(HorizontalAlignment::Center),
                 )
                 .scroll(false)
-                .highlighted_color(Color::Green)
                 .highlighted_str(">> ")
                 .row_height(1)
                 .headers(["Key", "Msg", "Description"])

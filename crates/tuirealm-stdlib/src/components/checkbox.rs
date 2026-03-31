@@ -31,11 +31,11 @@ use tuirealm::props::{
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
-use tuirealm::ratatui::text::{Line as Spans, Span};
+use tuirealm::ratatui::text::{Line, Span};
 use tuirealm::ratatui::widgets::Tabs;
 use tuirealm::state::{State, StateValue};
 
-use crate::prop_ext::CommonProps;
+use crate::prop_ext::{CommonHighlight, CommonProps};
 
 // -- states
 
@@ -120,6 +120,7 @@ impl CheckboxStates {
 #[must_use]
 pub struct Checkbox {
     common: CommonProps,
+    common_hg: CommonHighlight,
     props: Props,
     pub states: CheckboxStates,
 }
@@ -166,6 +167,14 @@ impl Checkbox {
     /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
+        self
+    }
+
+    /// Set a custom highlight style that is patched ontop of the normal style.
+    ///
+    /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
+    pub fn highlight_style(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
         self
     }
 
@@ -222,26 +231,21 @@ impl Component for Checkbox {
         }
 
         // Make choices
-        let choices: Vec<Spans> = self
+        let choices: Vec<Line> = self
             .states
             .choices
             .iter()
             .enumerate()
             .map(|(idx, x)| {
                 let checkbox: &str = if self.states.has(idx) { "☑ " } else { "☐ " };
-                // Make spans
-                Spans::from(vec![Span::raw(checkbox), Span::raw(x.to_string())])
+                // Make Lines
+                Line::from(vec![Span::raw(checkbox), Span::raw(x.to_string())])
             })
             .collect();
         let mut widget: Tabs = Tabs::new(choices)
             .select(self.states.choice)
             .style(self.common.style)
-            // TODO: highlight style
-            .highlight_style(self.common.style.add_modifier(if self.common.is_active() {
-                TextModifiers::REVERSED
-            } else {
-                TextModifiers::empty()
-            }));
+            .highlight_style(self.common_hg.get_style(self.common.style));
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);
@@ -251,7 +255,11 @@ impl Component for Checkbox {
     }
 
     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
-        if let Some(value) = self.common.get_for_query(attr) {
+        if let Some(value) = self
+            .common
+            .get_for_query(attr)
+            .or_else(|| self.common_hg.get_for_query(attr))
+        {
             return Some(value);
         }
 
@@ -259,7 +267,11 @@ impl Component for Checkbox {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        if let Some(value) = self.common.set(attr, value) {
+        if let Some(value) = self
+            .common
+            .set(attr, value)
+            .and_then(|value| self.common_hg.set(attr, value))
+        {
             match attr {
                 Attribute::Content => {
                     // Reset choices

@@ -1,14 +1,20 @@
 //! Extra extensions to handle Properties.
 
-use tuirealm::props::{AttrValue, AttrValueRef, Attribute, Borders, QueryResult, Style, Title};
+use tuirealm::props::{
+    AttrValue, AttrValueRef, Attribute, Borders, LineStatic, QueryResult, Style, TextModifiers,
+    Title,
+};
+use tuirealm::ratatui::text::Line;
 use tuirealm::ratatui::widgets::Block;
+
+use crate::utils::borrow_clone_line;
 
 /// Prop Store for very common props.
 ///
 /// This structure helps to have a common way to handle the "very common" properties, reducing boilerplate
 /// and potential mis-matches.
 ///
-/// Additionally, using this over [`Props`](tuirealm::Props), saves on indirection and heap-size.
+/// Additionally, using this over [`Props`](tuirealm::props::Props), saves on indirection and heap-size.
 /// On usage (usually on `view`), it also saves on `unwraps` or "defaulting".
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
@@ -132,6 +138,76 @@ impl CommonProps {
     }
 }
 
+/// Prop Store for very common highlight props.
+///
+/// This structure helps to have a common way to handle the "very common" highlight properties, reducing boilerplate
+/// and potential mis-matches.
+///
+/// Additionally, using this over [`Props`](tuirealm::props::Props), saves on indirection and heap-size.
+/// On usage (usually on `view`), it also saves on `unwraps` or "defaulting"
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct CommonHighlight {
+    /// The main style to patch [`CommonProps::style`] with for the currently active element.
+    pub style: Style,
+    /// The symbol to use to indicate the currently selected element.
+    pub symbol: LineStatic,
+}
+
+impl Default for CommonHighlight {
+    fn default() -> Self {
+        Self {
+            style: Style::default().add_modifier(TextModifiers::REVERSED),
+            symbol: LineStatic::default(),
+        }
+    }
+}
+
+impl CommonHighlight {
+    /// Try to set a given [`Attribute`]. Returns `Some` if the value is unhandled. `None` if handled.
+    pub fn set(&mut self, attr: Attribute, value: AttrValue) -> Option<AttrValue> {
+        match (attr, value) {
+            (Attribute::HighlightStyle, AttrValue::Style(val)) => self.style = val,
+            (Attribute::HighlightedStr, AttrValue::TextLine(val)) => self.symbol = val,
+
+            // other
+            (_, value) => return Some(value),
+        }
+
+        None
+    }
+
+    /// Try to get a given [`Attribute`].
+    pub fn get<'a>(&'a self, attr: Attribute) -> Option<AttrValueRef<'a>> {
+        match attr {
+            Attribute::HighlightStyle => Some(AttrValueRef::Style(self.style)),
+            Attribute::HighlightedStr => Some(AttrValueRef::TextLine(&self.symbol)),
+
+            // other
+            _ => None,
+        }
+    }
+
+    /// Try to get a given [`Attribute`] as a type compatible with [`Component::query`](tuirealm::component::Component::query).
+    #[inline]
+    pub fn get_for_query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.get(attr).map(QueryResult::Borrowed)
+    }
+
+    pub fn get_symbol(&self) -> Option<Line<'_>> {
+        if self.symbol.spans.is_empty() {
+            None
+        } else {
+            Some(borrow_clone_line(&self.symbol))
+        }
+    }
+
+    #[inline]
+    pub fn get_style(&self, normal_style: Style) -> Style {
+        normal_style.patch(self.style)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
@@ -141,7 +217,7 @@ mod tests {
     };
     use tuirealm::ratatui::widgets::{Block, TitlePosition};
 
-    use crate::prop_ext::CommonProps;
+    use crate::prop_ext::{CommonHighlight, CommonProps};
 
     #[test]
     fn common_should_have_expected_defaults() {
@@ -392,6 +468,60 @@ mod tests {
                 .title_bottom(LineStatic::from("Hello").centered())
                 .borders(BorderSides::TOP)
                 .border_type(BorderType::Double)
+        );
+    }
+
+    #[test]
+    fn common_highlight_should_have_expected_defaults() {
+        let props = CommonHighlight::default();
+
+        // test defaults
+        assert_eq!(
+            props.get(Attribute::HighlightStyle).unwrap().unwrap_style(),
+            Style::new().add_modifier(TextModifiers::REVERSED)
+        );
+        assert_eq!(
+            props
+                .get(Attribute::HighlightedStr)
+                .unwrap()
+                .unwrap_textline(),
+            &LineStatic::default()
+        );
+    }
+
+    #[test]
+    fn common_highlight_should_get_set() {
+        let mut props = CommonHighlight::default();
+
+        // style via highlight style attribute
+        props.set(
+            Attribute::HighlightStyle,
+            AttrValue::Style(
+                Style::new()
+                    .fg(Color::Blue)
+                    .add_modifier(TextModifiers::DIM),
+            ),
+        );
+
+        assert_eq!(
+            props.get(Attribute::HighlightStyle).unwrap().unwrap_style(),
+            Style::new()
+                .fg(Color::Blue)
+                .add_modifier(TextModifiers::DIM)
+        );
+
+        // symbol via highlight symbol attribute
+        props.set(
+            Attribute::HighlightedStr,
+            AttrValue::TextLine(LineStatic::raw(">>")),
+        );
+
+        assert_eq!(
+            props
+                .get(Attribute::HighlightedStr)
+                .unwrap()
+                .unwrap_textline(),
+            &LineStatic::raw(">>")
         );
     }
 }

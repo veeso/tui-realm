@@ -4,7 +4,7 @@ use pretty_assertions::assert_eq;
 use tui_realm_stdlib::components::List;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
-use tuirealm::props::{Borders, Color, Title};
+use tuirealm::props::{Borders, Color, Style, Title};
 use tuirealm::ratatui::text::Line;
 use tuirealm::state::{State, StateValue};
 
@@ -111,7 +111,7 @@ fn test_list_snapshot_default() {
         .title(Title::from("Items"))
         .foreground(Color::White)
         .scroll(true)
-        .highlighted_color(Color::Yellow)
+        .highlight_style(Style::new().fg(Color::Yellow))
         .rows(vec![
             Line::from("First item"),
             Line::from("Second item"),

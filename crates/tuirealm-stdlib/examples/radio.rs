@@ -8,7 +8,9 @@ use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
-use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
+use tuirealm::props::{
+    BorderType, Borders, Color, HorizontalAlignment, Style, TextModifiers, Title,
+};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::terminal::TerminalAdapter;
 
@@ -231,6 +233,7 @@ impl Default for RadioCeta {
                 )
                 .foreground(Color::LightYellow)
                 .title(Title::from("Choice of the day").alignment(HorizontalAlignment::Center))
+                .highlight_style(Style::new().add_modifier(TextModifiers::UNDERLINED))
                 .rewind(false)
                 .choices([
                     "hazelnuts",

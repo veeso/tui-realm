@@ -9,7 +9,8 @@ use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
 use tuirealm::listener::EventListenerCfg;
 use tuirealm::props::{
-    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, InputType, Style, Title,
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, InputType, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::state::{State, StateValue};
@@ -261,8 +262,12 @@ impl FsTree {
                 .title(
                     Title::from(tree.root().id().to_string()).alignment(HorizontalAlignment::Left),
                 )
-                .highlighted_color(Color::LightYellow)
-                .highlight_symbol("🦄")
+                .highlight_style(
+                    Style::new()
+                        .fg(Color::LightYellow)
+                        .add_modifier(TextModifiers::REVERSED),
+                )
+                .highlight_str("🦄")
                 .with_tree(tree)
                 .initial_node(initial_node),
         }

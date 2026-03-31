@@ -11,8 +11,8 @@ use tuirealm::ratatui::layout::Rect;
 use tuirealm::ratatui::widgets::{List as TuiList, ListItem, ListState};
 use tuirealm::state::{State, StateValue};
 
-use crate::prop_ext::CommonProps;
-use crate::utils::{self, borrow_clone_line};
+use crate::prop_ext::{CommonHighlight, CommonProps};
+use crate::utils;
 
 // -- States
 
@@ -102,6 +102,7 @@ impl ListStates {
 #[must_use]
 pub struct List {
     common: CommonProps,
+    common_hg: CommonHighlight,
     props: Props,
     pub states: ListStates,
 }
@@ -175,10 +176,11 @@ impl List {
         self
     }
 
-    /// Set a custom foreground color for the currently highlighted item.
-    pub fn highlighted_color(mut self, c: Color) -> Self {
-        // TODO: shouldnt this be a highlight style instead?
-        self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
+    /// Set a custom highlight style that is patched ontop of the normal style.
+    ///
+    /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
+    pub fn highlight_style(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
         self
     }
 
@@ -249,37 +251,22 @@ impl Component for List {
             }
             _ => Vec::new(),
         };
-        let highlighted_color = self
-            .props
-            .get(Attribute::HighlightedColor)
-            .and_then(AttrValue::as_color);
 
-        // Make list
+        // Make the widget
         let mut widget = TuiList::new(list_items)
             .style(self.common.style)
-            .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom);
+            .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
+            .highlight_style(self.common_hg.get_style(self.common.style));
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);
         }
 
-        if let Some(highlighted_color) = highlighted_color {
-            widget = widget.highlight_style(Style::default().fg(highlighted_color).add_modifier(
-                if self.common.is_active() {
-                    TextModifiers::REVERSED
-                } else {
-                    TextModifiers::empty()
-                },
-            ));
-        }
         // Highlighted symbol
-        let hg_str = self
-            .props
-            .get(Attribute::HighlightedStr)
-            .and_then(|x| x.as_textline());
-        if let Some(hg_str) = hg_str {
-            widget = widget.highlight_symbol(borrow_clone_line(hg_str));
+        if let Some(symbol) = self.common_hg.get_symbol() {
+            widget = widget.highlight_symbol(symbol);
         }
+
         if self.scrollable() {
             let mut state: ListState = ListState::default();
             state.select(Some(self.states.list_index));
@@ -290,7 +277,11 @@ impl Component for List {
     }
 
     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
-        if let Some(value) = self.common.get_for_query(attr) {
+        if let Some(value) = self
+            .common
+            .get_for_query(attr)
+            .or_else(|| self.common_hg.get_for_query(attr))
+        {
             return Some(value);
         }
 
@@ -298,7 +289,11 @@ impl Component for List {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        if let Some(value) = self.common.set(attr, value) {
+        if let Some(value) = self
+            .common
+            .set(attr, value)
+            .and_then(|value| self.common_hg.set(attr, value))
+        {
             self.props.set(attr, value);
             if matches!(attr, Attribute::Text) {
                 // Update list len and fix index
@@ -456,7 +451,7 @@ mod tests {
         let mut component = List::default()
             .foreground(Color::Red)
             .background(Color::Blue)
-            .highlighted_color(Color::Yellow)
+            .highlight_style(Style::new().fg(Color::Yellow))
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .scroll(true)
@@ -578,7 +573,7 @@ mod tests {
         let component = List::default()
             .foreground(Color::Red)
             .background(Color::Blue)
-            .highlighted_color(Color::Yellow)
+            .highlight_style(Style::new().fg(Color::Yellow))
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
@@ -601,7 +596,7 @@ mod tests {
         let mut component = List::default()
             .foreground(Color::Red)
             .background(Color::Blue)
-            .highlighted_color(Color::Yellow)
+            .highlight_style(Style::new().fg(Color::Yellow))
             .highlighted_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())

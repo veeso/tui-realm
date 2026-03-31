@@ -13,8 +13,7 @@ use tuirealm::ratatui::text::Line as Spans;
 use tuirealm::ratatui::widgets::{List, ListItem, ListState, Paragraph};
 use tuirealm::state::{State, StateValue};
 
-use crate::prop_ext::CommonProps;
-use crate::utils::borrow_clone_line;
+use crate::prop_ext::{CommonHighlight, CommonProps};
 
 // -- states
 
@@ -109,6 +108,7 @@ impl SelectStates {
 #[must_use]
 pub struct Select {
     common: CommonProps,
+    common_hg: CommonHighlight,
     props: Props,
     pub states: SelectStates,
 }
@@ -170,10 +170,11 @@ impl Select {
         self
     }
 
-    /// Set a custom foreground color for the currently highlighted item.
-    pub fn highlighted_color(mut self, c: Color) -> Self {
-        // TODO: shouldnt this be a highlight style instead?
-        self.attr(Attribute::HighlightedColor, AttrValue::Color(c));
+    /// Set a custom highlight style that is patched ontop of the normal style.
+    ///
+    /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
+    pub fn highlight_style(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
         self
     }
 
@@ -213,11 +214,6 @@ impl Select {
             .map(|x| ListItem::new(Spans::from(x.as_str())))
             .collect();
 
-        let hg = self
-            .props
-            .get(Attribute::HighlightedColor)
-            .and_then(AttrValue::as_color);
-
         if let Some(block) = self.common.get_block() {
             let inner = block.inner(area);
             render.render_widget(block, area);
@@ -239,31 +235,21 @@ impl Select {
         let para = Paragraph::new(selected_text).style(self.common.style);
         render.render_widget(para, para_area);
 
-        let hg_style = if let Some(color) = hg {
-            Style::new().fg(color)
-        } else {
-            Style::new()
-        }
-        .add_modifier(TextModifiers::REVERSED);
-
         // Render the list of elements in chunks [1]
         // Make list
-        let mut list = List::new(choices)
+        let mut widget = List::new(choices)
             .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
             .style(self.common.style)
-            .highlight_style(hg_style);
-        // Highlighted symbol
-        let hg_str = self
-            .props
-            .get(Attribute::HighlightedStr)
-            .and_then(|x| x.as_textline());
-        if let Some(hg_str) = hg_str {
-            list = list.highlight_symbol(borrow_clone_line(hg_str));
+            .highlight_style(self.common_hg.get_style(self.common.style));
+
+        if let Some(symbol) = self.common_hg.get_symbol() {
+            widget = widget.highlight_symbol(symbol);
         }
+
         let mut state: ListState = ListState::default();
         state.select(Some(self.states.selected));
 
-        render.render_stateful_widget(list, list_area, &mut state);
+        render.render_stateful_widget(widget, list_area, &mut state);
     }
 
     /// ### render_closed_tab
@@ -305,7 +291,11 @@ impl Component for Select {
     }
 
     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
-        if let Some(value) = self.common.get_for_query(attr) {
+        if let Some(value) = self
+            .common
+            .get_for_query(attr)
+            .or_else(|| self.common_hg.get_for_query(attr))
+        {
             return Some(value);
         }
 
@@ -313,7 +303,11 @@ impl Component for Select {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        if let Some(value) = self.common.set(attr, value) {
+        if let Some(value) = self
+            .common
+            .set(attr, value)
+            .and_then(|value| self.common_hg.set(attr, value))
+        {
             match attr {
                 Attribute::Content => {
                     // Reset choices
@@ -484,7 +478,11 @@ mod test {
             .foreground(Color::Red)
             .background(Color::Black)
             .borders(Borders::default())
-            .highlighted_color(Color::Red)
+            .highlight_style(
+                Style::new()
+                    .fg(Color::Red)
+                    .add_modifier(TextModifiers::REVERSED),
+            )
             .highlighted_str(">>")
             .title(
                 Title::from("C'est oui ou bien c'est non?").alignment(HorizontalAlignment::Center),

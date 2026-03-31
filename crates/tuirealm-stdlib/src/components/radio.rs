@@ -31,11 +31,11 @@ use tuirealm::props::{
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
-use tuirealm::ratatui::text::Line as Spans;
+use tuirealm::ratatui::text::Line;
 use tuirealm::ratatui::widgets::Tabs;
 use tuirealm::state::{State, StateValue};
 
-use crate::prop_ext::CommonProps;
+use crate::prop_ext::{CommonHighlight, CommonProps};
 
 // -- states
 
@@ -99,6 +99,7 @@ impl RadioStates {
 #[must_use]
 pub struct Radio {
     common: CommonProps,
+    common_hg: CommonHighlight,
     props: Props,
     pub states: RadioStates,
 }
@@ -145,6 +146,14 @@ impl Radio {
     /// Add a title to the component.
     pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
         self.attr(Attribute::Title, AttrValue::Title(title.into()));
+        self
+    }
+
+    /// Set a custom highlight style that is patched ontop of the normal style.
+    ///
+    /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
+    pub fn highlight_style(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
         self
     }
 
@@ -199,21 +208,17 @@ impl Component for Radio {
         }
 
         // Make choices
-        let choices: Vec<Spans> = self
+        let choices: Vec<Line> = self
             .states
             .choices
             .iter()
-            .map(|x| Spans::from(x.as_str()))
+            .map(|x| Line::from(x.as_str()))
             .collect();
 
         let mut widget = Tabs::new(choices)
             .select(self.states.choice)
             .style(self.common.style)
-            .highlight_style(Style::default().add_modifier(if self.common.is_active() {
-                TextModifiers::REVERSED
-            } else {
-                TextModifiers::empty()
-            }));
+            .highlight_style(self.common_hg.get_style(self.common.style));
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);
@@ -223,7 +228,11 @@ impl Component for Radio {
     }
 
     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
-        if let Some(value) = self.common.get_for_query(attr) {
+        if let Some(value) = self
+            .common
+            .get_for_query(attr)
+            .or_else(|| self.common_hg.get_for_query(attr))
+        {
             return Some(value);
         }
 
@@ -231,7 +240,11 @@ impl Component for Radio {
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
-        if let Some(value) = self.common.set(attr, value) {
+        if let Some(value) = self
+            .common
+            .set(attr, value)
+            .and_then(|value| self.common_hg.set(attr, value))
+        {
             match attr {
                 Attribute::Content => {
                     // Reset choices
