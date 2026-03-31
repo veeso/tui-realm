@@ -206,7 +206,7 @@ pub mod widget;
 use std::iter;
 
 pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
-use tui_realm_stdlib::utils::get_block;
+use tui_realm_stdlib::prop_ext::CommonProps;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{
@@ -261,6 +261,7 @@ pub const TREE_CMD_CLOSE: &str = "c";
 ///
 /// Tree view component for tui-realm
 pub struct TreeView<V: NodeValue> {
+    common: CommonProps,
     props: Props,
     states: TreeState,
     /// The actual Tree data structure. You can access this from your Component to operate on it
@@ -271,6 +272,7 @@ pub struct TreeView<V: NodeValue> {
 impl<V: NodeValue> Default for TreeView<V> {
     fn default() -> Self {
         Self {
+            common: CommonProps::default(),
             props: Props::default(),
             states: TreeState::default(),
             tree: Tree::new(Node::new(String::new(), V::default())),
@@ -404,43 +406,10 @@ impl<V: NodeValue> TreeView<V> {
 
 impl<V: NodeValue> Component for TreeView<V> {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
-        if matches!(
-            self.props.get(Attribute::Display),
-            Some(AttrValue::Flag(false))
-        ) {
+        if !self.common.display {
             return;
         }
 
-        let foreground = self
-            .props
-            .get(Attribute::Foreground)
-            .and_then(AttrValue::as_color)
-            .unwrap_or(Color::Reset);
-        let background = self
-            .props
-            .get(Attribute::Background)
-            .and_then(AttrValue::as_color)
-            .unwrap_or(Color::Reset);
-        let modifiers = self
-            .props
-            .get(Attribute::TextProps)
-            .and_then(AttrValue::as_text_modifiers)
-            .unwrap_or_default();
-        let title = self.props.get(Attribute::Title).and_then(|v| v.as_title());
-        let borders = self
-            .props
-            .get(Attribute::Borders)
-            .and_then(AttrValue::as_borders)
-            .unwrap_or_default();
-        let focus = self
-            .props
-            .get(Attribute::Focus)
-            .and_then(AttrValue::as_flag)
-            .unwrap_or_default();
-        let inactive_style = self
-            .props
-            .get(Attribute::UnfocusedBorderStyle)
-            .and_then(AttrValue::as_style);
         let indent_size = self
             .props
             .get(Attribute::Custom(TREE_INDENT_SIZE))
@@ -449,37 +418,41 @@ impl<V: NodeValue> Component for TreeView<V> {
         let hg_color = self
             .props
             .get(Attribute::HighlightedColor)
-            .and_then(AttrValue::as_color)
-            .unwrap_or(foreground);
-        let hg_style = match focus {
-            true => Style::default().bg(hg_color).fg(Color::Black),
-            false => Style::default().fg(hg_color),
-        }
-        .add_modifier(modifiers);
+            .and_then(AttrValue::as_color);
         let hg_str = self
             .props
             .get(Attribute::HighlightedStr)
-            .and_then(|x| x.as_string());
-        let div = get_block(borders, title, focus, inactive_style);
+            .and_then(AttrValue::as_string);
+        let block = self.common.get_block();
+
         // Make widget
         let mut tree = TreeWidget::new(self.tree())
-            .block(div)
-            .highlight_style(hg_style)
             .indent_size(indent_size.into())
-            .style(
-                Style::default()
-                    .fg(foreground)
-                    .bg(background)
-                    .add_modifier(modifiers),
-            );
+            .style(self.common.style);
+
+        if let Some(hg_color) = hg_color {
+            let hg_style = match self.common.is_active() {
+                true => Style::default().bg(hg_color).fg(Color::Black),
+                false => Style::default().fg(hg_color),
+            };
+            tree = tree.highlight_style(hg_style);
+        }
+        if let Some(block) = block {
+            tree = tree.block(block);
+        }
         if let Some(hg_str) = hg_str {
             tree = tree.highlight_symbol(hg_str.as_str());
         }
+
         let mut state = self.states.clone();
         frame.render_stateful_widget(tree, area, &mut state);
     }
 
     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        if let Some(value) = self.common.get_for_query(attr) {
+            return Some(value);
+        }
+
         self.props.get_for_query(attr)
     }
 
@@ -490,7 +463,7 @@ impl<V: NodeValue> Component for TreeView<V> {
             if let Some(node) = self.tree.root().query(&value.unwrap_string()) {
                 self.states.select(self.tree.root(), node);
             }
-        } else {
+        } else if let Some(value) = self.common.set(attr, value) {
             self.props.set(attr, value);
         }
     }
