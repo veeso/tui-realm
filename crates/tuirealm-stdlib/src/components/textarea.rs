@@ -213,7 +213,6 @@ impl Component for Textarea {
             .and_then(|x| x.as_textline());
         // NOTE: wrap width is width of area minus 2 (block) minus width of highlighting string
         let wrap_width = (area.width as usize) - hg_str.as_ref().map_or(0, |x| x.width()) - 2;
-        // TODO: refactor to use "Text"?
         let lines: Vec<ListItem> = self
             .props
             .get(Attribute::Text)

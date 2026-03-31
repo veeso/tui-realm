@@ -204,6 +204,7 @@ impl Chart {
 
     /// Give the X axis a title
     pub fn x_title<S: Into<String>>(mut self, t: S) -> Self {
+        // TODO: we should consider using Span or Line
         self.props.set(
             Attribute::Custom(CHART_X_TITLE),
             AttrValue::String(t.into()),
@@ -213,6 +214,7 @@ impl Chart {
 
     /// Give the Y axis a title
     pub fn y_title<S: Into<String>>(mut self, t: S) -> Self {
+        // TODO: we should consider using Span or Line
         self.props.set(
             Attribute::Custom(CHART_Y_TITLE),
             AttrValue::String(t.into()),

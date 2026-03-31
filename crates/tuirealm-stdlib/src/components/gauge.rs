@@ -74,6 +74,7 @@ impl Gauge {
 
     /// Set a label text for the Bar.
     pub fn label<S: Into<String>>(mut self, s: S) -> Self {
+        // TODO: we should consider using Span
         self.attr(Attribute::Text, AttrValue::String(s.into()));
         self
     }

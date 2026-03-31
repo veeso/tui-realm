@@ -50,6 +50,7 @@ impl Label {
 
     /// Set the Text content.
     pub fn text<S: Into<String>>(mut self, t: S) -> Self {
+        // TODO: we should consider using Span
         self.attr(Attribute::Text, AttrValue::String(t.into()));
         self
     }

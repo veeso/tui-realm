@@ -180,6 +180,7 @@ impl Select {
 
     /// Set the choices that should be possible.
     pub fn choices<S: Into<String>>(mut self, choices: impl IntoIterator<Item = S>) -> Self {
+        // TODO: we should consider using Spans or Lines
         self.attr(
             Attribute::Content,
             AttrValue::Payload(PropPayload::Vec(

@@ -75,6 +75,7 @@ impl LineGauge {
 
     /// Set a label text for the Gauge.
     pub fn label<S: Into<String>>(mut self, s: S) -> Self {
+        // TODO: we should consider using Span or Line
         self.attr(Attribute::Text, AttrValue::String(s.into()));
         self
     }

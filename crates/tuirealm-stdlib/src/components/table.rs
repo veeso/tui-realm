@@ -210,6 +210,7 @@ impl Table {
 
     /// Set headers for columns.
     pub fn headers<S: Into<String>>(mut self, headers: impl IntoIterator<Item = S>) -> Self {
+        // TODO: we should consider using Spans or Lines
         self.attr(
             Attribute::Text,
             AttrValue::Payload(PropPayload::Vec(
@@ -370,8 +371,8 @@ impl Component for Table {
         let headers: Vec<&str> = self
             .props
             .get(Attribute::Text)
-            .and_then(|v| v.as_payload())
-            .and_then(|v| v.as_vec())
+            .and_then(AttrValue::as_payload)
+            .and_then(PropPayload::as_vec)
             .map(|v| {
                 v.iter()
                     .filter_map(|v| v.as_str().map(|v| v.as_str()))
