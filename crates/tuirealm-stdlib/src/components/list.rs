@@ -171,7 +171,7 @@ impl List {
     }
 
     /// Set the Symbol and Style for the indicator of the current line.
-    pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+    pub fn highlight_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
         self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
@@ -452,7 +452,7 @@ mod tests {
             .foreground(Color::Red)
             .background(Color::Blue)
             .highlight_style(Style::new().fg(Color::Yellow))
-            .highlighted_str("🚀")
+            .highlight_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .scroll(true)
             .step(4)
@@ -574,7 +574,7 @@ mod tests {
             .foreground(Color::Red)
             .background(Color::Blue)
             .highlight_style(Style::new().fg(Color::Yellow))
-            .highlighted_str("🚀")
+            .highlight_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
             .title(Title::from("events").alignment(HorizontalAlignment::Center))
@@ -597,7 +597,7 @@ mod tests {
             .foreground(Color::Red)
             .background(Color::Blue)
             .highlight_style(Style::new().fg(Color::Yellow))
-            .highlighted_str("🚀")
+            .highlight_str("🚀")
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
             .title(Title::from("events").alignment(HorizontalAlignment::Center))

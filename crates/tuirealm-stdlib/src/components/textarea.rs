@@ -154,7 +154,7 @@ impl Textarea {
     }
 
     /// Set the Symbol and Style for the indicator of the current line.
-    pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+    pub fn highlight_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
         self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
@@ -331,7 +331,7 @@ mod tests {
             .background(Color::Blue)
             .modifiers(TextModifiers::BOLD)
             .borders(Borders::default())
-            .highlighted_str("🚀")
+            .highlight_str("🚀")
             .step(4)
             .title(Title::from("textarea").alignment(HorizontalAlignment::Center))
             .text_rows([Line::from("welcome to "), Line::from("tui-realm")]);

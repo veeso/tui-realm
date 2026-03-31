@@ -95,7 +95,7 @@ fn test_textarea_snapshot_default() {
         .borders(Borders::default())
         .title(Title::from("Log"))
         .foreground(Color::White)
-        .highlighted_str(">> ")
+        .highlight_str(">> ")
         .text_rows([
             Span::from("First line of text"),
             Span::from("Second line of text"),

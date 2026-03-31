@@ -126,7 +126,7 @@ impl Default for ListAlfa {
                 .title(Title::from("Lorem ipsum (scrollable)").alignment(HorizontalAlignment::Center))
                 .scroll(true)
                 .highlight_style(Style::new().fg(Color::LightYellow))
-                .highlighted_str("🚀")
+                .highlight_str("🚀")
                 .rewind(true)
                 .step(4)
                 .rows([

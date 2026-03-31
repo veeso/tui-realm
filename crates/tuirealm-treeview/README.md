@@ -173,7 +173,7 @@ impl FsTree {
                 .indent_size(3)
                 .scroll_step(6)
                 .title(tree.root().id(), Alignment::Left)
-                .highlighted_color(Color::LightYellow)
+                .highlight_color(Color::LightYellow)
                 .highlight_symbol("🦄")
                 .with_tree(tree)
                 .initial_node(initial_node),

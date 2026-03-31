@@ -165,7 +165,7 @@ impl Select {
     }
 
     /// Set the Symbol and Style for the indicator of the current line.
-    pub fn highlighted_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+    pub fn highlight_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
         self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
         self
     }
@@ -483,7 +483,7 @@ mod test {
                     .fg(Color::Red)
                     .add_modifier(TextModifiers::REVERSED),
             )
-            .highlighted_str(">>")
+            .highlight_str(">>")
             .title(
                 Title::from("C'est oui ou bien c'est non?").alignment(HorizontalAlignment::Center),
             )

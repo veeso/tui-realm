@@ -127,7 +127,7 @@ impl Default for TextareaAlfa {
                     Title::from("Night Moves (Bob Seger)").alignment(HorizontalAlignment::Center),
                 )
                 .step(4)
-                .highlighted_str("🎵")
+                .highlight_str("🎵")
                 .text_rows([
                     Line::from(Span::styled(
                         "I was a little too tall, could've used a few pounds,",
@@ -198,7 +198,7 @@ impl Default for TextareaBeta {
                 .foreground(Color::LightBlue)
                 .title(Title::from("Roxanne (The Police)").alignment(HorizontalAlignment::Center))
                 .step(4)
-                .highlighted_str("🎵")
+                .highlight_str("🎵")
                 .text_rows([
                     Line::from(Span::styled(
                         "Roxanne",

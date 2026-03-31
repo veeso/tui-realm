@@ -141,7 +141,7 @@ impl Default for SelectAlfa {
                 .rewind(true)
                 // No need to set highlight style as the default is "REVERSED"
                 // .highlight_style(Style::new().add_modifier(TextModifiers::REVERSED))
-                .highlighted_str(">> ")
+                .highlight_str(">> ")
                 .choices([
                     "vanilla",
                     "chocolate",
@@ -197,7 +197,7 @@ impl Default for SelectBeta {
                 .rewind(false)
                 // Overwrite the default "REVERSED" style to be underlined instead
                 .highlight_style(Style::new().add_modifier(TextModifiers::UNDERLINED))
-                .highlighted_str(">> ")
+                .highlight_str(">> ")
                 .choices([
                     "hazelnuts",
                     "chocolate",

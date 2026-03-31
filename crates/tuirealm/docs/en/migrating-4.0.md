@@ -192,3 +192,7 @@ This allowed the consumer to decide when a clone is actually necessary, for prac
 
 `Attribute` variant `HighlightColor` has been removed and instead variant `HighlightStyle` has been added to fully configure the style (including modifiers)
 instead of just the color.
+
+### Rename `::highlighted_*` functions to `::highlight_*`
+
+To have consistent naming and alight with function names in `ratatui`, all `highlighted_*` function (ex. `::highlighted_str`) to be `highlight_*` (ex. `::highlight_str`).

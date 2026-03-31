@@ -127,7 +127,7 @@ impl Default for MyContainer {
                             )
                             .scroll(true)
                             .highlight_style(Style::new().fg(Color::LightYellow))
-                            .highlighted_str("🚀")
+                            .highlight_str("🚀")
                             .rewind(true)
                             .step(4)
                             .row_height(1)
@@ -180,7 +180,7 @@ impl Default for MyContainer {
                                     .alignment(HorizontalAlignment::Center),
                             )
                             .scroll(false)
-                            .highlighted_str(">> ")
+                            .highlight_str(">> ")
                             .row_height(1)
                             .headers(["Key", "Msg", "Description"])
                             .column_spacing(3)
