@@ -179,6 +179,12 @@ impl InputStates {
     pub fn get_value(&self) -> String {
         self.input.iter().collect()
     }
+
+    /// Get whether the input is empty or has characters typed.
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.input.is_empty()
+    }
 }
 
 // -- Component
@@ -334,10 +340,8 @@ impl Component for Input {
             area_for_bounds = block_inner_area;
         }
 
-        let text_to_display = self.states.render_value_offset(self.get_input_type());
-
         // Choose whether to show placeholder; if placeholder is unset, show nothing
-        let text_to_display = if text_to_display.is_empty() {
+        let text_to_display = if self.states.is_empty() {
             self.states.cursor = 0;
             self.props
                 .get(Attribute::Custom(INPUT_PLACEHOLDER))
@@ -345,7 +349,7 @@ impl Component for Input {
                 .map(borrow_clone_line)
                 .unwrap_or_default()
         } else {
-            Line::from(text_to_display)
+            Line::from(self.states.render_value_offset(self.get_input_type()))
         };
         // Choose paragraph style based on whether is valid or not and if has focus and if should show placeholder
         let paragraph_style = if self.common.is_active() {
