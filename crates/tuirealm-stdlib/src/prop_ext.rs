@@ -125,7 +125,7 @@ impl CommonProps {
         let block = crate::utils::get_block(
             borders,
             title,
-            self.always_active || self.focused,
+            self.is_active(),
             Some(self.border_unfocused_style),
         );
 
