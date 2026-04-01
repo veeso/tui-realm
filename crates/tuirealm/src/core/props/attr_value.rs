@@ -1,5 +1,6 @@
 use ratatui::layout::{HorizontalAlignment, VerticalAlignment};
 use ratatui::style::{Color, Modifier as TextModifiers, Style};
+use ratatui::symbols::Marker;
 
 use crate::props::{
     AttrValueRef, Borders, Direction, InputType, Layout, LineStatic, PropPayload, Shape,
@@ -21,6 +22,7 @@ pub enum AttrValue {
     Length(usize),
     Number(isize),
     Shape(Shape),
+    Marker(Marker),
     Size(u16),
     String(String),
     Style(Style),
@@ -128,6 +130,14 @@ impl AttrValue {
         match self {
             AttrValue::Shape(x) => x,
             _ => panic!("AttrValue is not Shape"),
+        }
+    }
+
+    /// Get the inner Marker value from AttrValue, or panic.
+    pub fn unwrap_marker(self) -> Marker {
+        match self {
+            AttrValue::Marker(x) => x,
+            _ => panic!("AttrValue is not Marker"),
         }
     }
 
@@ -309,6 +319,14 @@ impl AttrValue {
         }
     }
 
+    /// Get a Marker value from AttrValue, or None
+    pub fn as_marker(&self) -> Option<Marker> {
+        match self {
+            AttrValue::Marker(v) => Some(*v),
+            _ => None,
+        }
+    }
+
     /// Get a Size value from AttrValue, or None
     pub fn as_size(&self) -> Option<u16> {
         match self {
@@ -482,6 +500,14 @@ impl AttrValue {
         }
     }
 
+    /// Get a Marker value from AttrValue, or None
+    pub fn as_marker_mut(&mut self) -> Option<&mut Marker> {
+        match self {
+            AttrValue::Marker(v) => Some(v),
+            _ => None,
+        }
+    }
+
     /// Get a Size value from AttrValue, or None
     pub fn as_size_mut(&mut self) -> Option<&mut u16> {
         match self {
@@ -601,6 +627,7 @@ mod tests {
         assert_eq!(AttrValue::Length(12).unwrap_length(), 12);
         assert_eq!(AttrValue::Number(-24).unwrap_number(), -24);
         assert_eq!(AttrValue::Shape(Shape::Layer).unwrap_shape(), Shape::Layer);
+        assert_eq!(AttrValue::Marker(Marker::Bar).unwrap_marker(), Marker::Bar);
         assert_eq!(AttrValue::Size(12).unwrap_size(), 12);
         assert_eq!(
             AttrValue::String(String::from("pippo")).unwrap_string(),
@@ -728,6 +755,15 @@ mod tests {
         );
         assert_eq!(
             AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_shape(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Marker(Marker::Bar).as_marker(),
+            Some(Marker::Bar)
+        );
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_marker(),
             None
         );
 
@@ -896,6 +932,15 @@ mod tests {
         );
         assert_eq!(
             AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_shape_mut(),
+            None
+        );
+
+        assert_eq!(
+            AttrValue::Marker(Marker::Bar).as_marker_mut(),
+            Some(&mut Marker::Bar)
+        );
+        assert_eq!(
+            AttrValue::AlignmentHorizontal(HorizontalAlignment::Center).as_marker_mut(),
             None
         );
 

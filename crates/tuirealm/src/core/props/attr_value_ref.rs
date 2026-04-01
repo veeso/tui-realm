@@ -1,5 +1,6 @@
 use ratatui::layout::{HorizontalAlignment, VerticalAlignment};
 use ratatui::style::{Color, Modifier as TextModifiers, Style};
+use ratatui::symbols::Marker;
 use ratatui::text::{Line, Span, Text};
 
 use crate::props::prop_value_ref::PropPayloadRef;
@@ -21,6 +22,7 @@ pub enum AttrValueRef<'a> {
     Length(usize),
     Number(isize),
     Shape(&'a Shape),
+    Marker(Marker),
     Size(u16),
     String(&'a str),
     Style(Style),
@@ -122,6 +124,14 @@ impl<'a> AttrValueRef<'a> {
         match self {
             AttrValueRef::Shape(x) => x,
             _ => panic!("AttrValue is not Shape"),
+        }
+    }
+
+    /// Get the inner Marker value from AttrValue, or panic.
+    pub fn unwrap_marker(self) -> Marker {
+        match self {
+            AttrValueRef::Marker(x) => x,
+            _ => panic!("AttrValue is not Marker"),
         }
     }
 
@@ -295,6 +305,14 @@ impl<'a> AttrValueRef<'a> {
         }
     }
 
+    /// Get a Marker value from AttrValue, or None
+    pub fn as_marker(&self) -> Option<Marker> {
+        match self {
+            AttrValueRef::Marker(v) => Some(*v),
+            _ => None,
+        }
+    }
+
     /// Get a Size value from AttrValue, or None
     pub fn as_size(self) -> Option<u16> {
         match self {
@@ -444,6 +462,7 @@ impl<'a> PartialEq<AttrValue> for AttrValueRef<'a> {
             AttrValue::Length(length) => Some(*length) == self.as_length(),
             AttrValue::Number(number) => Some(*number) == self.as_number(),
             AttrValue::Shape(shape) => Some(shape) == self.as_shape(),
+            AttrValue::Marker(marker) => Some(*marker) == self.as_marker(),
             AttrValue::Size(size) => Some(*size) == self.as_size(),
             AttrValue::String(string) => Some(string.as_str()) == self.as_string(),
             AttrValue::Style(style) => Some(*style) == self.as_style(),
@@ -487,6 +506,7 @@ impl<'a> From<&'a AttrValue> for AttrValueRef<'a> {
             AttrValue::Length(length) => Self::Length(*length),
             AttrValue::Number(number) => Self::Number(*number),
             AttrValue::Shape(shape) => Self::Shape(shape),
+            AttrValue::Marker(marker) => Self::Marker(*marker),
             AttrValue::Size(size) => Self::Size(*size),
             AttrValue::String(string) => Self::String(string),
             AttrValue::Style(style) => Self::Style(*style),
@@ -519,6 +539,7 @@ impl<'a> From<AttrValueRef<'a>> for AttrValue {
             AttrValueRef::Length(length) => Self::Length(length),
             AttrValueRef::Number(number) => Self::Number(number),
             AttrValueRef::Shape(shape) => Self::Shape(shape.to_owned()),
+            AttrValueRef::Marker(marker) => Self::Marker(marker),
             AttrValueRef::Size(size) => Self::Size(size),
             AttrValueRef::String(string) => Self::String(string.to_owned()),
             AttrValueRef::Style(style) => Self::Style(style),
@@ -574,6 +595,10 @@ mod tests {
         assert_eq!(
             AttrValueRef::Shape(&Shape::Layer).unwrap_shape(),
             &Shape::Layer
+        );
+        assert_eq!(
+            AttrValueRef::Marker(Marker::Bar).unwrap_marker(),
+            Marker::Bar
         );
         assert_eq!(AttrValueRef::Size(12).unwrap_size(), 12);
         assert_eq!(
@@ -709,6 +734,15 @@ mod tests {
             None
         );
 
+        assert_eq!(
+            AttrValueRef::Marker(Marker::Bar).as_marker(),
+            Some(Marker::Bar)
+        );
+        assert_eq!(
+            AttrValueRef::AlignmentHorizontal(HorizontalAlignment::Center).as_marker(),
+            None
+        );
+
         assert_eq!(AttrValueRef::Size(1).as_size(), Some(1));
         assert_eq!(
             AttrValueRef::AlignmentHorizontal(HorizontalAlignment::Center).as_size(),
@@ -838,6 +872,9 @@ mod tests {
         assert!(AttrValueRef::Shape(&Shape::Layer) == AttrValue::Shape(Shape::Layer));
         assert!(!(AttrValueRef::Shape(&Shape::Layer) == AttrValue::Flag(false)));
 
+        assert!(AttrValueRef::Marker(Marker::Bar) == AttrValue::Marker(Marker::Bar));
+        assert!(!(AttrValueRef::Marker(Marker::Bar) == AttrValue::Flag(false)));
+
         assert!(AttrValueRef::String("hello") == AttrValue::String("hello".to_string()));
         assert!(!(AttrValueRef::String("hello") == AttrValue::Flag(false)));
 
@@ -931,6 +968,10 @@ mod tests {
             AttrValueRef::Shape(&Shape::Layer)
         );
         assert_eq!(
+            AttrValueRef::from(&AttrValue::Marker(Marker::Bar)),
+            AttrValueRef::Marker(Marker::Bar)
+        );
+        assert_eq!(
             AttrValueRef::from(&AttrValue::String("hello".to_string())),
             AttrValueRef::String("hello")
         );
@@ -1016,6 +1057,10 @@ mod tests {
         assert_eq!(
             AttrValue::from(AttrValueRef::Shape(&Shape::Layer)),
             AttrValue::Shape(Shape::Layer)
+        );
+        assert_eq!(
+            AttrValue::from(AttrValueRef::Marker(Marker::Bar)),
+            AttrValue::Marker(Marker::Bar)
         );
         assert_eq!(
             AttrValue::from(AttrValueRef::String("hello")),
@@ -1119,6 +1164,12 @@ mod tests {
     #[should_panic]
     fn unwrapping_shape_should_panic_if_not_identity() {
         AttrValueRef::Flag(true).unwrap_shape();
+    }
+
+    #[test]
+    #[should_panic]
+    fn unwrapping_marker_should_panic_if_not_identity() {
+        AttrValueRef::Flag(true).unwrap_marker();
     }
 
     #[test]
