@@ -116,7 +116,6 @@ impl Default for ChartAlfa {
     fn default() -> Self {
         Self {
             component: BarChart::default()
-                .disabled(false)
                 .title(Title::from("my incomes").alignment(HorizontalAlignment::Center))
                 .label_style(Style::default().fg(Color::Yellow))
                 .bar_style(Style::default().fg(Color::LightYellow))
@@ -175,7 +174,6 @@ impl Default for ChartBeta {
     fn default() -> Self {
         Self {
             component: BarChart::default()
-                .disabled(false)
                 .title(Title::from("my incomes").alignment(HorizontalAlignment::Left))
                 .label_style(Style::default().fg(Color::Yellow))
                 .bar_style(Style::default().fg(Color::LightYellow))
