@@ -92,6 +92,8 @@ pub enum Attribute {
     Rewind,
     /// Intended to store a `AttrValue::Shape`
     Shape,
+    /// Intended to store a `AttrValue::Marker`
+    Marker,
     /// Should be used to choose whether to make list interactive (scrollable) or not
     Scroll,
     /// Intended as scroll step for fast scroll, for example when using `PageUp`

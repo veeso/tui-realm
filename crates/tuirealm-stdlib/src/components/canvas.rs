@@ -14,11 +14,7 @@ use tuirealm::ratatui::widgets::canvas::{Canvas as TuiCanvas, Context, Points};
 use tuirealm::state::State;
 
 // -- Props
-use super::props::{
-    CANVAS_MARKER, CANVAS_MARKER_BAR, CANVAS_MARKER_BLOCK, CANVAS_MARKER_BRAILLE,
-    CANVAS_MARKER_DOT, CANVAS_MARKER_HALF_BLOCK, CANVAS_MARKER_OCTANT, CANVAS_MARKER_QUADRANT,
-    CANVAS_MARKER_SEXTANT, CANVAS_X_BOUNDS, CANVAS_Y_BOUNDS,
-};
+use super::props::{CANVAS_X_BOUNDS, CANVAS_Y_BOUNDS};
 use crate::prop_ext::CommonProps;
 
 // -- Component
@@ -126,44 +122,8 @@ impl Canvas {
 
     /// Set which kind of [`Marker`] type should be used for a point.
     pub fn marker(mut self, marker: Marker) -> Self {
-        self.attr(
-            Attribute::Custom(CANVAS_MARKER),
-            Self::marker_to_prop(marker),
-        );
+        self.attr(Attribute::Marker, AttrValue::Marker(marker));
         self
-    }
-
-    fn marker_to_prop(marker: Marker) -> AttrValue {
-        AttrValue::Number(match marker {
-            Marker::HalfBlock => CANVAS_MARKER_HALF_BLOCK,
-            Marker::Bar => CANVAS_MARKER_BAR,
-            Marker::Block => CANVAS_MARKER_BLOCK,
-            Marker::Braille => CANVAS_MARKER_BRAILLE,
-            Marker::Dot => CANVAS_MARKER_DOT,
-            Marker::Quadrant => CANVAS_MARKER_QUADRANT,
-            Marker::Sextant => CANVAS_MARKER_SEXTANT,
-            Marker::Octant => CANVAS_MARKER_OCTANT,
-            marker => unimplemented!("{:#?}", marker),
-        })
-    }
-
-    fn prop_to_marker(&self) -> Marker {
-        match self
-            .props
-            .get(Attribute::Custom(CANVAS_MARKER))
-            .and_then(AttrValue::as_number)
-            .unwrap_or(CANVAS_MARKER_BRAILLE)
-        {
-            CANVAS_MARKER_BLOCK => Marker::Block,
-            CANVAS_MARKER_DOT => Marker::Dot,
-            CANVAS_MARKER_BRAILLE => Marker::Braille,
-            CANVAS_MARKER_BAR => Marker::Bar,
-            CANVAS_MARKER_HALF_BLOCK => Marker::HalfBlock,
-            CANVAS_MARKER_QUADRANT => Marker::Quadrant,
-            CANVAS_MARKER_SEXTANT => Marker::Sextant,
-            CANVAS_MARKER_OCTANT => Marker::Octant,
-            num => unimplemented!("Mapping: {:#?}", num),
-        }
     }
 
     /// Draw a shape into the canvas `Context`.
@@ -214,9 +174,16 @@ impl Component for Canvas {
             .and_then(PropPayload::as_vec)
             .map(|v| v.iter().filter_map(PropValue::as_shape).cloned().collect())
             .unwrap_or_default();
+
+        let marker = self
+            .props
+            .get(Attribute::Marker)
+            .and_then(AttrValue::as_marker)
+            .unwrap_or(Marker::Braille);
+
         // Make canvas
         let mut widget = TuiCanvas::default()
-            .marker(self.prop_to_marker())
+            .marker(marker)
             .x_bounds(x_bounds)
             .y_bounds(y_bounds)
             .paint(|ctx| shapes.iter().for_each(|x| Self::draw_shape(ctx, x)));
