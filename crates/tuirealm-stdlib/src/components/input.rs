@@ -4,17 +4,18 @@
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{
-    AttrValue, Attribute, Borders, Color, InputType, Props, QueryResult, Style, TextModifiers,
-    Title,
+    AttrValue, Attribute, Borders, Color, InputType, LineStatic, Props, QueryResult, Style,
+    TextModifiers, Title,
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
+use tuirealm::ratatui::text::Line;
 use tuirealm::ratatui::widgets::Paragraph;
 use tuirealm::state::{State, StateValue};
 
-use super::props::{INPUT_INVALID_STYLE, INPUT_PLACEHOLDER, INPUT_PLACEHOLDER_STYLE};
+use super::props::{INPUT_INVALID_STYLE, INPUT_PLACEHOLDER};
 use crate::prop_ext::CommonProps;
-use crate::utils::calc_utf8_cursor_position;
+use crate::utils::{borrow_clone_line, calc_utf8_cursor_position};
 
 // -- states
 
@@ -261,16 +262,11 @@ impl Input {
         self
     }
 
-    /// Set a placeholder text and stylew for when the Input is empty.
-    pub fn placeholder<S: Into<String>>(mut self, placeholder: S, style: Style) -> Self {
-        // TODO: Span / Line?
+    /// Set a placeholder text for when the Input is empty.
+    pub fn placeholder<S: Into<LineStatic>>(mut self, placeholder: S) -> Self {
         self.attr(
             Attribute::Custom(INPUT_PLACEHOLDER),
-            AttrValue::String(placeholder.into()),
-        );
-        self.attr(
-            Attribute::Custom(INPUT_PLACEHOLDER_STYLE),
-            AttrValue::Style(style),
+            AttrValue::TextLine(placeholder.into()),
         );
         self
     }
@@ -340,17 +336,16 @@ impl Component for Input {
 
         let text_to_display = self.states.render_value_offset(self.get_input_type());
 
-        let show_placeholder = text_to_display.is_empty();
         // Choose whether to show placeholder; if placeholder is unset, show nothing
-        let text_to_display = if show_placeholder {
+        let text_to_display = if text_to_display.is_empty() {
             self.states.cursor = 0;
             self.props
                 .get(Attribute::Custom(INPUT_PLACEHOLDER))
-                .and_then(AttrValue::as_string)
-                .map(String::as_str)
+                .and_then(AttrValue::as_textline)
+                .map(borrow_clone_line)
                 .unwrap_or_default()
         } else {
-            &text_to_display
+            Line::from(text_to_display)
         };
         // Choose paragraph style based on whether is valid or not and if has focus and if should show placeholder
         let paragraph_style = if self.common.is_active() {
@@ -358,14 +353,6 @@ impl Component for Input {
         } else {
             // TODO: this should likely be a different property
             self.common.border_unfocused_style
-        };
-        let paragraph_style = if show_placeholder {
-            self.props
-                .get(Attribute::Custom(INPUT_PLACEHOLDER_STYLE))
-                .and_then(AttrValue::as_style)
-                .unwrap_or(paragraph_style)
-        } else {
-            paragraph_style
         };
 
         let mut widget = Paragraph::new(text_to_display).style(paragraph_style);

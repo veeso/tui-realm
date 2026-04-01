@@ -13,6 +13,7 @@ use tuirealm::props::{
     TextModifiers, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::ratatui::text::Line;
 use tuirealm::state::{State, StateValue};
 use tuirealm::subscription::{EventClause as SubEventClause, Sub, SubClause};
 use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
@@ -370,10 +371,10 @@ impl Default for GoTo {
                         .modifiers(BorderType::Rounded),
                 )
                 .input_type(InputType::Text)
-                .placeholder(
+                .placeholder(Line::styled(
                     "/foo/bar/buzz",
-                    Style::default().fg(Color::Rgb(120, 120, 120)),
-                )
+                    Style::new().fg(Color::Rgb(120, 120, 120)),
+                ))
                 .title(Title::from("Go to...").alignment(HorizontalAlignment::Left)),
         }
     }

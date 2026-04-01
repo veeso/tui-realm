@@ -12,6 +12,7 @@ use tuirealm::props::{
     AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, InputType, Style, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::ratatui::text::Line;
 use tuirealm::state::{State, StateValue};
 use tuirealm::terminal::TerminalAdapter;
 
@@ -222,10 +223,10 @@ impl Default for InputEmail {
                 .inactive(Style::new().fg(Color::Gray))
                 .input_type(InputType::Email)
                 .title(Title::from("Email").alignment(HorizontalAlignment::Left))
-                .placeholder(
+                .placeholder(Line::styled(
                     "test@example.com",
-                    Style::default().fg(Color::Rgb(120, 120, 120)),
-                )
+                    Style::new().fg(Color::Rgb(120, 120, 120)),
+                ))
                 .invalid_style(Style::default().fg(Color::Red)),
         }
     }
@@ -393,10 +394,10 @@ impl Default for InputPhone {
                 .input_type(InputType::Telephone)
                 .input_len(14)
                 .title(Title::from("Phone number").alignment(HorizontalAlignment::Left))
-                .placeholder(
+                .placeholder(Line::styled(
                     "+39366123123",
-                    Style::default().fg(Color::Rgb(120, 120, 120)),
-                )
+                    Style::new().fg(Color::Rgb(120, 120, 120)),
+                ))
                 .invalid_style(Style::default().fg(Color::Red)),
         }
     }
