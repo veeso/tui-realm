@@ -49,8 +49,9 @@ where
     pub fn new_ports(ports: impl IntoIterator<Item = SyncPort<UserEvent>>) -> Self {
         let terminal = Self::init_adapter().expect("Couldnt initialize terminal modes");
 
-        let mut eventlistener =
-            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10);
+        let mut eventlistener = EventListenerCfg::default()
+            .crossterm_input_listener(Duration::from_millis(10), 10)
+            .tick_interval(Duration::from_millis(500));
 
         for port in ports {
             eventlistener = eventlistener.port(port);
