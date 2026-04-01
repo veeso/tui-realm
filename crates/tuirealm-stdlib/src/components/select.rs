@@ -9,8 +9,7 @@ use tuirealm::props::{
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout, Rect};
-use tuirealm::ratatui::text::Line as Spans;
-use tuirealm::ratatui::widgets::{List, ListItem, ListState, Paragraph};
+use tuirealm::ratatui::widgets::{List, ListDirection, ListItem, ListState, Paragraph};
 use tuirealm::state::{State, StateValue};
 
 use crate::prop_ext::{CommonHighlight, CommonProps};
@@ -203,43 +202,33 @@ impl Select {
         self
     }
 
-    /// ### render_open_tab
-    ///
-    /// Render component when tab is open
-    fn render_open_tab(&mut self, render: &mut Frame, mut area: Rect) {
+    /// Render the baseline of this component that his always there.
+    fn render_selected_text(&self, render: &mut Frame, area: Rect) {
+        let selected_text = self
+            .states
+            .choices
+            .get(self.states.selected)
+            .map(String::as_str)
+            .unwrap_or_default();
+        let widget = Paragraph::new(selected_text).style(self.common.style);
+
+        render.render_widget(widget, area);
+    }
+
+    /// Render the list of choices.
+    fn render_choices(&self, render: &mut Frame, area: Rect) {
         // Make choices
         let choices: Vec<ListItem> = self
             .states
             .choices
             .iter()
-            .map(|x| ListItem::new(Spans::from(x.as_str())))
+            .map(|x| ListItem::new(x.as_str()))
             .collect();
 
-        if let Some(block) = self.common.get_block() {
-            let inner = block.inner(area);
-            render.render_widget(block, area);
-            area = inner;
-        }
-
-        // Prepare layout
-        let [para_area, list_area] = Layout::default()
-            .direction(LayoutDirection::Vertical)
-            .margin(0)
-            .constraints([Constraint::Length(2), Constraint::Min(1)])
-            .areas(area);
-        // Render like "closed" tab in chunk 0
-        let selected_text: String = match self.states.choices.get(self.states.selected) {
-            None => String::default(),
-            Some(s) => s.clone(),
-        };
-
-        let para = Paragraph::new(selected_text).style(self.common.style);
-        render.render_widget(para, para_area);
-
-        // Render the list of elements in chunks [1]
+        // Render the list of elements
         // Make list
         let mut widget = List::new(choices)
-            .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
+            .direction(ListDirection::TopToBottom)
             .style(self.common.style);
 
         if self.common.is_active() {
@@ -250,29 +239,14 @@ impl Select {
             widget = widget.highlight_symbol(symbol);
         }
 
-        let mut state: ListState = ListState::default();
+        let mut state = ListState::default();
         state.select(Some(self.states.selected));
 
-        render.render_stateful_widget(widget, list_area, &mut state);
+        render.render_stateful_widget(widget, area, &mut state);
     }
 
-    /// ### render_closed_tab
-    ///
-    /// Render component when tab is closed
-    fn render_closed_tab(&self, render: &mut Frame, area: Rect) {
-        let selected_text: String = match self.states.choices.get(self.states.selected) {
-            None => String::default(),
-            Some(s) => s.clone(),
-        };
-        let mut widget = Paragraph::new(selected_text).style(self.common.style);
-
-        if let Some(block) = self.common.get_block() {
-            widget = widget.block(block);
-        }
-
-        render.render_widget(widget, area);
-    }
-
+    /// Get whether the list should be rewindable / wrappable.
+    #[inline]
     fn rewindable(&self) -> bool {
         self.props
             .get(Attribute::Rewind)
@@ -282,15 +256,36 @@ impl Select {
 }
 
 impl Component for Select {
-    fn view(&mut self, render: &mut Frame, area: Rect) {
+    fn view(&mut self, render: &mut Frame, mut area: Rect) {
         if !self.common.display {
             return;
         }
 
-        if self.states.is_tab_open() {
-            self.render_open_tab(render, area);
+        // apply common style to the whole area, to align with how all other components and ratatui widgets work
+        render.buffer_mut().set_style(area, self.common.style);
+
+        // Draw the block ourself, so we dont have to have different implementations based on which path we take
+        if let Some(block) = self.common.get_block() {
+            let inner = block.inner(area);
+            render.render_widget(block, area);
+            area = inner;
+        }
+
+        // Prepare layout
+        let [para_area, list_area] = if self.states.is_tab_open() {
+            Layout::default()
+                .direction(LayoutDirection::Vertical)
+                .margin(0)
+                .constraints([Constraint::Length(2), Constraint::Min(1)])
+                .areas(area)
         } else {
-            self.render_closed_tab(render, area);
+            [area, Rect::ZERO]
+        };
+
+        self.render_selected_text(render, para_area);
+
+        if !list_area.is_empty() {
+            self.render_choices(render, list_area);
         }
     }
 
