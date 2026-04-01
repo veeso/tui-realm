@@ -11,7 +11,7 @@ use tuirealm::event::{Event, Key, KeyEvent};
 use tuirealm::listener::{Poll, PortResult, SyncPort};
 use tuirealm::props::{
     AttrValue, AttrValueRef, Attribute, BorderType, Borders, Color, HorizontalAlignment,
-    PropPayload, PropPayloadRef, PropValue, PropValueRef, QueryResult, Title,
+    PropPayload, PropPayloadRef, PropValue, PropValueRef, QueryResult, Style, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::terminal::TerminalAdapter;
@@ -172,6 +172,7 @@ impl Default for GaugeAlfa {
                         .modifiers(BorderType::Rounded),
                 )
                 .foreground(Color::Green)
+                .inactive(Style::new().fg(Color::Gray))
                 .label("0%")
                 .title(Title::from("Fast Loading...").alignment(HorizontalAlignment::Center))
                 .progress(0.0),
@@ -215,6 +216,7 @@ impl Default for GaugeBeta {
                         .modifiers(BorderType::Rounded),
                 )
                 .foreground(Color::Yellow)
+                .inactive(Style::new().fg(Color::Gray))
                 .label("0%")
                 .title(Title::from("Slow Loading...").alignment(HorizontalAlignment::Center))
                 .progress(0.0),

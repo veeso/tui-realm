@@ -149,6 +149,7 @@ impl Default for GaugeAlfa {
                         .modifiers(BorderType::Rounded),
                 )
                 .foreground(Color::Green)
+                .inactive(Style::new().fg(Color::Gray))
                 .label("0%")
                 .title(Title::from("Loading...").alignment(HorizontalAlignment::Center))
                 .line_style(THICK_HORIZONTAL, HORIZONTAL)
@@ -193,6 +194,7 @@ impl Default for GaugeBeta {
                         .modifiers(BorderType::Rounded),
                 )
                 .foreground(Color::Blue)
+                .inactive(Style::new().fg(Color::Gray))
                 .label("0%")
                 .title(Title::from("Loading...").alignment(HorizontalAlignment::Center))
                 .line_style(

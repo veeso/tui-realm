@@ -163,6 +163,7 @@ impl Default for InputText {
                         .color(Color::LightYellow),
                 )
                 .foreground(Color::LightYellow)
+                .inactive(Style::new().fg(Color::Gray))
                 .input_type(InputType::Text)
                 .title(Title::from("Username").alignment(HorizontalAlignment::Left))
                 .value("veeso")
@@ -218,6 +219,7 @@ impl Default for InputEmail {
                         .color(Color::LightCyan),
                 )
                 .foreground(Color::LightCyan)
+                .inactive(Style::new().fg(Color::Gray))
                 .input_type(InputType::Email)
                 .title(Title::from("Email").alignment(HorizontalAlignment::Left))
                 .placeholder(
@@ -276,6 +278,7 @@ impl Default for InputNumber {
                         .color(Color::LightGreen),
                 )
                 .foreground(Color::LightGreen)
+                .inactive(Style::new().fg(Color::Gray))
                 .input_type(InputType::UnsignedInteger)
                 .input_len(2)
                 .title(Title::from("What's your age").alignment(HorizontalAlignment::Left))
@@ -331,6 +334,7 @@ impl Default for InputPassword {
                         .color(Color::LightMagenta),
                 )
                 .foreground(Color::LightMagenta)
+                .inactive(Style::new().fg(Color::Gray))
                 .input_type(InputType::Password('●'))
                 .title(Title::from("Password").alignment(HorizontalAlignment::Left))
                 .invalid_style(Style::default().fg(Color::Red)),
@@ -385,6 +389,7 @@ impl Default for InputPhone {
                         .color(Color::LightBlue),
                 )
                 .foreground(Color::LightBlue)
+                .inactive(Style::new().fg(Color::Gray))
                 .input_type(InputType::Telephone)
                 .input_len(14)
                 .title(Title::from("Phone number").alignment(HorizontalAlignment::Left))
@@ -444,6 +449,7 @@ impl Default for InputColor {
                         .color(Color::White),
                 )
                 .foreground(Color::White)
+                .inactive(Style::new().fg(Color::Gray))
                 .input_type(InputType::Color)
                 .title(
                     Title::from("What's your favourite color").alignment(HorizontalAlignment::Left),

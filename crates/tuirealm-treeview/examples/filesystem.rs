@@ -256,7 +256,7 @@ impl FsTree {
                         .color(Color::LightYellow)
                         .modifiers(BorderType::Rounded),
                 )
-                .inactive(Style::default().fg(Color::Gray))
+                .inactive(Style::new().fg(Color::Gray))
                 .indent_size(3)
                 .scroll_step(6)
                 .title(
@@ -363,6 +363,7 @@ impl Default for GoTo {
         Self {
             component: Input::default()
                 .foreground(Color::LightBlue)
+                .inactive(Style::new().fg(Color::Gray))
                 .borders(
                     Borders::default()
                         .color(Color::LightBlue)

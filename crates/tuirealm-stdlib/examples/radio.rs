@@ -130,6 +130,7 @@ impl Default for RadioAlfa {
                         .color(Color::LightGreen),
                 )
                 .foreground(Color::LightGreen)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(
                     Title::from("Select your ice cream flavour 🍦")
                         .alignment(HorizontalAlignment::Center),
@@ -184,6 +185,7 @@ impl Default for RadioBeta {
                         .color(Color::LightYellow),
                 )
                 .foreground(Color::LightYellow)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(Title::from("Select your topping 🧁").alignment(HorizontalAlignment::Center))
                 .rewind(false)
                 .choices([
@@ -232,6 +234,7 @@ impl Default for RadioCeta {
                         .color(Color::LightYellow),
                 )
                 .foreground(Color::LightYellow)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(Title::from("Choice of the day").alignment(HorizontalAlignment::Center))
                 .highlight_style(Style::new().add_modifier(TextModifiers::UNDERLINED))
                 .rewind(false)

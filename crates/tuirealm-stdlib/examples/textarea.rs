@@ -123,6 +123,7 @@ impl Default for TextareaAlfa {
                         .color(Color::Yellow),
                 )
                 .foreground(Color::Yellow)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(
                     Title::from("Night Moves (Bob Seger)").alignment(HorizontalAlignment::Center),
                 )
@@ -196,6 +197,7 @@ impl Default for TextareaBeta {
                         .color(Color::LightBlue),
                 )
                 .foreground(Color::LightBlue)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(Title::from("Roxanne (The Police)").alignment(HorizontalAlignment::Center))
                 .step(4)
                 .highlight_str("🎵")

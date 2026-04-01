@@ -134,6 +134,7 @@ impl Default for SelectAlfa {
                         .color(Color::LightGreen),
                 )
                 .foreground(Color::LightGreen)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(
                     Title::from("Select your ice cream flavour 🍦")
                         .alignment(HorizontalAlignment::Center),
@@ -193,6 +194,7 @@ impl Default for SelectBeta {
                         .color(Color::LightYellow),
                 )
                 .foreground(Color::LightYellow)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(Title::from("Select your topping 🧁").alignment(HorizontalAlignment::Center))
                 .rewind(false)
                 // Overwrite the default "REVERSED" style to be underlined instead

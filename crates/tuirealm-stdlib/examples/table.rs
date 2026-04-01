@@ -126,6 +126,7 @@ impl Default for TableAlfa {
                 )
                 .foreground(Color::Yellow)
                 .background(Color::Black)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(Title::from("Keybindings").alignment(HorizontalAlignment::Center))
                 .scroll(true)
                 .highlight_style(Style::new().fg(Color::LightYellow))
@@ -213,6 +214,7 @@ impl Default for TableBeta {
                 )
                 .foreground(Color::Green)
                 .background(Color::Gray)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(
                     Title::from("Keybindings (not scrollable)")
                         .alignment(HorizontalAlignment::Center),

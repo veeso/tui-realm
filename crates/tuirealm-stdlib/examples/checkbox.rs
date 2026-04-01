@@ -8,7 +8,7 @@ use tuirealm::application::PollStrategy;
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
-use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Title};
+use tuirealm::props::{BorderType, Borders, Color, HorizontalAlignment, Style, Title};
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::terminal::TerminalAdapter;
 
@@ -123,6 +123,7 @@ impl Default for CheckboxAlfa {
                 )
                 .foreground(Color::LightGreen)
                 .background(Color::Black)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(
                     Title::from("Select your ice cream flavours 🍦")
                         .alignment(HorizontalAlignment::Center),
@@ -182,6 +183,7 @@ impl Default for CheckboxBeta {
                 )
                 .foreground(Color::LightYellow)
                 .background(Color::Black)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(
                     Title::from("Select your toppings 🧁").alignment(HorizontalAlignment::Center),
                 )

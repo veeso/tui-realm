@@ -127,6 +127,7 @@ impl Default for ListAlfa {
                 .scroll(true)
                 .highlight_style(Style::new().fg(Color::LightYellow))
                 .highlight_str("🚀")
+                .inactive(Style::new().fg(Color::Gray))
                 .rewind(true)
                 .step(4)
                 .rows([
@@ -242,6 +243,7 @@ impl Default for ListBeta {
                         .color(Color::Green),
                 )
                 .foreground(Color::Green)
+                .inactive(Style::new().fg(Color::Gray))
                 .title(Title::from("Lorem ipsum (unscrollable)").alignment(HorizontalAlignment::Center))
                 .scroll(false)
                 .rows([

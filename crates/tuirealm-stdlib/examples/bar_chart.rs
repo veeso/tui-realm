@@ -124,6 +124,7 @@ impl Default for ChartAlfa {
                 .borders(Borders::default().color(Color::LightBlue))
                 .max_bars(4)
                 .value_style(Style::default().fg(Color::LightBlue))
+                .inactive(Style::new().fg(Color::Gray))
                 .data(&[
                     ("january", 250),
                     ("february", 300),
@@ -186,6 +187,7 @@ impl Default for ChartBeta {
                 )
                 .max_bars(12)
                 .value_style(Style::default().fg(Color::LightBlue))
+                .inactive(Style::new().fg(Color::Gray))
                 .data(&[
                     ("january", 250),
                     ("february", 300),
