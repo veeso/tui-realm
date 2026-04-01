@@ -346,9 +346,11 @@ impl Component for Table {
         let rows: Vec<Row> = self.make_rows(row_height);
         let widths: Vec<Constraint> = self.layout();
 
-        let mut widget = TuiTable::new(rows, &widths)
-            .style(self.common.style)
-            .row_highlight_style(self.common_hg.get_style(self.common.style));
+        let mut widget = TuiTable::new(rows, &widths).style(self.common.style);
+
+        if self.common.is_active() {
+            widget = widget.row_highlight_style(self.common_hg.get_style(self.common.style));
+        }
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);

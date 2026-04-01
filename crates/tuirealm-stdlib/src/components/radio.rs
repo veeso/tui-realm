@@ -218,8 +218,15 @@ impl Component for Radio {
 
         let mut widget = Tabs::new(choices)
             .select(self.states.choice)
-            .style(self.common.style)
-            .highlight_style(self.common_hg.get_style(self.common.style));
+            .style(self.common.style);
+
+        if self.common.is_active() {
+            widget = widget.highlight_style(self.common_hg.get_style(self.common.style));
+        } else {
+            // for some reason, it seems like "Tabs" has a default "REVERSED" set for the highlight style
+            // at least as of ratatui-widgets 0.30
+            widget = widget.highlight_style(Style::default());
+        }
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);

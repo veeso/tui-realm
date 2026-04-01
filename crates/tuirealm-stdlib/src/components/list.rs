@@ -255,8 +255,11 @@ impl Component for List {
         // Make the widget
         let mut widget = TuiList::new(list_items)
             .style(self.common.style)
-            .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
-            .highlight_style(self.common_hg.get_style(self.common.style));
+            .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom);
+
+        if self.common.is_active() {
+            widget = widget.highlight_style(self.common_hg.get_style(self.common.style));
+        }
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);

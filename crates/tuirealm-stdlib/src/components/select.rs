@@ -240,8 +240,11 @@ impl Select {
         // Make list
         let mut widget = List::new(choices)
             .direction(tuirealm::ratatui::widgets::ListDirection::TopToBottom)
-            .style(self.common.style)
-            .highlight_style(self.common_hg.get_style(self.common.style));
+            .style(self.common.style);
+
+        if self.common.is_active() {
+            widget = widget.highlight_style(self.common_hg.get_style(self.common.style));
+        }
 
         if let Some(symbol) = self.common_hg.get_symbol() {
             widget = widget.highlight_symbol(symbol);

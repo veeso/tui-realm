@@ -245,8 +245,11 @@ impl Component for Checkbox {
             .collect();
         let mut widget: Tabs = Tabs::new(choices)
             .select(self.states.choice)
-            .style(self.common.style)
-            .highlight_style(self.common_hg.get_style(self.common.style));
+            .style(self.common.style);
+
+        if self.common.is_active() {
+            widget = widget.highlight_style(self.common_hg.get_style(self.common.style));
+        }
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);
