@@ -155,6 +155,15 @@ fn test_input_snapshot_empty() {
 }
 
 #[test]
+fn test_input_snapshot_noborder() {
+    let mut component = Input::default()
+        .input_type(InputType::Text)
+        .value("Test Text");
+    let rendered = common::render_to_string(&mut component, 40, 3);
+    insta::assert_snapshot!("input_no_borders", rendered);
+}
+
+#[test]
 fn test_input_snapshot_password() {
     let mut component = Input::default()
         .borders(Borders::default())
