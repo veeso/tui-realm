@@ -3,7 +3,7 @@ use tui_realm_stdlib::components::{Container, Label};
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Layout, Title};
-use tuirealm::ratatui::layout::{Constraint, Direction};
+use tuirealm::ratatui::layout::{Constraint, Direction, Size};
 use tuirealm::state::State;
 use tuirealm::testing::render_to_string;
 
@@ -35,6 +35,6 @@ fn test_container_snapshot_with_children() {
                 .constraints(&[Constraint::Percentage(50), Constraint::Percentage(50)]),
         )
         .children(vec![Box::new(child1), Box::new(child2)]);
-    let rendered = render_to_string(&mut component, 40, 8);
+    let rendered = render_to_string(&mut component, Size::new(40, 8));
     insta::assert_snapshot!("container_with_children", rendered);
 }

@@ -3,6 +3,7 @@ use tui_realm_stdlib::components::Table;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Style, TableBuilder, Title};
+use tuirealm::ratatui::layout::Size;
 use tuirealm::ratatui::text::Line;
 use tuirealm::state::{State, StateValue};
 use tuirealm::testing::render_to_string;
@@ -110,6 +111,6 @@ fn test_table_snapshot_default() {
         .headers(["Name", "Age"])
         .widths(&[20, 10])
         .table(make_table_data());
-    let rendered = render_to_string(&mut component, 50, 8);
+    let rendered = render_to_string(&mut component, Size::new(50, 8));
     insta::assert_snapshot!("table_default", rendered);
 }

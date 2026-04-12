@@ -3,6 +3,7 @@ use tui_realm_stdlib::components::{Chart, ChartDataset};
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Style, Title};
+use tuirealm::ratatui::layout::Size;
 use tuirealm::state::State;
 use tuirealm::testing::render_to_string;
 
@@ -73,6 +74,6 @@ fn test_chart_snapshot_default() {
         .x_labels(&["0", "5", "10"])
         .y_labels(&["0", "5", "10"])
         .data([make_dataset()]);
-    let rendered = render_to_string(&mut component, 60, 15);
+    let rendered = render_to_string(&mut component, Size::new(60, 15));
     insta::assert_snapshot!("chart_default", rendered);
 }

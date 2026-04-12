@@ -9,6 +9,7 @@ use tui_realm_textarea::{
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Style, Title};
+use tuirealm::ratatui::layout::Size;
 use tuirealm::state::{State, StateValue};
 use tuirealm::testing::render_to_string;
 
@@ -297,7 +298,7 @@ fn test_textarea_snapshot_singleline() {
     for ch in "Hello, World!".chars() {
         component.perform(Cmd::Type(ch));
     }
-    let rendered = render_to_string(&mut component, 40, 8);
+    let rendered = render_to_string(&mut component, Size::new(40, 8));
     insta::assert_snapshot!("textarea_crate_singleline", rendered);
 }
 
@@ -317,7 +318,7 @@ fn test_textarea_snapshot_multiline() {
     for ch in "Line 3".chars() {
         component.perform(Cmd::Type(ch));
     }
-    let rendered = render_to_string(&mut component, 40, 8);
+    let rendered = render_to_string(&mut component, Size::new(40, 8));
     insta::assert_snapshot!("textarea_crate_multiline", rendered);
 }
 
@@ -326,6 +327,6 @@ fn test_textarea_snapshot_empty() {
     let mut component = TextArea::default()
         .borders(Borders::default())
         .title(Title::from("Empty"));
-    let rendered = render_to_string(&mut component, 40, 8);
+    let rendered = render_to_string(&mut component, Size::new(40, 8));
     insta::assert_snapshot!("textarea_crate_empty", rendered);
 }

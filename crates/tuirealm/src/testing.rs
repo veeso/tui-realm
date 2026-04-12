@@ -7,18 +7,19 @@
 //! # Example
 //!
 //! ```no_run
-//! use tuirealm::component::Component;
-//! use tuirealm::testing::render_to_string;
-//!
+//! # use tuirealm::component::Component;
+//! # use tuirealm::testing::render_to_string;
+//! # use tuirealm::ratatui::layout::Size;
+//! #
 //! fn assert_component_snapshot(component: &mut dyn Component) {
-//!     let rendered = render_to_string(component, 40, 10);
+//!     let rendered = render_to_string(component, Size::new(40, 10));
 //!     insta::assert_snapshot!(rendered);
 //! }
 //! ```
 
 use crate::component::Component;
 use crate::ratatui::buffer::Buffer;
-use crate::ratatui::layout::Rect;
+use crate::ratatui::layout::Size;
 use crate::terminal::{TerminalAdapter, TestTerminalAdapter};
 
 /// Convert a ratatui [`Buffer`] to a string, one line per row,
@@ -56,20 +57,17 @@ pub fn buffer_to_string(buffer: &Buffer) -> String {
 /// # Arguments
 ///
 /// * `component` — the component to render.
-/// * `width` — width of the virtual terminal in columns.
-/// * `height` — height of the virtual terminal in rows.
+/// * `size` — width & height of the virtual terminal.
 ///
 /// # Panics
 ///
 /// Panics if the [`TestTerminalAdapter`] cannot be created or if the
 /// draw call fails.
-pub fn render_to_string(component: &mut dyn Component, width: u16, height: u16) -> String {
-    let mut adapter =
-        TestTerminalAdapter::new(width, height).expect("failed to create TestTerminalAdapter");
-    let area = Rect::new(0, 0, width, height);
+pub fn render_to_string(component: &mut dyn Component, size: Size) -> String {
+    let mut adapter = TestTerminalAdapter::new(size).expect("failed to create TestTerminalAdapter");
     let completed = adapter
         .raw_mut()
-        .draw(|f| component.view(f, area))
+        .draw(|f| component.view(f, f.area()))
         .expect("failed to draw component");
     buffer_to_string(completed.buffer)
 }

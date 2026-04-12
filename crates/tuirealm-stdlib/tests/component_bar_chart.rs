@@ -3,6 +3,7 @@ use tui_realm_stdlib::components::BarChart;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Title};
+use tuirealm::ratatui::layout::Size;
 use tuirealm::state::State;
 use tuirealm::testing::render_to_string;
 
@@ -69,6 +70,6 @@ fn test_bar_chart_snapshot_default() {
         .title(Title::from("Sales"))
         .foreground(Color::Green)
         .data(&[("Q1", 100), ("Q2", 150), ("Q3", 200), ("Q4", 175)]);
-    let rendered = render_to_string(&mut component, 50, 12);
+    let rendered = render_to_string(&mut component, Size::new(50, 12));
     insta::assert_snapshot!("bar_chart_default", rendered);
 }

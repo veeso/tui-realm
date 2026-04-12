@@ -3,6 +3,7 @@ use tui_realm_stdlib::components::Checkbox;
 use tuirealm::command::{Cmd, CmdResult, Direction};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, HorizontalAlignment, Title};
+use tuirealm::ratatui::layout::Size;
 use tuirealm::state::{State, StateValue};
 use tuirealm::testing::render_to_string;
 
@@ -72,6 +73,6 @@ fn test_checkbox_snapshot_default() {
         .foreground(Color::Yellow)
         .choices(["Alpha", "Beta", "Gamma"])
         .values(&[1]);
-    let rendered = render_to_string(&mut component, 50, 3);
+    let rendered = render_to_string(&mut component, Size::new(50, 3));
     insta::assert_snapshot!("checkbox_default", rendered);
 }

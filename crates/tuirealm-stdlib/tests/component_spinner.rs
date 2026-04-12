@@ -3,6 +3,7 @@ use tui_realm_stdlib::components::Spinner;
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::Component;
 use tuirealm::props::Color;
+use tuirealm::ratatui::layout::Size;
 use tuirealm::state::State;
 use tuirealm::testing::render_to_string;
 
@@ -30,6 +31,6 @@ fn test_spinner_snapshot_default() {
     let mut component = Spinner::default()
         .foreground(Color::Cyan)
         .sequence("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏");
-    let rendered = render_to_string(&mut component, 10, 1);
+    let rendered = render_to_string(&mut component, Size::new(10, 1));
     insta::assert_snapshot!(rendered, @"⠋");
 }

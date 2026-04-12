@@ -3,6 +3,7 @@ use tui_realm_stdlib::components::Label;
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::Component;
 use tuirealm::props::{Color, HorizontalAlignment};
+use tuirealm::ratatui::layout::Size;
 use tuirealm::state::State;
 use tuirealm::testing::render_to_string;
 
@@ -34,7 +35,7 @@ fn test_label_snapshot_default() {
     let mut component = Label::default()
         .foreground(Color::Yellow)
         .text("Hello, World!");
-    let rendered = render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, Size::new(40, 3));
     insta::assert_snapshot!("label_default", rendered);
 }
 
@@ -43,6 +44,6 @@ fn test_label_snapshot_centered() {
     let mut component = Label::default()
         .text("Centered Text")
         .alignment_horizontal(HorizontalAlignment::Center);
-    let rendered = render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, Size::new(40, 3));
     insta::assert_snapshot!("label_centered", rendered);
 }

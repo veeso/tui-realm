@@ -3,6 +3,7 @@ use tui_realm_stdlib::components::Canvas;
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Shape, Title};
+use tuirealm::ratatui::layout::Size;
 use tuirealm::ratatui::widgets::canvas::Line as CanvasLine;
 use tuirealm::state::State;
 use tuirealm::testing::render_to_string;
@@ -37,6 +38,6 @@ fn test_canvas_snapshot_default() {
             y2: 100.0,
             color: Color::White,
         })]);
-    let rendered = render_to_string(&mut component, 40, 15);
+    let rendered = render_to_string(&mut component, Size::new(40, 15));
     insta::assert_snapshot!("canvas_default", rendered);
 }

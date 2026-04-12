@@ -3,6 +3,7 @@
 
 use ratatui::Terminal;
 use ratatui::backend::TestBackend;
+use ratatui::layout::Size;
 
 use crate::ratatui::TerminalOptions;
 use crate::terminal::{TerminalAdapter, TerminalError, TerminalResult};
@@ -17,18 +18,14 @@ pub struct TestTerminalAdapter {
 impl TestTerminalAdapter {
     /// Create a new [`TestTerminalAdapter`] instance with default ratatui Terminal options and the provided
     /// height and width.
-    pub fn new(width: u16, height: u16) -> TerminalResult<Self> {
-        Self::new_with_options(width, height, TerminalOptions::default())
+    pub fn new(size: Size) -> TerminalResult<Self> {
+        Self::new_with_options(size, TerminalOptions::default())
     }
 
     /// Create a new [`TestTerminalAdapter`] instance with custom ratatui Terminal options, and the provided
     /// sizes.
-    pub fn new_with_options(
-        width: u16,
-        height: u16,
-        options: TerminalOptions,
-    ) -> TerminalResult<Self> {
-        let backend = TestBackend::new(width, height);
+    pub fn new_with_options(size: Size, options: TerminalOptions) -> TerminalResult<Self> {
+        let backend = TestBackend::new(size.width, size.height);
         let terminal = Terminal::with_options(backend, options)
             .map_err(|_| TerminalError::Other("Failed creating terminal"))?;
 
