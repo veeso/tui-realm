@@ -1,11 +1,10 @@
-mod common;
-
 use pretty_assertions::assert_eq;
 use tui_realm_stdlib::components::Input;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, InputType, Title};
 use tuirealm::state::{State, StateValue};
+use tuirealm::testing::render_to_string;
 
 #[test]
 fn test_input_initial_state() {
@@ -140,7 +139,7 @@ fn test_input_snapshot_default() {
         .foreground(Color::Cyan)
         .input_type(InputType::Text)
         .value("john_doe");
-    let rendered = common::render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, 40, 3);
     insta::assert_snapshot!("input_default", rendered);
 }
 
@@ -150,7 +149,7 @@ fn test_input_snapshot_empty() {
         .borders(Borders::default())
         .title(Title::from("Input"))
         .input_type(InputType::Text);
-    let rendered = common::render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, 40, 3);
     insta::assert_snapshot!("input_empty", rendered);
 }
 
@@ -159,7 +158,7 @@ fn test_input_snapshot_noborder() {
     let mut component = Input::default()
         .input_type(InputType::Text)
         .value("Test Text");
-    let rendered = common::render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, 40, 3);
     insta::assert_snapshot!("input_no_borders", rendered);
 }
 
@@ -170,6 +169,6 @@ fn test_input_snapshot_password() {
         .title(Title::from("Password"))
         .input_type(InputType::Password('*'))
         .value("secret");
-    let rendered = common::render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, 40, 3);
     insta::assert_snapshot!("input_password", rendered);
 }

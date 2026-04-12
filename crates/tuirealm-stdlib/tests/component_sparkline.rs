@@ -1,11 +1,10 @@
-mod common;
-
 use pretty_assertions::assert_eq;
 use tui_realm_stdlib::components::Sparkline;
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Title};
 use tuirealm::state::State;
+use tuirealm::testing::render_to_string;
 
 #[test]
 fn test_sparkline_state_is_none() {
@@ -29,13 +28,13 @@ fn test_sparkline_snapshot_default() {
         .title(Title::from("Metrics"))
         .foreground(Color::Green)
         .data(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-    let rendered = common::render_to_string(&mut component, 40, 5);
+    let rendered = render_to_string(&mut component, 40, 5);
     insta::assert_snapshot!("sparkline_default", rendered);
 }
 
 #[test]
 fn test_sparkline_snapshot_empty() {
     let mut component = Sparkline::default().borders(Borders::default()).data(&[]);
-    let rendered = common::render_to_string(&mut component, 40, 5);
+    let rendered = render_to_string(&mut component, 40, 5);
     insta::assert_snapshot!("sparkline_empty", rendered);
 }

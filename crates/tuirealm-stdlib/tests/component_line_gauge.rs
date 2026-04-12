@@ -1,11 +1,10 @@
-mod common;
-
 use pretty_assertions::assert_eq;
 use tui_realm_stdlib::components::LineGauge;
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Title};
 use tuirealm::state::State;
+use tuirealm::testing::render_to_string;
 
 #[test]
 fn test_line_gauge_state_is_none() {
@@ -30,7 +29,7 @@ fn test_line_gauge_snapshot_default() {
         .foreground(Color::Cyan)
         .label("75%")
         .progress(0.75);
-    let rendered = common::render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, 40, 3);
     insta::assert_snapshot!("line_gauge_default", rendered);
 }
 
@@ -39,6 +38,6 @@ fn test_line_gauge_snapshot_empty() {
     let mut component = LineGauge::default()
         .borders(Borders::default())
         .progress(0.0);
-    let rendered = common::render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, 40, 3);
     insta::assert_snapshot!("line_gauge_empty", rendered);
 }

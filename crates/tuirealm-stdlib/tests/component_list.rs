@@ -1,5 +1,3 @@
-mod common;
-
 use pretty_assertions::assert_eq;
 use tui_realm_stdlib::components::List;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
@@ -7,6 +5,7 @@ use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Style, Title};
 use tuirealm::ratatui::text::Line;
 use tuirealm::state::{State, StateValue};
+use tuirealm::testing::render_to_string;
 
 #[test]
 fn test_list_initial_state_scrollable() {
@@ -117,7 +116,7 @@ fn test_list_snapshot_default() {
             Line::from("Second item"),
             Line::from("Third item"),
         ]);
-    let rendered = common::render_to_string(&mut component, 40, 7);
+    let rendered = render_to_string(&mut component, 40, 7);
     insta::assert_snapshot!("list_default", rendered);
 }
 
@@ -128,6 +127,6 @@ fn test_list_snapshot_empty() {
         .title(Title::from("Empty List"))
         .scroll(true)
         .rows(Vec::<Line>::new());
-    let rendered = common::render_to_string(&mut component, 40, 5);
+    let rendered = render_to_string(&mut component, 40, 5);
     insta::assert_snapshot!("list_empty", rendered);
 }

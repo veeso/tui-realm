@@ -1,5 +1,3 @@
-mod common;
-
 use pretty_assertions::assert_eq;
 use tui_realm_stdlib::components::Span;
 use tuirealm::command::{Cmd, CmdResult};
@@ -7,6 +5,7 @@ use tuirealm::component::Component;
 use tuirealm::props::HorizontalAlignment;
 use tuirealm::ratatui::text::Span as RatatuiSpan;
 use tuirealm::state::State;
+use tuirealm::testing::render_to_string;
 
 #[test]
 fn test_span_state_is_none() {
@@ -27,7 +26,7 @@ fn test_span_unhandled_cmd() {
 fn test_span_snapshot_default() {
     let mut component =
         Span::default().spans([RatatuiSpan::raw("Hello "), RatatuiSpan::raw("World")]);
-    let rendered = common::render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, 40, 3);
     insta::assert_snapshot!("span_default", rendered);
 }
 
@@ -36,6 +35,6 @@ fn test_span_snapshot_centered() {
     let mut component = Span::default()
         .alignment_horizontal(HorizontalAlignment::Center)
         .spans([RatatuiSpan::raw("Centered")]);
-    let rendered = common::render_to_string(&mut component, 40, 3);
+    let rendered = render_to_string(&mut component, 40, 3);
     insta::assert_snapshot!("span_centered", rendered);
 }

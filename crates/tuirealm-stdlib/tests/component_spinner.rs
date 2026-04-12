@@ -1,11 +1,10 @@
-mod common;
-
 use pretty_assertions::assert_eq;
 use tui_realm_stdlib::components::Spinner;
 use tuirealm::command::{Cmd, CmdResult};
 use tuirealm::component::Component;
 use tuirealm::props::Color;
 use tuirealm::state::State;
+use tuirealm::testing::render_to_string;
 
 #[test]
 fn test_spinner_state_is_none() {
@@ -31,6 +30,6 @@ fn test_spinner_snapshot_default() {
     let mut component = Spinner::default()
         .foreground(Color::Cyan)
         .sequence("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏");
-    let rendered = common::render_to_string(&mut component, 10, 1);
+    let rendered = render_to_string(&mut component, 10, 1);
     insta::assert_snapshot!(rendered, @"⠋");
 }

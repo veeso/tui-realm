@@ -1,5 +1,3 @@
-mod common;
-
 use pretty_assertions::assert_eq;
 use tui_realm_stdlib::components::Textarea;
 use tuirealm::command::{Cmd, CmdResult, Direction, Position};
@@ -7,6 +5,7 @@ use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Title};
 use tuirealm::ratatui::text::Span;
 use tuirealm::state::{State, StateValue};
+use tuirealm::testing::render_to_string;
 
 #[test]
 fn test_textarea_initial_state() {
@@ -101,6 +100,6 @@ fn test_textarea_snapshot_default() {
             Span::from("Second line of text"),
             Span::from("Third line of text"),
         ]);
-    let rendered = common::render_to_string(&mut component, 40, 7);
+    let rendered = render_to_string(&mut component, 40, 7);
     insta::assert_snapshot!("textarea_stdlib_default", rendered);
 }

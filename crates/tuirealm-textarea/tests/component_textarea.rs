@@ -1,5 +1,3 @@
-mod common;
-
 use pretty_assertions::assert_eq;
 use tui_realm_textarea::{
     TEXTAREA_CMD_DEL_LINE_BY_END, TEXTAREA_CMD_DEL_LINE_BY_HEAD, TEXTAREA_CMD_DEL_NEXT_WORD,
@@ -12,6 +10,7 @@ use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Style, Title};
 use tuirealm::state::{State, StateValue};
+use tuirealm::testing::render_to_string;
 
 #[test]
 fn test_textarea_initial_state_empty() {
@@ -298,7 +297,7 @@ fn test_textarea_snapshot_singleline() {
     for ch in "Hello, World!".chars() {
         component.perform(Cmd::Type(ch));
     }
-    let rendered = common::render_to_string(&mut component, 40, 8);
+    let rendered = render_to_string(&mut component, 40, 8);
     insta::assert_snapshot!("textarea_crate_singleline", rendered);
 }
 
@@ -318,7 +317,7 @@ fn test_textarea_snapshot_multiline() {
     for ch in "Line 3".chars() {
         component.perform(Cmd::Type(ch));
     }
-    let rendered = common::render_to_string(&mut component, 40, 8);
+    let rendered = render_to_string(&mut component, 40, 8);
     insta::assert_snapshot!("textarea_crate_multiline", rendered);
 }
 
@@ -327,6 +326,6 @@ fn test_textarea_snapshot_empty() {
     let mut component = TextArea::default()
         .borders(Borders::default())
         .title(Title::from("Empty"));
-    let rendered = common::render_to_string(&mut component, 40, 8);
+    let rendered = render_to_string(&mut component, 40, 8);
     insta::assert_snapshot!("textarea_crate_empty", rendered);
 }

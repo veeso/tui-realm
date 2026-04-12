@@ -1,5 +1,3 @@
-mod common;
-
 use pretty_assertions::assert_eq;
 use tui_realm_treeview::mock::mock_tree;
 use tui_realm_treeview::{TREE_CMD_CLOSE, TREE_CMD_OPEN, TreeView};
@@ -7,6 +5,7 @@ use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::Component;
 use tuirealm::props::{Borders, Color, Style, Title};
 use tuirealm::state::{State, StateValue};
+use tuirealm::testing::render_to_string;
 
 #[test]
 fn test_treeview_initial_state() {
@@ -115,7 +114,7 @@ fn test_treeview_snapshot_default() {
         .indent_size(3)
         .with_tree(mock_tree())
         .initial_node("/");
-    let rendered = common::render_to_string(&mut component, 40, 15);
+    let rendered = render_to_string(&mut component, 40, 15);
     insta::assert_snapshot!("treeview_default", rendered);
 }
 
@@ -128,6 +127,6 @@ fn test_treeview_snapshot_collapsed() {
         .with_tree(mock_tree())
         .initial_node("/");
     component.perform(Cmd::Custom(TREE_CMD_CLOSE));
-    let rendered = common::render_to_string(&mut component, 40, 15);
+    let rendered = render_to_string(&mut component, 40, 15);
     insta::assert_snapshot!("treeview_collapsed", rendered);
 }
