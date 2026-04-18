@@ -1,7 +1,6 @@
 #![allow(dead_code)] // practically just compile tests
 
 use tuirealm::command::{Cmd, CmdResult};
-use tuirealm::component::Component;
 use tuirealm::props::{AttrValue, Attribute, QueryResult};
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::Rect;
@@ -10,7 +9,7 @@ use tuirealm_derive::Component;
 
 struct Stub;
 
-impl Component for Stub {
+impl tuirealm::component::Component for Stub {
     fn view(&mut self, _frame: &mut Frame, _area: Rect) {}
 
     fn query(&self, _attr: Attribute) -> Option<QueryResult<'_>> {
