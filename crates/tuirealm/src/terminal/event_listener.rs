@@ -24,11 +24,13 @@ pub use test::TestEventListener;
 
 #[allow(unused_imports)] // used in the event listeners
 use crate::event::Event;
-use crate::listener::PortError;
 
 /// Convert [`io::Error`](std::io::Error) to a [`PortError`], with correct Intermittent & Permanent Mapping
-fn io_err_to_port_err(err: std::io::Error) -> PortError {
+#[cfg(any(feature = "crossterm", feature = "termion"))]
+fn io_err_to_port_err(err: std::io::Error) -> crate::listener::PortError {
     use std::io::ErrorKind;
+
+    use crate::listener::PortError;
 
     match err.kind() {
         ErrorKind::Interrupted
@@ -43,13 +45,14 @@ fn io_err_to_port_err(err: std::io::Error) -> PortError {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, any(feature = "crossterm", feature = "termion")))]
 mod tests {
     use std::io::{Error as ioError, ErrorKind};
 
     use pretty_assertions::assert_eq;
 
     use super::*;
+    use crate::listener::PortError;
 
     #[test]
     fn should_map_to_intermittend() {
