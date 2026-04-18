@@ -1,12 +1,12 @@
 # tui-realm
 
 <p align="center">
-  <img src="docs/images/tui-realm.svg" alt="logo" width="256" height="256" />
+  <img src="crates/tuirealm/docs/images/tui-realm.svg" alt="logo" width="256" height="256" />
 </p>
 
 <p align="center">~ A ratatui framework inspired by Elm and React ~</p>
 <p align="center">
-  <a href="docs/en/get-started.md" target="_blank">Get started</a>
+  <a href="crates/tuirealm/docs/en/get-started.md" target="_blank">Get started</a>
   ·
   <a href="https://github.com/veeso/tui-realm/tree/main/crates/tuirealm-stdlib" target="_blank">Standard Library</a>
   ·

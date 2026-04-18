@@ -163,17 +163,17 @@ tuirealm = { version = "4", default-features = false, features = [ "derive", "te
 
 ### Create a tui-realm application 🪂
 
-View how to implement a tui-realm application in the [Get Started Guide](/docs/en/get-started.md).
+View how to implement a tui-realm application in the [Get Started Guide](docs/en/get-started.md).
 
 ### Run examples 🔍
 
 Interested in how tui-realm works and how the resulting code looks? Try the examples:
 
-- [demo](/examples/demo/demo.rs): a simple example that shows basic tui-realm usage
-- [user-events](/examples/user_events/user_events.rs): showcase using custom events
-- [inline-display](/examples/inline_display.rs): showcase how tui-realm can be used without requiring a alternate screen
-- [async-ports](/examples/async_ports.rs): showcase usage of async ports
-- [arbitrary-data](/examples/arbitrary_data.rs): showcase usage of `PropPayload::Any` to send custom data across `query` and `attr`
+- [demo](examples/demo/demo.rs): a simple example that shows basic tui-realm usage
+- [user-events](examples/user_events/user_events.rs): showcase using custom events
+- [inline-display](examples/inline_display.rs): showcase how tui-realm can be used without requiring a alternate screen
+- [async-ports](examples/async_ports.rs): showcase usage of async ports
+- [arbitrary-data](examples/arbitrary_data.rs): showcase usage of `PropPayload::Any` to send custom data across `query` and `attr`
 
 ---
 
@@ -197,8 +197,8 @@ Want to add yours? Open an issue using the `New app/component` template 😄
 
 ## Guides 🎓
 
-- [Get Started Guide](/docs/en/get-started.md)
-- [Advanced concepts](/docs/en/advanced.md)
+- [Get Started Guide](docs/en/get-started.md)
+- [Advanced concepts](docs/en/advanced.md)
 
 ---
 

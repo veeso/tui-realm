@@ -1,7 +1,7 @@
 # tui-realm-treeview
 
 <p align="center">
-  <img src="/docs/images/tui-realm-treeview.svg" width="256" height="256" alt="logo" />
+  <img src="docs/images/tui-realm-treeview.svg" width="256" height="256" alt="logo" />
 </p>
 
 <p align="center">~ Treeview component for tui-realm ~</p>

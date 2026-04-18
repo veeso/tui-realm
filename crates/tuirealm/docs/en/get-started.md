@@ -529,7 +529,7 @@ Now that we know how a `tui-realm` application works, let's see how to implement
 We're finally ready to set up a realm `tui-realm` application. In this example we're going to start with something very simple.
 The application we're going to implement is really simple, we've got two **counters**, one will track when an alphabetic character is pressed by the user and the other when a digit is pressed by the user. Both of them will track events only when active. The active component will switch between the two counters pressing `<TAB>`, while pressing `<ESC>` the application will terminate.
 
-> This example will result in something similar to [the demo example](/examples/demo/demo.rs).
+> This example will result in something similar to [the demo example](../../examples/demo/demo.rs).
 
 ### Let's implement the Counter
 

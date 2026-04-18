@@ -39,7 +39,7 @@ This library also uses a few *Custom* attributes. These custom attributes are ob
 
 ## BarChart
 
-![bar_chart](/docs/images/components/bar_chart.gif)
+![bar_chart](images/components/bar_chart.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example bar-chart`
@@ -78,7 +78,7 @@ While in active mode (default) you can put as many entries as you wish. You can 
 
 ## Canvas
 
-![canvas](/docs/images/components/canvas.gif)
+![canvas](images/components/canvas.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example canvas`
@@ -101,7 +101,7 @@ Canvas component can be used to draw shapes on the terminal.
 
 ## Chart
 
-![chart](/docs/images/components/chart.gif)
+![chart](images/components/chart.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example chart`
@@ -144,7 +144,7 @@ While in active mode (default) you can put as many entries as you wish. You can 
 
 ## Checkbox
 
-![checkbox](/docs/images/components/checkbox.gif)
+![checkbox](images/components/checkbox.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example checkbox`
@@ -177,7 +177,7 @@ A checkbox group. Provides the possibility to select between multiple options, w
 
 ## Container
 
-![container](/docs/images/components/container.gif)
+![container](images/components/container.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example container`
@@ -203,7 +203,7 @@ While for `attr()` it will apply the properties for all the children by default.
 
 ## Input
 
-![input](/docs/images/components/input.gif)
+![input](images/components/input.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example input`
@@ -244,7 +244,7 @@ An input text. Provides the possiblity to input a text with the possibility to s
 
 ## Label
 
-![label](/docs/images/components/label.gif)
+![label](images/components/label.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example label`
@@ -267,7 +267,7 @@ A text label. Provides the possibility to display a simple text, with the possib
 
 ## Line gauge
 
-![line_gauge](/docs/images/components/line_gauge.gif)
+![line_gauge](images/components/line_gauge.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example line_gauge`
@@ -297,7 +297,7 @@ A line indicating progress. The progress bar provides the possibility to show th
 
 ## List
 
-![list](/docs/images/components/list.gif)
+![list](images/components/list.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example list`
@@ -337,7 +337,7 @@ Events will be reported only when set as `Scrollable`
 
 ## Paragraph
 
-![paragraph](/docs/images/components/paragraph.gif)
+![paragraph](images/components/paragraph.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example paragraph`
@@ -376,7 +376,7 @@ This component suits well to work as a subscriber for some global events (such a
 
 ## Progress bar
 
-![progress_bar](/docs/images/components/progress_bar.gif)
+![progress_bar](images/components/progress_bar.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example progress_bar`
@@ -401,7 +401,7 @@ A progress bar or basically a gauge. The progress bar provides the possibility t
 
 ## Radio
 
-![radio](/docs/images/components/radio.gif)
+![radio](images/components/radio.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example radio`
@@ -433,7 +433,7 @@ A radio button group. Provides the possibility to select a single option in a gr
 
 ## Select
 
-![select](/docs/images/components/select.gif)
+![select](images/components/select.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example select`
@@ -491,7 +491,7 @@ A span is an in-line component which supports text with different styles.
 
 ## Sparkline
 
-![sparkline](/docs/images/components/sparkline.gif)
+![sparkline](images/components/sparkline.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example sparkline`
@@ -514,7 +514,7 @@ A sparkline chart.
 
 ## Spinner
 
-![spinner](/docs/images/components/spinner.gif)
+![spinner](images/components/spinner.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example spinner`
@@ -536,7 +536,7 @@ So for example the sequence may be `"⣾⣽⣻⢿⡿⣟⣯⣷"`, so at first vie
 
 ## Table
 
-![table](/docs/images/components/table.gif)
+![table](images/components/table.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example table`
@@ -582,7 +582,7 @@ Events will be reported only when set as `Scrollable`
 
 ## Textarea
 
-![textarea](/docs/images/components/textarea.gif)
+![textarea](images/components/textarea.gif)
 
 > ✨ Check me out ✨  
 > `cargo run --example textarea`

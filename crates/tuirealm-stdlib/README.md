@@ -1,7 +1,7 @@
 # tui-realm-stdlib
 
 <p align="center">
-  <img src="/docs/images/tui-realm.svg" width="256" alt="logo" height="256" />
+  <img src="docs/images/tui-realm.svg" width="256" alt="logo" height="256" />
 </p>
 
 <p align="center">~ A tui-rs framework inspired by Elm and React ~</p>
@@ -89,7 +89,7 @@ You can make a donation with one of these platforms:
 
 ## Components 🎨
 
-All the components implemented in the standard library can be viewed in the [components wiki](/docs/components.md).
+All the components implemented in the standard library can be viewed in the [components wiki](docs/components.md).
 
 ---
 
