@@ -25,7 +25,6 @@ quote = "1"
 syn = "2"
 
 [dev-dependencies]
-tuirealm.workspace = true
-tui-realm-stdlib.workspace = true
+tuirealm = { path = "../tuirealm", default-features = false }
 
 [features]
