@@ -6,11 +6,11 @@ license.workspace =  true
 repository.workspace =  true
 homepage.workspace = true
 edition.workspace = true
-version = "2.0.1"
+version = "4.0.0"
 categories = ["command-line-utilities"]
 description = "Derive macro which automatically implements the Component trait"
 documentation = "https://docs.rs/tuirealm_derive"
-include = ["src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+include = ["src/**/*", "LICENSE", "README.md"]
 keywords = ["tui", "terminal"]
 readme = "README.md"
 

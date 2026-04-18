@@ -20,7 +20,7 @@ use crate::prop_ext::CommonProps;
 ///
 /// Read more in [`LineGauge`](TuiLineGauge).
 ///
-/// If a multi-line Guage is necessary, use [`Gauge`](crate::Gauge) instead.
+/// If a multi-line Guage is necessary, use [`Gauge`](crate::components::Gauge) instead.
 #[derive(Default)]
 #[must_use]
 pub struct LineGauge {

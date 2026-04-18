@@ -3,7 +3,6 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
-version = "4.0.0" # for now this only affects core and stdlib
 authors = [
   "Christian Visintin <christian.visintin@veeso.dev>",
   "hasezoey <hasezoey@gmail.com>",
@@ -15,6 +14,6 @@ repository = "https://github.com/veeso/tui-realm"
 homepage = "https://github.com/veeso/tui-realm"
 
 [workspace.dependencies]
-tuirealm = { path = "./crates/tuirealm", default-features = false }
-tui-realm-stdlib = { path = "./crates/tuirealm-stdlib" }
-tuirealm_derive = { path = "./crates/tuirealm-derive" }
+tuirealm = { path = "./crates/tuirealm", version = "4", default-features = false }
+tui-realm-stdlib = { path = "./crates/tuirealm-stdlib", version = "4" }
+tuirealm_derive = { path = "./crates/tuirealm-derive", version = "4" }

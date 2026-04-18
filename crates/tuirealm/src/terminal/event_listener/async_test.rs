@@ -8,7 +8,7 @@ use tuirealm::listener::PortError;
 use super::Event;
 use crate::listener::{PollAsync, PortResult};
 
-/// An async test [`Poll`] implementation that can be used for integration tests.
+/// An async test [`PollAsync`] implementation that can be used for integration tests.
 ///
 /// It has a [`Receiver`] which can be used to enqueue events to raise to the application.
 pub struct AsyncTestEventListener<UserEvent>
@@ -24,7 +24,7 @@ where
 {
     /// Creates a new [`crate::terminal::AsyncTestEventListener`] with the provided [`Receiver`].
     ///
-    /// The receiver will be checked for pending events each time [`Poll::poll`] is called.
+    /// The receiver will be checked for pending events each time [`PollAsync::poll`] is called.
     pub fn new(receiver: Receiver<Event<UserEvent>>) -> Self {
         Self { receiver }
     }

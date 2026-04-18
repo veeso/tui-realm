@@ -167,7 +167,7 @@ impl<'a> AttrValueRef<'a> {
         }
     }
 
-    /// Get the inner [`SpanStatic`] value from AttrValue, or panic.
+    /// Get the inner [`Span`] value from AttrValue, or panic.
     pub fn unwrap_textspan(self) -> &'a Span<'a> {
         match self {
             AttrValueRef::TextSpan(x) => x,
@@ -175,7 +175,7 @@ impl<'a> AttrValueRef<'a> {
         }
     }
 
-    /// Get the inner [`LineStatic`] value from AttrValue, or panic.
+    /// Get the inner [`Line`] value from AttrValue, or panic.
     pub fn unwrap_textline(self) -> &'a Line<'a> {
         match self {
             AttrValueRef::TextLine(x) => x,
@@ -183,7 +183,7 @@ impl<'a> AttrValueRef<'a> {
         }
     }
 
-    /// Get the inner [`TextStatic`] value from AttrValue, or panic.
+    /// Get the inner [`Text`] value from AttrValue, or panic.
     pub fn unwrap_text(self) -> &'a Text<'a> {
         match self {
             AttrValueRef::Text(x) => x,
@@ -345,7 +345,7 @@ impl<'a> AttrValueRef<'a> {
         }
     }
 
-    /// Get a [`SpanStatic`] value from AttrValue, or None
+    /// Get a [`Span`] value from AttrValue, or None
     pub fn as_textspan(self) -> Option<&'a Span<'a>> {
         match self {
             AttrValueRef::TextSpan(v) => Some(v),
@@ -353,7 +353,7 @@ impl<'a> AttrValueRef<'a> {
         }
     }
 
-    /// Get a [`LineStatic`] value from AttrValue, or None
+    /// Get a [`Line`] value from AttrValue, or None
     pub fn as_textline(self) -> Option<&'a Line<'a>> {
         match self {
             AttrValueRef::TextLine(v) => Some(v),
@@ -361,7 +361,7 @@ impl<'a> AttrValueRef<'a> {
         }
     }
 
-    /// Get a [`TextStatic`] value from AttrValue, or None
+    /// Get a [`Text`] value from AttrValue, or None
     pub fn as_text(self) -> Option<&'a Text<'a>> {
         match self {
             AttrValueRef::Text(v) => Some(v),

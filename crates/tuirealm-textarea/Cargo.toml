@@ -6,11 +6,11 @@ license.workspace =  true
 repository.workspace =  true
 homepage.workspace = true
 edition.workspace = true
-version = "2.1.0"
+version = "4.0.0"
 categories = ["command-line-utilities"]
 description = "textarea component for tui-realm"
 documentation = "https://docs.rs/tui-realm-textarea"
-include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+include = ["examples/**/*", "src/**/*", "LICENSE", "README.md"]
 keywords = ["tui", "terminal"]
 readme = "README.md"
 
@@ -22,7 +22,7 @@ tui-textarea-2 = "^0.10"
 [dev-dependencies]
 tuirealm = { workspace = true, features = ["derive"] }
 tui-realm-stdlib.workspace = true
-crossterm = "^0.28"
+crossterm = "^0.29"
 insta = "1"
 pretty_assertions = "1"
 

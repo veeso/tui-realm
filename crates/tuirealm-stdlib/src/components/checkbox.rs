@@ -115,7 +115,7 @@ impl CheckboxStates {
 
 /// The checkbox component is a multi-choice selector.
 ///
-/// Use [`Radio`](crate::Radio) if a single-choice selector is wanted.
+/// Use [`Radio`](crate::components::Radio) if a single-choice selector is wanted.
 #[derive(Default)]
 #[must_use]
 pub struct Checkbox {

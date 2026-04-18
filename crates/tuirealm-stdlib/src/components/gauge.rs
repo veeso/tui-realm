@@ -19,7 +19,7 @@ use crate::prop_ext::CommonProps;
 ///
 /// Read more in [`Gauge`](TuiGauge).
 ///
-/// If only a single-line Gauge is necessary, use [`LineGauge`](crate::LineGauge) instead.
+/// If only a single-line Gauge is necessary, use [`LineGauge`](crate::components::LineGauge) instead.
 #[derive(Default)]
 #[must_use]
 pub struct Gauge {

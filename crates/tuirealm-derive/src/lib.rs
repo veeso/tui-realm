@@ -75,14 +75,14 @@
 //!
 //! ```toml
 //! [dependencies]
-//! tuirealm = "^2.0.0"
+//! tuirealm = "^4"
 //! ```
 //!
 //! If you're not using the default features, be sure to enable the **derive** feature:
 //!
 //! ```toml
 //! [dependencies]
-//! tuirealm = { version = "^2.0.0", default-features = false, features = ["derive", "crossterm"] }
+//! tuirealm = { version = "^4", default-features = false, features = ["derive", "crossterm"] }
 //! ```
 //!
 //! Then you need to include tuirealm in your project using the `macro use` directive:

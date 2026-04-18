@@ -92,7 +92,7 @@ where
     ///
     /// As soon as function returns, you should call the [`Application::view`] method.
     ///
-    /// > You can also call [`Application::view`] from the [`crate::Update`] if you need it
+    /// > You can also call [`Application::view`] from your `update` function if you need it
     pub fn tick(&mut self, strategy: PollStrategy) -> ApplicationResult<Vec<Msg>> {
         // Poll event listener
         let events = self.poll(strategy)?;

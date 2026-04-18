@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 3.3.0 (2025-12-20)</p>
+<p align="center">Current version: 4.0.0 (2026-04-18)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -116,13 +116,13 @@ See tui-realm in action in the [Example](#run-examples-) or if you want to read 
 If you want the default features, just add tuirealm with version:
 
 ```toml
-tuirealm = "3"
+tuirealm = "4"
 ```
 
 otherwise you can specify the features you want to add:
 
 ```toml
-tuirealm = { version = "3", default-features = false, features = [ "derive", "serialize", "termion" ] }
+tuirealm = { version = "4", default-features = false, features = [ "derive", "serialize", "termion" ] }
 ```
 
 Supported features are:
@@ -146,19 +146,19 @@ This library supports all backends supported by `ratatui`, which are `crossterm`
 Example using crossterm backend explicitly:
 
 ```toml
-tuirealm = { version = "3", default-features = false, features = [ "derive", "crossterm" ]}
+tuirealm = { version = "4", default-features = false, features = [ "derive", "crossterm" ]}
 ```
 
 Example using the termion backend:
 
 ```toml
-tuirealm = { version = "3", default-features = false, features = [ "derive", "termion" ] }
+tuirealm = { version = "4", default-features = false, features = [ "derive", "termion" ] }
 ```
 
 Example using the termwiz backend:
 
 ```toml
-tuirealm = { version = "3", default-features = false, features = [ "derive", "termwiz" ] }
+tuirealm = { version = "4", default-features = false, features = [ "derive", "termwiz" ] }
 ```
 
 ### Create a tui-realm application 🪂
@@ -251,7 +251,7 @@ Please follow [our contributing guidelines](CONTRIBUTING.md)
 
 ## Changelog ⏳
 
-View tui-realm's changelog [HERE](CHANGELOG.md)
+View tui-realm's changelog [HERE](../../CHANGELOG.md)
 
 ---
 

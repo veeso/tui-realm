@@ -94,7 +94,7 @@ impl RadioStates {
 
 /// The radio component is a single-choice selector.
 ///
-/// Use [`Checkbox`](crate::Checkbox) if a multi-choice selector is wanted.
+/// Use [`Checkbox`](crate::components::Checkbox) if a multi-choice selector is wanted.
 #[derive(Default)]
 #[must_use]
 pub struct Radio {

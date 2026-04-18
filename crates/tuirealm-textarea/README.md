@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 2.1.0 (23/03/2025)</p>
+<p align="center">Current version: 4.0.0 (2026-04-18)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -67,20 +67,19 @@ It is based on the [tui-textarea](https://github.com/rhysd/tui-textarea) compone
 ### Add tui-realm-textarea to your Cargo.toml 🦀
 
 ```toml
-tui-realm-textarea = "2"
+tui-realm-textarea = "4"
 ```
 
 Or if you don't use **Crossterm**, define the backend as you do with tui-realm:
 
 ```toml
-tui-realm-textarea = { version = "2", default-features = false, features = [ "termion" ] }
+tui-realm-textarea = { version = "4", default-features = false, features = [ "termion" ] }
 ```
 
 #### Features ⚙️
 
 These features can be enabled in tui-realm-textarea:
 
-- `clipboard` enables system clipboard support
 - `search` enables the string search in the textarea
 
 ### Examples 📋
@@ -88,7 +87,7 @@ These features can be enabled in tui-realm-textarea:
 View how to use the textarea component in the [example](examples/demo.rs). The example contains a simple text editor.
 
 ```sh
-cargo run --example demo --features clipboard,search
+cargo run --example demo --features search
 ```
 
 Press `ESC` to quit
@@ -114,7 +113,7 @@ Press `ESC` to quit
 | `Custom($TEXTAREA_CMD_MOVE_BOTTOM)`            | `None`         | Move to the end of the file             |
 | `Custom($TEXTAREA_CMD_UNDO)`                   | `None`         | Undo last change                        |
 | `Custom($TEXTAREA_CMD_REDO)`                   | `None`         | Redo last change                        |
-| `Custom($TEXTAREA_CMD_PASTE)`                  | `None`         | Paste the current content of the buffer |
+| `Custom($TEXTAREA_CMD_PASTE)`                  | `None`         | Paste text via the `paste` function     |
 | `Custom($TEXTAREA_CMD_SEARCH_BACK)`            | `None`         | Go to the previous search match         |
 | `Custom($TEXTAREA_CMD_SEARCH_FORWARD)`         | `None`         | Go to the next search match             |
 | `Cancel`                                       | `None`         | Delete next char                        |
@@ -129,8 +128,6 @@ Press `ESC` to quit
 | `Scroll(Down)`                                 | `None`         | Move by scroll_step lines down          |
 | `Type(ch)`                                     | `None`         | Type a char in the editor               |
 | `Submit`                                       | `Submit`       | Get current lines                       |
-
-> ❗ Paste command is supported only if the `clipboard` feature is enabled
 
 **State**: the state returned is a `Vec(String)` containing the lines in the text area.
 
@@ -179,7 +176,7 @@ Please follow [our contributing guidelines](CONTRIBUTING.md)
 
 ## Changelog ⏳
 
-View tui-realm-textarea's changelog [HERE](CHANGELOG.md)
+View tui-realm-textarea's changelog [HERE](../../CHANGELOG.md)
 
 ---
 

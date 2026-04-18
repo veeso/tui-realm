@@ -75,8 +75,6 @@
 - `new_mouse_alternate_raw`
 - `new_mouse_raw`
 
-此外，`TerminalBridge::new_termion` 和 `init_termion` 已被移除，改用 `TerminalBridge::new_init_termion`。
-
 ### 移除 `PropBoundExt`
 
 `as_any` 和 `as_any_mut` 现在直接在 `dyn PropBound` 上实现，不再需要额外导入另一个 trait。

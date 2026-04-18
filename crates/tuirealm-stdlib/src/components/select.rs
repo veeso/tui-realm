@@ -101,7 +101,7 @@ impl SelectStates {
 /// `Select` represents a select field, like in HTML. The size for the component must be 3 (border + selected) + the quantity of rows
 /// you want to display other options when opened (at least 3).
 ///
-/// Similar to [`Radio`](crate::Radio), [`Select`] is a single-choice selector, but the difference is that it does not show the selector
+/// Similar to [`Radio`](crate::components::Radio), [`Select`] is a single-choice selector, but the difference is that it does not show the selector
 /// unless the "Tab" is open, and only shows the currently selected choice.
 #[derive(Default)]
 #[must_use]

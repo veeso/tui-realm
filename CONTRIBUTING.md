@@ -82,7 +82,7 @@ Let's make it simple and clear:
 4. Check your code with `cargo clippy`.
 5. Check if the CI for your commits reports three-green.
 6. Report changes to the PR you opened, writing a report of what you changed and what you have introduced.
-7. Update the `CHANGELOG.md` file with details of changes to the application. In changelog report changes under a chapter called `PR{PULL_REQUEST_NUMBER}` (e.g. PR12).
+7. Use [Conventional Commits](https://www.conventionalcommits.org/) — `CHANGELOG.md` is auto-generated from commit history via `git-cliff`.
 8. Assign a maintainer to the reviewers.
 9. Request maintainers to merge your changes.
 

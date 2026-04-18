@@ -1,6 +1,6 @@
 [package]
 name = "tui-realm-stdlib"
-version.workspace =  true
+version = "4.0.0"
 authors.workspace =  true
 edition.workspace =  true
 rust-version.workspace =  true
@@ -10,7 +10,7 @@ homepage.workspace = true
 categories = ["command-line-utilities"]
 description = "Standard components library for tui-realm."
 documentation = "https://docs.rs/tui-realm-stdlib"
-include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+include = ["examples/**/*", "src/**/*", "LICENSE", "README.md"]
 keywords = ["tui", "terminal"]
 readme = "README.md"
 

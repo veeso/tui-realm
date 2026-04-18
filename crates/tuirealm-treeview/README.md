@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 2.0.0 (13/10/2024)</p>
+<p align="center">Current version: 4.0.0 (2026-04-18)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -73,13 +73,13 @@ It uses the [Orange trees](https://github.com/veeso/orange-trees) engine for imp
 ### Add tui-realm-treeview to your Cargo.toml 🦀
 
 ```toml
-tui-realm-treeview = "2"
+tui-realm-treeview = "4"
 ```
 
 Or if you don't use **Crossterm**, define the backend as you do with tui-realm:
 
 ```toml
-tui-realm-treeview = { version = "2", default-features = false, features = [ "termion" ] }
+tui-realm-treeview = { version = "4", default-features = false, features = [ "termion" ] }
 ```
 
 ### Examples 📋
@@ -215,7 +215,7 @@ Please follow [our contributing guidelines](CONTRIBUTING.md)
 
 ## Changelog ⏳
 
-View tui-realm-treeview's changelog [HERE](CHANGELOG.md)
+View tui-realm-treeview's changelog [HERE](../../CHANGELOG.md)
 
 ---
 

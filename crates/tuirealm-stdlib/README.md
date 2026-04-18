@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.me/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 3.1.0 (2025-12-20)</p>
+<p align="center">Current version: 4.0.0 (2026-04-18)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -64,14 +64,14 @@ It provides several **Components** for your tui-realm applications. Probably all
 ### Add tui-realm to your Cargo.toml 🦀
 
 ```toml
-tui-realm = "3"
-tui-realm-stdlib = "3"
+tui-realm = "4"
+tui-realm-stdlib = "4"
 ```
 
 or if you're not using the default **crossterm backend**, specify another backend in the cargo entry:
 
 ```toml
-tui-realm = { version = "3", default-features = false, features = [ "termion" ] }
+tui-realm = { version = "4", default-features = false, features = [ "termion" ] }
 ```
 
 ---
@@ -120,7 +120,7 @@ Please follow [our contributing guidelines](CONTRIBUTING.md)
 
 ## Changelog ⏳
 
-View tui-realm's [Changelog](CHANGELOG.md).
+View tui-realm's [Changelog](../../CHANGELOG.md).
 
 ---
 

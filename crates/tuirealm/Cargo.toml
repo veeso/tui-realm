@@ -1,6 +1,6 @@
 [package]
 name = "tuirealm"
-version.workspace =  true
+version = "4.0.0"
 authors.workspace =  true
 edition.workspace =  true
 rust-version.workspace =  true
@@ -10,7 +10,7 @@ homepage.workspace = true
 categories = ["command-line-utilities"]
 description = "A tui-rs framework to build tui interfaces, inspired by React and Elm."
 documentation = "https://docs.rs/tuirealm"
-include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
+include = ["examples/**/*", "src/**/*", "LICENSE", "README.md"]
 keywords = ["tui", "terminal"]
 readme = "README.md"
 

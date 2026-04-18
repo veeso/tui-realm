@@ -9,13 +9,13 @@
 //! ### Adding `tui-realm-treeview` as dependency
 //!
 //! ```toml
-//! tui-realm-treeview = "2"
+//! tui-realm-treeview = "4"
 //! ```
 //!
 //! Or if you don't use **Crossterm**, define the backend as you would do with tui-realm:
 //!
 //! ```toml
-//! tui-realm-treeview = { version = "2", default-features = false, features = [ "termion" ] }
+//! tui-realm-treeview = { version = "4", default-features = false, features = [ "termion" ] }
 //! ```
 //!
 //! ## Component API

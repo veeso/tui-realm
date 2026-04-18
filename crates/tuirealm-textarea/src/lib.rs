@@ -9,13 +9,13 @@
 //! ### Adding `tui-realm-textarea` as dependency
 //!
 //! ```toml
-//! tui-realm-textarea = "2"
+//! tui-realm-textarea = "4"
 //! ```
 //!
 //! Or if you don't use **Crossterm**, define the backend as you would do with tui-realm:
 //!
 //! ```toml
-//! tui-realm-textarea = { version = "2", default-features = false, features = [ "termion" ] }
+//! tui-realm-textarea = { version = "4", default-features = false, features = [ "termion" ] }
 //! ```
 //!
 //! #### Features ⚙️

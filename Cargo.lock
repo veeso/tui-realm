@@ -199,22 +199,6 @@ dependencies = [
 
 [[package]]
 name = "crossterm"
-version = "0.28.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "829d955a0bb380ef178a640b91779e3987da38c9aea133b20614cfed8cdea9c6"
-dependencies = [
- "bitflags 2.11.0",
- "crossterm_winapi",
- "mio",
- "parking_lot",
- "rustix 0.38.44",
- "signal-hook",
- "signal-hook-mio",
- "winapi",
-]
-
-[[package]]
-name = "crossterm"
 version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8b9f2e4c67f833b660cdb0a3523065869fb35570177239812ed4c905aeff87b"
@@ -226,7 +210,7 @@ dependencies = [
  "futures-core",
  "mio",
  "parking_lot",
- "rustix 1.1.4",
+ "rustix",
  "signal-hook",
  "signal-hook-mio",
  "winapi",
@@ -719,12 +703,6 @@ dependencies = [
 
 [[package]]
 name = "linux-raw-sys"
-version = "0.4.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d26c52dbd32dccf2d10cac7725f8eae5296885fb5703b261f7d0a0739ec807ab"
-
-[[package]]
-name = "linux-raw-sys"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
@@ -1152,7 +1130,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "577c9b9f652b4c121fb25c6a391dd06406d3b092ba68827e6d2f09550edc54b3"
 dependencies = [
  "cfg-if",
- "crossterm 0.29.0",
+ "crossterm",
  "instability",
  "ratatui-core",
 ]
@@ -1246,19 +1224,6 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.44"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fdb5bc1ae2baa591800df16c9ca78619bf65c0488b41b96ccec5d11220d8c154"
-dependencies = [
- "bitflags 2.11.0",
- "errno",
- "libc",
- "linux-raw-sys 0.4.15",
- "windows-sys 0.59.0",
-]
-
-[[package]]
-name = "rustix"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190"
@@ -1266,7 +1231,7 @@ dependencies = [
  "bitflags 2.11.0",
  "errno",
  "libc",
- "linux-raw-sys 0.12.1",
+ "linux-raw-sys",
  "windows-sys 0.61.2",
 ]
 
@@ -1492,7 +1457,7 @@ dependencies = [
  "fastrand",
  "getrandom 0.4.2",
  "once_cell",
- "rustix 1.1.4",
+ "rustix",
  "windows-sys 0.61.2",
 ]
 
@@ -1736,9 +1701,9 @@ dependencies = [
 
 [[package]]
 name = "tui-realm-textarea"
-version = "2.1.0"
+version = "4.0.0"
 dependencies = [
- "crossterm 0.28.1",
+ "crossterm",
  "insta",
  "lazy-regex",
  "pretty_assertions",
@@ -1749,9 +1714,9 @@ dependencies = [
 
 [[package]]
 name = "tui-realm-treeview"
-version = "3.0.0"
+version = "4.0.0"
 dependencies = [
- "crossterm 0.29.0",
+ "crossterm",
  "insta",
  "orange-trees",
  "pretty_assertions",
@@ -1766,7 +1731,7 @@ version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74a31ca0965e3ff6a7ac5ecb02b20a88b4f68ebf138d8ae438e8510b27a1f00f"
 dependencies = [
- "crossterm 0.29.0",
+ "crossterm",
  "portable-atomic",
  "ratatui-core",
  "ratatui-widgets",
@@ -1781,7 +1746,7 @@ version = "4.0.0"
 dependencies = [
  "async-trait",
  "bitflags 2.11.0",
- "crossterm 0.29.0",
+ "crossterm",
  "dyn-clone",
  "futures-util",
  "insta",
@@ -1801,7 +1766,7 @@ dependencies = [
 
 [[package]]
 name = "tuirealm_derive"
-version = "2.0.1"
+version = "4.0.0"
 dependencies = [
  "proc-macro2",
  "quote",

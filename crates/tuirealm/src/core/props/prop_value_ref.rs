@@ -430,7 +430,7 @@ impl<'a> PropValueRef<'a> {
         }
     }
 
-    /// Unwrap PropValue as [`SpanStatic`].
+    /// Unwrap PropValue as [`Span`].
     /// Panics otherwise
     pub fn unwrap_textspan(self) -> &'a Span<'a> {
         match self {
@@ -439,7 +439,7 @@ impl<'a> PropValueRef<'a> {
         }
     }
 
-    /// Unwrap PropValue as [`LineStatic`].
+    /// Unwrap PropValue as [`Line`].
     /// Panics otherwise
     pub fn unwrap_textline(self) -> &'a Line<'a> {
         match self {
@@ -448,7 +448,7 @@ impl<'a> PropValueRef<'a> {
         }
     }
 
-    /// Unwrap PropValue as [`TextStatic`].
+    /// Unwrap PropValue as [`Text`].
     /// Panics otherwise
     pub fn unwrap_text(self) -> &'a Text<'a> {
         match self {
@@ -643,7 +643,7 @@ impl<'a> PropValueRef<'a> {
         }
     }
 
-    /// Get a [`SpanStatic`] value from PropValue, or None
+    /// Get a [`Span`] value from PropValue, or None
     pub fn as_textspan(self) -> Option<&'a Span<'a>> {
         match self {
             PropValueRef::TextSpan(v) => Some(v),
@@ -651,7 +651,7 @@ impl<'a> PropValueRef<'a> {
         }
     }
 
-    /// Get a [`LineStatic`] value from PropValue, or None
+    /// Get a [`Line`] value from PropValue, or None
     pub fn as_textline(self) -> Option<&'a Line<'a>> {
         match self {
             PropValueRef::TextLine(v) => Some(v),
@@ -659,7 +659,7 @@ impl<'a> PropValueRef<'a> {
         }
     }
 
-    /// Get a [`TextStatic`] value from PropValue, or None
+    /// Get a [`Text`] value from PropValue, or None
     pub fn as_text(self) -> Option<&'a Text<'a>> {
         match self {
             PropValueRef::Text(v) => Some(v),

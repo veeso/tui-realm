@@ -104,10 +104,4 @@ This is a monorepo of the following crates:
 
 ## Changelogs
 
-Changelogs can be found individually in each crate:
-
-- [tuirealm](crates/tuirealm/CHANGELOG.md)
-- [tui-realm-stdlib](crates/tuirealm-stdlib/CHANGELOG.md)
-- [tuirealm_derive](crates/tuirealm-derive/CHANGELOG.md)
-- [tui-realm-treeview](crates/tuirealm-treeview/CHANGELOG.md)
-- [tui-realm-textarea](crates/tuirealm-textarea/CHANGELOG.md)
+See [CHANGELOG.md](CHANGELOG.md).

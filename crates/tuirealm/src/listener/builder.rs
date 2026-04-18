@@ -324,7 +324,7 @@ where
 
     /// Set the async runtime handle to use to spawn the async ports on.
     ///
-    /// If this is not set, a Error is returned on [`start`](Self::start).
+    /// If this is not set, an Error is returned when the event listener is started.
     #[cfg(feature = "async-ports")]
     #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
     pub fn with_handle(mut self, handle: tokio::runtime::Handle) -> Self {
@@ -332,7 +332,7 @@ where
         self
     }
 
-    /// Change the way [`Event::Tick`](crate::Event::Tick) is emitted from being on a [`SyncPort`] to be a [`AsyncPort`].
+    /// Change the way [`Event::Tick`](crate::event::Event::Tick) is emitted from being on a [`SyncPort`] to be a [`AsyncPort`].
     #[cfg(feature = "async-ports")]
     #[cfg_attr(docsrs, doc(cfg(feature = "async-ports")))]
     pub fn async_tick(mut self, value: bool) -> Self {

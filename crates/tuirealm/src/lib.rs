@@ -19,13 +19,13 @@
 //! If you want the default features:
 //!
 //! ```toml
-//! tuirealm = "3"
+//! tuirealm = "4"
 //! ```
 //!
 //! Alternatively you can specify the features you want to add:
 //!
 //! ```toml
-//! tuirealm = { version = "3", default-features = false, features = [ "derive", "serialize", "crossterm" ] }
+//! tuirealm = { version = "4", default-features = false, features = [ "derive", "serialize", "crossterm" ] }
 //! ```
 //!
 //! Supported features are:

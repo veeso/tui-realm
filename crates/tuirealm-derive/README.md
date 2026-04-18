@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">Developed by <a href="https://veeso.github.io/" target="_blank">@veeso</a></p>
-<p align="center">Current version: 2.0.0 (12/10/2024)</p>
+<p align="center">Current version: 4.0.0 (2026-04-18)</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"
@@ -145,17 +145,17 @@ If you're using the default features:
 
 ```toml
 [dependencies]
-tuirealm = "^2"
+tuirealm = "^4"
 ```
 
 If you're not using the default features, be sure to enable the **derive** feature:
 
 ```toml
 [dependencies]
-tuirealm = { version = "^2", default-features = false, features = ["derive", "crossterm"] }
+tuirealm = { version = "^4", default-features = false, features = ["derive", "crossterm"] }
 ```
 
->⚠️ tuirealm_derive requires tui-realm >= 2.0.0; the old API is not supported
+>⚠️ tuirealm_derive requires tui-realm >= 4.0.0; the old API is not supported
 
 Then you need to include tuirealm in your project using the `macro use` directive:
 
@@ -236,7 +236,7 @@ You can make a donation with one of these platforms:
 
 ## Changelog ⏳
 
-View tuirealm_derive's changelog [HERE](CHANGELOG.md)
+View tuirealm_derive's changelog [HERE](../../CHANGELOG.md)
 
 ---
 
