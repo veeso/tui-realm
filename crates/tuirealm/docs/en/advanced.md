@@ -57,21 +57,21 @@ So what is a subscription actually, and how we can create them?
 The subscription is defined as:
 
 ```rust
-pub struct Sub<ComponentId, UserEvent>(SubEventClause<UserEvent>, Arc<SubClause<ComponentId>>)
+pub struct Sub<ComponentId, UserEvent>(EventClause<UserEvent>, Arc<SubClause<ComponentId>>)
 where
     ComponentId: Eq + PartialEq + Clone + Hash,
     UserEvent: Eq + PartialEq + Clone;
 ```
 
 It takes 2 parameters:
-- `SubEventClause<UserEvent>`: The **Event Clause**, which determines what type of event to forward. This practically mirrors `Event`'s Variants directly.
+- `EventClause<UserEvent>`: The **Event Clause**, which determines what type of event to forward. This practically mirrors `Event`'s Variants directly.
 - `SubClause<ComponentId>`: The actual *ruleset* to determine, well, *when* to forward a given Event to the target Component.
 
-**`SubClause`** has many variants to allow a broad range of possibilities, for example it has `Always`, which will always forward a event, no specific rules; it has `IsMounted`, which is like `Always`, only that it only forwards to **Id** if there is a component mounted to it; finally there are logical combinators like `And`, `Or` and `Not`. There are some other variants, which should be self-describing. More on that in a later section.
+**`SubClause`** has many variants to allow a broad range of possibilities, for example it has `Always`, which will always forward an event, no specific rules; it has `IsMounted`, which is like `Always`, only that it only forwards to **Id** if there is a component mounted to it; finally there are logical combinators like `And`, `Or` and `Not`. There are some other variants, which should be self-describing. More on that in a later section.
 
 So when an event is received, if a component, **that is not active**, satisfies the *event clause* and the *sub clause*, then the event will be forwarded to that component too.
 
-> ❗ In order to forward an event, both the `SubEventClause` and the `SubClause` must be satisfied
+> ❗ In order to forward an event, both the `EventClause` and the `SubClause` must be satisfied
 
 Note that if a given Component is active, it will never get the event twice through being focused and through a subscription it may also have.
 
@@ -88,25 +88,25 @@ app.mount(
     Id::Clock,
     Box::new(
         Clock::new(SystemTime::now())
-            .alignment(Alignment::Center)
+            .alignment(HorizontalAlignment::Center)
     ),
-    vec![Sub::new(SubEventClause::Tick, SubClause::Always)]
+    vec![Sub::new(EventClause::Tick, SubClause::Always)]
 );
 ```
 
 Or you can create new subscriptions whenever you want:
 
 ```rust
-app.subscribe(&Id::Clock, Sub::new(SubEventClause::Tick, SubClause::Always));
+app.subscribe(&Id::Clock, Sub::new(EventClause::Tick, SubClause::Always));
 ```
 
 And if you need to remove a subscription you can unsubscribe simply with:
 
 ```rust
-app.unsubscribe(&Id::Clock, SubEventClause::Tick);
+app.unsubscribe(&Id::Clock, EventClause::Tick);
 ```
 
-> ❗ If you have multiple rules for a given `SubEventClause`, `unsubscribe` will remove *all* subscriptions matching that clause.
+> ❗ If you have multiple rules for a given `EventClause`, `unsubscribe` will remove *all* subscriptions matching that clause.
 
 ### Event clauses in detail
 
@@ -274,12 +274,12 @@ Once we've defined what the component should look like, we can start defining th
 - `Borders(Borders)`: will define the border properties for the component
 - `Content(Payload(Vec(String)))`: will define the possible options for the radio group
 - `Title(Title)`: will define the box title
-- `Value(Payload(One(Usize)))`: will work as a prop, but will update the state too, for the current selected option.
+- `Value(Payload(Single(Usize)))`: will work as a prop, but will update the state too, for the current selected option.
 
 ```rust
 pub struct Radio {
     props: Props,
-    state: RadioState
+    states: RadioState,
 }
 
 impl Radio {
@@ -297,7 +297,7 @@ impl Component for Radio {
     // ...
 
     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
-        self.props.get_as_ref(attr)
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -310,11 +310,11 @@ impl Component for Radio {
                     .into_iter()
                     .map(|x| x.unwrap_str())
                     .collect();
-                self.state.set_choices(choices);
+                self.states.set_choices(choices);
             }
             Attribute::Value => {
-                let index = value.unwrap_payload().unwrap_one().unwrap_usize();
-                self.state.select(index);
+                let index = value.unwrap_payload().unwrap_single().unwrap_usize();
+                self.states.select(index);
             }
             attr => {
                 self.props.set(attr, value);
@@ -379,7 +379,7 @@ impl Component for Radio {
     // ...
 
     fn state(&self) -> State {
-        State::One(StateValue::Usize(self.states.choice))
+        State::Single(StateValue::Usize(self.states.choice))
     }
 
     // ...
@@ -439,11 +439,11 @@ impl Component for Radio {
         }
 
         // Make choices
-        let choices: Vec<Spans> = self
-            .state
+        let choices: Vec<Line> = self
+            .states
             .choices
             .iter()
-            .map(|x| Spans::from(x))
+            .map(|x| Line::from(x.as_str()))
             .collect();
 
         // Fetch all other style properties
@@ -467,7 +467,7 @@ impl Component for Radio {
             .fg(foreground)
             .bg(background);
 
-        let highlight_style = style.patch(Style::default().bg(highlight_bg));
+        let highlight_style = normal_style.patch(Style::default().bg(highlight_bg));
 
         // assemble the Block (borders)
         let borders = self
@@ -475,7 +475,12 @@ impl Component for Radio {
             .get(Attribute::Borders)
             .and_then(AttrValue::as_borders)
             .unwrap_or_default();
-        let title = self.props.get(Attribute::Title).map(|x| x.unwrap_title());
+        let title = self
+            .props
+            .get(Attribute::Title)
+            .and_then(AttrValue::as_title)
+            .cloned()
+            .unwrap_or_default();
         let focus = self
             .props
             .get(Attribute::Focus)
@@ -485,13 +490,17 @@ impl Component for Radio {
         let block = Block::default()
             .title_top(title.content)
             .borders(borders.sides)
-            .border_style(if focus { borders.style() } else { Style::default().fg(Color::DarkGrey) });
+            .border_style(if focus {
+                borders.style()
+            } else {
+                Style::default().fg(Color::DarkGray)
+            });
 
         // Finally, use a ratatui widget to draw the contents
         let tabs = Tabs::new(choices)
             .block(block)
-            .select(self.state.choice)
-            .style(style)
+            .select(self.states.choice)
+            .style(normal_style)
             .highlight_style(highlight_style);
         render.render_widget(tabs, area);
     }

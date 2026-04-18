@@ -1,5 +1,7 @@
 # Migrating from tui-realm 3.x
 
+📍<u>**English**</u> | <a href="../zh-cn/migrating-4.0.md">简体中文</a>
+
 - [Migrating from tui-realm 3.x](#migrating-from-tui-realm-3x)
   - [Introduction](#introduction)
 

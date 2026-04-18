@@ -127,7 +127,7 @@ In practice a component is a trait, with these methods to be implmented:
 ```rust
 pub trait Component {
     fn view(&mut self, frame: &mut Frame, area: Rect);
-    fn query(&self, attr: Attribute) -> Option<AttrValue>;
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>>;
     fn attr(&mut self, attr: Attribute, value: AttrValue);
     fn state(&self) -> State;
     fn perform(&mut self, cmd: Cmd) -> CmdResult;
@@ -427,7 +427,7 @@ As we can quickly see, the tick method has the following workflow:
 
 1. The event listener is fetched according to the provided `PollStrategy`
 
-    > ❗The poll strategy tells how to poll the event listener. For example you can only fetch one event per cycle, or multiple; various Strategies are available. For a fully event driven application `BlockingUpTo` is recommended.
+    > ❗The poll strategy tells how to poll the event listener. For example you can only fetch one event per cycle, or multiple; various Strategies are available. For a fully event driven application `Once` is recommended.
 
 2. All the incoming events are immediately forwarded to the current *active* component in the *view*, which may return some *messages*
 3. All the incoming events are sent to all the components subscribed to that event, which satisfied the clauses described in the subscription. They, as usual, will may return some *messages*
@@ -537,6 +537,7 @@ So we've said we have two Counters, one tracking alphabetic characters and one d
 With that said, let's start to implement the counter:
 
 ```rust
+#[derive(Default)]
 struct Counter {
     props: Props,
     states: OwnStates,
@@ -566,11 +567,11 @@ Then, we'll implement easy-to-use Builder methods for our Component:
 impl Counter {
     pub fn label<S>(mut self, label: S) -> Self
     where
-        S: AsRef<str>,
+        S: Into<LineStatic>,
     {
         self.attr(
             Attribute::Title,
-            AttrValue::Title((label.as_ref().to_string(), Alignment::Center)),
+            AttrValue::Title(Title::from(label).alignment(HorizontalAlignment::Center)),
         );
         self
     }
@@ -589,6 +590,11 @@ impl Counter {
         self.attr(Attribute::Background, AttrValue::Color(c));
         self
     }
+
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
 }
 ```
 
@@ -598,59 +604,65 @@ Finally we can implement `Component` for `Counter`
 impl Component for Counter {
     fn view(&mut self, frame: &mut Frame, area: Rect) {
         // Check if the component is meant to be displayed or hidden
-        if !self.props.get_or(Attribute::Display, AttrValue::Flag(true)).unwrap_flag() {
+        if matches!(
+            self.props.get(Attribute::Display),
+            Some(AttrValue::Flag(false))
+        ) {
             return;
         }
 
         // Get the text we want to display
-        let count_str = self.states.counter.to_string();
+        let text = self.states.counter.to_string();
 
-        // Get other properties to apply
+        // Get other properties to apply, falling back to defaults if unset
         let foreground = self
             .props
-            .get_or(Attribute::Foreground, AttrValue::Color(Color::Reset))
-            .unwrap_color();
+            .get(Attribute::Foreground)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let background = self
             .props
-            .get_or(Attribute::Background, AttrValue::Color(Color::Reset))
-            .unwrap_color();
-        let style = Style::default()
-            .fg(foreground)
-            .bg(background);
-
+            .get(Attribute::Background)
+            .and_then(AttrValue::as_color)
+            .unwrap_or(Color::Reset);
         let title = self
             .props
-            .get_or(
-                Attribute::Title,
-                AttrValue::Title(Title::default()),
-            )
-            .unwrap_title();
+            .get(Attribute::Title)
+            .and_then(AttrValue::as_title)
+            .cloned()
+            .unwrap_or_default();
         let borders = self
             .props
-            .get_or(Attribute::Borders, AttrValue::Borders(Borders::default()))
-            .unwrap_borders();
+            .get(Attribute::Borders)
+            .and_then(AttrValue::as_borders)
+            .unwrap_or_default();
         // we also want to draw the block border differently depending if the component is focused or not
         let focus = self
             .props
-            .get_or(Attribute::Focus, AttrValue::Flag(false))
-            .unwrap_flag();
+            .get(Attribute::Focus)
+            .and_then(AttrValue::as_flag)
+            .unwrap_or(false);
 
         let block = Block::default()
             .title_top(title.content)
             .borders(borders.sides)
-            .border_style(if focus { borders.style() } else { Style::default().fg(Color::DarkGrey) });
+            .border_style(if focus {
+                borders.style()
+            } else {
+                Style::default().fg(Color::DarkGray)
+            });
 
         frame.render_widget(
-            Paragraph::new(count_str)
+            Paragraph::new(text)
                 .block(block)
-                .style(style)
-                .alignment(alignment),
+                .style(Style::default().fg(foreground).bg(background))
+                .alignment(HorizontalAlignment::Center),
             area,
         );
     }
 
     fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
-        self.props.get_as_ref(attr)
+        self.props.get_for_query(attr)
     }
 
     fn attr(&mut self, attr: Attribute, value: AttrValue) {
@@ -658,7 +670,7 @@ impl Component for Counter {
     }
 
     fn state(&self) -> State {
-        State::One(StateValue::Isize(self.states.counter))
+        State::Single(StateValue::Isize(self.states.counter))
     }
 
     fn perform(&mut self, cmd: Cmd) -> CmdResult {
@@ -675,10 +687,11 @@ impl Component for Counter {
 
 This is one big code dump, so lets break it down:
 
-- in `view` we fetch all properties that can be set and apply them to be drawn
-- in `query` and `attr` just pass them right through to `Props` to get / set the properties
-- in `state` return the current counter `times` value
-- in `perform`, on Command `Submit` we increment the counter and return a `Changed` value and ignore all other commands
+- in `view` we fetch all properties that can be set and apply them to be drawn. `Props::get` returns `Option<&AttrValue>`; the `AttrValue::as_*` helpers convert it into the concrete type we want, and we fall back to a default if the attribute hasn't been set.
+- in `query` we hand back a `QueryResult` via `Props::get_for_query`, which the view uses to read attributes without cloning
+- `attr` just forwards the value through to `Props` to update a property
+- `state` returns the current counter value wrapped in `State::Single`
+- `perform` increments the counter and returns a `Changed` result on `Cmd::Submit`; any other command is rejected with `CmdResult::Invalid`
 
 With that our **Component** is ready, we could now implement our two **Components**, but we also need some other types like **Messages**, so lets go and do those first.
 
@@ -713,8 +726,11 @@ So for our application, as we did for `Msg`, let's define `Id` with a Enum:
 pub enum Id {
     DigitCounter,
     LetterCounter,
+    Label,
 }
 ```
+
+> ❗ We also include a `Label` id which we'll use to display the last message received from the counters. The `Label` itself comes from [`tui-realm-stdlib`](https://github.com/veeso/tui-realm/tree/main/crates/tuirealm-stdlib) so we don't need to implement one here.
 
 ### Implementing the two counter components
 
@@ -772,7 +788,7 @@ impl AppComponent<Msg, NoUserEvent> for LetterCounter {
         };
         // perform
         match self.perform(cmd) {
-            CmdResult::Changed(State::One(StateValue::Isize(c))) => {
+            CmdResult::Changed(State::Single(StateValue::Isize(c))) => {
                 Some(Msg::LetterCounterChanged(c))
             }
             _ => None,
@@ -810,18 +826,20 @@ impl Model {
         self
             .terminal
             .draw(|f| {
-                let [letter, digit] = Layout::default()
+                let [letter, digit, label] = Layout::default()
                     .direction(Direction::Vertical)
                     .margin(1)
                     .constraints(
                         [
                             Constraint::Length(3), // Letter Counter
                             Constraint::Length(3), // Digit Counter
+                            Constraint::Length(1), // Label
                         ]
                     )
-                    .areas(f.size());
+                    .areas(f.area());
                 self.app.view(&Id::LetterCounter, f, letter);
                 self.app.view(&Id::DigitCounter, f, digit);
+                self.app.view(&Id::Label, f, label);
             }).expect("App to draw without error");
     }
 }
@@ -896,10 +914,11 @@ We're almost done, lets just quickly create a helper method to create the **Appl
 fn init_app() -> Application<Id, Msg, NoUserEvent> {
     // Setup application
     // NOTE: NoUserEvent is a shorthand to tell tui-realm we're not going to use any custom user event
-    // NOTE: the event listener is configured to use the default crossterm input listener
+    // NOTE: the event listener is configured to use the default crossterm input listener,
+    //       polling every 20ms and collecting up to 3 events per poll
     let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
         EventListenerCfg::default()
-            .crossterm_input_listener(Duration::from_millis(20)),
+            .crossterm_input_listener(Duration::from_millis(20), 3),
     );
 }
 ```
@@ -908,7 +927,7 @@ The app requires the configuration for the `EventListener` which will poll `Port
 
 > ❗ Here we could also define other Ports or setup the `Tick` producer with `tick_interval()`
 
-Then we can mount the two components into the view:
+Then we can mount the two counters and the label into the view:
 
 ```rust
 app.mount(
@@ -921,11 +940,22 @@ app.mount(
     Box::new(DigitCounter::new(5)),
     Vec::default()
 )?;
+app.mount(
+    Id::Label,
+    Box::new(
+        Label::default()
+            .text("Waiting for a Msg...")
+            .alignment(HorizontalAlignment::Left)
+            .foreground(Color::LightYellow)
+            .modifiers(TextModifiers::BOLD),
+    ),
+    Vec::default(),
+)?;
 ```
 
-> ❗ The two empty vectors are the subscriptions related to the component. (In this case none)
+> ❗ The empty vectors are the subscriptions related to each component. (In this case none)
 
-Then we initilize focus:
+Then we initialize focus:
 
 ```rust
 app.active(&Id::LetterCounter)?;
@@ -948,7 +978,7 @@ impl Model {
     fn init_app() -> Result<Application<Id, Msg, NoUserEvent>, Box<dyn Error>> { 
         let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
             EventListenerCfg::default()
-                .crossterm_input_listener(Duration::from_millis(20)),
+                .crossterm_input_listener(Duration::from_millis(20), 3),
         );
 
         app.mount(
@@ -960,6 +990,17 @@ impl Model {
             Id::DigitCounter,
             Box::new(DigitCounter::new(5)),
             Vec::default()
+        )?;
+        app.mount(
+            Id::Label,
+            Box::new(
+                Label::default()
+                    .text("Waiting for a Msg...")
+                    .alignment(HorizontalAlignment::Left)
+                    .foreground(Color::LightYellow)
+                    .modifiers(TextModifiers::BOLD),
+            ),
+            Vec::default(),
         )?;
 
         app.active(&Id::LetterCounter)?;
@@ -986,7 +1027,7 @@ model.view();
 
 while !model.quit {
     // Tick
-    match model.app.tick(PollStrategy::BlockingUpTo(1)) {
+    match model.app.tick(PollStrategy::Once(Duration::from_millis(10))) {
         Err(err) => {
             // Handle error...
         }
@@ -999,16 +1040,19 @@ while !model.quit {
                 }
             }
         }
+        _ => {}
     }
     // Redraw
     if model.redraw {
-        model.view(&mut app);
+        model.view();
         model.redraw = false;
     }
 }
 ```
 
-On each cycle we call `tick()` on our application, with strategy `BlockingUpTo` with a max collection of events of `1`. If there is a message, we ask the Model to process the messages. After processing, we redraw, only if the Model has decided it needs to be re-drawn.
+On each cycle we call `tick()` on our application, with strategy `Once` and a 10ms timeout, meaning we poll once per cycle waiting at most 10ms for an event. If there is a message, we ask the Model to process the messages. After processing, we redraw, but only if the Model has decided it needs to be re-drawn.
+
+> ❗ Other `PollStrategy` variants exist (`TryFor`, `UpTo`, `BlockCollectUpTo`) which block for longer or collect more events per tick — pick the one that fits your application's responsiveness needs.
 
 Once `quit` becomes true, the application terminates.
 All backends provided by `tui-realm` itself, will automatically clean-up terminal modes on `Drop`.
