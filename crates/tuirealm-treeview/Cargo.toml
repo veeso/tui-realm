@@ -1,0 +1,37 @@
+[package]
+name = "tui-realm-treeview"
+authors.workspace =  true
+rust-version.workspace =  true
+license.workspace =  true
+repository.workspace =  true
+homepage.workspace = true
+edition.workspace = true
+version = "4.0.0"
+categories = ["command-line-utilities"]
+description = "Treeview component for tui-realm"
+documentation = "https://docs.rs/tui-realm-treeview"
+include = ["examples/**/*", "src/**/*", "LICENSE", "README.md"]
+keywords = ["tui", "terminal"]
+readme = "README.md"
+
+[dependencies]
+tuirealm.workspace = true
+tui-realm-stdlib.workspace = true
+orange-trees = "0.1.0"
+unicode-width = "0.2"
+
+[dev-dependencies]
+tuirealm = { workspace = true, features = ["derive"] }
+crossterm = "0.29"
+insta = "1"
+pretty_assertions = "1"
+
+[features]
+default = ["crossterm"]
+crossterm = ["tuirealm/crossterm"]
+termion = ["tuirealm/termion"]
+
+[[example]]
+name = "filesystem"
+path = "examples/filesystem.rs"
+required-features = ["crossterm"]

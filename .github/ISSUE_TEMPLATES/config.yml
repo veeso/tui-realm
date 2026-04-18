@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Have a question?
+    url: https://github.com/veeso/tui-realm/discussions
+    about: Please ask and answer questions here.
+  - name: New Component or Project
+    url: https://github.com/veeso/tui-realm/discussions/categories/show-and-tell
+    about: Have a new component or project that uses tuirealm? Showcase them here.

@@ -1,0 +1,484 @@
+use std::fs;
+use std::io::{self, BufRead};
+use std::time::Duration;
+
+// label
+#[cfg(feature = "search")]
+use tui_realm_stdlib::components::Input;
+use tui_realm_stdlib::components::Label;
+use tui_realm_textarea::{
+    TEXTAREA_CMD_MOVE_BOTTOM, TEXTAREA_CMD_MOVE_TOP, TEXTAREA_CMD_MOVE_WORD_BACK,
+    TEXTAREA_CMD_MOVE_WORD_FORWARD, TEXTAREA_CMD_NEWLINE, TEXTAREA_CMD_REDO, TEXTAREA_CMD_UNDO,
+    TextArea,
+};
+#[cfg(feature = "search")]
+use tui_realm_textarea::{
+    TEXTAREA_CMD_SEARCH_BACK, TEXTAREA_CMD_SEARCH_FORWARD, TEXTAREA_SEARCH_PATTERN,
+};
+use tuirealm::application::{Application, PollStrategy};
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::{AppComponent, Component};
+use tuirealm::event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent};
+use tuirealm::listener::EventListenerCfg;
+use tuirealm::props::{
+    AttrValue, Attribute, BorderType, Borders, Color, HorizontalAlignment, QueryResult, Style,
+    TextModifiers, Title,
+};
+// tui
+use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
+use tuirealm::state::State;
+#[cfg(feature = "search")]
+use tuirealm::state::StateValue;
+use tuirealm::terminal::{CrosstermTerminalAdapter, TerminalAdapter, TerminalResult};
+
+// -- message
+#[derive(Debug, PartialEq)]
+pub enum Msg {
+    AppClose,
+    Submit(Vec<String>),
+    ChangeFocus(Id),
+    #[cfg(feature = "search")]
+    Search(String),
+    Redraw,
+}
+
+// Let's define the component ids for our application
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
+pub enum Id {
+    Editor,
+    #[cfg(feature = "search")]
+    Search,
+    Label,
+}
+
+struct Model {
+    app: Application<Id, Msg, NoUserEvent>,
+    quit: bool,   // Becomes true when the user presses <ESC>
+    redraw: bool, // Tells whether to refresh the UI; performance optimization
+    terminal: CrosstermTerminalAdapter,
+}
+
+impl Model {
+    /// Initialize the Terminal modes.
+    fn init_adapter() -> TerminalResult<CrosstermTerminalAdapter> {
+        let mut adapter = CrosstermTerminalAdapter::new()?;
+        adapter.enable_raw_mode()?;
+        adapter.enter_alternate_screen()?;
+        adapter.enable_bracketed_paste()?;
+
+        Ok(adapter)
+    }
+
+    fn new() -> Self {
+        // Setup app
+        let mut app: Application<Id, Msg, NoUserEvent> = Application::init(
+            EventListenerCfg::default().crossterm_input_listener(Duration::from_millis(10), 10),
+        );
+        assert!(
+            app.mount(Id::Editor, Box::new(Editor::default()), vec![])
+                .is_ok()
+        );
+        assert!(
+            app.mount(Id::Label, Box::new(DummyLabel::default()), vec![])
+                .is_ok()
+        );
+        #[cfg(feature = "search")]
+        assert!(
+            app.mount(Id::Search, Box::new(Search::default()), vec![])
+                .is_ok()
+        );
+        assert!(app.active(&Id::Editor).is_ok());
+        Model {
+            app,
+            quit: false,
+            redraw: true,
+            terminal: Self::init_adapter().expect("Could not initialize terminal"),
+        }
+    }
+
+    fn view(&mut self) {
+        let _ = self.terminal.raw_mut().draw(|f| {
+            // Prepare chunks
+            let chunks = Layout::default()
+                .direction(LayoutDirection::Vertical)
+                .margin(1)
+                .constraints(
+                    [
+                        Constraint::Min(5),
+                        Constraint::Length(1),
+                        Constraint::Length(3),
+                    ]
+                    .as_ref(),
+                )
+                .split(f.area());
+            self.app.view(&Id::Editor, f, chunks[0]);
+            self.app.view(&Id::Label, f, chunks[1]);
+            #[cfg(feature = "search")]
+            self.app.view(&Id::Search, f, chunks[2]);
+        });
+    }
+}
+
+fn main() {
+    // Make model
+    let mut model: Model = Model::new();
+    // let's loop until quit is true
+    while !model.quit {
+        // Tick
+        if let Ok(messages) = model
+            .app
+            .tick(PollStrategy::Once(Duration::from_millis(10)))
+        {
+            for msg in messages.into_iter() {
+                model.update(msg);
+            }
+        }
+        // Redraw
+        if model.redraw {
+            model.view();
+            model.redraw = false;
+        }
+    }
+    // print content
+    model
+        .app
+        .state(&Id::Editor)
+        .unwrap()
+        .unwrap_vec()
+        .into_iter()
+        .for_each(|x| println!("{}", x.unwrap_string()));
+}
+
+// -- update
+
+impl Model {
+    pub fn update(&mut self, msg: Msg) {
+        self.redraw = true;
+        match msg {
+            Msg::AppClose => {
+                self.quit = true;
+            }
+            Msg::ChangeFocus(Id::Editor) => {
+                let _ = self.app.active(&Id::Editor);
+            }
+            Msg::ChangeFocus(Id::Label) => {
+                let _ = self.app.active(&Id::Label);
+            }
+            #[cfg(feature = "search")]
+            Msg::ChangeFocus(Id::Search) => {
+                let _ = self.app.active(&Id::Search);
+            }
+            Msg::Submit(lines) => {
+                println!("Got user text: {:?}", lines);
+            }
+            #[cfg(feature = "search")]
+            Msg::Search(pattern) => {
+                assert!(
+                    self.app
+                        .attr(
+                            &Id::Editor,
+                            Attribute::Custom(TEXTAREA_SEARCH_PATTERN),
+                            AttrValue::String(pattern)
+                        )
+                        .is_ok()
+                );
+            }
+            _ => (),
+        }
+    }
+}
+
+// -- components
+
+pub struct Editor {
+    component: TextArea<'static>,
+}
+
+impl Component for Editor {
+    fn view(
+        &mut self,
+        frame: &mut tuirealm::ratatui::Frame,
+        area: tuirealm::ratatui::layout::Rect,
+    ) {
+        self.component.view(frame, area);
+    }
+
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        self.component.query(attr)
+    }
+
+    fn attr(&mut self, query: Attribute, attr: AttrValue) {
+        self.component.attr(query, attr)
+    }
+
+    fn state(&self) -> State {
+        self.component.state()
+    }
+
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        self.component.perform(cmd)
+    }
+}
+
+impl Default for Editor {
+    fn default() -> Self {
+        let textarea = match fs::File::open("README.md") {
+            Ok(reader) => TextArea::new(
+                io::BufReader::new(reader)
+                    .lines()
+                    .map(|l| l.unwrap())
+                    .collect::<_>(),
+            ),
+            Err(_) => TextArea::default(),
+        };
+        Self {
+            component: textarea
+                .borders(
+                    Borders::default()
+                        .color(Color::LightYellow)
+                        .modifiers(BorderType::Double),
+                )
+                .cursor_line_style(Style::default())
+                .cursor_style(Style::default().add_modifier(TextModifiers::REVERSED))
+                .footer_bar("Press <ESC> to quit", Style::default())
+                .line_number_style(
+                    Style::default()
+                        .fg(Color::LightBlue)
+                        .add_modifier(TextModifiers::ITALIC),
+                )
+                .max_histories(64)
+                .scroll_step(4)
+                .status_bar(
+                    "README.md Ln {ROW}, Col {COL}",
+                    Style::default().add_modifier(TextModifiers::REVERSED),
+                )
+                .tab_length(4)
+                .title(Title::from("Editing README.md").alignment(HorizontalAlignment::Left)),
+        }
+    }
+}
+
+impl AppComponent<Msg, NoUserEvent> for Editor {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
+        if let Event::WindowResize(_, _) = ev {
+            return Some(Msg::Redraw);
+        }
+
+        if let Event::Paste(text) = ev {
+            self.component.paste(text);
+            return Some(Msg::Redraw);
+        }
+
+        let result = match ev.as_keyboard()? {
+            // Movement
+            KeyEvent {
+                code: Key::PageDown,
+                ..
+            }
+            | KeyEvent {
+                code: Key::Down,
+                modifiers: KeyModifiers::SHIFT,
+            } => self.perform(Cmd::Scroll(Direction::Down)),
+            KeyEvent {
+                code: Key::PageUp, ..
+            }
+            | KeyEvent {
+                code: Key::Up,
+                modifiers: KeyModifiers::SHIFT,
+            } => self.perform(Cmd::Scroll(Direction::Up)),
+            KeyEvent {
+                code: Key::Down, ..
+            } => self.perform(Cmd::Move(Direction::Down)),
+            KeyEvent {
+                code: Key::Left,
+                modifiers: KeyModifiers::SHIFT,
+            } => self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_BACK)),
+            KeyEvent {
+                code: Key::Left, ..
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
+                code: Key::Right,
+                modifiers: KeyModifiers::SHIFT,
+            } => self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_WORD_FORWARD)),
+            KeyEvent {
+                code: Key::Right, ..
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent { code: Key::Up, .. } => self.perform(Cmd::Move(Direction::Up)),
+            KeyEvent {
+                code: Key::End,
+                modifiers: KeyModifiers::NONE,
+            }
+            | KeyEvent {
+                code: Key::Char('e'),
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
+                code: Key::Home,
+                modifiers: KeyModifiers::NONE,
+            }
+            | KeyEvent {
+                code: Key::Char('a'),
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent {
+                code: Key::End,
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_BOTTOM)),
+            KeyEvent {
+                code: Key::Home,
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::Custom(TEXTAREA_CMD_MOVE_TOP)),
+
+            // undo redo
+            KeyEvent {
+                code: Key::Char('z'),
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::Custom(TEXTAREA_CMD_UNDO)),
+            KeyEvent {
+                code: Key::Char('y'),
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::Custom(TEXTAREA_CMD_REDO)),
+
+            // search
+            #[cfg(feature = "search")]
+            KeyEvent {
+                code: Key::Char('s'),
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_BACK)),
+            #[cfg(feature = "search")]
+            KeyEvent {
+                code: Key::Char('d'),
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::Custom(TEXTAREA_CMD_SEARCH_FORWARD)),
+
+            // other
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
+            KeyEvent {
+                code: Key::Function(2),
+                ..
+            } => return Some(Msg::ChangeFocus(Id::Label)),
+            #[cfg(feature = "search")]
+            KeyEvent {
+                code: Key::Function(3),
+                ..
+            } => return Some(Msg::ChangeFocus(Id::Search)),
+
+            // Typing
+            KeyEvent {
+                code: Key::Backspace,
+                ..
+            }
+            | KeyEvent {
+                code: Key::Char('h'),
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::Delete),
+            KeyEvent {
+                code: Key::Delete, ..
+            } => self.perform(Cmd::Cancel),
+            KeyEvent {
+                code: Key::Enter, ..
+            }
+            | KeyEvent {
+                code: Key::Char('m'),
+                modifiers: KeyModifiers::CONTROL,
+            } => self.perform(Cmd::Custom(TEXTAREA_CMD_NEWLINE)),
+            KeyEvent { code: Key::Tab, .. } => self.perform(Cmd::Type('\t')),
+            KeyEvent {
+                code: Key::Char(ch),
+                ..
+            } => self.perform(Cmd::Type(*ch)),
+            _ => return None,
+        };
+
+        if matches!(result, CmdResult::NoChange | CmdResult::Invalid(_)) {
+            None
+        } else {
+            Some(Msg::Redraw)
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct DummyLabel {
+    component: Label,
+}
+
+impl Default for DummyLabel {
+    fn default() -> Self {
+        Self {
+            component: Label::default().text("text editor demo"),
+        }
+    }
+}
+
+impl AppComponent<Msg, NoUserEvent> for DummyLabel {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
+        match ev {
+            Event::Keyboard(KeyEvent {
+                code: Key::Function(1),
+                ..
+            }) => Some(Msg::ChangeFocus(Id::Editor)),
+            _ => None,
+        }
+    }
+}
+
+#[cfg(feature = "search")]
+#[derive(Component)]
+pub struct Search {
+    component: Input,
+}
+
+#[cfg(feature = "search")]
+impl Default for Search {
+    fn default() -> Self {
+        Self {
+            component: Input::default()
+                .title(Title::from("Search text").alignment(HorizontalAlignment::Left))
+                .foreground(Color::LightYellow)
+                .invalid_style(Style::default().fg(Color::Red)),
+        }
+    }
+}
+
+#[cfg(feature = "search")]
+impl AppComponent<Msg, NoUserEvent> for Search {
+    fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
+        match ev.as_keyboard()? {
+            KeyEvent {
+                code: Key::Left, ..
+            } => self.perform(Cmd::Move(Direction::Left)),
+            KeyEvent {
+                code: Key::Right, ..
+            } => self.perform(Cmd::Move(Direction::Right)),
+            KeyEvent {
+                code: Key::Home, ..
+            } => self.perform(Cmd::GoTo(Position::Begin)),
+            KeyEvent { code: Key::End, .. } => self.perform(Cmd::GoTo(Position::End)),
+            KeyEvent {
+                code: Key::Delete, ..
+            } => self.perform(Cmd::Cancel),
+            KeyEvent {
+                code: Key::Backspace,
+                ..
+            } => self.perform(Cmd::Delete),
+            KeyEvent {
+                code: Key::Char(ch),
+                modifiers: KeyModifiers::NONE,
+            } => {
+                if let CmdResult::Changed(State::Single(StateValue::String(pattern))) =
+                    self.perform(Cmd::Type(*ch))
+                {
+                    return Some(Msg::Search(pattern));
+                }
+                CmdResult::NoChange
+            }
+            KeyEvent { code: Key::Tab, .. } => {
+                return Some(Msg::ChangeFocus(Id::Editor));
+            }
+            KeyEvent { code: Key::Esc, .. } => return Some(Msg::AppClose),
+            _ => CmdResult::NoChange,
+        };
+        Some(Msg::Redraw)
+    }
+}

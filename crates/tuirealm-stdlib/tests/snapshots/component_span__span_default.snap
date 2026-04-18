@@ -1,0 +1,5 @@
+---
+source: crates/tuirealm-stdlib/tests/component_span.rs
+expression: rendered
+---
+Hello World

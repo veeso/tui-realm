@@ -1,0 +1,1468 @@
+//! This module exposes the prop values
+
+use std::any::Any;
+use std::collections::{HashMap, LinkedList};
+
+use super::{
+    Color, HorizontalAlignment, InputType, LineStatic, Shape, SpanStatic, Style, Table, TextStatic,
+    VerticalAlignment,
+};
+use crate::props::{AnyPropBox, PropPayloadRef, PropValueRef};
+
+// -- Prop value
+
+/// The payload contains the actual value for user defined properties
+#[derive(Debug, PartialEq, Clone)]
+pub enum PropPayload {
+    Single(PropValue),
+    Pair((PropValue, PropValue)),
+    Vec(Vec<PropValue>),
+    Map(HashMap<String, PropValue>),
+    Linked(LinkedList<PropPayload>),
+    Any(AnyPropBox),
+    None,
+}
+
+/// Value describes the value contained in a `PropPayload`
+#[derive(Debug, PartialEq, Clone)]
+pub enum PropValue {
+    Bool(bool),
+    U8(u8),
+    U16(u16),
+    U32(u32),
+    U64(u64),
+    U128(u128),
+    Usize(usize),
+    I8(i8),
+    I16(i16),
+    I32(i32),
+    I64(i64),
+    I128(i128),
+    Isize(isize),
+    F64(f64),
+    F32(f32),
+    Str(String),
+    // -- tui props
+    AlignmentHorizontal(HorizontalAlignment),
+    AlignmentVertical(VerticalAlignment),
+    Color(Color),
+    InputType(InputType),
+    Shape(Shape),
+    Style(Style),
+    Table(Table),
+    TextSpan(SpanStatic),
+    TextLine(LineStatic),
+    Text(TextStatic),
+}
+
+impl PropPayload {
+    /// Create a [`PropPayloadRef`] from the current value.
+    #[inline]
+    pub fn as_payload_ref<'a>(&'a self) -> PropPayloadRef<'a> {
+        self.into()
+    }
+
+    // -- unwrappers
+
+    /// Unwrap a Single value from PropPayload
+    pub fn unwrap_single(self) -> PropValue {
+        match self {
+            PropPayload::Single(v) => v,
+            _ => panic!("Called `unwrap_single` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Pair value from PropPayload
+    pub fn unwrap_pair(self) -> (PropValue, PropValue) {
+        match self {
+            PropPayload::Pair(v) => v,
+            _ => panic!("Called `unwrap_pair` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Vec value from PropPayload
+    pub fn unwrap_vec(self) -> Vec<PropValue> {
+        match self {
+            PropPayload::Vec(v) => v,
+            _ => panic!("Called `unwrap_vec` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Map value from PropPayload
+    pub fn unwrap_map(self) -> HashMap<String, PropValue> {
+        match self {
+            PropPayload::Map(v) => v,
+            _ => panic!("Called `unwrap_map` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Linked list from PropPayload
+    pub fn unwrap_linked(self) -> LinkedList<PropPayload> {
+        match self {
+            PropPayload::Linked(v) => v,
+            _ => panic!("Called `unwrap_linked` on a bad value"),
+        }
+    }
+
+    /// Unwrap a Any from PropPayload
+    pub fn unwrap_any(self) -> AnyPropBox {
+        match self {
+            PropPayload::Any(v) => v,
+            _ => panic!("Called `unwrap_any` on a bad value"),
+        }
+    }
+
+    // -- as reference
+
+    /// Get a Single value from PropPayload, or None
+    pub fn as_single(&self) -> Option<&PropValue> {
+        match self {
+            PropPayload::Single(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Pair value from PropPayload, or None
+    pub fn as_pair(&self) -> Option<&(PropValue, PropValue)> {
+        match self {
+            PropPayload::Pair(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vec value from PropPayload, or None
+    pub fn as_vec(&self) -> Option<&Vec<PropValue>> {
+        match self {
+            PropPayload::Vec(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Map value from PropPayload, or None
+    pub fn as_map(&self) -> Option<&HashMap<String, PropValue>> {
+        match self {
+            PropPayload::Map(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Linked value from PropPayload, or None
+    pub fn as_linked(&self) -> Option<&LinkedList<PropPayload>> {
+        match self {
+            PropPayload::Linked(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Any value from PropPayload, or None
+    pub fn as_any(&self) -> Option<&dyn Any> {
+        match self {
+            PropPayload::Any(v) => Some(v.as_ref()),
+            _ => None,
+        }
+    }
+
+    // -- as mutable references
+
+    /// Get a Single value from PropPayload, or None
+    pub fn as_single_mut(&mut self) -> Option<&mut PropValue> {
+        match self {
+            PropPayload::Single(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Pair value from PropPayload, or None
+    pub fn as_pair_mut(&mut self) -> Option<&mut (PropValue, PropValue)> {
+        match self {
+            PropPayload::Pair(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vec value from PropPayload, or None
+    pub fn as_vec_mut(&mut self) -> Option<&mut Vec<PropValue>> {
+        match self {
+            PropPayload::Vec(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Map value from PropPayload, or None
+    pub fn as_map_mut(&mut self) -> Option<&mut HashMap<String, PropValue>> {
+        match self {
+            PropPayload::Map(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Linked value from PropPayload, or None
+    pub fn as_linked_mut(&mut self) -> Option<&mut LinkedList<PropPayload>> {
+        match self {
+            PropPayload::Linked(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Any value from PropPayload, or None
+    pub fn as_any_mut(&mut self) -> Option<&mut dyn Any> {
+        match self {
+            PropPayload::Any(v) => Some(v.as_mut()),
+            _ => None,
+        }
+    }
+}
+
+impl PropValue {
+    /// Create a [`PropValueRef`] from the current value.
+    #[inline]
+    pub fn as_value_ref<'a>(&'a self) -> PropValueRef<'a> {
+        self.into()
+    }
+
+    // -- unwrappers
+
+    /// Unwrap PropValue as Bool.
+    /// Panics otherwise
+    pub fn unwrap_bool(self) -> bool {
+        match self {
+            PropValue::Bool(v) => v,
+            _ => panic!("Called `unwrap_bool` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as u8.
+    /// Panics otherwise
+    pub fn unwrap_u8(self) -> u8 {
+        match self {
+            PropValue::U8(v) => v,
+            _ => panic!("Called `unwrap_u8` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as u16.
+    /// Panics otherwise
+    pub fn unwrap_u16(self) -> u16 {
+        match self {
+            PropValue::U16(v) => v,
+            _ => panic!("Called `unwrap_u16` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Bool.
+    /// Panics otherwise
+    pub fn unwrap_u32(self) -> u32 {
+        match self {
+            PropValue::U32(v) => v,
+            _ => panic!("Called `unwrap_u32` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as u64.
+    /// Panics otherwise
+    pub fn unwrap_u64(self) -> u64 {
+        match self {
+            PropValue::U64(v) => v,
+            _ => panic!("Called `unwrap_u64` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as u128.
+    /// Panics otherwise
+    pub fn unwrap_u128(self) -> u128 {
+        match self {
+            PropValue::U128(v) => v,
+            _ => panic!("Called `unwrap_u128` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as usize.
+    /// Panics otherwise
+    pub fn unwrap_usize(self) -> usize {
+        match self {
+            PropValue::Usize(v) => v,
+            _ => panic!("Called `unwrap_usize` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i8.
+    /// Panics otherwise
+    pub fn unwrap_i8(self) -> i8 {
+        match self {
+            PropValue::I8(v) => v,
+            _ => panic!("Called `unwrap_i8` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i16.
+    /// Panics otherwise
+    pub fn unwrap_i16(self) -> i16 {
+        match self {
+            PropValue::I16(v) => v,
+            _ => panic!("Called `unwrap_i16` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i32.
+    /// Panics otherwise
+    pub fn unwrap_i32(self) -> i32 {
+        match self {
+            PropValue::I32(v) => v,
+            _ => panic!("Called `unwrap_i32` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i64.
+    /// Panics otherwise
+    pub fn unwrap_i64(self) -> i64 {
+        match self {
+            PropValue::I64(v) => v,
+            _ => panic!("Called `unwrap_i64` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as i128.
+    /// Panics otherwise
+    pub fn unwrap_i128(self) -> i128 {
+        match self {
+            PropValue::I128(v) => v,
+            _ => panic!("Called `unwrap_i128` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as isize.
+    /// Panics otherwise
+    pub fn unwrap_isize(self) -> isize {
+        match self {
+            PropValue::Isize(v) => v,
+            _ => panic!("Called `unwrap_isize` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as f32.
+    /// Panics otherwise
+    pub fn unwrap_f32(self) -> f32 {
+        match self {
+            PropValue::F32(v) => v,
+            _ => panic!("Called `unwrap_f32` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as f64.
+    /// Panics otherwise
+    pub fn unwrap_f64(self) -> f64 {
+        match self {
+            PropValue::F64(v) => v,
+            _ => panic!("Called `unwrap_f64` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as String.
+    /// Panics otherwise
+    pub fn unwrap_str(self) -> String {
+        match self {
+            PropValue::Str(v) => v,
+            _ => panic!("Called `unwrap_str` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Horizontal Alignment.
+    /// Panics otherwise
+    pub fn unwrap_alignment_horizontal(self) -> HorizontalAlignment {
+        match self {
+            PropValue::AlignmentHorizontal(v) => v,
+            _ => panic!("Called `unwrap_alignment_horizontal` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Vertical Alignment.
+    /// Panics otherwise
+    pub fn unwrap_alignment_vertical(self) -> VerticalAlignment {
+        match self {
+            PropValue::AlignmentVertical(v) => v,
+            _ => panic!("Called `unwrap_alignment_vertical` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Color.
+    /// Panics otherwise
+    pub fn unwrap_color(self) -> Color {
+        match self {
+            PropValue::Color(v) => v,
+            _ => panic!("Called `unwrap_color` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as InputType.
+    /// Panics otherwise
+    pub fn unwrap_input_type(self) -> InputType {
+        match self {
+            PropValue::InputType(v) => v,
+            _ => panic!("Called `unwrap_input_type` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Shape.
+    /// Panics otherwise
+    pub fn unwrap_shape(self) -> Shape {
+        match self {
+            PropValue::Shape(v) => v,
+            _ => panic!("Called `unwrap_shape` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Style.
+    /// Panics otherwise
+    pub fn unwrap_style(self) -> Style {
+        match self {
+            PropValue::Style(v) => v,
+            _ => panic!("Called `unwrap_style` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as Table.
+    /// Panics otherwise
+    pub fn unwrap_table(self) -> Table {
+        match self {
+            PropValue::Table(v) => v,
+            _ => panic!("Called `unwrap_table` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as [`SpanStatic`].
+    /// Panics otherwise
+    pub fn unwrap_textspan(self) -> SpanStatic {
+        match self {
+            PropValue::TextSpan(v) => v,
+            _ => panic!("Called `unwrap_textspan` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as [`LineStatic`].
+    /// Panics otherwise
+    pub fn unwrap_textline(self) -> LineStatic {
+        match self {
+            PropValue::TextLine(b) => b,
+            _ => panic!("Called `unwrap_textline` on a bad value"),
+        }
+    }
+
+    /// Unwrap PropValue as [`TextStatic`].
+    /// Panics otherwise
+    pub fn unwrap_text(self) -> TextStatic {
+        match self {
+            PropValue::Text(v) => v,
+            _ => panic!("Called `unwrap_text` on a bad value"),
+        }
+    }
+
+    // -- as reference
+
+    /// Get a Bool value from PropValue, or None
+    pub fn as_bool(&self) -> Option<bool> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::Bool(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u8 value from PropValue, or None
+    pub fn as_u8(&self) -> Option<u8> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U8(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u16 value from PropValue, or None
+    pub fn as_u16(&self) -> Option<u16> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U16(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u32 value from PropValue, or None
+    pub fn as_u32(&self) -> Option<u32> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u64 value from PropValue, or None
+    pub fn as_u64(&self) -> Option<u64> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a u128 value from PropValue, or None
+    pub fn as_u128(&self) -> Option<u128> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::U128(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a usize value from PropValue, or None
+    pub fn as_usize(&self) -> Option<usize> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::Usize(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i8 value from PropValue, or None
+    pub fn as_i8(&self) -> Option<i8> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I8(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i16 value from PropValue, or None
+    pub fn as_i16(&self) -> Option<i16> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I16(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i32 value from PropValue, or None
+    pub fn as_i32(&self) -> Option<i32> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i64 value from PropValue, or None
+    pub fn as_i64(&self) -> Option<i64> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a i128 value from PropValue, or None
+    pub fn as_i128(&self) -> Option<i128> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::I128(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a isize value from PropValue, or None
+    pub fn as_isize(&self) -> Option<isize> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::Isize(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a f32 value from PropValue, or None
+    pub fn as_f32(&self) -> Option<f32> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::F32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a f64 value from PropValue, or None
+    pub fn as_f64(&self) -> Option<f64> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::F64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a String value from PropValue, or None
+    pub fn as_str(&self) -> Option<&String> {
+        match self {
+            PropValue::Str(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Horizontal Alignment value from PropValue, or None
+    pub fn as_alignment_horizontal(&self) -> Option<HorizontalAlignment> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::AlignmentHorizontal(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vertical Alignment value from PropValue, or None
+    pub fn as_alignment_vertical(&self) -> Option<VerticalAlignment> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::AlignmentVertical(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a Color value from PropValue, or None
+    pub fn as_color(&self) -> Option<Color> {
+        match self {
+            // cheap copy, so no reference
+            PropValue::Color(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    /// Get a InputType value from PropValue, or None
+    pub fn as_input_type(&self) -> Option<&InputType> {
+        match self {
+            PropValue::InputType(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Shape value from PropValue, or None
+    pub fn as_shape(&self) -> Option<&Shape> {
+        match self {
+            PropValue::Shape(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Style value from PropValue, or None
+    pub fn as_style(&self) -> Option<&Style> {
+        match self {
+            PropValue::Style(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Table value from PropValue, or None
+    pub fn as_table(&self) -> Option<&Table> {
+        match self {
+            PropValue::Table(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`SpanStatic`] value from PropValue, or None
+    pub fn as_textspan(&self) -> Option<&SpanStatic> {
+        match self {
+            PropValue::TextSpan(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`LineStatic`] value from PropValue, or None
+    pub fn as_textline(&self) -> Option<&LineStatic> {
+        match self {
+            PropValue::TextLine(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`TextStatic`] value from PropValue, or None
+    pub fn as_text(&self) -> Option<&TextStatic> {
+        match self {
+            PropValue::Text(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    // -- as mutable references
+
+    /// Get a Bool value from PropValue, or None
+    pub fn as_bool_mut(&mut self) -> Option<&mut bool> {
+        match self {
+            PropValue::Bool(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u8 value from PropValue, or None
+    pub fn as_u8_mut(&mut self) -> Option<&mut u8> {
+        match self {
+            PropValue::U8(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u16 value from PropValue, or None
+    pub fn as_u16_mut(&mut self) -> Option<&mut u16> {
+        match self {
+            PropValue::U16(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u32 value from PropValue, or None
+    pub fn as_u32_mut(&mut self) -> Option<&mut u32> {
+        match self {
+            PropValue::U32(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u64 value from PropValue, or None
+    pub fn as_u64_mut(&mut self) -> Option<&mut u64> {
+        match self {
+            PropValue::U64(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a u128 value from PropValue, or None
+    pub fn as_u128_mut(&mut self) -> Option<&mut u128> {
+        match self {
+            PropValue::U128(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a usize value from PropValue, or None
+    pub fn as_usize_mut(&mut self) -> Option<&mut usize> {
+        match self {
+            PropValue::Usize(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i8 value from PropValue, or None
+    pub fn as_i8_mut(&mut self) -> Option<&mut i8> {
+        match self {
+            PropValue::I8(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i16 value from PropValue, or None
+    pub fn as_i16_mut(&mut self) -> Option<&mut i16> {
+        match self {
+            PropValue::I16(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i32 value from PropValue, or None
+    pub fn as_i32_mut(&mut self) -> Option<&mut i32> {
+        match self {
+            PropValue::I32(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i64 value from PropValue, or None
+    pub fn as_i64_mut(&mut self) -> Option<&mut i64> {
+        match self {
+            PropValue::I64(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a i128 value from PropValue, or None
+    pub fn as_i128_mut(&mut self) -> Option<&mut i128> {
+        match self {
+            PropValue::I128(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a isize value from PropValue, or None
+    pub fn as_isize_mut(&mut self) -> Option<&mut isize> {
+        match self {
+            PropValue::Isize(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a f32 value from PropValue, or None
+    pub fn as_f32_mut(&mut self) -> Option<&mut f32> {
+        match self {
+            PropValue::F32(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a f64 value from PropValue, or None
+    pub fn as_f64_mut(&mut self) -> Option<&mut f64> {
+        match self {
+            PropValue::F64(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a String value from PropValue, or None
+    pub fn as_str_mut(&mut self) -> Option<&mut String> {
+        match self {
+            PropValue::Str(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Horizontal Alignment value from PropValue, or None
+    pub fn as_alignment_horizontal_mut(&mut self) -> Option<&mut HorizontalAlignment> {
+        match self {
+            PropValue::AlignmentHorizontal(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Vertical Alignment value from PropValue, or None
+    pub fn as_alignment_vertical_mut(&mut self) -> Option<&mut VerticalAlignment> {
+        match self {
+            PropValue::AlignmentVertical(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Color value from PropValue, or None
+    pub fn as_color_mut(&mut self) -> Option<&mut Color> {
+        match self {
+            PropValue::Color(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a InputType value from PropValue, or None
+    pub fn as_input_type_mut(&mut self) -> Option<&mut InputType> {
+        match self {
+            PropValue::InputType(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Shape value from PropValue, or None
+    pub fn as_shape_mut(&mut self) -> Option<&mut Shape> {
+        match self {
+            PropValue::Shape(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Style value from PropValue, or None
+    pub fn as_style_mut(&mut self) -> Option<&mut Style> {
+        match self {
+            PropValue::Style(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a Table value from PropValue, or None
+    pub fn as_table_mut(&mut self) -> Option<&mut Table> {
+        match self {
+            PropValue::Table(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`SpanStatic`] value from PropValue, or None
+    pub fn as_textspan_mut(&mut self) -> Option<&mut SpanStatic> {
+        match self {
+            PropValue::TextSpan(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`LineStatic`] value from PropValue, or None
+    pub fn as_textline_mut(&mut self) -> Option<&mut LineStatic> {
+        match self {
+            PropValue::TextLine(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Get a [`TextStatic`] value from PropValue, or None
+    pub fn as_text_mut(&mut self) -> Option<&mut TextStatic> {
+        match self {
+            PropValue::Text(v) => Some(v),
+            _ => None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use pretty_assertions::{assert_eq, assert_ne};
+
+    use super::*;
+    use crate::props::PropBound;
+    use crate::ratatui::widgets::canvas::Map;
+
+    #[test]
+    fn prop_values() {
+        // test that values can be created without compile errors
+        let _ = PropPayload::Single(PropValue::Usize(2));
+        let _ = PropPayload::Pair((PropValue::Bool(true), PropValue::Usize(128)));
+        let _ = PropPayload::Vec(vec![
+            PropValue::U16(1),
+            PropValue::U32(2),
+            PropValue::U64(3),
+            PropValue::U128(4),
+        ]);
+
+        let mut map: HashMap<String, PropValue> = HashMap::new();
+        map.insert(String::from("a"), PropValue::I8(4));
+        assert_eq!(*map.get("a").unwrap(), PropValue::I8(4));
+        map.insert(String::from("b"), PropValue::I16(-8));
+        assert_eq!(*map.get("b").unwrap(), PropValue::I16(-8));
+        map.insert(String::from("c"), PropValue::I32(16));
+        assert_eq!(*map.get("c").unwrap(), PropValue::I32(16));
+        map.insert(String::from("d"), PropValue::I64(-32));
+        assert_eq!(*map.get("d").unwrap(), PropValue::I64(-32));
+        map.insert(String::from("e"), PropValue::I128(64));
+        assert_eq!(*map.get("e").unwrap(), PropValue::I128(64));
+        map.insert(String::from("g"), PropValue::InputType(InputType::Number));
+        assert_eq!(
+            *map.get("g").unwrap(),
+            PropValue::InputType(InputType::Number)
+        );
+        map.insert(String::from("h"), PropValue::U8(0));
+        assert_eq!(*map.get("h").unwrap(), PropValue::U8(0));
+        map.insert(String::from("i"), PropValue::Bool(true));
+        assert_eq!(*map.get("i").unwrap(), PropValue::Bool(true));
+        map.insert(String::from("j"), PropValue::U16(256));
+        assert_eq!(*map.get("j").unwrap(), PropValue::U16(256));
+        map.insert(String::from("k"), PropValue::U32(65536));
+        assert_eq!(*map.get("k").unwrap(), PropValue::U32(65536));
+        map.insert(String::from("l"), PropValue::U64(10000000000));
+        assert_eq!(*map.get("l").unwrap(), PropValue::U64(10000000000));
+        map.insert(String::from("m"), PropValue::Isize(200));
+        assert_eq!(*map.get("m").unwrap(), PropValue::Isize(200));
+        map.insert(String::from("n"), PropValue::F32(0.23));
+        assert_eq!(*map.get("n").unwrap(), PropValue::F32(0.23));
+        map.insert(
+            String::from("p"),
+            PropValue::Style(Style::default().fg(Color::Red)),
+        );
+        assert_eq!(
+            *map.get("p").unwrap(),
+            PropValue::Style(Style::default().fg(Color::Red))
+        );
+        map.insert(String::from("s"), PropValue::InputType(InputType::Number));
+        assert_eq!(
+            *map.get("s").unwrap(),
+            PropValue::InputType(InputType::Number)
+        );
+        map.insert(
+            String::from("t"),
+            PropValue::Shape(Shape::Map(Map::default())),
+        );
+        assert_eq!(
+            *map.get("t").unwrap(),
+            PropValue::Shape(Shape::Map(Map::default()))
+        );
+        map.insert(
+            String::from("u"),
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center),
+        );
+        assert_eq!(
+            *map.get("u").unwrap(),
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center)
+        );
+
+        let value = map.get_mut("u").unwrap();
+        *value.as_alignment_horizontal_mut().unwrap() = HorizontalAlignment::Left;
+        assert_eq!(
+            *map.get("u").unwrap(),
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Left)
+        );
+
+        let _ = PropPayload::Map(map);
+        let mut link: LinkedList<PropPayload> = LinkedList::new();
+        link.push_back(PropPayload::Single(PropValue::Usize(1)));
+        link.push_back(PropPayload::Pair((
+            PropValue::Usize(2),
+            PropValue::Usize(4),
+        )));
+        let _ = PropPayload::Linked(link);
+    }
+
+    #[test]
+    fn unwrap_prop_values() {
+        assert_eq!(
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center)
+                .unwrap_alignment_horizontal(),
+            HorizontalAlignment::Center
+        );
+        assert_eq!(
+            PropValue::AlignmentVertical(VerticalAlignment::Top).unwrap_alignment_vertical(),
+            VerticalAlignment::Top
+        );
+        assert_eq!(PropValue::Color(Color::Black).unwrap_color(), Color::Black);
+        assert!(PropValue::Bool(true).unwrap_bool());
+        assert_eq!(PropValue::F32(0.32).unwrap_f32(), 0.32);
+        assert_eq!(PropValue::F64(0.32).unwrap_f64(), 0.32);
+        assert_eq!(PropValue::I128(5).unwrap_i128(), 5);
+        assert_eq!(PropValue::I64(5).unwrap_i64(), 5);
+        assert_eq!(PropValue::I32(5).unwrap_i32(), 5);
+        assert_eq!(PropValue::I16(5).unwrap_i16(), 5);
+        assert_eq!(PropValue::I8(5).unwrap_i8(), 5);
+        assert_eq!(PropValue::Isize(5).unwrap_isize(), 5);
+        assert_eq!(PropValue::U128(5).unwrap_u128(), 5);
+        assert_eq!(PropValue::U64(5).unwrap_u64(), 5);
+        assert_eq!(PropValue::U32(5).unwrap_u32(), 5);
+        assert_eq!(PropValue::U16(5).unwrap_u16(), 5);
+        assert_eq!(PropValue::U8(5).unwrap_u8(), 5);
+        assert_eq!(PropValue::Usize(5).unwrap_usize(), 5);
+        assert_eq!(
+            PropValue::InputType(InputType::Number).unwrap_input_type(),
+            InputType::Number
+        );
+        assert_eq!(PropValue::Shape(Shape::Layer).unwrap_shape(), Shape::Layer);
+        assert_eq!(
+            PropValue::Str(String::from("ciao")).unwrap_str(),
+            "ciao".to_string()
+        );
+        assert_eq!(
+            PropValue::Style(Style::default()).unwrap_style(),
+            Style::default()
+        );
+        assert_eq!(
+            PropValue::Table(vec![vec![LineStatic::from("test")]]).unwrap_table(),
+            vec![vec![LineStatic::from("test")]]
+        );
+        assert_eq!(
+            PropValue::TextSpan(SpanStatic::from("ciao")).unwrap_textspan(),
+            SpanStatic::from("ciao")
+        );
+        assert_eq!(
+            PropValue::TextLine(LineStatic::from("ciao")).unwrap_textline(),
+            LineStatic::from("ciao")
+        );
+        assert_eq!(
+            PropValue::Text(TextStatic::from("ciao")).unwrap_text(),
+            TextStatic::from("ciao")
+        );
+    }
+
+    #[test]
+    fn as_prop_value() {
+        assert_eq!(PropValue::Bool(true).as_bool(), Some(true));
+        assert_eq!(PropValue::U8(0).as_bool(), None);
+
+        assert_eq!(PropValue::U8(1).as_u8(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u8(), None);
+
+        assert_eq!(PropValue::U16(1).as_u16(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u16(), None);
+
+        assert_eq!(PropValue::U32(1).as_u32(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u32(), None);
+
+        assert_eq!(PropValue::U64(1).as_u64(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u64(), None);
+
+        assert_eq!(PropValue::U128(1).as_u128(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_u128(), None);
+
+        assert_eq!(PropValue::Usize(1).as_usize(), Some(1));
+        assert_eq!(PropValue::Bool(true).as_usize(), None);
+
+        assert_eq!(PropValue::I8(-1).as_i8(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i8(), None);
+
+        assert_eq!(PropValue::I16(-1).as_i16(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i16(), None);
+
+        assert_eq!(PropValue::I32(-1).as_i32(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i32(), None);
+
+        assert_eq!(PropValue::I64(-1).as_i64(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i64(), None);
+
+        assert_eq!(PropValue::I128(-1).as_i128(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_i128(), None);
+
+        assert_eq!(PropValue::Isize(-1).as_isize(), Some(-1));
+        assert_eq!(PropValue::Bool(true).as_isize(), None);
+
+        assert_eq!(PropValue::F32(1.1).as_f32(), Some(1.1));
+        assert_eq!(PropValue::Bool(true).as_f32(), None);
+
+        assert_eq!(PropValue::F64(1.1).as_f64(), Some(1.1));
+        assert_eq!(PropValue::Bool(true).as_f64(), None);
+
+        assert_eq!(
+            PropValue::Str("hello".to_string()).as_str(),
+            Some(&"hello".to_string())
+        );
+        assert_eq!(PropValue::Bool(true).as_str(), None);
+
+        assert_eq!(
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center).as_alignment_horizontal(),
+            Some(HorizontalAlignment::Center)
+        );
+        assert_eq!(PropValue::Bool(true).as_alignment_horizontal(), None);
+
+        assert_eq!(
+            PropValue::AlignmentVertical(VerticalAlignment::Top).as_alignment_vertical(),
+            Some(VerticalAlignment::Top)
+        );
+        assert_eq!(PropValue::Bool(true).as_alignment_vertical(), None);
+
+        assert_eq!(
+            PropValue::Color(Color::Black).as_color(),
+            Some(Color::Black)
+        );
+        assert_eq!(PropValue::Bool(true).as_color(), None);
+
+        assert_eq!(
+            PropValue::InputType(InputType::Color).as_input_type(),
+            Some(&InputType::Color)
+        );
+        assert_eq!(PropValue::Bool(true).as_input_type(), None);
+
+        assert_eq!(
+            PropValue::Shape(Shape::Layer).as_shape(),
+            Some(&Shape::Layer)
+        );
+        assert_eq!(PropValue::Bool(true).as_shape(), None);
+
+        assert_eq!(
+            PropValue::Style(Style::new()).as_style(),
+            Some(&Style::new())
+        );
+        assert_eq!(PropValue::Bool(true).as_style(), None);
+
+        assert_eq!(
+            PropValue::Table(Table::new()).as_table(),
+            Some(&Table::new())
+        );
+        assert_eq!(PropValue::Bool(true).as_table(), None);
+
+        assert_eq!(
+            PropValue::TextSpan(SpanStatic::from("hello")).as_textspan(),
+            Some(&SpanStatic::from("hello"))
+        );
+        assert_eq!(PropValue::Bool(true).as_textspan(), None);
+
+        assert_eq!(
+            PropValue::TextLine(LineStatic::from("hello")).as_textline(),
+            Some(&LineStatic::from("hello"))
+        );
+        assert_eq!(PropValue::Bool(true).as_textline(), None);
+
+        assert_eq!(
+            PropValue::Text(TextStatic::from("hello")).as_text(),
+            Some(&TextStatic::from("hello"))
+        );
+        assert_eq!(PropValue::Bool(true).as_text(), None);
+    }
+
+    #[test]
+    fn as_prop_value_mut() {
+        assert_eq!(PropValue::Bool(true).as_bool_mut(), Some(&mut true));
+        assert_eq!(PropValue::U8(0).as_bool_mut(), None);
+
+        assert_eq!(PropValue::U8(1).as_u8_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u8_mut(), None);
+
+        assert_eq!(PropValue::U16(1).as_u16_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u16_mut(), None);
+
+        assert_eq!(PropValue::U32(1).as_u32_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u32_mut(), None);
+
+        assert_eq!(PropValue::U64(1).as_u64_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u64_mut(), None);
+
+        assert_eq!(PropValue::U128(1).as_u128_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_u128_mut(), None);
+
+        assert_eq!(PropValue::Usize(1).as_usize_mut(), Some(&mut 1));
+        assert_eq!(PropValue::Bool(true).as_usize_mut(), None);
+
+        assert_eq!(PropValue::I8(-1).as_i8_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i8_mut(), None);
+
+        assert_eq!(PropValue::I16(-1).as_i16_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i16_mut(), None);
+
+        assert_eq!(PropValue::I32(-1).as_i32_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i32_mut(), None);
+
+        assert_eq!(PropValue::I64(-1).as_i64_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i64_mut(), None);
+
+        assert_eq!(PropValue::I128(-1).as_i128_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_i128_mut(), None);
+
+        assert_eq!(PropValue::Isize(-1).as_isize_mut(), Some(&mut -1));
+        assert_eq!(PropValue::Bool(true).as_isize_mut(), None);
+
+        assert_eq!(PropValue::F32(1.1).as_f32_mut(), Some(&mut 1.1));
+        assert_eq!(PropValue::Bool(true).as_f32_mut(), None);
+
+        assert_eq!(PropValue::F64(1.1).as_f64_mut(), Some(&mut 1.1));
+        assert_eq!(PropValue::Bool(true).as_f64_mut(), None);
+
+        assert_eq!(
+            PropValue::Str("hello".to_string()).as_str_mut(),
+            Some(&mut "hello".to_string())
+        );
+        assert_eq!(PropValue::Bool(true).as_str_mut(), None);
+
+        assert_eq!(
+            PropValue::AlignmentHorizontal(HorizontalAlignment::Center)
+                .as_alignment_horizontal_mut(),
+            Some(&mut HorizontalAlignment::Center)
+        );
+        assert_eq!(PropValue::Bool(true).as_alignment_horizontal_mut(), None);
+
+        assert_eq!(
+            PropValue::AlignmentVertical(VerticalAlignment::Top).as_alignment_vertical_mut(),
+            Some(&mut VerticalAlignment::Top)
+        );
+        assert_eq!(PropValue::Bool(true).as_alignment_vertical_mut(), None);
+
+        assert_eq!(
+            PropValue::Color(Color::Black).as_color_mut(),
+            Some(&mut Color::Black)
+        );
+        assert_eq!(PropValue::Bool(true).as_color_mut(), None);
+
+        assert_eq!(
+            PropValue::InputType(InputType::Color).as_input_type_mut(),
+            Some(&mut InputType::Color)
+        );
+        assert_eq!(PropValue::Bool(true).as_input_type_mut(), None);
+
+        assert_eq!(
+            PropValue::Shape(Shape::Layer).as_shape_mut(),
+            Some(&mut Shape::Layer)
+        );
+        assert_eq!(PropValue::Bool(true).as_shape_mut(), None);
+
+        assert_eq!(
+            PropValue::Style(Style::new()).as_style_mut(),
+            Some(&mut Style::new())
+        );
+        assert_eq!(PropValue::Bool(true).as_style_mut(), None);
+
+        assert_eq!(
+            PropValue::Table(Table::new()).as_table_mut(),
+            Some(&mut Table::new())
+        );
+        assert_eq!(PropValue::Bool(true).as_table_mut(), None);
+
+        assert_eq!(
+            PropValue::TextSpan(SpanStatic::from("hello")).as_textspan_mut(),
+            Some(&mut SpanStatic::from("hello"))
+        );
+        assert_eq!(PropValue::Bool(true).as_textspan_mut(), None);
+
+        assert_eq!(
+            PropValue::TextLine(LineStatic::from("hello")).as_textline_mut(),
+            Some(&mut LineStatic::from("hello"))
+        );
+        assert_eq!(PropValue::Bool(true).as_textline_mut(), None);
+
+        assert_eq!(
+            PropValue::Text(TextStatic::from("hello")).as_text_mut(),
+            Some(&mut TextStatic::from("hello"))
+        );
+        assert_eq!(PropValue::Bool(true).as_text_mut(), None);
+    }
+
+    #[test]
+    fn unwrap_prop_payloads() {
+        assert!(
+            !PropPayload::Single(PropValue::Bool(false))
+                .unwrap_single()
+                .unwrap_bool(),
+        );
+        assert_eq!(
+            PropPayload::Pair((PropValue::Bool(false), PropValue::Bool(false))).unwrap_pair(),
+            (PropValue::Bool(false), PropValue::Bool(false))
+        );
+        assert_eq!(
+            PropPayload::Vec(vec![PropValue::Bool(false), PropValue::Bool(false)]).unwrap_vec(),
+            &[PropValue::Bool(false), PropValue::Bool(false)]
+        );
+    }
+
+    #[test]
+    fn as_prop_payloads() {
+        assert_eq!(
+            PropPayload::Single(PropValue::Bool(true)).as_single(),
+            Some(&PropValue::Bool(true))
+        );
+        assert_eq!(PropPayload::None.as_single(), None);
+
+        assert_eq!(
+            PropPayload::Pair((PropValue::Bool(true), PropValue::Bool(true))).as_pair(),
+            Some(&(PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert_eq!(PropPayload::None.as_pair(), None);
+
+        assert_eq!(
+            PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec(),
+            Some(&vec![PropValue::Bool(true)])
+        );
+        assert_eq!(PropPayload::None.as_vec(), None);
+
+        assert_eq!(
+            PropPayload::Map(HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+            .as_map(),
+            Some(&HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+        );
+        assert_eq!(PropPayload::None.as_map(), None);
+
+        assert_eq!(
+            PropPayload::Linked(LinkedList::new()).as_linked(),
+            Some(&LinkedList::new())
+        );
+        assert_eq!(PropPayload::None.as_linked(), None);
+    }
+
+    #[test]
+    fn as_prop_payloads_mut() {
+        assert_eq!(
+            PropPayload::Single(PropValue::Bool(true)).as_single_mut(),
+            Some(&mut PropValue::Bool(true))
+        );
+        assert_eq!(PropPayload::None.as_single_mut(), None);
+
+        assert_eq!(
+            PropPayload::Pair((PropValue::Bool(true), PropValue::Bool(true))).as_pair_mut(),
+            Some(&mut (PropValue::Bool(true), PropValue::Bool(true)))
+        );
+        assert_eq!(PropPayload::None.as_pair_mut(), None);
+
+        assert_eq!(
+            PropPayload::Vec(vec![PropValue::Bool(true)]).as_vec_mut(),
+            Some(&mut vec![PropValue::Bool(true)])
+        );
+        assert_eq!(PropPayload::None.as_vec_mut(), None);
+
+        assert_eq!(
+            PropPayload::Map(HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+            .as_map_mut(),
+            Some(&mut HashMap::from([(
+                "hello".to_string(),
+                PropValue::Bool(true)
+            )]))
+        );
+        assert_eq!(PropPayload::None.as_map_mut(), None);
+
+        assert_eq!(
+            PropPayload::Linked(LinkedList::new()).as_linked_mut(),
+            Some(&mut LinkedList::new())
+        );
+        assert_eq!(PropPayload::None.as_linked_mut(), None);
+    }
+
+    #[test]
+    fn any() {
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        struct SomeCustomType {
+            field1: bool,
+            field2: bool,
+        }
+
+        #[derive(Debug, Clone, Copy, PartialEq)]
+        struct SomeDifferentCustomType {
+            field1: bool,
+        }
+
+        let input = SomeCustomType {
+            field1: true,
+            field2: false,
+        };
+        let single_value = PropPayload::Any(input.to_any_prop());
+
+        assert_eq!(
+            single_value,
+            PropPayload::Any(
+                SomeCustomType {
+                    field1: true,
+                    field2: false
+                }
+                .to_any_prop()
+            )
+        );
+        assert_ne!(
+            single_value,
+            PropPayload::Any(
+                SomeCustomType {
+                    field1: false,
+                    field2: true
+                }
+                .to_any_prop()
+            )
+        );
+
+        assert_ne!(
+            single_value,
+            PropPayload::Any(SomeDifferentCustomType { field1: true }.to_any_prop())
+        );
+
+        #[derive(Debug, Clone, PartialEq)]
+        struct CloneableType {
+            field1: String,
+        }
+
+        let input = PropPayload::Any(
+            CloneableType {
+                field1: "Hello".to_string(),
+            }
+            .to_any_prop(),
+        );
+        let cloned = input.clone();
+
+        assert_eq!(input, cloned);
+        let input_downcasted = input
+            .as_any()
+            .unwrap()
+            .downcast_ref::<CloneableType>()
+            .expect("Erased type should be CloneableType");
+        let cloned_downcasted = cloned
+            .as_any()
+            .unwrap()
+            .downcast_ref::<CloneableType>()
+            .expect("Erased type should be CloneableType");
+        // should be cloned and so not have the same memory pointer
+        assert_ne!(
+            input_downcasted.field1.as_ptr(),
+            cloned_downcasted.field1.as_ptr()
+        );
+
+        let mut changed_data = cloned;
+
+        let downcasted = changed_data
+            .as_any_mut()
+            .unwrap()
+            .downcast_mut::<CloneableType>()
+            .expect("Erased type should be CloneableType");
+
+        downcasted.field1 = "Changed later".to_string();
+
+        assert_ne!(input_downcasted, downcasted);
+    }
+}

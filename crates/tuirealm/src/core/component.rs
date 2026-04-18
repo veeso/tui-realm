@@ -1,0 +1,93 @@
+//! This module exposes the component traits
+
+use std::any::Any;
+
+use ratatui::Frame;
+// Despite how it seems, rust allows duplicate names if one is a proc_macro and the other anything else.
+#[cfg(feature = "derive")]
+pub use tuirealm_derive::Component;
+
+use crate::command::{Cmd, CmdResult};
+use crate::event::Event;
+use crate::props::{AttrValue, Attribute, QueryResult};
+use crate::ratatui::layout::Rect;
+use crate::state::State;
+
+/// A Component represents a reusable graphic element which defines all the properties and states it can handle and represent
+/// and the way it should be rendered. It must also define how to behave in case of a [`Cmd`] (command).
+///
+/// Despite that, it won't define how to behave after an [`Event`] and it won't send any `Msg`.
+/// The Component is intended to be used as a reusable component to implement your application component.
+///
+/// ### In practice
+///
+/// A real life example would be an Input field.
+/// The component is represented by the `Input`, which will define the properties (e.g. max input length, input type, ...)
+/// and by its behaviour (e.g. when the user types 'a', 'a' char is added to input state).
+///
+/// In your application though, you may use a `IpAddressInput` which is the [`AppComponent`] using the `Input` component.
+/// If you want more example, just dive into the `examples/` folder in the project root.
+pub trait Component {
+    /// Based on the current properties and states, renders the component in the provided area frame.
+    /// Render can also mutate the component state if this is required
+    fn view(&mut self, frame: &mut Frame, area: Rect);
+
+    /// Query attribute of component properties.
+    ///
+    /// The result should always be [`QueryResult::Borrowed`] unless absolutely necessary.
+    /// In practice, [`QueryResult::Owned`] should only be used for when [`PropPayload::Any`](crate::props::PropPayload::Any) is required to be send.
+    ///
+    /// For handling both [`QueryResult`] cases *readonly*, [`as_ref`](QueryResult::as_ref) can be used.
+    /// For handling both [`QueryResult`] cases *mutably*, [`into_attr`](QueryResult::into_attr) can be used.
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>>;
+
+    /// Set attribute to properties.
+    /// `query` describes the name, while `attr` the value it'll take
+    fn attr(&mut self, attr: Attribute, value: AttrValue);
+
+    /// Get current state from component
+    fn state(&self) -> State;
+
+    /// Perform a command on the component.
+    /// The command will may change the component state.
+    /// The method returns the result of the command applied (what changed if any)
+    fn perform(&mut self, cmd: Cmd) -> CmdResult;
+}
+
+/// The app component describes the application level component, which is a wrapper around the [`Component`],
+/// which, in addition to all the methods exposed by the base component, it will handle the [`Event`]s coming from the `View`.
+///
+/// The Event are passed to the `on` method, which will eventually return a `Msg`,
+/// which is defined in your application as an enum.
+/// In your application you should have a Component for each element on your UI, but the logic to implement
+/// is very tiny, since the most of the work should already be done into the [`Component`]
+/// and many of them are available in the standard library at [`tui-realm-stdlib`](https://github.com/veeso/tui-realm/tree/feature/main/crates/tuirealm-stdlib).
+///
+/// Don't forget you can find an example in the `examples/` directory and you can discover many more information
+/// about components in the repository documentation.
+pub trait AppComponent<Msg, UserEvent>: Component + Any
+where
+    Msg: PartialEq,
+    UserEvent: Eq + PartialEq + Clone,
+{
+    /// Handle input event and update internal states.
+    /// Returns a Msg to the view.
+    /// If [`None`] is returned it means there's no message to return for the provided event.
+    fn on(&mut self, ev: &Event<UserEvent>) -> Option<Msg>;
+}
+
+impl<Msg, UserEvent> dyn AppComponent<Msg, UserEvent>
+where
+    Msg: PartialEq,
+    UserEvent: Eq + PartialEq + Clone,
+{
+    /// Convenience function to cast to [`Any`].
+    pub fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    /// Convenience function to cast to [`Any`] mutably.
+    pub fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+}

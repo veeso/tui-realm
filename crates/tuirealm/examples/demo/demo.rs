@@ -1,0 +1,74 @@
+//! ## Demo
+//!
+//! `Demo` shows how to use tui-realm in a real case
+
+extern crate tuirealm;
+
+use std::time::Duration;
+
+use tuirealm::application::PollStrategy;
+use tuirealm::props::{AttrValue, Attribute};
+// -- internal
+mod app;
+mod components;
+use app::model::Model;
+
+// Let's define the messages handled by our app. NOTE: it must derive `PartialEq`
+#[derive(Debug, PartialEq)]
+pub enum Msg {
+    AppClose,
+    Clock,
+    DigitCounterChanged(isize),
+    DigitCounterBlur,
+    LetterCounterChanged(isize),
+    LetterCounterBlur,
+}
+
+// Let's define the component ids for our application
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
+pub enum Id {
+    Help,
+    Clock,
+    DigitCounter,
+    LetterCounter,
+    Label,
+}
+
+fn main() {
+    // Setup model
+    let mut model = Model::default();
+
+    // Main loop
+    // NOTE: loop until quit; quit is set in update if AppClose is received from counter
+    while !model.quit {
+        // Tick
+        match model
+            .app
+            .tick(PollStrategy::Once(Duration::from_millis(10)))
+        {
+            Err(err) => {
+                assert!(
+                    model
+                        .app
+                        .attr(
+                            &Id::Label,
+                            Attribute::Text,
+                            AttrValue::String(format!("Application error: {err}")),
+                        )
+                        .is_ok()
+                );
+            }
+            Ok(messages) if !messages.is_empty() => {
+                for msg in messages {
+                    model.update(msg);
+                }
+            }
+            _ => {}
+        }
+        // Redraw
+        if model.redraw {
+            model.view();
+            model.redraw = false;
+        }
+    }
+}

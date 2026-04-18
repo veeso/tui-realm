@@ -1,0 +1,100 @@
+[package]
+name = "tui-realm-stdlib"
+version = "4.0.0"
+authors.workspace =  true
+edition.workspace =  true
+rust-version.workspace =  true
+license.workspace =  true
+repository.workspace =  true
+homepage.workspace = true
+categories = ["command-line-utilities"]
+description = "Standard components library for tui-realm."
+documentation = "https://docs.rs/tui-realm-stdlib"
+include = ["examples/**/*", "src/**/*", "LICENSE", "README.md"]
+keywords = ["tui", "terminal"]
+readme = "README.md"
+
+[dependencies]
+tuirealm.workspace = true
+textwrap = "^0.16"
+unicode-width = "^0.2"
+
+[dev-dependencies]
+insta = "1"
+pretty_assertions = "1"
+rand = "0.10"
+tuirealm = { workspace = true, features = ["crossterm", "derive"] }
+
+[features]
+
+[[example]]
+name = "bar_chart"
+path = "examples/bar_chart.rs"
+
+[[example]]
+name = "canvas"
+path = "examples/canvas.rs"
+
+[[example]]
+name = "chart"
+path = "examples/chart.rs"
+
+[[example]]
+name = "checkbox"
+path = "examples/checkbox.rs"
+
+[[example]]
+name = "container"
+path = "examples/container.rs"
+
+[[example]]
+name = "input"
+path = "examples/input.rs"
+
+[[example]]
+name = "label"
+path = "examples/label.rs"
+
+[[example]]
+name = "line_gauge"
+path = "examples/line_gauge.rs"
+
+[[example]]
+name = "list"
+path = "examples/list.rs"
+
+[[example]]
+name = "paragraph"
+path = "examples/paragraph.rs"
+
+[[example]]
+name = "gauge"
+path = "examples/gauge.rs"
+
+[[example]]
+name = "radio"
+path = "examples/radio.rs"
+
+[[example]]
+name = "select"
+path = "examples/select.rs"
+
+[[example]]
+name = "span"
+path = "examples/span.rs"
+
+[[example]]
+name = "sparkline"
+path = "examples/sparkline.rs"
+
+[[example]]
+name = "spinner"
+path = "examples/spinner.rs"
+
+[[example]]
+name = "table"
+path = "examples/table.rs"
+
+[[example]]
+name = "textarea"
+path = "examples/textarea.rs"

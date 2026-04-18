@@ -1,0 +1,31 @@
+[package]
+name = "tuirealm_derive"
+authors.workspace =  true
+rust-version.workspace =  true
+license.workspace =  true
+repository.workspace =  true
+homepage.workspace = true
+edition.workspace = true
+version = "4.0.0"
+categories = ["command-line-utilities"]
+description = "Derive macro which automatically implements the Component trait"
+documentation = "https://docs.rs/tuirealm_derive"
+include = ["src/**/*", "LICENSE", "README.md"]
+keywords = ["tui", "terminal"]
+readme = "README.md"
+
+[lib]
+doctest = false
+name = "tuirealm_derive"
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = "2"
+
+[dev-dependencies]
+tuirealm.workspace = true
+tui-realm-stdlib.workspace = true
+
+[features]

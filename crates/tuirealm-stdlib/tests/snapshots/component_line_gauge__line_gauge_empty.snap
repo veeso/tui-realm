@@ -1,0 +1,7 @@
+---
+source: crates/tuirealm-stdlib/tests/component_line_gauge.rs
+expression: rendered
+---
+┌──────────────────────────────────────┐
+│ ─────────────────────────────────────│
+└──────────────────────────────────────┘

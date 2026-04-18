@@ -1,0 +1,765 @@
+//! # tui-realm-treeview
+//!
+//! [tui-realm-treeview](https://github.com/veeso/tui-realm/tree/feature/main/crates/tuirealm-treeview) is a
+//! [tui-realm](https://github.com/veeso/tui-realm) implementation of a treeview component.
+//! The tree engine is based on [Orange-trees](https://docs.rs/orange-trees/).
+//!
+//! ## Get Started
+//!
+//! ### Adding `tui-realm-treeview` as dependency
+//!
+//! ```toml
+//! tui-realm-treeview = "4"
+//! ```
+//!
+//! Or if you don't use **Crossterm**, define the backend as you would do with tui-realm:
+//!
+//! ```toml
+//! tui-realm-treeview = { version = "4", default-features = false, features = [ "termion" ] }
+//! ```
+//!
+//! ## Component API
+//!
+//! **Commands**:
+//!
+//! | Cmd                       | Result            | Behaviour                                            |
+//! |---------------------------|-------------------|------------------------------------------------------|
+//! | `Custom($TREE_CMD_CLOSE)` | `None`            | Close selected node                                  |
+//! | `Custom($TREE_CMD_OPEN)`  | `None`            | Open selected node                                   |
+//! | `GoTo(Begin)`             | `Changed \| None` | Move cursor to the top of the current tree node      |
+//! | `GoTo(End)`               | `Changed \| None` | Move cursor to the bottom of the current tree node   |
+//! | `Move(Down)`              | `Changed \| None` | Go to next element                                   |
+//! | `Move(Up)`                | `Changed \| None` | Go to previous element                               |
+//! | `Scroll(Down)`            | `Changed \| None` | Move cursor down by defined max steps or end of node |
+//! | `Scroll(Up)`              | `Changed \| None` | Move cursor up by defined max steps or begin of node |
+//! | `Submit`                  | `Submit`          | Just returns submit result with current state        |
+//!
+//! **State**: the state returned is a `One(String)` containing the id of the selected node. If no node is selected `None` is returned.
+//!
+//! **Properties**:
+//!
+//! - `Background(Color)`: background color. The background color will be used as background for unselected entry, but will be used as foreground for the selected entry when focus is true
+//! - `Borders(Borders)`: set borders properties for component
+//! - `Custom($TREE_IDENT_SIZE, Size)`: Set space to render for each each depth level
+//! - `Custom($TREE_INITIAL_NODE, String)`: Select initial node in the tree. This option has priority over `keep_state`
+//! - `Custom($TREE_PRESERVE_STATE, Flag)`: If true, the selected entry will be kept after an update of the tree (obviously if the entry still exists in the tree).
+//! - `FocusStyle(Style)`: inactive style
+//! - `Foreground(Color)`: foreground color. The foreground will be used as foreground for the selected item, when focus is false, otherwise as background
+//! - `HighlightedColor(Color)`: The provided color will be used to highlight the selected node. `Foreground` will be used if unset.
+//! - `HighlightedStr(String)`: The provided string will be displayed on the left side of the selected entry in the tree
+//! - `ScrollStep(Length)`: Defines the maximum amount of rows to scroll
+//! - `TextProps(TextModifiers)`: set text modifiers
+//! - `Title(Title)`: Set box title
+//!
+//! ### Updating the tree
+//!
+//! The tree in this component is not inside the `props`, but is a member of the `TreeView` component structure.
+//! In order to update and work with the tree you've got basically two ways to do this.
+//!
+//! #### Remounting the component
+//!
+//! In situation where you need to update the tree on the update routine (as happens in the example),
+//! the best way to update the tree is to remount the component from scratch.
+//!
+//! #### Updating the tree from the "on" method
+//!
+//! This method is probably better than remounting, but it is not always possible to use this.
+//! When you implement `Component` for your treeview, you have a mutable reference to the component, and so here you can call these methods to operate on the tree:
+//!
+//! - `pub fn tree(&self) -> &Tree`: returns a reference to the tree
+//! - `pub fn tree_mut(&mut self) -> &mut Tree`: returns a mutable reference to the tree; which allows you to operate on it
+//! - `pub fn set_tree(&mut self, tree: Tree)`: update the current tree with another
+//! - `pub fn tree_state(&self) -> &TreeState`: get a reference to the current tree state. (See tree state docs)
+//!
+//! You can access these methods from the `on()` method as said before. So these methods can be handy when you update the tree after a certain events or maybe even better, you can set the tree if you receive it from a `UserEvent` produced by a **Port**.
+//!
+//! ---
+//!
+//! ## Setup a tree component
+//!
+//! ```rust
+//! # use tuirealm::{
+//! #     command::{Cmd, CmdResult, Direction, Position},
+//! #     component::{AppComponent, Component},
+//! #     event::{Event, Key, KeyEvent, KeyModifiers, NoUserEvent},
+//! #     props::{Title, HorizontalAlignment, BorderType, Borders, Color, Style},
+//! #     state::{State, StateValue},
+//! # };
+//! # use tui_realm_treeview::{Node, Tree, TreeView, TREE_CMD_CLOSE, TREE_CMD_OPEN};
+//! #
+//! #[derive(Debug, PartialEq)]
+//! pub enum Msg {
+//!     ExtendDir(String),
+//!     GoToUpperDir,
+//!     Redraw,
+//! }
+//!
+//! #[derive(Component)]
+//! pub struct FsTree {
+//!     component: TreeView<String>,
+//! }
+//!
+//! impl FsTree {
+//!     pub fn new(tree: Tree<String>, initial_node: Option<String>) -> Self {
+//!         // Preserve initial node if exists
+//!         let initial_node = match initial_node {
+//!             Some(id) if tree.root().query(&id).is_some() => id,
+//!             _ => tree.root().id().to_string(),
+//!         };
+//!         FsTree {
+//!             component: TreeView::default()
+//!                 .foreground(Color::Reset)
+//!                 .borders(
+//!                     Borders::default()
+//!                         .color(Color::LightYellow)
+//!                         .modifiers(BorderType::Rounded),
+//!                 )
+//!                 .inactive(Style::default().fg(Color::Gray))
+//!                 .indent_size(3)
+//!                 .scroll_step(6)
+//!                 .title(Title::from(tree.root().id().to_string()).alignment(HorizontalAlignment::Left))
+//!                 .highlight_style(Style::new().fg(Color::LightYellow))
+//!                 .highlight_str("🦄")
+//!                 .with_tree(tree)
+//!                 .initial_node(initial_node),
+//!         }
+//!     }
+//! }
+//!
+//! impl AppComponent<Msg, NoUserEvent> for FsTree {
+//!     fn on(&mut self, ev: &Event<NoUserEvent>) -> Option<Msg> {
+//!         let result = match ev {
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::Left,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => self.perform(Cmd::Custom(TREE_CMD_CLOSE)),
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::Right,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => self.perform(Cmd::Custom(TREE_CMD_OPEN)),
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::PageDown,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => self.perform(Cmd::Scroll(Direction::Down)),
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::PageUp,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => self.perform(Cmd::Scroll(Direction::Up)),
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::Down,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => self.perform(Cmd::Move(Direction::Down)),
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::Up,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => self.perform(Cmd::Move(Direction::Up)),
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::Home,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => self.perform(Cmd::GoTo(Position::Begin)),
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::End,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => self.perform(Cmd::GoTo(Position::End)),
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::Enter,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => self.perform(Cmd::Submit),
+//!             Event::Keyboard(KeyEvent {
+//!                 code: Key::Backspace,
+//!                 modifiers: KeyModifiers::NONE,
+//!             }) => return Some(Msg::GoToUpperDir),
+//!             _ => return None,
+//!         };
+//!         match result {
+//!             CmdResult::Submit(State::Single(StateValue::String(node))) => Some(Msg::ExtendDir(node)),
+//!             _ => Some(Msg::Redraw),
+//!         }
+//!     }
+//! }
+//!
+//! ```
+//!
+//! ---
+//!
+//! ## Tree widget
+//!
+//! If you want, you can also implement your own version of a tree view component using the `TreeWidget`
+//! in order to render a tree.
+//! Keep in mind that if you want to create a stateful tree (with highlighted item), you'll need to render it
+//! as a stateful widget, passing to it a `TreeState`, which is provided by this library.
+//!
+
+#![doc(html_playground_url = "https://play.rust-lang.org")]
+#![doc(
+    html_favicon_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/crates/tuirealm-treeview/docs/images/cargo/tui-realm-treeview-128.png"
+)]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/veeso/tui-realm/main/crates/tuirealm-treeview/docs/images/cargo/tui-realm-treeview-128.png"
+)]
+
+#[doc(hidden)]
+pub mod mock;
+pub mod tree_state;
+pub mod widget;
+
+use std::iter;
+
+pub use orange_trees::{Node as OrangeNode, Tree as OrangeTree};
+use tui_realm_stdlib::prop_ext::{CommonHighlight, CommonProps};
+use tuirealm::command::{Cmd, CmdResult, Direction, Position};
+use tuirealm::component::Component;
+use tuirealm::props::{
+    AttrValue, Attribute, Borders, Color, LineStatic, Props, QueryResult, SpanStatic, Style,
+    TextModifiers, Title,
+};
+use tuirealm::ratatui::Frame;
+use tuirealm::ratatui::layout::Rect;
+use tuirealm::state::{State, StateValue};
+
+pub use self::tree_state::TreeState;
+pub use self::widget::TreeWidget;
+
+/// [`Tree`] node value.
+pub trait NodeValue: Default {
+    /// Return iterator over render parts - text with it style.
+    /// If style is `None`, then it will be inherited from widget style.
+    fn render_parts_iter(&self) -> impl Iterator<Item = (&str, Option<Style>)>;
+}
+
+impl NodeValue for String {
+    fn render_parts_iter(&self) -> impl Iterator<Item = (&str, Option<Style>)> {
+        iter::once((self.as_str(), None))
+    }
+}
+
+impl NodeValue for Vec<SpanStatic> {
+    fn render_parts_iter(&self) -> impl Iterator<Item = (&str, Option<Style>)> {
+        self.iter()
+            .map(|span| (span.content.as_ref(), Some(span.style)))
+    }
+}
+
+// -- type override
+pub type Node<V> = OrangeNode<String, V>;
+pub type Tree<V> = OrangeTree<String, V>;
+
+// -- props
+
+pub const TREE_INDENT_SIZE: &str = "indent-size";
+pub const TREE_INITIAL_NODE: &str = "initial-mode";
+pub const TREE_PRESERVE_STATE: &str = "preserve-state";
+
+// -- Cmd
+
+pub const TREE_CMD_OPEN: &str = "o";
+pub const TREE_CMD_CLOSE: &str = "c";
+
+// -- component
+
+/// ## TreeView
+///
+/// Tree view component for tui-realm
+pub struct TreeView<V: NodeValue> {
+    common: CommonProps,
+    common_hg: CommonHighlight,
+    props: Props,
+    states: TreeState,
+    /// The actual Tree data structure. You can access this from your Component to operate on it
+    /// for example after a certain events.
+    tree: Tree<V>,
+}
+
+impl<V: NodeValue> Default for TreeView<V> {
+    fn default() -> Self {
+        Self {
+            common: CommonProps::default(),
+            common_hg: CommonHighlight::default(),
+            props: Props::default(),
+            states: TreeState::default(),
+            tree: Tree::new(Node::new(String::new(), V::default())),
+        }
+    }
+}
+
+impl<V: NodeValue> TreeView<V> {
+    /// Set the main foreground color. This may get overwritten by individual text styles.
+    pub fn foreground(mut self, fg: Color) -> Self {
+        self.attr(Attribute::Foreground, AttrValue::Color(fg));
+        self
+    }
+
+    /// Set the main background color. This may get overwritten by individual text styles.
+    pub fn background(mut self, bg: Color) -> Self {
+        self.attr(Attribute::Background, AttrValue::Color(bg));
+        self
+    }
+
+    /// Set the main text modifiers. This may get overwritten by individual text styles.
+    pub fn modifiers(mut self, m: TextModifiers) -> Self {
+        self.attr(Attribute::TextProps, AttrValue::TextModifiers(m));
+        self
+    }
+
+    /// Set the main style. This may get overwritten by individual text styles.
+    ///
+    /// This option will overwrite any previous [`foreground`](Self::foreground), [`background`](Self::background) and [`modifiers`](Self::modifiers)!
+    pub fn style(mut self, style: Style) -> Self {
+        self.attr(Attribute::Style, AttrValue::Style(style));
+        self
+    }
+
+    /// Set a custom style for the border when the component is unfocused.
+    pub fn inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::UnfocusedBorderStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Set widget border properties
+    pub fn borders(mut self, b: Borders) -> Self {
+        self.attr(Attribute::Borders, AttrValue::Borders(b));
+        self
+    }
+
+    /// Add a title to the component.
+    pub fn title<T: Into<Title>>(mut self, title: T) -> Self {
+        self.attr(Attribute::Title, AttrValue::Title(title.into()));
+        self
+    }
+
+    /// Set the Symbol and Style for the indicator of the current line.
+    pub fn highlight_str<S: Into<LineStatic>>(mut self, s: S) -> Self {
+        self.attr(Attribute::HighlightedStr, AttrValue::TextLine(s.into()));
+        self
+    }
+
+    /// Set a custom highlight style that is patched ontop of the normal style.
+    ///
+    /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
+    pub fn highlight_style(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Set initial node for tree state.
+    /// NOTE: this must be specified after `with_tree`
+    pub fn initial_node<S: Into<String>>(mut self, node: S) -> Self {
+        self.attr(
+            Attribute::Custom(TREE_INITIAL_NODE),
+            AttrValue::String(node.into()),
+        );
+        self
+    }
+
+    /// Set whether to preserve state on tree change
+    pub fn preserve_state(mut self, preserve: bool) -> Self {
+        self.attr(
+            Attribute::Custom(TREE_PRESERVE_STATE),
+            AttrValue::Flag(preserve),
+        );
+        self
+    }
+
+    /// Set indent size for widget for each level of depth
+    pub fn indent_size(mut self, sz: u16) -> Self {
+        self.attr(Attribute::Custom(TREE_INDENT_SIZE), AttrValue::Size(sz));
+        self
+    }
+
+    /// Set scroll step for scrolling command
+    pub fn scroll_step(mut self, step: usize) -> Self {
+        self.attr(Attribute::ScrollStep, AttrValue::Length(step));
+        self
+    }
+
+    /// Set tree to use as data
+    pub fn with_tree(mut self, tree: Tree<V>) -> Self {
+        self.tree = tree;
+        self
+    }
+
+    /// Get a reference to tree
+    pub fn tree(&self) -> &Tree<V> {
+        &self.tree
+    }
+
+    /// Get mutable reference to tree
+    pub fn tree_mut(&mut self) -> &mut Tree<V> {
+        &mut self.tree
+    }
+
+    /// Set new tree in component.
+    /// Current state is preserved if `PRESERVE_STATE` is set to `AttrValue::Flag(true)`
+    pub fn set_tree(&mut self, tree: Tree<V>) {
+        self.tree = tree;
+        self.states.tree_changed(
+            self.tree.root(),
+            self.props
+                .get(Attribute::Custom(TREE_PRESERVE_STATE))
+                .and_then(AttrValue::as_flag)
+                .unwrap_or_default(),
+        );
+    }
+
+    /// Get a reference to the current tree state
+    pub fn tree_state(&self) -> &TreeState {
+        &self.states
+    }
+
+    /// Returns whether selectd node has changed
+    fn changed(&self, prev: Option<&str>) -> CmdResult {
+        match self.states.selected() {
+            None => CmdResult::NoChange,
+            id if id != prev => CmdResult::Changed(self.state()),
+            _ => CmdResult::NoChange,
+        }
+    }
+}
+
+impl<V: NodeValue> Component for TreeView<V> {
+    fn view(&mut self, frame: &mut Frame, area: Rect) {
+        if !self.common.display {
+            return;
+        }
+
+        let indent_size = self
+            .props
+            .get(Attribute::Custom(TREE_INDENT_SIZE))
+            .and_then(AttrValue::as_size)
+            .unwrap_or(4);
+
+        let block = self.common.get_block();
+
+        // Make widget
+        let mut tree = TreeWidget::new(self.tree())
+            .indent_size(indent_size.into())
+            .style(self.common.style)
+            .highlight_style(self.common_hg.get_style(self.common.style));
+
+        if let Some(block) = block {
+            tree = tree.block(block);
+        }
+        if let Some(symbol) = self.common_hg.get_symbol() {
+            tree = tree.highlight_str(symbol);
+        }
+
+        let mut state = self.states.clone();
+        frame.render_stateful_widget(tree, area, &mut state);
+    }
+
+    fn query<'a>(&'a self, attr: Attribute) -> Option<QueryResult<'a>> {
+        if let Some(value) = self
+            .common
+            .get_for_query(attr)
+            .or_else(|| self.common_hg.get_for_query(attr))
+        {
+            return Some(value);
+        }
+
+        self.props.get_for_query(attr)
+    }
+
+    fn attr(&mut self, attr: Attribute, value: AttrValue) {
+        // Initial node
+        if matches!(attr, Attribute::Custom(TREE_INITIAL_NODE)) {
+            // Select node if exists
+            if let Some(node) = self.tree.root().query(&value.unwrap_string()) {
+                self.states.select(self.tree.root(), node);
+            }
+        } else if let Some(value) = self
+            .common
+            .set(attr, value)
+            .and_then(|value| self.common_hg.set(attr, value))
+        {
+            self.props.set(attr, value);
+        }
+    }
+
+    fn state(&self) -> State {
+        match self.states.selected() {
+            None => State::None,
+            Some(id) => State::Single(StateValue::String(id.to_string())),
+        }
+    }
+
+    fn perform(&mut self, cmd: Cmd) -> CmdResult {
+        match cmd {
+            Cmd::GoTo(Position::Begin) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                // Get first sibling of current node
+                if let Some(first) = self.states.first_sibling(self.tree.root()) {
+                    self.states.select(self.tree.root(), first);
+                }
+                self.changed(prev.as_deref())
+            }
+            Cmd::GoTo(Position::End) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                // Get first sibling of current node
+                if let Some(last) = self.states.last_sibling(self.tree.root()) {
+                    self.states.select(self.tree.root(), last);
+                }
+                self.changed(prev.as_deref())
+            }
+            Cmd::Move(Direction::Down) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                self.states.move_down(self.tree.root());
+                self.changed(prev.as_deref())
+            }
+            Cmd::Move(Direction::Up) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                self.states.move_up(self.tree.root());
+                self.changed(prev.as_deref())
+            }
+            Cmd::Scroll(Direction::Down) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                let step = self
+                    .props
+                    .get(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
+                (0..step).for_each(|_| self.states.move_down(self.tree.root()));
+                self.changed(prev.as_deref())
+            }
+            Cmd::Scroll(Direction::Up) => {
+                let prev = self.states.selected().map(|x| x.to_string());
+                let step = self
+                    .props
+                    .get(Attribute::ScrollStep)
+                    .and_then(AttrValue::as_length)
+                    .unwrap_or(8);
+                (0..step).for_each(|_| self.states.move_up(self.tree.root()));
+                self.changed(prev.as_deref())
+            }
+            Cmd::Submit => CmdResult::Submit(self.state()),
+            Cmd::Custom(TREE_CMD_CLOSE) => {
+                // close selected node
+                self.states.close(self.tree.root());
+                CmdResult::Visual
+            }
+            Cmd::Custom(TREE_CMD_OPEN) => {
+                // close selected node
+                self.states.open(self.tree.root());
+                CmdResult::Visual
+            }
+            _ => CmdResult::Invalid(cmd),
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use pretty_assertions::assert_eq;
+    use tuirealm::props::HorizontalAlignment;
+
+    use super::*;
+    use crate::mock::mock_tree;
+
+    #[test]
+    fn should_initialize_component() {
+        let mut component = TreeView::default()
+            .background(Color::White)
+            .foreground(Color::Cyan)
+            .borders(Borders::default())
+            .inactive(Style::default())
+            .indent_size(4)
+            .modifiers(TextModifiers::all())
+            .preserve_state(true)
+            .scroll_step(4)
+            .title(Title::from("My tree").alignment(HorizontalAlignment::Center))
+            .with_tree(mock_tree())
+            .initial_node("aB1");
+        // Check tree
+        assert_eq!(component.tree_state().selected().unwrap(), "aB1");
+        assert!(component.tree().root().query(&String::from("aB")).is_some());
+        component
+            .tree_mut()
+            .root_mut()
+            .add_child(Node::new(String::from("d"), String::from("d")));
+    }
+
+    #[test]
+    fn should_return_consistent_state() {
+        let component = TreeView::default().with_tree(mock_tree());
+        assert_eq!(component.state(), State::None);
+        let component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("aA");
+        assert_eq!(
+            component.state(),
+            State::Single(StateValue::String(String::from("aA")))
+        );
+    }
+
+    #[test]
+    fn should_perform_go_to_begin() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("bB3");
+        // GoTo begin (changed)
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::Begin)),
+            CmdResult::Changed(State::Single(StateValue::String(String::from("bB0"))))
+        );
+        // GoTo begin (unchanged)
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::Begin)),
+            CmdResult::NoChange
+        );
+    }
+
+    #[test]
+    fn should_perform_go_to_end() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("bB1");
+        // GoTo end (changed)
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::End)),
+            CmdResult::Changed(State::Single(StateValue::String(String::from("bB5"))))
+        );
+        // GoTo end (unchanged)
+        assert_eq!(
+            component.perform(Cmd::GoTo(Position::End)),
+            CmdResult::NoChange
+        );
+    }
+
+    #[test]
+    fn should_perform_move_down() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("cA1");
+        // Move down (changed)
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Down)),
+            CmdResult::Changed(State::Single(StateValue::String(String::from("cA2"))))
+        );
+        // Move down (unchanged)
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Down)),
+            CmdResult::NoChange
+        );
+    }
+
+    #[test]
+    fn should_perform_move_up() {
+        let mut component = TreeView::default().with_tree(mock_tree()).initial_node("a");
+        // Move up (changed)
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Up)),
+            CmdResult::Changed(State::Single(StateValue::String(String::from("/"))))
+        );
+        // Move up (unchanged)
+        assert_eq!(
+            component.perform(Cmd::Move(Direction::Up)),
+            CmdResult::NoChange
+        );
+    }
+
+    #[test]
+    fn should_perform_scroll_down() {
+        let mut component = TreeView::default()
+            .scroll_step(2)
+            .with_tree(mock_tree())
+            .initial_node("cA0");
+        // Scroll down (changed)
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Down)),
+            CmdResult::Changed(State::Single(StateValue::String(String::from("cA2"))))
+        );
+        // Scroll down (unchanged)
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Down)),
+            CmdResult::NoChange
+        );
+    }
+
+    #[test]
+    fn should_perform_scroll_up() {
+        let mut component = TreeView::default()
+            .scroll_step(4)
+            .with_tree(mock_tree())
+            .initial_node("aA1");
+        // Scroll Up (changed)
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Up)),
+            CmdResult::Changed(State::Single(StateValue::String(String::from("/"))))
+        );
+        // Scroll Up (unchanged)
+        assert_eq!(
+            component.perform(Cmd::Scroll(Direction::Up)),
+            CmdResult::NoChange
+        );
+    }
+
+    #[test]
+    fn should_perform_submit() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("aA1");
+        assert_eq!(
+            component.perform(Cmd::Submit),
+            CmdResult::Submit(State::Single(StateValue::String(String::from("aA1"))))
+        );
+    }
+
+    #[test]
+    fn should_perform_close() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("aA1");
+        component.states.open(component.tree.root());
+        assert_eq!(
+            component.perform(Cmd::Custom(TREE_CMD_CLOSE)),
+            CmdResult::Visual
+        );
+        assert!(
+            component
+                .tree_state()
+                .is_closed(component.tree().root().query(&String::from("aA1")).unwrap())
+        );
+    }
+
+    #[test]
+    fn should_perform_open() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .initial_node("aA");
+        assert_eq!(
+            component.perform(Cmd::Custom(TREE_CMD_OPEN)),
+            CmdResult::Visual
+        );
+        assert!(
+            component
+                .tree_state()
+                .is_open(component.tree().root().query(&String::from("aA")).unwrap())
+        );
+    }
+
+    #[test]
+    fn should_update_tree() {
+        let mut component = TreeView::default()
+            .with_tree(mock_tree())
+            .preserve_state(true)
+            .initial_node("aA");
+        // open 'bB'
+        component.states.select(
+            component.tree.root(),
+            component.tree.root().query(&String::from("bB")).unwrap(),
+        );
+        component.states.open(component.tree.root());
+        // re-selecte 'aA'
+        component.states.select(
+            component.tree.root(),
+            component.tree.root().query(&String::from("aA")).unwrap(),
+        );
+        // Create new tree
+        let mut new_tree = mock_tree();
+        new_tree.root_mut().remove_child(&String::from("a"));
+        // Set new tree
+        component.set_tree(new_tree);
+        // selected item should be root
+        assert_eq!(component.states.selected().unwrap(), "/");
+    }
+}
