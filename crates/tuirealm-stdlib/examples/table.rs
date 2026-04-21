@@ -115,6 +115,9 @@ struct TableAlfa {
     component: Table,
 }
 
+/// Define the style once and re-use it. Saves on some characters and lines.
+const STYLE_BOLD: Style = Style::new().bold();
+
 impl Default for TableAlfa {
     fn default() -> Self {
         Self {
@@ -144,31 +147,31 @@ impl Default for TableAlfa {
                 .widths(&[30, 20, 50])
                 .table(
                     TableBuilder::default()
-                        .add_col(Line::from("KeyCode::Down"))
+                        .add_col(Line::styled("KeyCode::Down", STYLE_BOLD))
                         .add_col(Line::from("OnKey"))
                         .add_col(Line::from("Move cursor down"))
                         .add_row()
-                        .add_col(Line::from("KeyCode::Up"))
+                        .add_col(Line::styled("KeyCode::Up", STYLE_BOLD))
                         .add_col(Line::from("OnKey"))
                         .add_col(Line::from("Move cursor up"))
                         .add_row()
-                        .add_col(Line::from("KeyCode::PageDown"))
+                        .add_col(Line::styled("KeyCode::PageDown", STYLE_BOLD))
                         .add_col(Line::from("OnKey"))
                         .add_col(Line::from("Move cursor down by 8"))
                         .add_row()
-                        .add_col(Line::from("KeyCode::PageUp"))
+                        .add_col(Line::styled("KeyCode::PageUp", STYLE_BOLD))
                         .add_col(Line::from("OnKey"))
                         .add_col(Line::from("Move cursor up by 8"))
                         .add_row()
-                        .add_col(Line::from("KeyCode::End"))
+                        .add_col(Line::styled("KeyCode::End", STYLE_BOLD))
                         .add_col(Line::from("OnKey"))
                         .add_col(Line::from("Move cursor to last item"))
                         .add_row()
-                        .add_col(Line::from("KeyCode::Home"))
+                        .add_col(Line::styled("KeyCode::Home", STYLE_BOLD))
                         .add_col(Line::from("OnKey"))
                         .add_col(Line::from("Move cursor to first item"))
                         .add_row()
-                        .add_col(Line::from("KeyCode::Char(_)"))
+                        .add_col(Line::styled("KeyCode::Char(_)", STYLE_BOLD))
                         .add_col(Line::from("OnKey"))
                         .add_col(Line::from("Return pressed key"))
                         .build(),
