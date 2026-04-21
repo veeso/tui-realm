@@ -150,6 +150,8 @@ impl CommonProps {
 pub struct CommonHighlight {
     /// The main style to patch [`CommonProps::style`] with for the currently active element.
     pub style: Style,
+    /// A Style to patch on-top of [`style`](Self::style) when unfocused.
+    pub style_unfocused: Style,
     /// The symbol to use to indicate the currently selected element.
     pub symbol: LineStatic,
 }
@@ -158,6 +160,7 @@ impl Default for CommonHighlight {
     fn default() -> Self {
         Self {
             style: Style::default().add_modifier(TextModifiers::REVERSED),
+            style_unfocused: Style::default(),
             symbol: LineStatic::default(),
         }
     }
@@ -168,6 +171,9 @@ impl CommonHighlight {
     pub fn set(&mut self, attr: Attribute, value: AttrValue) -> Option<AttrValue> {
         match (attr, value) {
             (Attribute::HighlightStyle, AttrValue::Style(val)) => self.style = val,
+            (Attribute::HighlightStyleUnfocused, AttrValue::Style(val)) => {
+                self.style_unfocused = val
+            }
             (Attribute::HighlightedStr, AttrValue::TextLine(val)) => self.symbol = val,
 
             // other
@@ -181,6 +187,7 @@ impl CommonHighlight {
     pub fn get<'a>(&'a self, attr: Attribute) -> Option<AttrValueRef<'a>> {
         match attr {
             Attribute::HighlightStyle => Some(AttrValueRef::Style(self.style)),
+            Attribute::HighlightStyleUnfocused => Some(AttrValueRef::Style(self.style_unfocused)),
             Attribute::HighlightedStr => Some(AttrValueRef::TextLine(&self.symbol)),
 
             // other
@@ -194,6 +201,7 @@ impl CommonHighlight {
         self.get(attr).map(QueryResult::Borrowed)
     }
 
+    /// Get the set highlight symbol as its own `Line` instance, but referencing the existing data.
     pub fn get_symbol(&self) -> Option<Line<'_>> {
         if self.symbol.spans.is_empty() {
             None
@@ -202,9 +210,22 @@ impl CommonHighlight {
         }
     }
 
+    /// Get the patched highlight style.
     #[inline]
     pub fn get_style(&self, normal_style: Style) -> Style {
         normal_style.patch(self.style)
+    }
+
+    /// Get the patched highlight style with focused or unfocused style.
+    #[inline]
+    pub fn get_style_focus(&self, normal_style: Style, focus: bool) -> Style {
+        let style = normal_style.patch(self.style);
+
+        if focus {
+            style
+        } else {
+            style.patch(self.style_unfocused)
+        }
     }
 }
 
@@ -482,6 +503,13 @@ mod tests {
         );
         assert_eq!(
             props
+                .get(Attribute::HighlightStyleUnfocused)
+                .unwrap()
+                .unwrap_style(),
+            Style::new()
+        );
+        assert_eq!(
+            props
                 .get(Attribute::HighlightedStr)
                 .unwrap()
                 .unwrap_textline(),
@@ -508,6 +536,20 @@ mod tests {
             Style::new()
                 .fg(Color::Blue)
                 .add_modifier(TextModifiers::DIM)
+        );
+
+        // style unfocused via highlight style attribute
+        props.set(
+            Attribute::HighlightStyleUnfocused,
+            AttrValue::Style(Style::new().remove_modifier(TextModifiers::DIM)),
+        );
+
+        assert_eq!(
+            props
+                .get(Attribute::HighlightStyleUnfocused)
+                .unwrap()
+                .unwrap_style(),
+            Style::new().remove_modifier(TextModifiers::DIM)
         );
 
         // symbol via highlight symbol attribute
