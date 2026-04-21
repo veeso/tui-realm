@@ -10,13 +10,12 @@ use tuirealm::props::{
 };
 use tuirealm::ratatui::Frame;
 use tuirealm::ratatui::layout::{Constraint, Rect};
-use tuirealm::ratatui::text::Line;
 use tuirealm::ratatui::widgets::{Cell, Row, Table as TuiTable, TableState};
 use tuirealm::state::{State, StateValue};
 
 use super::props::TABLE_COLUMN_SPACING;
 use crate::prop_ext::{CommonHighlight, CommonProps};
-use crate::utils;
+use crate::utils::borrow_clone_line;
 
 // -- States
 
@@ -321,15 +320,7 @@ impl Table {
             .map(|row| {
                 let columns: Vec<Cell> = row
                     .iter()
-                    .map(|col| {
-                        let line = Line::from(
-                            col.spans
-                                .iter()
-                                .map(utils::borrow_clone_span)
-                                .collect::<Vec<_>>(),
-                        );
-                        Cell::from(line)
-                    })
+                    .map(|col| Cell::from(borrow_clone_line(col)))
                     .collect();
                 Row::new(columns).height(row_height)
             })
@@ -532,6 +523,7 @@ mod tests {
 
     use pretty_assertions::assert_eq;
     use tuirealm::props::{HorizontalAlignment, TableBuilder};
+    use tuirealm::ratatui::text::Line;
 
     use super::*;
 
