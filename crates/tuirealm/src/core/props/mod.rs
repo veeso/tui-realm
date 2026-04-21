@@ -80,6 +80,8 @@ pub enum Attribute {
     HighlightedStr,
     /// Style to patch [`Style`](Self::Style) with to apply on the highlighted element.
     HighlightStyle,
+    /// Style to patch on-top of [`HighlightStyle`](Self::HighlightStyle) to modify for unfocused state.
+    HighlightStyleUnfocused,
     /// Maximum input length for input fields
     InputLength,
     /// Input type for input fields
