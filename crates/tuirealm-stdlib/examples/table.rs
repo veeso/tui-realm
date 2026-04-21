@@ -9,7 +9,7 @@ use tuirealm::command::{Cmd, CmdResult, Direction, Position};
 use tuirealm::component::{AppComponent, Component};
 use tuirealm::event::{Event, Key, KeyEvent, NoUserEvent};
 use tuirealm::props::{
-    BorderType, Borders, Color, HorizontalAlignment, Style, TableBuilder, Title,
+    BorderType, Borders, Color, HorizontalAlignment, Style, TableBuilder, TextModifiers, Title,
 };
 use tuirealm::ratatui::layout::{Constraint, Direction as LayoutDirection, Layout};
 use tuirealm::ratatui::text::Line;
@@ -129,7 +129,12 @@ impl Default for TableAlfa {
                 .inactive(Style::new().fg(Color::Gray))
                 .title(Title::from("Keybindings").alignment(HorizontalAlignment::Center))
                 .scroll(true)
-                .highlight_style(Style::new().fg(Color::LightYellow))
+                .highlight_style(
+                    Style::new()
+                        .fg(Color::LightYellow)
+                        .add_modifier(TextModifiers::REVERSED),
+                )
+                .highlight_style_inactive(Style::new().remove_modifier(TextModifiers::REVERSED))
                 .highlight_str("🚀")
                 .rewind(true)
                 .step(4)

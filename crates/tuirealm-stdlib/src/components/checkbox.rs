@@ -170,11 +170,17 @@ impl Checkbox {
         self
     }
 
-    /// Set a custom highlight style that is patched ontop of the normal style.
+    /// Set a custom highlight style that is patched on-top of the normal style.
     ///
     /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
     pub fn highlight_style(mut self, s: Style) -> Self {
         self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Set a custom highlight style that is patched on-top of the highlight style when unfocused.
+    pub fn highlight_style_inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyleUnfocused, AttrValue::Style(s));
         self
     }
 
@@ -245,11 +251,11 @@ impl Component for Checkbox {
             .collect();
         let mut widget: Tabs = Tabs::new(choices)
             .select(self.states.choice)
-            .style(self.common.style);
-
-        if self.common.is_active() {
-            widget = widget.highlight_style(self.common_hg.get_style(self.common.style));
-        }
+            .style(self.common.style)
+            .highlight_style(
+                self.common_hg
+                    .get_style_focus(self.common.style, self.common.is_active()),
+            );
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);

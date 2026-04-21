@@ -174,11 +174,17 @@ impl Table {
         self
     }
 
-    /// Set a custom highlight style that is patched ontop of the normal style.
+    /// Set a custom highlight style that is patched on-top of the normal style.
     ///
     /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
     pub fn highlight_style(mut self, s: Style) -> Self {
         self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Set a custom highlight style that is patched on-top of the highlight style when unfocused.
+    pub fn highlight_style_inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyleUnfocused, AttrValue::Style(s));
         self
     }
 
@@ -346,11 +352,12 @@ impl Component for Table {
         let rows: Vec<Row> = self.make_rows(row_height);
         let widths: Vec<Constraint> = self.layout();
 
-        let mut widget = TuiTable::new(rows, &widths).style(self.common.style);
-
-        if self.common.is_active() {
-            widget = widget.row_highlight_style(self.common_hg.get_style(self.common.style));
-        }
+        let mut widget = TuiTable::new(rows, &widths)
+            .style(self.common.style)
+            .row_highlight_style(
+                self.common_hg
+                    .get_style_focus(self.common.style, self.common.is_active()),
+            );
 
         if let Some(block) = self.common.get_block() {
             widget = widget.block(block);

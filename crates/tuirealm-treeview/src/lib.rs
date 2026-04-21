@@ -333,11 +333,17 @@ impl<V: NodeValue> TreeView<V> {
         self
     }
 
-    /// Set a custom highlight style that is patched ontop of the normal style.
+    /// Set a custom highlight style that is patched on-top of the normal style.
     ///
     /// By default the highlight style is just `Style::new().add_modifier(Modifier::REVERSED)`.
     pub fn highlight_style(mut self, s: Style) -> Self {
         self.attr(Attribute::HighlightStyle, AttrValue::Style(s));
+        self
+    }
+
+    /// Set a custom highlight style that is patched on-top of the highlight style when unfocused.
+    pub fn highlight_style_inactive(mut self, s: Style) -> Self {
+        self.attr(Attribute::HighlightStyleUnfocused, AttrValue::Style(s));
         self
     }
 
@@ -434,7 +440,10 @@ impl<V: NodeValue> Component for TreeView<V> {
         let mut tree = TreeWidget::new(self.tree())
             .indent_size(indent_size.into())
             .style(self.common.style)
-            .highlight_style(self.common_hg.get_style(self.common.style));
+            .highlight_style(
+                self.common_hg
+                    .get_style_focus(self.common.style, self.common.is_active()),
+            );
 
         if let Some(block) = block {
             tree = tree.block(block);
