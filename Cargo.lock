@@ -1694,7 +1694,7 @@ checksum = "756daf9b1013ebe47a8776667b466417e2d4c5679d441c26230efd9ef78692db"
 
 [[package]]
 name = "tui-realm-stdlib"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "insta",
  "pretty_assertions",
@@ -1706,7 +1706,7 @@ dependencies = [
 
 [[package]]
 name = "tui-realm-textarea"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "crossterm",
  "insta",
@@ -1719,7 +1719,7 @@ dependencies = [
 
 [[package]]
 name = "tui-realm-treeview"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "crossterm",
  "insta",
@@ -1747,7 +1747,7 @@ dependencies = [
 
 [[package]]
 name = "tuirealm"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "async-trait",
  "bitflags 2.11.1",
@@ -1771,7 +1771,7 @@ dependencies = [
 
 [[package]]
 name = "tuirealm_derive"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "proc-macro2",
  "quote",

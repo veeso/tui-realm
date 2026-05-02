@@ -1,6 +1,6 @@
 [package]
 name = "tui-realm-stdlib"
-version = "4.0.0"
+version = "4.1.0"
 authors.workspace =  true
 edition.workspace =  true
 rust-version.workspace =  true

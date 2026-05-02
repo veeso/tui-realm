@@ -1,3 +1,18 @@
+## 4.1.0
+
+Released on 2026-05-02
+
+### Features
+
+- **tuirealm:** add `Attribute::HighlightStyleUnfocused`
+- **stdlib:** handle `Attribute::HighlightStyleUnfocused` in `CommonHighlight`
+- **stdlib:** change components to allow `HighlightStyleUnfocused` properly
+- **treeview:** add `highlight_style_inactive` to set highlight style when unfocused
+
+### Bug Fixes
+
+- **stdlib:** fix `Table` not respecting row's line style
+
 ## 4.0.0
 
 Released on 2026-04-18
