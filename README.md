@@ -102,6 +102,20 @@ This is a monorepo of the following crates:
 - [tui-realm-treeview](crates/tuirealm-treeview/): A Tree Component implementation
 - [tui-realm-textarea](crates/tuirealm-textarea/): A Text Area Component implementation
 
+### Development
+
+This repo uses [`just`](https://github.com/casey/just) as the task runner. All build, lint, format, and test checks should go through the `just` recipes — they encode the exact flags used by CI.
+
+```bash
+just                          # list all recipes
+just build_all                # build the workspace with all features
+just test_all                 # run all tests with all features
+just check_code               # rustfmt --check + clippy (CI-equivalent)
+just publish_all              # publish all crates in dependency order
+```
+
+See [`Justfile`](Justfile) and [`just/`](just/) for the full set of recipes.
+
 ## Changelogs
 
 See [CHANGELOG.md](CHANGELOG.md).

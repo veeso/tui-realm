@@ -16,33 +16,37 @@ tui-realm is a monorepo workspace containing the following crates:
 
 ## Commands
 
+**IMPORTANT:** Always use the `just` recipes for build, lint, format, and test checks. Do not invoke `cargo build`, `cargo test`, `cargo clippy`, or `cargo fmt` directly — the recipes encode the exact flags used by CI, and consistency between local and CI is required.
+
 ```bash
-# Build entire workspace
-cargo build --workspace
+# List all recipes
+just
 
-# Build with all features
-cargo build --workspace --all-features
+# Build
+just build_all                # workspace, all features
+just build_examples           # all examples
+just build <crate>            # single crate, all features
 
-# Build a single crate
-cargo build -p tuirealm
-cargo build -p tui-realm-stdlib
+# Test
+just test_all                 # workspace, all features
+just test <crate> [name]      # single crate
+just coverage                 # lcov coverage (Linux/macOS)
+just coverage_no_termion      # lcov coverage (Windows; no termion)
 
-# Run all tests
-cargo test --workspace --all-features
+# Lint / format
+just fmt_nightly              # nightly rustfmt (apply)
+just fmt_nightly "--check"    # nightly rustfmt (check)
+just clippy "-- -Dwarnings"            # clippy, all features + targets
+just clippy_default "-- -Dwarnings"    # clippy, default features
+just check_code               # fmt_nightly --check + clippy (both feature sets)
 
-# Run tests for a single crate
-cargo test -p tuirealm --all-features
+# Publish (in dependency order, with retry on registry lag)
+just publish_all
+```
 
-# Lint
-cargo clippy --workspace --all-targets --all-features -- -Dwarnings
+For one-off cases not covered by a recipe (e.g. running a specific example), `cargo` is acceptable:
 
-# Format (always use nightly)
-cargo +nightly fmt --all
-
-# Format check (always use nightly)
-cargo +nightly fmt --all -- --check
-
-# Run example (from a specific crate)
+```bash
 cargo run -p tuirealm --example demo --features crossterm
 cargo run -p tui-realm-stdlib --example input
 ```
