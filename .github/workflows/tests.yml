@@ -71,7 +71,7 @@ jobs:
         # Tests crossterm, termion and termwiz
         run: just coverage
       - name: Coveralls
-        uses: coverallsapp/github-action@v2.3.6
+        uses: coverallsapp/github-action@v2.3.8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           file: lcov.info
@@ -100,7 +100,7 @@ jobs:
         # Tests crossterm and termwiz; termion is unix-only
         run: just coverage_no_termion
       - name: Coveralls
-        uses: coverallsapp/github-action@v2.3.6
+        uses: coverallsapp/github-action@v2.3.8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           file: lcov.info
@@ -129,7 +129,7 @@ jobs:
         # Tests crossterm, termion and termwiz
         run: just coverage
       - name: Coveralls
-        uses: coverallsapp/github-action@v2.3.6
+        uses: coverallsapp/github-action@v2.3.8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           file: lcov.info
