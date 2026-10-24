@@ -364,10 +364,8 @@ where
 
         let mut evs: Vec<Event<UserEvent>> = Vec::with_capacity(upto);
 
-        match self.poll_listener_blocking() {
-            Err(err) => return Err(err),
-            Ok(ev) => evs.push(ev),
-        }
+        let ev = self.poll_listener_blocking()?;
+        evs.push(ev);
 
         let t = upto.saturating_sub(1);
 
