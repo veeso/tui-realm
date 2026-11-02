@@ -506,8 +506,6 @@ flowchart TD
 
 In the diagramm above we can see the flow of what gets executed when. There are 3 types of lines: Thin, Thick and Dottet. The Dottet line is to help understand flow, the Thick line is to indicate automatic calling by the **Application**, finally the Thin line is what needs to be implemented by the users.
 
-In the image, we can see there are all the entities we've talked about earlier, which are connected through two kind of arrows, the *black* arrows defines the flow you have to implement, while the *red* arrows, follows what is already implemented and implicitly called by the application.
-
 So the `tui-realm` lifecycle consists of:
 
 1. the `tick()` routine is called on **Application**
